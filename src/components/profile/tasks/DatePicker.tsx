@@ -13,12 +13,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-interface TaskDatePickerProps {
+interface DatePickerProps {
   value?: Date;
   onChange?: (date: Date | undefined) => void;
 }
 
-export function TaskDatePicker({ value, onChange }: TaskDatePickerProps) {
+export function DatePicker({ value, onChange }: DatePickerProps) {
   return (
     <Popover>
       <PopoverTrigger asChild>

@@ -4,15 +4,7 @@ import { useRef, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronDown,
-  List,
-  ListIcon,
-  Table,
-  Calendar,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Table, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -21,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { CreateEvent } from "./CreateEvent";
 
 export default function ActivitiesPage() {
   const calendarRef = useRef<FullCalendar | null>(null);
@@ -75,7 +68,7 @@ export default function ActivitiesPage() {
           >
             <Calendar className="size-4" />
           </Button>
-          <Button>Новая активность</Button>
+          <CreateEvent />
         </div>
         <div className="space-y-2 mb-4">
           <div className="flex w-full flex-wrap items-center justify-between max-md:pb-2">

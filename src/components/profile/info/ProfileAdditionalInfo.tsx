@@ -5,7 +5,7 @@ import {
   differenceInYears,
 } from "date-fns";
 import { Input } from "@/components/ui/input";
-import { TaskDatePicker } from "../tasks/TaskDatePicker";
+import { DatePicker } from "../tasks/DatePicker";
 import { format } from "date-fns";
 
 export default function ProfileAdditionalInfo({
@@ -83,7 +83,7 @@ export default function ProfileAdditionalInfo({
       <div className="mt-4">
         <span>Дата вступления: </span>
         {editMode ? (
-          <TaskDatePicker
+          <DatePicker
             value={
               formData.joined_at ? new Date(formData.joined_at) : undefined
             }

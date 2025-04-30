@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { TaskDatePicker } from "./TaskDatePicker";
+
 import {
   Dialog,
   DialogContent,
@@ -22,6 +22,7 @@ import * as React from "react";
 import { Task } from "./types/task";
 import { useTaskForm } from "./hooks/useTaskForm";
 import editUserTask from "@/src/actions/editUserTask";
+import { DatePicker } from "./DatePicker";
 
 interface EditTaskDialogProps {
   open: boolean;
@@ -71,7 +72,7 @@ export function EditTaskDialog({
           </div>
           <div className="grid grid-cols-3 items-center gap-4">
             <Label>Дата создания</Label>
-            <TaskDatePicker
+            <DatePicker
               value={createdAt}
               onChange={(date) => date && setCreatedAt(date)}
             />
@@ -95,7 +96,7 @@ export function EditTaskDialog({
           </div>
           <div className="grid grid-cols-3 items-center gap-4">
             <Label>Дата завершения</Label>
-            <TaskDatePicker
+            <DatePicker
               value={completedAt || undefined}
               onChange={(date) => setCompletedAt(date ?? null)}
             />
