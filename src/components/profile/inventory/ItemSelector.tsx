@@ -12,7 +12,11 @@ interface ItemSelectorProps {
   onChange: (value: string) => void;
 }
 
-export default function ItemSelector({ item, userItem, onChange }: ItemSelectorProps) {
+export default function ItemSelector({
+  item,
+  userItem,
+  onChange,
+}: ItemSelectorProps) {
   const isBafalka = item.name === "Бафалка";
 
   const isSpecialItem = [
@@ -55,8 +59,11 @@ export default function ItemSelector({ item, userItem, onChange }: ItemSelectorP
 
   if (isDragon) {
     return (
-      <Select value={!userItem ? "Нету" : userItem.name} onValueChange={onChange}>
-        <SelectTrigger className="w-[150px]">
+      <Select
+        value={!userItem ? "Нету" : userItem.name}
+        onValueChange={onChange}
+      >
+        <SelectTrigger className="w-[100px]">
           <SelectValue placeholder="Выбрать" />
         </SelectTrigger>
         <SelectContent>
