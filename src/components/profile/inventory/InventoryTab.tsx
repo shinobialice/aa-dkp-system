@@ -1,0 +1,78 @@
+import {
+  Table,
+  TableBody,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+import InventoryRow from "./InventoryRow";
+import inventoryItems from "./InventoryItems";
+
+export default function InventoryTab({
+  type,
+  inventory,
+  userId,
+  onChange,
+}: {
+  type: string;
+  inventory: any[];
+  userId: number;
+  onChange: () => void;
+}) {
+  const filteredItems = inventoryItems
+    .filter((item) => item.type === type)
+    .filter((item) => {
+      if (
+        item.name === "Коллеционный глайдер" &&
+        inventory.find((inv) => inv.name === "Коллеционный глайдер т2")
+      )
+        return false;
+      if (
+        item.name === "Коллеционный глайдер т2" &&
+        !inventory.find((inv) => inv.name === "Коллеционный глайдер т2")
+      )
+        return false;
+      if (
+        item.name === "Коллекционный фамильяр" &&
+        inventory.find((inv) => inv.name === "Коллекционный фамильяр т2")
+      )
+        return false;
+      if (
+        item.name === "Коллекционный фамильяр т2" &&
+        !inventory.find((inv) => inv.name === "Коллекционный фамильяр т2")
+      )
+        return false;
+      if (
+        ["Красный Дракон", "Черный Дракон", "Зеленый Дракон"].includes(
+          item.name
+        )
+      )
+        return false;
+      return true;
+    });
+
+  return (
+    <div className="border-t">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Название</TableHead>
+            <TableHead>Наличие</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {filteredItems.map((item) => (
+            <InventoryRow
+              key={item.name}
+              item={item}
+              inventory={inventory}
+              userId={userId}
+              onChange={onChange}
+            />
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}

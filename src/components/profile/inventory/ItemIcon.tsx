@@ -43,7 +43,6 @@ export default function ItemIcon({
         />
       )}
 
-      {/* Grade Overlay */}
       <img
         src={gradeUrl}
         alt="grade icon"
