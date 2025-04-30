@@ -40,7 +40,6 @@ export default function InventoryTabsClient({
           }
         } else {
           const quality = value[0];
-
           if (userItem) {
             if (quality) {
               await setItemQuality(userItem.id, quality);
@@ -76,6 +75,17 @@ export default function InventoryTabsClient({
             await addItemToUserInventory(userId, item.name, item.type, quality);
           }
         }
+      } else if (item.name === "Дракон") {
+        if (value === "Нету") {
+          if (userItem) {
+            await deleteItemFromUserInventory(userItem.id);
+          }
+        } else {
+          if (userItem) {
+            await deleteItemFromUserInventory(userItem.id);
+          }
+          await addItemToUserInventory(userId, value, item.type, null);
+        }
       } else {
         if (value === "Есть" && !userItem) {
           await addItemToUserInventory(userId, item.name, item.type, null);
@@ -87,6 +97,13 @@ export default function InventoryTabsClient({
     } catch (error) {
       console.error("Ошибка при обновлении инвентаря:", error);
     }
+  };
+
+  const getItemIconName = (item: any, userItem: any) => {
+    if (item.name === "Дракон" && userItem) {
+      return userItem.name;
+    }
+    return item.name;
   };
 
   return (
@@ -124,7 +141,6 @@ export default function InventoryTabsClient({
                         )
                       )
                         return false;
-
                       if (
                         item.name === "Коллеционный глайдер т2" &&
                         !inventory.find(
@@ -132,7 +148,6 @@ export default function InventoryTabsClient({
                         )
                       )
                         return false;
-
                       if (
                         item.name === "Коллекционный фамильяр" &&
                         inventory.find(
@@ -140,7 +155,6 @@ export default function InventoryTabsClient({
                         )
                       )
                         return false;
-
                       if (
                         item.name === "Коллекционный фамильяр т2" &&
                         !inventory.find(
@@ -148,16 +162,36 @@ export default function InventoryTabsClient({
                         )
                       )
                         return false;
-
+                      if (
+                        [
+                          "Красный Дракон",
+                          "Черный Дракон",
+                          "Зеленый Дракон",
+                        ].includes(item.name)
+                      )
+                        return false;
                       return true;
                     })
                     .map((item) => {
-                      const userItem = inventory.find(
-                        (inv) =>
-                          inv.name === item.name && inv.type === item.type
-                      );
+                      const isDragon = item.name === "Дракон";
+                      const userItem = isDragon
+                        ? inventory.find(
+                            (inv) =>
+                              inv.type === item.type &&
+                              [
+                                "Красный Дракон",
+                                "Черный Дракон",
+                                "Зеленый Дракон",
+                              ].includes(inv.name)
+                          )
+                        : inventory.find(
+                            (inv) =>
+                              inv.name === item.name && inv.type === item.type
+                          );
 
-                      const itemIconUrl = inventoryIcons[item.name] || null;
+                      const displayIconName = getItemIconName(item, userItem);
+                      const itemIconUrl =
+                        inventoryIcons[displayIconName] || null;
                       const isBafalka = item.name === "Бафалка";
 
                       const isSpecialItem = [
@@ -171,11 +205,25 @@ export default function InventoryTabsClient({
                         <TableRow key={item.name}>
                           <TableCell>
                             <div className="flex items-center gap-2">
-                              <ItemIcon
-                                itemName={item.name}
-                                itemIconUrl={itemIconUrl}
-                                quality={userItem?.quality || null}
-                              />
+                              <div style={{ position: "relative" }}>
+                                <ItemIcon
+                                  itemName={displayIconName}
+                                  itemIconUrl={itemIconUrl}
+                                  quality={userItem?.quality || null}
+                                />
+                                {isDragon && userItem && (
+                                  <img
+                                    src="https://archeagecodex.com/images/icon_grade6.png"
+                                    alt="legendary"
+                                    style={{
+                                      position: "absolute",
+                                      top: 0,
+                                      left: 0,
+                                      pointerEvents: "none",
+                                    }}
+                                  />
+                                )}
+                              </div>
                               <span>{item.name}</span>
                             </div>
                           </TableCell>
@@ -211,6 +259,29 @@ export default function InventoryTabsClient({
                                   </SelectItem>
                                   <SelectItem value="5 эпоха">
                                     5 эпоха
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+                            ) : isDragon ? (
+                              <Select
+                                value={!userItem ? "Нету" : userItem.name}
+                                onValueChange={(value) =>
+                                  handleChange(item, userItem, value)
+                                }
+                              >
+                                <SelectTrigger className="w-[150px]">
+                                  <SelectValue placeholder="Выбрать" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Нету">Нету</SelectItem>
+                                  <SelectItem value="Красный Дракон">
+                                    Красный Дракон
+                                  </SelectItem>
+                                  <SelectItem value="Черный Дракон">
+                                    Черный Дракон
+                                  </SelectItem>
+                                  <SelectItem value="Зеленый Дракон">
+                                    Зеленый Дракон
                                   </SelectItem>
                                 </SelectContent>
                               </Select>

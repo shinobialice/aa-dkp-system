@@ -15,10 +15,9 @@ const inventoryIcons: { [key: string]: string } = {
     "https://archeagecodex.com/items/icon_item_4547.png",
   "Коллекционный фамильяр т2":
     "https://archeagecodex.com/items/icon_item_5854.png",
+  Дракон: "https://archeagecodex.com/items/icon_item_4260.png",
   "Красный Дракон": "https://archeagecodex.com/items/icon_item_4308.png",
   "Черный Дракон": "https://archeagecodex.com/items/icon_item_4309.png",
   "Зеленый Дракон": "https://archeagecodex.com/items/icon_item_4310.png",
 };
-
-//archeagecodex.com/images/icon_grade6.png легендари для дракона
 export default inventoryIcons;

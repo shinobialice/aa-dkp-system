@@ -12,7 +12,9 @@ const inventoryItems = [
   { type: "Петы", name: "Коллекционный фамильяр" },
   { type: "Петы", name: "Коллекционный фамильяр т2" },
   { type: "Петы", name: "Дракон" },
+  { type: "Петы", name: "Красный Дракон" },
+  { type: "Петы", name: "Черный Дракон" },
+  { type: "Петы", name: "Зеленый Дракон" },
 ];
-
 
 export default inventoryItems;
