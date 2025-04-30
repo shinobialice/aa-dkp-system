@@ -53,7 +53,7 @@ export default function ProfileAdditionalInfo({
         Дополнительная информация:
       </CardDescription>
 
-      <div>
+      <div className="flex items-center gap-2">
         <span>VK: </span>
         {editMode ? (
           <Input
