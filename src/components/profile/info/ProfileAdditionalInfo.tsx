@@ -59,13 +59,16 @@ export default function ProfileAdditionalInfo({
           <Input
             className="w-[200px]"
             value={formData.vkName ?? ""}
-            onChange={(e) =>
-              setFormData((prev: any) => ({ ...prev, vkName: e.target.value }))
-            }
+            onChange={(e) => {
+              const input = e.target.value;
+              const match = input.match(/vk\.com\/([a-zA-Z0-9_\.]+)/);
+              const vkName = match ? match[1] : input;
+              setFormData((prev: any) => ({ ...prev, vkName }));
+            }}
           />
         ) : user.vk_name ? (
           <a
-            href={`${formData.vkName}`}
+            href={`https://vk.com/${formData.vkName}`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-500 hover:underline"
