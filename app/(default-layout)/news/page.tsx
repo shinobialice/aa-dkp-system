@@ -22,7 +22,7 @@ const newsData = [
 
 export default function NewsPage() {
   return (
-    <div className="flex min-h-screen bg-bgMain text-onBackground">
+    <div className="flex min-h-screen bg-background text-onBackground">
       <div className="flex-1 p-8">
         <h1 className="text-3xl font-bold mb-6 text-primary">Новости</h1>
         <div className="space-y-6">

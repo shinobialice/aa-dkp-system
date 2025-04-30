@@ -49,7 +49,7 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarContent>
-        <div className="text-center mb-6 border-b border-border pb-4">
+        <div className="text-center mb-6 border-b border-border pb-4 pt-4">
           <h2 className="text-2xl font-bold text-primary">No Fear</h2>
         </div>
 

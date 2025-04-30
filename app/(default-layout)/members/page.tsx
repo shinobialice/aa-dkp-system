@@ -13,7 +13,7 @@ export default async function MembersPage() {
   });
 
   return (
-    <div className="flex min-h-screen flex-col bg-bgMain text-onBackground p-8">
+    <div className="flex min-h-screen flex-col bg-background text-onBackground p-8">
       <h1 className="text-3xl font-bold mb-6 text-primary">Список игроков</h1>
       <MembersTable users={users} />
     </div>

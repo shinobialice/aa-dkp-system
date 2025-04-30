@@ -3,7 +3,7 @@ import { authMiddleware } from "@/auth";
 import type { NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
-  const session = await authMiddleware(); 
+  const session = await authMiddleware();
 
   if (!session && request.nextUrl.pathname !== "/login") {
     return NextResponse.redirect(new URL("/login", request.url));
@@ -13,5 +13,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!api|_next/static|_next|favicon.ico).*)"],
 };
