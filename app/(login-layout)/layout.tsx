@@ -5,7 +5,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
   title: "No Fear",
-  description: "Login page with system theme support",
+  description: "Login page",
 };
 
 export default function RootLayout({
