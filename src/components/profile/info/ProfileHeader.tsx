@@ -1,11 +1,10 @@
-"use client";
-
 import { CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Pencil, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import editUser from "@/src/actions/editUser";
 
 const badgeColors: { [key: string]: string } = {
   Активен: "rgb(47, 158, 98)",
@@ -46,7 +45,18 @@ export default function ProfileHeader({
               size="icon"
               className="size-8 text-green-500"
               onClick={() => {
-                // save??
+                editUser(
+                  user.id,
+                  formData.username,
+                  formData.class,
+                  Number(formData.classGearScore),
+                  formData.secondaryClass ?? null,
+                  formData.secondaryClassGearScore != null
+                    ? Number(formData.secondaryClassGearScore)
+                    : null,
+                  formData.vkName,
+                  formData.joined_at
+                );
                 setEditMode(false);
               }}
             >

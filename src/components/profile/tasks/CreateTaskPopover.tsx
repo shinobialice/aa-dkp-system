@@ -1,5 +1,3 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,16 +16,16 @@ import {
 import { TaskDatePicker } from "./TaskDatePicker";
 import * as React from "react";
 import { useTaskForm } from "./hooks/useTaskForm";
-import { createTask } from "./services/tasksApi";
+import createUserTask from "@/src/actions/createUserTask";
 
 interface CreateTaskPopoverProps {
   userId: number;
-  onTaskCreatedAction: () => void;
+  onChange: () => void;
 }
 
 export function CreateTaskPopover({
   userId,
-  onTaskCreatedAction,
+  onChange,
 }: CreateTaskPopoverProps) {
   const [open, setOpen] = React.useState(false);
 
@@ -41,30 +39,7 @@ export function CreateTaskPopover({
     completedAt,
     setCompletedAt,
     loading,
-    setLoading,
   } = useTaskForm();
-
-  async function handleCreateTask() {
-    try {
-      setLoading(true);
-      await createTask(userId, {
-        user_id: userId,
-        name,
-        created_at: createdAt.toISOString(),
-        completed_at:
-          status === "completed" && completedAt
-            ? completedAt.toISOString()
-            : null,
-      });
-
-      onTaskCreatedAction();
-      resetForm();
-    } catch (error) {
-      alert("Ошибка при создании задания");
-    } finally {
-      setLoading(false);
-    }
-  }
 
   function resetForm() {
     setOpen(false);
@@ -127,7 +102,14 @@ export function CreateTaskPopover({
                 onChange={(date) => setCompletedAt(date ?? null)}
               />
             </div>
-            <Button onClick={handleCreateTask} disabled={loading}>
+            <Button
+              onClick={async () => {
+                await createUserTask(userId, name, createdAt, completedAt);
+                onChange();
+                resetForm();
+              }}
+              disabled={loading}
+            >
               {loading ? "Создание..." : "Создать"}
             </Button>
           </div>

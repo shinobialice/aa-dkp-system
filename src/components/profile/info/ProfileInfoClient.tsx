@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import ProfileHeader from "./ProfileHeader";
@@ -16,7 +15,7 @@ export default function ProfileInfoClient({ user }: { user: any }) {
     secondaryClassGearScore: user.secondary_class_gear_score,
     vkName: user.vk_name,
     vkRealName: "",
-    joinedDate: user.joined_at
+    joined_at: user.joined_at
       ? new Date(user.joined_at).toISOString().split("T")[0]
       : "",
   });

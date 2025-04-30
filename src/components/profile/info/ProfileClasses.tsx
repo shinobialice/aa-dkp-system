@@ -1,5 +1,3 @@
-"use client";
-
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -110,6 +108,8 @@ export default function ProfileClasses({
                   setFormData((prev: any) => ({
                     ...prev,
                     secondaryClass: value === "Нет" ? null : value,
+                    secondaryClassGearScore:
+                      value === "Нет" ? null : prev.secondaryClassGearScore,
                   }))
                 }
               >

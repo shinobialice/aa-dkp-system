@@ -1,5 +1,3 @@
-"use client";
-
 import { CardDescription } from "@/components/ui/card";
 import {
   differenceInDays,
@@ -84,17 +82,17 @@ export default function ProfileAdditionalInfo({
         {editMode ? (
           <TaskDatePicker
             value={
-              formData.joinedDate ? new Date(formData.joinedDate) : undefined
+              formData.joined_at ? new Date(formData.joined_at) : undefined
             }
             onChange={(date) =>
               setFormData((prev: any) => ({
                 ...prev,
-                joinedDate: date ? format(date, "yyyy-MM-dd") : "",
+                joined_at: date ? format(date, "yyyy-MM-dd") : "",
               }))
             }
           />
-        ) : formData.joinedDate ? (
-          new Date(formData.joinedDate).toLocaleDateString("ru-RU")
+        ) : formData.joined_at ? (
+          new Date(formData.joined_at).toLocaleDateString("ru-RU")
         ) : (
           "Неизвестно"
         )}

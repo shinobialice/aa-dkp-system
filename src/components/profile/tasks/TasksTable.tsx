@@ -1,5 +1,3 @@
-"use client";
-
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -31,50 +29,29 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import React from "react";
-import { fetchTasks, deleteTask as deleteTaskApi } from "./services/tasksApi";
 import { Task } from "./types/task";
+import deleteUserTask from "@/src/actions/deleteUserTask";
 
 interface TasksTableClientProps {
   tasks: Task[];
   userId: number;
+  onChange: () => {};
 }
 
 export default function TasksTable({
-  tasks: initialTasks,
+  tasks,
   userId,
+  onChange,
 }: TasksTableClientProps) {
-  const [tasks, setTasks] = React.useState<Task[]>(initialTasks);
   const [openDialogId, setOpenDialogId] = React.useState<number | null>(null);
   const [editDialogTask, setEditDialogTask] = React.useState<Task | null>(null);
-
-  async function reloadTasks() {
-    try {
-      const data = await fetchTasks(userId);
-      setTasks(data);
-    } catch (error) {
-      alert("Ошибка загрузки заданий");
-    }
-  }
-
-  async function handleDeleteTask(taskId: number) {
-    try {
-      await deleteTaskApi(userId, taskId);
-      setOpenDialogId(null);
-      await reloadTasks();
-    } catch (error) {
-      alert("Ошибка при удалении задания");
-    }
-  }
 
   return (
     <Card>
       <CardHeader className="border-b">
         <CardTitle className="flex items-center justify-between">
           Задания игрока
-          <CreateTaskPopover
-            userId={userId}
-            onTaskCreatedAction={reloadTasks}
-          />
+          <CreateTaskPopover userId={userId} onChange={onChange} />
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -154,7 +131,10 @@ export default function TasksTable({
                         <AlertDialogFooter>
                           <AlertDialogCancel>Отмена</AlertDialogCancel>
                           <AlertDialogAction
-                            onClick={() => handleDeleteTask(task.id)}
+                            onClick={async () => {
+                              await deleteUserTask(task.id);
+                              onChange();
+                            }}
                           >
                             Удалить
                           </AlertDialogAction>
@@ -181,7 +161,7 @@ export default function TasksTable({
           }}
           task={editDialogTask}
           userId={userId}
-          onTaskUpdatedAction={reloadTasks}
+          onChange={onChange}
         />
       )}
     </Card>

@@ -1,5 +1,3 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,15 +20,15 @@ import {
 } from "@/components/ui/dialog";
 import * as React from "react";
 import { Task } from "./types/task";
-import { updateTask } from "./services/tasksApi";
 import { useTaskForm } from "./hooks/useTaskForm";
+import editUserTask from "@/src/actions/editUserTask";
 
 interface EditTaskDialogProps {
   open: boolean;
   onOpenChangeAction: (open: boolean) => void;
   task: Task;
   userId: number;
-  onTaskUpdatedAction: () => void;
+  onChange: () => {};
 }
 
 export function EditTaskDialog({
@@ -38,7 +36,7 @@ export function EditTaskDialog({
   onOpenChangeAction,
   task,
   userId,
-  onTaskUpdatedAction,
+  onChange,
 }: EditTaskDialogProps) {
   const {
     name,
@@ -50,29 +48,7 @@ export function EditTaskDialog({
     completedAt,
     setCompletedAt,
     loading,
-    setLoading,
   } = useTaskForm(task);
-
-  async function handleUpdateTask() {
-    try {
-      setLoading(true);
-      await updateTask(userId, task.id, {
-        name,
-        created_at: createdAt.toISOString(),
-        completed_at:
-          status === "completed" && completedAt
-            ? completedAt.toISOString()
-            : null,
-      });
-
-      onTaskUpdatedAction();
-      onOpenChangeAction(false);
-    } catch (error) {
-      alert("Ошибка при обновлении задания");
-    } finally {
-      setLoading(false);
-    }
-  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChangeAction}>
@@ -130,7 +106,14 @@ export function EditTaskDialog({
           <DialogClose asChild>
             <Button variant="secondary">Отмена</Button>
           </DialogClose>
-          <Button onClick={handleUpdateTask} disabled={loading}>
+          <Button
+            onClick={async () => {
+              await editUserTask(userId, task.id, name, createdAt, completedAt);
+              onChange();
+              onOpenChangeAction(false);
+            }}
+            disabled={loading}
+          >
             {loading ? "Сохранение..." : "Сохранить"}
           </Button>
         </DialogFooter>

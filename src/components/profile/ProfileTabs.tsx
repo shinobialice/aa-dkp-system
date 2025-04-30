@@ -5,17 +5,19 @@ import InventoryTabsClient from "./inventory/InventoryTabsClient";
 import TasksTable from "./tasks/TasksTable";
 import UserNotes from "./notes/UserNotes";
 import getUserInventory from "@/src/actions/getUserInventory";
+import getUserTasks from "@/src/actions/getUserTasks";
 
 export default function ProfileTabs({
   user,
   inventory: initialInventory,
-  tasks,
+  tasks: initialTasks,
 }: {
   user: any;
   inventory: any[];
   tasks: any[];
 }) {
   const [inventory, setInventory] = useState<any[]>(initialInventory);
+  const [tasks, setTasks] = useState<any[]>(initialTasks);
 
   useEffect(() => {
     setInventory(initialInventory);
@@ -41,7 +43,14 @@ export default function ProfileTabs({
       </TabsContent>
 
       <TabsContent value="tasks">
-        <TasksTable tasks={tasks} userId={user.id} />
+        <TasksTable
+          tasks={tasks}
+          userId={user.id}
+          onChange={async () => {
+            const tasks = await getUserTasks(user.id);
+            setTasks(tasks);
+          }}
+        />
       </TabsContent>
 
       <TabsContent value="notes">

@@ -60,10 +60,7 @@ export default function ActivitiesPage() {
         </h1>
 
         {/* Календарь */}
-        <div
-          className="bg-surface  p-6 shadow-md"
-          style={{ height: "80dvh" }}
-        >
+        <div className="bg-surface  p-6 shadow-md" style={{ height: "80dvh" }}>
           <FullCalendar
             plugins={[dayGridPlugin, timeGridPlugin]}
             initialView="timeGridWeek"
@@ -103,17 +100,17 @@ export default function ActivitiesPage() {
             { color: "rgb(90, 54, 165)", label: "Прайм" },
             { color: "rgb(215, 100, 168)", label: "АГЛ" },
             { color: "rgb(232, 157, 53)", label: "Кошка" },
-            { color: "rgb(201, 52, 52)", label: "World Boss" },
-            { color: "rgb(47, 158, 98)", label: "Arch Boss" },
-            { color: "rgb(0, 148, 168)", label: "Boonstone" },
-            { color: "rgb(157, 41, 41)", label: "War" },
-            { color: "rgb(40, 111, 180)", label: "Siege" },
-            { color: "rgb(138, 81, 184)", label: "Guild Contract" },
-            { color: "rgb(58, 76, 92)", label: "Raid" },
-            { color: "rgb(23, 133, 115)", label: "Tax Delivery" },
-            { color: "rgb(184, 92, 52)", label: "War Games" },
-            { color: "rgb(57, 74, 53)", label: "Other" },
-            { color: "rgb(0, 128, 128)", label: "Lawless Wilds" },
+            // { color: "rgb(201, 52, 52)", label: "World Boss" },
+            // { color: "rgb(47, 158, 98)", label: "Arch Boss" },
+            // { color: "rgb(0, 148, 168)", label: "Boonstone" },
+            // { color: "rgb(157, 41, 41)", label: "War" },
+            // { color: "rgb(40, 111, 180)", label: "Siege" },
+            // { color: "rgb(138, 81, 184)", label: "Guild Contract" },
+            // { color: "rgb(58, 76, 92)", label: "Raid" },
+            // { color: "rgb(23, 133, 115)", label: "Tax Delivery" },
+            // { color: "rgb(184, 92, 52)", label: "War Games" },
+            // { color: "rgb(57, 74, 53)", label: "Other" },
+            // { color: "rgb(0, 128, 128)", label: "Lawless Wilds" },
           ].map((item, index) => (
             <div key={index} className="flex items-center gap-2">
               <div

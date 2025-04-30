@@ -20,6 +20,7 @@ import setItemQuality from "@/src/actions/setItemQuality";
 import inventoryIcons from "./InventoryIcons";
 import inventoryItems from "./InventoryItems";
 import ItemIcon from "./ItemIcon";
+import addItemToUserInventory from "@/src/actions/addItemToUserInventory";
 
 export default function InventoryTabsClient({
   inventory,
@@ -38,20 +39,14 @@ export default function InventoryTabsClient({
             await deleteItemFromUserInventory(userItem.id);
           }
         } else {
-          const quality = value[0]; // "3", "4" или "5"
+          const quality = value[0];
 
           if (userItem) {
-            await setItemQuality(userItem.id, quality);
+            if (quality) {
+              await setItemQuality(userItem.id, quality);
+            }
           } else {
-            await fetch(`/api/users/${userId}/inventory`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                name: item.name,
-                type: item.type,
-                quality,
-              }),
-            });
+            await addItemToUserInventory(userId, item.name, item.type, quality);
           }
         }
       } else if (
@@ -64,7 +59,7 @@ export default function InventoryTabsClient({
       ) {
         if (value === "Нету") {
           if (userItem) {
-            await deleteItemFromUserInventory(userId);
+            await deleteItemFromUserInventory(userItem.id);
           }
         } else {
           let quality = null;
@@ -76,39 +71,18 @@ export default function InventoryTabsClient({
           }
 
           if (userItem) {
-            await fetch(`/api/users/${userId}/inventory/${userItem.id}`, {
-              method: "PATCH",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ quality }),
-            });
+            await setItemQuality(userItem.id, quality as string);
           } else {
-            await fetch(`/api/users/${userId}/inventory`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                name: item.name,
-                type: item.type,
-                quality,
-              }),
-            });
+            await addItemToUserInventory(userId, item.name, item.type, quality);
           }
         }
       } else {
         if (value === "Есть" && !userItem) {
-          await fetch(`/api/users/${userId}/inventory`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              name: item.name,
-              type: item.type,
-            }),
-          });
+          await addItemToUserInventory(userId, item.name, item.type, null);
         } else if (value === "Нет" && userItem) {
           await deleteItemFromUserInventory(userItem.id);
         }
       }
-
-      // await getUserInventory(userId);
       onChange();
     } catch (error) {
       console.error("Ошибка при обновлении инвентаря:", error);
