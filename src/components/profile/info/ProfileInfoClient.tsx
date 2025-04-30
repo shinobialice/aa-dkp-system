@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import ProfileHeader from "./ProfileHeader";
 import ProfileClasses from "./ProfileClasses";
@@ -19,6 +19,21 @@ export default function ProfileInfoClient({ user }: { user: any }) {
       ? new Date(user.joined_at).toISOString().split("T")[0]
       : "",
   });
+
+  useEffect(() => {
+    const fetchVkName = async () => {
+      if (!formData.vkName) return;
+
+      const res = await fetch(`/api/vk-name?username=${formData.vkName}`);
+      const data = await res.json();
+
+      if (data.name) {
+        setFormData((prev) => ({ ...prev, vkRealName: data.name }));
+      }
+    };
+
+    fetchVkName();
+  }, [formData.vkName]);
 
   return (
     <Card>

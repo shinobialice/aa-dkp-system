@@ -73,7 +73,7 @@ export default function ProfileAdditionalInfo({
             rel="noopener noreferrer"
             className="text-blue-500 hover:underline"
           >
-            {formData.vkName}
+            {formData.vkRealName ? formData.vkRealName : "—"}
           </a>
         ) : (
           "Нет данных"
