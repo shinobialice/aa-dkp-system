@@ -12,8 +12,10 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -23,6 +25,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ClassFilter } from "../../../MembersTable/ClassFilter";
+import { Label } from "@/components/ui/label";
 
 export type User = {
   id: number;
@@ -33,9 +37,35 @@ export type User = {
 
 interface SelectRaidListProps {
   users: User[];
+  rowSelection: Record<number, boolean>;
+  setRowSelection: React.Dispatch<
+    React.SetStateAction<Record<number, boolean>>
+  >;
 }
 
 const columns: ColumnDef<User>[] = [
+  {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
   {
     accessorKey: "username",
     header: ({ column }) => (
@@ -64,7 +94,11 @@ const columns: ColumnDef<User>[] = [
   },
 ];
 
-export function SelectedRaidList({ users }: SelectRaidListProps) {
+export function SelectRaidList({
+  users,
+  rowSelection,
+  setRowSelection,
+}: SelectRaidListProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -85,18 +119,33 @@ export function SelectedRaidList({ users }: SelectRaidListProps) {
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
     state: {
       sorting,
       columnFilters,
       columnVisibility,
+      rowSelection,
     },
   });
 
   return (
-    <div className="w-full mt-7">
-      <div className="flex justify-center text-xl mb-4">Рейд</div>
+    <div className="w-full ">
+      <Label>Выбор игроков</Label>
+      <div className="flex items-center py-4">
+        <Input
+          placeholder="поиск по нику..."
+          value={
+            (table.getColumn("username")?.getFilterValue() as string) ?? ""
+          }
+          onChange={(event) =>
+            table.getColumn("username")?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm"
+        />
+        <ClassFilter table={table} />
+      </div>
       <div className="rounded-md border">
-        <ScrollArea className="w-full h-180">
+        <ScrollArea className="w-full h-187">
           <Table>
             <TableHeader className="sticky top-0 z-1 bg-background">
               {table.getHeaderGroups().map((headerGroup) => (
@@ -148,7 +197,12 @@ export function SelectedRaidList({ users }: SelectRaidListProps) {
           </Table>
         </ScrollArea>
       </div>
-      <div className="flex justify-end space-x-2 py-4"></div>
+      <div className="flex justify-end space-x-2 py-4">
+        <div className="flex-1 text-sm text-muted-foreground">
+          {table.getFilteredSelectedRowModel().rows.length} из{" "}
+          {table.getFilteredRowModel().rows.length} выбраны.
+        </div>
+      </div>
     </div>
   );
 }
