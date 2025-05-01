@@ -3,7 +3,8 @@ import { useRef, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import { ChevronLeft, ChevronRight, Table, Calendar } from "lucide-react";
+import listPlugin from "@fullcalendar/list";
+import { ChevronLeft, ChevronRight, Table, Calendar1 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -33,7 +34,7 @@ export default function ActivitiesPage() {
   };
 
   const handleNav = (
-    action: "prev" | "next" | "today" | "week" | "month" | "list"
+    action: "prev" | "next" | "today" | "week" | "monthGrid" | "list"
   ) => {
     const api = calendarRef.current?.getApi();
     if (api) {
@@ -41,8 +42,10 @@ export default function ActivitiesPage() {
       if (action === "next") api.next();
       if (action === "today") api.today();
       if (action === "week") api.changeView("timeGridWeek");
-      if (action === "month") api.changeView("dayGridMonth");
+      if (action === "monthGrid") api.changeView("dayGridMonth"); // Fix here
       if (action === "list") api.changeView("listWeek");
+    } else {
+      console.error("Calendar API is not available");
     }
   };
 
@@ -63,9 +66,9 @@ export default function ActivitiesPage() {
           <Button
             variant="outline"
             className="hidden md:flex"
-            onClick={() => handleNav("list")}
+            onClick={() => handleNav("week")}
           >
-            <Calendar className="size-4" />
+            <Calendar1 className="size-4" />
           </Button>
           <CreateEvent />
         </div>
@@ -77,23 +80,20 @@ export default function ActivitiesPage() {
             </span>
 
             <div className="flex items-end gap-2 mr-6">
-              <Select>
+              <Select
+                defaultValue="weekGrid" // Preselect "week" view
+                onValueChange={(value) => {
+                  console.log(`Switching to ${value} view`); // Debugging
+                  if (value === "weekGrid") handleNav("week");
+                  if (value === "monthGrid") handleNav("monthGrid");
+                }}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Неделя" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem
-                    value="weekGrid"
-                    onClick={() => handleNav("week")}
-                  >
-                    Неделя
-                  </SelectItem>
-                  <SelectItem
-                    value="monthGrid"
-                    onClick={() => handleNav("month")}
-                  >
-                    Месяц
-                  </SelectItem>
+                  <SelectItem value="weekGrid">Неделя</SelectItem>
+                  <SelectItem value="monthGrid">Месяц</SelectItem>
                 </SelectContent>
               </Select>
               <Button onClick={() => handleNav("today")}>Сегодня</Button>
@@ -111,7 +111,7 @@ export default function ActivitiesPage() {
         <div className="bg-surface p-6 shadow-md" style={{ height: "80dvh" }}>
           <FullCalendar
             ref={calendarRef}
-            plugins={[dayGridPlugin, timeGridPlugin]}
+            plugins={[dayGridPlugin, timeGridPlugin, listPlugin]}
             initialView="timeGridWeek"
             events={calendarEvents}
             eventClick={(info) => alert(`Event: ${info.event.title}`)}
