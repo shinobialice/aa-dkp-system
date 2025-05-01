@@ -8,23 +8,22 @@ const prisma = new PrismaClient();
  *
  * @param type Тип рейда (например, raid.type.prime)
  * @param boss_name Имя босса (например, raid.boss_name.kaleil)
- * @param dkp_value Сколько DKP дают
+ * @param dkp_summary Сколько DKP в сумме
  * @param start_date Дата рейда
  * @param userIds Массив ID пользователей, которые участвовали
  */
 
 const createRaidEvent = async (
   type: string,
-  boss_name: string,
-  dkp_value: number,
+  dkp_summary: number,
   start_date: Date,
-  userIds: number[]
+  userIds: number[],
+  bossIds: number[]
 ) => {
   const event = await prisma.raid.create({
     data: {
       type,
-      boss_name,
-      dkp_value,
+      dkp_summary,
       start_date,
       created_at: new Date(),
       attendance: {
@@ -33,9 +32,13 @@ const createRaidEvent = async (
           created_at: new Date(),
         })),
       },
+      bosses: {
+        connect: bossIds.map((id) => ({ id })),
+      },
     },
     include: {
       attendance: true,
+      bosses: true,
     },
   });
 

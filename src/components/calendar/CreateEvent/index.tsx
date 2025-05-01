@@ -16,13 +16,20 @@ import { SelectedRaidList } from "./components/SelectedRaidList";
 import { Separator } from "@/components/ui/separator";
 import createRaidEvent from "@/src/actions/createRaidEvent";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { getBosses } from "@/src/actions/getBosses";
 
 export function CreateEvent() {
   const [category, setCategory] = React.useState<string | null>(null);
   const [selectedBoss, setSelectedBoss] = React.useState<string | null>(null);
   const [dkpPoints, setDkpPoints] = React.useState<number>(0);
   const [selectedDate, setSelectedDate] = React.useState<Date | null>(null);
+  const [bosses, setBosses] = React.useState<
+    { id: number; boss_name: string; dkp_points: number; category: string }[]
+  >([]);
+  const [selectedBosses, setSelectedBosses] = React.useState<
+    { id: number; boss_name: string; category: string; dkp_points: number }[]
+  >([]);
+
   const [errors, setErrors] = React.useState({
     category: false,
     selectedBoss: false,
@@ -45,6 +52,10 @@ export function CreateEvent() {
     [activeUsers, rowSelection]
   );
 
+  React.useEffect(() => {
+    getBosses().then(setBosses);
+  }, []);
+
   const handleCreateEvent = async () => {
     const newErrors = {
       category: !category,
@@ -60,16 +71,12 @@ export function CreateEvent() {
 
     await createRaidEvent(
       category as string,
-      selectedBoss as string,
       dkpPoints,
       selectedDate as Date,
-      userIds
+      userIds,
+      selectedBosses.map((b) => b.id)
     );
 
-    setCategory(null);
-    setSelectedBoss(null);
-    setDkpPoints(0);
-    setSelectedDate(null);
     setRowSelection({});
     setSuccess("Активность успешно создана");
     setOpen(false);
@@ -97,12 +104,15 @@ export function CreateEvent() {
               setCategory={setCategory}
               selectedBoss={selectedBoss}
               setSelectedBoss={setSelectedBoss}
+              selectedBosses={selectedBosses}
+              setSelectedBosses={setSelectedBosses}
               dkpPoints={dkpPoints}
               setDkpPoints={setDkpPoints}
               selectedDate={selectedDate}
               setSelectedDate={setSelectedDate}
               errors={errors}
               setErrors={setErrors}
+              bosses={bosses}
             />
           </div>
           <div className="md:border-r md:pr-4">

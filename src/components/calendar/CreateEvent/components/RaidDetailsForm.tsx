@@ -6,13 +6,17 @@ import {
   SelectValue,
   SelectContent,
   SelectItem,
-  SelectSeparator,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { eventDkpCalculator } from "@/src/utils/eventDkpCalculator";
-import { getActiveUsers } from "@/src/actions/getActiveUsers";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+} from "@/components/ui/dropdown-menu";
 import DatetimePicker from "./DateTimePicker";
+import { getActiveUsers } from "@/src/actions/getActiveUsers";
 
 export function RaidDetailsForm({
   users,
@@ -21,12 +25,15 @@ export function RaidDetailsForm({
   setCategory,
   selectedBoss,
   setSelectedBoss,
+  selectedBosses,
+  setSelectedBosses,
   dkpPoints,
   setDkpPoints,
   selectedDate,
   setSelectedDate,
   errors,
   setErrors,
+  bosses,
 }: {
   users: any[];
   setUsers: (users: any[]) => void;
@@ -34,6 +41,23 @@ export function RaidDetailsForm({
   setCategory: (value: string | null) => void;
   selectedBoss: string | null;
   setSelectedBoss: (value: string | null) => void;
+  selectedBosses: {
+    id: number;
+    boss_name: string;
+    category: string;
+    dkp_points: number;
+  }[];
+  setSelectedBosses: React.Dispatch<
+    React.SetStateAction<
+      {
+        id: number;
+        boss_name: string;
+        category: string;
+        dkp_points: number;
+      }[]
+    >
+  >;
+
   dkpPoints: number;
   setDkpPoints: (value: number) => void;
   selectedDate: Date | null;
@@ -50,12 +74,15 @@ export function RaidDetailsForm({
       selectedDate: boolean;
     }>
   >;
+  bosses: {
+    id: number;
+    boss_name: string;
+    dkp_points: number;
+    category: string;
+  }[];
 }) {
   const [isPvp, setIsPvp] = React.useState(false);
   const [isLongPvp, setIsLongPvp] = React.useState(false);
-  const [isProc, setIsProc] = React.useState(false);
-  const [isDoubleProc, setIsDoubleProc] = React.useState(false);
-  const [isMarliProc, setIsMarliProc] = React.useState(false);
 
   React.useEffect(() => {
     async function fetchUsers() {
@@ -65,26 +92,6 @@ export function RaidDetailsForm({
     fetchUsers();
   }, [setUsers]);
 
-  React.useEffect(() => {
-    const calculated = eventDkpCalculator(
-      selectedBoss,
-      isPvp,
-      isLongPvp,
-      isProc,
-      isDoubleProc,
-      isMarliProc
-    );
-    setDkpPoints(calculated);
-  }, [
-    selectedBoss,
-    isPvp,
-    isLongPvp,
-    isProc,
-    isDoubleProc,
-    isMarliProc,
-    setDkpPoints,
-  ]);
-
   return (
     <div className="space-y-4">
       <Label>Категория</Label>
@@ -92,12 +99,10 @@ export function RaidDetailsForm({
         onValueChange={(value) => {
           setCategory(value);
           setSelectedBoss(null);
+          setSelectedBosses([]);
           setIsPvp(false);
           setIsLongPvp(false);
-          setIsProc(false);
-          setIsDoubleProc(false);
-          setIsMarliProc(false);
-          setErrors((prev) => ({ ...prev, category: false })); // ✅ сбрасываем ошибку
+          setErrors((prev) => ({ ...prev, category: false }));
         }}
         value={category ?? undefined}
       >
@@ -108,23 +113,18 @@ export function RaidDetailsForm({
           <SelectItem value="Прайм">Прайм</SelectItem>
           <SelectItem value="АГЛ">АГЛ</SelectItem>
         </SelectContent>
-        {errors.category && (
-          <p className="text-sm text-red-500">Обязательное поле</p>
-        )}
       </Select>
+      {errors.category && (
+        <p className="text-sm text-red-500">Обязательное поле</p>
+      )}
 
-      {category && (
+      {category === "Прайм" && (
         <>
           <Label>Босс</Label>
           <Select
             onValueChange={(value) => {
               setSelectedBoss(value);
-              setIsPvp(false);
-              setIsLongPvp(false);
-              setIsProc(false);
-              setIsDoubleProc(false);
-              setIsMarliProc(false);
-              setErrors((prev) => ({ ...prev, selectedBoss: false })); // ✅
+              setErrors((prev) => ({ ...prev, selectedBoss: false }));
             }}
             value={selectedBoss ?? undefined}
           >
@@ -132,37 +132,60 @@ export function RaidDetailsForm({
               <SelectValue placeholder="Выберите босса" />
             </SelectTrigger>
             <SelectContent>
-              {category === "АГЛ" && (
-                <>
-                  <SelectItem value="АГЛ">АГЛ</SelectItem>
-                  <SelectItem value="Разъяренная Сехекмет">
-                    Разъяренная Сехекмет
+              {bosses
+                .filter((boss) => boss.category === "Прайм")
+                .map((boss) => (
+                  <SelectItem key={boss.id} value={boss.boss_name}>
+                    {boss.boss_name}
                   </SelectItem>
-                  <SelectSeparator />
-                  <SelectItem value="Морфеос">Морфеос</SelectItem>
-                  <SelectItem value="Марли">Марли</SelectItem>
-                </>
-              )}
-              {category === "Прайм" && (
-                <>
-                  <SelectItem value="Ксанатос">Ксанатос</SelectItem>
-                  <SelectItem value="Кракен">Кракен</SelectItem>
-                  <SelectItem value="Калидис">Калидис</SelectItem>
-                  <SelectItem value="Левиафан">Левиафан</SelectItem>
-                  <SelectSeparator />
-                  <SelectItem value="Анталлон">Анталлон</SelectItem>
-                  <SelectItem value="Калеиль">Калеиль</SelectItem>
-                  <SelectItem value="Корвус">Корвус</SelectItem>
-                  <SelectSeparator />
-                  <SelectItem value="Дельфиец">Дельфиец</SelectItem>
-                  <SelectItem value="Осада">Осада</SelectItem>
-                </>
-              )}
+                ))}
             </SelectContent>
-            {errors.selectedBoss && (
-              <p className="text-sm text-red-500">Обязательное поле</p>
-            )}
           </Select>
+          {errors.selectedBoss && (
+            <p className="text-sm text-red-500">Обязательное поле</p>
+          )}
+        </>
+      )}
+
+      {category === "АГЛ" && (
+        <>
+          <Label>Боссы (можно выбрать нескольких)</Label>
+          <DropdownMenu>
+            <DropdownMenuTrigger className="border rounded px-4 py-2 text-left w-[270px]">
+              {selectedBosses.length > 0
+                ? selectedBosses.map((b) => b.boss_name).join(", ")
+                : "Выберите боссов"}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-64 max-h-80 overflow-y-auto">
+              {bosses
+                .filter((boss) => boss.category === "АГЛ")
+                .map((boss) => (
+                  <DropdownMenuCheckboxItem
+                    key={boss.id}
+                    checked={selectedBosses.some((b) => b.id === boss.id)}
+                    onSelect={(event) => {
+                      event.preventDefault();
+                    }}
+                    onCheckedChange={(checked) => {
+                      setSelectedBosses((prev) =>
+                        checked
+                          ? [...prev, boss]
+                          : prev.filter((b) => b.id !== boss.id)
+                      );
+                      setErrors((prev) => ({
+                        ...prev,
+                        selectedBoss: false,
+                      }));
+                    }}
+                  >
+                    {boss.boss_name}
+                  </DropdownMenuCheckboxItem>
+                ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          {errors.selectedBoss && (
+            <p className="text-sm text-red-500">Обязательное поле</p>
+          )}
         </>
       )}
 
@@ -189,42 +212,6 @@ export function RaidDetailsForm({
               ПВП дольше 30 минут
             </label>
           </div>
-          {(selectedBoss === "Марли" || selectedBoss === "АГЛ") && (
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="proc"
-                checked={isProc}
-                onCheckedChange={(checked) => setIsProc(checked === true)}
-              />
-              <label htmlFor="proc" className="text-sm">
-                Прок
-              </label>
-            </div>
-          )}
-          {selectedBoss === "АГЛ" && (
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="double_proc"
-                checked={isDoubleProc}
-                onCheckedChange={(checked) => setIsDoubleProc(checked === true)}
-              />
-              <label htmlFor="double_proc" className="text-sm">
-                х2 Прок
-              </label>
-            </div>
-          )}
-          {selectedBoss === "Морфеос" && (
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="marli_proc"
-                checked={isMarliProc}
-                onCheckedChange={(checked) => setIsMarliProc(checked === true)}
-              />
-              <label htmlFor="marli_proc" className="text-sm">
-                Марли прок
-              </label>
-            </div>
-          )}
         </>
       )}
 
@@ -234,7 +221,7 @@ export function RaidDetailsForm({
           value={selectedDate}
           onChange={(date) => {
             setSelectedDate(date);
-            setErrors((prev) => ({ ...prev, selectedDate: false })); // ✅
+            setErrors((prev) => ({ ...prev, selectedDate: false }));
           }}
         />
         {errors.selectedDate && (

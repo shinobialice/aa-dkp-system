@@ -68,19 +68,35 @@ model Tasks {
 }
 
 model Raid {
-  id          Int              @id @default(autoincrement())
-  type        String?
-  boss_name   String?
-  start_date  DateTime?
-  created_at  DateTime         @default(now())
-  dkp_value   Int
-  
+  id           Int      @id @default(autoincrement())
+  type         String?
+  is_pvp       Boolean  @default(false)
+  is_pvp_long  Boolean  @default(false)
+  start_date   DateTime?
+  created_at   DateTime @default(now())
+  dkp_summary  Int      @default(0)
 
-  attendance  RaidAttendance[]
-  loot        Loot[]
+  bosses       Boss[]   @relation("RaidBosses") // OK
+  attendance   RaidAttendance[]
 
   @@map("raid")
 }
+
+
+
+model Boss {
+  id         Int     @id @default(autoincrement())
+  boss_name  String
+  dkp_points Int
+  category   String
+
+  raids      Raid[]  @relation("RaidBosses")
+
+  @@map("boss") // ✅ указывает Prisma, что таблица называется `boss` в базе
+}
+
+
+
 
 model RaidAttendance {
   id         Int      @id @default(autoincrement())
@@ -96,7 +112,6 @@ model RaidAttendance {
 
 model Loot {
   id             Int       @id
-  raid_id        Int?
   name           String?
   quantity       Int?
   price          Float?
@@ -106,8 +121,6 @@ model Loot {
   sold_to        String?
   comment        String?
   created_at     DateTime
-
-  raid           Raid?     @relation(fields: [raid_id], references: [id])
 
   @@map("loot")
 }
