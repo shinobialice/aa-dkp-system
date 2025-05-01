@@ -5,7 +5,7 @@ import {
   differenceInYears,
 } from "date-fns";
 import { Input } from "@/components/ui/input";
-import { DatePicker } from "../tasks/DatePicker";
+import { DatePicker } from "../tasks/TaskDatePicker";
 import { format } from "date-fns";
 
 export default function ProfileAdditionalInfo({

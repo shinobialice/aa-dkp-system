@@ -20,13 +20,49 @@ import {
 } from "@/components/ui/select";
 import DatetimePicker from "./DateTimePicker";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { SelectRaidList } from "./SelectRaidList";
+import { getActiveUsers } from "@/src/actions/getActiveUsers";
+import { SelectedRaidList } from "./SelectedRaidList";
+import { eventDkpCalculator } from "@/src/utils/eventDkpCalculator";
 
 export function CreateEvent() {
+  const [isPvp, setIsPvp] = React.useState(false);
+  const [isLongPvp, setIsLongPvp] = React.useState(false);
+  const [isProc, setIsProc] = React.useState(false);
   const [category, setCategory] = React.useState<string | null>(null);
   const [selectedBoss, setSelectedBoss] = React.useState<string | null>(null);
+  const [isDoubleProc, setIsDoubleProc] = React.useState(false);
+  const [users, setUsers] = React.useState<any[]>([]);
+  const dkpPoints = React.useMemo(() => {
+    return eventDkpCalculator(
+      selectedBoss,
+      isPvp,
+      isLongPvp,
+      isProc,
+      isDoubleProc
+    );
+  }, [selectedBoss, isPvp, isLongPvp, isProc, isDoubleProc]);
+  const [rowSelection, setRowSelection] = React.useState<
+    Record<number, boolean>
+  >({});
+
+  const activeUsers = React.useMemo(
+    () => users.filter((u) => u.active),
+    [users]
+  );
+
+  const selectedUsers = React.useMemo(() => {
+    return activeUsers.filter((_, index) => rowSelection[index]);
+  }, [activeUsers, rowSelection]);
+
+  React.useEffect(() => {
+    async function fetchUsers() {
+      const activeUsers = await getActiveUsers();
+      setUsers(activeUsers);
+    }
+    fetchUsers();
+  }, []);
 
   return (
     <Dialog>
@@ -50,9 +86,13 @@ export function CreateEvent() {
                   onValueChange={(value) => {
                     setCategory(value);
                     setSelectedBoss(null); // сбросить босса при смене категории
+                    setIsPvp(false); // сбросить чекбоксы
+                    setIsLongPvp(false);
+                    setIsProc(false);
+                    setIsDoubleProc(false);
                   }}
                 >
-                  <SelectTrigger className="w-[180px]">
+                  <SelectTrigger className="w-[270px]">
                     <SelectValue placeholder="Выберите категорию события" />
                   </SelectTrigger>
                   <SelectContent>
@@ -67,7 +107,7 @@ export function CreateEvent() {
               <div className="space-y-2">
                 <Label>Босс</Label>
                 <Select onValueChange={setSelectedBoss}>
-                  <SelectTrigger className="w-[180px]">
+                  <SelectTrigger className="w-[270px]">
                     <SelectValue placeholder="Выберите босса" />
                   </SelectTrigger>
                   <SelectContent>
@@ -82,14 +122,24 @@ export function CreateEvent() {
                 </Select>
 
                 <div className="flex items-center space-x-2 py-2">
-                  <Checkbox id="pvp" />
+                  <Checkbox
+                    id="pvp"
+                    checked={isPvp}
+                    onCheckedChange={(checked) => setIsPvp(checked === true)}
+                  />
                   <label htmlFor="pvp" className="text-sm font-medium">
                     ПВП
                   </label>
                 </div>
 
                 <div className="flex items-center space-x-2 py-2">
-                  <Checkbox id="long_pvp" />
+                  <Checkbox
+                    id="long_pvp"
+                    checked={isLongPvp}
+                    onCheckedChange={(checked) =>
+                      setIsLongPvp(checked === true)
+                    }
+                  />
                   <label htmlFor="long_pvp" className="text-sm font-medium">
                     ПВП дольше 30 минут
                   </label>
@@ -98,9 +148,30 @@ export function CreateEvent() {
                 {(selectedBoss === "raid.boss_name.marli" ||
                   selectedBoss === "raid.boss_name.agl") && (
                   <div className="flex items-center space-x-2 py-2">
-                    <Checkbox id="procedure" />
+                    <Checkbox
+                      id="procedure"
+                      checked={isProc}
+                      onCheckedChange={(checked) => setIsProc(checked === true)}
+                    />
                     <label htmlFor="procedure" className="text-sm font-medium">
                       Прок
+                    </label>
+                  </div>
+                )}
+                {selectedBoss === "raid.boss_name.agl" && (
+                  <div className="flex items-center space-x-2 py-2">
+                    <Checkbox
+                      id="double_procedure"
+                      checked={isDoubleProc}
+                      onCheckedChange={(checked) =>
+                        setIsDoubleProc(checked === true)
+                      }
+                    />
+                    <label
+                      htmlFor="double_procedure"
+                      className="text-sm font-medium"
+                    >
+                      х2 Прок
                     </label>
                   </div>
                 )}
@@ -111,7 +182,7 @@ export function CreateEvent() {
               <div className="space-y-2">
                 <Label>Босс</Label>
                 <Select onValueChange={setSelectedBoss}>
-                  <SelectTrigger className="w-[180px]">
+                  <SelectTrigger className="w-[270px]">
                     <SelectValue placeholder="Выберите босса" />
                   </SelectTrigger>
                   <SelectContent>
@@ -146,7 +217,11 @@ export function CreateEvent() {
                 </Select>
 
                 <div className="flex items-center space-x-2 py-4">
-                  <Checkbox id="terms" />
+                  <Checkbox
+                    id="pvp"
+                    checked={isPvp}
+                    onCheckedChange={(checked) => setIsPvp(checked === true)}
+                  />
                   <label htmlFor="terms" className="text-sm font-medium">
                     ПВП
                   </label>
@@ -160,17 +235,19 @@ export function CreateEvent() {
             </div>
             <div className="space-y-2">
               <Label>Ценность посещения</Label>
-              <Input
-                className="w-[180px]"
-                disabled
-                type="dkp_point"
-                placeholder="5"
-              />
+              <Input className="w-[270px]" disabled value={dkpPoints ?? 0} />
             </div>
           </div>
-          <div className="md:w-1/3"> poop</div>
           <div className="md:w-1/3">
-            <SelectRaidList></SelectRaidList>
+            {" "}
+            <SelectRaidList
+              users={users}
+              rowSelection={rowSelection}
+              setRowSelection={setRowSelection}
+            ></SelectRaidList>
+          </div>
+          <div className="md:w-1/3">
+            <SelectedRaidList users={selectedUsers}></SelectedRaidList>
           </div>
         </div>
 

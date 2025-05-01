@@ -10,7 +10,7 @@ const DatetimePicker = () => {
       onChange={setDate}
       defaultPopupValue={new Date()}
       granularity="minute"
-      className="w-[180px]"
+      className="w-[270px]"
     />
   );
 };

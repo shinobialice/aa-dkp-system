@@ -12,16 +12,8 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown } from "lucide-react";
+import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -41,35 +33,9 @@ export type User = {
 
 interface SelectRaidListProps {
   users: User[];
-  rowSelection: Record<number, boolean>;
-  setRowSelection: React.Dispatch<
-    React.SetStateAction<Record<number, boolean>>
-  >;
 }
 
 const columns: ColumnDef<User>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
   {
     accessorKey: "username",
     header: ({ column }) => (
@@ -98,11 +64,7 @@ const columns: ColumnDef<User>[] = [
   },
 ];
 
-export function SelectRaidList({
-  users,
-  rowSelection,
-  setRowSelection,
-}: SelectRaidListProps) {
+export function SelectedRaidList({ users }: SelectRaidListProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -123,51 +85,16 @@ export function SelectRaidList({
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
     state: {
       sorting,
       columnFilters,
       columnVisibility,
-      rowSelection,
     },
   });
 
   return (
-    <div className="w-full">
-      <div className="flex items-center py-4">
-        <Input
-          placeholder="поиск по нику..."
-          value={
-            (table.getColumn("username")?.getFilterValue() as string) ?? ""
-          }
-          onChange={(event) =>
-            table.getColumn("username")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              Фильтр <ChevronDown />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => (
-                <DropdownMenuCheckboxItem
-                  key={column.id}
-                  className="capitalize"
-                  checked={column.getIsVisible()}
-                  onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                >
-                  {column.id}
-                </DropdownMenuCheckboxItem>
-              ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+    <div className="w-full mt-7">
+      <div className="flex justify-center text-xl mb-4">Рейд</div>
       <div className="rounded-md border">
         <ScrollArea className="w-full h-180">
           <Table>
@@ -221,12 +148,7 @@ export function SelectRaidList({
           </Table>
         </ScrollArea>
       </div>
-      <div className="flex justify-end space-x-2 py-4">
-        <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} из{" "}
-          {table.getFilteredRowModel().rows.length} выбраны.
-        </div>
-      </div>
+      <div className="flex justify-end space-x-2 py-4"></div>
     </div>
   );
 }

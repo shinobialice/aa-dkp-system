@@ -22,7 +22,7 @@ import * as React from "react";
 import { Task } from "./types/task";
 import { useTaskForm } from "./hooks/useTaskForm";
 import editUserTask from "@/src/actions/editUserTask";
-import { DatePicker } from "./DatePicker";
+import { DatePicker } from "./TaskDatePicker";
 
 interface EditTaskDialogProps {
   open: boolean;

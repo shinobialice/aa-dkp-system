@@ -17,7 +17,7 @@ import {
 import * as React from "react";
 import { useTaskForm } from "./hooks/useTaskForm";
 import createUserTask from "@/src/actions/createUserTask";
-import { DatePicker } from "./DatePicker";
+import { DatePicker } from "./TaskDatePicker";
 
 interface CreateTaskPopoverProps {
   userId: number;

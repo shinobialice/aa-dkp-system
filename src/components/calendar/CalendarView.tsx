@@ -1,5 +1,4 @@
 "use client";
-
 import { useRef, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -162,7 +161,7 @@ export default function ActivitiesPage() {
   );
 }
 
-// Fake example events (replace with your own logic or data source)
+
 const calendarEvents = [
   {
     title: "Прайм",
