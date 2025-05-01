@@ -18,6 +18,7 @@ import createRaidEvent from "@/src/actions/createRaidEvent";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getBosses } from "@/src/actions/getBosses";
 import { eventDkpCalculator } from "@/src/utils/eventDkpCalculator";
+import { AlertDialog } from "@/components/ui/alert-dialog";
 
 export function CreateEvent() {
   const [category, setCategory] = useState<string | null>(null);
@@ -38,8 +39,7 @@ export function CreateEvent() {
     selectedBoss: false,
     selectedDate: false,
   });
-  const [success, setSuccess] = useState<string | null>(null);
-  const [open, setOpen] = useState(false); // для закрытия модалки
+  const [open, setOpen] = useState(false);
 
   const [rowSelection, setRowSelection] = useState<Record<number, boolean>>({});
   const [users, setUsers] = useState<any[]>([]);
@@ -92,7 +92,6 @@ export function CreateEvent() {
     setIsPvp(false);
     setIsPvpLong(false);
     setRowSelection({});
-    setSuccess("Активность успешно создана");
     setOpen(false);
   };
 
@@ -147,17 +146,11 @@ export function CreateEvent() {
             <SelectedRaidList users={selectedUsers} />
           </div>
         </div>
-
+        <Separator />
         <DialogFooter>
           <Button onClick={handleCreateEvent} className="w-full md:w-auto">
             Создать
           </Button>
-          {success && (
-            <Alert variant="default" className="mb-4">
-              <AlertTitle>Успех</AlertTitle>
-              <AlertDescription>{success}</AlertDescription>
-            </Alert>
-          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

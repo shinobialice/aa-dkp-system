@@ -118,7 +118,7 @@ export function RaidDetailsForm({
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col h-full space-y-4">
       <Label>Категория</Label>
       <Select
         onValueChange={(value) => {
@@ -251,7 +251,6 @@ export function RaidDetailsForm({
           </label>
         </div>
       )}
-
       <div className="space-y-2">
         <Label>Дата и время (МСК)</Label>
         <DatetimePicker
@@ -266,7 +265,7 @@ export function RaidDetailsForm({
         )}
       </div>
 
-      <div className="space-y-2">
+      <div className="mt-auto space-y-2">
         <Label>Ценность посещения</Label>
         <Input className="w-[270px]" disabled value={dkpPoints ?? 0} />
       </div>
