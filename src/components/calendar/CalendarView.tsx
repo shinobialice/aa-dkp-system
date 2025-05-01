@@ -28,7 +28,7 @@ export default function ActivitiesPage() {
       day: "2-digit",
       month: "long",
       year: "numeric",
-    }).format(new Date(info.end.getTime() - 1)); 
+    }).format(new Date(info.end.getTime() - 1));
     setCurrentRange(`${start} – ${end}`);
   };
 
@@ -107,7 +107,7 @@ export default function ActivitiesPage() {
           </div>
         </div>
 
-        {/* Calendar */}
+        {/* Calendar Settings*/}
         <div className="bg-surface p-6 shadow-md" style={{ height: "80dvh" }}>
           <FullCalendar
             ref={calendarRef}
@@ -139,8 +139,6 @@ export default function ActivitiesPage() {
             datesSet={handleDateSet}
           />
         </div>
-
-
         <div className="flex flex-wrap gap-4 ml-6">
           {[
             { color: "rgb(90, 54, 165)", label: "Прайм" },
@@ -160,7 +158,6 @@ export default function ActivitiesPage() {
     </div>
   );
 }
-
 
 const calendarEvents = [
   {
