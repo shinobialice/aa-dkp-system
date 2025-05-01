@@ -15,8 +15,9 @@ import {
   DropdownMenuContent,
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
-import DatetimePicker from "./DateTimePicker";
+
 import { getActiveUsers } from "@/src/actions/getActiveUsers";
+import DatetimePicker from "./DateTimePicker";
 
 export function RaidDetailsForm({
   users,
@@ -34,6 +35,10 @@ export function RaidDetailsForm({
   errors,
   setErrors,
   bosses,
+  isPvp,
+  setIsPvp,
+  isPvpLong,
+  setIsPvpLong,
 }: {
   users: any[];
   setUsers: (users: any[]) => void;
@@ -57,7 +62,6 @@ export function RaidDetailsForm({
       }[]
     >
   >;
-
   dkpPoints: number;
   setDkpPoints: (value: number) => void;
   selectedDate: Date | null;
@@ -80,10 +84,11 @@ export function RaidDetailsForm({
     dkp_points: number;
     category: string;
   }[];
+  isPvp: boolean;
+  setIsPvp: (val: boolean) => void;
+  isPvpLong: boolean;
+  setIsPvpLong: (val: boolean) => void;
 }) {
-  const [isPvp, setIsPvp] = React.useState(false);
-  const [isLongPvp, setIsLongPvp] = React.useState(false);
-
   React.useEffect(() => {
     async function fetchUsers() {
       const activeUsers = await getActiveUsers();
@@ -101,7 +106,7 @@ export function RaidDetailsForm({
           setSelectedBoss(null);
           setSelectedBosses([]);
           setIsPvp(false);
-          setIsLongPvp(false);
+          setIsPvpLong(false);
           setErrors((prev) => ({ ...prev, category: false }));
         }}
         value={category ?? undefined}
@@ -201,18 +206,16 @@ export function RaidDetailsForm({
       </div>
 
       {category === "АГЛ" && (
-        <>
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="long_pvp"
-              checked={isLongPvp}
-              onCheckedChange={(checked) => setIsLongPvp(checked === true)}
-            />
-            <label htmlFor="long_pvp" className="text-sm">
-              ПВП дольше 30 минут
-            </label>
-          </div>
-        </>
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="long_pvp"
+            checked={isPvpLong}
+            onCheckedChange={(checked) => setIsPvpLong(checked === true)}
+          />
+          <label htmlFor="long_pvp" className="text-sm">
+            ПВП дольше 30 минут
+          </label>
+        </div>
       )}
 
       <div className="space-y-2">

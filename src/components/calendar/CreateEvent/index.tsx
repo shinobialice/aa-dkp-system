@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -19,47 +19,47 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getBosses } from "@/src/actions/getBosses";
 
 export function CreateEvent() {
-  const [category, setCategory] = React.useState<string | null>(null);
-  const [selectedBoss, setSelectedBoss] = React.useState<string | null>(null);
-  const [dkpPoints, setDkpPoints] = React.useState<number>(0);
-  const [selectedDate, setSelectedDate] = React.useState<Date | null>(null);
-  const [bosses, setBosses] = React.useState<
+  const [category, setCategory] = useState<string | null>(null);
+  const [selectedBoss, setSelectedBoss] = useState<string | null>(null);
+  const [dkpPoints, setDkpPoints] = useState<number>(0);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [bosses, setBosses] = useState<
     { id: number; boss_name: string; dkp_points: number; category: string }[]
   >([]);
-  const [selectedBosses, setSelectedBosses] = React.useState<
+  const [selectedBosses, setSelectedBosses] = useState<
     { id: number; boss_name: string; category: string; dkp_points: number }[]
   >([]);
+  const [isPvp, setIsPvp] = useState(false);
+  const [isPvpLong, setIsPvpLong] = useState(false);
 
-  const [errors, setErrors] = React.useState({
+  const [errors, setErrors] = useState({
     category: false,
     selectedBoss: false,
     selectedDate: false,
   });
-  const [success, setSuccess] = React.useState<string | null>(null);
-  const [open, setOpen] = React.useState(false); // для закрытия модалки
+  const [success, setSuccess] = useState<string | null>(null);
+  const [open, setOpen] = useState(false); // для закрытия модалки
 
-  const [rowSelection, setRowSelection] = React.useState<
-    Record<number, boolean>
-  >({});
-  const [users, setUsers] = React.useState<any[]>([]);
+  const [rowSelection, setRowSelection] = useState<Record<number, boolean>>({});
+  const [users, setUsers] = useState<any[]>([]);
 
-  const activeUsers = React.useMemo(
-    () => users.filter((u) => u.active),
-    [users]
-  );
-  const selectedUsers = React.useMemo(
+  const activeUsers = useMemo(() => users.filter((u) => u.active), [users]);
+  const selectedUsers = useMemo(
     () => activeUsers.filter((_, index) => rowSelection[index]),
     [activeUsers, rowSelection]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     getBosses().then(setBosses);
   }, []);
 
   const handleCreateEvent = async () => {
+    const isBossSelected =
+      category === "Прайм" ? !!selectedBoss : selectedBosses.length > 0;
+
     const newErrors = {
       category: !category,
-      selectedBoss: !selectedBoss,
+      selectedBoss: !isBossSelected,
       selectedDate: !selectedDate,
     };
     setErrors(newErrors);
@@ -74,9 +74,17 @@ export function CreateEvent() {
       dkpPoints,
       selectedDate as Date,
       userIds,
-      selectedBosses.map((b) => b.id)
+      selectedBosses.map((b) => b.id),
+      isPvp,
+      isPvpLong
     );
-
+    setCategory(null);
+    setSelectedBoss(null);
+    setSelectedBosses([]);
+    setDkpPoints(0);
+    setSelectedDate(null);
+    setIsPvp(false);
+    setIsPvpLong(false);
     setRowSelection({});
     setSuccess("Активность успешно создана");
     setOpen(false);
@@ -113,6 +121,10 @@ export function CreateEvent() {
               errors={errors}
               setErrors={setErrors}
               bosses={bosses}
+              isPvp={isPvp}
+              setIsPvp={setIsPvp}
+              isPvpLong={isPvpLong}
+              setIsPvpLong={setIsPvpLong}
             />
           </div>
           <div className="md:border-r md:pr-4">

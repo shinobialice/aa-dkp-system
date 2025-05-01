@@ -76,13 +76,11 @@ model Raid {
   created_at   DateTime @default(now())
   dkp_summary  Int      @default(0)
 
-  bosses       Boss[]   @relation("RaidBosses") // OK
+  raidBosses   RaidBoss[] 
   attendance   RaidAttendance[]
 
   @@map("raid")
 }
-
-
 
 model Boss {
   id         Int     @id @default(autoincrement())
@@ -90,9 +88,20 @@ model Boss {
   dkp_points Int
   category   String
 
-  raids      Raid[]  @relation("RaidBosses")
+  raidBosses RaidBoss[] 
 
-  @@map("boss") // ✅ указывает Prisma, что таблица называется `boss` в базе
+  @@map("boss")
+}
+
+model RaidBoss {
+  raid_id Int
+  boss_id Int
+
+  raid Raid @relation(fields: [raid_id], references: [id])
+  boss Boss @relation(fields: [boss_id], references: [id])
+
+  @@id([raid_id, boss_id])
+  @@map("raid_boss")
 }
 
 
