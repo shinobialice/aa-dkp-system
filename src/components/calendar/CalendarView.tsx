@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -14,10 +14,24 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CreateEvent } from "./CreateEvent";
+import { getRaids } from "@/src/actions/getEvents";
 
 export default function ActivitiesPage() {
   const calendarRef = useRef<FullCalendar | null>(null);
   const [currentRange, setCurrentRange] = useState("...");
+  const [events, setEvents] = useState<
+    {
+      id: string;
+      title: string;
+      start: string;
+      end: string;
+      color: string;
+    }[]
+  >([]);
+
+  useEffect(() => {
+    getRaids().then(setEvents);
+  }, []);
 
   const handleDateSet = (info: any) => {
     const start = new Intl.DateTimeFormat("ru-RU", {
@@ -70,7 +84,7 @@ export default function ActivitiesPage() {
           >
             <Calendar1 className="size-4" />
           </Button>
-          <CreateEvent />
+          <CreateEvent onCreated={() => getRaids().then(setEvents)} />
         </div>
         <div className="space-y-2 mb-4">
           <div className="flex w-full flex-wrap items-center justify-between max-md:pb-2">
@@ -81,7 +95,7 @@ export default function ActivitiesPage() {
 
             <div className="flex items-end gap-2 mr-6">
               <Select
-                defaultValue="weekGrid" 
+                defaultValue="weekGrid"
                 onValueChange={(value) => {
                   if (value === "weekGrid") handleNav("week");
                   if (value === "monthGrid") handleNav("monthGrid");
@@ -112,7 +126,7 @@ export default function ActivitiesPage() {
             ref={calendarRef}
             plugins={[dayGridPlugin, timeGridPlugin, listPlugin]}
             initialView="timeGridWeek"
-            events={calendarEvents}
+            events={events}
             eventClick={(info) => alert(`Event: ${info.event.title}`)}
             headerToolbar={false}
             height="100%"
@@ -157,24 +171,3 @@ export default function ActivitiesPage() {
     </div>
   );
 }
-
-const calendarEvents = [
-  {
-    title: "Прайм",
-    start: "2025-04-30T19:00:00",
-    end: "2025-04-30T20:00:00",
-    color: "rgb(90, 54, 165)",
-  },
-  {
-    title: "АГЛ",
-    start: "2025-05-01T20:00:00",
-    end: "2025-05-01T21:00:00",
-    color: "rgb(215, 100, 168)",
-  },
-  {
-    title: "Кошка",
-    start: "2025-05-02T21:00:00",
-    end: "2025-05-02T22:00:00",
-    color: "rgb(232, 157, 53)",
-  },
-];

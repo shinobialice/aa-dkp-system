@@ -15,12 +15,10 @@ import { SelectRaidList } from "./components/SelectRaidList";
 import { SelectedRaidList } from "./components/SelectedRaidList";
 import { Separator } from "@/components/ui/separator";
 import createRaidEvent from "@/src/actions/createRaidEvent";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getBosses } from "@/src/actions/getBosses";
 import { eventDkpCalculator } from "@/src/utils/eventDkpCalculator";
-import { AlertDialog } from "@/components/ui/alert-dialog";
 
-export function CreateEvent() {
+export function CreateEvent({ onCreated }: { onCreated?: () => void }) {
   const [category, setCategory] = useState<string | null>(null);
   const [selectedBoss, setSelectedBoss] = useState<string | null>(null);
   const [dkpPoints, setDkpPoints] = useState(0);
@@ -93,6 +91,7 @@ export function CreateEvent() {
     setIsPvpLong(false);
     setRowSelection({});
     setOpen(false);
+    onCreated?.();
   };
 
   return (

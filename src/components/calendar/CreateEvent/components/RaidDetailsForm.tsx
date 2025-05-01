@@ -105,10 +105,10 @@ export function RaidDetailsForm({
   }, [selectedBosses, isPvp, isPvpLong]);
 
   const aglBossOrder = [
-    "Гленн и Лорея",
-    "Гленн и Лорея Прок",
     "Ашьяра",
     "Ашьяра Прок",
+    "Гленн и Лорея",
+    "Гленн и Лорея Прок",
     "---", // разделитель
     "Морф",
     "Марли",
