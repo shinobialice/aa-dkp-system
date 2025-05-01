@@ -147,11 +147,6 @@
   border-top: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent) !important; 
 }
 
-.fc-timegrid-now-indicator-container * {
-  border-top: none !important;
-  background: none !important;
-}
-
 .fc-timegrid-now-indicator-line {
   background-color: var(--color-accent) !important;
   height: 2px !important;
