@@ -14,10 +14,12 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuCheckboxItem,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 
 import { getActiveUsers } from "@/src/actions/getActiveUsers";
 import DatetimePicker from "./DateTimePicker";
+import { eventDkpCalculator } from "@/src/utils/eventDkpCalculator";
 
 export function RaidDetailsForm({
   users,
@@ -97,6 +99,24 @@ export function RaidDetailsForm({
     fetchUsers();
   }, [setUsers]);
 
+  React.useEffect(() => {
+    const total = eventDkpCalculator(selectedBosses, isPvp, isPvpLong);
+    setDkpPoints(total);
+  }, [selectedBosses, isPvp, isPvpLong]);
+
+  const aglBossOrder = [
+    "Гленн и Лорея",
+    "Гленн и Лорея Прок",
+    "Ашьяра",
+    "Ашьяра Прок",
+    "---", // разделитель
+    "Морф",
+    "Марли",
+    "Марли Прок",
+    "---", // разделитель
+    "Кошка",
+  ];
+
   return (
     <div className="space-y-4">
       <Label>Категория</Label>
@@ -130,8 +150,14 @@ export function RaidDetailsForm({
             onValueChange={(value) => {
               setSelectedBoss(value);
               setErrors((prev) => ({ ...prev, selectedBoss: false }));
+
+              const boss = bosses.find((b) => b.boss_name === value);
+              if (boss) {
+                setSelectedBosses([boss]);
+              } else {
+                setSelectedBosses([]);
+              }
             }}
-            value={selectedBoss ?? undefined}
           >
             <SelectTrigger className="w-[270px]">
               <SelectValue placeholder="Выберите босса" />
@@ -162,30 +188,30 @@ export function RaidDetailsForm({
                 : "Выберите боссов"}
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-64 max-h-80 overflow-y-auto">
-              {bosses
-                .filter((boss) => boss.category === "АГЛ")
-                .map((boss) => (
+              {aglBossOrder.map((name, i) =>
+                name === "---" ? (
+                  <DropdownMenuSeparator key={`sep-${i}`} />
+                ) : (
                   <DropdownMenuCheckboxItem
-                    key={boss.id}
-                    checked={selectedBosses.some((b) => b.id === boss.id)}
-                    onSelect={(event) => {
-                      event.preventDefault();
-                    }}
+                    key={name}
+                    onSelect={(event) => event.preventDefault()}
+                    checked={selectedBosses.some((b) => b.boss_name === name)}
                     onCheckedChange={(checked) => {
+                      const boss = bosses.find((b) => b.boss_name === name);
+                      if (!boss) return;
+
                       setSelectedBosses((prev) =>
                         checked
                           ? [...prev, boss]
                           : prev.filter((b) => b.id !== boss.id)
                       );
-                      setErrors((prev) => ({
-                        ...prev,
-                        selectedBoss: false,
-                      }));
+                      setErrors((prev) => ({ ...prev, selectedBoss: false }));
                     }}
                   >
-                    {boss.boss_name}
+                    {name}
                   </DropdownMenuCheckboxItem>
-                ))}
+                )
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
           {errors.selectedBoss && (
@@ -198,7 +224,11 @@ export function RaidDetailsForm({
         <Checkbox
           id="pvp"
           checked={isPvp}
-          onCheckedChange={(checked) => setIsPvp(checked === true)}
+          disabled={isPvpLong}
+          onCheckedChange={(checked) => {
+            setIsPvp(checked === true);
+            if (checked) setIsPvpLong(false); // Отключаем второй
+          }}
         />
         <label htmlFor="pvp" className="text-sm">
           ПВП
@@ -210,7 +240,11 @@ export function RaidDetailsForm({
           <Checkbox
             id="long_pvp"
             checked={isPvpLong}
-            onCheckedChange={(checked) => setIsPvpLong(checked === true)}
+            disabled={isPvp} // блокируем, если выбран ПВП
+            onCheckedChange={(checked) => {
+              setIsPvpLong(checked === true);
+              if (checked) setIsPvp(false); // Отключаем первый
+            }}
           />
           <label htmlFor="long_pvp" className="text-sm">
             ПВП дольше 30 минут

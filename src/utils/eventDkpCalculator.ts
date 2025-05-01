@@ -1,41 +1,22 @@
+type Boss = {
+  id: number;
+  boss_name: string;
+  category: string;
+  dkp_points: number;
+};
+
 export function eventDkpCalculator(
-  boss: string | null,
+  selectedBosses: Boss[],
   isPvp: boolean,
-  isLongPvp: boolean,
-  isProc: boolean,
-  isDoubleProc: boolean,
-  isMarliProc: boolean
+  isPvpLong: boolean
 ): number {
-  let total = 0;
+  const bossPoints = selectedBosses.reduce(
+    (sum, boss) => sum + boss.dkp_points,
+    0
+  );
 
-  switch (boss) {
-    case "Кракен":
-    case "Ксанатос":
-    case "Калидис":
-    case "Левиафан":
-      total += 7;
-      break;
-    case "Анталлон":
-      total += 5;
-      break;
-    case "Калеиль":
-    case "Корвус":
-    case "Дельфиец":
-    case "Осада":
-      total += 3;
-      break;
-    case "АГЛ":
-    case "Марли":
-    case "Морфеос":
-    case "Разъяренная Сехекмет":
-      total += 1;
-      break;
-  }
+  const pvpBonus = isPvp ? 1 : 0;
+  const longPvpBonus = isPvpLong ? 3 : 0;
 
-  if (isPvp) total += 1;
-  if (isLongPvp) total += 3;
-  if (isProc) total += 1;
-  if (isDoubleProc) total += 2;
-  if (isMarliProc) total += 1;
-  return total;
+  return bossPoints + pvpBonus + longPvpBonus;
 }

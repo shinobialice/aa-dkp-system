@@ -17,11 +17,12 @@ import { Separator } from "@/components/ui/separator";
 import createRaidEvent from "@/src/actions/createRaidEvent";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getBosses } from "@/src/actions/getBosses";
+import { eventDkpCalculator } from "@/src/utils/eventDkpCalculator";
 
 export function CreateEvent() {
   const [category, setCategory] = useState<string | null>(null);
   const [selectedBoss, setSelectedBoss] = useState<string | null>(null);
-  const [dkpPoints, setDkpPoints] = useState<number>(0);
+  const [dkpPoints, setDkpPoints] = useState(0);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [bosses, setBosses] = useState<
     { id: number; boss_name: string; dkp_points: number; category: string }[]
@@ -52,6 +53,11 @@ export function CreateEvent() {
   useEffect(() => {
     getBosses().then(setBosses);
   }, []);
+
+  useEffect(() => {
+    const summary = eventDkpCalculator(selectedBosses, isPvp, isPvpLong);
+    setDkpPoints(summary);
+  }, [selectedBosses, isPvp, isPvpLong]);
 
   const handleCreateEvent = async () => {
     const isBossSelected =
