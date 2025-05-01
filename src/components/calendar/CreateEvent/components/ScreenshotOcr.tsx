@@ -68,6 +68,7 @@ export function ScreenshotOcr({
         multiple
         onChange={handleFileUpload}
       />
+      <p className="text-sm text-muted-foreground italic">Бета-функция.</p>
       {(loading || error || unmatched.length > 0) && (
         <div className="p-3 rounded-md space-y-2">
           {imagePreviews.length > 0 && (
@@ -100,7 +101,7 @@ export function ScreenshotOcr({
           {error && <p className="text-red-500">⚠️ {error}</p>}
           {unmatched.length > 0 && (
             <>
-              <p className="font-bold">❗ Не найдены в списке:</p>
+              <p className="font-bold">❗ Не распознанные ники:</p>
               <div className="h-84 overflow-auto rounded border p-2">
                 <ul className="list-disc pl-5 text-sm">
                   {unmatched.map((name, idx) => (
