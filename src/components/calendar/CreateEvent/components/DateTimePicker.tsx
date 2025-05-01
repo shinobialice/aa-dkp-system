@@ -1,13 +1,17 @@
 "use client";
-import { DateTimePicker } from "@/components/ui/date-time-picker";
-import React, { useState } from "react";
+import { DateTimePicker as BaseDateTimePicker } from "@/components/ui/date-time-picker";
+import React from "react";
 
-const DatetimePicker = () => {
-  const [date, setDate] = useState<Date | undefined>(undefined);
+type Props = {
+  value: Date | null;
+  onChange: (value: Date | null) => void;
+};
+
+const DatetimePicker: React.FC<Props> = ({ value, onChange }) => {
   return (
-    <DateTimePicker
-      value={date}
-      onChange={setDate}
+    <BaseDateTimePicker
+      value={value ?? undefined} // 👈 внутренний компонент ждёт undefined
+      onChange={(date: Date | undefined) => onChange(date ?? null)} // 👈 мы возвращаем null
       defaultPopupValue={new Date()}
       granularity="minute"
       className="w-[270px]"

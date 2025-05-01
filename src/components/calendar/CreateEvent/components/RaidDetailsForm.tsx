@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-
 import { eventDkpCalculator } from "@/src/utils/eventDkpCalculator";
 import { getActiveUsers } from "@/src/actions/getActiveUsers";
 import DatetimePicker from "./DateTimePicker";
@@ -18,28 +17,31 @@ import DatetimePicker from "./DateTimePicker";
 export function RaidDetailsForm({
   users,
   setUsers,
+  category,
+  setCategory,
+  selectedBoss,
+  setSelectedBoss,
+  dkpPoints,
+  setDkpPoints,
+  selectedDate,
+  setSelectedDate,
 }: {
   users: any[];
   setUsers: (users: any[]) => void;
+  category: string | null;
+  setCategory: (value: string | null) => void;
+  selectedBoss: string | null;
+  setSelectedBoss: (value: string | null) => void;
+  dkpPoints: number;
+  setDkpPoints: (value: number) => void;
+  selectedDate: Date | null;
+  setSelectedDate: (value: Date | null) => void;
 }) {
   const [isPvp, setIsPvp] = React.useState(false);
   const [isLongPvp, setIsLongPvp] = React.useState(false);
   const [isProc, setIsProc] = React.useState(false);
   const [isDoubleProc, setIsDoubleProc] = React.useState(false);
   const [isMarliProc, setIsMarliProc] = React.useState(false);
-  const [category, setCategory] = React.useState<string | null>(null);
-  const [selectedBoss, setSelectedBoss] = React.useState<string | null>(null);
-
-  const dkpPoints = React.useMemo(() => {
-    return eventDkpCalculator(
-      selectedBoss,
-      isPvp,
-      isLongPvp,
-      isProc,
-      isDoubleProc,
-      isMarliProc
-    );
-  }, [selectedBoss, isPvp, isLongPvp, isProc, isDoubleProc, isMarliProc]);
 
   React.useEffect(() => {
     async function fetchUsers() {
@@ -48,6 +50,26 @@ export function RaidDetailsForm({
     }
     fetchUsers();
   }, [setUsers]);
+
+  React.useEffect(() => {
+    const calculated = eventDkpCalculator(
+      selectedBoss,
+      isPvp,
+      isLongPvp,
+      isProc,
+      isDoubleProc,
+      isMarliProc
+    );
+    setDkpPoints(calculated);
+  }, [
+    selectedBoss,
+    isPvp,
+    isLongPvp,
+    isProc,
+    isDoubleProc,
+    isMarliProc,
+    setDkpPoints,
+  ]);
 
   return (
     <div className="space-y-4">
@@ -60,14 +82,16 @@ export function RaidDetailsForm({
           setIsLongPvp(false);
           setIsProc(false);
           setIsDoubleProc(false);
+          setIsMarliProc(false);
         }}
+        value={category ?? undefined}
       >
         <SelectTrigger className="w-[270px]">
           <SelectValue placeholder="Выберите категорию события" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="raid.type.prime">Прайм</SelectItem>
-          <SelectItem value="raid.type.agl">АГЛ</SelectItem>
+          <SelectItem value="Прайм">Прайм</SelectItem>
+          <SelectItem value="АГЛ">АГЛ</SelectItem>
         </SelectContent>
       </Select>
 
@@ -83,43 +107,36 @@ export function RaidDetailsForm({
               setIsDoubleProc(false);
               setIsMarliProc(false);
             }}
+            value={selectedBoss ?? undefined}
           >
             <SelectTrigger className="w-[270px]">
               <SelectValue placeholder="Выберите босса" />
             </SelectTrigger>
             <SelectContent>
-              {category === "raid.type.agl" && (
+              {category === "АГЛ" && (
                 <>
-                  <SelectItem value="raid.boss_name.agl">АГЛ</SelectItem>
-                  <SelectItem value="raid.boss_name.koshka">Кошка</SelectItem>
+                  <SelectItem value="АГЛ">АГЛ</SelectItem>
+                  <SelectItem value="Разъяренная Сехекмет">
+                    Разъяренная Сехекмет
+                  </SelectItem>
                   <SelectSeparator />
-                  <SelectItem value="raid.boss_name.morpheus">Морф</SelectItem>
-                  <SelectItem value="raid.boss_name.marli">Марли</SelectItem>
+                  <SelectItem value="Морфеос">Морфеос</SelectItem>
+                  <SelectItem value="Марли">Марли</SelectItem>
                 </>
               )}
-              {category === "raid.type.prime" && (
+              {category === "Прайм" && (
                 <>
-                  <SelectItem value="raid.boss_name.ksanatos">
-                    Ксанатос
-                  </SelectItem>
-                  <SelectItem value="raid.boss_name.kraken">Кракен</SelectItem>
-                  <SelectItem value="raid.boss_name.kalidis">
-                    Калидис
-                  </SelectItem>
-                  <SelectItem value="raid.boss_name.leviathan">
-                    Левиафан
-                  </SelectItem>
+                  <SelectItem value="Ксанатос">Ксанатос</SelectItem>
+                  <SelectItem value="Кракен">Кракен</SelectItem>
+                  <SelectItem value="Калидис">Калидис</SelectItem>
+                  <SelectItem value="Левиафан">Левиафан</SelectItem>
                   <SelectSeparator />
-                  <SelectItem value="raid.boss_name.antallon">
-                    Анталлон
-                  </SelectItem>
-                  <SelectItem value="raid.boss_name.kaleil">Калеиль</SelectItem>
-                  <SelectItem value="raid.boss_name.korvus">Корвус</SelectItem>
+                  <SelectItem value="Анталлон">Анталлон</SelectItem>
+                  <SelectItem value="Калеиль">Калеиль</SelectItem>
+                  <SelectItem value="Корвус">Корвус</SelectItem>
                   <SelectSeparator />
-                  <SelectItem value="raid.boss_name.delphie">
-                    Дельфиец
-                  </SelectItem>
-                  <SelectItem value="raid.boss_name.siege">Осада</SelectItem>
+                  <SelectItem value="Дельфиец">Дельфиец</SelectItem>
+                  <SelectItem value="Осада">Осада</SelectItem>
                 </>
               )}
             </SelectContent>
@@ -138,7 +155,7 @@ export function RaidDetailsForm({
         </label>
       </div>
 
-      {category === "raid.type.agl" && (
+      {category === "АГЛ" && (
         <>
           <div className="flex items-center space-x-2">
             <Checkbox
@@ -150,8 +167,7 @@ export function RaidDetailsForm({
               ПВП дольше 30 минут
             </label>
           </div>
-          {(selectedBoss === "raid.boss_name.marli" ||
-            selectedBoss === "raid.boss_name.agl") && (
+          {(selectedBoss === "Марли" || selectedBoss === "АГЛ") && (
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="proc"
@@ -163,7 +179,7 @@ export function RaidDetailsForm({
               </label>
             </div>
           )}
-          {selectedBoss === "raid.boss_name.agl" && (
+          {selectedBoss === "АГЛ" && (
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="double_proc"
@@ -175,7 +191,7 @@ export function RaidDetailsForm({
               </label>
             </div>
           )}
-          {selectedBoss === "raid.boss_name.morpheus" && (
+          {selectedBoss === "Морфеос" && (
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="marli_proc"
@@ -192,7 +208,7 @@ export function RaidDetailsForm({
 
       <div className="space-y-2">
         <Label>Дата и время (МСК)</Label>
-        <DatetimePicker />
+        <DatetimePicker value={selectedDate} onChange={setSelectedDate} />
       </div>
       <div className="space-y-2">
         <Label>Ценность посещения</Label>

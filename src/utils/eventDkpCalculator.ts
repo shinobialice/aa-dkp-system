@@ -9,25 +9,25 @@ export function eventDkpCalculator(
   let total = 0;
 
   switch (boss) {
-    case "raid.boss_name.kraken":
-    case "raid.boss_name.ksanatos":
-    case "raid.boss_name.kalidis":
-    case "raid.boss_name.leviathan":
+    case "Кракен":
+    case "Ксанатос":
+    case "Калидис":
+    case "Левиафан":
       total += 7;
       break;
-    case "raid.boss_name.antallon":
+    case "Анталлон":
       total += 5;
       break;
-    case "raid.boss_name.kaleil":
-    case "raid.boss_name.korvus":
-    case "raid.boss_name.delphie":
-    case "raid.boss_name.siege":
+    case "Калеиль":
+    case "Корвус":
+    case "Дельфиец":
+    case "Осада":
       total += 3;
       break;
-    case "raid.boss_name.agl":
-    case "raid.boss_name.marli":
-    case "raid.boss_name.morpheus":
-    case "raid.boss_name.koshka":
+    case "АГЛ":
+    case "Марли":
+    case "Морфеос":
+    case "Разъяренная Сехекмет":
       total += 1;
       break;
   }

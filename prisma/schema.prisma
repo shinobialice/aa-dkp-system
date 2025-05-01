@@ -68,11 +68,12 @@ model Tasks {
 }
 
 model Raid {
-  id          Int              @id
+  id          Int              @id @default(autoincrement())
   type        String?
   boss_name   String?
   start_date  DateTime?
-  created_at  DateTime
+  created_at  DateTime         @default(now())
+  dkp_value   Int
 
   attendance  RaidAttendance[]
   loot        Loot[]
@@ -81,7 +82,7 @@ model Raid {
 }
 
 model RaidAttendance {
-  id         Int      @id
+  id         Int      @id @default(autoincrement())
   user_id    Int
   raid_id    Int
   created_at DateTime

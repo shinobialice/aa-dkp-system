@@ -15,7 +15,7 @@ const addItemToUserInventory = async (
       name,
       type,
       quality: quality || null,
-      created_at: new Date(), // обязательно добавляем дату
+      created_at: new Date(),
     },
   });
   return newInventoryItem;

@@ -14,8 +14,14 @@ import { RaidDetailsForm } from "./components/RaidDetailsForm";
 import { SelectRaidList } from "./components/SelectRaidList";
 import { SelectedRaidList } from "./components/SelectedRaidList";
 import { Separator } from "@/components/ui/separator";
+import createRaidEvent from "@/src/actions/createRaidEvent";
 
 export function CreateEvent() {
+  const [category, setCategory] = React.useState<string | null>(null);
+  const [selectedBoss, setSelectedBoss] = React.useState<string | null>(null);
+  const [dkpPoints, setDkpPoints] = React.useState<number>(0);
+  const [selectedDate, setSelectedDate] = React.useState<Date | null>(null);
+
   const [rowSelection, setRowSelection] = React.useState<
     Record<number, boolean>
   >({});
@@ -29,6 +35,26 @@ export function CreateEvent() {
     () => activeUsers.filter((_, index) => rowSelection[index]),
     [activeUsers, rowSelection]
   );
+
+  const handleCreateEvent = async () => {
+    if (!category || !selectedBoss || !selectedDate) {
+      alert("Заполни все поля");
+      return;
+    }
+
+    const userIds = selectedUsers.map((u) => u.id);
+
+    await createRaidEvent(
+      category,
+      selectedBoss,
+      dkpPoints,
+      selectedDate,
+      userIds
+    );
+
+    // Можно сбросить форму, закрыть диалог и показать уведомление
+    alert("Рейд создан!");
+  };
 
   return (
     <Dialog>
@@ -45,7 +71,18 @@ export function CreateEvent() {
         <Separator />
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="md:border-r md:pr-4">
-            <RaidDetailsForm users={users} setUsers={setUsers} />
+            <RaidDetailsForm
+              users={users}
+              setUsers={setUsers}
+              category={category}
+              setCategory={setCategory}
+              selectedBoss={selectedBoss}
+              setSelectedBoss={setSelectedBoss}
+              dkpPoints={dkpPoints}
+              setDkpPoints={setDkpPoints}
+              selectedDate={selectedDate}
+              setSelectedDate={setSelectedDate}
+            />
           </div>
           <div className="md:border-r md:pr-4">
             <ScreenshotOcr users={users} setRowSelection={setRowSelection} />
@@ -63,7 +100,7 @@ export function CreateEvent() {
         </div>
 
         <DialogFooter>
-          <Button type="submit" className="w-full md:w-auto">
+          <Button onClick={handleCreateEvent} className="w-full md:w-auto">
             Создать
           </Button>
         </DialogFooter>
