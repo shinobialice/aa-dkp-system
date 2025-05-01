@@ -52,7 +52,6 @@ export function DataTable<TData, TValue>({
   return (
     <div className="w-full">
       <div className="flex items-center py-4 gap-2 justify-start">
-        {/* Фильтр по классу */}
         <Input
           placeholder="Поиск по нику..."
           value={
@@ -63,6 +62,7 @@ export function DataTable<TData, TValue>({
           }
           className="max-w-sm"
         />
+        {/* Фильтр по классу */}
         <ClassFilter table={table} />
       </div>
       <div className="rounded-md border">

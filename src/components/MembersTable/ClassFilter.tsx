@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Table } from "@tanstack/react-table";
+import { ChevronDown } from "lucide-react";
 
 interface ClassFilterProps<TData> {
   table: Table<TData>;
@@ -42,6 +43,7 @@ export function ClassFilter<TData>({ table }: ClassFilterProps<TData>) {
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="ml-auto">
           Фильтр по классу
+          <ChevronDown />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
@@ -49,7 +51,10 @@ export function ClassFilter<TData>({ table }: ClassFilterProps<TData>) {
           <DropdownMenuCheckboxItem
             key={className}
             checked={selectedClasses.includes(className)}
-            onCheckedChange={() => toggleClass(className)}
+            onSelect={(event) => {
+              event.preventDefault();
+              toggleClass(className);
+            }}
           >
             {className}
           </DropdownMenuCheckboxItem>
