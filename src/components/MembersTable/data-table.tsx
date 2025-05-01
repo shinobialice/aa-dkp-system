@@ -50,8 +50,18 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="w-full">
-      <div className="flex items-center py-4 gap-4">
+      <div className="flex items-center py-4 gap-2 justify-start">
         {/* Фильтр по классу */}
+        <Input
+          placeholder="Поиск по нику..."
+          value={
+            (table.getColumn("username")?.getFilterValue() as string) ?? ""
+          }
+          onChange={(event) =>
+            table.getColumn("username")?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm"
+        />
         <ClassFilter table={table} />
       </div>
       <div className="rounded-md border">
