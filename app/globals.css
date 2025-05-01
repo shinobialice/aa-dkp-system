@@ -44,7 +44,7 @@
 }
 
 .dark {
-  --background: oklch(0.141 0.005 285.823);
+  --background: oklch(0.18 0.005 285.823);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.21 0.006 285.885);
   --card-foreground: oklch(0.985 0 0);
@@ -133,8 +133,6 @@
 .fc-event {
   border: none !important; 
   box-shadow: none !important; 
-  background-color: var(--color-primary) !important;
-  color: var(--color-primary-foreground) !important;
 }
 
 .fc-timegrid-col {
@@ -157,6 +155,15 @@
 .fc-timegrid-now-indicator-line {
   background-color: var(--color-accent) !important;
   height: 2px !important;
+}
+
+.fc .fc-list-day-cushion {
+  background-color: var(--color-primary) !important; /* Match the row background */
+  color: var(--color-primary-foreground) !important; /* Match the text color */
+}
+
+.fc-list-table .fc-list-event:hover td {
+  background-color: var(--color-sidebar) !important; /* Match the row background */
 }
 
 .fc-timegrid-now-indicator-arrow {

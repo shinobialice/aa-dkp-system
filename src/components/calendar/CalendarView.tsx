@@ -42,7 +42,7 @@ export default function ActivitiesPage() {
       if (action === "next") api.next();
       if (action === "today") api.today();
       if (action === "week") api.changeView("timeGridWeek");
-      if (action === "monthGrid") api.changeView("dayGridMonth"); // Fix here
+      if (action === "monthGrid") api.changeView("dayGridMonth");
       if (action === "list") api.changeView("listWeek");
     } else {
       console.error("Calendar API is not available");
