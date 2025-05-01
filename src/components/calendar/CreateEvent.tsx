@@ -85,8 +85,8 @@ export function CreateEvent() {
                 <Select
                   onValueChange={(value) => {
                     setCategory(value);
-                    setSelectedBoss(null); // сбросить босса при смене категории
-                    setIsPvp(false); // сбросить чекбоксы
+                    setSelectedBoss(null); 
+                    setIsPvp(false); 
                     setIsLongPvp(false);
                     setIsProc(false);
                     setIsDoubleProc(false);

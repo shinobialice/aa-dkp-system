@@ -28,7 +28,7 @@ export default function ActivitiesPage() {
       day: "2-digit",
       month: "long",
       year: "numeric",
-    }).format(new Date(info.end.getTime() - 1)); // subtract 1 ms to get real end day
+    }).format(new Date(info.end.getTime() - 1)); 
     setCurrentRange(`${start} – ${end}`);
   };
 
@@ -140,7 +140,7 @@ export default function ActivitiesPage() {
           />
         </div>
 
-        {/* Легенда */}
+
         <div className="flex flex-wrap gap-4 ml-6">
           {[
             { color: "rgb(90, 54, 165)", label: "Прайм" },
