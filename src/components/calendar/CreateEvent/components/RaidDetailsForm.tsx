@@ -26,6 +26,7 @@ export function RaidDetailsForm({
   const [isLongPvp, setIsLongPvp] = React.useState(false);
   const [isProc, setIsProc] = React.useState(false);
   const [isDoubleProc, setIsDoubleProc] = React.useState(false);
+  const [isMarliProc, setIsMarliProc] = React.useState(false);
   const [category, setCategory] = React.useState<string | null>(null);
   const [selectedBoss, setSelectedBoss] = React.useState<string | null>(null);
 
@@ -35,9 +36,10 @@ export function RaidDetailsForm({
       isPvp,
       isLongPvp,
       isProc,
-      isDoubleProc
+      isDoubleProc,
+      isMarliProc
     );
-  }, [selectedBoss, isPvp, isLongPvp, isProc, isDoubleProc]);
+  }, [selectedBoss, isPvp, isLongPvp, isProc, isDoubleProc, isMarliProc]);
 
   React.useEffect(() => {
     async function fetchUsers() {
@@ -72,7 +74,16 @@ export function RaidDetailsForm({
       {category && (
         <>
           <Label>Босс</Label>
-          <Select onValueChange={setSelectedBoss}>
+          <Select
+            onValueChange={(value) => {
+              setSelectedBoss(value);
+              setIsPvp(false);
+              setIsLongPvp(false);
+              setIsProc(false);
+              setIsDoubleProc(false);
+              setIsMarliProc(false);
+            }}
+          >
             <SelectTrigger className="w-[270px]">
               <SelectValue placeholder="Выберите босса" />
             </SelectTrigger>
@@ -82,8 +93,8 @@ export function RaidDetailsForm({
                   <SelectItem value="raid.boss_name.agl">АГЛ</SelectItem>
                   <SelectItem value="raid.boss_name.koshka">Кошка</SelectItem>
                   <SelectSeparator />
-                  <SelectItem value="raid.boss_name.marli">Марли</SelectItem>
                   <SelectItem value="raid.boss_name.morpheus">Морф</SelectItem>
+                  <SelectItem value="raid.boss_name.marli">Марли</SelectItem>
                 </>
               )}
               {category === "raid.type.prime" && (
@@ -161,6 +172,18 @@ export function RaidDetailsForm({
               />
               <label htmlFor="double_proc" className="text-sm">
                 х2 Прок
+              </label>
+            </div>
+          )}
+          {selectedBoss === "raid.boss_name.morpheus" && (
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="marli_proc"
+                checked={isMarliProc}
+                onCheckedChange={(checked) => setIsMarliProc(checked === true)}
+              />
+              <label htmlFor="marli_proc" className="text-sm">
+                Марли прок
               </label>
             </div>
           )}

@@ -3,7 +3,8 @@ export function eventDkpCalculator(
   isPvp: boolean,
   isLongPvp: boolean,
   isProc: boolean,
-  isDoubleProc: boolean
+  isDoubleProc: boolean,
+  isMarliProc: boolean
 ): number {
   let total = 0;
 
@@ -35,6 +36,6 @@ export function eventDkpCalculator(
   if (isLongPvp) total += 3;
   if (isProc) total += 1;
   if (isDoubleProc) total += 2;
-
+  if (isMarliProc) total += 1;
   return total;
 }
