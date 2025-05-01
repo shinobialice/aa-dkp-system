@@ -81,9 +81,8 @@ export default function ActivitiesPage() {
 
             <div className="flex items-end gap-2 mr-6">
               <Select
-                defaultValue="weekGrid" // Preselect "week" view
+                defaultValue="weekGrid" 
                 onValueChange={(value) => {
-                  console.log(`Switching to ${value} view`); // Debugging
                   if (value === "weekGrid") handleNav("week");
                   if (value === "monthGrid") handleNav("monthGrid");
                 }}

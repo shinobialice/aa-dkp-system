@@ -25,6 +25,8 @@ export function RaidDetailsForm({
   setDkpPoints,
   selectedDate,
   setSelectedDate,
+  errors,
+  setErrors,
 }: {
   users: any[];
   setUsers: (users: any[]) => void;
@@ -36,6 +38,18 @@ export function RaidDetailsForm({
   setDkpPoints: (value: number) => void;
   selectedDate: Date | null;
   setSelectedDate: (value: Date | null) => void;
+  errors: {
+    category: boolean;
+    selectedBoss: boolean;
+    selectedDate: boolean;
+  };
+  setErrors: React.Dispatch<
+    React.SetStateAction<{
+      category: boolean;
+      selectedBoss: boolean;
+      selectedDate: boolean;
+    }>
+  >;
 }) {
   const [isPvp, setIsPvp] = React.useState(false);
   const [isLongPvp, setIsLongPvp] = React.useState(false);
@@ -83,6 +97,7 @@ export function RaidDetailsForm({
           setIsProc(false);
           setIsDoubleProc(false);
           setIsMarliProc(false);
+          setErrors((prev) => ({ ...prev, category: false })); // ✅ сбрасываем ошибку
         }}
         value={category ?? undefined}
       >
@@ -93,6 +108,9 @@ export function RaidDetailsForm({
           <SelectItem value="Прайм">Прайм</SelectItem>
           <SelectItem value="АГЛ">АГЛ</SelectItem>
         </SelectContent>
+        {errors.category && (
+          <p className="text-sm text-red-500">Обязательное поле</p>
+        )}
       </Select>
 
       {category && (
@@ -106,6 +124,7 @@ export function RaidDetailsForm({
               setIsProc(false);
               setIsDoubleProc(false);
               setIsMarliProc(false);
+              setErrors((prev) => ({ ...prev, selectedBoss: false })); // ✅
             }}
             value={selectedBoss ?? undefined}
           >
@@ -140,6 +159,9 @@ export function RaidDetailsForm({
                 </>
               )}
             </SelectContent>
+            {errors.selectedBoss && (
+              <p className="text-sm text-red-500">Обязательное поле</p>
+            )}
           </Select>
         </>
       )}
@@ -208,8 +230,18 @@ export function RaidDetailsForm({
 
       <div className="space-y-2">
         <Label>Дата и время (МСК)</Label>
-        <DatetimePicker value={selectedDate} onChange={setSelectedDate} />
+        <DatetimePicker
+          value={selectedDate}
+          onChange={(date) => {
+            setSelectedDate(date);
+            setErrors((prev) => ({ ...prev, selectedDate: false })); // ✅
+          }}
+        />
+        {errors.selectedDate && (
+          <p className="text-sm text-red-500">Обязательное поле</p>
+        )}
       </div>
+
       <div className="space-y-2">
         <Label>Ценность посещения</Label>
         <Input className="w-[270px]" disabled value={dkpPoints ?? 0} />

@@ -15,12 +15,21 @@ import { SelectRaidList } from "./components/SelectRaidList";
 import { SelectedRaidList } from "./components/SelectedRaidList";
 import { Separator } from "@/components/ui/separator";
 import createRaidEvent from "@/src/actions/createRaidEvent";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 export function CreateEvent() {
   const [category, setCategory] = React.useState<string | null>(null);
   const [selectedBoss, setSelectedBoss] = React.useState<string | null>(null);
   const [dkpPoints, setDkpPoints] = React.useState<number>(0);
   const [selectedDate, setSelectedDate] = React.useState<Date | null>(null);
+  const [errors, setErrors] = React.useState({
+    category: false,
+    selectedBoss: false,
+    selectedDate: false,
+  });
+  const [success, setSuccess] = React.useState<string | null>(null);
+  const [open, setOpen] = React.useState(false); // для закрытия модалки
 
   const [rowSelection, setRowSelection] = React.useState<
     Record<number, boolean>
@@ -37,27 +46,37 @@ export function CreateEvent() {
   );
 
   const handleCreateEvent = async () => {
-    if (!category || !selectedBoss || !selectedDate) {
-      alert("Заполни все поля");
-      return;
-    }
+    const newErrors = {
+      category: !category,
+      selectedBoss: !selectedBoss,
+      selectedDate: !selectedDate,
+    };
+    setErrors(newErrors);
+
+    const hasErrors = Object.values(newErrors).some(Boolean);
+    if (hasErrors) return;
 
     const userIds = selectedUsers.map((u) => u.id);
 
     await createRaidEvent(
-      category,
-      selectedBoss,
+      category as string,
+      selectedBoss as string,
       dkpPoints,
-      selectedDate,
+      selectedDate as Date,
       userIds
     );
 
-    // Можно сбросить форму, закрыть диалог и показать уведомление
-    alert("Рейд создан!");
+    setCategory(null);
+    setSelectedBoss(null);
+    setDkpPoints(0);
+    setSelectedDate(null);
+    setRowSelection({});
+    setSuccess("Активность успешно создана");
+    setOpen(false);
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline">Добавить Активность</Button>
       </DialogTrigger>
@@ -82,6 +101,8 @@ export function CreateEvent() {
               setDkpPoints={setDkpPoints}
               selectedDate={selectedDate}
               setSelectedDate={setSelectedDate}
+              errors={errors}
+              setErrors={setErrors}
             />
           </div>
           <div className="md:border-r md:pr-4">
@@ -103,6 +124,12 @@ export function CreateEvent() {
           <Button onClick={handleCreateEvent} className="w-full md:w-auto">
             Создать
           </Button>
+          {success && (
+            <Alert variant="default" className="mb-4">
+              <AlertTitle>Успех</AlertTitle>
+              <AlertDescription>{success}</AlertDescription>
+            </Alert>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

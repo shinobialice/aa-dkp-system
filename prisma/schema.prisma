@@ -74,6 +74,7 @@ model Raid {
   start_date  DateTime?
   created_at  DateTime         @default(now())
   dkp_value   Int
+  
 
   attendance  RaidAttendance[]
   loot        Loot[]
