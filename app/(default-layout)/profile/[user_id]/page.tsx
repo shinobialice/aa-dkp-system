@@ -1,10 +1,11 @@
-import { UserActivity } from "@/src/components/profile/activity/UserActivity";
 import ProfileTabs from "@/src/components/profile/ProfileTabs";
 import ProfileInfoClient from "@/src/components/profile/info/ProfileInfoClient";
 import getTasks from "@/src/actions/getTasks";
 import getUserInventory from "@/src/actions/getUserInventory";
 import getUser from "@/src/actions/getUser";
 import getUserNotes from "@/src/actions/getUserNotes";
+import { UserActivityChart } from "@/src/components/profile/activity/UserActivityChart";
+import { UserMonthActivity } from "@/src/components/profile/activity/UserMonthActivity";
 
 export default async function ProfilePage({
   params,
@@ -20,7 +21,16 @@ export default async function ProfilePage({
 
   return (
     <div className="space-y-8 p-4">
-      <div>{user && <UserActivity userId={user.id} />}</div>
+      <div className="grid grid-cols-3 gap-6 lg:grid-cols-2 items-start">
+        <UserMonthActivity
+          aglPercent={72}
+          primePercent={85}
+          totalPercent={80}
+          dkp={120}
+        />
+
+        <div>{user && <UserActivityChart userId={user.id} />}</div>
+      </div>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 items-start">
         <ProfileInfoClient user={user} />
         <ProfileTabs

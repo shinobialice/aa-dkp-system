@@ -61,7 +61,7 @@ const months = [
   "Декабрь",
 ];
 
-export function UserActivity({ userId }: { userId: number }) {
+export function UserActivityChart({ userId }: { userId: number }) {
   const [chartData, setChartData] = React.useState<any[]>([]);
   const [types, setTypes] = React.useState<string[]>(["праймы", "агл"]);
   const [selectedYear, setSelectedYear] = React.useState<number>(
