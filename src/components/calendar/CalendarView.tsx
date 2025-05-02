@@ -1,3 +1,5 @@
+// CalendarView.tsx (обновлённый фрагмент с интеграцией EventDialog)
+
 "use client";
 import { useEffect, useRef, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
@@ -13,8 +15,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CreateEvent } from "./CreateEvent";
 import { getRaids } from "@/src/actions/getEvents";
+import { EventDialog } from "./EventDialog"; // новый компонент
+import { getRaidById } from "@/src/actions/getRaidById";
 
 export default function ActivitiesPage() {
   const calendarRef = useRef<FullCalendar | null>(null);
@@ -28,6 +31,16 @@ export default function ActivitiesPage() {
       color: string;
     }[]
   >([]);
+
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+
+  const handleEventClick = async (info: any) => {
+    const fullEvent = await getRaidById(info.event.id);
+    setSelectedEvent(fullEvent);
+    setOpenDialog(true);
+  };
 
   useEffect(() => {
     getRaids().then(setEvents);
@@ -51,16 +64,13 @@ export default function ActivitiesPage() {
     action: "prev" | "next" | "today" | "week" | "monthGrid" | "list"
   ) => {
     const api = calendarRef.current?.getApi();
-    if (api) {
-      if (action === "prev") api.prev();
-      if (action === "next") api.next();
-      if (action === "today") api.today();
-      if (action === "week") api.changeView("timeGridWeek");
-      if (action === "monthGrid") api.changeView("dayGridMonth");
-      if (action === "list") api.changeView("listWeek");
-    } else {
-      console.error("Calendar API is not available");
-    }
+    if (!api) return;
+    if (action === "prev") api.prev();
+    if (action === "next") api.next();
+    if (action === "today") api.today();
+    if (action === "week") api.changeView("timeGridWeek");
+    if (action === "monthGrid") api.changeView("dayGridMonth");
+    if (action === "list") api.changeView("listWeek");
   };
 
   return (
@@ -84,15 +94,23 @@ export default function ActivitiesPage() {
           >
             <Calendar1 className="size-4" />
           </Button>
-          <CreateEvent onCreated={() => getRaids().then(setEvents)} />
+          <Button
+            variant="default"
+            onClick={() => {
+              setSelectedEvent(null); // очищаем, чтобы был режим создания
+              setOpenDialog(true);
+            }}
+          >
+            Добавить активность
+          </Button>
         </div>
+
         <div className="space-y-2 mb-4">
           <div className="flex w-full flex-wrap items-center justify-between max-md:pb-2">
             <div className="w-full max-w-40" />
             <span className="text-nowrap font-semibold md:text-xl">
               {currentRange}
             </span>
-
             <div className="flex items-end gap-2 mr-6">
               <Select
                 defaultValue="weekGrid"
@@ -120,14 +138,13 @@ export default function ActivitiesPage() {
           </div>
         </div>
 
-        {/* Calendar Settings*/}
         <div className="bg-surface p-6 shadow-md" style={{ height: "80dvh" }}>
           <FullCalendar
             ref={calendarRef}
             plugins={[dayGridPlugin, timeGridPlugin, listPlugin]}
             initialView="timeGridWeek"
             events={events}
-            eventClick={(info) => alert(`Event: ${info.event.title}`)}
+            eventClick={handleEventClick}
             headerToolbar={false}
             height="100%"
             locale="ru-RU"
@@ -152,6 +169,7 @@ export default function ActivitiesPage() {
             datesSet={handleDateSet}
           />
         </div>
+
         <div className="flex flex-wrap gap-4 ml-6">
           {[
             { color: "rgb(90, 54, 165)", label: "Прайм" },
@@ -167,6 +185,20 @@ export default function ActivitiesPage() {
             </div>
           ))}
         </div>
+
+        {(selectedEvent || selectedEvent === null) && (
+          <EventDialog
+            mode={selectedEvent ? "edit" : "create"}
+            open={openDialog}
+            setOpen={setOpenDialog}
+            selectedEvent={selectedEvent}
+            onComplete={() => {
+              setOpenDialog(false);
+              setSelectedEvent(null);
+              getRaids().then(setEvents);
+            }}
+          />
+        )}
       </div>
     </div>
   );

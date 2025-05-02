@@ -20,6 +20,8 @@ import {
 import { getActiveUsers } from "@/src/actions/getActiveUsers";
 import DatetimePicker from "./DateTimePicker";
 import { eventDkpCalculator } from "@/src/utils/eventDkpCalculator";
+import { Button } from "@/components/ui/button";
+import { ChevronDown } from "lucide-react";
 
 export function RaidDetailsForm({
   users,
@@ -146,32 +148,33 @@ export function RaidDetailsForm({
       {category === "Прайм" && (
         <>
           <Label>Босс</Label>
-          <Select
-            onValueChange={(value) => {
-              setSelectedBoss(value);
-              setErrors((prev) => ({ ...prev, selectedBoss: false }));
-
-              const boss = bosses.find((b) => b.boss_name === value);
-              if (boss) {
-                setSelectedBosses([boss]);
-              } else {
-                setSelectedBosses([]);
-              }
-            }}
-          >
-            <SelectTrigger className="w-[270px]">
-              <SelectValue placeholder="Выберите босса" />
-            </SelectTrigger>
-            <SelectContent>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="w-[270px] justify-between">
+                {selectedBoss || "Выберите босса"}
+                <ChevronDown className="ml-2" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-[270px] max-h-80 overflow-y-auto">
               {bosses
                 .filter((boss) => boss.category === "Прайм")
                 .map((boss) => (
-                  <SelectItem key={boss.id} value={boss.boss_name}>
+                  <DropdownMenuCheckboxItem
+                    key={boss.id}
+                    checked={selectedBoss === boss.boss_name}
+                    onSelect={(e) => e.preventDefault()}
+                    onCheckedChange={() => {
+                      setSelectedBoss(boss.boss_name);
+                      setSelectedBosses([boss]);
+                      setErrors((prev) => ({ ...prev, selectedBoss: false }));
+                    }}
+                  >
                     {boss.boss_name}
-                  </SelectItem>
+                  </DropdownMenuCheckboxItem>
                 ))}
-            </SelectContent>
-          </Select>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           {errors.selectedBoss && (
             <p className="text-sm text-red-500">Обязательное поле</p>
           )}
@@ -182,10 +185,13 @@ export function RaidDetailsForm({
         <>
           <Label>Боссы (можно выбрать нескольких)</Label>
           <DropdownMenu>
-            <DropdownMenuTrigger className="border rounded px-4 py-2 text-left w-[270px]">
-              {selectedBosses.length > 0
-                ? selectedBosses.map((b) => b.boss_name).join(", ")
-                : "Выберите боссов"}
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="w-[270px] justify-between">
+                {selectedBosses.length > 0
+                  ? selectedBosses.map((b) => b.boss_name).join(", ")
+                  : "Выберите боссов"}
+                <ChevronDown className="ml-2" />
+              </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-64 max-h-80 overflow-y-auto">
               {aglBossOrder.map((name, i) =>

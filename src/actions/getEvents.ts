@@ -28,7 +28,7 @@ export const getRaids = async () => {
       if (title.includes("Кошка")) color = "rgb(232, 157, 53)";
 
       return {
-        id: raid.id.toString(), 
+        id: raid.id.toString(),
         title,
         start: start.toISOString(),
         end: end.toISOString(),
