@@ -6,6 +6,7 @@ import {
   Moon,
   Sun,
   ChevronUp,
+  ChevronDown,
   LayoutDashboard,
   Newspaper,
   Users,
@@ -14,6 +15,9 @@ import {
   LineChart,
   Settings,
   User,
+  PiggyBank,
+  Gift,
+  BadgeDollarSign,
 } from "lucide-react";
 import {
   Sidebar,
@@ -32,6 +36,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "@radix-ui/react-collapsible";
 
 export function AppSidebar() {
   const { setTheme } = useTheme();
@@ -41,7 +50,15 @@ export function AppSidebar() {
     { title: "Новости", url: "/news", icon: Newspaper },
     { title: "Участники", url: "/members", icon: Users },
     { title: "Активности", url: "/activities", icon: CalendarDays },
-    { title: "Добыча", url: "/loot", icon: Trophy },
+    {
+      title: "Добыча",
+      icon: Trophy,
+      items: [
+        { title: "Казна", url: "/loot", icon: PiggyBank },
+        { title: "Раздача лута", url: "/giveaway", icon: Gift },
+        { title: "Цены", url: "/prices", icon: BadgeDollarSign },
+      ],
+    },
     { title: "Статистика", url: "/stats", icon: LineChart },
     { title: "Настройки", url: "/settings", icon: Settings },
   ];
@@ -57,16 +74,47 @@ export function AppSidebar() {
           <SidebarGroupLabel>Меню</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <Link href={item.url}>
-                      <item.icon className="h-5 w-5" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {menuItems.map((item) =>
+                item.items ? (
+                  <SidebarMenuItem key={item.title}>
+                    <Collapsible
+                      defaultOpen
+                      className="group/collapsible w-full"
+                    >
+                      <SidebarMenuButton asChild>
+                        <CollapsibleTrigger className="flex items-center w-full gap-2 rounded-md p-2 text-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition">
+                          <item.icon className="h-5 w-5" />
+                          <span className="truncate">{item.title}</span>
+                          <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                        </CollapsibleTrigger>
+                      </SidebarMenuButton>
+                      <CollapsibleContent className="pl-7">
+                        <SidebarMenu>
+                          {item.items.map((subItem) => (
+                            <SidebarMenuItem key={subItem.title}>
+                              <SidebarMenuButton asChild>
+                                <Link href={subItem.url}>
+                                  <subItem.icon className="h-4 w-4" />
+                                  <span>{subItem.title}</span>
+                                </Link>
+                              </SidebarMenuButton>
+                            </SidebarMenuItem>
+                          ))}
+                        </SidebarMenu>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  </SidebarMenuItem>
+                ) : (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <Link href={item.url}>
+                        <item.icon className="h-5 w-5" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
