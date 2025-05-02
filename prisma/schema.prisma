@@ -24,11 +24,13 @@ model User {
   tasks                       Tasks[]
   raidAttendance              RaidAttendance[]
   tasksAssigned               TasksUser[]
-
   tags                        UserTags[] @relation("UserTags")
+
+  soldLoot                    Loot[]    @relation("UserSoldLoot") // 👈 Add this
 
   @@map("user")
 }
+
 
 model UserTags {
   id         Int      @id @default(autoincrement())
@@ -119,20 +121,37 @@ model RaidAttendance {
   @@map("raid_attendance")
 }
 
+model ItemType {
+  id     Int     @id @default(autoincrement())
+  name   String  @unique
+  price  Float?
+
+  loot   Loot[]
+
+  @@map("item_type") 
+}
+
+
 model Loot {
-  id             Int       @id
-  name           String?
-  quantity       Int?
-  price          Float?
-  status         String?
-  sold_quantity  Int?
-  sold_at        DateTime?
-  sold_to        String?
-  comment        String?
-  created_at     DateTime
+  id               Int       @id @default(autoincrement())
+  itemTypeId       Int       @map("item_type_id")  // 👈 fix here
+  status           String
+  acquired_at      DateTime
+  sold_at          DateTime?
+  sold_to          String?  
+  sold_to_user_id  Int?      
+  comment          String?
+  source           String?
+  created_at       DateTime  @default(now())
+
+  itemType         ItemType  @relation(fields: [itemTypeId], references: [id])
+  soldToUser       User?     @relation("UserSoldLoot", fields: [sold_to_user_id], references: [id])
 
   @@map("loot")
 }
+
+
+
 
 model TasksUser {
   tasks_user_id Int
