@@ -20,9 +20,7 @@ export default async function ProfilePage({
 
   return (
     <div className="space-y-8 p-4">
-      <div>
-        <UserActivity />
-      </div>
+      <div>{user && <UserActivity userId={user.id} />}</div>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 items-start">
         <ProfileInfoClient user={user} />
         <ProfileTabs

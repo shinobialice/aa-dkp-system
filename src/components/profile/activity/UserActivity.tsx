@@ -2,7 +2,15 @@
 
 import * as React from "react";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
-
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Card,
   CardContent,
@@ -18,6 +26,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { getUserActivity } from "@/src/actions/getUserActivity";
 import {
   Select,
   SelectContent,
@@ -25,19 +34,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-const chartData = [
-  { date: "2024-06-08", праймы: 1, агл: 2 },
-  { date: "2024-06-09", праймы: 1, агл: 4 },
-  { date: "2024-06-10", праймы: 1, агл: 3 },
-  { date: "2024-06-11", праймы: 1, агл: 0 },
-  { date: "2024-06-12", праймы: 0, агл: 0 },
-  { date: "2024-06-13", праймы: 0, агл: 4 },
-];
 
 const chartConfig = {
-  visitors: {
-    label: "Visitors",
-  },
   праймы: {
     label: "праймы",
     color: "hsl(var(--chart-1))",
@@ -48,51 +46,137 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function UserActivity() {
-  const [timeRange, setTimeRange] = React.useState("90d");
+const months = [
+  "Январь",
+  "Февраль",
+  "Март",
+  "Апрель",
+  "Май",
+  "Июнь",
+  "Июль",
+  "Август",
+  "Сентябрь",
+  "Октябрь",
+  "Ноябрь",
+  "Декабрь",
+];
 
-  const filteredData = chartData.filter((item) => {
-    const date = new Date(item.date);
-    const referenceDate = new Date("2024-06-30");
-    let daysToSubtract = 90;
-    if (timeRange === "30d") {
-      daysToSubtract = 30;
-    } else if (timeRange === "7d") {
-      daysToSubtract = 7;
-    }
-    const startDate = new Date(referenceDate);
-    startDate.setDate(startDate.getDate() - daysToSubtract);
-    return date >= startDate;
-  });
+export function UserActivity({ userId }: { userId: number }) {
+  const [chartData, setChartData] = React.useState<any[]>([]);
+  const [types, setTypes] = React.useState<string[]>(["праймы", "агл"]);
+  const [selectedYear, setSelectedYear] = React.useState<number>(
+    new Date().getFullYear()
+  );
+  const [selectedMonth, setSelectedMonth] = React.useState<number | null>(
+    new Date().getMonth()
+  );
+
+  const dateRange = React.useMemo(() => {
+    const from = new Date(selectedYear, selectedMonth ?? 0, 1);
+    const to =
+      selectedMonth !== null
+        ? new Date(selectedYear, selectedMonth + 1, 0, 23, 59, 59)
+        : new Date(selectedYear, 11, 31, 23, 59, 59);
+    return { from, to };
+  }, [selectedYear, selectedMonth]);
+
+  React.useEffect(() => {
+    console.log("Fetching activity for user:", userId);
+    getUserActivity(userId).then(setChartData);
+  }, [userId]);
+
+  const filteredData = chartData
+    .filter((item) => {
+      const date = new Date(item.date);
+      return (
+        date >= dateRange.from &&
+        date <= dateRange.to &&
+        types.some((type) => item[type] !== undefined)
+      );
+    })
+    .map((item) => {
+      const filteredEntry: Record<string, any> = { date: item.date };
+      types.forEach((type) => {
+        if (item[type] !== undefined) {
+          filteredEntry[type] = item[type];
+        }
+      });
+      return filteredEntry;
+    });
 
   return (
     <Card>
-      <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
+      <CardHeader className="flex flex-wrap items-center gap-4 border-b py-5">
         <div className="grid flex-1 gap-1 text-center sm:text-left">
-          <CardTitle>Индивидуальная месячная посещаемость</CardTitle>
+          <CardTitle>Индивидуальная посещаемость</CardTitle>
           <CardDescription>
-            Showing total visitors for the last 3 months
+            По типам рейдов и выбранному периоду
           </CardDescription>
         </div>
-        <Select value={timeRange} onValueChange={setTimeRange}>
-          <SelectTrigger
-            className="w-[160px] rounded-lg sm:ml-auto"
-            aria-label="Select a value"
+        <div className="flex items-center gap-2">
+          {/* Типы рейдов */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                {types.length === 2 ? "Все типы" : types.join(", ") || "Типы"}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-40">
+              <DropdownMenuLabel>Типы рейдов</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {["праймы", "агл"].map((type) => (
+                <DropdownMenuCheckboxItem
+                  key={type}
+                  checked={types.includes(type)}
+                  onCheckedChange={(checked) => {
+                    setTypes((prev) =>
+                      checked ? [...prev, type] : prev.filter((t) => t !== type)
+                    );
+                  }}
+                >
+                  {type}
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Выбор года */}
+          <Select
+            value={String(selectedYear)}
+            onValueChange={(val) => setSelectedYear(Number(val))}
           >
-            <SelectValue placeholder="Last 3 months" />
-          </SelectTrigger>
-          <SelectContent className="rounded-xl">
-            <SelectItem value="90d" className="rounded-lg">
-              Last 3 months
-            </SelectItem>
-            <SelectItem value="30d" className="rounded-lg">
-              Last 30 days
-            </SelectItem>
-            <SelectItem value="7d" className="rounded-lg">
-              Last 7 days
-            </SelectItem>
-          </SelectContent>
-        </Select>
+            <SelectTrigger className="w-[100px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {[2023, 2024, 2025].map((year) => (
+                <SelectItem key={year} value={String(year)}>
+                  {year}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Выбор месяца */}
+          <Select
+            value={selectedMonth !== null ? String(selectedMonth) : "all"}
+            onValueChange={(val) => {
+              setSelectedMonth(val === "all" ? null : Number(val));
+            }}
+          >
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="Весь год" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Весь год</SelectItem>
+              {months.map((label, index) => (
+                <SelectItem key={index} value={String(index)}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </CardHeader>
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
         <ChartContainer
@@ -155,20 +239,24 @@ export function UserActivity() {
                 />
               }
             />
-            <Area
-              dataKey="агл"
-              type="natural"
-              fill="url(#fillагл)"
-              stroke="var(--color-агл)"
-              stackId="a"
-            />
-            <Area
-              dataKey="праймы"
-              type="natural"
-              fill="url(#fillпраймы)"
-              stroke="var(--color-праймы)"
-              stackId="a"
-            />
+            {types.includes("агл") && (
+              <Area
+                dataKey="агл"
+                type="natural"
+                fill="url(#fillагл)"
+                stroke="var(--color-агл)"
+                stackId="a"
+              />
+            )}
+            {types.includes("праймы") && (
+              <Area
+                dataKey="праймы"
+                type="natural"
+                fill="url(#fillпраймы)"
+                stroke="var(--color-праймы)"
+                stackId="a"
+              />
+            )}
             <ChartLegend content={<ChartLegendContent />} />
           </AreaChart>
         </ChartContainer>
