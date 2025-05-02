@@ -187,9 +187,11 @@ export function RaidDetailsForm({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="w-[270px] justify-between">
-                {selectedBosses.length > 0
-                  ? selectedBosses.map((b) => b.boss_name).join(", ")
-                  : "Выберите боссов"}
+                <span className="truncate min-w-0 flex-1 text-left">
+                  {selectedBosses.length > 0
+                    ? selectedBosses.map((b) => b.boss_name).join(", ")
+                    : "Выберите боссов"}
+                </span>
                 <ChevronDown className="ml-2" />
               </Button>
             </DropdownMenuTrigger>
