@@ -17,11 +17,29 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 const allUsers = ["Vladzor", "Mazik", "Shaiya", "Verta", "Rrrr"];
+const extendedItems = ["Эссенция ярости", "Трофейная эссенция стихий"];
 
-const mockQueue: Record<string, { username: string }[]> = {
+const mockQueue: Record<
+  string,
+  {
+    username: string;
+    status?: string;
+    synthTarget?: string;
+    remaining?: number;
+  }[]
+> = {
   "Клык Калидиса": [{ username: "Vladzor" }, { username: "Mazik" }],
+  "Эссенция ярости": [
+    {
+      username: "Shaiya",
+      status: "ожидание",
+      synthTarget: "Кристалл",
+      remaining: 3,
+    },
+  ],
 };
 
 export function LootQueuePopover({
@@ -35,37 +53,59 @@ export function LootQueuePopover({
   const [selectedUser, setSelectedUser] = useState("");
   const [queue, setQueue] = useState(mockQueue);
 
+  const isExtended = extendedItems.includes(itemName);
+
   const handleAddToQueue = () => {
     if (!selectedUser) return;
+    const newEntry = isExtended
+      ? {
+          username: selectedUser,
+          status: "ожидание",
+          synthTarget: "",
+          remaining: 1,
+        }
+      : { username: selectedUser };
     setQueue((prev) => ({
       ...prev,
-      [itemName]: [...(prev[itemName] || []), { username: selectedUser }],
+      [itemName]: [...(prev[itemName] || []), newEntry],
     }));
     setSelectedUser("");
     setSearchUser("");
   };
 
   const handleSold = (username: string) => {
-    // Remove from queue
     setQueue((prev) => ({
       ...prev,
       [itemName]: (prev[itemName] || []).filter((u) => u.username !== username),
     }));
-
-    // Here you would call an API to move the item to user inventory
     console.log(`Добавлен в инвентарь: ${username} => ${itemName}`);
+  };
+
+  const handleChange = (
+    index: number,
+    field: string,
+    value: string | number
+  ) => {
+    setQueue((prev) => {
+      const newQueue = [...(prev[itemName] || [])];
+      newQueue[index] = { ...newQueue[index], [field]: value };
+      return { ...prev, [itemName]: newQueue };
+    });
   };
 
   return (
     <Popover>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent className="w-[300px]">
+      <PopoverContent className="w-[520px]">
         <div className="text-sm font-semibold mb-2">Очередь на: {itemName}</div>
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>#</TableHead>
               <TableHead>Игрок</TableHead>
+              {isExtended && <TableHead>Статус</TableHead>}
+              {isExtended && <TableHead>Синтез</TableHead>}
+              {isExtended && <TableHead>Осталось</TableHead>}
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>
@@ -74,6 +114,48 @@ export function LootQueuePopover({
               <TableRow key={entry.username}>
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>{entry.username}</TableCell>
+                {isExtended && (
+                  <>
+                    <TableCell>
+                      <select
+                        className="text-xs border rounded"
+                        value={entry.status || "ожидание"}
+                        onChange={(e) =>
+                          handleChange(index, "status", e.target.value)
+                        }
+                      >
+                        <option value="продано">Продано</option>
+                        <option value="пропуск">Пропуск</option>
+                        <option value="позже">Позже</option>
+                        <option value="ожидание">Ожидание</option>
+                      </select>
+                    </TableCell>
+                    <TableCell>
+                      <Input
+                        className="text-xs"
+                        value={entry.synthTarget || ""}
+                        onChange={(e) =>
+                          handleChange(index, "synthTarget", e.target.value)
+                        }
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Input
+                        className="text-xs w-14"
+                        type="number"
+                        min={0}
+                        value={entry.remaining ?? 1}
+                        onChange={(e) =>
+                          handleChange(
+                            index,
+                            "remaining",
+                            Number(e.target.value)
+                          )
+                        }
+                      />
+                    </TableCell>
+                  </>
+                )}
                 <TableCell>
                   <Button
                     variant="secondary"
@@ -100,9 +182,10 @@ export function LootQueuePopover({
               .map((u) => (
                 <div
                   key={u}
-                  className={`cursor-pointer px-2 py-1 rounded hover:bg-muted ${
-                    u === selectedUser ? "bg-muted" : ""
-                  }`}
+                  className={cn(
+                    "cursor-pointer px-2 py-1 rounded hover:bg-muted",
+                    u === selectedUser && "bg-muted"
+                  )}
                   onClick={() => setSelectedUser(u)}
                 >
                   {u}
