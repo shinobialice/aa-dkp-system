@@ -55,8 +55,8 @@ export function AppSidebar() {
       icon: Trophy,
       items: [
         { title: "Казна", url: "/loot", icon: PiggyBank },
-        { title: "Раздача лута", url: "/giveaway", icon: Gift },
-        { title: "Цены", url: "/prices", icon: BadgeDollarSign },
+        { title: "Раздача лута", url: "/loot/giveaway", icon: Gift },
+        { title: "Покупка лута", url: "/loot/buy", icon: BadgeDollarSign },
       ],
     },
     { title: "Статистика", url: "/stats", icon: LineChart },
