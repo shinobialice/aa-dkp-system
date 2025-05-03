@@ -12,7 +12,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ru" suppressHydrationWarning>
-      <body className="flex min-h-screen bg-background text-foreground">
+      <body
+        suppressHydrationWarning
+        className="flex min-h-screen bg-background text-foreground"
+      >
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <SidebarProvider defaultOpen={true}>
             <div className="flex w-full">
