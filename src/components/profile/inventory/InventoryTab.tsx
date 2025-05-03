@@ -1,6 +1,7 @@
 import {
   Table,
   TableBody,
+  TableCell,
   TableHead,
   TableHeader,
   TableRow,
@@ -20,6 +21,32 @@ export default function InventoryTab({
   userId: number;
   onChange: () => void;
 }) {
+  if (type === "Лут") {
+    const lootItems = inventory.filter((inv) => inv.type === "Лут");
+    return (
+      <div className="border-t">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Название</TableHead>
+              <TableHead>Дата покупки</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {lootItems.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell>{item.name}</TableCell>
+                <TableCell>
+                  {new Date(item.created_at).toLocaleDateString("ru-RU")}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    );
+  }
+
   const filteredItems = inventoryItems
     .filter((item) => item.type === type)
     .filter((item) => {

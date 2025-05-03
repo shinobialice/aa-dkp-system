@@ -19,14 +19,14 @@ export default function InventoryTabsClient({
       <CardContent>
         <Tabs defaultValue="Техника">
           <TabsList className="mb-4">
-            {["Техника", "Глайдеры", "Петы"].map((type) => (
+            {["Техника", "Глайдеры", "Петы", "Лут"].map((type) => (
               <TabsTrigger key={type} value={type}>
                 {type}
               </TabsTrigger>
             ))}
           </TabsList>
 
-          {["Техника", "Глайдеры", "Петы"].map((type) => (
+          {["Техника", "Глайдеры", "Петы", "Лут"].map((type) => (
             <TabsContent key={type} value={type}>
               <InventoryTab
                 type={type}
