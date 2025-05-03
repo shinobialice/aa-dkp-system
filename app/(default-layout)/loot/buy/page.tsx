@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getLootGrouped } from "@/src/actions/getLootGrouped";
 import { PricesComponent } from "@/src/components/Loot/PricesComponent";
 
-export default async function PricesPage() {
+export default async function LootPage() {
   const lootByBoss = await getLootGrouped();
 
   const bossTabs = Object.keys(lootByBoss).filter((s) => s !== "Разное");
