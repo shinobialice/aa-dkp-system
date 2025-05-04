@@ -1,8 +1,7 @@
 "use server";
 
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/db";
 
-const prisma = new PrismaClient();
 const getUser = async (userId: number) => {
   const user = await prisma.user.findUnique({
     where: { id: Number(userId) },

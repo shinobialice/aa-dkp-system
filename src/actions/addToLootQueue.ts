@@ -1,11 +1,9 @@
 "use server";
 
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/db";
 
 export const addToLootQueue = async (username: string, itemName: string) => {
-  const user = await prisma.user.findUnique({ where: { username } });
+  const user = await prisma.user.findFirst({ where: { username } });
   const item = await prisma.itemType.findUnique({ where: { name: itemName } });
 
   if (!user || !item) {

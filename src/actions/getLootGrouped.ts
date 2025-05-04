@@ -1,8 +1,6 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/db";
 import { sourceMap } from "../components/Loot/priceSourceMap";
 import { getLootIconUrl } from "../components/Loot/LootBuy/icons/LootIcons";
-
-const prisma = new PrismaClient();
 
 export async function getLootGrouped() {
   const items = await prisma.itemType.findMany();

@@ -1,8 +1,6 @@
 "use server";
 
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/db";
 
 export default async function deleteEvent(eventId: number) {
   await prisma.raidAttendance.deleteMany({ where: { raid_id: eventId } });

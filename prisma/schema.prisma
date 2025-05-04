@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "./node_modules/@prisma/client"
 }
 
 datasource db {
@@ -172,9 +171,9 @@ model LootQueue {
   id              Int      @id @default(autoincrement())
   itemTypeId      Int      @map("item_type_id")
   userId          Int      @map("user_id")
-  status          String   @default("ожидание") // "продано" | "пропуск" | "позже"
-  synthTarget     String?  // Синтезируемый предмет
-  remaining       Int?     // Кол-во осталось
+  status          String   @default("ожидание")
+  synthTarget     String?  
+  remaining       Int?
   created_at      DateTime @default(now())
 
   itemType        ItemType @relation(fields: [itemTypeId], references: [id])

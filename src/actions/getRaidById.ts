@@ -1,9 +1,7 @@
 // src/actions/getRaidById.ts
 "use server";
 
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/db";
 
 export const getRaidById = async (id: string) => {
   const raid = await prisma.raid.findUnique({
