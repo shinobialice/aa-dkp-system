@@ -1,7 +1,21 @@
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { LootQueueEntry } from "./LootQueueTypes";
 
-export function QueueTableSimple({ queue, editMode, handleSold }) {
+type Props = {
+  queue: LootQueueEntry[];
+  editMode: boolean;
+  handleSold: (entry: LootQueueEntry) => void;
+};
+
+export function QueueTableSimple({ queue, editMode, handleSold }: Props) {
   return (
     <Table>
       <TableHeader>
@@ -14,7 +28,7 @@ export function QueueTableSimple({ queue, editMode, handleSold }) {
       </TableHeader>
       <TableBody>
         {queue.map((entry, index) => (
-          <TableRow key={entry.username}>
+          <TableRow key={entry.id}>
             <TableCell>{index + 1}</TableCell>
             <TableCell>{entry.username}</TableCell>
             <TableCell>
@@ -30,7 +44,11 @@ export function QueueTableSimple({ queue, editMode, handleSold }) {
             </TableCell>
             {editMode && (
               <TableCell className="text-right">
-                <Button variant="secondary" size="sm" onClick={() => handleSold(entry.username, entry.delivered ?? 0)}>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => handleSold(entry)}
+                >
                   Продано
                 </Button>
               </TableCell>

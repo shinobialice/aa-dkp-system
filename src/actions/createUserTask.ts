@@ -1,7 +1,6 @@
 "use server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/db";
 
-const prisma = new PrismaClient();
 const createUserTask = async (
   userId: number,
   name: string,

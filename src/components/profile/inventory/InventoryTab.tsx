@@ -30,6 +30,7 @@ export default function InventoryTab({
             <TableRow>
               <TableHead>Название</TableHead>
               <TableHead>Дата покупки</TableHead>
+              <TableHead>Количество</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -39,6 +40,7 @@ export default function InventoryTab({
                 <TableCell>
                   {new Date(item.created_at).toLocaleDateString("ru-RU")}
                 </TableCell>
+                <TableCell>{item.quantity ?? 1}</TableCell>
               </TableRow>
             ))}
           </TableBody>

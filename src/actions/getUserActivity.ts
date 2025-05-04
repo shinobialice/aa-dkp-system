@@ -1,9 +1,7 @@
 // src/actions/getUserActivity.ts
 "use server";
 
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/db";
 
 export async function getUserActivity(userId: number) {
   const attendances = await prisma.raidAttendance.findMany({

@@ -1,7 +1,5 @@
 "use server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/db";
 
 const getUserTasks = async (userId: number) => {
   const tasks = await prisma.tasks.findMany({

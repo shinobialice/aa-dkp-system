@@ -1,7 +1,5 @@
 "use server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/db";
 
 const getUserInventory = async (userId: number) => {
   const inventory = await prisma.userInventory.findMany({
@@ -13,6 +11,7 @@ const getUserInventory = async (userId: number) => {
       name: true,
       quality: true,
       created_at: true,
+      quantity: true,
     },
   });
   return inventory;

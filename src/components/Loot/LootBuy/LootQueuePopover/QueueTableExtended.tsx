@@ -1,8 +1,28 @@
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { LootQueueEntry } from "./LootQueueTypes";
 
-export function QueueTableExtended({ queue, editMode, handleChange, handleSold }) {
+type Props = {
+  queue: LootQueueEntry[];
+  editMode: boolean;
+  handleChange: (index: number, field: string, value: any) => void;
+  handleSold: (entry: LootQueueEntry) => void;
+};
+
+export function QueueTableExtended({
+  queue,
+  editMode,
+  handleChange,
+  handleSold,
+}: Props) {
   return (
     <div className="max-h-[420px] overflow-y-auto border rounded mt-4">
       <Table>
@@ -22,27 +42,54 @@ export function QueueTableExtended({ queue, editMode, handleChange, handleSold }
           {queue.map((entry, index) => {
             const remaining = (entry.required || 0) - (entry.delivered || 0);
             return (
-              <TableRow key={entry.username}>
+              <TableRow key={entry.id}>
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>{entry.username}</TableCell>
                 <TableCell>
                   {editMode ? (
-                    <Input type="number" min={0} value={entry.required ?? 0} onChange={(e) => handleChange(index, "required", Number(e.target.value))} />
+                    <Input
+                      type="number"
+                      value={entry.required}
+                      onChange={(e) =>
+                        handleChange(index, "required", Number(e.target.value))
+                      }
+                    />
                   ) : (
-                    <span>{entry.required?.toLocaleString("ru-RU").replaceAll(",", " ") || "-"}</span>
+                    entry.required
                   )}
                 </TableCell>
                 <TableCell>
                   {editMode ? (
-                    <Input type="number" min={0} value={entry.delivered ?? 0} onChange={(e) => handleChange(index, "delivered", Number(e.target.value))} />
+                    <Input
+                      type="number"
+                      min={0}
+                      value={entry.delivered ?? 0}
+                      onChange={(e) =>
+                        handleChange(index, "delivered", Number(e.target.value))
+                      }
+                    />
                   ) : (
-                    <span>{entry.delivered?.toLocaleString("ru-RU").replaceAll(",", " ") || "-"}</span>
+                    <span>
+                      {entry.delivered
+                        ?.toLocaleString("ru-RU")
+                        .replaceAll(",", " ") || "-"}
+                    </span>
                   )}
                 </TableCell>
-                <TableCell>{remaining > 0 ? remaining.toLocaleString("ru-RU").replaceAll(",", " ") : 0}</TableCell>
+                <TableCell>
+                  {remaining > 0
+                    ? remaining.toLocaleString("ru-RU").replaceAll(",", " ")
+                    : 0}
+                </TableCell>
                 <TableCell>
                   {editMode ? (
-                    <select className="border rounded" value={entry.status || "позже"} onChange={(e) => handleChange(index, "status", e.target.value)}>
+                    <select
+                      className="border rounded"
+                      value={entry.status || "позже"}
+                      onChange={(e) =>
+                        handleChange(index, "status", e.target.value)
+                      }
+                    >
                       <option value="продано">Продано</option>
                       <option value="пропуск">Пропуск</option>
                       <option value="позже">Позже</option>
@@ -54,9 +101,16 @@ export function QueueTableExtended({ queue, editMode, handleChange, handleSold }
                 </TableCell>
                 <TableCell>
                   {editMode ? (
-                    <Input value={entry.synthTarget || ""} onChange={(e) => handleChange(index, "synthTarget", e.target.value)} />
+                    <Input
+                      value={entry.synth_target || ""}
+                      onChange={(e) =>
+                        handleChange(index, "synth_target", e.target.value)
+                      }
+                    />
                   ) : (
-                    <span className="w-80 truncate inline-block">{entry.synthTarget || "-"}</span>
+                    <span className="w-80 truncate inline-block">
+                      {entry.synth_target || "-"}
+                    </span>
                   )}
                 </TableCell>
                 {editMode && (
@@ -64,7 +118,10 @@ export function QueueTableExtended({ queue, editMode, handleChange, handleSold }
                     <Button
                       variant="secondary"
                       size="sm"
-                      onClick={() => handleSold(entry.username, entry.delivered ?? 0)}
+                      onClick={() => {
+                        console.log("SOLD:", entry); // <-- добавь это
+                        handleSold(entry);
+                      }}
                       disabled={(entry.required || 0) > (entry.delivered || 0)}
                     >
                       Продано
