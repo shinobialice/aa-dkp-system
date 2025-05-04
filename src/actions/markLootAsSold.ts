@@ -6,22 +6,23 @@ export const markLootAsSold = async ({
   lootQueueId,
   userId,
   itemName,
+  delivered,
 }: {
   lootQueueId: number;
   userId: number;
   itemName: string;
+  delivered: number;
 }) => {
-  // Удалить из очереди
   await prisma.lootQueue.delete({
     where: { id: lootQueueId },
   });
 
-  // Добавить в инвентарь
   return prisma.userInventory.create({
     data: {
       user_id: userId,
       name: itemName,
       type: "Лут",
+      quantity: delivered,
       created_at: new Date(),
     },
   });

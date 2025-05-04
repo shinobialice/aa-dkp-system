@@ -15,7 +15,9 @@ export const addToLootQueue = async (username: string, itemName: string) => {
       userId: user.id,
       itemTypeId: item.id,
       status: "ожидание",
-      remaining: item.price ?? 0,
+      required: 1,
+      delivered: 0,
+      synth_target: "",
     },
   });
 };

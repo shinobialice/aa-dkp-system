@@ -49,18 +49,13 @@ export function QueueTableExtended({
                   {editMode ? (
                     <Input
                       type="number"
-                      min={0}
-                      value={entry.required ?? 0}
+                      value={entry.required}
                       onChange={(e) =>
                         handleChange(index, "required", Number(e.target.value))
                       }
                     />
                   ) : (
-                    <span>
-                      {entry.required
-                        ?.toLocaleString("ru-RU")
-                        .replaceAll(",", " ") || "-"}
-                    </span>
+                    entry.required
                   )}
                 </TableCell>
                 <TableCell>
@@ -107,14 +102,14 @@ export function QueueTableExtended({
                 <TableCell>
                   {editMode ? (
                     <Input
-                      value={entry.synthTarget || ""}
+                      value={entry.synth_target || ""}
                       onChange={(e) =>
-                        handleChange(index, "synthTarget", e.target.value)
+                        handleChange(index, "synth_target", e.target.value)
                       }
                     />
                   ) : (
                     <span className="w-80 truncate inline-block">
-                      {entry.synthTarget || "-"}
+                      {entry.synth_target || "-"}
                     </span>
                   )}
                 </TableCell>
@@ -123,7 +118,10 @@ export function QueueTableExtended({
                     <Button
                       variant="secondary"
                       size="sm"
-                      onClick={() => handleSold(entry)}
+                      onClick={() => {
+                        console.log("SOLD:", entry); // <-- добавь это
+                        handleSold(entry);
+                      }}
                       disabled={(entry.required || 0) > (entry.delivered || 0)}
                     >
                       Продано

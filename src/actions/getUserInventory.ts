@@ -11,6 +11,7 @@ const getUserInventory = async (userId: number) => {
       name: true,
       quality: true,
       created_at: true,
+      quantity: true,
     },
   });
   return inventory;

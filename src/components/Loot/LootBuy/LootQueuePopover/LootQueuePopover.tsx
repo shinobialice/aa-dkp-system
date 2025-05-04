@@ -22,19 +22,9 @@ import { getLootQueueByItemName } from "@/src/actions/getLootQueueByItemName";
 import { addToLootQueue } from "@/src/actions/addToLootQueue";
 import { markLootAsSold } from "@/src/actions/markLootAsSold";
 import { updateLootQueueEntry } from "@/src/actions/updateLootQueueEntry";
+import type { LootQueueEntry } from "./LootQueueTypes";
 
 const extendedItems = ["Эссенция ярости", "Трофейная эссенция стихий"];
-
-type LootQueueEntry = {
-  id: number;
-  userId: number;
-  username: string;
-  status: string;
-  synthTarget?: string;
-  required: number;
-  delivered: number;
-  createdAt: Date;
-};
 
 type LootQueuePopoverProps = {
   itemName: string;
@@ -65,10 +55,12 @@ export function LootQueuePopover({
   };
 
   const handleSold = async (entry: LootQueueEntry) => {
+    console.log("handleSold", entry);
     await markLootAsSold({
       lootQueueId: entry.id,
       userId: entry.userId,
       itemName,
+      delivered: entry.delivered,
     });
     const updatedQueue = await getLootQueueByItemName(itemName);
     setQueue({ [itemName]: updatedQueue });
@@ -79,11 +71,7 @@ export function LootQueuePopover({
     if (!entry) return;
 
     const updated = {
-      id: entry.id,
-      required: entry.required,
-      delivered: entry.delivered,
-      status: entry.status,
-      synthTarget: entry.synthTarget,
+      ...entry,
       [field]: value,
     };
 

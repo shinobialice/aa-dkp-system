@@ -22,9 +22,9 @@ export const getLootQueueByItemName = async (itemName: string) => {
     userId: entry.userId,
     username: entry.user.username,
     status: entry.status,
-    synthTarget: entry.synthTarget,
-    required: item.price ?? 0,
-    delivered: item.price && entry.remaining ? item.price - entry.remaining : 0,
+    synth_target: entry.synth_target,
+    required: entry.required ?? 0,
+    delivered: entry.delivered ?? 0,
     createdAt: entry.created_at,
   }));
 };

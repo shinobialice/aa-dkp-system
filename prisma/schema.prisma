@@ -48,9 +48,10 @@ model UserTags {
 model UserInventory {
   id         Int      @id @default(autoincrement())
   user_id    Int
-  type       String?
   name       String?
+  type       String?
   quality    String?
+  quantity   Int      @default(1)
   created_at DateTime
 
   user       User     @relation(fields: [user_id], references: [id])
@@ -172,8 +173,9 @@ model LootQueue {
   itemTypeId      Int      @map("item_type_id")
   userId          Int      @map("user_id")
   status          String   @default("ожидание")
-  synthTarget     String?  
-  remaining       Int?
+  synth_target    String?  // 👈 используем snake_case, как в БД
+  required        Int      @default(1)
+  delivered       Int      @default(0)
   created_at      DateTime @default(now())
 
   itemType        ItemType @relation(fields: [itemTypeId], references: [id])
