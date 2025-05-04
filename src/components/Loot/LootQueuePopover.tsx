@@ -18,6 +18,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Pen } from "lucide-react";
 
 const allUsers = ["Vladzor", "Mazik", "Shaiya", "Verta", "Rrrr"];
 const extendedItems = ["Эссенция ярости", "Трофейная эссенция стихий"];
@@ -28,16 +36,29 @@ const mockQueue: Record<
     username: string;
     status?: string;
     synthTarget?: string;
-    remaining?: number;
+    delivered?: number;
+    required?: number;
   }[]
 > = {
-  "Клык Калидиса": [{ username: "Vladzor" }, { username: "Mazik" }],
   "Эссенция ярости": [
     {
-      username: "Shaiya",
-      status: "ожидание",
-      synthTarget: "Кристалл",
-      remaining: 3,
+      username: "Dimonishx",
+      status: "позже",
+      synthTarget: "...",
+      required: 1000000,
+      delivered: 185268,
+    },
+    {
+      username: "Бобр",
+      status: "продано",
+      synthTarget: "Сет Анталона",
+      delivered: 700000,
+    },
+    {
+      username: "Felanza",
+      status: "пропуск",
+      synthTarget: "Булава с Ксанатоса и Щит с Ксанатоса",
+      delivered: 407296,
     },
   ],
 };
@@ -52,6 +73,7 @@ export function LootQueuePopover({
   const [searchUser, setSearchUser] = useState("");
   const [selectedUser, setSelectedUser] = useState("");
   const [queue, setQueue] = useState(mockQueue);
+  const [editMode, setEditMode] = useState(false);
 
   const isExtended = extendedItems.includes(itemName);
 
@@ -60,9 +82,10 @@ export function LootQueuePopover({
     const newEntry = isExtended
       ? {
           username: selectedUser,
-          status: "ожидание",
+          status: "позже",
           synthTarget: "",
-          remaining: 1,
+          delivered: 0,
+          required: 0,
         }
       : { username: selectedUser };
     setQueue((prev) => ({
@@ -73,12 +96,14 @@ export function LootQueuePopover({
     setSearchUser("");
   };
 
-  const handleSold = (username: string) => {
+  const handleSold = (username: string, totalDelivered: number) => {
     setQueue((prev) => ({
       ...prev,
       [itemName]: (prev[itemName] || []).filter((u) => u.username !== username),
     }));
-    console.log(`Добавлен в инвентарь: ${username} => ${itemName}`);
+    console.log(
+      `Добавлен в инвентарь: ${username} => ${itemName}, всего отдано: ${totalDelivered}`
+    );
   };
 
   const handleChange = (
@@ -93,115 +118,190 @@ export function LootQueuePopover({
     });
   };
 
+  if (!isExtended) return <>{children}</>;
+
   return (
-    <Popover>
-      <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent className="w-[520px]">
-        <div className="text-sm font-semibold mb-2">Очередь на: {itemName}</div>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>#</TableHead>
-              <TableHead>Игрок</TableHead>
-              {isExtended && <TableHead>Статус</TableHead>}
-              {isExtended && <TableHead>Синтез</TableHead>}
-              {isExtended && <TableHead>Осталось</TableHead>}
-              <TableHead></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {(queue[itemName] || []).map((entry, index) => (
-              <TableRow key={entry.username}>
-                <TableCell>{index + 1}</TableCell>
-                <TableCell>{entry.username}</TableCell>
-                {isExtended && (
-                  <>
+    <Dialog>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent className="w-[1200px]">
+        <DialogHeader>
+          <DialogTitle>Очередь на: {itemName}</DialogTitle>
+          <Button
+            size="sm"
+            variant="outline"
+            className="ml-auto"
+            onClick={() => setEditMode((prev) => !prev)}
+          >
+            {editMode ? (
+              "Сохранить"
+            ) : (
+              <>
+                <Pen className="h-3 w-3 mr-1" /> Редактировать
+              </>
+            )}
+          </Button>
+        </DialogHeader>
+        <div className="max-h-[420px] overflow-y-auto border rounded mt-4">
+          <Table>
+            <TableHeader className="sticky top-0 z-1 bg-background">
+              <TableRow>
+                <TableHead className="w-[30px]">#</TableHead>
+                <TableHead className="w-[100px]">Игрок</TableHead>
+                <TableHead className="w-[100px]">Запрошено</TableHead>
+                <TableHead className="w-[100px]">Отдано</TableHead>
+                <TableHead className="w-[100px]">Осталось</TableHead>
+                <TableHead className="w-[100px]">Статус</TableHead>
+                <TableHead>Синтезируемые предметы</TableHead>
+                <TableHead className="w-[80px]" />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {(queue[itemName] || []).map((entry, index) => {
+                const remaining =
+                  (entry.required || 0) - (entry.delivered || 0);
+                return (
+                  <TableRow key={entry.username}>
+                    <TableCell>{index + 1}</TableCell>
+                    <TableCell>{entry.username}</TableCell>
                     <TableCell>
-                      <select
-                        className="text-xs border rounded"
-                        value={entry.status || "ожидание"}
-                        onChange={(e) =>
-                          handleChange(index, "status", e.target.value)
+                      {editMode ? (
+                        <Input
+                          type="number"
+                          min={0}
+                          value={entry.required ?? 0}
+                          onChange={(e) =>
+                            handleChange(
+                              index,
+                              "required",
+                              Number(e.target.value)
+                            )
+                          }
+                        />
+                      ) : (
+                        <span>
+                          {entry.required
+                            ?.toLocaleString("ru-RU")
+                            .replaceAll(",", " ") || "-"}
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {editMode ? (
+                        <Input
+                          type="number"
+                          min={0}
+                          value={entry.delivered ?? 0}
+                          onChange={(e) =>
+                            handleChange(
+                              index,
+                              "delivered",
+                              Number(e.target.value)
+                            )
+                          }
+                        />
+                      ) : (
+                        <span>
+                          {entry.delivered
+                            ?.toLocaleString("ru-RU")
+                            .replaceAll(",", " ") || "-"}
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {remaining > 0
+                        ? remaining.toLocaleString("ru-RU").replaceAll(",", " ")
+                        : 0}
+                    </TableCell>
+                    <TableCell>
+                      {editMode ? (
+                        <select
+                          className=" border rounded"
+                          value={entry.status || "позже"}
+                          onChange={(e) =>
+                            handleChange(index, "status", e.target.value)
+                          }
+                        >
+                          <option value="продано">Продано</option>
+                          <option value="пропуск">Пропуск</option>
+                          <option value="позже">Позже</option>
+                          <option value="ожидание">Ожидание</option>
+                        </select>
+                      ) : (
+                        <span>{entry.status || "-"}</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {editMode ? (
+                        <Input
+                          className=" w-80"
+                          value={entry.synthTarget || ""}
+                          onChange={(e) =>
+                            handleChange(index, "synthTarget", e.target.value)
+                          }
+                        />
+                      ) : (
+                        <span className="w-80 truncate  inline-block">
+                          {entry.synthTarget || "-"}
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() =>
+                          handleSold(entry.username, entry.delivered ?? 0)
+                        }
+                        disabled={
+                          (entry.required || 0) > (entry.delivered || 0)
                         }
                       >
-                        <option value="продано">Продано</option>
-                        <option value="пропуск">Пропуск</option>
-                        <option value="позже">Позже</option>
-                        <option value="ожидание">Ожидание</option>
-                      </select>
+                        Продано
+                      </Button>
                     </TableCell>
-                    <TableCell>
-                      <Input
-                        className="text-xs"
-                        value={entry.synthTarget || ""}
-                        onChange={(e) =>
-                          handleChange(index, "synthTarget", e.target.value)
-                        }
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Input
-                        className="text-xs w-14"
-                        type="number"
-                        min={0}
-                        value={entry.remaining ?? 1}
-                        onChange={(e) =>
-                          handleChange(
-                            index,
-                            "remaining",
-                            Number(e.target.value)
-                          )
-                        }
-                      />
-                    </TableCell>
-                  </>
-                )}
-                <TableCell>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => handleSold(entry.username)}
-                  >
-                    Продано
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-
-        <div className="mt-3 space-y-2">
-          <Input
-            placeholder="Поиск игрока..."
-            value={searchUser}
-            onChange={(e) => setSearchUser(e.target.value)}
-          />
-          <div className="max-h-[100px] overflow-y-auto border rounded px-2 py-1">
-            {allUsers
-              .filter((u) => u.toLowerCase().includes(searchUser.toLowerCase()))
-              .map((u) => (
-                <div
-                  key={u}
-                  className={cn(
-                    "cursor-pointer px-2 py-1 rounded hover:bg-muted",
-                    u === selectedUser && "bg-muted"
-                  )}
-                  onClick={() => setSelectedUser(u)}
-                >
-                  {u}
-                </div>
-              ))}
-          </div>
-          <Button
-            variant="default"
-            className="w-full"
-            onClick={handleAddToQueue}
-            disabled={!selectedUser}
-          >
-            Добавить в очередь
-          </Button>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
         </div>
-      </PopoverContent>
-    </Popover>
+
+        {editMode && (
+          <div className="mt-6 space-y-2">
+            <Input
+              placeholder="Поиск игрока..."
+              value={searchUser}
+              onChange={(e) => setSearchUser(e.target.value)}
+            />
+            <div className="max-h-[100px] overflow-y-auto border rounded px-2 py-1">
+              {allUsers
+                .filter((u) =>
+                  u.toLowerCase().includes(searchUser.toLowerCase())
+                )
+                .map((u) => (
+                  <div
+                    key={u}
+                    className={cn(
+                      "cursor-pointer px-2 py-1 rounded hover:bg-muted",
+                      u === selectedUser && "bg-muted"
+                    )}
+                    onClick={() => setSelectedUser(u)}
+                  >
+                    {u}
+                  </div>
+                ))}
+            </div>
+            <Button
+              variant="default"
+              className="w-full"
+              onClick={handleAddToQueue}
+              disabled={!selectedUser}
+            >
+              Добавить в очередь
+            </Button>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
