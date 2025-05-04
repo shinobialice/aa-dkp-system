@@ -22,7 +22,7 @@ export const markLootAsSold = async ({
       user_id: userId,
       name: itemName,
       type: "Лут",
-      quantity: delivered,
+      quantity: delivered > 0 ? delivered : 1,
       created_at: new Date(),
     },
   });

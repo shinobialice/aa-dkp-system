@@ -1,6 +1,5 @@
 export type LootQueueEntry = {
   id: number;
-  itemTypeId: number; // 👈 добавьте это
   userId: number;
   username: string;
   status: string;
@@ -8,4 +7,5 @@ export type LootQueueEntry = {
   required: number;
   delivered: number;
   createdAt: Date;
+  quantity?: number; // 👈 добавлено
 };
