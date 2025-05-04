@@ -7,11 +7,7 @@ import getUserNotes from "@/src/actions/getUserNotes";
 import { UserActivityChart } from "@/src/components/profile/activity/UserActivityChart";
 import { UserMonthActivity } from "@/src/components/profile/activity/UserMonthActivity";
 
-export default async function ProfilePage({
-  params,
-}: {
-  params: { user_id: number };
-}) {
+const ProfilePage = async ({ params }: { params: { user_id: number } }) => {
   const { user_id: userId } = await params;
 
   const user = await getUser(userId);
@@ -42,4 +38,5 @@ export default async function ProfilePage({
       </div>
     </div>
   );
-}
+};
+export default ProfilePage;

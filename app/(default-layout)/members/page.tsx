@@ -1,7 +1,7 @@
 import MembersTable from "@/src/components/MembersTable";
 import { prisma } from "@/lib/db";
 
-export default async function MembersPage() {
+const MembersPage = async () => {
   const users = await prisma.user.findMany({
     orderBy: [
       { active: "desc" },
@@ -16,4 +16,5 @@ export default async function MembersPage() {
       <MembersTable users={users} />
     </div>
   );
-}
+};
+export default MembersPage;

@@ -20,7 +20,7 @@ const newsData = [
   },
 ];
 
-export default function NewsPage() {
+const NewsPage = () => {
   return (
     <div className="flex min-h-screen bg-background text-onBackground">
       <div className="flex-1 p-8">
@@ -42,4 +42,5 @@ export default function NewsPage() {
       </div>
     </div>
   );
-}
+};
+export default NewsPage;
