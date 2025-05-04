@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { sourceMap } from "../components/Loot/priceSourceMap";
-import { getLootIconUrl } from "../components/Loot/icons/LootIcons";
+import { getLootIconUrl } from "../components/Loot/LootBuy/icons/LootIcons";
 
 const prisma = new PrismaClient();
 

@@ -29,21 +29,19 @@ export function PricesComponent({ items }: { items: LootItem[] }) {
       </TableHeader>
       <TableBody>
         {items.map((item) => (
-          <TableRow key={item.name} className="hover:bg-muted">
-            <TableCell>
-              <div className="flex items-center gap-2">
-                <LootQueuePopover itemName={item.name}>
-                  <div className="flex items-center gap-2 cursor-pointer hover:underline">
-                    <LootIcon itemName={item.name} />
-                    <span>{item.name}</span>
-                  </div>
-                </LootQueuePopover>
-              </div>
-            </TableCell>
-            <TableCell className="text-yellow-600 font-semibold">
-              {item.price}
-            </TableCell>
-          </TableRow>
+          <LootQueuePopover key={item.name} itemName={item.name}>
+            <TableRow className="hover:bg-muted cursor-pointer">
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <LootIcon itemName={item.name} />
+                  <span>{item.name}</span>
+                </div>
+              </TableCell>
+              <TableCell className="text-yellow-600 font-semibold">
+                {item.price}
+              </TableCell>
+            </TableRow>
+          </LootQueuePopover>
         ))}
       </TableBody>
     </Table>

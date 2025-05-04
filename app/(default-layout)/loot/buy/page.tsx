@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getLootGrouped } from "@/src/actions/getLootGrouped";
-import { PricesComponent } from "@/src/components/Loot/PricesComponent";
+import { PricesComponent } from "@/src/components/Loot/LootBuy/PricesComponent";
 
 export default async function LootPage() {
   const lootByBoss = await getLootGrouped();

@@ -38,6 +38,7 @@ const mockQueue: Record<
     synthTarget?: string;
     delivered?: number;
     required?: number;
+    createdAt?: Date;
   }[]
 > = {
   "Эссенция ярости": [
@@ -79,15 +80,19 @@ export function LootQueuePopover({
 
   const handleAddToQueue = () => {
     if (!selectedUser) return;
-    const newEntry = isExtended
-      ? {
-          username: selectedUser,
-          status: "позже",
-          synthTarget: "",
-          delivered: 0,
-          required: 0,
-        }
-      : { username: selectedUser };
+    const now = new Date();
+    const newEntry = {
+      username: selectedUser,
+      createdAt: now,
+      ...(isExtended
+        ? {
+            status: "позже",
+            synthTarget: "",
+            delivered: 0,
+            required: 0,
+          }
+        : {}),
+    };
     setQueue((prev) => ({
       ...prev,
       [itemName]: [...(prev[itemName] || []), newEntry],
@@ -118,7 +123,110 @@ export function LootQueuePopover({
     });
   };
 
-  if (!isExtended) return <>{children}</>;
+  if (!isExtended) {
+    return (
+      <Popover>
+        <PopoverTrigger asChild>{children}</PopoverTrigger>
+        <PopoverContent className="w-[620px]">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-sm font-semibold">Очередь на: {itemName}</div>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setEditMode((prev) => !prev)}
+            >
+              {editMode ? (
+                "Сохранить"
+              ) : (
+                <>
+                  <Pen className="h-3 w-3 mr-1" /> Редактировать
+                </>
+              )}
+            </Button>
+          </div>
+
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>#</TableHead>
+                <TableHead>Игрок</TableHead>
+                <TableHead>Встал в очередь</TableHead>
+                <TableHead />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {(queue[itemName] || []).map((entry, index) => (
+                <TableRow key={entry.username}>
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>{entry.username}</TableCell>
+                  <TableCell>
+                    {entry.createdAt
+                      ? new Date(entry.createdAt).toLocaleString("ru-RU", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : "-"}
+                  </TableCell>
+                  {editMode && (
+                    <TableCell className="text-right">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() =>
+                          handleSold(entry.username, entry.delivered ?? 0)
+                        }
+                      >
+                        Продано
+                      </Button>
+                    </TableCell>
+                  )}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+
+          {editMode && (
+            <div className="mt-3 space-y-2">
+              <Input
+                placeholder="Поиск игрока..."
+                value={searchUser}
+                onChange={(e) => setSearchUser(e.target.value)}
+              />
+              <div className="max-h-[100px] overflow-y-auto border rounded px-2 py-1">
+                {allUsers
+                  .filter((u) =>
+                    u.toLowerCase().includes(searchUser.toLowerCase())
+                  )
+                  .map((u) => (
+                    <div
+                      key={u}
+                      className={cn(
+                        "cursor-pointer px-2 py-1 rounded hover:bg-muted",
+                        u === selectedUser && "bg-muted"
+                      )}
+                      onClick={() => setSelectedUser(u)}
+                    >
+                      {u}
+                    </div>
+                  ))}
+              </div>
+              <Button
+                variant="default"
+                className="w-full"
+                onClick={handleAddToQueue}
+                disabled={!selectedUser}
+              >
+                Добавить в очередь
+              </Button>
+            </div>
+          )}
+        </PopoverContent>
+      </Popover>
+    );
+  }
 
   return (
     <Dialog>
@@ -245,20 +353,22 @@ export function LootQueuePopover({
                         </span>
                       )}
                     </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() =>
-                          handleSold(entry.username, entry.delivered ?? 0)
-                        }
-                        disabled={
-                          (entry.required || 0) > (entry.delivered || 0)
-                        }
-                      >
-                        Продано
-                      </Button>
-                    </TableCell>
+                    {editMode && (
+                      <TableCell>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() =>
+                            handleSold(entry.username, entry.delivered ?? 0)
+                          }
+                          disabled={
+                            (entry.required || 0) > (entry.delivered || 0)
+                          }
+                        >
+                          Продано
+                        </Button>
+                      </TableCell>
+                    )}
                   </TableRow>
                 );
               })}
