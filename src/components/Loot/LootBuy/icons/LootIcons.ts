@@ -22,7 +22,7 @@ const LootGrade: { [key: string]: number } = {
   "Кристалл властелина морей": 7,
 };
 
-const LootIcons: { [key: string]: string | number } = {
+export const LootIcons: { [key: string]: string | number } = {
   "Глайдер «Крылья небесного стража»": 4312,
   "Аметистовая гравировка северной звезды": 4190,
   "Средоточие безумия": 4773,

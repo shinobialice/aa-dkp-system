@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -10,9 +10,29 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowUpDown } from "lucide-react";
-import { sellLootItem, getLoot } from "@/src/actions/lootActions";
+import { sellLootItem, getLoot, addLootItem } from "@/src/actions/lootActions";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { LootIcon } from "./LootBuy/icons/LootIconComponent";
+import { LootIcons } from "@/src/components/Loot/LootBuy/icons/LootIcons";
+import { Label } from "@/components/ui/label";
 
 export default function LootTable() {
   type LootItem = {
@@ -33,8 +53,18 @@ export default function LootTable() {
   };
 
   const [loot, setLoot] = useState<LootItem[]>([]);
-  const [month, setMonth] = useState<number>(new Date().getMonth() + 1); // JS months: 0-11
+  const [month, setMonth] = useState<number>(new Date().getMonth() + 1);
   const [year, setYear] = useState<number>(new Date().getFullYear());
+  const [showDialog, setShowDialog] = useState(false);
+  const [newItem, setNewItem] = useState({
+    itemTypeId: 1,
+    itemName: "",
+    source: "",
+    acquired_at: new Date().toISOString().split("T")[0],
+    quantity: 1,
+  });
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -78,7 +108,6 @@ export default function LootTable() {
       }
 
       acc[key].total += 1;
-
       if (item.status === "Продано") {
         acc[key].sold += 1;
         if (
@@ -96,10 +125,16 @@ export default function LootTable() {
     }, {} as Record<string, any>)
   );
 
+  const allItemNames = Object.keys(LootIcons);
+
+  const getItemTypeIdByName = (name: string): number => {
+    const match = loot.find((l) => l.itemType.name === name);
+    return match?.itemTypeId ?? 1;
+  };
+
   return (
     <div className="grid grid-cols-3 gap-4">
       <div className="col-span-2 space-y-4">
-        {/* Month and Year Selectors */}
         <div className="flex gap-4 items-center">
           <select
             value={month}
@@ -114,6 +149,7 @@ export default function LootTable() {
               </option>
             ))}
           </select>
+
           <select
             value={year}
             onChange={(e) => setYear(parseInt(e.target.value))}
@@ -125,9 +161,10 @@ export default function LootTable() {
               </option>
             ))}
           </select>
+
+          <Button onClick={() => setShowDialog(true)}>Добавить лут</Button>
         </div>
 
-        {/* Loot Table */}
         <div className="overflow-auto rounded-md border">
           <ScrollArea className="h-[1000px] w-full">
             <Table>
@@ -181,6 +218,119 @@ export default function LootTable() {
           </ScrollArea>
         </div>
       </div>
+
+      {showDialog && (
+        <Dialog
+          open={showDialog}
+          onOpenChange={(open) => {
+            setShowDialog(open);
+            if (!open) setPopoverOpen(false); // сбрасываем поповер при закрытии диалога
+          }}
+        >
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Добавить лут</DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col gap-2 py-4">
+              <Label>Предмет</Label>
+              {newItem.itemName && (
+                <div className="flex items-center gap-2 mb-2">
+                  <LootIcon itemName={newItem.itemName} size={32} />
+                  <span className="font-medium">{newItem.itemName}</span>
+                </div>
+              )}
+              <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    placeholder="Поиск предмета..."
+                    value={newItem.itemName}
+                    onClick={() => setPopoverOpen(true)} // было onFocus
+                    readOnly // это можно оставить, но лучше заменить на disabled + стили, или убрать
+                    className="border rounded px-2 py-1 cursor-pointer"
+                  />
+                </PopoverTrigger>
+                <PopoverContent className="p-0 w-[378px]">
+                  <Command>
+                    <CommandInput placeholder="Поиск..." />
+                    <CommandList>
+                      {allItemNames.map((name) => (
+                        <CommandItem
+                          key={name}
+                          value={name}
+                          onSelect={() => {
+                            setNewItem((prev) => ({
+                              ...prev,
+                              itemTypeId: getItemTypeIdByName(name),
+                              itemName: name,
+                            }));
+                            setPopoverOpen(false);
+                            inputRef.current?.blur();
+                          }}
+                          className="flex items-center gap-2"
+                        >
+                          <LootIcon itemName={name} size={24} />
+                          <span>{name}</span>
+                        </CommandItem>
+                      ))}
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+
+              <Label>Источник</Label>
+              <input
+                type="text"
+                value={newItem.source}
+                onChange={(e) =>
+                  setNewItem({ ...newItem, source: e.target.value })
+                }
+                className="border rounded px-2 py-1"
+              />
+              <Label>Дата получения</Label>
+              <input
+                type="date"
+                value={newItem.acquired_at}
+                onChange={(e) =>
+                  setNewItem({ ...newItem, acquired_at: e.target.value })
+                }
+                className="border rounded px-2 py-1"
+              />
+              <Label>Количество</Label>
+              <input
+                type="number"
+                min={1}
+                value={newItem.quantity}
+                onChange={(e) =>
+                  setNewItem({ ...newItem, quantity: parseInt(e.target.value) })
+                }
+                className="border rounded px-2 py-1"
+              />
+            </div>
+            <DialogFooter>
+              <Button variant="secondary" onClick={() => setShowDialog(false)}>
+                Отмена
+              </Button>
+              <Button
+                onClick={async () => {
+                  await addLootItem({
+                    itemTypeId: newItem.itemTypeId,
+                    source: newItem.source,
+                    acquired_at: newItem.acquired_at,
+                    quantity: newItem.quantity,
+                  });
+                  setShowDialog(false);
+                  const updated = await getLoot();
+                  setLoot(updated);
+                }}
+              >
+                Сохранить
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

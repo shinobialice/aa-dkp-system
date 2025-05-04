@@ -21,3 +21,25 @@ export const sellLootItem = async (lootId: number) => {
     },
   });
 };
+
+export const addLootItem = async ({
+  itemTypeId,
+  source,
+  acquired_at,
+  quantity,
+}: {
+  itemTypeId: number;
+  source?: string;
+  acquired_at: string;
+  quantity?: number;
+}) => {
+  await prisma.loot.create({
+    data: {
+      itemTypeId,
+      status: "В наличии",
+      source,
+      acquired_at: new Date(acquired_at),
+      quantity: quantity ?? 1,
+    },
+  });
+};

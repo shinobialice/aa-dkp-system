@@ -139,7 +139,7 @@ model ItemType {
 
 model Loot {
   id               Int       @id @default(autoincrement())
-  itemTypeId       Int       @map("item_type_id")  // 👈 fix here
+  itemTypeId       Int       @map("item_type_id")
   status           String
   acquired_at      DateTime
   sold_at          DateTime?
@@ -147,6 +147,7 @@ model Loot {
   sold_to_user_id  Int?      
   comment          String?
   source           String?
+  quantity         Int       @default(1)  // 👈 ДОБАВЬ ЭТУ СТРОКУ
   created_at       DateTime  @default(now())
 
   itemType         ItemType  @relation(fields: [itemTypeId], references: [id])
@@ -154,6 +155,7 @@ model Loot {
 
   @@map("loot")
 }
+
 
 
 
