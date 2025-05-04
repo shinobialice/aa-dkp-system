@@ -21,8 +21,8 @@ export default function InventoryTab({
   userId: number;
   onChange: () => void;
 }) {
-  if (type === "Лут") {
-    const lootItems = inventory.filter((inv) => inv.type === "Лут");
+  if (type === "Куплено") {
+    const lootItems = inventory.filter((inv) => inv.type === "Куплено");
     return (
       <div className="border-t">
         <Table>
@@ -41,6 +41,32 @@ export default function InventoryTab({
                   {new Date(item.created_at).toLocaleDateString("ru-RU")}
                 </TableCell>
                 <TableCell>{item.quantity ?? 1}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    );
+  }
+
+  if (type === "Выдано") {
+    const givenItems = inventory.filter((inv) => inv.type === "Выдано");
+    return (
+      <div className="border-t">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Название</TableHead>
+              <TableHead>Дата выдачи</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {givenItems.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell>{item.name}</TableCell>
+                <TableCell>
+                  {new Date(item.created_at).toLocaleDateString("ru-RU")}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

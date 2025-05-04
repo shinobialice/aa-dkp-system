@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, startTransition } from "react";
 import {
   Table,
   TableHeader,
@@ -20,11 +20,14 @@ import {
   ColumnDef,
   ColumnFiltersState,
 } from "@tanstack/react-table";
+import { saveGivenAwayLoot } from "@/src/actions/saveGivenAwayLoot";
+import { lootColumns } from "./lootColumns";
 
 interface LootItem {
   name: string;
   date: string;
   comment?: string;
+  status: string;
 }
 
 interface Player {
@@ -33,15 +36,6 @@ interface Player {
   active: boolean;
   loot: LootItem[];
 }
-
-const lootColumns = [
-  "Ро'кана, Безумие морей",
-  "Анд'хакар, Чернильная тьма",
-  "Глайдер охотника на драконов",
-  "Фрегат",
-  "Прочее",
-  "Прочее 2",
-];
 
 export default function LootGiveaway({
   initialPlayers,
@@ -58,24 +52,32 @@ export default function LootGiveaway({
     [allPlayers, showInactive]
   );
 
-  const handleDateChange = (
+  const updateLoot = (
     playerIndex: number,
     lootIndex: number,
-    value: string
+    changes: Partial<LootItem>
   ) => {
     const updated = [...allPlayers];
-    updated[playerIndex].loot[lootIndex].date = value;
+    const loot = updated[playerIndex].loot[lootIndex];
+    Object.assign(loot, changes);
     setAllPlayers(updated);
-  };
 
-  const handleCommentChange = (
-    playerIndex: number,
-    lootIndex: number,
-    value: string
-  ) => {
-    const updated = [...allPlayers];
-    updated[playerIndex].loot[lootIndex].comment = value;
-    setAllPlayers(updated);
+    const { name, date, comment, status } = loot;
+    const isValidDate = date && !isNaN(Date.parse(date));
+    if (
+      !name.startsWith("Прочее") &&
+      status &&
+      (status === "Выдано" ? isValidDate : true)
+    ) {
+      startTransition(() => {
+        saveGivenAwayLoot(updated[playerIndex].id, {
+          name,
+          date: isValidDate ? date : new Date().toISOString().split("T")[0],
+          comment,
+          status,
+        });
+      });
+    }
   };
 
   const renderLootCell = (
@@ -84,72 +86,76 @@ export default function LootGiveaway({
     playerIndex: number,
     lootIndex: number
   ) => {
-    if (isEditMode) {
+    const dateValid = loot.date && !isNaN(Date.parse(loot.date));
+
+    if (!isEditMode) {
       if (loot.name.startsWith("Прочее")) {
-        return (
-          <div className="flex flex-col gap-1">
-            <Input
-              placeholder="Название предмета"
-              value={loot.comment || ""}
-              onChange={(e) =>
-                handleCommentChange(playerIndex, lootIndex, e.target.value)
-              }
-              className="text-xs"
-            />
-            <input
-              type="date"
-              className="text-xs border rounded px-2 py-1"
-              value={loot.date || ""}
-              onChange={(e) =>
-                handleDateChange(playerIndex, lootIndex, e.target.value)
-              }
-            />
-          </div>
-        );
-      } else {
-        return (
-          <div className="flex flex-col gap-1">
-            <select
-              className="text-xs border rounded px-2 py-1"
-              value={loot.date || ""}
-              onChange={(e) =>
-                handleDateChange(playerIndex, lootIndex, e.target.value)
-              }
-            >
-              <option value="">–</option>
-              <option value="in_stock">В наличии</option>
-              <option value={new Date().toISOString().split("T")[0]}>
-                Сегодня ({new Date().toLocaleDateString("ru-RU")})
-              </option>
-            </select>
-            <input
-              type="date"
-              className="text-xs border rounded px-2 py-1"
-              value={loot.date !== "in_stock" && loot.date ? loot.date : ""}
-              onChange={(e) =>
-                handleDateChange(playerIndex, lootIndex, e.target.value)
-              }
-            />
-          </div>
-        );
-      }
-    } else {
-      if (loot.name.startsWith("Прочее")) {
-        if (loot.comment && loot.date) {
+        if (loot.comment && dateValid) {
           return `${loot.comment} (${format(
             new Date(loot.date),
             "dd.MM.yyyy"
           )})`;
         }
         if (loot.comment) return loot.comment;
-        if (loot.date) return format(new Date(loot.date), "dd.MM.yyyy");
-        return "–";
-      } else {
-        if (loot.date === "in_stock") return "В наличии";
-        if (loot.date) return format(new Date(loot.date), "dd.MM.yyyy");
+        if (dateValid) return format(new Date(loot.date), "dd.MM.yyyy");
         return "–";
       }
+
+      if (loot.status === "В наличии") return "В наличии";
+      if (loot.status === "Выдано" && dateValid)
+        return `Выдано (${format(new Date(loot.date), "dd.MM.yyyy")})`;
+      return "–";
     }
+
+    if (loot.name.startsWith("Прочее")) {
+      return (
+        <div className="flex flex-col gap-1">
+          <Input
+            placeholder="Название предмета"
+            value={loot.comment || ""}
+            onChange={(e) =>
+              updateLoot(playerIndex, lootIndex, { comment: e.target.value })
+            }
+            className="text-xs"
+          />
+          <input
+            type="date"
+            className="text-xs border rounded px-2 py-1"
+            value={loot.date || ""}
+            onChange={(e) =>
+              updateLoot(playerIndex, lootIndex, { date: e.target.value })
+            }
+          />
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex flex-col gap-1">
+        <select
+          className="text-xs border rounded px-2 py-1"
+          value={loot.status || ""}
+          onChange={(e) =>
+            updateLoot(playerIndex, lootIndex, { status: e.target.value })
+          }
+        >
+          <option value="">–</option>
+          <option value="Выдано">Выдано</option>
+          <option value="В наличии">В наличии</option>
+        </select>
+
+        {loot.status === "Выдано" && (
+          <input
+            type="date"
+            className="text-xs border rounded px-2 py-1"
+            value={loot.date || ""}
+            onChange={(e) =>
+              updateLoot(playerIndex, lootIndex, { date: e.target.value })
+            }
+          />
+        )}
+      </div>
+    );
   };
 
   const tableColumns: ColumnDef<Player>[] = [
@@ -181,9 +187,7 @@ export default function LootGiveaway({
     columns: tableColumns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    state: {
-      columnFilters,
-    },
+    state: { columnFilters },
     onColumnFiltersChange: setColumnFilters,
   });
 
@@ -191,16 +195,7 @@ export default function LootGiveaway({
     <div className="p-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-bold">Раздача лута</h2>
-        <Button
-          variant="outline"
-          onClick={() => {
-            if (editMode) {
-              console.log("Сохраняем:", displayedPlayers);
-            }
-            setEditMode(!editMode);
-            setColumnFilters([]);
-          }}
-        >
+        <Button variant="outline" onClick={() => setEditMode(!editMode)}>
           {editMode ? "Сохранить" : "Редактировать"}
         </Button>
       </div>
@@ -225,7 +220,7 @@ export default function LootGiveaway({
       </div>
 
       <Table>
-        <TableHeader>
+        <TableHeader className="sticky top-0 z-1 bg-background">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (

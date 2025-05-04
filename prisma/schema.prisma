@@ -28,6 +28,7 @@ model User {
 
   soldLoot                    Loot[]        @relation("UserSoldLoot")
   lootQueue                   LootQueue[]   
+  givenAwayLoot GivenAwayLoot[]
 
   @@map("user")
 }
@@ -182,4 +183,18 @@ model LootQueue {
   user            User     @relation(fields: [userId], references: [id])
 
   @@map("loot_queue")
+}
+
+model GivenAwayLoot {
+  id       Int      @id @default(autoincrement())
+  user_id  Int
+  name     String
+  date     DateTime
+  comment  String?
+  status   String
+
+  user     User     @relation(fields: [user_id], references: [id])
+
+  @@map("givenawayloot")
+  @@unique([user_id, name]) // для upsert
 }
