@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Popover,
   PopoverTrigger,
@@ -17,76 +17,94 @@ import { QueueTableSimple } from "./QueueTableSimple";
 import { QueueTableExtended } from "./QueueTableExtended";
 import { AddToQueueForm } from "./AddToQueueForm";
 import { EditToggleButton } from "./EditToggleButton";
+import { getActiveUsers } from "@/src/actions/getActiveUsers";
+import { getLootQueueByItemName } from "@/src/actions/getLootQueueByItemName";
+import { addToLootQueue } from "@/src/actions/addToLootQueue";
+import { markLootAsSold } from "@/src/actions/markLootAsSold";
+import { updateLootQueueEntry } from "@/src/actions/updateLootQueueEntry";
 
-const allUsers = ["Vladzor", "Mazik", "Shaiya", "Verta", "Rrrr"];
 const extendedItems = ["Эссенция ярости", "Трофейная эссенция стихий"];
 
-const mockQueue = {
-  "Эссенция ярости": [
-    {
-      username: "Dimonishx",
-      status: "позже",
-      synthTarget: "...",
-      required: 1000000,
-      delivered: 185268,
-    },
-    {
-      username: "Бобр",
-      status: "продано",
-      synthTarget: "Сет Анталона",
-      delivered: 700000,
-    },
-    {
-      username: "Felanza",
-      status: "пропуск",
-      synthTarget: "Булава с Ксанатоса и Щит с Ксанатоса",
-      delivered: 407296,
-    },
-  ],
+type LootQueueEntry = {
+  id: number;
+  userId: number;
+  username: string;
+  status: string;
+  synthTarget?: string;
+  required: number;
+  delivered: number;
+  createdAt: Date;
 };
 
-export function LootQueuePopover({ itemName, children }) {
+type LootQueuePopoverProps = {
+  itemName: string;
+  children: React.ReactNode;
+};
+
+export function LootQueuePopover({
+  itemName,
+  children,
+}: LootQueuePopoverProps) {
   const [searchUser, setSearchUser] = useState("");
   const [selectedUser, setSelectedUser] = useState("");
-  const [queue, setQueue] = useState(mockQueue);
+  const [queue, setQueue] = useState<Record<string, LootQueueEntry[]>>({});
+
   const [editMode, setEditMode] = useState(false);
   const isExtended = extendedItems.includes(itemName);
+  const [allUsers, setAllUsers] = useState<string[]>([]);
 
-  const handleAddToQueue = () => {
+  const handleAddToQueue = async () => {
     if (!selectedUser) return;
-    const now = new Date();
-    const newEntry = {
-      username: selectedUser,
-      createdAt: now,
-      ...(isExtended
-        ? { status: "позже", synthTarget: "", delivered: 0, required: 0 }
-        : {}),
-    };
-    setQueue((prev) => ({
-      ...prev,
-      [itemName]: [...(prev[itemName] || []), newEntry],
-    }));
+
+    await addToLootQueue(selectedUser, itemName);
+    const updatedQueue = await getLootQueueByItemName(itemName);
+    setQueue({ [itemName]: updatedQueue });
+
     setSelectedUser("");
     setSearchUser("");
   };
 
-  const handleSold = (username, totalDelivered) => {
-    setQueue((prev) => ({
-      ...prev,
-      [itemName]: (prev[itemName] || []).filter((u) => u.username !== username),
-    }));
-    console.log(
-      `Добавлен в инвентарь: ${username} => ${itemName}, всего отдано: ${totalDelivered}`
-    );
+  const handleSold = async (entry: LootQueueEntry) => {
+    await markLootAsSold({
+      lootQueueId: entry.id,
+      userId: entry.userId,
+      itemName,
+    });
+    const updatedQueue = await getLootQueueByItemName(itemName);
+    setQueue({ [itemName]: updatedQueue });
   };
 
-  const handleChange = (index, field, value) => {
-    setQueue((prev) => {
-      const newQueue = [...(prev[itemName] || [])];
-      newQueue[index] = { ...newQueue[index], [field]: value };
-      return { ...prev, [itemName]: newQueue };
-    });
+  const handleChange = async (index: number, field: string, value: any) => {
+    const entry = queue[itemName]?.[index];
+    if (!entry) return;
+
+    const updated = {
+      id: entry.id,
+      required: entry.required,
+      delivered: entry.delivered,
+      status: entry.status,
+      synthTarget: entry.synthTarget,
+      [field]: value,
+    };
+
+    await updateLootQueueEntry(updated);
+    const updatedQueue = await getLootQueueByItemName(itemName);
+    setQueue({ [itemName]: updatedQueue });
   };
+
+  useEffect(() => {
+    const loadData = async () => {
+      const [fetchedUsers, fetchedQueue] = await Promise.all([
+        getActiveUsers(),
+        getLootQueueByItemName(itemName),
+      ]);
+
+      setAllUsers(fetchedUsers.map((u: { username: string }) => u.username));
+      setQueue({ [itemName]: fetchedQueue });
+    };
+
+    loadData();
+  }, [itemName]);
 
   const commonProps = {
     queue: queue[itemName] || [],
