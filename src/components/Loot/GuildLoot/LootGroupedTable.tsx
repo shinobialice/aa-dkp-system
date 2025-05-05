@@ -11,9 +11,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { GroupedLootItem, LootItem } from "./LootTypes";
 import { SellLootDialog } from "./SellLootDialog";
 import { useEffect, useState } from "react";
-import { markLootItemAsSold } from "@/src/actions/markLootItemAsSold";
 import { getActiveUsers } from "@/src/actions/getActiveUsers";
-import { getLoot } from "@/src/actions/lootActions";
+import { getLoot, getLootQuantity } from "@/src/actions/lootActions";
+import { distributeLootItem } from "@/src/actions/distributeLootItems";
 
 export function LootGroupedTable({
   groupedLoot,
@@ -27,7 +27,8 @@ export function LootGroupedTable({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
   const [dialogInitialPrice, setDialogInitialPrice] = useState<number>(0);
-  const [maxQuantity, setMaxQuantity] = useState(1);
+  const [maxQuantity, setMaxQuantity] = useState<number>(1);
+
   const [activeUsers, setActiveUsers] = useState<
     { id: number; username: string }[]
   >([]);
@@ -39,6 +40,20 @@ export function LootGroupedTable({
     };
     loadUsers();
   }, []);
+
+  const handleSellClick = async (group: GroupedLootItem) => {
+    const itemToSell = loot.find((item) => item.group_id === group.id);
+
+    if (itemToSell) {
+      setSelectedItemId(itemToSell.id);
+      setDialogInitialPrice(itemToSell.itemType?.price ?? 0);
+
+      const quantityFromDb = await getLootQuantity(itemToSell.id);
+      setMaxQuantity(quantityFromDb || 1);
+
+      setDialogOpen(true);
+    }
+  };
 
   return (
     <div className="overflow-auto rounded-md border">
@@ -61,7 +76,7 @@ export function LootGroupedTable({
           </TableHeader>
           <TableBody>
             {groupedLoot.map((group) => (
-              <TableRow key={`${group.itemTypeId}-${group.status}`}>
+              <TableRow key={group.id}>
                 <TableCell>
                   {group.acquired_at
                     ? new Intl.DateTimeFormat("ru-RU").format(
@@ -92,21 +107,7 @@ export function LootGroupedTable({
                     <Button
                       className="cursor-pointer"
                       variant="outline"
-                      onClick={() => {
-                        const itemToSell = loot.find(
-                          (item) =>
-                            item.itemTypeId === group.itemTypeId &&
-                            item.status !== "Продано"
-                        );
-                        if (itemToSell) {
-                          setSelectedItemId(itemToSell.id);
-                          setDialogInitialPrice(
-                            itemToSell.itemType?.price ?? 0
-                          );
-                          setMaxQuantity(itemToSell.quantity ?? 1);
-                          setDialogOpen(true);
-                        }
-                      }}
+                      onClick={() => handleSellClick(group)}
                     >
                       Продать
                     </Button>
@@ -132,21 +133,15 @@ export function LootGroupedTable({
             quantity,
             isFree,
           }) => {
-            console.log("📤 LootGroupedTable → markLootItemAsSold", {
-              soldTo,
-              price,
-              quantity,
-              isFree,
-            });
             if (selectedItemId !== null) {
-              await markLootItemAsSold({
+              await distributeLootItem({
                 lootId: selectedItemId,
                 soldTo,
                 soldToId,
-                price,
-                comment,
                 quantity,
-                isFree,
+                isFree: !!isFree,
+                comment,
+                price: isFree ? 0 : price,
               });
               const updatedLoot = await getLoot();
               setLoot(updatedLoot);

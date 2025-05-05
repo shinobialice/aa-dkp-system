@@ -1,6 +1,7 @@
 export type LootItem = {
   id: number;
-  status: string | null; 
+  group_id?: number | null; // ✅ добавь это поле
+  status: string | null;
   source: string | null;
   created_at: Date;
   itemTypeId: number;
@@ -8,8 +9,8 @@ export type LootItem = {
   sold_to: string | null;
   comment: string | null;
   acquired_at: Date | null;
-  quantity?: number; 
-  price: number | null; 
+  quantity?: number;
+  price: number | null;
   itemType: {
     id: number;
     name: string;
@@ -18,6 +19,7 @@ export type LootItem = {
 };
 
 export type GroupedLootItem = {
+  id: number;
   itemTypeId: number;
   name: string;
   price: number | null;

@@ -6,6 +6,7 @@ export function groupLoot(
   year: number
 ): GroupedLootItem[] {
   const result: GroupedLootItem[] = [];
+  let idCounter = 1; // fallback id, если group_id нет
 
   for (const item of loot) {
     const date =
@@ -21,6 +22,7 @@ export function groupLoot(
     if (item.status === "Продано" || item.status === "Выдано") {
       // Каждая продажа или выдача — отдельной строкой
       result.push({
+        id: item.group_id ?? idCounter++, // если есть group_id — используем его
         itemTypeId: item.itemTypeId,
         name: item.itemType.name,
         price: item.price ?? item.itemType.price,
@@ -39,6 +41,7 @@ export function groupLoot(
       let existing = result.find((r) => `${r.itemTypeId}-${r.status}` === key);
       if (!existing) {
         existing = {
+          id: idCounter++,
           itemTypeId: item.itemTypeId,
           name: item.itemType.name,
           price: item.itemType.price,

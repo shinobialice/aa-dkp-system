@@ -126,12 +126,13 @@ model ItemType {
 
 model Loot {
   id              Int       @id @default(autoincrement())
+  group_id        Int?      // ← добавь это
   status          String?
   sold_at         DateTime?
   sold_to         String?
   comment         String?
   created_at      DateTime  @default(now())
-  source          String?   @db.VarChar(255)
+  source          String  ?   @db.VarChar(255)
   acquired_at     DateTime? @db.Timestamp(6)
   itemTypeId      Int       @map("item_type_id")
   sold_to_user_id Int?

@@ -34,7 +34,7 @@ export function SellLootDialog({
   onConfirm,
   initialPrice,
   users = [],
-  maxQuantity = 1,
+  maxQuantity,
 }: {
   open: boolean;
   onClose: () => void;
@@ -61,18 +61,23 @@ export function SellLootDialog({
   const [manualPriceEdit, setManualPriceEdit] = useState(false);
   const [isFree, setIsFree] = useState(false);
 
+  // Fallback to default value (1) if maxQuantity is undefined
+  const effectiveMaxQuantity = maxQuantity ?? 1;
+
   useEffect(() => {
     if (!manualPriceEdit) {
-      setPrice(quantity * unitPrice);
+      setPrice(isFree ? 0 : quantity * unitPrice);
     }
-  }, [quantity, unitPrice, manualPriceEdit]);
+  }, [quantity, unitPrice, manualPriceEdit, isFree]);
 
   useEffect(() => {
     if (open) {
       const startPrice = initialPrice ?? 0;
-      setUnitPrice(initialPrice ?? 0);
+      setUnitPrice(startPrice);
       setQuantity(1);
       setPrice(startPrice);
+      setIsFree(false); // <--- добавь это
+      setManualPriceEdit(false);
     }
   }, [initialPrice, open]);
 
@@ -83,25 +88,38 @@ export function SellLootDialog({
       quantity,
       isFree,
     });
+
+    console.log("Проверка данных перед отправкой...");
+    console.log("soldTo:", soldTo);
+    console.log("price:", price);
+    console.log("quantity:", quantity);
+    console.log("isFree:", isFree);
+    console.log("maxQuantity:", effectiveMaxQuantity);
+
     if (
       !soldTo ||
-      (!isFree && price <= 0) ||
       quantity < 1 ||
-      quantity > maxQuantity
+      quantity > effectiveMaxQuantity ||
+      (!isFree && price <= 0)
     ) {
+      console.log("Ошибка валидации: данные не прошли проверку.");
       alert("Проверьте данные перед сохранением");
       return;
     }
 
+    // Если все валидно, отправляем данные
+    console.log("Данные прошли валидацию. Отправка...");
     onConfirm({
       soldTo,
       soldToId,
-      price: isFree ? 0 : price,
+      price: isFree ? 0 : price, // Если бесплатно, то цена 0
       comment,
       quantity,
       isFree,
     });
 
+    // Закрытие диалога и сброс полей
+    console.log("Закрытие диалога и сброс данных");
     onClose();
     setSoldTo("");
     setSoldToId(undefined);
@@ -177,7 +195,7 @@ export function SellLootDialog({
                 setIsFree(e.target.checked);
                 if (e.target.checked) {
                   setManualPriceEdit(false);
-                  setPrice(0);
+                  setPrice(0); // сбросить цену в 0 при выборе "выдать бесплатно"
                 } else {
                   setPrice(quantity * unitPrice);
                 }
@@ -196,7 +214,7 @@ export function SellLootDialog({
           <Input
             type="number"
             min={1}
-            max={maxQuantity}
+            max={effectiveMaxQuantity} // использует значение effectiveMaxQuantity
             value={quantity === 0 ? "" : quantity}
             onChange={(e) => {
               const val = Number(e.target.value);

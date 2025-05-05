@@ -33,7 +33,7 @@ export const addLootItem = async ({
   acquired_at: string;
   quantity?: number;
 }) => {
-  await prisma.loot.create({
+  const created = await prisma.loot.create({
     data: {
       itemTypeId,
       status: "В наличии",
@@ -42,4 +42,21 @@ export const addLootItem = async ({
       quantity: quantity ?? 1,
     },
   });
+
+  // Сразу обновляем group_id на свой id
+  await prisma.loot.update({
+    where: { id: created.id },
+    data: {
+      group_id: created.id,
+    },
+  });
 };
+
+export async function getLootQuantity(lootId: number) {
+  const loot = await prisma.loot.findUnique({
+    where: { id: lootId },
+    select: { quantity: true },
+  });
+
+  return loot?.quantity ?? 0;
+}

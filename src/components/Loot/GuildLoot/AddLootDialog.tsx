@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { LootItemSelector } from "./LootItemSelector";
 import { LootIcon } from "../LootBuy/icons/LootIconComponent";
 import { ItemType, NewLootItem } from "./LootTypes";
+import { on } from "events";
 
 export function AddLootDialog({
   open,
@@ -101,10 +102,16 @@ export function AddLootDialog({
           />
         </div>
         <DialogFooter>
-          <Button className="cursor-pointer" variant="secondary" onClick={onClose}>
+          <Button
+            className="cursor-pointer"
+            variant="secondary"
+            onClick={onClose}
+          >
             Отмена
           </Button>
-          <Button className="cursor-pointer" onClick={handleSubmit}>Сохранить</Button>
+          <Button className="cursor-pointer" onClick={handleSubmit}>
+            Сохранить
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
