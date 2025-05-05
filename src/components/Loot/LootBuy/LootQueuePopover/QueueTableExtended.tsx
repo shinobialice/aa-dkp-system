@@ -24,7 +24,7 @@ export function QueueTableExtended({
   handleSold,
 }: Props) {
   return (
-    <div className="max-h-[420px] overflow-y-auto border rounded mt-4">
+    <div className="max-h-[420px] border rounded mt-4">
       <Table>
         <TableHeader className="sticky top-0 z-1 bg-background">
           <TableRow>
@@ -134,7 +134,7 @@ export function QueueTableExtended({
                       );
                     } else {
                       return (
-                        <span className="w-80 truncate inline-block">
+                        <span className="w-[80px] truncate inline-block">
                           {entry.synth_target || "-"}
                         </span>
                       );

@@ -132,7 +132,7 @@ export function LootQueuePopover({
   return (
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="w-[2000px]">
+      <DialogContent className="w-[1200px] max-w-none">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-lg font-semibold">
