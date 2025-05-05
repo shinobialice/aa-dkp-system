@@ -22,15 +22,6 @@ export const getLoot = async () => {
   });
 };
 
-export const sellLootItem = async (lootId: number) => {
-  await prisma.loot.update({
-    where: { id: lootId },
-    data: {
-      status: "Продано",
-    },
-  });
-};
-
 export const addLootItem = async ({
   itemTypeId,
   source,

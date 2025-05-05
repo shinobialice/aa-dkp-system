@@ -5,19 +5,38 @@ export function groupLoot(
   month: number,
   year: number
 ): GroupedLootItem[] {
-  const filteredLoot = loot.filter((item) => {
-    if (item.status === "В наличии" || item.status === "Продаётся") return true;
-    if (!item.sold_at) return false;
+  const result: GroupedLootItem[] = [];
 
-    const soldDate = new Date(item.sold_at);
-    return soldDate.getMonth() + 1 === month && soldDate.getFullYear() === year;
-  });
+  for (const item of loot) {
+    // Проверка по месяцу: для "Продано" — sold_at, для остальных — acquired_at
+    const date = item.status === "Продано" ? item.sold_at : item.acquired_at;
 
-  return Object.values(
-    filteredLoot.reduce((acc, item) => {
+    if (!date) continue;
+
+    const d = new Date(date);
+    if (d.getMonth() + 1 !== month || d.getFullYear() !== year) continue;
+
+    if (item.status === "Продано") {
+      // Каждую продажу — как отдельную строку
+      result.push({
+        itemTypeId: item.itemTypeId,
+        name: item.itemType.name,
+        price: item.itemType.price,
+        source: item.source,
+        acquired_at: item.acquired_at,
+        total: item.quantity ?? 1,
+        sold: item.quantity ?? 1,
+        latest_sold_at: item.sold_at,
+        sold_to: new Set(item.sold_to ? [item.sold_to] : []),
+        comments: new Set(item.comment ? [item.comment] : []),
+        status: "Продано",
+      });
+    } else {
+      // Группируем "В наличии" и "Продаётся"
       const key = `${item.itemTypeId}-${item.status}`;
-      if (!acc[key]) {
-        acc[key] = {
+      let existing = result.find((r) => `${r.itemTypeId}-${r.status}` === key);
+      if (!existing) {
+        existing = {
           itemTypeId: item.itemTypeId,
           name: item.itemType.name,
           price: item.itemType.price,
@@ -30,21 +49,13 @@ export function groupLoot(
           comments: new Set(),
           status: item.status,
         };
+        result.push(existing);
       }
 
-      acc[key].total += item.quantity ?? 1;
-      if (item.status === "Продано") {
-        acc[key].sold++;
-        if (
-          item.sold_at &&
-          (!acc[key].latest_sold_at || item.sold_at > acc[key].latest_sold_at)
-        ) {
-          acc[key].latest_sold_at = item.sold_at;
-        }
-      }
-      if (item.sold_to) acc[key].sold_to.add(item.sold_to);
-      if (item.comment) acc[key].comments.add(item.comment);
-      return acc;
-    }, {} as Record<string, GroupedLootItem>)
-  );
+      existing.total += item.quantity ?? 1;
+      if (item.comment) existing.comments.add(item.comment);
+    }
+  }
+
+  return result;
 }

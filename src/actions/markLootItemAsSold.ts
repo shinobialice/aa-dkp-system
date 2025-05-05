@@ -30,29 +30,33 @@ export const markLootItemAsSold = async ({
     );
   }
 
-  if (quantity === loot.quantity) {
-    // продаём всё — статус "Продано"
-    await prisma.loot.update({
-      where: { id: lootId },
-      data: {
-        status: "Продано",
-        sold_at: new Date(),
-        sold_to: soldTo,
-        sold_to_user_id: soldToId ?? null,
-        comment,
-      },
-    });
-  } else {
-    // продаём часть — просто уменьшаем количество
-    await prisma.loot.update({
-      where: { id: lootId },
-      data: {
-        quantity: loot.quantity - quantity,
-      },
-    });
-  }
+  const remainingQuantity = loot.quantity - quantity;
 
-  // Добавим в инвентарь, если пользователь есть
+  // Обновляем количество у исходной записи
+  await prisma.loot.update({
+    where: { id: lootId },
+    data: {
+      quantity: remainingQuantity,
+      status: remainingQuantity === 0 ? "Продано" : "В наличии", // <-- явное указание
+    },
+  });
+
+  // Создаем отдельную запись "Продано"
+  await prisma.loot.create({
+    data: {
+      itemTypeId: loot.itemTypeId,
+      source: loot.source,
+      acquired_at: new Date().toISOString(),
+      quantity,
+      status: "Продано",
+      sold_at: new Date(),
+      sold_to: soldTo,
+      sold_to_user_id: soldToId ?? null,
+      comment,
+    },
+  });
+
+  // Добавляем в инвентарь
   if (soldToId) {
     await prisma.userInventory.create({
       data: {

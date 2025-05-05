@@ -14,7 +14,7 @@ export const generateGuildFunds = async (month: number, year: number) => {
         gte: startDate,
         lt: endDate,
       },
-      status: "Продано", // 👈 фильтр только на проданное
+      status: "Продано", 
     },
     include: {
       itemType: true,

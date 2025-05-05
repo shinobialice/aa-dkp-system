@@ -1,12 +1,7 @@
 "use client";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useState, useEffect } from "react";
-import {
-  getLoot,
-  sellLootItem,
-  addLootItem,
-  getItemTypes,
-} from "@/src/actions/lootActions";
+import { getLoot, addLootItem, getItemTypes } from "@/src/actions/lootActions";
 import { LootItem, ItemType, NewLootItem } from "./LootTypes";
 import { groupLoot } from "./groupLoot";
 import { LootTableControls } from "./LootTableControls";
@@ -41,11 +36,6 @@ export default function LootTable() {
     loadData();
   }, []);
 
-  const handleSell = async (id: number) => {
-    await sellLootItem(id);
-    setLoot(await getLoot());
-  };
-
   const handleAdd = async (item: NewLootItem) => {
     await addLootItem(item);
     setLoot(await getLoot());
@@ -78,7 +68,6 @@ export default function LootTable() {
             <LootGroupedTable
               groupedLoot={grouped}
               loot={loot}
-              onSell={handleSell}
               setLoot={setLoot}
             />
           </div>

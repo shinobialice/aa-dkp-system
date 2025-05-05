@@ -18,12 +18,10 @@ import { getLoot } from "@/src/actions/lootActions";
 export function LootGroupedTable({
   groupedLoot,
   loot,
-  onSell,
   setLoot,
 }: {
   groupedLoot: GroupedLootItem[];
   loot: LootItem[];
-  onSell: (id: number) => Promise<void>;
   setLoot: (loot: LootItem[]) => void;
 }) {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -84,9 +82,7 @@ export function LootGroupedTable({
                     : "—"}
                 </TableCell>
                 <TableCell>{group.sold}</TableCell>
-                <TableCell>
-                  {Array.from(group.sold_to).join(", ") || "—"}
-                </TableCell>
+                <TableCell>{Array.from(group.sold_to)[0]}</TableCell>
                 <TableCell>
                   {Array.from(group.comments).join(" | ") || "—"}
                 </TableCell>
@@ -138,7 +134,6 @@ export function LootGroupedTable({
                 comment,
                 quantity,
               });
-              await onSell(selectedItemId);
               const updatedLoot = await getLoot();
               setLoot(updatedLoot);
               setSelectedItemId(null);
