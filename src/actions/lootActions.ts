@@ -2,6 +2,15 @@
 
 import { prisma } from "@/lib/db";
 
+export const getItemTypes = async () => {
+  return await prisma.itemType.findMany({
+    select: {
+      id: true,
+      name: true,
+    },
+  });
+};
+
 export const getLoot = async () => {
   return await prisma.loot.findMany({
     include: {

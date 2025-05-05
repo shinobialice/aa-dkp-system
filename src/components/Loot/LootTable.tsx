@@ -10,7 +10,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { sellLootItem, getLoot, addLootItem } from "@/src/actions/lootActions";
+import {
+  sellLootItem,
+  getLoot,
+  addLootItem,
+  getItemTypes,
+} from "@/src/actions/lootActions";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Dialog,
@@ -56,15 +61,28 @@ export default function LootTable() {
   const [month, setMonth] = useState<number>(new Date().getMonth() + 1);
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [showDialog, setShowDialog] = useState(false);
+  const [itemTypes, setItemTypes] = useState<{ id: number; name: string }[]>(
+    []
+  );
+
   const [newItem, setNewItem] = useState({
-    itemTypeId: 1,
+    itemTypeId: undefined as number | undefined,
     itemName: "",
     source: "",
     acquired_at: new Date().toISOString().split("T")[0],
     quantity: 1,
   });
+
   const [popoverOpen, setPopoverOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    const loadItemTypes = async () => {
+      const data = await getItemTypes();
+      setItemTypes(data);
+    };
+    loadItemTypes();
+  }, []);
 
   useEffect(() => {
     const loadData = async () => {
@@ -127,9 +145,8 @@ export default function LootTable() {
 
   const allItemNames = Object.keys(LootIcons);
 
-  const getItemTypeIdByName = (name: string): number => {
-    const match = loot.find((l) => l.itemType.name === name);
-    return match?.itemTypeId ?? 1;
+  const getItemTypeIdByName = (name: string): number | undefined => {
+    return itemTypes.find((item) => item.name === name)?.id;
   };
 
   return (
@@ -180,11 +197,12 @@ export default function LootTable() {
                   <TableHead>Продано</TableHead>
                   <TableHead>Кому</TableHead>
                   <TableHead>Комментарий</TableHead>
+                  <TableHead>Действия</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {groupedLoot.map((group) => (
-                  <TableRow key={group.itemTypeId}>
+                  <TableRow key={`${group.itemTypeId}-${group.status}`}>
                     <TableCell>
                       {group.acquired_at
                         ? new Intl.DateTimeFormat("ru-RU").format(
@@ -211,6 +229,26 @@ export default function LootTable() {
                     <TableCell>
                       {Array.from(group.comments).join(" | ") || "—"}
                     </TableCell>
+                    <TableCell>
+                      {(group.status === "В наличии" ||
+                        group.status === "Продаётся") && (
+                        <Button
+                          variant="outline"
+                          onClick={async () => {
+                            const itemToSell = loot.find(
+                              (item) =>
+                                item.itemTypeId === group.itemTypeId &&
+                                item.status !== "Продано"
+                            );
+                            if (itemToSell) {
+                              await handleSell(itemToSell.id);
+                            }
+                          }}
+                        >
+                          Продать
+                        </Button>
+                      )}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -224,7 +262,7 @@ export default function LootTable() {
           open={showDialog}
           onOpenChange={(open) => {
             setShowDialog(open);
-            if (!open) setPopoverOpen(false); // сбрасываем поповер при закрытии диалога
+            if (!open) setPopoverOpen(false);
           }}
         >
           <DialogContent className="sm:max-w-[425px]">
@@ -246,8 +284,8 @@ export default function LootTable() {
                     type="text"
                     placeholder="Поиск предмета..."
                     value={newItem.itemName}
-                    onClick={() => setPopoverOpen(true)} // было onFocus
-                    readOnly // это можно оставить, но лучше заменить на disabled + стили, или убрать
+                    onClick={() => setPopoverOpen(true)}
+                    readOnly
                     className="border rounded px-2 py-1 cursor-pointer"
                   />
                 </PopoverTrigger>
@@ -260,9 +298,11 @@ export default function LootTable() {
                           key={name}
                           value={name}
                           onSelect={() => {
+                            const id = getItemTypeIdByName(name);
+                            if (!id) return;
                             setNewItem((prev) => ({
                               ...prev,
-                              itemTypeId: getItemTypeIdByName(name),
+                              itemTypeId: id,
                               itemName: name,
                             }));
                             setPopoverOpen(false);
@@ -314,15 +354,32 @@ export default function LootTable() {
               </Button>
               <Button
                 onClick={async () => {
+                  if (!newItem.itemTypeId) {
+                    alert("Выберите предмет из списка!");
+                    return;
+                  }
+
                   await addLootItem({
                     itemTypeId: newItem.itemTypeId,
                     source: newItem.source,
                     acquired_at: newItem.acquired_at,
                     quantity: newItem.quantity,
                   });
+
                   setShowDialog(false);
+                  setPopoverOpen(false);
+
                   const updated = await getLoot();
                   setLoot(updated);
+
+                  // Очистка формы
+                  setNewItem({
+                    itemTypeId: undefined,
+                    itemName: "",
+                    source: "",
+                    acquired_at: new Date().toISOString().split("T")[0],
+                    quantity: 1,
+                  });
                 }}
               >
                 Сохранить
