@@ -48,7 +48,7 @@ export function LootQueuePopover({
 
     await addToLootQueue(selectedUser, itemName);
     const updatedQueue = await getLootQueueByItemName(itemName);
-    setQueue({ [itemName]: updatedQueue });
+    setQueue({ [itemName]: updatedQueue as LootQueueEntry[] });
 
     setSelectedUser("");
     setSearchUser("");
@@ -63,7 +63,7 @@ export function LootQueuePopover({
       delivered: entry.delivered,
     });
     const updatedQueue = await getLootQueueByItemName(itemName);
-    setQueue({ [itemName]: updatedQueue });
+    setQueue({ [itemName]: updatedQueue as LootQueueEntry[] });
   };
 
   const handleChange = async (index: number, field: string, value: any) => {
@@ -77,7 +77,7 @@ export function LootQueuePopover({
 
     await updateLootQueueEntry(updated);
     const updatedQueue = await getLootQueueByItemName(itemName);
-    setQueue({ [itemName]: updatedQueue });
+    setQueue({ [itemName]: updatedQueue as LootQueueEntry[] });
   };
 
   useEffect(() => {
@@ -88,7 +88,7 @@ export function LootQueuePopover({
       ]);
 
       setAllUsers(fetchedUsers.map((u: { username: string }) => u.username));
-      setQueue({ [itemName]: fetchedQueue });
+      setQueue({ [itemName]: fetchedQueue as LootQueueEntry[] });
     };
 
     loadData();
@@ -132,7 +132,7 @@ export function LootQueuePopover({
   return (
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="w-[1200px]">
+      <DialogContent className="w-[2000px]">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-lg font-semibold">

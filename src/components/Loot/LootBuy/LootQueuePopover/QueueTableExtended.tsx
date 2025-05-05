@@ -53,7 +53,11 @@ export function QueueTableExtended({
                           type="number"
                           value={entry.required}
                           onChange={(e) =>
-                            handleChange(index, "required", Number(e.target.value))
+                            handleChange(
+                              index,
+                              "required",
+                              Number(e.target.value)
+                            )
                           }
                         />
                       );
@@ -71,7 +75,11 @@ export function QueueTableExtended({
                           min={0}
                           value={entry.delivered ?? 0}
                           onChange={(e) =>
-                            handleChange(index, "delivered", Number(e.target.value))
+                            handleChange(
+                              index,
+                              "delivered",
+                              Number(e.target.value)
+                            )
                           }
                         />
                       );
@@ -136,7 +144,7 @@ export function QueueTableExtended({
                 {editMode && (
                   <TableCell>
                     <Button
-                    className="cursor-pointer"
+                      className="cursor-pointer"
                       variant="secondary"
                       size="sm"
                       onClick={() => {
