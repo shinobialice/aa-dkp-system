@@ -18,7 +18,6 @@ import { deleteLootItem } from "@/src/actions/deleteLootItem";
 import { Pen, Trash2 } from "lucide-react";
 import {
   AlertDialog,
-  AlertDialogTrigger,
   AlertDialogContent,
   AlertDialogHeader,
   AlertDialogTitle,
@@ -41,6 +40,13 @@ export function LootGroupedTable({
   const [dialogInitialPrice, setDialogInitialPrice] = useState<number>(0);
   const [maxQuantity, setMaxQuantity] = useState<number>(1);
   const [lootToDelete, setLootToDelete] = useState<LootItem | null>(null);
+  const [initialModeValues, setInitialModeValues] = useState<{
+    soldTo?: string;
+    soldToId?: number;
+    quantity?: number;
+    price?: number;
+    comment?: string;
+  }>();
 
   const [activeUsers, setActiveUsers] = useState<
     { id: number; username: string }[]
@@ -56,14 +62,12 @@ export function LootGroupedTable({
 
   const handleSellClick = async (group: GroupedLootItem) => {
     const itemToSell = loot.find((item) => item.group_id === group.id);
-
     if (itemToSell) {
       setSelectedItemId(itemToSell.id);
       setDialogInitialPrice(itemToSell.itemType?.price ?? 0);
-
       const quantityFromDb = await getLootQuantity(itemToSell.id);
       setMaxQuantity(quantityFromDb || 1);
-
+      setInitialModeValues(undefined);
       setDialogOpen(true);
     }
   };
@@ -74,6 +78,13 @@ export function LootGroupedTable({
       setSelectedItemId(itemToEdit.id);
       setDialogInitialPrice(itemToEdit.price ?? 0);
       setMaxQuantity(itemToEdit.quantity ?? 1);
+      setInitialModeValues({
+        soldTo: itemToEdit.sold_to ?? undefined,
+        soldToId: itemToEdit.sold_to_user_id ?? undefined,
+        quantity: itemToEdit.quantity ?? 1,
+        price: itemToEdit.price ?? undefined,
+        comment: itemToEdit.comment ?? "",
+      });
       setDialogOpen(true);
     }
   };
@@ -169,13 +180,16 @@ export function LootGroupedTable({
           </TableBody>
         </Table>
       </ScrollArea>
+
       {selectedItemId !== null && (
         <SellLootDialog
           open={dialogOpen}
           maxQuantity={maxQuantity}
+          editMode={!!initialModeValues}
           onClose={() => setDialogOpen(false)}
           users={activeUsers.map(({ id, username }) => ({ id, username }))}
           initialPrice={dialogInitialPrice}
+          initialValues={initialModeValues}
           onConfirm={async ({
             soldTo,
             soldToId,
@@ -197,10 +211,12 @@ export function LootGroupedTable({
               const updatedLoot = await getLoot();
               setLoot(updatedLoot);
               setSelectedItemId(null);
+              setInitialModeValues(undefined);
             }
           }}
         />
       )}
+
       <AlertDialog
         open={!!lootToDelete}
         onOpenChange={(open) => !open && setLootToDelete(null)}

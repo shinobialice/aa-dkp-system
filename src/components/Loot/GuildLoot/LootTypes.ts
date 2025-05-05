@@ -1,4 +1,5 @@
 export type LootItem = {
+  sold_to_user_id?: number | null; // ← вот это исправьте
   id: number;
   group_id?: number | null; // ✅ добавь это поле
   status: string | null;

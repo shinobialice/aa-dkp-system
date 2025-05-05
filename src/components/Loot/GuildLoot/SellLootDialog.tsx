@@ -35,6 +35,8 @@ export function SellLootDialog({
   initialPrice,
   users = [],
   maxQuantity,
+  editMode, // ← ЭТО надо ДОБАВИТЬ
+  initialValues, // ← ЭТО надо ДОБАВИТЬ
 }: {
   open: boolean;
   onClose: () => void;
@@ -49,6 +51,14 @@ export function SellLootDialog({
     quantity: number;
     isFree?: boolean;
   }) => void;
+  editMode?: boolean;
+  initialValues?: {
+    soldTo?: string;
+    soldToId?: number;
+    quantity?: number;
+    price?: number;
+    comment?: string;
+  };
 }) {
   const [soldTo, setSoldTo] = useState("");
   const [soldToId, setSoldToId] = useState<number | undefined>(undefined);
@@ -72,14 +82,28 @@ export function SellLootDialog({
 
   useEffect(() => {
     if (open) {
-      const startPrice = initialPrice ?? 0;
-      setUnitPrice(startPrice);
-      setQuantity(1);
-      setPrice(startPrice);
-      setIsFree(false); // <--- добавь это
-      setManualPriceEdit(false);
+      if (editMode && initialValues) {
+        setSoldTo(initialValues.soldTo ?? "");
+        setSoldToId(initialValues.soldToId);
+        setQuantity(initialValues.quantity ?? 1);
+        setPrice(initialValues.price ?? 0);
+        setUnitPrice(initialValues.price ?? 0);
+        setComment(initialValues.comment ?? "");
+        setIsFree(false);
+        setManualPriceEdit(false);
+      } else {
+        const startPrice = initialPrice ?? 0;
+        setUnitPrice(startPrice);
+        setQuantity(1);
+        setPrice(startPrice);
+        setSoldTo("");
+        setSoldToId(undefined);
+        setComment("");
+        setIsFree(false);
+        setManualPriceEdit(false);
+      }
     }
-  }, [initialPrice, open]);
+  }, [open, editMode, initialValues, initialPrice]);
 
   const handleSubmit = () => {
     console.log("📤 SellLootDialog → onConfirm", {
@@ -131,9 +155,11 @@ export function SellLootDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-[400px]">
+      <DialogContent aria-describedby={undefined} className="max-w-[400px]">
         <DialogHeader>
-          <DialogTitle>Продажа предмета</DialogTitle>
+          <DialogTitle>
+            {editMode ? "Изменение предмета" : "Продажа предмета"}
+          </DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-2 py-2">
           <Label>Кому</Label>
