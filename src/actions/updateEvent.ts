@@ -33,14 +33,14 @@ const updateEvent = async (
       is_pvp,
       is_pvp_long,
       attendance: {
-        deleteMany: {}, // Удалить старых участников
+        deleteMany: {},
         create: userIds.map((user_id) => ({
           user_id,
           created_at: new Date(),
         })),
       },
       raidBosses: {
-        deleteMany: {}, // Удалить старых боссов
+        deleteMany: {}, 
         create: bossIds.map((boss_id) => ({
           boss_id,
         })),

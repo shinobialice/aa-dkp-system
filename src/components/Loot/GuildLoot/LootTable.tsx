@@ -5,12 +5,10 @@ import { getLoot, addLootItem, getItemTypes } from "@/src/actions/lootActions";
 import { LootItem, ItemType, NewLootItem } from "./LootTypes";
 import { groupLoot } from "./groupLoot";
 import { LootTableControls } from "./LootTableControls";
-
 import { AddLootDialog } from "./AddLootDialog";
 import { ExpensesTable } from "./ExpenseTable";
 import { LootGroupedTable } from "./LootGroupedTable";
 
-// Тип расхода
 type ExpenseItem = {
   date: string;
   amount: number;

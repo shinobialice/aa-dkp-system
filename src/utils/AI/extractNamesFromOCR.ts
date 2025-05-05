@@ -8,6 +8,6 @@ export function extractNamesFromReadOCR(data: any): string[] {
   });
 
   return words.filter(
-    (w) => /^[A-Za-zА-Яа-яЁё0-9._-]{3,20}$/.test(w) // фильтруем мусор
+    (w) => /^[A-Za-zА-Яа-яЁё0-9._-]{3,20}$/.test(w) 
   );
 }

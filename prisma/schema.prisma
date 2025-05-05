@@ -8,41 +8,37 @@ datasource db {
 }
 
 model User {
-  id                          Int      @id
-  username                    String
-  class                       String?
-  secondary_class             String?
-  class_gear_score            Int?
-  secondary_class_gear_score  Int?
-  vk_name                     String?
-  active                      Boolean
-  is_eligible_for_salary      Boolean
-  joined_at                   DateTime?
-  created_at                  DateTime
-  salaryBonus  Int?     @default(0)
-
-  inventory                   UserInventory[]
-  tasks                       Tasks[]
-  raidAttendance              RaidAttendance[]
-  tasksAssigned               TasksUser[]
-  tags                        UserTags[] @relation("UserTags")
-  salaries Salary[]
-  soldLoot                    Loot[]        @relation("UserSoldLoot")
-  lootQueue                   LootQueue[]   
-  givenAwayLoot GivenAwayLoot[]
+  id                         Int              @id
+  username                   String
+  class                      String?
+  secondary_class            String?
+  class_gear_score           Int?
+  secondary_class_gear_score Int?
+  vk_name                    String?
+  active                     Boolean
+  is_eligible_for_salary     Boolean
+  joined_at                  DateTime?
+  created_at                 DateTime
+  salaryBonus                Int?             @default(0)
+  salaries                   Salary[]
+  givenAwayLoot              GivenAwayLoot[]
+  soldLoot                   Loot[]           @relation("UserSoldLoot")
+  lootQueue                  LootQueue[]
+  raidAttendance             RaidAttendance[]
+  tasks                      Tasks[]
+  tasksAssigned              TasksUser[]
+  inventory                  UserInventory[]
+  tags                       UserTags[]       @relation("UserTags")
 
   @@map("user")
 }
-
-
 
 model UserTags {
   id         Int      @id @default(autoincrement())
   user_id    Int
   tag        String
   created_at DateTime @default(now())
-
-  user       User     @relation(fields: [user_id], references: [id], name: "UserTags")
+  user       User     @relation("UserTags", fields: [user_id], references: [id])
 
   @@map("user_tags")
 }
@@ -50,52 +46,48 @@ model UserTags {
 model UserInventory {
   id         Int      @id @default(autoincrement())
   user_id    Int
-  name       String?
   type       String?
+  name       String?
   quality    String?
-  quantity   Int      @default(1)
   created_at DateTime
-
+  quantity   Int?     @default(1)
   user       User     @relation(fields: [user_id], references: [id])
 
   @@map("user_inventory")
 }
 
 model Tasks {
-  id           Int          @id @default(autoincrement())
+  id           Int         @id @default(autoincrement())
   user_id      Int
   name         String?
   completed_at DateTime?
   created_at   DateTime
-
-  user         User         @relation(fields: [user_id], references: [id])
-  assignedTo   TasksUser[]  @relation("tasks_assigned")
+  user         User        @relation(fields: [user_id], references: [id])
+  assignedTo   TasksUser[] @relation("tasks_assigned")
 
   @@map("tasks")
 }
 
 model Raid {
-  id           Int      @id @default(autoincrement())
-  type         String?
-  is_pvp       Boolean  @default(false)
-  is_pvp_long  Boolean  @default(false)
-  start_date   DateTime?
-  created_at   DateTime @default(now())
-  dkp_summary  Int      @default(0)
-
-  raidBosses   RaidBoss[] 
-  attendance   RaidAttendance[]
+  id          Int              @id @default(autoincrement())
+  type        String?
+  start_date  DateTime?
+  created_at  DateTime
+  is_pvp      Boolean?         @default(false)
+  is_pvp_long Boolean?         @default(false)
+  dkp_summary Int?             @default(0)
+  attendance  RaidAttendance[]
+  raidBosses  RaidBoss[]
 
   @@map("raid")
 }
 
 model Boss {
-  id         Int     @id @default(autoincrement())
+  id         Int        @id @default(autoincrement())
   boss_name  String
   dkp_points Int
-  category   String
-
-  raidBosses RaidBoss[] 
+  category   String?
+  raidBosses RaidBoss[]
 
   @@map("boss")
 }
@@ -103,133 +95,120 @@ model Boss {
 model RaidBoss {
   raid_id Int
   boss_id Int
-
-  raid Raid @relation(fields: [raid_id], references: [id])
-  boss Boss @relation(fields: [boss_id], references: [id])
+  boss    Boss @relation(fields: [boss_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  raid    Raid @relation(fields: [raid_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@id([raid_id, boss_id])
   @@map("raid_boss")
 }
-
-
-
 
 model RaidAttendance {
   id         Int      @id @default(autoincrement())
   user_id    Int
   raid_id    Int
   created_at DateTime
-
-  user       User     @relation(fields: [user_id], references: [id])
   raid       Raid     @relation(fields: [raid_id], references: [id])
+  user       User     @relation(fields: [user_id], references: [id])
 
   @@map("raid_attendance")
 }
 
 model ItemType {
-  id         Int          @id @default(autoincrement())
-  name       String       @unique
-  price      Float?
-
-  loot       Loot[]
-  lootQueue  LootQueue[]  
+  id        Int         @id @default(autoincrement())
+  name      String      @unique @db.VarChar(255)
+  price     Float?
+  loot      Loot[]
+  lootQueue LootQueue[]
 
   @@map("item_type")
 }
 
-
 model Loot {
-  id               Int       @id @default(autoincrement())
-  itemTypeId       Int       @map("item_type_id")
-  status           String
-  acquired_at      DateTime
-  sold_at          DateTime?
-  sold_to          String?  
-  sold_to_user_id  Int?      
-  comment          String?
-  source           String?
-  quantity         Int       @default(1)  // 👈 ДОБАВЬ ЭТУ СТРОКУ
-  created_at       DateTime  @default(now())
-
-  itemType         ItemType  @relation(fields: [itemTypeId], references: [id])
-  soldToUser       User?     @relation("UserSoldLoot", fields: [sold_to_user_id], references: [id])
+  id              Int       @id @default(autoincrement())
+  status          String?
+  sold_at         DateTime?
+  sold_to         String?
+  comment         String?
+  created_at      DateTime  @default(now())
+  source          String?   @db.VarChar(255)
+  acquired_at     DateTime? @db.Timestamp(6)
+  itemTypeId      Int       @map("item_type_id")
+  sold_to_user_id Int?
+  quantity        Int       @default(1)
+  price           Int?
+  itemType        ItemType  @relation(fields: [itemTypeId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_item_type")
+  soldToUser      User?     @relation("UserSoldLoot", fields: [sold_to_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_sold_to_user")
 
   @@map("loot")
 }
 
-
-
-
-
 model TasksUser {
   tasks_user_id Int
   user_id       Int
-
-  task          Tasks     @relation("tasks_assigned", fields: [tasks_user_id], references: [id])
-  user          User      @relation(fields: [user_id], references: [id])
+  task          Tasks @relation("tasks_assigned", fields: [tasks_user_id], references: [id])
+  user          User  @relation(fields: [user_id], references: [id])
 
   @@id([tasks_user_id, user_id])
   @@map("tasks_user")
 }
 
 model LootQueue {
-  id              Int      @id @default(autoincrement())
-  itemTypeId      Int      @map("item_type_id")
-  userId          Int      @map("user_id")
-  status          String   @default("ожидание")
-  synth_target    String?  // 👈 используем snake_case, как в БД
-  required        Int      @default(1)
-  delivered       Int      @default(0)
-  created_at      DateTime @default(now())
-
-  itemType        ItemType @relation(fields: [itemTypeId], references: [id])
-  user            User     @relation(fields: [userId], references: [id])
+  id           Int       @id @default(autoincrement())
+  itemTypeId   Int       @map("item_type_id")
+  userId       Int       @map("user_id")
+  created_at   DateTime? @default(now()) @db.Timestamp(6)
+  status       String?   @default("ожидание")
+  synth_target String?
+  remaining    Int?
+  required     Int       @default(1)
+  delivered    Int       @default(0)
+  itemType     ItemType  @relation(fields: [itemTypeId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@map("loot_queue")
 }
 
 model GivenAwayLoot {
-  id       Int      @id @default(autoincrement())
-  user_id  Int
-  name     String
-  date     DateTime
-  comment  String?
-  status   String
+  id         Int       @id @default(autoincrement())
+  user_id    Int
+  name       String
+  date       DateTime  @db.Date
+  comment    String?
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  status     String?
+  user       User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  user     User     @relation(fields: [user_id], references: [id])
-
+  @@unique([user_id, name], map: "user_loot_unique")
   @@map("givenawayloot")
-  @@unique([user_id, name]) // для upsert
 }
 
 model Expense {
-  id        Int      @id @default(autoincrement())
-  date      DateTime
-  amount    Int
-  target    String
-  source    String
-  comment   String?
+  id      Int      @id @default(autoincrement())
+  date    DateTime @db.Timestamp(6)
+  amount  Int
+  target  String
+  source  String
+  comment String?
 }
 
 model GuildFunds {
-  id         Int      @id @default(autoincrement())
-  year       Int
-  month      Int
+  id            Int @id @default(autoincrement())
+  year          Int
+  month         Int
   totalIncome   Int
   totalExpenses Int
-  profit         Int
-  salaryBudget   Int // 70%
-  treasuryLeft   Int // 30%
+  profit        Int
+  salaryBudget  Int
+  treasuryLeft  Int
 }
 
 model Salary {
-  id         Int      @id @default(autoincrement())
-  year       Int
-  month      Int
-  userId     Int
-  amount     Int
-  bonus      Int?
-  total      Int
-
-  user       User     @relation(fields: [userId], references: [id])
+  id     Int  @id @default(autoincrement())
+  year   Int
+  month  Int
+  userId Int
+  amount Int
+  bonus  Int?
+  total  Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }

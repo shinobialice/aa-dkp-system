@@ -1,4 +1,3 @@
-// components/OCRUploader.tsx
 import { useState } from 'react';
 
 export default function OCRUploader() {
@@ -17,7 +16,7 @@ export default function OCRUploader() {
 
     const data = await res.json();
     console.log(data);
-    setText(JSON.stringify(data, null, 2)); // Показывает "сырой" результат
+    setText(JSON.stringify(data, null, 2));
   };
 
   return (

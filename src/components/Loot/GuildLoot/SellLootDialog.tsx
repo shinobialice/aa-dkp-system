@@ -47,6 +47,7 @@ export function SellLootDialog({
     price: number;
     comment?: string;
     quantity: number;
+    isFree?: boolean;
   }) => void;
 }) {
   const [soldTo, setSoldTo] = useState("");
@@ -58,6 +59,7 @@ export function SellLootDialog({
   const [search, setSearch] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [manualPriceEdit, setManualPriceEdit] = useState(false);
+  const [isFree, setIsFree] = useState(false);
 
   useEffect(() => {
     if (!manualPriceEdit) {
@@ -68,7 +70,7 @@ export function SellLootDialog({
   useEffect(() => {
     if (open) {
       const startPrice = initialPrice ?? 0;
-      setUnitPrice(initialPrice ?? 0); // ← цена должна быть 0.23, если это 23 серебра
+      setUnitPrice(initialPrice ?? 0); 
       setQuantity(1);
       setPrice(startPrice);
     }
@@ -81,12 +83,25 @@ export function SellLootDialog({
     console.log("price:", price);
     console.log("quantity:", quantity);
     console.log("maxQuantity:", maxQuantity);
-    if (!soldTo || price <= 0 || quantity < 1 || quantity > maxQuantity) {
+    if (
+      !soldTo ||
+      (!isFree && price <= 0) ||
+      quantity < 1 ||
+      quantity > maxQuantity
+    ) {
       alert("Проверьте данные перед сохранением");
       return;
     }
 
-    onConfirm({ soldTo, soldToId, price, comment, quantity });
+    onConfirm({
+      soldTo,
+      soldToId,
+      price: isFree ? 0 : price,
+      comment,
+      quantity,
+      isFree,
+    });
+
     onClose();
     setSoldTo("");
     setSoldToId(undefined);
@@ -154,6 +169,23 @@ export function SellLootDialog({
             </PopoverContent>
           </Popover>
 
+          <Label className="flex items-center gap-2 mt-2">
+            <input
+              type="checkbox"
+              checked={isFree}
+              onChange={(e) => {
+                setIsFree(e.target.checked);
+                if (e.target.checked) {
+                  setManualPriceEdit(false);
+                  setPrice(0);
+                } else {
+                  setPrice(quantity * unitPrice);
+                }
+              }}
+            />
+            Выдать бесплатно (0 голды)
+          </Label>
+
           <Label>Цена за 1 шт</Label>
           <div className="text-sm text-muted-foreground font-semibold flex items-center gap-1">
             {unitPrice.toLocaleString("ru-RU")}
@@ -178,9 +210,11 @@ export function SellLootDialog({
           <Label>Общая цена</Label>
           <Input
             type="number"
-            min={1}
+            min={0}
             value={price > 0 ? price : ""}
+            disabled={isFree}
             onChange={(e) => {
+              if (isFree) return; 
               setManualPriceEdit(true);
               const val = Number(e.target.value);
               if (!Number.isNaN(val)) setPrice(val);

@@ -1,4 +1,3 @@
-// src/actions/markLootAsGiven.ts
 "use server";
 
 import { prisma } from "@/lib/db";

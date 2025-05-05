@@ -47,7 +47,7 @@ export function AddExpenseDialog({
     onClose();
     setForm({
       date: new Date().toISOString().split("T")[0],
-      amount: "", // ✅ строка
+      amount: "", 
       target: "",
       source: "",
       comment: "",

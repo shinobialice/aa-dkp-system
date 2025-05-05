@@ -1,4 +1,3 @@
-// src/constants/lootColumns.ts
 export const lootColumns = [
   "Ро'кана, Безумие морей",
   "Анд'хакар, Чернильная тьма",

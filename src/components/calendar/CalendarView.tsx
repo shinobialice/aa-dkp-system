@@ -1,5 +1,3 @@
-// CalendarView.tsx (обновлённый фрагмент с интеграцией EventDialog)
-
 "use client";
 import { useEffect, useRef, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
@@ -16,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getRaids } from "@/src/actions/getEvents";
-import { EventDialog } from "./EventDialog"; // новый компонент
+import { EventDialog } from "./EventDialog";
 import { getRaidById } from "@/src/actions/getRaidById";
 
 export default function ActivitiesPage() {
@@ -98,7 +96,7 @@ export default function ActivitiesPage() {
           className="cursor-pointer"
             variant="default"
             onClick={() => {
-              setSelectedEvent(null); // очищаем, чтобы был режим создания
+              setSelectedEvent(null);
               setOpenDialog(true);
             }}
           >

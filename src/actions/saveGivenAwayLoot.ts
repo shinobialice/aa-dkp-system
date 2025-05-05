@@ -8,7 +8,6 @@ export const saveGivenAwayLoot = async (
 ) => {
   const dateObj = new Date(item.date);
 
-  // ⏫ Используем upsert, чтобы не было дублей
   await prisma.givenAwayLoot.upsert({
     where: {
       user_id_name: {
@@ -31,7 +30,6 @@ export const saveGivenAwayLoot = async (
   });
 
   if (item.status === "Выдано") {
-    // Убедимся, что в инвентаре нет дубликата
     const exists = await prisma.userInventory.findFirst({
       where: {
         user_id: userId,
@@ -51,7 +49,6 @@ export const saveGivenAwayLoot = async (
       });
     }
   } else {
-    // Если статус "В наличии" — удалим из инвентаря
     await prisma.userInventory.deleteMany({
       where: {
         user_id: userId,

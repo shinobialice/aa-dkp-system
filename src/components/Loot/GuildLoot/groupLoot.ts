@@ -8,7 +8,6 @@ export function groupLoot(
   const result: GroupedLootItem[] = [];
 
   for (const item of loot) {
-    // Проверка по месяцу: для "Продано" — sold_at, для остальных — acquired_at
     const date = item.status === "Продано" ? item.sold_at : item.acquired_at;
 
     if (!date) continue;
@@ -17,7 +16,6 @@ export function groupLoot(
     if (d.getMonth() + 1 !== month || d.getFullYear() !== year) continue;
 
     if (item.status === "Продано") {
-      // Каждую продажу — как отдельную строку
       result.push({
         itemTypeId: item.itemTypeId,
         name: item.itemType.name,
@@ -32,7 +30,6 @@ export function groupLoot(
         status: "Продано",
       });
     } else {
-      // Группируем "В наличии" и "Продаётся"
       const key = `${item.itemTypeId}-${item.status}`;
       let existing = result.find((r) => `${r.itemTypeId}-${r.status}` === key);
       if (!existing) {

@@ -239,7 +239,7 @@ export function RaidDetailsForm({
           disabled={isPvpLong}
           onCheckedChange={(checked) => {
             setIsPvp(checked === true);
-            if (checked) setIsPvpLong(false); // Отключаем второй
+            if (checked) setIsPvpLong(false);
           }}
         />
         <label htmlFor="pvp" className="text-sm">
@@ -252,10 +252,10 @@ export function RaidDetailsForm({
           <Checkbox
             id="long_pvp"
             checked={isPvpLong}
-            disabled={isPvp} // блокируем, если выбран ПВП
+            disabled={isPvp} 
             onCheckedChange={(checked) => {
               setIsPvpLong(checked === true);
-              if (checked) setIsPvp(false); // Отключаем первый
+              if (checked) setIsPvp(false); 
             }}
           />
           <label htmlFor="long_pvp" className="text-sm">

@@ -36,7 +36,6 @@ export const generateGuildFunds = async (month: number, year: number) => {
   const salaryBudget = Math.floor(profit * 0.7);
   const treasuryLeft = profit - salaryBudget;
 
-  // 🧹 Удаляем старый фонд, если есть
   await prisma.guildFunds.deleteMany({ where: { year, month } });
 
   await prisma.guildFunds.create({

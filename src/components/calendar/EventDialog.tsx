@@ -1,4 +1,3 @@
-// components/EventDialog.tsx
 "use client";
 
 import {

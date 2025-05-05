@@ -13,7 +13,7 @@ export const getAllUsersWithInventory = async () => {
         select: {
           name: true,
           type: true,
-          created_at: true, // 👈 обязательно добавить!
+          created_at: true, 
         },
       },
     },

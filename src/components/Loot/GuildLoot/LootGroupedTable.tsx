@@ -124,7 +124,7 @@ export function LootGroupedTable({
           onClose={() => setDialogOpen(false)}
           users={activeUsers.map(({ id, username }) => ({ id, username }))}
           initialPrice={dialogInitialPrice}
-          onConfirm={async ({ soldTo, soldToId, price, comment, quantity }) => {
+          onConfirm={async ({ soldTo, soldToId, price, comment, quantity, isFree }) => {
             if (selectedItemId !== null) {
               await markLootItemAsSold({
                 lootId: selectedItemId,
@@ -133,6 +133,7 @@ export function LootGroupedTable({
                 price,
                 comment,
                 quantity,
+                isFree,
               });
               const updatedLoot = await getLoot();
               setLoot(updatedLoot);

@@ -10,8 +10,8 @@ type Props = {
 const DatetimePicker: React.FC<Props> = ({ value, onChange }) => {
   return (
     <BaseDateTimePicker
-      value={value ?? undefined} // 👈 внутренний компонент ждёт undefined
-      onChange={(date: Date | undefined) => onChange(date ?? null)} // 👈 мы возвращаем null
+      value={value ?? undefined} 
+      onChange={(date: Date | undefined) => onChange(date ?? null)} 
       defaultPopupValue={new Date()}
       granularity="minute"
       className="w-[270px]"

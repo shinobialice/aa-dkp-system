@@ -9,6 +9,7 @@ export const markLootItemAsSold = async ({
   price,
   comment,
   quantity,
+  isFree = false,
 }: {
   lootId: number;
   soldTo: string;
@@ -16,6 +17,7 @@ export const markLootItemAsSold = async ({
   price: number;
   comment?: string;
   quantity: number;
+  isFree?: boolean;
 }) => {
   const loot = await prisma.loot.findUnique({
     where: { id: lootId },
@@ -32,23 +34,22 @@ export const markLootItemAsSold = async ({
 
   const remainingQuantity = loot.quantity - quantity;
 
-  // Обновляем количество у исходной записи
   await prisma.loot.update({
     where: { id: lootId },
     data: {
       quantity: remainingQuantity,
-      status: remainingQuantity === 0 ? "Продано" : "В наличии", // <-- явное указание
+      status: remainingQuantity === 0 ? "Продано" : "В наличии",
     },
   });
 
-  // Создаем отдельную запись "Продано"
   await prisma.loot.create({
     data: {
       itemTypeId: loot.itemTypeId,
       source: loot.source,
       acquired_at: new Date().toISOString(),
       quantity,
-      status: "Продано",
+      status: isFree ? "Выдано" : "Продано",
+      price: isFree ? 0 : price,
       sold_at: new Date(),
       sold_to: soldTo,
       sold_to_user_id: soldToId ?? null,
@@ -56,13 +57,12 @@ export const markLootItemAsSold = async ({
     },
   });
 
-  // Добавляем в инвентарь
   if (soldToId) {
     await prisma.userInventory.create({
       data: {
         user_id: soldToId,
         name: loot.itemType.name,
-        type: "Куплено",
+        type: isFree ? "Выдано" : "Куплено", 
         quantity,
         created_at: new Date(),
       },

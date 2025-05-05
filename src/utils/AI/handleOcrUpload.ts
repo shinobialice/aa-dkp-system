@@ -19,7 +19,6 @@ export const handleOcrUpload = async (file: File) => {
       );
 
       if (matchedCandidates.length === 1) {
-        // находим оригинальный ник (в том же регистре)
         const originalName = userNames.find(
           (u) => u.toLowerCase() === matchedCandidates[0]
         );

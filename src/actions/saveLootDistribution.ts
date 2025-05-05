@@ -9,7 +9,7 @@ type LootItem = {
 };
 
 type Player = {
-  id: number; // 👈 используем ID
+  id: number; 
   loot: LootItem[];
 };
 
@@ -34,7 +34,6 @@ export async function saveLootDistribution(players: Player[]) {
         continue;
       }
 
-      // Удаляем предыдущую выдачу, если она уже была
       await prisma.userInventory.deleteMany({
         where: {
           user_id: user.id,
@@ -42,7 +41,6 @@ export async function saveLootDistribution(players: Player[]) {
         },
       });
 
-      // Добавляем в инвентарь
       await prisma.userInventory.create({
         data: {
           user_id: user.id,

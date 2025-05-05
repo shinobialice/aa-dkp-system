@@ -148,7 +148,6 @@ export function QueueTableExtended({
                       variant="secondary"
                       size="sm"
                       onClick={() => {
-                        console.log("SOLD:", entry); // <-- добавь это
                         handleSold(entry);
                       }}
                       disabled={(entry.required || 0) > (entry.delivered || 0)}

@@ -1,6 +1,6 @@
 export type LootItem = {
   id: number;
-  status: string;
+  status: string | null; 
   source: string | null;
   created_at: Date;
   itemTypeId: number;
@@ -8,7 +8,7 @@ export type LootItem = {
   sold_to: string | null;
   comment: string | null;
   acquired_at: Date | null;
-  quantity?: number; // ← добавь это!
+  quantity?: number; 
   itemType: {
     id: number;
     name: string;
@@ -37,5 +37,5 @@ export interface NewLootItem {
   source: string;
   acquired_at: string;
   quantity: number;
-  itemName: string; // Added itemName property
+  itemName: string;
 }
