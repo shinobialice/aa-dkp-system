@@ -21,9 +21,15 @@ export function AddExpenseDialog({
   onClose: () => void;
   onAdd: (expense: ExpenseItem) => Promise<void>;
 }) {
-  const [form, setForm] = useState<ExpenseItem>({
+  const [form, setForm] = useState<{
+    date: string;
+    amount: string;
+    target: string;
+    source: string;
+    comment: string;
+  }>({
     date: new Date().toISOString().split("T")[0],
-    amount: 0,
+    amount: "",
     target: "",
     source: "",
     comment: "",
@@ -34,11 +40,14 @@ export function AddExpenseDialog({
       alert("Заполните обязательные поля");
       return;
     }
-    await onAdd(form);
+    await onAdd({
+      ...form,
+      amount: Number(form.amount),
+    });
     onClose();
     setForm({
       date: new Date().toISOString().split("T")[0],
-      amount: 0,
+      amount: "", // ✅ строка
       target: "",
       source: "",
       comment: "",
@@ -56,11 +65,7 @@ export function AddExpenseDialog({
           <Label>Дата</Label>
           <input
             type="date"
-            value={
-              typeof form.date === "string"
-                ? form.date
-                : form.date.toISOString().split("T")[0]
-            }
+            value={form.date}
             onChange={(e) => setForm({ ...form, date: e.target.value })}
             className="border rounded px-2 py-1"
           />
@@ -70,9 +75,7 @@ export function AddExpenseDialog({
             type="number"
             min={0}
             value={form.amount}
-            onChange={(e) =>
-              setForm({ ...form, amount: Number(e.target.value) })
-            }
+            onChange={(e) => setForm({ ...form, amount: e.target.value })}
             className="border rounded px-2 py-1"
           />
 

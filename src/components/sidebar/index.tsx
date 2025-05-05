@@ -18,6 +18,7 @@ import {
   PiggyBank,
   Gift,
   BadgeDollarSign,
+  HandCoins,
 } from "lucide-react";
 import {
   Sidebar,
@@ -57,6 +58,7 @@ export function AppSidebar() {
         { title: "Казна", url: "/loot", icon: PiggyBank },
         { title: "Раздача лута", url: "/loot/giveaway", icon: Gift },
         { title: "Покупка лута", url: "/loot/buy", icon: BadgeDollarSign },
+        { title: "Финансы", url: "/loot/finance", icon: HandCoins },
       ],
     },
     { title: "Статистика", url: "/stats", icon: LineChart },

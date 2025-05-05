@@ -19,13 +19,14 @@ model User {
   is_eligible_for_salary      Boolean
   joined_at                   DateTime?
   created_at                  DateTime
+  salaryBonus  Int?     @default(0)
 
   inventory                   UserInventory[]
   tasks                       Tasks[]
   raidAttendance              RaidAttendance[]
   tasksAssigned               TasksUser[]
   tags                        UserTags[] @relation("UserTags")
-
+  salaries Salary[]
   soldLoot                    Loot[]        @relation("UserSoldLoot")
   lootQueue                   LootQueue[]   
   givenAwayLoot GivenAwayLoot[]
@@ -208,4 +209,27 @@ model Expense {
   target    String
   source    String
   comment   String?
+}
+
+model GuildFunds {
+  id         Int      @id @default(autoincrement())
+  year       Int
+  month      Int
+  totalIncome   Int
+  totalExpenses Int
+  profit         Int
+  salaryBudget   Int // 70%
+  treasuryLeft   Int // 30%
+}
+
+model Salary {
+  id         Int      @id @default(autoincrement())
+  year       Int
+  month      Int
+  userId     Int
+  amount     Int
+  bonus      Int?
+  total      Int
+
+  user       User     @relation(fields: [userId], references: [id])
 }
