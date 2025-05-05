@@ -36,12 +36,11 @@ export function groupLoot(
         status: item.status,
       });
     } else {
-      // Группировка "В наличии", "Продаётся" и т.п.
       const key = `${item.itemTypeId}-${item.status}`;
       let existing = result.find((r) => `${r.itemTypeId}-${r.status}` === key);
       if (!existing) {
         existing = {
-          id: idCounter++,
+          id: item.group_id ?? idCounter++, // ← теперь используем group_id и тут тоже
           itemTypeId: item.itemTypeId,
           name: item.itemType.name,
           price: item.itemType.price,

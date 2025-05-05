@@ -63,4 +63,16 @@ export async function distributeLootItem({
       group_id: created.id,
     },
   });
+
+  if (soldToId) {
+    await prisma.userInventory.create({
+      data: {
+        user_id: soldToId,
+        name: loot.itemType.name,
+        type: isFree ? "Выдано" : "Куплено",
+        created_at: new Date(),
+        quantity,
+      },
+    });
+  }
 }

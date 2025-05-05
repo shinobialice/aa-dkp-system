@@ -37,6 +37,7 @@ export function SellLootDialog({
   maxQuantity,
   editMode, // ← ЭТО надо ДОБАВИТЬ
   initialValues, // ← ЭТО надо ДОБАВИТЬ
+  itemName,
 }: {
   open: boolean;
   onClose: () => void;
@@ -59,6 +60,7 @@ export function SellLootDialog({
     price?: number;
     comment?: string;
   };
+  itemName?: string; // ← ДОБАВЛЕНО
 }) {
   const [soldTo, setSoldTo] = useState("");
   const [soldToId, setSoldToId] = useState<number | undefined>(undefined);
@@ -158,7 +160,9 @@ export function SellLootDialog({
       <DialogContent aria-describedby={undefined} className="max-w-[400px]">
         <DialogHeader>
           <DialogTitle>
-            {editMode ? "Изменение предмета" : "Продажа предмета"}
+            {editMode
+              ? `Изменение предмета:${itemName ? ` ${itemName}` : ""}`
+              : `Продажа предмета:${itemName ? ` ${itemName}` : ""}`}
           </DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-2 py-2">
