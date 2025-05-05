@@ -1,4 +1,4 @@
-import LootTable from "@/src/components/Loot/LootTable";
+import LootTable from "@/src/components/Loot/GuildLoot/LootTable";
 
 const LootPage = async () => (
   <>
