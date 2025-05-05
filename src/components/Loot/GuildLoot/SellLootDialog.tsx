@@ -70,19 +70,19 @@ export function SellLootDialog({
   useEffect(() => {
     if (open) {
       const startPrice = initialPrice ?? 0;
-      setUnitPrice(initialPrice ?? 0); 
+      setUnitPrice(initialPrice ?? 0);
       setQuantity(1);
       setPrice(startPrice);
     }
   }, [initialPrice, open]);
 
   const handleSubmit = () => {
-    console.log({ soldTo, price, quantity, maxQuantity });
-    console.log("Проверка перед отправкой:");
-    console.log("soldTo:", soldTo);
-    console.log("price:", price);
-    console.log("quantity:", quantity);
-    console.log("maxQuantity:", maxQuantity);
+    console.log("📤 SellLootDialog → onConfirm", {
+      soldTo,
+      price,
+      quantity,
+      isFree,
+    });
     if (
       !soldTo ||
       (!isFree && price <= 0) ||
@@ -214,7 +214,7 @@ export function SellLootDialog({
             value={price > 0 ? price : ""}
             disabled={isFree}
             onChange={(e) => {
-              if (isFree) return; 
+              if (isFree) return;
               setManualPriceEdit(true);
               const val = Number(e.target.value);
               if (!Number.isNaN(val)) setPrice(val);

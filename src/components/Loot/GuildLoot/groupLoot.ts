@@ -8,18 +8,22 @@ export function groupLoot(
   const result: GroupedLootItem[] = [];
 
   for (const item of loot) {
-    const date = item.status === "Продано" ? item.sold_at : item.acquired_at;
+    const date =
+      item.status === "Продано" || item.status === "Выдано"
+        ? item.sold_at
+        : item.acquired_at;
 
     if (!date) continue;
 
     const d = new Date(date);
     if (d.getMonth() + 1 !== month || d.getFullYear() !== year) continue;
 
-    if (item.status === "Продано") {
+    if (item.status === "Продано" || item.status === "Выдано") {
+      // Каждая продажа или выдача — отдельной строкой
       result.push({
         itemTypeId: item.itemTypeId,
         name: item.itemType.name,
-        price: item.itemType.price,
+        price: item.price ?? item.itemType.price,
         source: item.source,
         acquired_at: item.acquired_at,
         total: item.quantity ?? 1,
@@ -27,9 +31,10 @@ export function groupLoot(
         latest_sold_at: item.sold_at,
         sold_to: new Set(item.sold_to ? [item.sold_to] : []),
         comments: new Set(item.comment ? [item.comment] : []),
-        status: "Продано",
+        status: item.status,
       });
     } else {
+      // Группировка "В наличии", "Продаётся" и т.п.
       const key = `${item.itemTypeId}-${item.status}`;
       let existing = result.find((r) => `${r.itemTypeId}-${r.status}` === key);
       if (!existing) {
@@ -44,7 +49,7 @@ export function groupLoot(
           latest_sold_at: null,
           sold_to: new Set(),
           comments: new Set(),
-          status: item.status,
+          status: item.status ?? "—",
         };
         result.push(existing);
       }

@@ -9,6 +9,7 @@ export type LootItem = {
   comment: string | null;
   acquired_at: Date | null;
   quantity?: number; 
+  price: number | null; 
   itemType: {
     id: number;
     name: string;
