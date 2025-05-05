@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/db";
 
-export const markLootAsSold = async ({
+export const markQueueLootAsSold = async ({
   lootQueueId,
   userId,
   itemName,

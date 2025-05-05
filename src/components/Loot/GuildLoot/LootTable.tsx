@@ -64,8 +64,8 @@ export default function LootTable() {
       </TabsList>
       {/* Доходы */}
       <TabsContent value="income">
-        <div className="grid grid-cols-3 gap-4">
-          <div className="col-span-2 space-y-4">
+        <div>
+          <div className="space-y-4">
             <LootTableControls
               month={month}
               year={year}
@@ -91,8 +91,8 @@ export default function LootTable() {
       {/* Расходы */}
 
       <TabsContent value="expenses">
-        <div className="grid grid-cols-3 gap-4">
-          <div className="col-span-2">
+        <div>
+          <div>
             <ExpensesTable />
           </div>
         </div>

@@ -9,6 +9,10 @@ import {
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { GroupedLootItem, LootItem } from "./LootTypes";
+import { SellLootDialog } from "./SellLootDialog";
+import { useEffect, useState } from "react";
+import { markLootItemAsSold } from "@/src/actions/markLootItemAsSold";
+import { getActiveUsers } from "@/src/actions/getActiveUsers";
 
 export function LootGroupedTable({
   groupedLoot,
@@ -19,6 +23,21 @@ export function LootGroupedTable({
   loot: LootItem[];
   onSell: (id: number) => Promise<void>;
 }) {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
+  const [dialogInitialPrice, setDialogInitialPrice] = useState<number>(0);
+  const [activeUsers, setActiveUsers] = useState<
+    { id: number; username: string }[]
+  >([]);
+
+  useEffect(() => {
+    const loadUsers = async () => {
+      const users = await getActiveUsers(); // уже [{ id, username }]
+      setActiveUsers(users);
+    };
+    loadUsers();
+  }, []);
+
   return (
     <div className="overflow-auto rounded-md border">
       <ScrollArea className="h-[1000px] w-full">
@@ -71,15 +90,21 @@ export function LootGroupedTable({
                   {(group.status === "В наличии" ||
                     group.status === "Продаётся") && (
                     <Button
-                    className="cursor-pointer"
+                      className="cursor-pointer"
                       variant="outline"
-                      onClick={async () => {
+                      onClick={() => {
                         const itemToSell = loot.find(
                           (item) =>
                             item.itemTypeId === group.itemTypeId &&
                             item.status !== "Продано"
                         );
-                        if (itemToSell) await onSell(itemToSell.id);
+                        if (itemToSell) {
+                          setSelectedItemId(itemToSell.id);
+                          setDialogInitialPrice(
+                            itemToSell.itemType?.price ?? 0
+                          ); // 👈
+                          setDialogOpen(true);
+                        }
                       }}
                     >
                       Продать
@@ -91,6 +116,28 @@ export function LootGroupedTable({
           </TableBody>
         </Table>
       </ScrollArea>
+      {selectedItemId !== null && (
+        <SellLootDialog
+          open={dialogOpen}
+          onClose={() => setDialogOpen(false)}
+          users={activeUsers.map(({ id, username }) => ({ id, username }))}
+          initialPrice={dialogInitialPrice}
+          onConfirm={async ({ soldTo, soldToId, price, comment }) => {
+            // ← добавь soldToId
+            if (selectedItemId !== null) {
+              await markLootItemAsSold({
+                lootId: selectedItemId,
+                soldTo,
+                soldToId, // ← обязательно передай сюда!
+                price,
+                comment,
+              });
+              await onSell(selectedItemId);
+              setSelectedItemId(null);
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

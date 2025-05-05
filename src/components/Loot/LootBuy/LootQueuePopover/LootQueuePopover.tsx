@@ -20,9 +20,10 @@ import { EditToggleButton } from "./EditToggleButton";
 import { getActiveUsers } from "@/src/actions/getActiveUsers";
 import { getLootQueueByItemName } from "@/src/actions/getLootQueueByItemName";
 import { addToLootQueue } from "@/src/actions/addToLootQueue";
-import { markLootAsSold } from "@/src/actions/markLootAsSold";
+
 import { updateLootQueueEntry } from "@/src/actions/updateLootQueueEntry";
 import type { LootQueueEntry } from "./LootQueueTypes";
+import { markQueueLootAsSold } from "@/src/actions/markLootAsSold";
 
 const extendedItems = ["Эссенция ярости", "Трофейная эссенция стихий"];
 
@@ -56,7 +57,7 @@ export function LootQueuePopover({
 
   const handleSold = async (entry: LootQueueEntry) => {
     console.log("handleSold", entry);
-    await markLootAsSold({
+    await markQueueLootAsSold({
       lootQueueId: entry.id,
       userId: entry.userId,
       itemName,
