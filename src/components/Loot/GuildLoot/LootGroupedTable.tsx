@@ -14,6 +14,18 @@ import { useEffect, useState } from "react";
 import { getActiveUsers } from "@/src/actions/getActiveUsers";
 import { getLoot, getLootQuantity } from "@/src/actions/lootActions";
 import { distributeLootItem } from "@/src/actions/distributeLootItems";
+import { deleteLootItem } from "@/src/actions/deleteLootItem";
+import { Pen, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 export function LootGroupedTable({
   groupedLoot,
@@ -28,6 +40,7 @@ export function LootGroupedTable({
   const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
   const [dialogInitialPrice, setDialogInitialPrice] = useState<number>(0);
   const [maxQuantity, setMaxQuantity] = useState<number>(1);
+  const [lootToDelete, setLootToDelete] = useState<LootItem | null>(null);
 
   const [activeUsers, setActiveUsers] = useState<
     { id: number; username: string }[]
@@ -52,6 +65,23 @@ export function LootGroupedTable({
       setMaxQuantity(quantityFromDb || 1);
 
       setDialogOpen(true);
+    }
+  };
+
+  const handleEdit = (group: GroupedLootItem) => {
+    const itemToEdit = loot.find((item) => item.group_id === group.id);
+    if (itemToEdit) {
+      setSelectedItemId(itemToEdit.id);
+      setDialogInitialPrice(itemToEdit.price ?? 0);
+      setMaxQuantity(itemToEdit.quantity ?? 1);
+      setDialogOpen(true);
+    }
+  };
+
+  const handleDeleteClick = (group: GroupedLootItem) => {
+    const itemToDelete = loot.find((item) => item.group_id === group.id);
+    if (itemToDelete) {
+      setLootToDelete(itemToDelete);
     }
   };
 
@@ -102,6 +132,27 @@ export function LootGroupedTable({
                   {Array.from(group.comments).join(" | ") || "—"}
                 </TableCell>
                 <TableCell>
+                  {(group.status === "Продано" ||
+                    group.status === "Выдано") && (
+                    <div className="flex gap-2">
+                      <Button
+                        className="cursor-pointer"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEdit(group)}
+                      >
+                        <Pen className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="cursor-pointer"
+                        size="icon"
+                        onClick={() => handleDeleteClick(group)}
+                      >
+                        <Trash2 className="w-4 h-4 text-red-500" />
+                      </Button>
+                    </div>
+                  )}
                   {(group.status === "В наличии" ||
                     group.status === "Продаётся") && (
                     <Button
@@ -150,6 +201,40 @@ export function LootGroupedTable({
           }}
         />
       )}
+      <AlertDialog
+        open={!!lootToDelete}
+        onOpenChange={(open) => !open && setLootToDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Удалить предмет?</AlertDialogTitle>
+          </AlertDialogHeader>
+          <div>
+            Вы уверены, что хотите удалить <b>{lootToDelete?.itemType.name}</b>?
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              className="cursor-pointer"
+              onClick={() => setLootToDelete(null)}
+            >
+              Отмена
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="cursor-pointer"
+              onClick={async () => {
+                if (lootToDelete) {
+                  await deleteLootItem(lootToDelete.id);
+                  const updated = await getLoot();
+                  setLoot(updated);
+                  setLootToDelete(null);
+                }
+              }}
+            >
+              Удалить
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
