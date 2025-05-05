@@ -85,7 +85,7 @@ export function EditTaskDialog({
                 setStatus(value)
               }
             >
-              <SelectTrigger className="w-[186px]">
+              <SelectTrigger className="w-[186px] cursor-pointer">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -105,10 +105,12 @@ export function EditTaskDialog({
 
         <DialogFooter>
           <DialogClose asChild>
-            <Button className="cursor-pointer" variant="secondary">Отмена</Button>
+            <Button className="cursor-pointer" variant="secondary">
+              Отмена
+            </Button>
           </DialogClose>
           <Button
-          className="cursor-pointer"
+            className="cursor-pointer"
             onClick={async () => {
               await editUserTask(userId, task.id, name, createdAt, completedAt);
               onChange();

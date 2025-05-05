@@ -87,7 +87,7 @@ export function CreateTaskPopover({
                   setStatus(value)
                 }
               >
-                <SelectTrigger className="w-[186px]">
+                <SelectTrigger className="w-[186px] cursor-pointer">
                   <SelectValue placeholder="Статус" />
                 </SelectTrigger>
                 <SelectContent>

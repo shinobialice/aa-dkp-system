@@ -44,7 +44,7 @@ export default function ItemSelector({
         }
         onValueChange={onChange}
       >
-        <SelectTrigger className="w-[100px]">
+        <SelectTrigger className="w-[100px] cursor-pointer">
           <SelectValue placeholder="Выбрать" />
         </SelectTrigger>
         <SelectContent>
@@ -63,7 +63,7 @@ export default function ItemSelector({
         value={!userItem ? "Нету" : userItem.name}
         onValueChange={onChange}
       >
-        <SelectTrigger className="w-[100px]">
+        <SelectTrigger className="w-[100px] cursor-pointer">
           <SelectValue placeholder="Выбрать" />
         </SelectTrigger>
         <SelectContent>
@@ -90,7 +90,7 @@ export default function ItemSelector({
         }
         onValueChange={onChange}
       >
-        <SelectTrigger className="w-[100px]">
+        <SelectTrigger className="w-[100px] cursor-pointer">
           <SelectValue placeholder="Выбрать" />
         </SelectTrigger>
         <SelectContent>
@@ -104,7 +104,7 @@ export default function ItemSelector({
 
   return (
     <Select value={userItem ? "Есть" : "Нет"} onValueChange={onChange}>
-      <SelectTrigger className="w-[100px]">
+      <SelectTrigger className="w-[100px] cursor-pointer">
         <SelectValue placeholder="Выбрать" />
       </SelectTrigger>
       <SelectContent>

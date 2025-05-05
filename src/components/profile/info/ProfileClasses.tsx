@@ -60,7 +60,7 @@ export default function ProfileClasses({
                     setFormData((prev: any) => ({ ...prev, class: value }))
                   }
                 >
-                  <SelectTrigger className="w-[100px]">
+                  <SelectTrigger className="w-[100px] cursor-pointer">
                     <SelectValue placeholder="Выберите класс" />
                   </SelectTrigger>
                   <SelectContent>
@@ -125,7 +125,7 @@ export default function ProfileClasses({
                       }))
                     }
                   >
-                    <SelectTrigger className="w-[100px]">
+                    <SelectTrigger className="w-[100px] cursor-pointer">
                       <SelectValue placeholder="Выберите класс" />
                     </SelectTrigger>
                     <SelectContent>

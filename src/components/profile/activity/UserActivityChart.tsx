@@ -145,7 +145,7 @@ export function UserActivityChart({ userId }: { userId: number }) {
             value={String(selectedYear)}
             onValueChange={(val) => setSelectedYear(Number(val))}
           >
-            <SelectTrigger className="w-[100px]">
+            <SelectTrigger className="w-[100px] cursor-pointer">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -164,7 +164,7 @@ export function UserActivityChart({ userId }: { userId: number }) {
               setSelectedMonth(val === "all" ? null : Number(val));
             }}
           >
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-[140px] cursor-pointer">
               <SelectValue placeholder="Весь год" />
             </SelectTrigger>
             <SelectContent>

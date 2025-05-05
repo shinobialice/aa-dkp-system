@@ -120,7 +120,7 @@ export default function ActivitiesPage() {
                   if (value === "monthGrid") handleNav("monthGrid");
                 }}
               >
-                <SelectTrigger>
+                <SelectTrigger className="cursor-pointer">
                   <SelectValue placeholder="Неделя" />
                 </SelectTrigger>
                 <SelectContent>

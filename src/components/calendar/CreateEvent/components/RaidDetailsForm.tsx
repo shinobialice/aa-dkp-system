@@ -133,7 +133,7 @@ export function RaidDetailsForm({
         }}
         value={category ?? undefined}
       >
-        <SelectTrigger className="w-[270px]">
+        <SelectTrigger className="w-[270px] cursor-pointer">
           <SelectValue placeholder="Выберите категорию события" />
         </SelectTrigger>
         <SelectContent>
