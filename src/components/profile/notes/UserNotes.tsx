@@ -1,22 +1,67 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { differenceInMonths } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Trash2, CirclePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import AddSalaryBonusDialog from "./AddSalaryBonusDialog";
+import { deleteUserSalaryBonus } from "@/src/actions/addUserSalaryBonus";
+import { getUserSalaryBonus } from "@/src/actions/getUserSalaryBonus";
+
+function UserBonusesSection({
+  bonuses,
+  onRemove,
+}: {
+  bonuses: any[];
+  onRemove: () => void;
+}) {
+  return (
+    <div className="flex flex-col divide-y">
+      {bonuses.map((bonus) => (
+        <div key={bonus.id} className="flex justify-between items-center py-4">
+          <div className="text-sm font-medium">{bonus.reason}</div>
+          <div className="flex items-center gap-2">
+            <div className="text-lg font-semibold">{bonus.amount}%</div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-muted-foreground"
+              onClick={async () => {
+                await deleteUserSalaryBonus(bonus.id);
+                onRemove();
+              }}
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function UserNotes({ user }: { user: any }) {
+  const [bonuses, setBonuses] = useState<any[]>([]);
+  const [refreshToggle, setRefreshToggle] = useState(false);
+  const [bonusDialogOpen, setBonusDialogOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchBonuses = async () => {
+      const data = await getUserSalaryBonus(user.id);
+      setBonuses(data);
+    };
+    fetchBonuses();
+  }, [user.id, refreshToggle]);
+
   function calculateGuildBonus(joinedAt: string | null) {
     if (!joinedAt) return 0;
-
     const now = new Date();
     const joinedDate = new Date(joinedAt);
     const months = differenceInMonths(now, joinedDate);
-
     if (months < 6) return 0;
-
     const extraPeriods = Math.floor((months - 6) / 6);
     return 10 + extraPeriods * 5;
   }
@@ -50,35 +95,23 @@ export default function UserNotes({ user }: { user: any }) {
             <div className="flex justify-between">
               <div className="text-xl font-bold mb-4">Бонусы к ЗП</div>
               <Button
+                onClick={() => setBonusDialogOpen(true)}
                 variant="ghost"
                 className="flex size-8 text-muted-foreground data-[state=open]:bg-muted cursor-pointer"
                 size="icon"
               >
                 <CirclePlus />
-                <span className="sr-only">Открыть меню</span>
               </Button>
             </div>
-            <div className="flex flex-col divide-y">
-              <div className="flex justify-between items-center py-4">
-                <div className="text-sm font-medium">
-                  За выполнение проектов
-                </div>
-                <div className="text-lg font-semibold">10%</div>
-              </div>
-              <div className="flex justify-between items-center py-4">
-                <div className="text-sm font-medium">За командную работу</div>
-                <div className="text-lg font-semibold">5%</div>
-              </div>
-              <div className="flex justify-between items-center py-4">
-                <div className="text-sm font-medium">За инициативу</div>
-                <div className="text-lg font-semibold">7%</div>
-              </div>
-              <div className="flex justify-between items-center py-4">
-                <div className="text-sm font-medium">
-                  Бонус за стаж в гильдии
-                </div>
-                <div className="text-lg font-semibold">{guildBonus}%</div>
-              </div>
+
+            <UserBonusesSection
+              bonuses={bonuses}
+              onRemove={() => setRefreshToggle(!refreshToggle)}
+            />
+
+            <div className="flex justify-between items-center py-4">
+              <div className="text-sm font-medium">Бонус за стаж в гильдии</div>
+              <div className="text-lg font-semibold">{guildBonus}%</div>
             </div>
           </div>
 
@@ -147,6 +180,13 @@ export default function UserNotes({ user }: { user: any }) {
           </div>
         </div>
       </CardContent>
+
+      <AddSalaryBonusDialog
+        open={bonusDialogOpen}
+        onClose={() => setBonusDialogOpen(false)}
+        userId={user.id}
+        onAdded={() => setRefreshToggle(!refreshToggle)}
+      />
     </Card>
   );
 }
