@@ -69,7 +69,7 @@ export function LootGroupedTable({
     const itemToSell = loot.find((item) => item.group_id === group.id);
     if (itemToSell) {
       setSelectedItemId(itemToSell.id);
-      setSelectedItemName(group.name); // <--- сохранить имя
+      setSelectedItemName(group.name); 
       setDialogInitialPrice(itemToSell.itemType?.price ?? 0);
       const quantityFromDb = await getLootQuantity(itemToSell.id);
       setMaxQuantity(quantityFromDb || 1);
@@ -82,7 +82,7 @@ export function LootGroupedTable({
     const itemToEdit = loot.find((item) => item.group_id === group.id);
     if (itemToEdit) {
       setSelectedItemId(itemToEdit.id);
-      setSelectedItemName(group.name); // <--- сохранить имя
+      setSelectedItemName(group.name);
       setDialogInitialPrice(itemToEdit.price ?? 0);
       setMaxQuantity(itemToEdit.quantity ?? 1);
       setInitialModeValues({

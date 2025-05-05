@@ -1,4 +1,3 @@
-// src/actions/deleteLootItem.ts
 "use server";
 import { prisma } from "@/lib/db";
 

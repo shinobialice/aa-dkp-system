@@ -43,7 +43,6 @@ export const addLootItem = async ({
     },
   });
 
-  // Сразу обновляем group_id на свой id
   await prisma.loot.update({
     where: { id: created.id },
     data: {

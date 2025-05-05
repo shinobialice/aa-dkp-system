@@ -19,7 +19,6 @@ export async function distributeLootItem({
   comment?: string;
   price?: number;
 }) {
-  // Получаем оригинальный лут
   const loot = await prisma.loot.findUnique({
     where: { id: lootId },
     include: { itemType: true },
@@ -31,7 +30,6 @@ export async function distributeLootItem({
 
   const remainingQuantity = loot.quantity - quantity;
 
-  // Обновляем остаток у оригинального лута
   await prisma.loot.update({
     where: { id: lootId },
     data: {
@@ -40,7 +38,6 @@ export async function distributeLootItem({
     },
   });
 
-  // Создаём новую запись — сначала без group_id
   const created = await prisma.loot.create({
     data: {
       itemTypeId: loot.itemTypeId,
@@ -56,7 +53,6 @@ export async function distributeLootItem({
     },
   });
 
-  // Обновляем group_id новым уникальным значением (равным id созданной записи)
   await prisma.loot.update({
     where: { id: created.id },
     data: {

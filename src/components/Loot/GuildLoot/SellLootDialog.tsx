@@ -35,8 +35,8 @@ export function SellLootDialog({
   initialPrice,
   users = [],
   maxQuantity,
-  editMode, // ← ЭТО надо ДОБАВИТЬ
-  initialValues, // ← ЭТО надо ДОБАВИТЬ
+  editMode, 
+  initialValues, 
   itemName,
 }: {
   open: boolean;
@@ -60,7 +60,7 @@ export function SellLootDialog({
     price?: number;
     comment?: string;
   };
-  itemName?: string; // ← ДОБАВЛЕНО
+  itemName?: string; 
 }) {
   const [soldTo, setSoldTo] = useState("");
   const [soldToId, setSoldToId] = useState<number | undefined>(undefined);
@@ -72,8 +72,6 @@ export function SellLootDialog({
   const [isOpen, setIsOpen] = useState(false);
   const [manualPriceEdit, setManualPriceEdit] = useState(false);
   const [isFree, setIsFree] = useState(false);
-
-  // Fallback to default value (1) if maxQuantity is undefined
   const effectiveMaxQuantity = maxQuantity ?? 1;
 
   useEffect(() => {
@@ -133,18 +131,16 @@ export function SellLootDialog({
       return;
     }
 
-    // Если все валидно, отправляем данные
     console.log("Данные прошли валидацию. Отправка...");
     onConfirm({
       soldTo,
       soldToId,
-      price: isFree ? 0 : price, // Если бесплатно, то цена 0
+      price: isFree ? 0 : price, 
       comment,
       quantity,
       isFree,
     });
 
-    // Закрытие диалога и сброс полей
     console.log("Закрытие диалога и сброс данных");
     onClose();
     setSoldTo("");
@@ -225,7 +221,7 @@ export function SellLootDialog({
                 setIsFree(e.target.checked);
                 if (e.target.checked) {
                   setManualPriceEdit(false);
-                  setPrice(0); // сбросить цену в 0 при выборе "выдать бесплатно"
+                  setPrice(0);
                 } else {
                   setPrice(quantity * unitPrice);
                 }
@@ -244,7 +240,7 @@ export function SellLootDialog({
           <Input
             type="number"
             min={1}
-            max={effectiveMaxQuantity} // использует значение effectiveMaxQuantity
+            max={effectiveMaxQuantity} 
             value={quantity === 0 ? "" : quantity}
             onChange={(e) => {
               const val = Number(e.target.value);

@@ -1,7 +1,7 @@
 export type LootItem = {
-  sold_to_user_id?: number | null; // ← вот это исправьте
+  sold_to_user_id?: number | null;
   id: number;
-  group_id?: number | null; // ✅ добавь это поле
+  group_id?: number | null; 
   status: string | null;
   source: string | null;
   created_at: Date;
