@@ -25,6 +25,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
+import { LootIcon } from "../LootBuy/icons/LootIconComponent";
 
 export function LootGroupedTable({
   groupedLoot,
@@ -126,7 +127,10 @@ export function LootGroupedTable({
                     : "—"}
                 </TableCell>
                 <TableCell>{group.source ?? "—"}</TableCell>
-                <TableCell>{group.name}</TableCell>
+                <TableCell className="flex items-center gap-2">
+                  <LootIcon itemName={group.name} size={30} />
+                  <span>{group.name}</span>
+                </TableCell>
                 <TableCell>{group.total}</TableCell>
                 <TableCell>{group.price ?? "—"}</TableCell>
                 <TableCell>{group.status}</TableCell>
