@@ -55,50 +55,60 @@ export default function ProfileAdditionalInfo({
 
       <div className="flex items-center gap-2">
         <span>VK: </span>
-        {editMode ? (
-          <Input
-            className="w-[200px]"
-            value={formData.vkName ?? ""}
-            onChange={(e) => {
-              const input = e.target.value;
-              const match = input.match(/vk\.com\/([a-zA-Z0-9_\.]+)/);
-              const vkName = match ? match[1] : input;
-              setFormData((prev: any) => ({ ...prev, vkName }));
-            }}
-          />
-        ) : user.vk_name ? (
-          <a
-            href={`https://vk.com/${formData.vkName}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-500 hover:underline"
-          >
-            {formData.vkRealName ? formData.vkRealName : "—"}
-          </a>
-        ) : (
-          "Нет данных"
-        )}
+        {(() => {
+          if (editMode) {
+            return (
+              <Input
+                className="w-[200px]"
+                value={formData.vkName ?? ""}
+                onChange={(e) => {
+                  const input = e.target.value;
+                  const match = input.match(/vk\.com\/([a-zA-Z0-9_\.]+)/);
+                  const vkName = match ? match[1] : input;
+                  setFormData((prev: any) => ({ ...prev, vkName }));
+                }}
+              />
+            );
+          } else if (user.vk_name) {
+            return (
+              <a
+                href={`https://vk.com/${formData.vkName}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 hover:underline"
+              >
+                {formData.vkRealName ? formData.vkRealName : "—"}
+              </a>
+            );
+          } else {
+            return "Нет данных";
+          }
+        })()}
       </div>
 
       <div className="mt-4">
         <span>Дата вступления: </span>
-        {editMode ? (
-          <DatePicker
-            value={
-              formData.joined_at ? new Date(formData.joined_at) : undefined
-            }
-            onChange={(date) =>
-              setFormData((prev: any) => ({
-                ...prev,
-                joined_at: date ? format(date, "yyyy-MM-dd") : "",
-              }))
-            }
-          />
-        ) : formData.joined_at ? (
-          new Date(formData.joined_at).toLocaleDateString("ru-RU")
-        ) : (
-          "Неизвестно"
-        )}
+        {(() => {
+          if (editMode) {
+            return (
+              <DatePicker
+                value={
+                  formData.joined_at ? new Date(formData.joined_at) : undefined
+                }
+                onChange={(date) =>
+                  setFormData((prev: any) => ({
+                    ...prev,
+                    joined_at: date ? format(date, "yyyy-MM-dd") : "",
+                  }))
+                }
+              />
+            );
+          } else if (formData.joined_at) {
+            return new Date(formData.joined_at).toLocaleDateString("ru-RU");
+          } else {
+            return "Неизвестно";
+          }
+        })()}
       </div>
 
       <div className="mt-4">

@@ -13,13 +13,17 @@ export function EditToggleButton({
   return (
     <div className={`${classname}`}>
       <Button size="sm" variant="outline" onClick={toggle}>
-        {editMode ? (
-          "Сохранить"
-        ) : (
-          <>
-            <Pen className="h-3 w-3 mr-1" /> Редактировать
-          </>
-        )}
+        {(() => {
+          if (editMode) {
+            return "Сохранить";
+          } else {
+            return (
+              <>
+                <Pen className="h-3 w-3 mr-1" /> Редактировать
+              </>
+            );
+          }
+        })()}
       </Button>
     </div>
   );

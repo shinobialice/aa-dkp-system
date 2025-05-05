@@ -46,35 +46,45 @@ export function QueueTableExtended({
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>{entry.username}</TableCell>
                 <TableCell>
-                  {editMode ? (
-                    <Input
-                      type="number"
-                      value={entry.required}
-                      onChange={(e) =>
-                        handleChange(index, "required", Number(e.target.value))
-                      }
-                    />
-                  ) : (
-                    entry.required
-                  )}
+                  {(() => {
+                    if (editMode) {
+                      return (
+                        <Input
+                          type="number"
+                          value={entry.required}
+                          onChange={(e) =>
+                            handleChange(index, "required", Number(e.target.value))
+                          }
+                        />
+                      );
+                    } else {
+                      return entry.required;
+                    }
+                  })()}
                 </TableCell>
                 <TableCell>
-                  {editMode ? (
-                    <Input
-                      type="number"
-                      min={0}
-                      value={entry.delivered ?? 0}
-                      onChange={(e) =>
-                        handleChange(index, "delivered", Number(e.target.value))
-                      }
-                    />
-                  ) : (
-                    <span>
-                      {entry.delivered
-                        ?.toLocaleString("ru-RU")
-                        .replaceAll(",", " ") || "-"}
-                    </span>
-                  )}
+                  {(() => {
+                    if (editMode) {
+                      return (
+                        <Input
+                          type="number"
+                          min={0}
+                          value={entry.delivered ?? 0}
+                          onChange={(e) =>
+                            handleChange(index, "delivered", Number(e.target.value))
+                          }
+                        />
+                      );
+                    } else {
+                      return (
+                        <span>
+                          {entry.delivered
+                            ?.toLocaleString("ru-RU")
+                            .replaceAll(",", " ") || "-"}
+                        </span>
+                      );
+                    }
+                  })()}
                 </TableCell>
                 <TableCell>
                   {remaining > 0
@@ -82,36 +92,46 @@ export function QueueTableExtended({
                     : 0}
                 </TableCell>
                 <TableCell>
-                  {editMode ? (
-                    <select
-                      className="border rounded"
-                      value={entry.status || "позже"}
-                      onChange={(e) =>
-                        handleChange(index, "status", e.target.value)
-                      }
-                    >
-                      <option value="продано">Продано</option>
-                      <option value="пропуск">Пропуск</option>
-                      <option value="позже">Позже</option>
-                      <option value="ожидание">Ожидание</option>
-                    </select>
-                  ) : (
-                    <span>{entry.status || "-"}</span>
-                  )}
+                  {(() => {
+                    if (editMode) {
+                      return (
+                        <select
+                          className="border rounded"
+                          value={entry.status || "позже"}
+                          onChange={(e) =>
+                            handleChange(index, "status", e.target.value)
+                          }
+                        >
+                          <option value="продано">Продано</option>
+                          <option value="пропуск">Пропуск</option>
+                          <option value="позже">Позже</option>
+                          <option value="ожидание">Ожидание</option>
+                        </select>
+                      );
+                    } else {
+                      return <span>{entry.status || "-"}</span>;
+                    }
+                  })()}
                 </TableCell>
                 <TableCell>
-                  {editMode ? (
-                    <Input
-                      value={entry.synth_target || ""}
-                      onChange={(e) =>
-                        handleChange(index, "synth_target", e.target.value)
-                      }
-                    />
-                  ) : (
-                    <span className="w-80 truncate inline-block">
-                      {entry.synth_target || "-"}
-                    </span>
-                  )}
+                  {(() => {
+                    if (editMode) {
+                      return (
+                        <Input
+                          value={entry.synth_target || ""}
+                          onChange={(e) =>
+                            handleChange(index, "synth_target", e.target.value)
+                          }
+                        />
+                      );
+                    } else {
+                      return (
+                        <span className="w-80 truncate inline-block">
+                          {entry.synth_target || "-"}
+                        </span>
+                      );
+                    }
+                  })()}
                 </TableCell>
                 {editMode && (
                   <TableCell>

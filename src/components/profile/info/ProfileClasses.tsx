@@ -51,47 +51,57 @@ export default function ProfileClasses({
       {/* Primary Class */}
       <div className="space-y-2 ">
         <div className="text-lg flex justify-center items-center gap-2">
-          {editMode ? (
-            <Select
-              value={formData.class ?? ""}
-              onValueChange={(value) =>
-                setFormData((prev: any) => ({ ...prev, class: value }))
-              }
-            >
-              <SelectTrigger className="w-[100px]">
-                <SelectValue placeholder="Выберите класс" />
-              </SelectTrigger>
-              <SelectContent>
-                {classList.map((className) => (
-                  <SelectItem key={className} value={className}>
-                    {className}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          ) : (
-            <>
-              {classIcons[formData.class] ?? "❓"} {formData.class ?? "—"}
-            </>
-          )}
+          {(() => {
+            if (editMode) {
+              return (
+                <Select
+                  value={formData.class ?? ""}
+                  onValueChange={(value) =>
+                    setFormData((prev: any) => ({ ...prev, class: value }))
+                  }
+                >
+                  <SelectTrigger className="w-[100px]">
+                    <SelectValue placeholder="Выберите класс" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {classList.map((className) => (
+                      <SelectItem key={className} value={className}>
+                        {className}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              );
+            } else {
+              return (
+                <>
+                  {classIcons[formData.class] ?? "❓"} {formData.class ?? "—"}
+                </>
+              );
+            }
+          })()}
         </div>
 
         <div className="text-sm text-gray-400 ">
           <span>ГС: </span>
-          {editMode ? (
-            <Input
-              className="text-center w-[100px]"
-              value={formData.classGearScore ?? ""}
-              onChange={(e) =>
-                setFormData((prev: any) => ({
-                  ...prev,
-                  classGearScore: e.target.value,
-                }))
-              }
-            />
-          ) : (
-            formData.classGearScore ?? "Нет данных"
-          )}
+          {(() => {
+            if (editMode) {
+              return (
+                <Input
+                  className="text-center w-[100px]"
+                  value={formData.classGearScore ?? ""}
+                  onChange={(e) =>
+                    setFormData((prev: any) => ({
+                      ...prev,
+                      classGearScore: e.target.value,
+                    }))
+                  }
+                />
+              );
+            } else {
+              return formData.classGearScore ?? "Нет данных";
+            }
+          })()}
         </div>
       </div>
 
@@ -101,55 +111,65 @@ export default function ProfileClasses({
         user.secondary_class_gear_score) && (
         <div className="space-y-2">
           <div className="text-lg flex justify-center items-center gap-2">
-            {editMode ? (
-              <Select
-                value={formData.secondaryClass ?? "Нет"}
-                onValueChange={(value) =>
-                  setFormData((prev: any) => ({
-                    ...prev,
-                    secondaryClass: value === "Нет" ? null : value,
-                    secondaryClassGearScore:
-                      value === "Нет" ? null : prev.secondaryClassGearScore,
-                  }))
-                }
-              >
-                <SelectTrigger className="w-[100px]">
-                  <SelectValue placeholder="Выберите класс" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Нет">Нет</SelectItem>
-                  {classList.map((className) => (
-                    <SelectItem key={className} value={className}>
-                      {className}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            ) : (
-              <>
-                {classIcons[formData.secondaryClass] ?? "❓"}{" "}
-                {formData.secondaryClass ?? "Нет данных"}
-              </>
-            )}
+            {(() => {
+              if (editMode) {
+                return (
+                  <Select
+                    value={formData.secondaryClass ?? "Нет"}
+                    onValueChange={(value) =>
+                      setFormData((prev: any) => ({
+                        ...prev,
+                        secondaryClass: value === "Нет" ? null : value,
+                        secondaryClassGearScore:
+                          value === "Нет" ? null : prev.secondaryClassGearScore,
+                      }))
+                    }
+                  >
+                    <SelectTrigger className="w-[100px]">
+                      <SelectValue placeholder="Выберите класс" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Нет">Нет</SelectItem>
+                      {classList.map((className) => (
+                        <SelectItem key={className} value={className}>
+                          {className}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                );
+              } else {
+                return (
+                  <>
+                    {classIcons[formData.secondaryClass] ?? "❓"}{" "}
+                    {formData.secondaryClass ?? "Нет данных"}
+                  </>
+                );
+              }
+            })()}
           </div>
 
           <div className="text-sm text-gray-400">
             <span>ГС: </span>
-            {editMode ? (
-              <Input
-                className="text-center w-[100px]"
-                value={formData.secondaryClassGearScore ?? ""}
-                onChange={(e) =>
-                  setFormData((prev: any) => ({
-                    ...prev,
-                    secondaryClassGearScore: e.target.value,
-                  }))
-                }
-                disabled={!formData.secondaryClass}
-              />
-            ) : (
-              formData.secondaryClassGearScore ?? "Нет данных"
-            )}
+            {(() => {
+              if (editMode) {
+                return (
+                  <Input
+                    className="text-center w-[100px]"
+                    value={formData.secondaryClassGearScore ?? ""}
+                    onChange={(e) =>
+                      setFormData((prev: any) => ({
+                        ...prev,
+                        secondaryClassGearScore: e.target.value,
+                      }))
+                    }
+                    disabled={!formData.secondaryClass}
+                  />
+                );
+              } else {
+                return formData.secondaryClassGearScore ?? "Нет данных";
+              }
+            })()}
           </div>
         </div>
       )}

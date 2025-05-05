@@ -197,28 +197,32 @@ export function RaidDetailsForm({
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-64 max-h-80 overflow-y-auto">
               {aglBossOrder.map((name, i) =>
-                name === "---" ? (
-                  <DropdownMenuSeparator key={`sep-${i}`} />
-                ) : (
-                  <DropdownMenuCheckboxItem
-                    key={name}
-                    onSelect={(event) => event.preventDefault()}
-                    checked={selectedBosses.some((b) => b.boss_name === name)}
-                    onCheckedChange={(checked) => {
-                      const boss = bosses.find((b) => b.boss_name === name);
-                      if (!boss) return;
+                (() => {
+                  if (name === "---") {
+                    return <DropdownMenuSeparator key={`sep-${i}`} />;
+                  } else {
+                    return (
+                      <DropdownMenuCheckboxItem
+                        key={name}
+                        onSelect={(event) => event.preventDefault()}
+                        checked={selectedBosses.some((b) => b.boss_name === name)}
+                        onCheckedChange={(checked) => {
+                          const boss = bosses.find((b) => b.boss_name === name);
+                          if (!boss) return;
 
-                      setSelectedBosses((prev) =>
-                        checked
-                          ? [...prev, boss]
-                          : prev.filter((b) => b.id !== boss.id)
-                      );
-                      setErrors((prev) => ({ ...prev, selectedBoss: false }));
-                    }}
-                  >
-                    {name}
-                  </DropdownMenuCheckboxItem>
-                )
+                          setSelectedBosses((prev) =>
+                            checked
+                              ? [...prev, boss]
+                              : prev.filter((b) => b.id !== boss.id)
+                          );
+                          setErrors((prev) => ({ ...prev, selectedBoss: false }));
+                        }}
+                      >
+                        {name}
+                      </DropdownMenuCheckboxItem>
+                    );
+                  }
+                })()
               )}
             </DropdownMenuContent>
           </DropdownMenu>

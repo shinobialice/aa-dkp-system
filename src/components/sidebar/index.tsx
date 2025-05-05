@@ -74,47 +74,51 @@ export function AppSidebar() {
           <SidebarGroupLabel>Меню</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) =>
-                item.items ? (
-                  <SidebarMenuItem key={item.title}>
-                    <Collapsible
-                      defaultOpen
-                      className="group/collapsible w-full"
-                    >
+              {menuItems.map((item) => {
+                if (item.items) {
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <Collapsible
+                        defaultOpen
+                        className="group/collapsible w-full"
+                      >
+                        <SidebarMenuButton asChild>
+                          <CollapsibleTrigger className="flex items-center w-full gap-2 rounded-md p-2 text-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition">
+                            <item.icon className="h-5 w-5" />
+                            <span className="truncate">{item.title}</span>
+                            <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                          </CollapsibleTrigger>
+                        </SidebarMenuButton>
+                        <CollapsibleContent className="pl-7">
+                          <SidebarMenu>
+                            {item.items.map((subItem) => (
+                              <SidebarMenuItem key={subItem.title}>
+                                <SidebarMenuButton asChild>
+                                  <Link href={subItem.url}>
+                                    <subItem.icon className="h-4 w-4" />
+                                    <span>{subItem.title}</span>
+                                  </Link>
+                                </SidebarMenuButton>
+                              </SidebarMenuItem>
+                            ))}
+                          </SidebarMenu>
+                        </CollapsibleContent>
+                      </Collapsible>
+                    </SidebarMenuItem>
+                  );
+                } else {
+                  return (
+                    <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild>
-                        <CollapsibleTrigger className="flex items-center w-full gap-2 rounded-md p-2 text-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition">
+                        <Link href={item.url}>
                           <item.icon className="h-5 w-5" />
-                          <span className="truncate">{item.title}</span>
-                          <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
-                        </CollapsibleTrigger>
+                          <span>{item.title}</span>
+                        </Link>
                       </SidebarMenuButton>
-                      <CollapsibleContent className="pl-7">
-                        <SidebarMenu>
-                          {item.items.map((subItem) => (
-                            <SidebarMenuItem key={subItem.title}>
-                              <SidebarMenuButton asChild>
-                                <Link href={subItem.url}>
-                                  <subItem.icon className="h-4 w-4" />
-                                  <span>{subItem.title}</span>
-                                </Link>
-                              </SidebarMenuButton>
-                            </SidebarMenuItem>
-                          ))}
-                        </SidebarMenu>
-                      </CollapsibleContent>
-                    </Collapsible>
-                  </SidebarMenuItem>
-                ) : (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <Link href={item.url}>
-                        <item.icon className="h-5 w-5" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )
-              )}
+                    </SidebarMenuItem>
+                  );
+                }
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

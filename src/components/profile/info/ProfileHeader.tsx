@@ -83,20 +83,24 @@ export default function ProfileHeader({
       </div>
 
       <CardTitle className="text-2xl">
-        {editMode ? (
-          <Input
-            className="text-center text-2xl font-bold"
-            value={formData.username}
-            onChange={(e) =>
-              setFormData((prev: any) => ({
-                ...prev,
-                username: e.target.value,
-              }))
-            }
-          />
-        ) : (
-          formData.username
-        )}
+        {(() => {
+          if (editMode) {
+            return (
+              <Input
+                className="text-center text-2xl font-bold"
+                value={formData.username}
+                onChange={(e) =>
+                  setFormData((prev: any) => ({
+                    ...prev,
+                    username: e.target.value,
+                  }))
+                }
+              />
+            );
+          } else {
+            return formData.username;
+          }
+        })()}
       </CardTitle>
 
       <div className="flex gap-2 mt-2">
