@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import {
   Popover,
   PopoverContent,
@@ -22,9 +22,10 @@ export function LootItemSelector({
 }) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const allItemNames = Object.keys(LootIcons);
+  const [isOpen, setIsOpen] = useState(false); // контролируем popover
 
   return (
-    <Popover>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <input
           ref={inputRef}
@@ -33,21 +34,23 @@ export function LootItemSelector({
           value={value}
           readOnly
           className="border rounded px-2 py-1 cursor-pointer"
+          onClick={() => setIsOpen(true)}
         />
       </PopoverTrigger>
       <PopoverContent className="p-0 w-[378px]">
         <Command>
           <CommandInput placeholder="Поиск..." />
-          <CommandList>
+          <CommandList className="cursor-pointer">
             {allItemNames.map((name) => (
               <CommandItem
                 key={name}
                 value={name}
                 onSelect={() => {
                   onSelect(name);
+                  setIsOpen(false); // закрываем popover
                   inputRef.current?.blur();
                 }}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 cursor-pointer"
               >
                 <LootIcon itemName={name} size={24} />
                 <span>{name}</span>
