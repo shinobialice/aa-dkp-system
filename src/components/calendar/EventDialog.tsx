@@ -218,7 +218,7 @@ export function EventDialog({
             />
           )}
 
-          <Button onClick={handleSubmit} className="w-full md:w-auto">
+          <Button onClick={handleSubmit} className="w-full cursor-pointer md:w-auto">
             {mode === "edit" ? "Изменить" : "Создать"}
           </Button>
         </DialogFooter>

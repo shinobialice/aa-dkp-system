@@ -41,6 +41,7 @@ const columns: ColumnDef<User>[] = [
     accessorKey: "username",
     header: ({ column }) => (
       <Button
+        className="cursor-pointer"
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
@@ -54,6 +55,7 @@ const columns: ColumnDef<User>[] = [
     accessorKey: "class",
     header: ({ column }) => (
       <Button
+        className="cursor-pointer"
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >

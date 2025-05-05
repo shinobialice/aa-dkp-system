@@ -98,7 +98,7 @@ export default function TasksTable({
                           <DropdownMenuTrigger asChild>
                             <Button
                               variant="ghost"
-                              className="flex size-8 text-muted-foreground data-[state=open]:bg-muted"
+                              className="flex size-8 text-muted-foreground cursor-pointer data-[state=open]:bg-muted"
                               size="icon"
                             >
                               <MoreVerticalIcon />

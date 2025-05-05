@@ -105,9 +105,10 @@ export function EditTaskDialog({
 
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="secondary">Отмена</Button>
+            <Button className="cursor-pointer" variant="secondary">Отмена</Button>
           </DialogClose>
           <Button
+          className="cursor-pointer"
             onClick={async () => {
               await editUserTask(userId, task.id, name, createdAt, completedAt);
               onChange();

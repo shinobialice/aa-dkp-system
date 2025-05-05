@@ -44,7 +44,7 @@ export function AddToQueueForm({
       </div>
       <Button
         variant="default"
-        className="w-full"
+        className="w-full cursor-pointer"
         onClick={onAdd}
         disabled={!selectedUser}
       >

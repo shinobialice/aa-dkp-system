@@ -76,6 +76,7 @@ export function ScreenshotOcr({
               <div className="flex gap-2">
                 {imagePreviews.map((_, idx) => (
                   <Button
+                    className="cursor-pointer"
                     key={idx}
                     variant={activePreviewIndex === idx ? "default" : "outline"}
                     size="sm"

@@ -136,6 +136,7 @@ export function QueueTableExtended({
                 {editMode && (
                   <TableCell>
                     <Button
+                    className="cursor-pointer"
                       variant="secondary"
                       size="sm"
                       onClick={() => {

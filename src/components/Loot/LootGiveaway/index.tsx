@@ -195,7 +195,7 @@ export default function LootGiveaway({
     <div className="p-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-bold">Раздача лута</h2>
-        <Button variant="outline" onClick={() => setEditMode(!editMode)}>
+        <Button className="cursor-pointer" variant="outline" onClick={() => setEditMode(!editMode)}>
           {editMode ? "Сохранить" : "Редактировать"}
         </Button>
       </div>

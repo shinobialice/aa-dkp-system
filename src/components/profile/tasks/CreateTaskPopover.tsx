@@ -53,7 +53,7 @@ export function CreateTaskPopover({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" className="ml-auto">
+        <Button variant="outline" className="ml-auto cursor-pointer">
           Добавить задание
         </Button>
       </PopoverTrigger>
@@ -104,6 +104,7 @@ export function CreateTaskPopover({
               />
             </div>
             <Button
+            className="cursor-pointer"
               onClick={async () => {
                 await createUserTask(userId, name, createdAt, completedAt);
                 onChange();

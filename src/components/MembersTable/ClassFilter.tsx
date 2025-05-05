@@ -41,7 +41,7 @@ export function ClassFilter<TData>({ table }: ClassFilterProps<TData>) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="ml-auto">
+        <Button variant="outline" className="ml-auto cursor-pointer">
           Фильтр по классу
           <ChevronDown />
         </Button>

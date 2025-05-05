@@ -150,7 +150,7 @@ export function RaidDetailsForm({
           <Label>Босс</Label>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="w-[270px] justify-between">
+              <Button variant="outline" className="w-[270px] justify-between cursor-pointer">
                 {selectedBoss || "Выберите босса"}
                 <ChevronDown className="ml-2" />
               </Button>
@@ -186,7 +186,7 @@ export function RaidDetailsForm({
           <Label>Боссы (можно выбрать нескольких)</Label>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="w-[270px] justify-between">
+              <Button variant="outline" className="w-[270px] justify-between cursor-pointer">
                 <span className="truncate min-w-0 flex-1 text-left">
                   {selectedBosses.length > 0
                     ? selectedBosses.map((b) => b.boss_name).join(", ")

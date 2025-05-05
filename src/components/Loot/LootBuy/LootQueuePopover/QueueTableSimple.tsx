@@ -45,6 +45,7 @@ export function QueueTableSimple({ queue, editMode, handleSold }: Props) {
             {editMode && (
               <TableCell className="text-right">
                 <Button
+                className="cursor-pointer"
                   variant="secondary"
                   size="sm"
                   onClick={() => handleSold(entry)}

@@ -71,6 +71,7 @@ export function LootGroupedTable({
                   {(group.status === "В наличии" ||
                     group.status === "Продаётся") && (
                     <Button
+                    className="cursor-pointer"
                       variant="outline"
                       onClick={async () => {
                         const itemToSell = loot.find(

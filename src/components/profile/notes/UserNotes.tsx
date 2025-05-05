@@ -51,7 +51,7 @@ export default function UserNotes({ user }: { user: any }) {
               <div className="text-xl font-bold mb-4">Бонусы к ЗП</div>
               <Button
                 variant="ghost"
-                className="flex size-8 text-muted-foreground data-[state=open]:bg-muted"
+                className="flex size-8 text-muted-foreground data-[state=open]:bg-muted cursor-pointer"
                 size="icon"
               >
                 <CirclePlus />
@@ -87,7 +87,7 @@ export default function UserNotes({ user }: { user: any }) {
               <div className="text-xl font-bold mb-4">Тэги</div>
               <Button
                 variant="ghost"
-                className="flex size-8 text-muted-foreground data-[state=open]:bg-muted"
+                className="flex size-8 text-muted-foreground data-[state=open]:bg-muted cursor-pointer"
                 size="icon"
               >
                 <CirclePlus />
@@ -135,7 +135,7 @@ export default function UserNotes({ user }: { user: any }) {
                   </Badge>
                   <Button
                     variant="ghost"
-                    className="flex size-8 text-muted-foreground data-[state=open]:bg-muted"
+                    className="flex size-8 text-muted-foreground data-[state=open]:bg-muted cursor-pointer"
                     size="icon"
                   >
                     <Trash2 />

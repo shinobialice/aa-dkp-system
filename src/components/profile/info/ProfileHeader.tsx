@@ -43,7 +43,7 @@ export default function ProfileHeader({
             <Button
               variant="ghost"
               size="icon"
-              className="size-8 text-green-500"
+              className="size-8 text-green-500 cursor-pointer"
               onClick={() => {
                 editUser(
                   user.id,
@@ -66,7 +66,7 @@ export default function ProfileHeader({
           <Button
             variant="ghost"
             size="icon"
-            className="size-8 text-muted-foreground"
+            className="size-8 text-muted-foreground cursor-pointer"
             onClick={() => setEditMode(!editMode)}
           >
             <Pencil />

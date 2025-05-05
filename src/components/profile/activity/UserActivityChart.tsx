@@ -117,7 +117,7 @@ export function UserActivityChart({ userId }: { userId: number }) {
           {/* Типы рейдов */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline">
+              <Button className="cursor-pointer" variant="outline">
                 {types.length === 2 ? "Все типы" : types.join(", ") || "Типы"}
               </Button>
             </DropdownMenuTrigger>

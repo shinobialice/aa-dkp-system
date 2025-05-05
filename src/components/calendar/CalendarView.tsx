@@ -82,19 +82,20 @@ export default function ActivitiesPage() {
         <div className="flex justify-end mb-4 space-x-2 mr-6">
           <Button
             variant="outline"
-            className="hidden md:flex"
+            className="hidden md:flex cursor-pointer"
             onClick={() => handleNav("list")}
           >
             <Table className="size-4" />
           </Button>
           <Button
             variant="outline"
-            className="hidden md:flex"
+            className="hidden md:flex cursor-pointer"
             onClick={() => handleNav("week")}
           >
             <Calendar1 className="size-4" />
           </Button>
           <Button
+          className="cursor-pointer"
             variant="default"
             onClick={() => {
               setSelectedEvent(null); // очищаем, чтобы был режим создания
@@ -127,11 +128,11 @@ export default function ActivitiesPage() {
                   <SelectItem value="monthGrid">Месяц</SelectItem>
                 </SelectContent>
               </Select>
-              <Button onClick={() => handleNav("today")}>Сегодня</Button>
-              <Button onClick={() => handleNav("prev")}>
+              <Button className="cursor-pointer" onClick={() => handleNav("today")}>Сегодня</Button>
+              <Button className="cursor-pointer" onClick={() => handleNav("prev")}>
                 <ChevronLeft />
               </Button>
-              <Button onClick={() => handleNav("next")}>
+              <Button className="cursor-pointer" onClick={() => handleNav("next")}>
                 <ChevronRight />
               </Button>
             </div>

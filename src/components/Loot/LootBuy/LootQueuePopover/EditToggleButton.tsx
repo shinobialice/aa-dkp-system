@@ -12,7 +12,7 @@ export function EditToggleButton({
 }) {
   return (
     <div className={`${classname}`}>
-      <Button size="sm" variant="outline" onClick={toggle}>
+      <Button className="cursor-pointer" size="sm" variant="outline" onClick={toggle}>
         {(() => {
           if (editMode) {
             return "Сохранить";

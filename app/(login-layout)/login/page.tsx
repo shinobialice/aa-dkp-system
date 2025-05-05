@@ -22,7 +22,7 @@ export default function LoginPage() {
             <h1 className="text-2xl font-bold text-center">Вход в систему</h1>
             <Button
               onClick={() => signIn("google", { callbackUrl: "/" })}
-              className="w-full gap-2"
+              className="w-full gap-2 cursor-pointer"
               variant="outline"
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">

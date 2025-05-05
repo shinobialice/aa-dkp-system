@@ -28,6 +28,7 @@ export const columns: ColumnDef<any>[] = [
     accessorKey: "class",
     header: ({ column }) => (
       <Button
+        className="cursor-pointer"
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
@@ -47,6 +48,7 @@ export const columns: ColumnDef<any>[] = [
     accessorKey: "class_gear_score",
     header: ({ column }) => (
       <Button
+        className="cursor-pointer"
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
@@ -60,6 +62,7 @@ export const columns: ColumnDef<any>[] = [
     accessorKey: "joinedAtFormatted",
     header: ({ column }) => (
       <Button
+        className="cursor-pointer"
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
@@ -73,6 +76,7 @@ export const columns: ColumnDef<any>[] = [
     accessorKey: "daysInGuild",
     header: ({ column }) => (
       <Button
+        className="cursor-pointer"
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >

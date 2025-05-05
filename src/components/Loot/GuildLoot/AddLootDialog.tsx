@@ -101,10 +101,10 @@ export function AddLootDialog({
           />
         </div>
         <DialogFooter>
-          <Button variant="secondary" onClick={onClose}>
+          <Button className="cursor-pointer" variant="secondary" onClick={onClose}>
             Отмена
           </Button>
-          <Button onClick={handleSubmit}>Сохранить</Button>
+          <Button className="cursor-pointer" onClick={handleSubmit}>Сохранить</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
