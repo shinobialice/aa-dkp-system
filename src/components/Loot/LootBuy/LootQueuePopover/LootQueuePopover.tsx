@@ -23,7 +23,7 @@ import { addToLootQueue } from "@/src/actions/addToLootQueue";
 
 import { updateLootQueueEntry } from "@/src/actions/updateLootQueueEntry";
 import type { LootQueueEntry } from "./LootQueueTypes";
-import { markQueueLootAsSold } from "@/src/actions/markLootAsSold";
+import { markQueueLootAsSold } from "@/src/actions/markQueueLootAsSold";
 
 const extendedItems = ["Эссенция ярости", "Трофейная эссенция стихий"];
 

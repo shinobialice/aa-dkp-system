@@ -10,9 +10,10 @@ import {
 import { LootItem, ItemType, NewLootItem } from "./LootTypes";
 import { groupLoot } from "./groupLoot";
 import { LootTableControls } from "./LootTableControls";
-import { LootGroupedTable } from "./LootGroupedTable";
+
 import { AddLootDialog } from "./AddLootDialog";
 import { ExpensesTable } from "./ExpenseTable";
+import { LootGroupedTable } from "./LootGroupedTable";
 
 // Тип расхода
 type ExpenseItem = {
@@ -78,6 +79,7 @@ export default function LootTable() {
               groupedLoot={grouped}
               loot={loot}
               onSell={handleSell}
+              setLoot={setLoot}
             />
           </div>
         </div>

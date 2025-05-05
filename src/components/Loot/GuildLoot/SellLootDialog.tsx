@@ -57,17 +57,30 @@ export function SellLootDialog({
   const [comment, setComment] = useState("");
   const [search, setSearch] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [manualPriceEdit, setManualPriceEdit] = useState(false);
+
+  useEffect(() => {
+    if (!manualPriceEdit) {
+      setPrice(quantity * unitPrice);
+    }
+  }, [quantity, unitPrice, manualPriceEdit]);
 
   useEffect(() => {
     if (open) {
       const startPrice = initialPrice ?? 0;
-      setUnitPrice(startPrice);
+      setUnitPrice(initialPrice ?? 0); // ← цена должна быть 0.23, если это 23 серебра
       setQuantity(1);
       setPrice(startPrice);
     }
   }, [initialPrice, open]);
 
   const handleSubmit = () => {
+    console.log({ soldTo, price, quantity, maxQuantity });
+    console.log("Проверка перед отправкой:");
+    console.log("soldTo:", soldTo);
+    console.log("price:", price);
+    console.log("quantity:", quantity);
+    console.log("maxQuantity:", maxQuantity);
     if (!soldTo || price <= 0 || quantity < 1 || quantity > maxQuantity) {
       alert("Проверьте данные перед сохранением");
       return;
@@ -162,14 +175,21 @@ export function SellLootDialog({
             }}
           />
 
-          <Label>Общая цена (можно изменить)</Label>
+          <Label>Общая цена</Label>
           <Input
             type="number"
             min={1}
-            value={price === 0 ? "" : price}
+            value={price > 0 ? price : ""}
             onChange={(e) => {
+              setManualPriceEdit(true);
               const val = Number(e.target.value);
-              if (!isNaN(val)) setPrice(val);
+              if (!Number.isNaN(val)) setPrice(val);
+            }}
+            onBlur={() => {
+              if (!price || price < 1) {
+                setManualPriceEdit(false);
+                setPrice(quantity * unitPrice);
+              }
             }}
           />
 

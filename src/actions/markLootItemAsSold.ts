@@ -30,12 +30,6 @@ export const markLootItemAsSold = async ({
     );
   }
 
-  // Обновим цену
-  await prisma.itemType.update({
-    where: { id: loot.itemTypeId },
-    data: { price },
-  });
-
   if (quantity === loot.quantity) {
     // продаём всё — статус "Продано"
     await prisma.loot.update({

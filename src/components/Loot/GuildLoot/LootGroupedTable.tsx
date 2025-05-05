@@ -13,26 +13,30 @@ import { SellLootDialog } from "./SellLootDialog";
 import { useEffect, useState } from "react";
 import { markLootItemAsSold } from "@/src/actions/markLootItemAsSold";
 import { getActiveUsers } from "@/src/actions/getActiveUsers";
+import { getLoot } from "@/src/actions/lootActions";
 
 export function LootGroupedTable({
   groupedLoot,
   loot,
   onSell,
+  setLoot,
 }: {
   groupedLoot: GroupedLootItem[];
   loot: LootItem[];
   onSell: (id: number) => Promise<void>;
+  setLoot: (loot: LootItem[]) => void;
 }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
   const [dialogInitialPrice, setDialogInitialPrice] = useState<number>(0);
+  const [maxQuantity, setMaxQuantity] = useState(1);
   const [activeUsers, setActiveUsers] = useState<
     { id: number; username: string }[]
   >([]);
 
   useEffect(() => {
     const loadUsers = async () => {
-      const users = await getActiveUsers(); // уже [{ id, username }]
+      const users = await getActiveUsers();
       setActiveUsers(users);
     };
     loadUsers();
@@ -102,7 +106,8 @@ export function LootGroupedTable({
                           setSelectedItemId(itemToSell.id);
                           setDialogInitialPrice(
                             itemToSell.itemType?.price ?? 0
-                          ); // 👈
+                          );
+                          setMaxQuantity(itemToSell.quantity ?? 1);
                           setDialogOpen(true);
                         }
                       }}
@@ -119,21 +124,23 @@ export function LootGroupedTable({
       {selectedItemId !== null && (
         <SellLootDialog
           open={dialogOpen}
+          maxQuantity={maxQuantity}
           onClose={() => setDialogOpen(false)}
           users={activeUsers.map(({ id, username }) => ({ id, username }))}
           initialPrice={dialogInitialPrice}
-          onConfirm={async ({ soldTo, soldToId, price, comment }) => {
-            // ← добавь soldToId
+          onConfirm={async ({ soldTo, soldToId, price, comment, quantity }) => {
             if (selectedItemId !== null) {
               await markLootItemAsSold({
                 lootId: selectedItemId,
                 soldTo,
-                soldToId, // ← обязательно передай сюда!
+                soldToId,
                 price,
                 comment,
-                quantity: 1,
+                quantity,
               });
               await onSell(selectedItemId);
+              const updatedLoot = await getLoot();
+              setLoot(updatedLoot);
               setSelectedItemId(null);
             }
           }}
