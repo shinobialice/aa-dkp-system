@@ -46,7 +46,6 @@ export const addLootItem = async ({
   await prisma.loot.update({
     where: { id: created.id },
     data: {
-      group_id: created.id,
     },
   });
 };

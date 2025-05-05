@@ -126,7 +126,6 @@ model ItemType {
 
 model Loot {
   id              Int       @id @default(autoincrement())
-  group_id        Int?      
   status          String?
   sold_at         DateTime?
   sold_to         String?

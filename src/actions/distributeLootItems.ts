@@ -56,7 +56,6 @@ export async function distributeLootItem({
   await prisma.loot.update({
     where: { id: created.id },
     data: {
-      group_id: created.id,
     },
   });
 

@@ -66,10 +66,16 @@ export function LootGroupedTable({
   }, []);
 
   const handleSellClick = async (group: GroupedLootItem) => {
-    const itemToSell = loot.find((item) => item.group_id === group.id);
+    const itemToSell = loot.find(
+      (item) =>
+        item.itemTypeId === group.itemTypeId &&
+        item.status === group.status &&
+        item.status !== "Продано" &&
+        item.status !== "Выдано"
+    );
     if (itemToSell) {
       setSelectedItemId(itemToSell.id);
-      setSelectedItemName(group.name); 
+      setSelectedItemName(group.name);
       setDialogInitialPrice(itemToSell.itemType?.price ?? 0);
       const quantityFromDb = await getLootQuantity(itemToSell.id);
       setMaxQuantity(quantityFromDb || 1);
@@ -79,7 +85,13 @@ export function LootGroupedTable({
   };
 
   const handleEdit = (group: GroupedLootItem) => {
-    const itemToEdit = loot.find((item) => item.group_id === group.id);
+    const itemToEdit = loot.find(
+      (item) =>
+        item.itemTypeId === group.itemTypeId &&
+        item.status === group.status &&
+        (item.status === "Продано" || item.status === "Выдано")
+    );
+
     if (itemToEdit) {
       setSelectedItemId(itemToEdit.id);
       setSelectedItemName(group.name);
@@ -97,7 +109,13 @@ export function LootGroupedTable({
   };
 
   const handleDeleteClick = (group: GroupedLootItem) => {
-    const itemToDelete = loot.find((item) => item.group_id === group.id);
+    const itemToDelete = loot.find(
+      (item) =>
+        item.itemTypeId === group.itemTypeId &&
+        item.status === group.status &&
+        (item.status === "Продано" || item.status === "Выдано")
+    );
+
     if (itemToDelete) {
       setLootToDelete(itemToDelete);
     }

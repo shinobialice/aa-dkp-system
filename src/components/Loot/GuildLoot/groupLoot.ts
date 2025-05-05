@@ -21,7 +21,7 @@ export function groupLoot(
 
     if (item.status === "Продано" || item.status === "Выдано") {
       result.push({
-        id: item.group_id ?? idCounter++, 
+        id: idCounter++,
         itemTypeId: item.itemTypeId,
         name: item.itemType.name,
         price: item.price ?? item.itemType.price,
@@ -39,7 +39,7 @@ export function groupLoot(
       let existing = result.find((r) => `${r.itemTypeId}-${r.status}` === key);
       if (!existing) {
         existing = {
-          id: item.group_id ?? idCounter++,
+          id: idCounter++,
           itemTypeId: item.itemTypeId,
           name: item.itemType.name,
           price: item.itemType.price,
