@@ -1,0 +1,112 @@
+"use client";
+
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { ExpenseItem } from "./ExpensesTypes";
+
+export function AddExpenseDialog({
+  open,
+  onClose,
+  onAdd,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onAdd: (expense: ExpenseItem) => Promise<void>;
+}) {
+  const [form, setForm] = useState<ExpenseItem>({
+    date: new Date().toISOString().split("T")[0],
+    amount: 0,
+    target: "",
+    source: "",
+    comment: "",
+  });
+
+  const handleSubmit = async () => {
+    if (!form.amount || !form.target || !form.source) {
+      alert("Заполните обязательные поля");
+      return;
+    }
+    await onAdd(form);
+    onClose();
+    setForm({
+      date: new Date().toISOString().split("T")[0],
+      amount: 0,
+      target: "",
+      source: "",
+      comment: "",
+    });
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Добавить расход</DialogTitle>
+        </DialogHeader>
+
+        <div className="flex flex-col gap-2 py-4">
+          <Label>Дата</Label>
+          <input
+            type="date"
+            value={
+              typeof form.date === "string"
+                ? form.date
+                : form.date.toISOString().split("T")[0]
+            }
+            onChange={(e) => setForm({ ...form, date: e.target.value })}
+            className="border rounded px-2 py-1"
+          />
+
+          <Label>Сумма</Label>
+          <input
+            type="number"
+            min={0}
+            value={form.amount}
+            onChange={(e) =>
+              setForm({ ...form, amount: Number(e.target.value) })
+            }
+            className="border rounded px-2 py-1"
+          />
+
+          <Label>Цель</Label>
+          <input
+            type="text"
+            value={form.target}
+            onChange={(e) => setForm({ ...form, target: e.target.value })}
+            className="border rounded px-2 py-1"
+          />
+
+          <Label>Источник</Label>
+          <input
+            type="text"
+            value={form.source}
+            onChange={(e) => setForm({ ...form, source: e.target.value })}
+            className="border rounded px-2 py-1"
+          />
+
+          <Label>Комментарий</Label>
+          <textarea
+            value={form.comment ?? ""}
+            onChange={(e) => setForm({ ...form, comment: e.target.value })}
+            className="border rounded px-2 py-1"
+          />
+        </div>
+
+        <DialogFooter>
+          <Button variant="secondary" onClick={onClose}>
+            Отмена
+          </Button>
+          <Button onClick={handleSubmit}>Сохранить</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

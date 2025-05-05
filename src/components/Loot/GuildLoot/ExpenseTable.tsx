@@ -12,31 +12,35 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { AddExpenseDialog } from "./AddExpenseDialog";
+import { getExpenses, addExpense } from "@/src/actions/expenseActions";
 
 export function ExpensesTable() {
   const [month, setMonth] = useState<number>(new Date().getMonth() + 1);
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [expenses, setExpenses] = useState<ExpenseItem[]>([]);
+  const [showDialog, setShowDialog] = useState(false);
 
   useEffect(() => {
-    // Временный мок, позже заменить на fetch из API
-    setExpenses([
-      {
-        date: "2025-05-04",
-        amount: 200,
-        target: "Ремонт шмота",
-        source: "Казна",
-        comment: "После осады",
-      },
-      {
-        date: "2025-04-20",
-        amount: 150,
-        target: "Баффы",
-        source: "Пожертвования",
-        comment: "Перед инстой",
-      },
-    ]);
+    const load = async () => {
+      const all = await getExpenses();
+      setExpenses(all);
+    };
+    load();
   }, []);
+
+  const handleAdd = async (exp: ExpenseItem) => {
+    await addExpense({
+      ...exp,
+      date:
+        typeof exp.date === "string"
+          ? exp.date
+          : exp.date.toISOString().split("T")[0],
+      comment: exp.comment ?? undefined, 
+    });
+    setExpenses(await getExpenses());
+    setShowDialog(false);
+  };
 
   const filteredExpenses = expenses.filter((e) => {
     const d = new Date(e.date);
@@ -50,8 +54,16 @@ export function ExpensesTable() {
         year={year}
         onMonthChange={setMonth}
         onYearChange={setYear}
-        onAddClick={() => alert("Добавить расход — не реализовано")}
+        onAddClick={() => setShowDialog(true)}
+        label="Добавить расход"
       />
+
+      <AddExpenseDialog
+        open={showDialog}
+        onClose={() => setShowDialog(false)}
+        onAdd={handleAdd}
+      />
+
       <div className="overflow-auto rounded-md border">
         <ScrollArea className="h-[1000px] w-full">
           <Table>

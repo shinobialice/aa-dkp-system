@@ -58,7 +58,7 @@ export function AddLootDialog({
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Добавить лут</DialogTitle>
+          <DialogTitle>Добавить доход</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-2 py-4">
           <Label>Предмет</Label>

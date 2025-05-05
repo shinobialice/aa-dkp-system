@@ -200,3 +200,12 @@ model GivenAwayLoot {
   @@map("givenawayloot")
   @@unique([user_id, name]) // для upsert
 }
+
+model Expense {
+  id        Int      @id @default(autoincrement())
+  date      DateTime
+  amount    Int
+  target    String
+  source    String
+  comment   String?
+}

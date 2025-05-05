@@ -6,12 +6,14 @@ export function LootTableControls({
   onMonthChange,
   onYearChange,
   onAddClick,
+  label = "Добавить",
 }: {
   month: number;
   year: number;
   onMonthChange: (m: number) => void;
   onYearChange: (y: number) => void;
   onAddClick: () => void;
+  label?: string;
 }) {
   return (
     <div className="flex gap-4 items-center">
@@ -39,7 +41,7 @@ export function LootTableControls({
         ))}
       </select>
 
-      <Button onClick={onAddClick}>Добавить лут</Button>
+      <Button onClick={onAddClick}>{label}</Button>
     </div>
   );
 }

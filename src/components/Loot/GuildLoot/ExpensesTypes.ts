@@ -1,8 +1,8 @@
 export type ExpenseItem = {
-    date: string;
-    amount: number;
-    target: string;
-    source: string;
-    comment: string;
-  };
-  
+  id?: number;
+  date: string | Date;
+  amount: number;
+  target: string;
+  source: string;
+  comment?: string | null;
+};

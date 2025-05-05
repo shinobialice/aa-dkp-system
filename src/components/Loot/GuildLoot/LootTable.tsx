@@ -72,6 +72,7 @@ export default function LootTable() {
               onMonthChange={setMonth}
               onYearChange={setYear}
               onAddClick={() => setShowDialog(true)}
+              label="Добавить доход"
             />
             <LootGroupedTable
               groupedLoot={grouped}
