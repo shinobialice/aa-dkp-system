@@ -131,6 +131,7 @@ export function LootGroupedTable({
                 soldToId, // ← обязательно передай сюда!
                 price,
                 comment,
+                quantity: 1,
               });
               await onSell(selectedItemId);
               setSelectedItemId(null);
