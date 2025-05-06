@@ -42,11 +42,13 @@ import {
   CollapsibleTrigger,
   CollapsibleContent,
 } from "@radix-ui/react-collapsible";
+import { NavUser } from "./NavUser";
 
 export function AppSidebar() {
   const { data: session } = useSession();
   const username = session?.user?.username ?? "Неизвестный пользователь";
   const { setTheme } = useTheme();
+  const userId = session?.user?.id;
   console.log("Session:", session);
 
   const menuItems = [
@@ -88,13 +90,13 @@ export function AppSidebar() {
                         className="group/collapsible w-full"
                       >
                         <SidebarMenuButton asChild>
-                          <CollapsibleTrigger className="flex items-center w-full gap-2 rounded-md p-2 text-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition">
+                          <CollapsibleTrigger className="flex items-center w-full gap-2 rounded-md p-2 text-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition cursor-pointer">
                             <item.icon className="h-5 w-5" />
                             <span className="truncate">{item.title}</span>
                             <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
                           </CollapsibleTrigger>
                         </SidebarMenuButton>
-                        <CollapsibleContent className="pl-7">
+                        <CollapsibleContent className="pl-7 ">
                           <SidebarMenu>
                             {item.items.map((subItem) => (
                               <SidebarMenuItem key={subItem.title}>
@@ -130,39 +132,12 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter>
-        <div className="text-center text-sm text-muted-foreground mb-2">
-          👤 Вошли как: <span className="font-medium">{username}</span>
-        </div>
         <SidebarMenu>
+          {/* Переключатель темы — теперь сверху */}
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuButton>
-                  <User className="h-5 w-5" />
-                  <span>Профиль</span>
-                  <ChevronUp className="ml-auto" />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                side="top"
-                className="w-[--radix-popper-anchor-width]"
-              >
-                <DropdownMenuItem asChild>
-                  <Link href="/profile/overview">Обзор</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => signOut({ callbackUrl: "/login" })}
-                >
-                  <span className="text-destructive">Выйти</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SidebarMenuItem>
-
-          <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton>
+                <SidebarMenuButton className="cursor-pointer">
                   <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                   <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
                   <span>Тема</span>
@@ -185,6 +160,17 @@ export function AppSidebar() {
               </DropdownMenuContent>
             </DropdownMenu>
           </SidebarMenuItem>
+
+          {/* NavUser — теперь снизу */}
+          {session?.user?.id && session.user.email && session.user.name && (
+            <NavUser
+              user={{
+                id: session.user.id,
+                name: session.user.username || session.user.name,
+                avatar: session.user.image || "",
+              }}
+            />
+          )}
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
