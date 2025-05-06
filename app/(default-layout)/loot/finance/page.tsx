@@ -18,6 +18,7 @@ import {
 } from "@/src/actions/financeActions";
 import { generateGuildFunds } from "@/src/actions/generateGuildFunds";
 import { Loader2 } from "lucide-react";
+import { useUserTag } from "@/src/hooks/useUserTag";
 
 export default function FinancePage() {
   const currentMonth = new Date().getMonth() + 1;
@@ -26,6 +27,8 @@ export default function FinancePage() {
   const [year, setYear] = useState(currentYear);
   const [loadingFund, setLoadingFund] = useState(false);
   const [loadingSalaries, setLoadingSalaries] = useState(false);
+  const isAdmin = useUserTag("Администратор");
+  const isModerator = useUserTag("Модератор");
 
   const [fund, setFund] = useState<null | {
     totalIncome: number;
@@ -72,72 +75,73 @@ export default function FinancePage() {
       <h1 className="text-2xl font-bold">
         Финансы гильдии — {month}/{year}
       </h1>
+      {isAdmin && (
+        <div className="flex items-center gap-4">
+          <select
+            value={month}
+            onChange={(e) => setMonth(+e.target.value)}
+            className="border rounded px-2 py-1"
+          >
+            {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+              <option key={m} value={m}>
+                {new Date(0, m - 1).toLocaleString("ru-RU", { month: "long" })}
+              </option>
+            ))}
+          </select>
+          <select
+            value={year}
+            onChange={(e) => setYear(+e.target.value)}
+            className="border rounded px-2 py-1"
+          >
+            {[2024, 2025, 2026].map((y) => (
+              <option key={y} value={y}>
+                {y}
+              </option>
+            ))}
+          </select>
+          <Button
+            onClick={async () => {
+              setLoadingFund(true);
+              try {
+                await handleGenerateFund();
+              } finally {
+                setLoadingFund(false);
+              }
+            }}
+            className="cursor-pointer"
+            disabled={loadingFund}
+          >
+            {loadingFund ? (
+              <Loader2 className="animate-spin w-4 h-4 mr-2" />
+            ) : (
+              "Сгенерировать фонд"
+            )}
+          </Button>
 
-      <div className="flex items-center gap-4">
-        <select
-          value={month}
-          onChange={(e) => setMonth(+e.target.value)}
-          className="border rounded px-2 py-1"
-        >
-          {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-            <option key={m} value={m}>
-              {new Date(0, m - 1).toLocaleString("ru-RU", { month: "long" })}
-            </option>
-          ))}
-        </select>
-        <select
-          value={year}
-          onChange={(e) => setYear(+e.target.value)}
-          className="border rounded px-2 py-1"
-        >
-          {[2024, 2025, 2026].map((y) => (
-            <option key={y} value={y}>
-              {y}
-            </option>
-          ))}
-        </select>
-        <Button
-          onClick={async () => {
-            setLoadingFund(true);
-            try {
-              await handleGenerateFund();
-            } finally {
-              setLoadingFund(false);
+          <Button
+            onClick={async () => {
+              setLoadingSalaries(true);
+              try {
+                await handleGenerateSalaries();
+              } finally {
+                setLoadingSalaries(false);
+              }
+            }}
+            disabled={!fund || loadingSalaries}
+            className={
+              !fund || loadingSalaries
+                ? "cursor-not-allowed opacity-50"
+                : "cursor-pointer"
             }
-          }}
-          className="cursor-pointer"
-          disabled={loadingFund}
-        >
-          {loadingFund ? (
-            <Loader2 className="animate-spin w-4 h-4 mr-2" />
-          ) : (
-            "Сгенерировать фонд"
-          )}
-        </Button>
-
-        <Button
-          onClick={async () => {
-            setLoadingSalaries(true);
-            try {
-              await handleGenerateSalaries();
-            } finally {
-              setLoadingSalaries(false);
-            }
-          }}
-          disabled={!fund || loadingSalaries}
-          className={
-            !fund || loadingSalaries
-              ? "cursor-not-allowed opacity-50"
-              : "cursor-pointer"
-          }
-        >
-          {loadingSalaries ? (
-            <Loader2 className="animate-spin w-4 h-4 mr-2" />
-          ) : (
-            "Распределить зарплаты"
-          )}
-        </Button>
-      </div>
+          >
+            {loadingSalaries ? (
+              <Loader2 className="animate-spin w-4 h-4 mr-2" />
+            ) : (
+              "Распределить зарплаты"
+            )}
+          </Button>
+        </div>
+      )}
 
       {fund && (
         <div className="grid grid-cols-2 gap-4 border rounded-md p-4 bg-muted/30">

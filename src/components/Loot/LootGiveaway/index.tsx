@@ -22,6 +22,7 @@ import {
 } from "@tanstack/react-table";
 import { saveGivenAwayLoot } from "@/src/actions/saveGivenAwayLoot";
 import { lootColumns } from "./lootColumns";
+import { useUserTag } from "@/src/hooks/useUserTag";
 
 interface LootItem {
   name: string;
@@ -46,6 +47,8 @@ export default function LootGiveaway({
   const [editMode, setEditMode] = useState(false);
   const [showInactive, setShowInactive] = useState(false);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const isAdmin = useUserTag("Администратор");
+  const isModerator = useUserTag("Модератор");
 
   const displayedPlayers = useMemo(
     () => allPlayers.filter((p) => p.active || showInactive),
@@ -195,9 +198,15 @@ export default function LootGiveaway({
     <div className="p-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-bold">Раздача лута</h2>
-        <Button className="cursor-pointer" variant="outline" onClick={() => setEditMode(!editMode)}>
-          {editMode ? "Сохранить" : "Редактировать"}
-        </Button>
+        {isAdmin && (
+          <Button
+            className="cursor-pointer"
+            variant="outline"
+            onClick={() => setEditMode(!editMode)}
+          >
+            {editMode ? "Сохранить" : "Редактировать"}
+          </Button>
+        )}
       </div>
 
       <div className="flex items-center justify-between mb-4">
@@ -212,7 +221,11 @@ export default function LootGiveaway({
           className="max-w-sm"
         />
         <div className="flex items-center gap-2">
-          <Switch checked={showInactive} onCheckedChange={setShowInactive} />
+          <Switch
+            className="cursor-pointer"
+            checked={showInactive}
+            onCheckedChange={setShowInactive}
+          />
           <span className="text-sm text-muted-foreground">
             Показать неактивных
           </span>

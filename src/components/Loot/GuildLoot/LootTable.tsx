@@ -9,6 +9,7 @@ import { AddLootDialog } from "./AddLootDialog";
 import { ExpensesTable } from "./ExpenseTable";
 import { LootGroupedTable } from "./LootGroupedTable";
 import { groupLootItems } from "./groupLootItems";
+import { useUserTag } from "@/src/hooks/useUserTag";
 
 type ExpenseItem = {
   date: string;
@@ -24,6 +25,8 @@ export default function LootTable() {
   const [month, setMonth] = useState<number>(new Date().getMonth() + 1);
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [showDialog, setShowDialog] = useState(false);
+  const isAdmin = useUserTag("Администратор");
+  const isModerator = useUserTag("Модератор");
 
   useEffect(() => {
     const loadData = async () => {
@@ -50,14 +53,16 @@ export default function LootTable() {
       <TabsContent value="income">
         <div>
           <div className="space-y-4">
-            <LootTableControls
-              month={month}
-              year={year}
-              onMonthChange={setMonth}
-              onYearChange={setYear}
-              onAddClick={() => setShowDialog(true)}
-              label="Добавить доход"
-            />
+            {isAdmin && (
+              <LootTableControls
+                month={month}
+                year={year}
+                onMonthChange={setMonth}
+                onYearChange={setYear}
+                onAddClick={() => setShowDialog(true)}
+                label="Добавить доход"
+              />
+            )}
             <LootGroupedTable
               groupedLoot={groupedLoot}
               loot={loot}

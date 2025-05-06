@@ -24,6 +24,7 @@ import { addToLootQueue } from "@/src/actions/addToLootQueue";
 import { updateLootQueueEntry } from "@/src/actions/updateLootQueueEntry";
 import type { LootQueueEntry } from "./LootQueueTypes";
 import { markQueueLootAsSold } from "@/src/actions/markQueueLootAsSold";
+import { useUserTag } from "@/src/hooks/useUserTag";
 
 const extendedItems = ["Эссенция ярости", "Трофейная эссенция стихий"];
 
@@ -39,6 +40,8 @@ export function LootQueuePopover({
   const [searchUser, setSearchUser] = useState("");
   const [selectedUser, setSelectedUser] = useState("");
   const [queue, setQueue] = useState<Record<string, LootQueueEntry[]>>({});
+  const isAdmin = useUserTag("Администратор");
+  const isModerator = useUserTag("Модератор");
 
   const [editMode, setEditMode] = useState(false);
   const isExtended = extendedItems.includes(itemName);
@@ -139,11 +142,13 @@ export function LootQueuePopover({
             <DialogTitle className="text-lg font-semibold">
               Очередь на: {itemName}
             </DialogTitle>
-            <EditToggleButton
-              classname="mr-4"
-              editMode={editMode}
-              toggle={() => setEditMode((prev) => !prev)}
-            />
+            {isAdmin && (
+              <EditToggleButton
+                classname="mr-4"
+                editMode={editMode}
+                toggle={() => setEditMode((prev) => !prev)}
+              />
+            )}
           </div>
         </DialogHeader>
 

@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { useUserTag } from "@/src/hooks/useUserTag";
 import { Pen } from "lucide-react";
 
 export function EditToggleButton({
@@ -10,21 +11,29 @@ export function EditToggleButton({
   toggle: () => void;
   classname?: string;
 }) {
+  const isAdmin = useUserTag("Администратор");
   return (
     <div className={`${classname}`}>
-      <Button className="cursor-pointer" size="sm" variant="outline" onClick={toggle}>
-        {(() => {
-          if (editMode) {
-            return "Сохранить";
-          } else {
-            return (
-              <>
-                <Pen className="h-3 w-3 mr-1" /> Редактировать
-              </>
-            );
-          }
-        })()}
-      </Button>
+      {isAdmin && (
+        <Button
+          className="cursor-pointer"
+          size="sm"
+          variant="outline"
+          onClick={toggle}
+        >
+          {(() => {
+            if (editMode) {
+              return "Сохранить";
+            } else {
+              return (
+                <>
+                  <Pen className="h-3 w-3 mr-1" /> Редактировать
+                </>
+              );
+            }
+          })()}
+        </Button>
+      )}
     </div>
   );
 }

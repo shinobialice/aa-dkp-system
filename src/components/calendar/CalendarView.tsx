@@ -16,6 +16,7 @@ import {
 import { getRaids } from "@/src/actions/getEvents";
 import { EventDialog } from "./EventDialog";
 import { getRaidById } from "@/src/actions/getRaidById";
+import { useUserTag } from "@/src/hooks/useUserTag";
 
 export default function ActivitiesPage() {
   const calendarRef = useRef<FullCalendar | null>(null);
@@ -33,6 +34,9 @@ export default function ActivitiesPage() {
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const isAdmin = useUserTag("Администратор");
+  const isModerator = useUserTag("Модератор");
+  const canEditEvents = isAdmin && isModerator;
 
   const handleEventClick = async (info: any) => {
     const fullEvent = await getRaidById(info.event.id);
@@ -92,16 +96,18 @@ export default function ActivitiesPage() {
           >
             <Calendar1 className="size-4" />
           </Button>
-          <Button
-          className="cursor-pointer"
-            variant="default"
-            onClick={() => {
-              setSelectedEvent(null);
-              setOpenDialog(true);
-            }}
-          >
-            Добавить активность
-          </Button>
+          {isAdmin && isModerator && (
+            <Button
+              className="cursor-pointer"
+              variant="default"
+              onClick={() => {
+                setSelectedEvent(null);
+                setOpenDialog(true);
+              }}
+            >
+              Добавить активность
+            </Button>
+          )}
         </div>
 
         <div className="space-y-2 mb-4">
@@ -126,11 +132,22 @@ export default function ActivitiesPage() {
                   <SelectItem value="monthGrid">Месяц</SelectItem>
                 </SelectContent>
               </Select>
-              <Button className="cursor-pointer" onClick={() => handleNav("today")}>Сегодня</Button>
-              <Button className="cursor-pointer" onClick={() => handleNav("prev")}>
+              <Button
+                className="cursor-pointer"
+                onClick={() => handleNav("today")}
+              >
+                Сегодня
+              </Button>
+              <Button
+                className="cursor-pointer"
+                onClick={() => handleNav("prev")}
+              >
                 <ChevronLeft />
               </Button>
-              <Button className="cursor-pointer" onClick={() => handleNav("next")}>
+              <Button
+                className="cursor-pointer"
+                onClick={() => handleNav("next")}
+              >
                 <ChevronRight />
               </Button>
             </div>
@@ -143,7 +160,7 @@ export default function ActivitiesPage() {
             plugins={[dayGridPlugin, timeGridPlugin, listPlugin]}
             initialView="timeGridWeek"
             events={events}
-            eventClick={handleEventClick}
+            eventClick={canEditEvents ? handleEventClick : undefined}
             headerToolbar={false}
             height="100%"
             locale="ru-RU"

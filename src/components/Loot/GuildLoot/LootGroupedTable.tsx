@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { LootIcon } from "../LootBuy/icons/LootIconComponent";
 import { sellGroupedLootItems } from "@/src/actions/sellGroupedLootItems";
+import { useUserTag } from "@/src/hooks/useUserTag";
 
 export function LootGroupedTable({
   groupedLoot,
@@ -41,9 +42,12 @@ export function LootGroupedTable({
   const [selectedGroup, setSelectedGroup] = useState<GroupedLootItem | null>(
     null
   );
+  const isAdmin = useUserTag("Администратор");
+  const isModerator = useUserTag("Модератор");
   const [dialogInitialPrice, setDialogInitialPrice] = useState<number>(0);
   const [maxQuantity, setMaxQuantity] = useState<number>(1);
   const [lootToDelete, setLootToDelete] = useState<LootItem | null>(null);
+
   const [selectedItemName, setSelectedItemName] = useState<
     string | undefined
   >();
@@ -90,18 +94,6 @@ export function LootGroupedTable({
     setDialogOpen(true);
   };
 
-  const handleDeleteClick = (group: GroupedLootItem) => {
-    const itemToDelete = loot.find(
-      (item) =>
-        item.itemTypeId === group.itemTypeId &&
-        item.status === group.status &&
-        (item.status === "Продано" || item.status === "Выдано")
-    );
-    if (itemToDelete) {
-      setLootToDelete(itemToDelete);
-    }
-  };
-
   return (
     <div className="overflow-auto rounded-md border">
       <ScrollArea className="h-[1000px] w-full">
@@ -118,7 +110,7 @@ export function LootGroupedTable({
               <TableHead>Продано</TableHead>
               <TableHead>Кому</TableHead>
               <TableHead>Комментарий</TableHead>
-              <TableHead>Действия</TableHead>
+              {isAdmin && <TableHead>Действия</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -151,33 +143,37 @@ export function LootGroupedTable({
                 <TableCell>
                   {Array.from(group.comments).join(" | ") || "—"}
                 </TableCell>
-                <TableCell>
-                  {(group.status === "Продано" ||
-                    group.status === "Выдано") && (
-                    <div className="flex gap-2">
-                      <Button
-                        className="cursor-pointer"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleEdit(group)}
-                      >
-                        <Pen className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  )}
-                  {(group.status === "В наличии" ||
-                    group.status === "Продаётся") && (
-                    <div className="flex gap-2">
-                      <Button
-                        className="cursor-pointer"
-                        variant="outline"
-                        onClick={() => handleSellClick(group)}
-                      >
-                        Продать
-                      </Button>
-                    </div>
-                  )}
-                </TableCell>
+                {isAdmin && (
+                  <TableCell>
+                    {(group.status === "Продано" ||
+                      group.status === "Выдано") && (
+                      <div className="flex gap-2">
+                        <Button
+                          className="cursor-pointer"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEdit(group)}
+                        >
+                          <Pen className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    )}
+                    {(group.status === "В наличии" ||
+                      group.status === "Продаётся") && (
+                      <div className="flex gap-2">
+                        {isAdmin && (
+                          <Button
+                            className="cursor-pointer"
+                            variant="outline"
+                            onClick={() => handleSellClick(group)}
+                          >
+                            Продать
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  </TableCell>
+                )}
               </TableRow>
             ))}
           </TableBody>

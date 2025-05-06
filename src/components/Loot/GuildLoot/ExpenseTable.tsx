@@ -14,12 +14,15 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AddExpenseDialog } from "./AddExpenseDialog";
 import { getExpenses, addExpense } from "@/src/actions/expenseActions";
+import { useUserTag } from "@/src/hooks/useUserTag";
 
 export function ExpensesTable() {
   const [month, setMonth] = useState<number>(new Date().getMonth() + 1);
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [expenses, setExpenses] = useState<ExpenseItem[]>([]);
   const [showDialog, setShowDialog] = useState(false);
+  const isAdmin = useUserTag("Администратор");
+  const isModerator = useUserTag("Модератор");
 
   useEffect(() => {
     const load = async () => {
@@ -36,7 +39,7 @@ export function ExpensesTable() {
         typeof exp.date === "string"
           ? exp.date
           : exp.date.toISOString().split("T")[0],
-      comment: exp.comment ?? undefined, 
+      comment: exp.comment ?? undefined,
     });
     setExpenses(await getExpenses());
     setShowDialog(false);
@@ -49,14 +52,16 @@ export function ExpensesTable() {
 
   return (
     <div className="col-span-2 space-y-4">
-      <LootTableControls
-        month={month}
-        year={year}
-        onMonthChange={setMonth}
-        onYearChange={setYear}
-        onAddClick={() => setShowDialog(true)}
-        label="Добавить расход"
-      />
+      {isAdmin && (
+        <LootTableControls
+          month={month}
+          year={year}
+          onMonthChange={setMonth}
+          onYearChange={setYear}
+          onAddClick={() => setShowDialog(true)}
+          label="Добавить расход"
+        />
+      )}
 
       <AddExpenseDialog
         open={showDialog}
