@@ -1,0 +1,18 @@
+"use server";
+
+import { prisma } from "@/lib/db";
+import { randomUUID } from "crypto";
+
+export async function createLinkToken(userId: number) {
+  const token = randomUUID();
+
+  await prisma.linkToken.create({
+    data: {
+      token,
+      userId,
+      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24), // 24h expiry
+    },
+  });
+
+  return `${process.env.NEXT_PUBLIC_BASE_URL}/link-account/${token}`; // <-- FIXED
+}
