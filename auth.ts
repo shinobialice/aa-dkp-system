@@ -30,7 +30,6 @@ export const {
   ],
   callbacks: {
     async jwt({ token, user }) {
-      // Only runs at sign-in or if user object is available
       if (user) {
         token.id = user.id;
         token.active = user.active;
@@ -38,7 +37,6 @@ export const {
       return token;
     },
     async session({ session, token }) {
-      // Attach token values to session
       if (token) {
         session.user.id = token.id;
         session.user.active = token.active;
@@ -71,13 +69,12 @@ export const {
               data: { used: true },
             });
 
-            return true; // ✅ Allow login
+            return true;
           }
 
-          return false; // 🚫 Invalid token
+          return false;
         }
 
-        // No token? Check if this googleId is already linked to an active user
         const existingUser = await prisma.user.findFirst({
           where: {
             googleId: account.providerAccountId,
@@ -85,10 +82,14 @@ export const {
           },
         });
 
-        return !!existingUser; // ✅ Allow only if already linked and active
+        return !!existingUser;
       }
 
-      return false; // 🚫 All other cases rejected
+      return false;
     },
+  },
+  pages: {
+    signIn: "/login",
+    error: "/auth/error",
   },
 });
