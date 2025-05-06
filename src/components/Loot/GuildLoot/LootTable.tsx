@@ -8,6 +8,7 @@ import { LootTableControls } from "./LootTableControls";
 import { AddLootDialog } from "./AddLootDialog";
 import { ExpensesTable } from "./ExpenseTable";
 import { LootGroupedTable } from "./LootGroupedTable";
+import { groupLootItems } from "./groupLootItems";
 
 type ExpenseItem = {
   date: string;
@@ -20,8 +21,6 @@ type ExpenseItem = {
 export default function LootTable() {
   const [loot, setLoot] = useState<LootItem[]>([]);
   const [itemTypes, setItemTypes] = useState<ItemType[]>([]);
-  const [expenses, setExpenses] = useState<ExpenseItem[]>([]);
-
   const [month, setMonth] = useState<number>(new Date().getMonth() + 1);
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [showDialog, setShowDialog] = useState(false);
@@ -39,11 +38,7 @@ export default function LootTable() {
     setLoot(await getLoot());
   };
 
-  const grouped = groupLoot(loot, month, year);
-  const filteredExpenses = expenses.filter((e) => {
-    const d = new Date(e.date);
-    return d.getMonth() + 1 === month && d.getFullYear() === year;
-  });
+  const groupedLoot = groupLootItems(loot);
 
   return (
     <Tabs defaultValue="income" className="w-full">
@@ -64,7 +59,7 @@ export default function LootTable() {
               label="Добавить доход"
             />
             <LootGroupedTable
-              groupedLoot={grouped}
+              groupedLoot={groupedLoot}
               loot={loot}
               setLoot={setLoot}
             />

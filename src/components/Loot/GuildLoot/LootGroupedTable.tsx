@@ -12,7 +12,7 @@ import { GroupedLootItem, LootItem } from "./LootTypes";
 import { SellLootDialog } from "./SellLootDialog";
 import { useEffect, useState } from "react";
 import { getActiveUsers } from "@/src/actions/getActiveUsers";
-import { getLoot, getLootQuantity } from "@/src/actions/lootActions";
+import { getLoot } from "@/src/actions/lootActions";
 import { distributeLootItem } from "@/src/actions/distributeLootItems";
 import { deleteLootItem } from "@/src/actions/deleteLootItem";
 import { Pen, Trash2 } from "lucide-react";
@@ -26,6 +26,7 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import { LootIcon } from "../LootBuy/icons/LootIconComponent";
+import { sellGroupedLootItems } from "@/src/actions/sellGroupedLootItems";
 
 export function LootGroupedTable({
   groupedLoot,
@@ -37,14 +38,15 @@ export function LootGroupedTable({
   setLoot: (loot: LootItem[]) => void;
 }) {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
+  const [selectedGroup, setSelectedGroup] = useState<GroupedLootItem | null>(
+    null
+  );
   const [dialogInitialPrice, setDialogInitialPrice] = useState<number>(0);
   const [maxQuantity, setMaxQuantity] = useState<number>(1);
   const [lootToDelete, setLootToDelete] = useState<LootItem | null>(null);
   const [selectedItemName, setSelectedItemName] = useState<
     string | undefined
   >();
-
   const [initialModeValues, setInitialModeValues] = useState<{
     soldTo?: string;
     soldToId?: number;
@@ -52,7 +54,6 @@ export function LootGroupedTable({
     price?: number;
     comment?: string;
   }>();
-
   const [activeUsers, setActiveUsers] = useState<
     { id: number; username: string }[]
   >([]);
@@ -66,46 +67,27 @@ export function LootGroupedTable({
   }, []);
 
   const handleSellClick = async (group: GroupedLootItem) => {
-    const itemToSell = loot.find(
-      (item) =>
-        item.itemTypeId === group.itemTypeId &&
-        item.status === group.status &&
-        item.status !== "Продано" &&
-        item.status !== "Выдано"
-    );
-    if (itemToSell) {
-      setSelectedItemId(itemToSell.id);
-      setSelectedItemName(group.name);
-      setDialogInitialPrice(itemToSell.itemType?.price ?? 0);
-      const quantityFromDb = await getLootQuantity(itemToSell.id);
-      setMaxQuantity(quantityFromDb || 1);
-      setInitialModeValues(undefined);
-      setDialogOpen(true);
-    }
+    setSelectedItemName(group.name);
+    setDialogInitialPrice(group.price ?? 0);
+    setMaxQuantity(group.total);
+    setInitialModeValues(undefined);
+    setSelectedGroup(group);
+    setDialogOpen(true);
   };
 
-  const handleEdit = (group: GroupedLootItem) => {
-    const itemToEdit = loot.find(
-      (item) =>
-        item.itemTypeId === group.itemTypeId &&
-        item.status === group.status &&
-        (item.status === "Продано" || item.status === "Выдано")
-    );
-
-    if (itemToEdit) {
-      setSelectedItemId(itemToEdit.id);
-      setSelectedItemName(group.name);
-      setDialogInitialPrice(itemToEdit.price ?? 0);
-      setMaxQuantity(itemToEdit.quantity ?? 1);
-      setInitialModeValues({
-        soldTo: itemToEdit.sold_to ?? undefined,
-        soldToId: itemToEdit.sold_to_user_id ?? undefined,
-        quantity: itemToEdit.quantity ?? 1,
-        price: itemToEdit.price ?? undefined,
-        comment: itemToEdit.comment ?? "",
-      });
-      setDialogOpen(true);
-    }
+  const handleEdit = async (group: GroupedLootItem) => {
+    setSelectedItemName(group.name);
+    setDialogInitialPrice(group.price ?? 0);
+    setMaxQuantity(group.total);
+    setInitialModeValues({
+      soldTo: Array.from(group.sold_to)[0],
+      quantity: group.total,
+      price: group.price ?? undefined,
+      comment: Array.from(group.comments).join(" | "),
+      soldToId: undefined,
+    });
+    setSelectedGroup(group);
+    setDialogOpen(true);
   };
 
   const handleDeleteClick = (group: GroupedLootItem) => {
@@ -115,7 +97,6 @@ export function LootGroupedTable({
         item.status === group.status &&
         (item.status === "Продано" || item.status === "Выдано")
     );
-
     if (itemToDelete) {
       setLootToDelete(itemToDelete);
     }
@@ -182,25 +163,19 @@ export function LootGroupedTable({
                       >
                         <Pen className="w-4 h-4" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        className="cursor-pointer"
-                        size="icon"
-                        onClick={() => handleDeleteClick(group)}
-                      >
-                        <Trash2 className="w-4 h-4 text-red-500" />
-                      </Button>
                     </div>
                   )}
                   {(group.status === "В наличии" ||
                     group.status === "Продаётся") && (
-                    <Button
-                      className="cursor-pointer"
-                      variant="outline"
-                      onClick={() => handleSellClick(group)}
-                    >
-                      Продать
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        className="cursor-pointer"
+                        variant="outline"
+                        onClick={() => handleSellClick(group)}
+                      >
+                        Продать
+                      </Button>
+                    </div>
                   )}
                 </TableCell>
               </TableRow>
@@ -209,42 +184,57 @@ export function LootGroupedTable({
         </Table>
       </ScrollArea>
 
-      {selectedItemId !== null && (
-        <SellLootDialog
-          open={dialogOpen}
-          maxQuantity={maxQuantity}
-          editMode={!!initialModeValues}
-          itemName={selectedItemName}
-          onClose={() => setDialogOpen(false)}
-          users={activeUsers.map(({ id, username }) => ({ id, username }))}
-          initialPrice={dialogInitialPrice}
-          initialValues={initialModeValues}
-          onConfirm={async ({
+      <SellLootDialog
+        open={dialogOpen}
+        maxQuantity={maxQuantity}
+        editMode={!!initialModeValues}
+        itemName={selectedItemName}
+        onClose={() => {
+          setDialogOpen(false);
+          setSelectedGroup(null);
+        }}
+        users={activeUsers.map(({ id, username }) => ({ id, username }))}
+        initialPrice={dialogInitialPrice}
+        initialValues={initialModeValues}
+        onConfirm={async ({
+          soldTo,
+          soldToId,
+          price,
+          comment,
+          quantity,
+          isFree,
+        }) => {
+          if (!selectedGroup) return;
+
+          // Удалить все проданные записи этой группы
+          const groupItems = loot.filter(
+            (item) =>
+              item.itemTypeId === selectedGroup.itemTypeId &&
+              item.status === selectedGroup.status &&
+              (item.status === "Продано" || item.status === "Выдано")
+          );
+
+          for (const item of groupItems) {
+            await deleteLootItem(item.id);
+          }
+
+          // Создать одну новую запись с нужным количеством
+          await distributeLootItem({
+            lootId: groupItems[0]?.id ?? 0, // любой id, он не используется
             soldTo,
             soldToId,
-            price,
-            comment,
             quantity,
-            isFree,
-          }) => {
-            if (selectedItemId !== null) {
-              await distributeLootItem({
-                lootId: selectedItemId,
-                soldTo,
-                soldToId,
-                quantity,
-                isFree: !!isFree,
-                comment,
-                price: isFree ? 0 : price,
-              });
-              const updatedLoot = await getLoot();
-              setLoot(updatedLoot);
-              setSelectedItemId(null);
-              setInitialModeValues(undefined);
-            }
-          }}
-        />
-      )}
+            isFree: !!isFree,
+            comment,
+            price,
+          });
+
+          const updatedLoot = await getLoot();
+          setLoot(updatedLoot);
+          setSelectedGroup(null);
+          setInitialModeValues(undefined);
+        }}
+      />
 
       <AlertDialog
         open={!!lootToDelete}
