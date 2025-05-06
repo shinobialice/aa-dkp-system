@@ -30,6 +30,10 @@ model User {
   inventory                  UserInventory[]
   salaryBonuses              UserSalaryBonus[]
   tags                       UserTags[]        @relation("UserTags")
+  googleId                   String? @unique
+  vkId                       String? @unique
+  linkTokens LinkToken[] @relation("UserToLinkTokens")
+
 
   @@map("user")
 }
@@ -223,4 +227,15 @@ model UserSalaryBonus {
   user       User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@map("user_salary_bonus")
+}
+
+model LinkToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  user      User     @relation("UserToLinkTokens", fields: [userId], references: [id])
+  userId    Int
+  expiresAt DateTime
+  used      Boolean  @default(false)
+
+  @@map("link_token")
 }
