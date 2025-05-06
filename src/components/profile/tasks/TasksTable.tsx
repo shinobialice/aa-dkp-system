@@ -31,6 +31,7 @@ import {
 import React from "react";
 import { Task } from "./types/task";
 import deleteUserTask from "@/src/actions/deleteUserTask";
+import { useUserTag } from "@/src/hooks/useUserTag";
 
 interface TasksTableClientProps {
   tasks: Task[];
@@ -45,13 +46,15 @@ export default function TasksTable({
 }: TasksTableClientProps) {
   const [openDialogId, setOpenDialogId] = React.useState<number | null>(null);
   const [editDialogTask, setEditDialogTask] = React.useState<Task | null>(null);
+  const isAdmin = useUserTag("Администратор");
+  const isModerator = useUserTag("Модератор");
 
   return (
     <Card>
       <CardHeader className="border-b">
         <CardTitle className="flex items-center justify-between">
           Задания игрока
-          <CreateTaskPopover userId={userId} onChange={onChange} />
+          {isAdmin && <CreateTaskPopover userId={userId} onChange={onChange} />}
         </CardTitle>
       </CardHeader>
       {(() => {
@@ -94,30 +97,32 @@ export default function TasksTable({
                           : "—"}
                       </TableCell>
                       <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              className="flex size-8 text-muted-foreground cursor-pointer data-[state=open]:bg-muted"
-                              size="icon"
-                            >
-                              <MoreVerticalIcon />
-                              <span className="sr-only">Открыть меню</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-32">
-                            <DropdownMenuItem
-                              onClick={() => setEditDialogTask(task)}
-                            >
-                              Изменить
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => setOpenDialogId(task.id)}
-                            >
-                              Удалить
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        {isAdmin && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                className="flex size-8 text-muted-foreground cursor-pointer data-[state=open]:bg-muted"
+                                size="icon"
+                              >
+                                <MoreVerticalIcon />
+                                <span className="sr-only">Открыть меню</span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-32">
+                              <DropdownMenuItem
+                                onClick={() => setEditDialogTask(task)}
+                              >
+                                Изменить
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => setOpenDialogId(task.id)}
+                              >
+                                Удалить
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
 
                         <AlertDialog
                           open={openDialogId === task.id}

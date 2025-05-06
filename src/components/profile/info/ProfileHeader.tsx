@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Pencil, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import editUser from "@/src/actions/editUser";
+import { useUserTag } from "@/src/hooks/useUserTag";
 
 const badgeColors: { [key: string]: string } = {
   Активен: "rgb(47, 158, 98)",
@@ -34,6 +35,8 @@ export default function ProfileHeader({
   setEditMode: (v: boolean) => void;
   tags: { id: number; tag: string }[];
 }) {
+  const isAdmin = useUserTag("Администратор");
+  const isModerator = useUserTag("Модератор");
   return (
     <CardHeader className="flex flex-col items-center">
       <div className="relative flex justify-center w-full">
@@ -62,14 +65,16 @@ export default function ProfileHeader({
               <Check />
             </Button>
           )}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8 text-muted-foreground cursor-pointer"
-            onClick={() => setEditMode(!editMode)}
-          >
-            <Pencil />
-          </Button>
+          {isAdmin && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8 text-muted-foreground cursor-pointer"
+              onClick={() => setEditMode(!editMode)}
+            >
+              <Pencil />
+            </Button>
+          )}
         </div>
 
         <Avatar className="h-20 w-20 mb-4">
