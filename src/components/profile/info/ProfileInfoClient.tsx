@@ -5,7 +5,14 @@ import ProfileHeader from "./ProfileHeader";
 import ProfileClasses from "./ProfileClasses";
 import ProfileAdditionalInfo from "./ProfileAdditionalInfo";
 
-export default function ProfileInfoClient({ user }: { user: any }) {
+export default function ProfileInfoClient({
+  user,
+  tags: initialTags,
+}: {
+  user: any;
+  tags: any[];
+}) {
+  const [tags, setTags] = useState(initialTags);
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({
     username: user.username,
@@ -19,6 +26,10 @@ export default function ProfileInfoClient({ user }: { user: any }) {
       ? new Date(user.joined_at).toISOString().split("T")[0]
       : "",
   });
+
+  useEffect(() => {
+    setTags(initialTags);
+  }, [initialTags]);
 
   useEffect(() => {
     const fetchVkName = async () => {
@@ -43,6 +54,7 @@ export default function ProfileInfoClient({ user }: { user: any }) {
         setFormData={setFormData}
         editMode={editMode}
         setEditMode={setEditMode}
+        tags={tags}
       />
       <CardContent className="space-y-4">
         <ProfileClasses

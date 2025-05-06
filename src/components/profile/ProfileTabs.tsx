@@ -11,17 +11,27 @@ export default function ProfileTabs({
   user,
   inventory: initialInventory,
   tasks: initialTasks,
+  tags,
+  setTags,
+  setUser, // ✅
 }: {
   user: any;
   inventory: any[];
   tasks: any[];
+  tags: any[];
+  setTags: (tags: any[]) => void;
+  setUser: (user: any) => void; // ✅
 }) {
-  const [inventory, setInventory] = useState<any[]>(initialInventory);
-  const [tasks, setTasks] = useState<any[]>(initialTasks);
+  const [inventory, setInventory] = useState(initialInventory);
+  const [tasks, setTasks] = useState(initialTasks);
 
   useEffect(() => {
     setInventory(initialInventory);
   }, [initialInventory]);
+
+  useEffect(() => {
+    setTasks(initialTasks);
+  }, [initialTasks]);
 
   return (
     <Tabs defaultValue="inventory">
@@ -36,8 +46,8 @@ export default function ProfileTabs({
           inventory={inventory}
           userId={user.id}
           onChange={async () => {
-            const inventory = await getUserInventory(user.id);
-            setInventory(inventory);
+            const updatedInventory = await getUserInventory(user.id);
+            setInventory(updatedInventory);
           }}
         />
       </TabsContent>
@@ -47,14 +57,19 @@ export default function ProfileTabs({
           tasks={tasks}
           userId={user.id}
           onChange={async () => {
-            const tasks = await getUserTasks(user.id);
-            setTasks(tasks);
+            const updatedTasks = await getUserTasks(user.id);
+            setTasks(updatedTasks);
           }}
         />
       </TabsContent>
 
       <TabsContent value="notes">
-        <UserNotes user={user} />
+        <UserNotes
+          user={user}
+          initialTags={tags}
+          updateTags={setTags}
+          setUser={setUser} // ✅ вот это должно быть
+        />
       </TabsContent>
     </Tabs>
   );

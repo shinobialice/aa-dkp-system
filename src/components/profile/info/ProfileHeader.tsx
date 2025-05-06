@@ -13,12 +13,9 @@ const badgeColors: { [key: string]: string } = {
   Сноровка: "rgb(90, 54, 165)",
   Крит: "rgb(215, 100, 168)",
   ДВ: "rgb(232, 157, 53)",
-  "World Boss": "rgb(201, 52, 52)",
-  "Arch Boss": "rgb(47, 158, 98)",
   Двурук: "rgb(0, 148, 168)",
   Каст: "rgb(157, 41, 41)",
   Деф: "rgb(40, 111, 180)",
-  "Guild Contract": "rgb(138, 81, 184)",
   Модератор: "rgb(58, 76, 92)",
 };
 
@@ -28,12 +25,14 @@ export default function ProfileHeader({
   setFormData,
   editMode,
   setEditMode,
+  tags,
 }: {
   user: any;
   formData: any;
   setFormData: (data: any) => void;
   editMode: boolean;
   setEditMode: (v: boolean) => void;
+  tags: { id: number; tag: string }[];
 }) {
   return (
     <CardHeader className="flex flex-col items-center">
@@ -120,7 +119,7 @@ export default function ProfileHeader({
             Получает зарплату
           </Badge>
         )}
-        {user.tags?.map((tag: { id: number; tag: string }) => (
+        {tags?.map((tag) => (
           <Badge
             key={tag.id}
             className="text-background"
