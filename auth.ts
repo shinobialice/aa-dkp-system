@@ -1,18 +1,17 @@
-import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import VkProvider from "next-auth/providers/vk";
 import MailRuProvider from "next-auth/providers/mailru";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/db";
 import { cookies } from "next/headers";
+import type {
+  NextAuthOptions,
+  Account,
+  Session,
+  User as NextAuthUser,
+} from "next-auth";
+import type { JWT } from "next-auth/jwt";
 
-const prisma = new PrismaClient();
-
-export const {
-  handlers: { GET, POST },
-  auth,
-  signIn,
-  signOut,
-} = NextAuth({
+const authConfig: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   providers: [
     GoogleProvider({
@@ -24,72 +23,138 @@ export const {
       clientSecret: process.env.VK_CLIENT_SECRET!,
     }),
     MailRuProvider({
-      clientId: process.env.MAILRU_CLIENT_ID,
-      clientSecret: process.env.MAILRU_CLIENT_SECRET,
+      clientId: process.env.MAILRU_CLIENT_ID!,
+      clientSecret: process.env.MAILRU_CLIENT_SECRET!,
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-        token.active = user.active;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (token) {
-        session.user.id = token.id;
-        session.user.active = token.active;
-      }
-      return session;
-    },
-    async signIn({ account, profile }) {
-      if (account?.provider === "google") {
-        const cookieStore = await cookies();
-        const token = cookieStore.get("link-token")?.value;
+    async signIn({ account }: { account: Account | null }) {
+      if (!account?.provider || !account.providerAccountId) return false;
 
-        if (token) {
-          const linkToken = await prisma.linkToken.findFirst({
-            where: {
-              token,
-              used: false,
-              expiresAt: { gt: new Date() },
+      const cookieStore = cookies();
+      const token = (await cookieStore).get("link-token")?.value;
+
+      if (token) {
+        const linkToken = await prisma.linkToken.findFirst({
+          where: {
+            token,
+            used: false,
+            expiresAt: { gt: new Date() },
+          },
+          include: { user: true },
+        });
+
+        if (linkToken) {
+          await prisma.user.update({
+            where: { id: linkToken.userId },
+            data: {
+              googleId:
+                account.provider === "google"
+                  ? account.providerAccountId
+                  : undefined,
+              vkId:
+                account.provider === "vk"
+                  ? account.providerAccountId
+                  : undefined,
             },
-            include: { user: true },
           });
 
-          if (linkToken) {
-            await prisma.user.update({
-              where: { id: linkToken.userId },
-              data: { googleId: account.providerAccountId },
-            });
+          await prisma.linkToken.update({
+            where: { id: linkToken.id },
+            data: { used: true },
+          });
 
-            await prisma.linkToken.update({
-              where: { id: linkToken.id },
-              data: { used: true },
-            });
-
-            return true;
-          }
-
-          return false;
+          return true;
         }
 
-        const existingUser = await prisma.user.findFirst({
+        return false;
+      }
+
+      const existingUser = await prisma.user.findFirst({
+        where: {
+          active: true,
+          OR: [
+            {
+              googleId:
+                account.provider === "google"
+                  ? account.providerAccountId
+                  : undefined,
+            },
+            {
+              vkId:
+                account.provider === "vk"
+                  ? account.providerAccountId
+                  : undefined,
+            },
+            {
+              vkId:
+                account.provider === "mailru"
+                  ? account.providerAccountId
+                  : undefined,
+            },
+          ],
+        },
+      });
+
+      return !!existingUser;
+    },
+
+    async jwt({ token, user, account }) {
+      if (user) {
+        // First login
+        const dbUser = await prisma.user.findFirst({
           where: {
-            googleId: account.providerAccountId,
+            OR: [
+              {
+                googleId:
+                  account?.provider === "google"
+                    ? account.providerAccountId
+                    : undefined,
+              },
+              {
+                vkId:
+                  account?.provider === "vk"
+                    ? account.providerAccountId
+                    : undefined,
+              },
+              {
+                vkId:
+                  account?.provider === "mailru"
+                    ? account.providerAccountId
+                    : undefined,
+              },
+            ],
+          },
+          select: {
+            id: true,
             active: true,
+            username: true,
           },
         });
 
-        return !!existingUser;
+        if (dbUser) {
+          token.id = dbUser.id;
+          token.active = dbUser.active;
+          token.username = dbUser.username;
+        }
       }
 
-      return false;
+      return token;
+    },
+
+    async session({ session, token }: { session: Session; token: JWT }) {
+      console.log("[SESSION] before enrich:", session);
+      session.user.id = token.id;
+      session.user.active = token.active;
+      session.user.username = token.username;
+      console.log("[SESSION] enriched:", session);
+      return session;
     },
   },
   pages: {
     signIn: "/login",
     error: "/auth/error",
   },
-});
+};
+
+export default authConfig;

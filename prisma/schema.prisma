@@ -8,7 +8,7 @@ datasource db {
 }
 
 model User {
-  id                         Int               @id
+id Int @id @default(autoincrement())
   username                   String
   class                      String?
   secondary_class            String?
@@ -20,6 +20,9 @@ model User {
   joined_at                  DateTime?
   created_at                 DateTime
   salaryBonus                Int?              @default(0)
+  googleId                   String?           @unique @map("google_id")
+  vkId                       String?           @unique @map("vk_id")
+
   salaries                   Salary[]
   givenAwayLoot              GivenAwayLoot[]
   soldLoot                   Loot[]            @relation("UserSoldLoot")
@@ -30,13 +33,11 @@ model User {
   inventory                  UserInventory[]
   salaryBonuses              UserSalaryBonus[]
   tags                       UserTags[]        @relation("UserTags")
-  googleId                   String? @unique
-  vkId                       String? @unique
-  linkTokens LinkToken[] @relation("UserToLinkTokens")
-
+  linkTokens                 LinkToken[]       @relation("UserToLinkTokens")
 
   @@map("user")
 }
+
 
 model UserTags {
   id         Int      @id @default(autoincrement())

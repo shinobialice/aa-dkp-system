@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import {
   Moon,
@@ -44,7 +44,10 @@ import {
 } from "@radix-ui/react-collapsible";
 
 export function AppSidebar() {
+  const { data: session } = useSession();
+  const username = session?.user?.username ?? "Неизвестный пользователь";
   const { setTheme } = useTheme();
+  console.log("Session:", session);
 
   const menuItems = [
     { title: "Панель", url: "/", icon: LayoutDashboard },
@@ -127,6 +130,9 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter>
+        <div className="text-center text-sm text-muted-foreground mb-2">
+          👤 Вошли как: <span className="font-medium">{username}</span>
+        </div>
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
