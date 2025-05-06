@@ -1,5 +1,7 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import VkProvider from "next-auth/providers/vk";
+import MailRuProvider from "next-auth/providers/mailru";
 import { PrismaClient } from "@prisma/client";
 import { cookies } from "next/headers";
 
@@ -16,6 +18,14 @@ export const {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
+    VkProvider({
+      clientId: process.env.VK_CLIENT_ID!,
+      clientSecret: process.env.VK_CLIENT_SECRET!,
+    }),
+    MailRuProvider({
+      clientId: process.env.MAILRU_CLIENT_ID,
+      clientSecret: process.env.MAILRU_CLIENT_SECRET,
     }),
   ],
   callbacks: {
