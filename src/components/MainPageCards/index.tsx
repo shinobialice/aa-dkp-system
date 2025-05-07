@@ -42,7 +42,6 @@ const MainPageCards: FC = () => {
         const data = await getStats();
         setStats(data);
       } catch (error) {
-        console.error("Ошибка при загрузке статистики:", error);
       }
     };
 

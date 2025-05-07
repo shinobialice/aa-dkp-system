@@ -142,11 +142,10 @@ const authConfig: NextAuthOptions = {
     },
 
     async session({ session, token }: { session: Session; token: JWT }) {
-      console.log("[SESSION] before enrich:", session);
       session.user.id = token.id;
       session.user.active = token.active;
       session.user.username = token.username;
-      console.log("[SESSION] enriched:", session);
+
       return session;
     },
   },

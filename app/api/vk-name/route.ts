@@ -26,7 +26,6 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
   } catch (error) {
-    console.error("VK API error:", error);
     return NextResponse.json(
       { error: "Failed to fetch VK data" },
       { status: 500 }

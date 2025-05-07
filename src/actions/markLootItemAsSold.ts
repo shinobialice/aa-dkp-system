@@ -19,13 +19,7 @@ export const markLootItemAsSold = async ({
   quantity: number;
   isFree?: boolean;
 }) => {
-  console.log("✅ markLootItemAsSold()", {
-    lootId,
-    soldTo,
-    price,
-    quantity,
-    isFree,
-  });
+
   const loot = await prisma.loot.findUnique({
     where: { id: lootId },
     include: { itemType: true },
@@ -48,11 +42,8 @@ export const markLootItemAsSold = async ({
       status: remainingQuantity === 0 ? "Продано" : "В наличии",
     },
   });
-  console.log(
-    "🧾 Creating new loot record with status:",
-    isFree ? "Выдано" : "Продано"
-  );
-
+  
+ 
   await prisma.loot.create({
     data: {
       itemTypeId: loot.itemTypeId,

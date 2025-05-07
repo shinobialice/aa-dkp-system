@@ -51,7 +51,6 @@ export function AppSidebar() {
   const { setTheme } = useTheme();
   const userId = session?.user?.id;
   const isAdmin = useUserTag("Администратор");
-  console.log("Session:", session);
 
   const menuItems = [
     { title: "Панель", url: "/", icon: LayoutDashboard },

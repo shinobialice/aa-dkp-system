@@ -36,20 +36,6 @@ export async function getUserMonthlyAttendance(
       0
     );
     const attended = raid.attendance.some((a) => a.user_id === userId);
-    console.log(
-      "raid",
-      raid.type,
-      raid.id,
-      "attended by",
-      raid.attendance.map((a) => a.user_id)
-    );
-    console.log("userId", userId);
-    console.log("All raids found:", allRaids.length);
-    allRaids.forEach((r) => console.log("Raid", r.id, r.type, r.start_date));
-    if (!raid.start_date) {
-      console.warn(`Raid ${raid.id} has no start_date`);
-      return;
-    }
 
     if (raid.type === "Прайм") {
       totalPrime += dkp;

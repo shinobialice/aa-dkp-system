@@ -31,7 +31,6 @@ export default function LinkAccountPage() {
         return res.json();
       })
       .then((data) => {
-        console.log("User info fetched:", data);
         setUserInfo(data);
       })
       .catch(() => {

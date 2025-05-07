@@ -81,7 +81,6 @@ export function UserActivityChart({ userId }: { userId: number }) {
   }, [selectedYear, selectedMonth]);
 
   React.useEffect(() => {
-    console.log("Fetching activity for user:", userId);
     getUserActivity(userId).then(setChartData);
   }, [userId]);
 

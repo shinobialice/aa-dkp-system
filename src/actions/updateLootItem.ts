@@ -23,7 +23,6 @@ export async function updateLootItem({
       },
     });
   } catch (error) {
-    console.error("Ошибка при обновлении предмета:", error);
     throw new Error("Не удалось обновить предмет");
   }
 }

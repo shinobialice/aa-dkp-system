@@ -1,21 +1,21 @@
-import { useState } from 'react';
+import { useState } from "react";
 
 export default function OCRUploader() {
-  const [text, setText] = useState('');
+  const [text, setText] = useState("");
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const file = e.target.files[0];
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append("image", file);
 
-    const res = await fetch('/api/analyze', {
-      method: 'POST',
+    const res = await fetch("/api/analyze", {
+      method: "POST",
       body: formData,
     });
 
     const data = await res.json();
-    console.log(data);
+
     setText(JSON.stringify(data, null, 2));
   };
 

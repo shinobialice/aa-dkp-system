@@ -106,19 +106,15 @@ export function SellLootDialog({
   }, [open, editMode, initialValues, initialPrice]);
 
   const handleSubmit = () => {
-    console.log("📤 SellLootDialog → onConfirm", {
-      soldTo,
-      price,
-      quantity,
-      isFree,
-    });
+    
 
-    console.log("Проверка данных перед отправкой...");
-    console.log("soldTo:", soldTo);
-    console.log("price:", price);
-    console.log("quantity:", quantity);
-    console.log("isFree:", isFree);
-    console.log("maxQuantity:", effectiveMaxQuantity);
+
+    
+    
+    
+    
+    
+    
 
     if (
       !soldTo ||
@@ -126,12 +122,12 @@ export function SellLootDialog({
       quantity > effectiveMaxQuantity ||
       (!isFree && price <= 0)
     ) {
-      console.log("Ошибка валидации: данные не прошли проверку.");
+      
       alert("Проверьте данные перед сохранением");
       return;
     }
 
-    console.log("Данные прошли валидацию. Отправка...");
+    
     onConfirm({
       soldTo,
       soldToId,
@@ -141,7 +137,7 @@ export function SellLootDialog({
       isFree,
     });
 
-    console.log("Закрытие диалога и сброс данных");
+    
     onClose();
     setSoldTo("");
     setSoldToId(undefined);

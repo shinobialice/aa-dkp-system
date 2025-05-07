@@ -13,7 +13,6 @@ export function useUserTag(tag: string) {
         const json = await res.json();
         setHasTag(json.hasTag === true);
       } catch (err) {
-        console.error("Ошибка при получении тега:", err);
       }
     };
     checkTag();

@@ -30,7 +30,6 @@ export async function saveLootDistribution(players: Player[]) {
       });
 
       if (!itemType) {
-        console.warn(`Предмет '${itemName}' не найден в item_type — пропущен`);
         continue;
       }
 

@@ -81,7 +81,6 @@ export default function InventoryRow({
       }
       onChange();
     } catch (err) {
-      console.error("Ошибка при обновлении:", err);
     }
   };
 
