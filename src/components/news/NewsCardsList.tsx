@@ -1,5 +1,9 @@
 "use client";
 
+import { useState } from "react";
+import { Trash2, Pencil } from "lucide-react";
+import { NewsFormDialog } from "./NewsFormDialog";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -7,14 +11,10 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { Trash2, Pencil } from "lucide-react";
-import { NewsFormDialog } from "./NewsFormDialog";
-import { useUserTag } from "@/src/hooks/useUserTag";
 import { deleteNews, updateNews } from "@/src/actions/news";
+import { useUserTag } from "@/src/hooks/useUserTag";
 
-interface NewsItem {
+type NewsItem = {
   id: number;
   title: string;
   date: string;
@@ -36,7 +36,7 @@ export default function NewsCardList({
   };
 
   const handleUpdate = async (data: { title: string; content: string }) => {
-    if (!editing) return;
+    if (!editing) {return;}
     const updated = await updateNews(editing.id, data.title, data.content);
 
     const updatedFixed: NewsItem = {
@@ -95,7 +95,7 @@ export default function NewsCardList({
 
       {editing && (
         <NewsFormDialog
-          open={true}
+          open
           onClose={() => setEditing(null)}
           initialData={editing}
           onSubmit={handleUpdate}

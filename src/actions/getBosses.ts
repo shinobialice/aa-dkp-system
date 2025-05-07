@@ -2,8 +2,7 @@
 
 import prisma from "@/lib/db";
 
-export const getBosses = async () => {
-  return await prisma.boss.findMany({
+export const getBosses = async () => await prisma.boss.findMany({
     select: {
       id: true,
       boss_name: true,
@@ -11,4 +10,3 @@ export const getBosses = async () => {
       category: true,
     },
   });
-};

@@ -1,5 +1,3 @@
-"use client";
-
 import { Toaster } from "@/components/sonner";
 import { Separator } from "@/components/ui/separator";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -13,7 +11,7 @@ export default function DefaultLayout({
 }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <SidebarProvider defaultOpen={true}>
+      <SidebarProvider defaultOpen>
         <div className="flex bg-background text-foreground w-full">
           <AppSidebar />
           <div className="flex flex-col flex-1">

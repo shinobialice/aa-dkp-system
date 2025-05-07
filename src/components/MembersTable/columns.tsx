@@ -1,14 +1,13 @@
-import { ArrowUpDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import * as React from "react";
 import { ColumnDef } from "@tanstack/react-table";
+import { ArrowUpDown } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export const columns: ColumnDef<any>[] = [
   {
     accessorKey: "username",
-    header: ({ column }) => {
-      return (
+    header: ({ column }) => (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
@@ -16,8 +15,7 @@ export const columns: ColumnDef<any>[] = [
           Ник
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
-      );
-    },
+      ),
     cell: ({ row }) => (
       <Link href={`/profile/${row.original.id}`} className=" underline">
         {row.original.username}

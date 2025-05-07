@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable react-hooks/exhaustive-deps */
-import { Loader } from "lucide-react";
 import { useEffect, useState, FC } from "react";
+import { Loader } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import getStats from "@/src/actions/getStats";
 

@@ -1,8 +1,9 @@
 "use client";
-import Link from "next/link";
-import {  useSession } from "next-auth/react";
-import { useTheme } from "next-themes";
-import { useUserTag } from "@/src/hooks/useUserTag";
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "@radix-ui/react-collapsible";
 import {
   Moon,
   Sun,
@@ -20,6 +21,16 @@ import {
   BadgeDollarSign,
   HandCoins,
 } from "lucide-react";
+import Link from "next/link";
+import {  useSession } from "next-auth/react";
+import { useTheme } from "next-themes";
+import { NavUser } from "./NavUser";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Sidebar,
   SidebarContent,
@@ -31,18 +42,7 @@ import {
   SidebarMenuItem,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Collapsible,
-  CollapsibleTrigger,
-  CollapsibleContent,
-} from "@radix-ui/react-collapsible";
-import { NavUser } from "./NavUser";
+import { useUserTag } from "@/src/hooks/useUserTag";
 
 export function AppSidebar() {
   const { data: session } = useSession();
@@ -69,7 +69,7 @@ export function AppSidebar() {
   ];
 
   const visibleMenuItems = menuItems.filter((item) => {
-    if (item.url === "/settings" && !isAdmin) return false;
+    if (item.url === "/settings" && !isAdmin) {return false;}
     return true;
   });
 
@@ -116,7 +116,7 @@ export function AppSidebar() {
                       </Collapsible>
                     </SidebarMenuItem>
                   );
-                } else {
+                } 
                   return (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild>
@@ -127,7 +127,7 @@ export function AppSidebar() {
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   );
-                }
+                
               })}
             </SidebarMenu>
           </SidebarGroupContent>

@@ -1,13 +1,13 @@
 "use client";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useState, useEffect } from "react";
-import { getLoot, addLootItem, getItemTypes } from "@/src/actions/lootActions";
-import { LootItem, ItemType, NewLootItem } from "./LootTypes";
-import { LootTableControls } from "./LootTableControls";
 import { AddLootDialog } from "./AddLootDialog";
 import { ExpensesTable } from "./ExpenseTable";
-import { LootGroupedTable } from "./LootGroupedTable";
 import { groupLootItems } from "./groupLootItems";
+import { LootGroupedTable } from "./LootGroupedTable";
+import { LootTableControls } from "./LootTableControls";
+import { LootItem, ItemType, NewLootItem } from "./LootTypes";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { getLoot, addLootItem, getItemTypes } from "@/src/actions/lootActions";
 import { useUserTag } from "@/src/hooks/useUserTag";
 
 export default function LootTable() {

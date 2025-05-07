@@ -35,7 +35,7 @@ export type GroupedLootItem = {
 
 export type ItemType = { id: number; name: string };
 
-export interface NewLootItem {
+export type NewLootItem = {
   itemTypeId: number;
   source: string;
   acquired_at: string;

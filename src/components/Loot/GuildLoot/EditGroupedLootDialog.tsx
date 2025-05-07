@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { LootItem } from "./LootTypes";
+import { LootIcon } from "../LootBuy/icons/LootIconComponent";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,13 +11,10 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LootIcon } from "../LootBuy/icons/LootIconComponent";
-import { LootItem } from "./LootTypes";
-import { updateLootItem } from "@/src/actions/updateLootItem";
 import { deleteLootItem } from "@/src/actions/deleteLootItem";
+import { updateLootItem } from "@/src/actions/updateLootItem";
 
 type Props = {
   open: boolean;

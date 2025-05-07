@@ -2,8 +2,7 @@
 
 import prisma from "@/lib/db";
 
-export const getUserSalaryBonus = async (userId: number) => {
-  return await prisma.userSalaryBonus.findMany({
+export const getUserSalaryBonus = async (userId: number) => await prisma.userSalaryBonus.findMany({
     where: {
       user_id: userId,
     },
@@ -11,4 +10,3 @@ export const getUserSalaryBonus = async (userId: number) => {
       created_at: "desc",
     },
   });
-};

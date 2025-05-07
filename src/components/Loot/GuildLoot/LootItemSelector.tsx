@@ -1,17 +1,17 @@
 import { useRef, useState } from "react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { LootIcon } from "../LootBuy/icons/LootIconComponent";
+import { LootIcons } from "../LootBuy/icons/LootIcons";
 import {
   Command,
   CommandInput,
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { LootIcon } from "../LootBuy/icons/LootIconComponent";
-import { LootIcons } from "../LootBuy/icons/LootIcons";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 export function LootItemSelector({
   value,

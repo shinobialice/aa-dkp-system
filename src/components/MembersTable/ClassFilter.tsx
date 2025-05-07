@@ -1,16 +1,16 @@
 "use client";
 
+import { Table } from "@tanstack/react-table";
+import { ChevronDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Table } from "@tanstack/react-table";
-import { ChevronDown } from "lucide-react";
 
-interface ClassFilterProps<TData> {
+type ClassFilterProps<TData> = {
   table: Table<TData>;
 }
 

@@ -1,11 +1,11 @@
-import ProfilePageWrapper from "@/src/components/profile/ProfilePageWrapper";
-import getUser from "@/src/actions/getUser";
-import { getUserTags } from "@/src/actions/userTagsActions";
-import getUserInventory from "@/src/actions/getUserInventory";
-import getTasks from "@/src/actions/getTasks";
-import getUserNotes from "@/src/actions/getUserNotes";
 import { getAverageGuildGS } from "@/src/actions/getAverageGuildGS";
+import getTasks from "@/src/actions/getTasks";
+import getUser from "@/src/actions/getUser";
+import getUserInventory from "@/src/actions/getUserInventory";
 import { getUserMonthlyAttendance } from "@/src/actions/getUserMonthlyAttendance";
+import getUserNotes from "@/src/actions/getUserNotes";
+import { getUserTags } from "@/src/actions/userTagsActions";
+import ProfilePageWrapper from "@/src/components/profile/ProfilePageWrapper";
 
 export default async function Page(p: {
   params: Promise<{ user_id: string }>;

@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover";
+import { AddToQueueForm } from "./AddToQueueForm";
+import { EditToggleButton } from "./EditToggleButton";
+import type { LootQueueEntry } from "./LootQueueTypes";
+import { QueueTableExtended } from "./QueueTableExtended";
+import { QueueTableSimple } from "./QueueTableSimple";
 import {
   Dialog,
   DialogTrigger,
@@ -13,17 +13,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { QueueTableSimple } from "./QueueTableSimple";
-import { QueueTableExtended } from "./QueueTableExtended";
-import { AddToQueueForm } from "./AddToQueueForm";
-import { EditToggleButton } from "./EditToggleButton";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import { addToLootQueue } from "@/src/actions/addToLootQueue";
 import { getActiveUsers } from "@/src/actions/getActiveUsers";
 import { getLootQueueByItemName } from "@/src/actions/getLootQueueByItemName";
-import { addToLootQueue } from "@/src/actions/addToLootQueue";
-
-import { updateLootQueueEntry } from "@/src/actions/updateLootQueueEntry";
-import type { LootQueueEntry } from "./LootQueueTypes";
 import { markQueueLootAsSold } from "@/src/actions/markQueueLootAsSold";
+import { updateLootQueueEntry } from "@/src/actions/updateLootQueueEntry";
 import { useUserTag } from "@/src/hooks/useUserTag";
 
 const extendedItems = ["Эссенция ярости", "Трофейная эссенция стихий"];
@@ -33,6 +32,8 @@ type LootQueuePopoverProps = {
   children: React.ReactNode;
 };
 
+type EditableField = "required" | "delivered" | "status" | "synth_target";
+
 export function LootQueuePopover({
   itemName,
   children,
@@ -40,19 +41,16 @@ export function LootQueuePopover({
   const [searchUser, setSearchUser] = useState("");
   const [selectedUser, setSelectedUser] = useState("");
   const [queue, setQueue] = useState<Record<string, LootQueueEntry[]>>({});
-  const isAdmin = useUserTag("Администратор");
-
   const [editMode, setEditMode] = useState(false);
-  const isExtended = extendedItems.includes(itemName);
   const [allUsers, setAllUsers] = useState<string[]>([]);
+  const isAdmin = useUserTag("Администратор");
+  const isExtended = extendedItems.includes(itemName);
 
   const handleAddToQueue = async () => {
-    if (!selectedUser) return;
-
+    if (!selectedUser) {return;}
     await addToLootQueue(selectedUser, itemName);
     const updatedQueue = await getLootQueueByItemName(itemName);
-    setQueue({ [itemName]: updatedQueue as LootQueueEntry[] });
-
+    setQueue({ [itemName]: updatedQueue });
     setSelectedUser("");
     setSearchUser("");
   };
@@ -65,21 +63,36 @@ export function LootQueuePopover({
       delivered: entry.delivered,
     });
     const updatedQueue = await getLootQueueByItemName(itemName);
-    setQueue({ [itemName]: updatedQueue as LootQueueEntry[] });
+    setQueue({ [itemName]: updatedQueue });
   };
 
-  const handleChange = async (index: number, field: string, value: any) => {
+  const handleChange = async (
+    index: number,
+    field: EditableField,
+    value: string | number
+  ): Promise<void> => {
     const entry = queue[itemName]?.[index];
-    if (!entry) return;
+    if (!entry) {return;}
+
+    let castedValue: string | number = value;
+
+    if (
+      (field === "required" || field === "delivered") &&
+      typeof value === "string"
+    ) {
+      const parsed = parseInt(value);
+      if (isNaN(parsed)) {return;}
+      castedValue = parsed;
+    }
 
     const updated = {
       ...entry,
-      [field]: value,
+      [field]: castedValue,
     };
 
     await updateLootQueueEntry(updated);
     const updatedQueue = await getLootQueueByItemName(itemName);
-    setQueue({ [itemName]: updatedQueue as LootQueueEntry[] });
+    setQueue({ [itemName]: updatedQueue });
   };
 
   useEffect(() => {
@@ -88,9 +101,8 @@ export function LootQueuePopover({
         getActiveUsers(),
         getLootQueueByItemName(itemName),
       ]);
-
       setAllUsers(fetchedUsers.map((u: { username: string }) => u.username));
-      setQueue({ [itemName]: fetchedQueue as LootQueueEntry[] });
+      setQueue({ [itemName]: fetchedQueue });
     };
 
     loadData();

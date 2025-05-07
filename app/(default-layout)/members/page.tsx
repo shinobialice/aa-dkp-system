@@ -1,5 +1,5 @@
-import MembersTable from "@/src/components/MembersTable";
 import prisma from "@/lib/db";
+import MembersTable from "@/src/components/MembersTable";
 
 const MembersPage = async () => {
   const users = await prisma.user.findMany({

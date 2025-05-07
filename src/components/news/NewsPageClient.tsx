@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { createNews } from "@/src/actions/news";
-import { Button } from "@/components/ui/button";
-import { useUserTag } from "@/src/hooks/useUserTag";
-import { NewsFormDialog } from "./NewsFormDialog";
 import NewsCardList from "./NewsCardsList";
+import { NewsFormDialog } from "./NewsFormDialog";
+import { Button } from "@/components/ui/button";
+import { createNews } from "@/src/actions/news";
+import { useUserTag } from "@/src/hooks/useUserTag";
 
-interface NewsItem {
+type NewsItem = {
   id: number;
   title: string;
   content: string;

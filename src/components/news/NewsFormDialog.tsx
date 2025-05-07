@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,7 +12,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
 
 export function NewsFormDialog({
   open,
@@ -28,7 +28,7 @@ export function NewsFormDialog({
   const [content, setContent] = useState(initialData?.content || "");
 
   const handleSubmit = () => {
-    if (!title || !content) return;
+    if (!title || !content) {return;}
     onSubmit({ title, content });
     onClose();
   };

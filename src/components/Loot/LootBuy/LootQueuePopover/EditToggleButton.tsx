@@ -1,6 +1,6 @@
+import { Pen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUserTag } from "@/src/hooks/useUserTag";
-import { Pen } from "lucide-react";
 
 export function EditToggleButton({
   editMode,
@@ -24,13 +24,13 @@ export function EditToggleButton({
           {(() => {
             if (editMode) {
               return "Сохранить";
-            } else {
+            } 
               return (
                 <>
                   <Pen className="h-3 w-3 mr-1" /> Редактировать
                 </>
               );
-            }
+            
           })()}
         </Button>
       )}

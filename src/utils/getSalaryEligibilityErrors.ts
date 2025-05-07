@@ -9,19 +9,17 @@ type UserTag = {
   tag: string;
 };
 
-export function getSalaryEligibilityErrors(
+function getSalaryEligibilityErrors(
   user: UserForEligibility,
   averageGuildGS: number,
   tags: UserTag[]
 ): string[] {
   const errors: string[] = [];
 
-  // 0. Активность
   if (!user.active) {
     errors.push("Игрок не активен");
   }
 
-  // 1. Проверка даты вступления
   const now = new Date();
   const joined = user.joined_at ? new Date(user.joined_at) : null;
   if (!joined) {
@@ -44,7 +42,6 @@ export function getSalaryEligibilityErrors(
     }
   }
 
-  // 2. Проверка ГС
   const isTwoHanded = tags.some((t) => t.tag === "Двурук");
   const className = user.class?.toLowerCase() || "";
   const roundedGS = Math.floor(averageGuildGS / 500) * 500;
@@ -67,3 +64,5 @@ export function getSalaryEligibilityErrors(
 
   return errors;
 }
+
+export default getSalaryEligibilityErrors;

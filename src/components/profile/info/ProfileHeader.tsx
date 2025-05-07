@@ -1,8 +1,8 @@
-import { CardHeader, CardTitle } from "@/components/ui/card";
+import { Pencil, Check } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Pencil, Check } from "lucide-react";
+import { CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import editUser from "@/src/actions/editUser";
 import { useUserTag } from "@/src/hooks/useUserTag";
@@ -100,9 +100,9 @@ export default function ProfileHeader({
                 }
               />
             );
-          } else {
+          } 
             return formData.username;
-          }
+          
         })()}
       </CardTitle>
 

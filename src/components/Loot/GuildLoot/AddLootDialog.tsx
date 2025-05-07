@@ -1,4 +1,9 @@
 import { useState } from "react";
+import { LootItemSelector } from "./LootItemSelector";
+import { ItemType, NewLootItem } from "./LootTypes";
+import { LootIcon } from "../LootBuy/icons/LootIconComponent";
+import { Button } from "@/components/ui/button";
+import { DateTimePicker } from "@/components/ui/datetime-picker";
 import {
   Dialog,
   DialogContent,
@@ -6,12 +11,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { LootItemSelector } from "./LootItemSelector";
-import { LootIcon } from "../LootBuy/icons/LootIconComponent";
-import { ItemType, NewLootItem } from "./LootTypes";
-import { DateTimePicker } from "@/components/ui/datetime-picker";
 
 export function AddLootDialog({
   open,
@@ -32,18 +32,16 @@ export function AddLootDialog({
     itemName: "",
   });
 
-  const getItemTypeIdByName = (name: string): number | undefined => {
-    return itemTypes.find((item) => item.name === name)?.id;
-  };
+  const getItemTypeIdByName = (name: string): number | undefined => itemTypes.find((item) => item.name === name)?.id;
 
   const handleSelect = (name: string) => {
     const id = getItemTypeIdByName(name);
-    if (!id) return;
+    if (!id) {return;}
     setForm((prev) => ({ ...prev, itemTypeId: id, itemName: name }));
   };
 
   const handleSubmit = async () => {
-    if (!form.itemTypeId) return alert("Выберите предмет из списка!");
+    if (!form.itemTypeId) {return alert("Выберите предмет из списка!");}
     await onAdd(form);
     onClose();
     setForm({

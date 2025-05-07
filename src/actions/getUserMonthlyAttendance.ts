@@ -39,10 +39,10 @@ export async function getUserMonthlyAttendance(
 
     if (raid.type === "Прайм") {
       totalPrime += dkp;
-      if (attended) userPrime += dkp;
+      if (attended) {userPrime += dkp;}
     } else if (raid.type === "АГЛ") {
       totalAgl += dkp;
-      if (attended) userAgl += dkp;
+      if (attended) {userAgl += dkp;}
     }
   });
 

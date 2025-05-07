@@ -1,5 +1,15 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { Coins } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import {
   Dialog,
   DialogContent,
@@ -7,24 +17,14 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useEffect, useState } from "react";
 import {
   Popover,
   PopoverTrigger,
   PopoverContent,
 } from "@/components/ui/popover";
-import {
-  Command,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Coins } from "lucide-react";
 
 type User = { id: number; username: string };
 
@@ -254,10 +254,10 @@ export function SellLootDialog({
             value={price > 0 ? price : ""}
             disabled={isFree}
             onChange={(e) => {
-              if (isFree) return;
+              if (isFree) {return;}
               setManualPriceEdit(true);
               const val = Number(e.target.value);
-              if (!Number.isNaN(val)) setPrice(val);
+              if (!Number.isNaN(val)) {setPrice(val);}
             }}
             onBlur={() => {
               if (!price || price < 1) {

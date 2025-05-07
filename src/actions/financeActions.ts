@@ -1,11 +1,9 @@
 "use server";
 import prisma from "@/lib/db";
 
-export const getGuildFunds = async (month: number, year: number) => {
-  return await prisma.guildFunds.findFirst({
+export const getGuildFunds = async (month: number, year: number) => await prisma.guildFunds.findFirst({
     where: { month, year },
   });
-};
 
 export const getSalariesForMonth = async (month: number, year: number) => {
   const result = await prisma.salary.findMany({
@@ -26,7 +24,7 @@ export const getSalariesForMonth = async (month: number, year: number) => {
 
 export const generateSalaries = async (month: number, year: number) => {
   const fund = await prisma.guildFunds.findFirst({ where: { month, year } });
-  if (!fund) throw new Error("Сначала нужно сгенерировать фонд");
+  if (!fund) {throw new Error("Сначала нужно сгенерировать фонд");}
 
   const users = await prisma.user.findMany({
     where: {
@@ -36,7 +34,7 @@ export const generateSalaries = async (month: number, year: number) => {
   });
 
   if (users.length === 0)
-    throw new Error("Нет активных сотрудников для выплаты");
+    {throw new Error("Нет активных сотрудников для выплаты");}
 
   const baseAmount = Math.floor(fund.salaryBudget / users.length);
   await prisma.salary.deleteMany({

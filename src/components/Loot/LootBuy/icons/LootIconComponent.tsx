@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { getLootGradeUrl, getLootIconUrl } from "./LootIcons";
 
-interface LootIconProps {
+type LootIconProps = {
   itemName: string;
   size?: number;
   className?: string;

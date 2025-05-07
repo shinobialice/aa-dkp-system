@@ -1,9 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import InventoryTabsClient from "./inventory/InventoryTabsClient";
-import TasksTable from "./tasks/TasksTable";
 import UserNotes from "./notes/UserNotes";
+import TasksTable from "./tasks/TasksTable";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import getUserInventory from "@/src/actions/getUserInventory";
 import getUserTasks from "@/src/actions/getUserTasks";
 

@@ -1,18 +1,6 @@
 "use client";
 import { useState, useMemo, startTransition } from "react";
 import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableHead,
-  TableRow,
-  TableCell,
-} from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { format } from "date-fns";
-import {
   useReactTable,
   getCoreRowModel,
   getFilteredRowModel,
@@ -20,19 +8,31 @@ import {
   ColumnDef,
   ColumnFiltersState,
 } from "@tanstack/react-table";
-import { saveGivenAwayLoot } from "@/src/actions/saveGivenAwayLoot";
-import { lootColumns } from "./lootColumns";
-import { useUserTag } from "@/src/hooks/useUserTag";
 import type { Row } from "@tanstack/react-table";
+import { format } from "date-fns";
+import { lootColumns } from "./lootColumns";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
+import { saveGivenAwayLoot } from "@/src/actions/saveGivenAwayLoot";
+import { useUserTag } from "@/src/hooks/useUserTag";
 
-interface LootItem {
+type LootItem = {
   name: string;
   date: string;
   comment?: string;
   status: string;
 }
 
-interface Player {
+type Player = {
   id: number;
   username: string;
   active: boolean;
@@ -99,14 +99,14 @@ export default function LootGiveaway({
             "dd.MM.yyyy"
           )})`;
         }
-        if (loot.comment) return loot.comment;
-        if (dateValid) return format(new Date(loot.date), "dd.MM.yyyy");
+        if (loot.comment) {return loot.comment;}
+        if (dateValid) {return format(new Date(loot.date), "dd.MM.yyyy");}
         return "–";
       }
 
-      if (loot.status === "В наличии") return "В наличии";
+      if (loot.status === "В наличии") {return "В наличии";}
       if (loot.status === "Выдано" && dateValid)
-        return `Выдано (${format(new Date(loot.date), "dd.MM.yyyy")})`;
+        {return `Выдано (${format(new Date(loot.date), "dd.MM.yyyy")})`;}
       return "–";
     }
 

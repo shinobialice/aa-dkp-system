@@ -6,7 +6,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 
-interface ItemSelectorProps {
+type ItemSelectorProps = {
   item: any;
   userItem: any;
   onChange: (value: string) => void;

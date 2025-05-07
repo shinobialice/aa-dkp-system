@@ -2,10 +2,10 @@
 
 import { Heart } from "lucide-react";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { signIn } from "next-auth/react";
-import { GoogleIcon, MailIcon, VkIcon } from "@/src/components/login/authIcons";
 import Link from "next/link";
+import { signIn } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+import { GoogleIcon, MailIcon, VkIcon } from "@/src/components/login/authIcons";
 
 export default function LoginPage() {
   return (

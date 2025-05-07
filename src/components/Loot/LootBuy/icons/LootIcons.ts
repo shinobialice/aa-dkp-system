@@ -112,8 +112,8 @@ export const LootIcons: { [key: string]: string | number } = {
 
 export function getLootIconUrl(itemName: string): string {
   const value = LootIcons[itemName];
-  if (!value) return "/icons/placeholder.png";
-  if (typeof value === "number") return `${BASE_URL}${value}.png`;
+  if (!value) {return "/icons/placeholder.png";}
+  if (typeof value === "number") {return `${BASE_URL}${value}.png`;}
   return value;
 }
 

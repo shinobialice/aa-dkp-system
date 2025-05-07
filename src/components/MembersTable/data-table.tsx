@@ -10,6 +10,8 @@ import {
   flexRender,
 } from "@tanstack/react-table";
 import { ClassFilter } from "./ClassFilter";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Table,
   TableBody,
@@ -18,10 +20,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
-interface DataTableProps<TData, TValue> {
+type DataTableProps<TData, TValue> = {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   sorting: any;
@@ -99,7 +99,7 @@ export function DataTable<TData, TValue>({
                       ))}
                     </TableRow>
                   ));
-                } else {
+                } 
                   return (
                     <TableRow>
                       <TableCell
@@ -110,7 +110,7 @@ export function DataTable<TData, TValue>({
                       </TableCell>
                     </TableRow>
                   );
-                }
+                
               })()}
             </TableBody>
           </Table>

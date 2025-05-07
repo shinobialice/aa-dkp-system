@@ -4,7 +4,7 @@ export default function OCRUploader() {
   const [text, setText] = useState("");
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
+    if (!e.target.files) {return;}
     const file = e.target.files[0];
     const formData = new FormData();
     formData.append("image", file);

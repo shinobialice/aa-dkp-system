@@ -35,7 +35,7 @@ export function groupLootItems(loot: LootItem[]): GroupedLootItem[] {
           ? item.quantity ?? 1
           : 0;
       group.sold_to.add(item.sold_to ?? "");
-      if (item.comment) group.comments.add(item.comment);
+      if (item.comment) {group.comments.add(item.comment);}
 
       if (
         item.sold_at &&

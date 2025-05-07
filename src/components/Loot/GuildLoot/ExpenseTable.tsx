@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { LootTableControls } from "./LootTableControls";
+import { AddExpenseDialog } from "./AddExpenseDialog";
 import { ExpenseItem } from "./ExpensesTypes";
+import { LootTableControls } from "./LootTableControls";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Table,
   TableHeader,
@@ -11,8 +13,6 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/table";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { AddExpenseDialog } from "./AddExpenseDialog";
 import { getExpenses, addExpense } from "@/src/actions/expenseActions";
 import { useUserTag } from "@/src/hooks/useUserTag";
 

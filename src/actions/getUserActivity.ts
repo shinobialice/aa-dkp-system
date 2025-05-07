@@ -13,7 +13,7 @@ export async function getUserActivity(userId: number) {
   const grouped: Record<string, { праймы: number; агл: number }> = {};
 
   attendances.forEach(({ raid }) => {
-    if (!raid.start_date) return;
+    if (!raid.start_date) {return;}
 
     const date = raid.start_date.toISOString().split("T")[0];
     const type = raid.type?.toLowerCase() === "Прайм" ? "праймы" : "агл";

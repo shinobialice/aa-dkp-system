@@ -1,10 +1,10 @@
 import * as React from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Loader } from "lucide-react";
-import { handleOcrUpload } from "@/src/utils/AI/handleOcrUpload";
-import { Label } from "@/components/ui/label";
 import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { handleOcrUpload } from "@/src/utils/AI/handleOcrUpload";
 
 export function ScreenshotOcr({
   users,
@@ -25,7 +25,7 @@ export function ScreenshotOcr({
   );
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files?.length) return;
+    if (!e.target.files?.length) {return;}
     const files = Array.from(e.target.files);
     setLoading(true);
     setError("");

@@ -1,5 +1,12 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { DeleteEventButton } from "./CreateEvent/components/DeleteEventButton";
+import { RaidDetailsForm } from "./CreateEvent/components/RaidDetailsForm";
+import { ScreenshotOcr } from "./CreateEvent/components/ScreenshotOcr";
+import { SelectedRaidList } from "./CreateEvent/components/SelectedRaidList";
+import { SelectRaidList } from "./CreateEvent/components/SelectRaidList";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,17 +15,10 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { useEffect, useState } from "react";
-import { getBosses } from "@/src/actions/getBosses";
 import createEvent from "@/src/actions/createRaidEvent";
+import { getBosses } from "@/src/actions/getBosses";
 import updateEvent from "@/src/actions/updateEvent";
-import { RaidDetailsForm } from "./CreateEvent/components/RaidDetailsForm";
-import { ScreenshotOcr } from "./CreateEvent/components/ScreenshotOcr";
-import { SelectRaidList } from "./CreateEvent/components/SelectRaidList";
-import { SelectedRaidList } from "./CreateEvent/components/SelectedRaidList";
-import { DeleteEventButton } from "./CreateEvent/components/DeleteEventButton";
 
 export function EventDialog({
   open,
@@ -119,7 +119,7 @@ export function EventDialog({
     setErrors(newErrors);
 
     const hasErrors = Object.values(newErrors).some(Boolean);
-    if (hasErrors) return;
+    if (hasErrors) {return;}
 
     const userIds = selectedUsers.map((u) => u.id);
     const bossIds = selectedBosses.map((b) => b.id);
@@ -149,7 +149,7 @@ export function EventDialog({
 
     setSuccess(mode === "edit" ? "Обновлено!" : "Создано!");
     setOpen(false);
-    if (onComplete) onComplete();
+    if (onComplete) {onComplete();}
   };
 
   return (

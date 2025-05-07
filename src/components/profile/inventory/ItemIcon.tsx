@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-interface ItemIconProps {
+type ItemIconProps = {
   itemName: string;
   itemIconUrl: string | null;
   quality?: string | null;

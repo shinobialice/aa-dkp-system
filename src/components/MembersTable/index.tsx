@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { SortingState, ColumnFiltersState } from "@tanstack/react-table";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
-import { SortingState, ColumnFiltersState } from "@tanstack/react-table";
 
 export default function MembersTable({
   users: initialUsers,

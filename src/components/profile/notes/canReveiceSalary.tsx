@@ -3,7 +3,7 @@ export default function canReceiveSalary(
   averageGuildGS: number,
   tags: { tag: string }[]
 ): boolean {
-  if (!user.joined_at || !user.class || !user.class_gear_score) return false;
+  if (!user.joined_at || !user.class || !user.class_gear_score) {return false;}
 
   const now = new Date();
   const joined = new Date(user.joined_at);

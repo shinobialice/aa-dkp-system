@@ -11,8 +11,8 @@ export async function addUserSalaryBonus({
   amount: number;
   reason: string;
 }) {
-  if (amount <= 0) throw new Error("Бонус должен быть больше 0%");
-  if (!reason.trim()) throw new Error("Нужен комментарий за что бонус");
+  if (amount <= 0) {throw new Error("Бонус должен быть больше 0%");}
+  if (!reason.trim()) {throw new Error("Нужен комментарий за что бонус");}
 
   await prisma.userSalaryBonus.create({
     data: {

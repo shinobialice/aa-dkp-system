@@ -18,10 +18,10 @@ export async function saveLootDistribution(players: Player[]) {
     const user = await prisma.user.findUnique({
       where: { id: player.id },
     });
-    if (!user) continue;
+    if (!user) {continue;}
 
     for (const loot of player.loot) {
-      if (!loot.date) continue;
+      if (!loot.date) {continue;}
 
       const itemName = loot.comment || loot.name;
 

@@ -1,4 +1,16 @@
 import * as React from "react";
+import { ChevronDown } from "lucide-react";
+import DatetimePicker from "./DateTimePicker";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -7,21 +19,9 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuCheckboxItem,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
 
 import { getActiveUsers } from "@/src/actions/getActiveUsers";
-import DatetimePicker from "./DateTimePicker";
 import { eventDkpCalculator } from "@/src/utils/eventDkpCalculator";
-import { Button } from "@/components/ui/button";
-import { ChevronDown } from "lucide-react";
 
 export function RaidDetailsForm({
   setUsers,
@@ -205,7 +205,7 @@ export function RaidDetailsForm({
                 (() => {
                   if (name === "---") {
                     return <DropdownMenuSeparator key={`sep-${i}`} />;
-                  } else {
+                  } 
                     return (
                       <DropdownMenuCheckboxItem
                         key={name}
@@ -219,7 +219,7 @@ export function RaidDetailsForm({
                               b.boss_name.trim().toLowerCase() ===
                               name.trim().toLowerCase()
                           );
-                          if (!boss) return;
+                          if (!boss) {return;}
 
                           setSelectedBosses((prev) =>
                             checked
@@ -235,7 +235,7 @@ export function RaidDetailsForm({
                         {name}
                       </DropdownMenuCheckboxItem>
                     );
-                  }
+                  
                 })()
               )}
             </DropdownMenuContent>
@@ -253,7 +253,7 @@ export function RaidDetailsForm({
           disabled={isPvpLong}
           onCheckedChange={(checked) => {
             setIsPvp(checked === true);
-            if (checked) setIsPvpLong(false);
+            if (checked) {setIsPvpLong(false);}
           }}
         />
         <label htmlFor="pvp" className="text-sm">
@@ -269,7 +269,7 @@ export function RaidDetailsForm({
             disabled={isPvp}
             onCheckedChange={(checked) => {
               setIsPvpLong(checked === true);
-              if (checked) setIsPvp(false);
+              if (checked) {setIsPvp(false);}
             }}
           />
           <label htmlFor="long_pvp" className="text-sm">

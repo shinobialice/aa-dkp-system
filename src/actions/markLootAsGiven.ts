@@ -8,8 +8,7 @@ export const markLootAsGiven = async ({
 }: {
   userId: number;
   itemName: string;
-}) => {
-  return prisma.userInventory.create({
+}) => prisma.userInventory.create({
     data: {
       user_id: userId,
       name: itemName,
@@ -17,4 +16,3 @@ export const markLootAsGiven = async ({
       created_at: new Date(),
     },
   });
-};

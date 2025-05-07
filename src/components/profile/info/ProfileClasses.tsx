@@ -1,11 +1,4 @@
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
+import { JSX } from "react";
 import {
   BowArrow,
   Drum,
@@ -15,7 +8,14 @@ import {
   Sword,
   Wand,
 } from "lucide-react";
-import { JSX } from "react";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 
 const classIcons: Record<string, JSX.Element> = {
   Хил: <HeartPlus className="text-xl" />,
@@ -72,13 +72,13 @@ export default function ProfileClasses({
                   </SelectContent>
                 </Select>
               );
-            } else {
+            } 
               return (
                 <>
                   {classIcons[formData.class] ?? "❓"} {formData.class ?? "—"}
                 </>
               );
-            }
+            
           })()}
         </div>
 
@@ -98,9 +98,9 @@ export default function ProfileClasses({
                   }
                 />
               );
-            } else {
+            } 
               return formData.classGearScore ?? "Нет данных";
-            }
+            
           })()}
         </div>
       </div>
@@ -138,14 +138,14 @@ export default function ProfileClasses({
                     </SelectContent>
                   </Select>
                 );
-              } else {
+              } 
                 return (
                   <>
                     {classIcons[formData.secondaryClass] ?? "❓"}{" "}
                     {formData.secondaryClass ?? "Нет данных"}
                   </>
                 );
-              }
+              
             })()}
           </div>
 
@@ -166,9 +166,9 @@ export default function ProfileClasses({
                     disabled={!formData.secondaryClass}
                   />
                 );
-              } else {
+              } 
                 return formData.secondaryClassGearScore ?? "Нет данных";
-              }
+              
             })()}
           </div>
         </div>

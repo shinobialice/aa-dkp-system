@@ -1,13 +1,11 @@
 "use server";
 
-import prisma from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import prisma from "@/lib/db";
 
-export const getExpenses = async () => {
-  return await prisma.expense.findMany({
+export const getExpenses = async () => await prisma.expense.findMany({
     orderBy: { date: "desc" },
   });
-};
 
 export const addExpense = async ({
   date,

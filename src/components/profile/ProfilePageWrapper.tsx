@@ -1,9 +1,9 @@
 "use client";
 import { useState } from "react";
-import ProfileTabs from "@/src/components/profile/ProfileTabs";
-import ProfileInfoClient from "@/src/components/profile/info/ProfileInfoClient";
 import { UserActivityChart } from "@/src/components/profile/activity/UserActivityChart";
 import { UserMonthActivity } from "@/src/components/profile/activity/UserMonthActivity";
+import ProfileInfoClient from "@/src/components/profile/info/ProfileInfoClient";
+import ProfileTabs from "@/src/components/profile/ProfileTabs";
 
 export default function ProfilePageWrapper({
   user: initialUser,

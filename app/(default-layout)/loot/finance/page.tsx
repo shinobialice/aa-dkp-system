@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -17,7 +18,6 @@ import {
   getSalariesForMonth,
 } from "@/src/actions/financeActions";
 import { generateGuildFunds } from "@/src/actions/generateGuildFunds";
-import { Loader2 } from "lucide-react";
 import { useUserTag } from "@/src/hooks/useUserTag";
 
 export default function FinancePage() {

@@ -1,3 +1,5 @@
+import { LootQueueEntry } from "./LootQueueTypes";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableHeader,
@@ -6,8 +8,6 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { LootQueueEntry } from "./LootQueueTypes";
 
 type Props = {
   queue: LootQueueEntry[];

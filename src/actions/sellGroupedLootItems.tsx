@@ -66,6 +66,6 @@ export async function sellGroupedLootItems({
     }
 
     left -= takeQty;
-    if (left <= 0) break;
+    if (left <= 0) {break;}
   }
 }

@@ -1,7 +1,7 @@
 "use server";
 
-import prisma from "@/lib/db";
 import { randomUUID } from "crypto";
+import prisma from "@/lib/db";
 
 export async function createLinkToken(userId: number) {
   const token = randomUUID();

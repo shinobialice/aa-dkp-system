@@ -2,10 +2,10 @@
 
 import * as React from "react";
 import { ru } from "date-fns/locale";
-import { cn } from "@/lib/utils";
 import { DateTimePicker } from "@/components/ui/datetime-picker";
+import { cn } from "@/lib/utils";
 
-interface DatePickerProps {
+type DatePickerProps = {
   value?: Date;
   onChange?: (date: Date | undefined) => void;
   disabled?: boolean;

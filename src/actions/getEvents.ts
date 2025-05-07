@@ -21,9 +21,9 @@ export const getRaids = async () => {
       const title = raid.raidBosses.map((rb) => rb.boss.boss_name).join(", ");
 
       let color = "gray";
-      if (raid.type === "Прайм") color = "rgb(90, 54, 165)";
-      if (raid.type === "АГЛ") color = "rgb(215, 100, 168)";
-      if (title.includes("Кошка")) color = "rgb(232, 157, 53)";
+      if (raid.type === "Прайм") {color = "rgb(90, 54, 165)";}
+      if (raid.type === "АГЛ") {color = "rgb(215, 100, 168)";}
+      if (title.includes("Кошка")) {color = "rgb(232, 157, 53)";}
 
       return {
         id: raid.id.toString(),

@@ -2,8 +2,8 @@
 
 import { useEffect } from "react";
 import Cookies from "js-cookie";
-import { useRouter } from "next/navigation";
 import { Loader } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function LinkAccountComplete() {
   const router = useRouter();

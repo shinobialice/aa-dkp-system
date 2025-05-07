@@ -1,7 +1,8 @@
-import { getActiveUsers } from "@/src/actions/getActiveUsers";
-import { analyzeImageFromFile } from "./analyzeImageFromFile";
 
-export const handleOcrUpload = async (file: File) => {
+import analyzeImageFromFile from "./analyzeImageFromFile";
+import { getActiveUsers } from "@/src/actions/getActiveUsers";
+
+const handleOcrUpload = async (file: File) => {
   const ocrResults = await analyzeImageFromFile(file);
   const allUsers = await getActiveUsers();
 
@@ -35,3 +36,5 @@ export const handleOcrUpload = async (file: File) => {
 
   return { matchedUserNames, unmatchedUserNames };
 };
+
+export default handleOcrUpload;

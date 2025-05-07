@@ -1,16 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Trash2, CirclePlus } from "lucide-react";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { updateUser } from "@/src/actions/updateUser";
+import { deleteUserTag, addUserTag } from "@/src/actions/userTagsActions";
 import { useUserTag } from "@/src/hooks/useUserTag";
 import { getSalaryEligibilityErrors } from "@/src/utils/getSalaryEligibilityErrors";
 
-import { deleteUserTag, addUserTag } from "@/src/actions/userTagsActions";
 
 const badgeColors: Record<string, string> = {
   Активен: "rgb(47, 158, 98)",
@@ -93,7 +93,7 @@ export function UserTagsSection({
 
   async function handleAddTag(tag: string) {
     const exists = tags.some((t) => t.tag === tag);
-    if (exists) return;
+    if (exists) {return;}
     const newTag = await addUserTag(user.id, tag);
     setTags([...tags, newTag]);
   }

@@ -10,7 +10,7 @@ export async function getAverageGuildGS() {
     select: { class_gear_score: true },
   });
 
-  if (users.length === 0) return 0;
+  if (users.length === 0) {return 0;}
 
   const sum = users.reduce((acc, u) => acc + (u.class_gear_score ?? 0), 0);
   const avg = sum / users.length;

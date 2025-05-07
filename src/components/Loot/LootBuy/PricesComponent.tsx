@@ -1,3 +1,5 @@
+import { LootIcon } from "./icons/LootIconComponent";
+import { LootQueuePopover } from "./LootQueuePopover";
 import {
   Table,
   TableBody,
@@ -6,8 +8,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { LootIcon } from "./icons/LootIconComponent";
-import { LootQueuePopover } from "./LootQueuePopover";
 
 export type LootItem = {
   name: string;

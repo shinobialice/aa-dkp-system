@@ -15,7 +15,7 @@ export const getLootQueueByItemName = async (itemName: string) => {
     },
   });
 
-  if (!item) return [];
+  if (!item) {return [];}
 
   return item.lootQueue.map((entry) => ({
     id: entry.id,

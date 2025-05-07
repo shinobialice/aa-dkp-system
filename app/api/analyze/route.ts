@@ -1,5 +1,5 @@
-import { NextRequest } from "next/server";
 import axios from "axios";
+import { NextRequest } from "next/server";
 import { extractNamesFromReadOCR } from "@/src/utils/AI/extractNamesFromOCR";
 
 export const runtime = "nodejs";

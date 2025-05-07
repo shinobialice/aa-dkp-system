@@ -14,10 +14,10 @@ export function groupLoot(
         ? item.sold_at
         : item.acquired_at;
 
-    if (!date) continue;
+    if (!date) {continue;}
 
     const d = new Date(date);
-    if (d.getMonth() + 1 !== month || d.getFullYear() !== year) continue;
+    if (d.getMonth() + 1 !== month || d.getFullYear() !== year) {continue;}
 
     if (item.status === "Продано" || item.status === "Выдано") {
       result.push({
@@ -56,7 +56,7 @@ export function groupLoot(
       }
 
       existing.total += item.quantity ?? 1;
-      if (item.comment) existing.comments.add(item.comment);
+      if (item.comment) {existing.comments.add(item.comment);}
     }
   }
 

@@ -1,3 +1,6 @@
+import { LootQueueEntry } from "./LootQueueTypes";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableHeader,
@@ -6,9 +9,6 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { LootQueueEntry } from "./LootQueueTypes";
 
 type Props = {
   queue: LootQueueEntry[];
@@ -61,9 +61,9 @@ export function QueueTableExtended({
                           }
                         />
                       );
-                    } else {
+                    } 
                       return entry.required;
-                    }
+                    
                   })()}
                 </TableCell>
                 <TableCell>
@@ -83,7 +83,7 @@ export function QueueTableExtended({
                           }
                         />
                       );
-                    } else {
+                    } 
                       return (
                         <span>
                           {entry.delivered
@@ -91,7 +91,7 @@ export function QueueTableExtended({
                             .replaceAll(",", " ") || "-"}
                         </span>
                       );
-                    }
+                    
                   })()}
                 </TableCell>
                 <TableCell>
@@ -116,9 +116,9 @@ export function QueueTableExtended({
                           <option value="ожидание">Ожидание</option>
                         </select>
                       );
-                    } else {
+                    } 
                       return <span>{entry.status || "-"}</span>;
-                    }
+                    
                   })()}
                 </TableCell>
                 <TableCell>
@@ -132,13 +132,13 @@ export function QueueTableExtended({
                           }
                         />
                       );
-                    } else {
+                    } 
                       return (
                         <span className="w-[80px] truncate inline-block">
                           {entry.synth_target || "-"}
                         </span>
                       );
-                    }
+                    
                   })()}
                 </TableCell>
                 {editMode && (

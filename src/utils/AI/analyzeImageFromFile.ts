@@ -10,7 +10,7 @@ type OCRResult = {
   readResults?: OCRPage[];
 };
 
-export async function analyzeImageFromFile(
+async function analyzeImageFromFile(
   file: File
 ): Promise<{ name: string; className?: string }[]> {
   const formData = new FormData();
@@ -33,7 +33,9 @@ export async function analyzeImageFromFile(
       canvas.height = img.height;
 
       const ctx = canvas.getContext("2d", { willReadFrequently: true });
-      if (!ctx) return resolve([]);
+      if (!ctx) {
+        return resolve([]);
+      }
 
       ctx.drawImage(img, 0, 0);
 
@@ -42,7 +44,9 @@ export async function analyzeImageFromFile(
           page.lines
             .filter((line) => {
               const text = line.text.replace(/[.]/g, "").trim();
-              if (/^\d+$/.test(text)) return false;
+              if (/^\d+$/.test(text)) {
+                return false;
+              }
 
               const nonWordRatio =
                 text.replace(/[a-zA-Zа-яА-ЯёЁ0-9]/g, "").length / text.length;
@@ -58,3 +62,5 @@ export async function analyzeImageFromFile(
     };
   });
 }
+
+export default analyzeImageFromFile;

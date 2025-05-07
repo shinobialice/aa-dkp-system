@@ -1,10 +1,11 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
-import timeGridPlugin from "@fullcalendar/timegrid";
 import listPlugin from "@fullcalendar/list";
+import FullCalendar from "@fullcalendar/react";
+import timeGridPlugin from "@fullcalendar/timegrid";
 import { ChevronLeft, ChevronRight, Table, Calendar1 } from "lucide-react";
+import { EventDialog } from "./EventDialog";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -14,7 +15,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getRaids } from "@/src/actions/getEvents";
-import { EventDialog } from "./EventDialog";
 import { getRaidById } from "@/src/actions/getRaidById";
 import { useUserTag } from "@/src/hooks/useUserTag";
 
@@ -65,13 +65,13 @@ export default function ActivitiesPage() {
     action: "prev" | "next" | "today" | "week" | "monthGrid" | "list"
   ) => {
     const api = calendarRef.current?.getApi();
-    if (!api) return;
-    if (action === "prev") api.prev();
-    if (action === "next") api.next();
-    if (action === "today") api.today();
-    if (action === "week") api.changeView("timeGridWeek");
-    if (action === "monthGrid") api.changeView("dayGridMonth");
-    if (action === "list") api.changeView("listWeek");
+    if (!api) {return;}
+    if (action === "prev") {api.prev();}
+    if (action === "next") {api.next();}
+    if (action === "today") {api.today();}
+    if (action === "week") {api.changeView("timeGridWeek");}
+    if (action === "monthGrid") {api.changeView("dayGridMonth");}
+    if (action === "list") {api.changeView("listWeek");}
   };
 
   return (
@@ -119,8 +119,8 @@ export default function ActivitiesPage() {
               <Select
                 defaultValue="weekGrid"
                 onValueChange={(value) => {
-                  if (value === "weekGrid") handleNav("week");
-                  if (value === "monthGrid") handleNav("monthGrid");
+                  if (value === "weekGrid") {handleNav("week");}
+                  if (value === "monthGrid") {handleNav("monthGrid");}
                 }}
               >
                 <SelectTrigger className="cursor-pointer">
@@ -164,7 +164,7 @@ export default function ActivitiesPage() {
             height="100%"
             locale="ru-RU"
             eventDisplay="block"
-            nowIndicator={true}
+            nowIndicator
             slotDuration="00:30:00"
             slotLabelFormat={{
               hour: "2-digit",

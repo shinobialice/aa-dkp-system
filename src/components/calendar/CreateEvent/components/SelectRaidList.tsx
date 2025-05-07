@@ -13,9 +13,12 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
+import { ClassFilter } from "../../../MembersTable/ClassFilter";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Table,
   TableBody,
@@ -24,9 +27,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { ClassFilter } from "../../../MembersTable/ClassFilter";
-import { Label } from "@/components/ui/label";
 
 export type User = {
   id: number;
@@ -35,7 +35,7 @@ export type User = {
   active: boolean;
 };
 
-interface SelectRaidListProps {
+type SelectRaidListProps = {
   users: User[];
   rowSelection: Record<number, boolean>;
   setRowSelection: React.Dispatch<
@@ -108,9 +108,7 @@ export function SelectRaidList({
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
 
-  const activeUsers = React.useMemo(() => {
-    return users.filter((u) => u.active);
-  }, [users]);
+  const activeUsers = React.useMemo(() => users.filter((u) => u.active), [users]);
 
   const table = useReactTable({
     data: activeUsers,
@@ -186,7 +184,7 @@ export function SelectRaidList({
                       ))}
                     </TableRow>
                   ));
-                } else {
+                } 
                   return (
                     <TableRow>
                       <TableCell
@@ -197,7 +195,7 @@ export function SelectRaidList({
                       </TableCell>
                     </TableRow>
                   );
-                }
+                
               })()}
             </TableBody>
           </Table>

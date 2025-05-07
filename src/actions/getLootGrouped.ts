@@ -1,6 +1,6 @@
-import prisma from "@/lib/db";
-import { sourceMap } from "../components/Loot/priceSourceMap";
 import { getLootIconUrl } from "../components/Loot/LootBuy/icons/LootIcons";
+import { sourceMap } from "../components/Loot/priceSourceMap";
+import prisma from "@/lib/db";
 
 export async function getLootGrouped() {
   const items = await prisma.itemType.findMany();
@@ -20,7 +20,7 @@ export async function getLootGrouped() {
 
     const icon = getLootIconUrl(item.name);
 
-    if (!grouped[source]) grouped[source] = [];
+    if (!grouped[source]) {grouped[source] = [];}
 
     grouped[source].push({
       name: item.name,

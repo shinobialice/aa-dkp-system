@@ -1,3 +1,5 @@
+import inventoryItems from "./InventoryItems";
+import InventoryRow from "./InventoryRow";
 import {
   Table,
   TableBody,
@@ -7,8 +9,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import InventoryRow from "./InventoryRow";
-import inventoryItems from "./InventoryItems";
 
 export default function InventoryTab({
   type,
@@ -84,28 +84,28 @@ export default function InventoryTab({
         item.name === "Коллеционный глайдер" &&
         inventory.find((inv) => inv.name === "Коллеционный глайдер т2")
       )
-        return false;
+        {return false;}
       if (
         item.name === "Коллеционный глайдер т2" &&
         !inventory.find((inv) => inv.name === "Коллеционный глайдер т2")
       )
-        return false;
+        {return false;}
       if (
         item.name === "Коллекционный фамильяр" &&
         inventory.find((inv) => inv.name === "Коллекционный фамильяр т2")
       )
-        return false;
+        {return false;}
       if (
         item.name === "Коллекционный фамильяр т2" &&
         !inventory.find((inv) => inv.name === "Коллекционный фамильяр т2")
       )
-        return false;
+        {return false;}
       if (
         ["Красный Дракон", "Черный Дракон", "Зеленый Дракон"].includes(
           item.name
         )
       )
-        return false;
+        {return false;}
       return true;
     });
 

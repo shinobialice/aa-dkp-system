@@ -1,4 +1,17 @@
+import * as React from "react";
+import { useTaskForm } from "./hooks/useTaskForm";
+import { TaskDatePicker } from "./TaskDatePicker";
+import { Task } from "./types/task";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -9,22 +22,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogDescription,
-  DialogClose,
-} from "@/components/ui/dialog";
-import * as React from "react";
-import { Task } from "./types/task";
-import { useTaskForm } from "./hooks/useTaskForm";
 import editUserTask from "@/src/actions/editUserTask";
-import { TaskDatePicker } from "./TaskDatePicker";
 
-interface EditTaskDialogProps {
+type EditTaskDialogProps = {
   open: boolean;
   onOpenChangeAction: (open: boolean) => void;
   task: Task;

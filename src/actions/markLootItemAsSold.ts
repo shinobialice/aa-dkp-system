@@ -24,7 +24,7 @@ export const markLootItemAsSold = async ({
     include: { itemType: true },
   });
 
-  if (!loot) throw new Error("Лут не найден");
+  if (!loot) {throw new Error("Лут не найден");}
 
   if (quantity > loot.quantity) {
     throw new Error(

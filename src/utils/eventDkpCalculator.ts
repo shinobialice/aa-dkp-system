@@ -5,7 +5,7 @@ type Boss = {
   dkp_points: number;
 };
 
-export function eventDkpCalculator(
+function eventDkpCalculator(
   selectedBosses: Boss[],
   isPvp: boolean,
   isPvpLong: boolean
@@ -20,3 +20,5 @@ export function eventDkpCalculator(
 
   return bossPoints + pvpBonus + longPvpBonus;
 }
+
+export default eventDkpCalculator;

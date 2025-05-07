@@ -1,23 +1,8 @@
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+import React from "react";
+import { MoreVerticalIcon } from "lucide-react";
 import { CreateTaskPopover } from "./CreateTaskPopover";
 import { EditTaskDialog } from "./EditTaskDialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { MoreVerticalIcon } from "lucide-react";
+import { Task } from "./types/task";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,12 +13,27 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import React from "react";
-import { Task } from "./types/task";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import deleteUserTask from "@/src/actions/deleteUserTask";
 import { useUserTag } from "@/src/hooks/useUserTag";
 
-interface TasksTableClientProps {
+type TasksTableClientProps = {
   tasks: Task[];
   userId: number;
   onChange: () => {};
@@ -83,9 +83,9 @@ export default function TasksTable({
                             return (
                               <Badge className="bg-green-500">Выполнено</Badge>
                             );
-                          } else {
+                          } 
                             return <Badge variant="outline">В процессе</Badge>;
-                          }
+                          
                         })()}
                       </TableCell>
                       <TableCell>
@@ -126,7 +126,7 @@ export default function TasksTable({
                         <AlertDialog
                           open={openDialogId === task.id}
                           onOpenChange={(open) => {
-                            if (!open) setOpenDialogId(null);
+                            if (!open) {setOpenDialogId(null);}
                           }}
                         >
                           <AlertDialogContent>
@@ -160,7 +160,7 @@ export default function TasksTable({
               </Table>
             </CardContent>
           );
-        } else {
+        } 
           return (
             <CardContent>
               <div className="text-center py-8 text-muted-foreground">
@@ -168,14 +168,14 @@ export default function TasksTable({
               </div>
             </CardContent>
           );
-        }
+        
       })()}
 
       {editDialogTask && (
         <EditTaskDialog
           open={!!editDialogTask}
           onOpenChangeAction={(open) => {
-            if (!open) setEditDialogTask(null);
+            if (!open) {setEditDialogTask(null);}
           }}
           task={editDialogTask}
           userId={userId}

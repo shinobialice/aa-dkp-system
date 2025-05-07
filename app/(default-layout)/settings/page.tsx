@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import { Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -10,11 +11,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getEligibleUsers } from "@/src/actions/getEligibleUsers";
 import { createLinkToken } from "@/src/actions/createLinkToken";
-import { Copy, Check } from "lucide-react";
+import { getEligibleUsers } from "@/src/actions/getEligibleUsers";
 
-interface UserOption {
+type UserOption = {
   id: number;
   username: string;
 }
@@ -53,7 +53,7 @@ export default function SettingsPage() {
   }, []);
 
   const handleGenerate = () => {
-    if (!selectedUserId) return;
+    if (!selectedUserId) {return;}
     startTransition(() => {
       createLinkToken(selectedUserId).then(setLink);
     });

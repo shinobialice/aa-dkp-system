@@ -1,3 +1,6 @@
+import * as React from "react";
+import { useTaskForm } from "./hooks/useTaskForm";
+import { TaskDatePicker } from "./TaskDatePicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,12 +17,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import * as React from "react";
-import { useTaskForm } from "./hooks/useTaskForm";
 import createUserTask from "@/src/actions/createUserTask";
-import { TaskDatePicker } from "./TaskDatePicker";
 
-interface CreateTaskPopoverProps {
+type CreateTaskPopoverProps = {
   userId: number;
   onChange: () => void;
 }

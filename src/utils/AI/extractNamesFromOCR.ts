@@ -10,7 +10,7 @@ type OCRReadResults = {
   readResults?: OCRPage[];
 };
 
-export function extractNamesFromReadOCR(data: OCRReadResults): string[] {
+function extractNamesFromReadOCR(data: OCRReadResults): string[] {
   const words: string[] = [];
 
   data.readResults?.forEach((page) => {
@@ -21,3 +21,4 @@ export function extractNamesFromReadOCR(data: OCRReadResults): string[] {
 
   return words.filter((w) => /^[A-Za-zА-Яа-яЁё0-9._-]{3,20}$/.test(w));
 }
+export default extractNamesFromReadOCR;

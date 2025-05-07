@@ -22,9 +22,9 @@ export async function GET(request: Request) {
       return NextResponse.json({
         name: `${user.first_name} ${user.last_name}`,
       });
-    } else {
+    } 
       return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
+    
   } catch {
     return NextResponse.json(
       { error: "Failed to fetch VK data" },

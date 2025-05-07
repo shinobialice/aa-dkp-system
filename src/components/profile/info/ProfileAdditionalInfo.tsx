@@ -1,13 +1,13 @@
-import { CardDescription } from "@/components/ui/card";
 import {
   differenceInDays,
   differenceInMonths,
   differenceInYears,
 } from "date-fns";
-import { Input } from "@/components/ui/input";
 
 import { format } from "date-fns";
+import { CardDescription } from "@/components/ui/card";
 import { DateTimePicker } from "@/components/ui/datetime-picker";
+import { Input } from "@/components/ui/input";
 
 export default function ProfileAdditionalInfo({
   user,
@@ -40,13 +40,13 @@ export default function ProfileAdditionalInfo({
 
   const parts = [];
   if (years > 0)
-    parts.push(`${years} ${years === 1 ? "год" : years < 5 ? "года" : "лет"}`);
+    {parts.push(`${years} ${years === 1 ? "год" : years < 5 ? "года" : "лет"}`);}
   if (months > 0)
-    parts.push(
+    {parts.push(
       `${months} ${months === 1 ? "месяц" : months < 5 ? "месяца" : "месяцев"}`
-    );
+    );}
   if (days > 0)
-    parts.push(`${days} ${days === 1 ? "день" : days < 5 ? "дня" : "дней"}`);
+    {parts.push(`${days} ${days === 1 ? "день" : days < 5 ? "дня" : "дней"}`);}
 
   return (
     <div className="pt-2 border-t">
@@ -81,9 +81,9 @@ export default function ProfileAdditionalInfo({
                 {formData.vkRealName ? formData.vkRealName : "—"}
               </a>
             );
-          } else {
+          } 
             return "Нет данных";
-          }
+          
         })()}
       </div>
 
@@ -108,9 +108,9 @@ export default function ProfileAdditionalInfo({
             );
           } else if (formData.joined_at) {
             return new Date(formData.joined_at).toLocaleDateString("ru-RU");
-          } else {
+          } 
             return "Неизвестно";
-          }
+          
         })()}
       </div>
 

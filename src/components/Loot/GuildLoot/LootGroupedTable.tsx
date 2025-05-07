@@ -1,21 +1,8 @@
-import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { useEffect, useState } from "react";
+import { Pen } from "lucide-react";
 import { GroupedLootItem, LootItem } from "./LootTypes";
 import { SellLootDialog } from "./SellLootDialog";
-import { useEffect, useState } from "react";
-import { getActiveUsers } from "@/src/actions/getActiveUsers";
-import { getLoot } from "@/src/actions/lootActions";
-import { distributeLootItem } from "@/src/actions/distributeLootItems";
-import { deleteLootItem } from "@/src/actions/deleteLootItem";
-import { Pen } from "lucide-react";
+import { LootIcon } from "../LootBuy/icons/LootIconComponent";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -25,7 +12,20 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
-import { LootIcon } from "../LootBuy/icons/LootIconComponent";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { deleteLootItem } from "@/src/actions/deleteLootItem";
+import { distributeLootItem } from "@/src/actions/distributeLootItems";
+import { getActiveUsers } from "@/src/actions/getActiveUsers";
+import { getLoot } from "@/src/actions/lootActions";
 import { useUserTag } from "@/src/hooks/useUserTag";
 
 export function LootGroupedTable({
@@ -198,7 +198,7 @@ export function LootGroupedTable({
           quantity,
           isFree,
         }) => {
-          if (!selectedGroup) return;
+          if (!selectedGroup) {return;}
 
           const groupItems = loot.filter(
             (item) =>
