@@ -8,6 +8,7 @@
     "strict": false,
     "noEmit": true,
     "esModuleInterop": true,
+    "exactOptionalPropertyTypes": false,
     "module": "esnext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
