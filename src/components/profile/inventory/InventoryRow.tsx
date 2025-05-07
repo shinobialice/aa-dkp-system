@@ -5,6 +5,7 @@ import deleteItemFromUserInventory from "@/src/actions/deleteItemFromUserInvento
 import setItemQuality from "@/src/actions/setItemQuality";
 import inventoryIcons from "./InventoryIcons";
 import ItemIcon from "./ItemIcon";
+import { useUserTag } from "@/src/hooks/useUserTag";
 
 export default function InventoryRow({
   item,
@@ -31,6 +32,7 @@ export default function InventoryRow({
 
   const displayIconName = isDragon && userItem ? userItem.name : item.name;
   const itemIconUrl = inventoryIcons[displayIconName] || null;
+  const isAdmin = useUserTag("Администратор");
 
   const handleChange = async (value: string) => {
     try {
@@ -110,7 +112,7 @@ export default function InventoryRow({
         </div>
       </TableCell>
       <TableCell>
-        <ItemSelector item={item} userItem={userItem} onChange={handleChange} />
+        <ItemSelector item={item} userItem={userItem} onChange={handleChange}  isAdmin={isAdmin}/>
       </TableCell>
     </TableRow>
   );

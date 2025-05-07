@@ -10,12 +10,14 @@ interface ItemSelectorProps {
   item: any;
   userItem: any;
   onChange: (value: string) => void;
+  isAdmin: boolean;
 }
 
 export default function ItemSelector({
   item,
   userItem,
   onChange,
+  isAdmin,
 }: ItemSelectorProps) {
   const isBafalka = item.name === "Бафалка";
 
@@ -27,6 +29,43 @@ export default function ItemSelector({
   ].includes(item.name);
 
   const isDragon = item.name === "Дракон";
+  const getDisplayValue = () => {
+    if (isBafalka) {
+      return !userItem
+        ? "Нету"
+        : userItem.quality === "3"
+        ? "3 эпоха"
+        : userItem.quality === "4"
+        ? "4 эпоха"
+        : userItem.quality === "5"
+        ? "5 эпоха"
+        : "Нету";
+    }
+
+    if (isDragon) {
+      return userItem?.name || "Нету";
+    }
+
+    if (isSpecialItem) {
+      return !userItem
+        ? "Нету"
+        : userItem.quality === "3"
+        ? "T1"
+        : userItem.quality === "4"
+        ? "T2"
+        : "Нету";
+    }
+
+    return userItem ? "Есть" : "Нет";
+  };
+
+  if (!isAdmin) {
+    return (
+      <div className="w-[100px] text-sm py-2 px-3 border rounded bg-muted text-muted-foreground">
+        {getDisplayValue()}
+      </div>
+    );
+  }
 
   if (isBafalka) {
     return (
