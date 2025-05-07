@@ -26,7 +26,6 @@ export default function LootTable() {
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [showDialog, setShowDialog] = useState(false);
   const isAdmin = useUserTag("Администратор");
-  const isModerator = useUserTag("Модератор");
 
   useEffect(() => {
     const loadData = async () => {

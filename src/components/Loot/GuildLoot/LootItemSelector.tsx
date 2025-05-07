@@ -22,7 +22,7 @@ export function LootItemSelector({
 }) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const allItemNames = Object.keys(LootIcons);
-  const [isOpen, setIsOpen] = useState(false); // контролируем popover
+  const [isOpen, setIsOpen] = useState(false); 
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -47,7 +47,7 @@ export function LootItemSelector({
                 value={name}
                 onSelect={() => {
                   onSelect(name);
-                  setIsOpen(false); // закрываем popover
+                  setIsOpen(false); 
                   inputRef.current?.blur();
                 }}
                 className="flex items-center gap-2 cursor-pointer"

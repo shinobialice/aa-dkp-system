@@ -67,16 +67,15 @@ export function UserTagsSection({
   onUpdate: () => void;
   tags: { id: number; tag: string }[];
   setTags: (tags: { id: number; tag: string }[]) => void;
-  setUser: (user: any) => void; // ✅
+  setUser: (user: any) => void;
 }) {
   const [updating, setUpdating] = useState(false);
   const isAdmin = useUserTag("Администратор");
-  const isModerator = useUserTag("Модератор");
 
   async function toggleActive(newValue: boolean) {
     setUpdating(true);
     await updateUser(user.id, { active: newValue });
-    setUser({ ...user, active: newValue }); // ✅ обновляем родительский user
+    setUser({ ...user, active: newValue }); 
     setUpdating(false);
     onUpdate();
   }
@@ -88,7 +87,7 @@ export function UserTagsSection({
     }
     setUpdating(true);
     await updateUser(user.id, { is_eligible_for_salary: newValue });
-    setUser({ ...user, is_eligible_for_salary: newValue }); // ✅ обновляем родительский user
+    setUser({ ...user, is_eligible_for_salary: newValue }); 
     setUpdating(false);
     onUpdate();
   }

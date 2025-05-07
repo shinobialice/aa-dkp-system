@@ -11,7 +11,7 @@ function canReceiveSalary(user: User): boolean {
       (joinedDay <= 20 && monthsPassed >= 1) ||
       (joinedDay > 20 && monthsPassed >= 2);
   
-    const passesGearScore = checkGearScore(user); // реализуешь по своей логике
+    const passesGearScore = checkGearScore(user);
   
     return probationDone && passesGearScore;
   }

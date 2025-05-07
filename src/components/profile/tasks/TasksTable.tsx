@@ -47,7 +47,6 @@ export default function TasksTable({
   const [openDialogId, setOpenDialogId] = React.useState<number | null>(null);
   const [editDialogTask, setEditDialogTask] = React.useState<Task | null>(null);
   const isAdmin = useUserTag("Администратор");
-  const isModerator = useUserTag("Модератор");
 
   return (
     <Card>

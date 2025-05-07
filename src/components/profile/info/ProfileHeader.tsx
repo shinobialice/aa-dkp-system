@@ -36,7 +36,6 @@ export default function ProfileHeader({
   tags: { id: number; tag: string }[];
 }) {
   const isAdmin = useUserTag("Администратор");
-  const isModerator = useUserTag("Модератор");
   return (
     <CardHeader className="flex flex-col items-center">
       <div className="relative flex justify-center w-full">

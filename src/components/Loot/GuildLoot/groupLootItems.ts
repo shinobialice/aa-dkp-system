@@ -37,7 +37,6 @@ export function groupLootItems(loot: LootItem[]): GroupedLootItem[] {
       group.sold_to.add(item.sold_to ?? "");
       if (item.comment) group.comments.add(item.comment);
 
-      // Обновляем дату последней продажи, если позже
       if (
         item.sold_at &&
         (!group.latest_sold_at || item.sold_at > group.latest_sold_at)

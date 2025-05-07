@@ -101,7 +101,6 @@ const authConfig: NextAuthOptions = {
 
     async jwt({ token, user, account }) {
       if (user) {
-        // First login
         const dbUser = await prisma.user.findFirst({
           where: {
             OR: [

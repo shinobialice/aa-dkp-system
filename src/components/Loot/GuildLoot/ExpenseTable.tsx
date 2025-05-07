@@ -22,7 +22,6 @@ export function ExpensesTable() {
   const [expenses, setExpenses] = useState<ExpenseItem[]>([]);
   const [showDialog, setShowDialog] = useState(false);
   const isAdmin = useUserTag("Администратор");
-  const isModerator = useUserTag("Модератор");
 
   useEffect(() => {
     const load = async () => {

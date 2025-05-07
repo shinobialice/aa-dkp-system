@@ -10,9 +10,9 @@ export async function createLinkToken(userId: number) {
     data: {
       token,
       userId,
-      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24), // 24h expiry
+      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24), 
     },
   });
 
-  return `${process.env.NEXT_PUBLIC_BASE_URL}/link-account/${token}`; // <-- FIXED
+  return `${process.env.NEXT_PUBLIC_BASE_URL}/link-account/${token}`; 
 }

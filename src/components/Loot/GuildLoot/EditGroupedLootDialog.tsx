@@ -33,7 +33,6 @@ export function EditGroupedLootDialog({
 }: Props) {
   const [editedItems, setEditedItems] = useState<LootItem[]>([]);
 
-  // Скопируем записи при открытии диалога
   useEffect(() => {
     if (open) {
       setEditedItems(items);
@@ -46,7 +45,6 @@ export function EditGroupedLootDialog({
     value: any
   ) => {
     const updated = [...editedItems];
-    // преобразования:
     if (field === "quantity") value = parseInt(value);
     if (field === "acquired_at") value = new Date(value);
     updated[index] = { ...updated[index], [field]: value };

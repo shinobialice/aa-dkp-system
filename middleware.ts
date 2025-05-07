@@ -10,7 +10,7 @@ export async function middleware(request: NextRequest) {
 
   const isAuthPage =
     request.nextUrl.pathname === "/login" ||
-    request.nextUrl.pathname === "/auth/error" || // ✅ allow error page
+    request.nextUrl.pathname === "/auth/error" || 
     request.nextUrl.pathname.startsWith("/link-account");
 
   if (!token && !isAuthPage) {

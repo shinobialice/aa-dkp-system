@@ -13,14 +13,14 @@ export default function ProfileTabs({
   tasks: initialTasks,
   tags,
   setTags,
-  setUser, // ✅
+  setUser, 
 }: {
   user: any;
   inventory: any[];
   tasks: any[];
   tags: any[];
   setTags: (tags: any[]) => void;
-  setUser: (user: any) => void; // ✅
+  setUser: (user: any) => void; 
 }) {
   const [inventory, setInventory] = useState(initialInventory);
   const [tasks, setTasks] = useState(initialTasks);
@@ -68,7 +68,7 @@ export default function ProfileTabs({
           user={user}
           initialTags={tags}
           updateTags={setTags}
-          setUser={setUser} // ✅ вот это должно быть
+          setUser={setUser} 
         />
       </TabsContent>
     </Tabs>

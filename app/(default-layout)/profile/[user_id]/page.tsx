@@ -8,7 +8,7 @@ import getUserNotes from "@/src/actions/getUserNotes";
 export default async function Page(p: {
   params: Promise<{ user_id: string }>;
 }) {
-  const { user_id } = await p.params; // 👈 ключевой момент
+  const { user_id } = await p.params; 
   const userId = Number(user_id);
 
   const [user, tags, inventory, tasks, notes] = await Promise.all([

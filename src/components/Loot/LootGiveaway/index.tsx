@@ -48,7 +48,6 @@ export default function LootGiveaway({
   const [showInactive, setShowInactive] = useState(false);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const isAdmin = useUserTag("Администратор");
-  const isModerator = useUserTag("Модератор");
 
   const displayedPlayers = useMemo(
     () => allPlayers.filter((p) => p.active || showInactive),

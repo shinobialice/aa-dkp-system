@@ -29,7 +29,7 @@ export async function sellGroupedLootItems({
       status,
     },
     orderBy: {
-      acquired_at: "asc", // FIFO
+      acquired_at: "asc", 
     },
     include: {
       itemType: true,

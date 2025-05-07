@@ -41,7 +41,6 @@ export function LootQueuePopover({
   const [selectedUser, setSelectedUser] = useState("");
   const [queue, setQueue] = useState<Record<string, LootQueueEntry[]>>({});
   const isAdmin = useUserTag("Администратор");
-  const isModerator = useUserTag("Модератор");
 
   const [editMode, setEditMode] = useState(false);
   const isExtended = extendedItems.includes(itemName);

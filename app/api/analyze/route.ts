@@ -1,4 +1,3 @@
-// app/api/analyze/route.ts
 import { NextRequest } from "next/server";
 import axios from "axios";
 import { extractNamesFromReadOCR } from "@/src/utils/AI/extractNamesFromOCR";
@@ -19,7 +18,6 @@ export async function POST(req: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // 1. Запрос на чтение
     const postRes = await axios.post(
       `${process.env.AZURE_ENDPOINT}/vision/v3.2/read/analyze`,
       buffer,
@@ -40,11 +38,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2. Ждём результат
     let resultData;
     for (let i = 0; i < 10; i++) {
-      await new Promise((r) => setTimeout(r, 1000)); // Ждём 1 сек
-
+      await new Promise((r) => setTimeout(r, 1000)); 
       const getRes = await axios.get(operationLocation, {
         headers: {
           "Ocp-Apim-Subscription-Key": process.env.AZURE_KEY!,

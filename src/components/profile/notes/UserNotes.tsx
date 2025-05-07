@@ -60,7 +60,6 @@ export default function UserNotes({
   const [bonusDialogOpen, setBonusDialogOpen] = useState(false);
   const [tags, setTags] = useState(initialTags);
   const isAdmin = useUserTag("Администратор");
-  const isModerator = useUserTag("Модератор");
 
   useEffect(() => {
     const fetchBonuses = async () => {

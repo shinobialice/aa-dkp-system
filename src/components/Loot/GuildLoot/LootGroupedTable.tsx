@@ -43,7 +43,6 @@ export function LootGroupedTable({
     null
   );
   const isAdmin = useUserTag("Администратор");
-  const isModerator = useUserTag("Модератор");
   const [dialogInitialPrice, setDialogInitialPrice] = useState<number>(0);
   const [maxQuantity, setMaxQuantity] = useState<number>(1);
   const [lootToDelete, setLootToDelete] = useState<LootItem | null>(null);
@@ -202,7 +201,6 @@ export function LootGroupedTable({
         }) => {
           if (!selectedGroup) return;
 
-          // Удалить все проданные записи этой группы
           const groupItems = loot.filter(
             (item) =>
               item.itemTypeId === selectedGroup.itemTypeId &&
@@ -214,9 +212,8 @@ export function LootGroupedTable({
             await deleteLootItem(item.id);
           }
 
-          // Создать одну новую запись с нужным количеством
           await distributeLootItem({
-            lootId: groupItems[0]?.id ?? 0, // любой id, он не используется
+            lootId: groupItems[0]?.id ?? 0, 
             soldTo,
             soldToId,
             quantity,

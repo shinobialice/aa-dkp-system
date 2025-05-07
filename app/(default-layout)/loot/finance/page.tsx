@@ -28,7 +28,6 @@ export default function FinancePage() {
   const [loadingFund, setLoadingFund] = useState(false);
   const [loadingSalaries, setLoadingSalaries] = useState(false);
   const isAdmin = useUserTag("Администратор");
-  const isModerator = useUserTag("Модератор");
 
   const [fund, setFund] = useState<null | {
     totalIncome: number;

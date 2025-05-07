@@ -1,5 +1,3 @@
-"use client";
-
 import MainPageCards from "@/src/components/MainPageCards";
 import { FC } from "react";
 
