@@ -125,7 +125,7 @@ export type News = $Result.DefaultSelection<Prisma.$NewsPayload>
  */
 export class PrismaClient<
   ClientOptions extends Prisma.PrismaClientOptions = Prisma.PrismaClientOptions,
-  U = 'log' extends keyof ClientOptions ? ClientOptions['log'] extends (Prisma.LogLevel | Prisma.LogDefinition)[] ? Prisma.GetEvents<ClientOptions['log']> : never : never,
+  U = 'log' extends keyof ClientOptions ? ClientOptions['log'] extends Array<Prisma.LogLevel | Prisma.LogDefinition> ? Prisma.GetEvents<ClientOptions['log']> : never : never,
   ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs
 > {
   [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['other'] }
@@ -594,7 +594,7 @@ export namespace Prisma {
   };
 
 
-  export type Enumerable<T> = T | T[];
+  export type Enumerable<T> = T | Array<T>;
 
   export type RequiredKeys<T> = {
     [K in keyof T]-?: {} extends Prisma__Pick<T, K> ? never : K
@@ -653,13 +653,13 @@ export namespace Prisma {
   /**
    * Is T a Record?
    */
-  type IsObject<T extends any> = T extends any[]
+  type IsObject<T extends any> = T extends Array<any>
   ? False
   : T extends Date
   ? False
   : T extends Uint8Array
   ? False
-  : T extends bigint
+  : T extends BigInt
   ? False
   : T extends object
   ? True
@@ -669,7 +669,7 @@ export namespace Prisma {
   /**
    * If it's T[], return T
    */
-  export type UnEnumerate<T extends unknown> = T extends (infer U)[] ? U : T
+  export type UnEnumerate<T extends unknown> = T extends Array<infer U> ? U : T
 
   /**
    * From ts-toolbelt
@@ -891,9 +891,9 @@ export namespace Prisma {
     db?: Datasource
   }
 
-  type TypeMapCb<ClientOptions = {}> = {
+  interface TypeMapCb<ClientOptions = {}> extends $Utils.Fn<{extArgs: $Extensions.InternalArgs }, $Utils.Record<string, any>> {
     returns: Prisma.TypeMap<this['params']['extArgs'], ClientOptions extends { omit: infer OmitOptions } ? OmitOptions : {}>
-  } & $Utils.Fn<{extArgs: $Extensions.InternalArgs }, $Utils.Record<string, any>>
+  }
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
     globalOmitOptions: {
@@ -2337,7 +2337,7 @@ export namespace Prisma {
   export const defineExtension: $Extensions.ExtendsHook<"define", Prisma.TypeMapCb, $Extensions.DefaultArgs>
   export type DefaultPrismaClient = PrismaClient
   export type ErrorFormat = 'pretty' | 'colorless' | 'minimal'
-  export type PrismaClientOptions = {
+  export interface PrismaClientOptions {
     /**
      * Overwrites the datasource url from your schema.prisma file
      */
@@ -2423,7 +2423,7 @@ export namespace Prisma {
   }
 
   export type GetLogType<T extends LogLevel | LogDefinition> = T extends LogDefinition ? T['emit'] extends 'event' ? T['level'] : never : never
-  export type GetEvents<T extends any> = T extends (LogLevel | LogDefinition)[] ?
+  export type GetEvents<T extends any> = T extends Array<LogLevel | LogDefinition> ?
     GetLogType<T[0]> | GetLogType<T[1]> | GetLogType<T[2]> | GetLogType<T[3]>
     : never
 
@@ -2486,7 +2486,7 @@ export namespace Prisma {
   ) => $Utils.JsPromise<T>
 
   // tested in getLogLevel.test.ts
-  export function getLogLevel(log: (LogLevel | LogDefinition)[]): LogLevel | undefined;
+  export function getLogLevel(log: Array<LogLevel | LogDefinition>): LogLevel | undefined;
 
   /**
    * `PrismaClient` proxy available in interactive transactions.
@@ -3023,14 +3023,16 @@ export namespace Prisma {
   }
 
   type GetUserGroupByPayload<T extends UserGroupByArgs> = Prisma.PrismaPromise<
-    (PickEnumerable<UserGroupByOutputType, T['by']> &
+    Array<
+      PickEnumerable<UserGroupByOutputType, T['by']> &
         {
           [P in ((keyof T) & (keyof UserGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
               ? number
               : GetScalarType<T[P], UserGroupByOutputType[P]>
             : GetScalarType<T[P], UserGroupByOutputType[P]>
-        })[]
+        }
+      >
     >
 
 
@@ -3173,7 +3175,7 @@ export namespace Prisma {
       select?: UserCountAggregateInputType | true
     }
 
-  export type UserDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface UserDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['User'], meta: { name: 'User' } }
     /**
      * Find zero or one User that matches the filter.
@@ -3554,7 +3556,7 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export type Prisma__UserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface Prisma__UserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     salaries<T extends User$salariesArgs<ExtArgs> = {}>(args?: Subset<T, User$salariesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SalaryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     givenAwayLoot<T extends User$givenAwayLootArgs<ExtArgs> = {}>(args?: Subset<T, User$givenAwayLootArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GivenAwayLootPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -3587,7 +3589,7 @@ export namespace Prisma {
      * @returns A Promise for the completion of the callback.
      */
     finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  } & Prisma.PrismaPromise<T>
+  }
 
 
 
@@ -3595,7 +3597,7 @@ export namespace Prisma {
   /**
    * Fields of the User model
    */
-  type UserFieldRefs = {
+  interface UserFieldRefs {
     readonly id: FieldRef<"User", 'Int'>
     readonly username: FieldRef<"User", 'String'>
     readonly class: FieldRef<"User", 'String'>
@@ -4456,14 +4458,16 @@ export namespace Prisma {
   }
 
   type GetUserTagsGroupByPayload<T extends UserTagsGroupByArgs> = Prisma.PrismaPromise<
-    (PickEnumerable<UserTagsGroupByOutputType, T['by']> &
+    Array<
+      PickEnumerable<UserTagsGroupByOutputType, T['by']> &
         {
           [P in ((keyof T) & (keyof UserTagsGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
               ? number
               : GetScalarType<T[P], UserTagsGroupByOutputType[P]>
             : GetScalarType<T[P], UserTagsGroupByOutputType[P]>
-        })[]
+        }
+      >
     >
 
 
@@ -4530,7 +4534,7 @@ export namespace Prisma {
       select?: UserTagsCountAggregateInputType | true
     }
 
-  export type UserTagsDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface UserTagsDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['UserTags'], meta: { name: 'UserTags' } }
     /**
      * Find zero or one UserTags that matches the filter.
@@ -4911,7 +4915,7 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export type Prisma__UserTagsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface Prisma__UserTagsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
@@ -4934,7 +4938,7 @@ export namespace Prisma {
      * @returns A Promise for the completion of the callback.
      */
     finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  } & Prisma.PrismaPromise<T>
+  }
 
 
 
@@ -4942,7 +4946,7 @@ export namespace Prisma {
   /**
    * Fields of the UserTags model
    */
-  type UserTagsFieldRefs = {
+  interface UserTagsFieldRefs {
     readonly id: FieldRef<"UserTags", 'Int'>
     readonly user_id: FieldRef<"UserTags", 'Int'>
     readonly tag: FieldRef<"UserTags", 'String'>
@@ -5562,14 +5566,16 @@ export namespace Prisma {
   }
 
   type GetUserInventoryGroupByPayload<T extends UserInventoryGroupByArgs> = Prisma.PrismaPromise<
-    (PickEnumerable<UserInventoryGroupByOutputType, T['by']> &
+    Array<
+      PickEnumerable<UserInventoryGroupByOutputType, T['by']> &
         {
           [P in ((keyof T) & (keyof UserInventoryGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
               ? number
               : GetScalarType<T[P], UserInventoryGroupByOutputType[P]>
             : GetScalarType<T[P], UserInventoryGroupByOutputType[P]>
-        })[]
+        }
+      >
     >
 
 
@@ -5651,7 +5657,7 @@ export namespace Prisma {
       select?: UserInventoryCountAggregateInputType | true
     }
 
-  export type UserInventoryDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface UserInventoryDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['UserInventory'], meta: { name: 'UserInventory' } }
     /**
      * Find zero or one UserInventory that matches the filter.
@@ -6032,7 +6038,7 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export type Prisma__UserInventoryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface Prisma__UserInventoryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
@@ -6055,7 +6061,7 @@ export namespace Prisma {
      * @returns A Promise for the completion of the callback.
      */
     finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  } & Prisma.PrismaPromise<T>
+  }
 
 
 
@@ -6063,7 +6069,7 @@ export namespace Prisma {
   /**
    * Fields of the UserInventory model
    */
-  type UserInventoryFieldRefs = {
+  interface UserInventoryFieldRefs {
     readonly id: FieldRef<"UserInventory", 'Int'>
     readonly user_id: FieldRef<"UserInventory", 'Int'>
     readonly type: FieldRef<"UserInventory", 'String'>
@@ -6668,14 +6674,16 @@ export namespace Prisma {
   }
 
   type GetTasksGroupByPayload<T extends TasksGroupByArgs> = Prisma.PrismaPromise<
-    (PickEnumerable<TasksGroupByOutputType, T['by']> &
+    Array<
+      PickEnumerable<TasksGroupByOutputType, T['by']> &
         {
           [P in ((keyof T) & (keyof TasksGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
               ? number
               : GetScalarType<T[P], TasksGroupByOutputType[P]>
             : GetScalarType<T[P], TasksGroupByOutputType[P]>
-        })[]
+        }
+      >
     >
 
 
@@ -6752,7 +6760,7 @@ export namespace Prisma {
       select?: TasksCountAggregateInputType | true
     }
 
-  export type TasksDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface TasksDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Tasks'], meta: { name: 'Tasks' } }
     /**
      * Find zero or one Tasks that matches the filter.
@@ -7133,7 +7141,7 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export type Prisma__TasksClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface Prisma__TasksClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     assignedTo<T extends Tasks$assignedToArgs<ExtArgs> = {}>(args?: Subset<T, Tasks$assignedToArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TasksUserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -7157,7 +7165,7 @@ export namespace Prisma {
      * @returns A Promise for the completion of the callback.
      */
     finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  } & Prisma.PrismaPromise<T>
+  }
 
 
 
@@ -7165,7 +7173,7 @@ export namespace Prisma {
   /**
    * Fields of the Tasks model
    */
-  type TasksFieldRefs = {
+  interface TasksFieldRefs {
     readonly id: FieldRef<"Tasks", 'Int'>
     readonly user_id: FieldRef<"Tasks", 'Int'>
     readonly name: FieldRef<"Tasks", 'String'>
@@ -7806,14 +7814,16 @@ export namespace Prisma {
   }
 
   type GetRaidGroupByPayload<T extends RaidGroupByArgs> = Prisma.PrismaPromise<
-    (PickEnumerable<RaidGroupByOutputType, T['by']> &
+    Array<
+      PickEnumerable<RaidGroupByOutputType, T['by']> &
         {
           [P in ((keyof T) & (keyof RaidGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
               ? number
               : GetScalarType<T[P], RaidGroupByOutputType[P]>
             : GetScalarType<T[P], RaidGroupByOutputType[P]>
-        })[]
+        }
+      >
     >
 
 
@@ -7894,7 +7904,7 @@ export namespace Prisma {
       select?: RaidCountAggregateInputType | true
     }
 
-  export type RaidDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface RaidDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Raid'], meta: { name: 'Raid' } }
     /**
      * Find zero or one Raid that matches the filter.
@@ -8275,7 +8285,7 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export type Prisma__RaidClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface Prisma__RaidClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     attendance<T extends Raid$attendanceArgs<ExtArgs> = {}>(args?: Subset<T, Raid$attendanceArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RaidAttendancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     raidBosses<T extends Raid$raidBossesArgs<ExtArgs> = {}>(args?: Subset<T, Raid$raidBossesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RaidBossPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -8299,7 +8309,7 @@ export namespace Prisma {
      * @returns A Promise for the completion of the callback.
      */
     finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  } & Prisma.PrismaPromise<T>
+  }
 
 
 
@@ -8307,7 +8317,7 @@ export namespace Prisma {
   /**
    * Fields of the Raid model
    */
-  type RaidFieldRefs = {
+  interface RaidFieldRefs {
     readonly id: FieldRef<"Raid", 'Int'>
     readonly type: FieldRef<"Raid", 'String'>
     readonly start_date: FieldRef<"Raid", 'DateTime'>
@@ -8945,14 +8955,16 @@ export namespace Prisma {
   }
 
   type GetBossGroupByPayload<T extends BossGroupByArgs> = Prisma.PrismaPromise<
-    (PickEnumerable<BossGroupByOutputType, T['by']> &
+    Array<
+      PickEnumerable<BossGroupByOutputType, T['by']> &
         {
           [P in ((keyof T) & (keyof BossGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
               ? number
               : GetScalarType<T[P], BossGroupByOutputType[P]>
             : GetScalarType<T[P], BossGroupByOutputType[P]>
-        })[]
+        }
+      >
     >
 
 
@@ -9015,7 +9027,7 @@ export namespace Prisma {
       select?: BossCountAggregateInputType | true
     }
 
-  export type BossDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface BossDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Boss'], meta: { name: 'Boss' } }
     /**
      * Find zero or one Boss that matches the filter.
@@ -9396,7 +9408,7 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export type Prisma__BossClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface Prisma__BossClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     raidBosses<T extends Boss$raidBossesArgs<ExtArgs> = {}>(args?: Subset<T, Boss$raidBossesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RaidBossPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
@@ -9419,7 +9431,7 @@ export namespace Prisma {
      * @returns A Promise for the completion of the callback.
      */
     finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  } & Prisma.PrismaPromise<T>
+  }
 
 
 
@@ -9427,7 +9439,7 @@ export namespace Prisma {
   /**
    * Fields of the Boss model
    */
-  type BossFieldRefs = {
+  interface BossFieldRefs {
     readonly id: FieldRef<"Boss", 'Int'>
     readonly boss_name: FieldRef<"Boss", 'String'>
     readonly dkp_points: FieldRef<"Boss", 'Int'>
@@ -10024,14 +10036,16 @@ export namespace Prisma {
   }
 
   type GetRaidBossGroupByPayload<T extends RaidBossGroupByArgs> = Prisma.PrismaPromise<
-    (PickEnumerable<RaidBossGroupByOutputType, T['by']> &
+    Array<
+      PickEnumerable<RaidBossGroupByOutputType, T['by']> &
         {
           [P in ((keyof T) & (keyof RaidBossGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
               ? number
               : GetScalarType<T[P], RaidBossGroupByOutputType[P]>
             : GetScalarType<T[P], RaidBossGroupByOutputType[P]>
-        })[]
+        }
+      >
     >
 
 
@@ -10095,7 +10109,7 @@ export namespace Prisma {
       select?: RaidBossCountAggregateInputType | true
     }
 
-  export type RaidBossDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface RaidBossDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['RaidBoss'], meta: { name: 'RaidBoss' } }
     /**
      * Find zero or one RaidBoss that matches the filter.
@@ -10476,7 +10490,7 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export type Prisma__RaidBossClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface Prisma__RaidBossClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     boss<T extends BossDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BossDefaultArgs<ExtArgs>>): Prisma__BossClient<$Result.GetResult<Prisma.$BossPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     raid<T extends RaidDefaultArgs<ExtArgs> = {}>(args?: Subset<T, RaidDefaultArgs<ExtArgs>>): Prisma__RaidClient<$Result.GetResult<Prisma.$RaidPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
@@ -10500,7 +10514,7 @@ export namespace Prisma {
      * @returns A Promise for the completion of the callback.
      */
     finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  } & Prisma.PrismaPromise<T>
+  }
 
 
 
@@ -10508,7 +10522,7 @@ export namespace Prisma {
   /**
    * Fields of the RaidBoss model
    */
-  type RaidBossFieldRefs = {
+  interface RaidBossFieldRefs {
     readonly raid_id: FieldRef<"RaidBoss", 'Int'>
     readonly boss_id: FieldRef<"RaidBoss", 'Int'>
   }
@@ -11105,14 +11119,16 @@ export namespace Prisma {
   }
 
   type GetRaidAttendanceGroupByPayload<T extends RaidAttendanceGroupByArgs> = Prisma.PrismaPromise<
-    (PickEnumerable<RaidAttendanceGroupByOutputType, T['by']> &
+    Array<
+      PickEnumerable<RaidAttendanceGroupByOutputType, T['by']> &
         {
           [P in ((keyof T) & (keyof RaidAttendanceGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
               ? number
               : GetScalarType<T[P], RaidAttendanceGroupByOutputType[P]>
             : GetScalarType<T[P], RaidAttendanceGroupByOutputType[P]>
-        })[]
+        }
+      >
     >
 
 
@@ -11186,7 +11202,7 @@ export namespace Prisma {
       select?: RaidAttendanceCountAggregateInputType | true
     }
 
-  export type RaidAttendanceDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface RaidAttendanceDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['RaidAttendance'], meta: { name: 'RaidAttendance' } }
     /**
      * Find zero or one RaidAttendance that matches the filter.
@@ -11567,7 +11583,7 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export type Prisma__RaidAttendanceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface Prisma__RaidAttendanceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     raid<T extends RaidDefaultArgs<ExtArgs> = {}>(args?: Subset<T, RaidDefaultArgs<ExtArgs>>): Prisma__RaidClient<$Result.GetResult<Prisma.$RaidPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
@@ -11591,7 +11607,7 @@ export namespace Prisma {
      * @returns A Promise for the completion of the callback.
      */
     finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  } & Prisma.PrismaPromise<T>
+  }
 
 
 
@@ -11599,7 +11615,7 @@ export namespace Prisma {
   /**
    * Fields of the RaidAttendance model
    */
-  type RaidAttendanceFieldRefs = {
+  interface RaidAttendanceFieldRefs {
     readonly id: FieldRef<"RaidAttendance", 'Int'>
     readonly user_id: FieldRef<"RaidAttendance", 'Int'>
     readonly raid_id: FieldRef<"RaidAttendance", 'Int'>
@@ -12187,14 +12203,16 @@ export namespace Prisma {
   }
 
   type GetItemTypeGroupByPayload<T extends ItemTypeGroupByArgs> = Prisma.PrismaPromise<
-    (PickEnumerable<ItemTypeGroupByOutputType, T['by']> &
+    Array<
+      PickEnumerable<ItemTypeGroupByOutputType, T['by']> &
         {
           [P in ((keyof T) & (keyof ItemTypeGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
               ? number
               : GetScalarType<T[P], ItemTypeGroupByOutputType[P]>
             : GetScalarType<T[P], ItemTypeGroupByOutputType[P]>
-        })[]
+        }
+      >
     >
 
 
@@ -12255,7 +12273,7 @@ export namespace Prisma {
       select?: ItemTypeCountAggregateInputType | true
     }
 
-  export type ItemTypeDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface ItemTypeDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ItemType'], meta: { name: 'ItemType' } }
     /**
      * Find zero or one ItemType that matches the filter.
@@ -12636,7 +12654,7 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export type Prisma__ItemTypeClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface Prisma__ItemTypeClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     loot<T extends ItemType$lootArgs<ExtArgs> = {}>(args?: Subset<T, ItemType$lootArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LootPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     lootQueue<T extends ItemType$lootQueueArgs<ExtArgs> = {}>(args?: Subset<T, ItemType$lootQueueArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LootQueuePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -12660,7 +12678,7 @@ export namespace Prisma {
      * @returns A Promise for the completion of the callback.
      */
     finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  } & Prisma.PrismaPromise<T>
+  }
 
 
 
@@ -12668,7 +12686,7 @@ export namespace Prisma {
   /**
    * Fields of the ItemType model
    */
-  type ItemTypeFieldRefs = {
+  interface ItemTypeFieldRefs {
     readonly id: FieldRef<"ItemType", 'Int'>
     readonly name: FieldRef<"ItemType", 'String'>
     readonly price: FieldRef<"ItemType", 'Float'>
@@ -13381,14 +13399,16 @@ export namespace Prisma {
   }
 
   type GetLootGroupByPayload<T extends LootGroupByArgs> = Prisma.PrismaPromise<
-    (PickEnumerable<LootGroupByOutputType, T['by']> &
+    Array<
+      PickEnumerable<LootGroupByOutputType, T['by']> &
         {
           [P in ((keyof T) & (keyof LootGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
               ? number
               : GetScalarType<T[P], LootGroupByOutputType[P]>
             : GetScalarType<T[P], LootGroupByOutputType[P]>
-        })[]
+        }
+      >
     >
 
 
@@ -13507,7 +13527,7 @@ export namespace Prisma {
       select?: LootCountAggregateInputType | true
     }
 
-  export type LootDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface LootDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Loot'], meta: { name: 'Loot' } }
     /**
      * Find zero or one Loot that matches the filter.
@@ -13888,7 +13908,7 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export type Prisma__LootClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface Prisma__LootClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     itemType<T extends ItemTypeDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ItemTypeDefaultArgs<ExtArgs>>): Prisma__ItemTypeClient<$Result.GetResult<Prisma.$ItemTypePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     soldToUser<T extends Loot$soldToUserArgs<ExtArgs> = {}>(args?: Subset<T, Loot$soldToUserArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
@@ -13912,7 +13932,7 @@ export namespace Prisma {
      * @returns A Promise for the completion of the callback.
      */
     finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  } & Prisma.PrismaPromise<T>
+  }
 
 
 
@@ -13920,7 +13940,7 @@ export namespace Prisma {
   /**
    * Fields of the Loot model
    */
-  type LootFieldRefs = {
+  interface LootFieldRefs {
     readonly id: FieldRef<"Loot", 'Int'>
     readonly status: FieldRef<"Loot", 'String'>
     readonly sold_at: FieldRef<"Loot", 'DateTime'>
@@ -14529,14 +14549,16 @@ export namespace Prisma {
   }
 
   type GetTasksUserGroupByPayload<T extends TasksUserGroupByArgs> = Prisma.PrismaPromise<
-    (PickEnumerable<TasksUserGroupByOutputType, T['by']> &
+    Array<
+      PickEnumerable<TasksUserGroupByOutputType, T['by']> &
         {
           [P in ((keyof T) & (keyof TasksUserGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
               ? number
               : GetScalarType<T[P], TasksUserGroupByOutputType[P]>
             : GetScalarType<T[P], TasksUserGroupByOutputType[P]>
-        })[]
+        }
+      >
     >
 
 
@@ -14600,7 +14622,7 @@ export namespace Prisma {
       select?: TasksUserCountAggregateInputType | true
     }
 
-  export type TasksUserDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface TasksUserDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['TasksUser'], meta: { name: 'TasksUser' } }
     /**
      * Find zero or one TasksUser that matches the filter.
@@ -14981,7 +15003,7 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export type Prisma__TasksUserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface Prisma__TasksUserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     task<T extends TasksDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TasksDefaultArgs<ExtArgs>>): Prisma__TasksClient<$Result.GetResult<Prisma.$TasksPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
@@ -15005,7 +15027,7 @@ export namespace Prisma {
      * @returns A Promise for the completion of the callback.
      */
     finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  } & Prisma.PrismaPromise<T>
+  }
 
 
 
@@ -15013,7 +15035,7 @@ export namespace Prisma {
   /**
    * Fields of the TasksUser model
    */
-  type TasksUserFieldRefs = {
+  interface TasksUserFieldRefs {
     readonly tasks_user_id: FieldRef<"TasksUser", 'Int'>
     readonly user_id: FieldRef<"TasksUser", 'Int'>
   }
@@ -15657,14 +15679,16 @@ export namespace Prisma {
   }
 
   type GetLootQueueGroupByPayload<T extends LootQueueGroupByArgs> = Prisma.PrismaPromise<
-    (PickEnumerable<LootQueueGroupByOutputType, T['by']> &
+    Array<
+      PickEnumerable<LootQueueGroupByOutputType, T['by']> &
         {
           [P in ((keyof T) & (keyof LootQueueGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
               ? number
               : GetScalarType<T[P], LootQueueGroupByOutputType[P]>
             : GetScalarType<T[P], LootQueueGroupByOutputType[P]>
-        })[]
+        }
+      >
     >
 
 
@@ -15763,7 +15787,7 @@ export namespace Prisma {
       select?: LootQueueCountAggregateInputType | true
     }
 
-  export type LootQueueDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface LootQueueDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['LootQueue'], meta: { name: 'LootQueue' } }
     /**
      * Find zero or one LootQueue that matches the filter.
@@ -16144,7 +16168,7 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export type Prisma__LootQueueClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface Prisma__LootQueueClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     itemType<T extends ItemTypeDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ItemTypeDefaultArgs<ExtArgs>>): Prisma__ItemTypeClient<$Result.GetResult<Prisma.$ItemTypePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
@@ -16168,7 +16192,7 @@ export namespace Prisma {
      * @returns A Promise for the completion of the callback.
      */
     finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  } & Prisma.PrismaPromise<T>
+  }
 
 
 
@@ -16176,7 +16200,7 @@ export namespace Prisma {
   /**
    * Fields of the LootQueue model
    */
-  type LootQueueFieldRefs = {
+  interface LootQueueFieldRefs {
     readonly id: FieldRef<"LootQueue", 'Int'>
     readonly itemTypeId: FieldRef<"LootQueue", 'Int'>
     readonly userId: FieldRef<"LootQueue", 'Int'>
@@ -16797,14 +16821,16 @@ export namespace Prisma {
   }
 
   type GetGivenAwayLootGroupByPayload<T extends GivenAwayLootGroupByArgs> = Prisma.PrismaPromise<
-    (PickEnumerable<GivenAwayLootGroupByOutputType, T['by']> &
+    Array<
+      PickEnumerable<GivenAwayLootGroupByOutputType, T['by']> &
         {
           [P in ((keyof T) & (keyof GivenAwayLootGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
               ? number
               : GetScalarType<T[P], GivenAwayLootGroupByOutputType[P]>
             : GetScalarType<T[P], GivenAwayLootGroupByOutputType[P]>
-        })[]
+        }
+      >
     >
 
 
@@ -16886,7 +16912,7 @@ export namespace Prisma {
       select?: GivenAwayLootCountAggregateInputType | true
     }
 
-  export type GivenAwayLootDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface GivenAwayLootDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['GivenAwayLoot'], meta: { name: 'GivenAwayLoot' } }
     /**
      * Find zero or one GivenAwayLoot that matches the filter.
@@ -17267,7 +17293,7 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export type Prisma__GivenAwayLootClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface Prisma__GivenAwayLootClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
@@ -17290,7 +17316,7 @@ export namespace Prisma {
      * @returns A Promise for the completion of the callback.
      */
     finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  } & Prisma.PrismaPromise<T>
+  }
 
 
 
@@ -17298,7 +17324,7 @@ export namespace Prisma {
   /**
    * Fields of the GivenAwayLoot model
    */
-  type GivenAwayLootFieldRefs = {
+  interface GivenAwayLootFieldRefs {
     readonly id: FieldRef<"GivenAwayLoot", 'Int'>
     readonly user_id: FieldRef<"GivenAwayLoot", 'Int'>
     readonly name: FieldRef<"GivenAwayLoot", 'String'>
@@ -17910,14 +17936,16 @@ export namespace Prisma {
   }
 
   type GetExpenseGroupByPayload<T extends ExpenseGroupByArgs> = Prisma.PrismaPromise<
-    (PickEnumerable<ExpenseGroupByOutputType, T['by']> &
+    Array<
+      PickEnumerable<ExpenseGroupByOutputType, T['by']> &
         {
           [P in ((keyof T) & (keyof ExpenseGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
               ? number
               : GetScalarType<T[P], ExpenseGroupByOutputType[P]>
             : GetScalarType<T[P], ExpenseGroupByOutputType[P]>
-        })[]
+        }
+      >
     >
 
 
@@ -17980,7 +18008,7 @@ export namespace Prisma {
       select?: ExpenseCountAggregateInputType | true
     }
 
-  export type ExpenseDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface ExpenseDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Expense'], meta: { name: 'Expense' } }
     /**
      * Find zero or one Expense that matches the filter.
@@ -18361,7 +18389,7 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export type Prisma__ExpenseClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface Prisma__ExpenseClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -18383,7 +18411,7 @@ export namespace Prisma {
      * @returns A Promise for the completion of the callback.
      */
     finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  } & Prisma.PrismaPromise<T>
+  }
 
 
 
@@ -18391,7 +18419,7 @@ export namespace Prisma {
   /**
    * Fields of the Expense model
    */
-  type ExpenseFieldRefs = {
+  interface ExpenseFieldRefs {
     readonly id: FieldRef<"Expense", 'Int'>
     readonly date: FieldRef<"Expense", 'DateTime'>
     readonly amount: FieldRef<"Expense", 'Int'>
@@ -18992,14 +19020,16 @@ export namespace Prisma {
   }
 
   type GetGuildFundsGroupByPayload<T extends GuildFundsGroupByArgs> = Prisma.PrismaPromise<
-    (PickEnumerable<GuildFundsGroupByOutputType, T['by']> &
+    Array<
+      PickEnumerable<GuildFundsGroupByOutputType, T['by']> &
         {
           [P in ((keyof T) & (keyof GuildFundsGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
               ? number
               : GetScalarType<T[P], GuildFundsGroupByOutputType[P]>
             : GetScalarType<T[P], GuildFundsGroupByOutputType[P]>
-        })[]
+        }
+      >
     >
 
 
@@ -19072,7 +19102,7 @@ export namespace Prisma {
       select?: GuildFundsCountAggregateInputType | true
     }
 
-  export type GuildFundsDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface GuildFundsDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['GuildFunds'], meta: { name: 'GuildFunds' } }
     /**
      * Find zero or one GuildFunds that matches the filter.
@@ -19453,7 +19483,7 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export type Prisma__GuildFundsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface Prisma__GuildFundsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -19475,7 +19505,7 @@ export namespace Prisma {
      * @returns A Promise for the completion of the callback.
      */
     finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  } & Prisma.PrismaPromise<T>
+  }
 
 
 
@@ -19483,7 +19513,7 @@ export namespace Prisma {
   /**
    * Fields of the GuildFunds model
    */
-  type GuildFundsFieldRefs = {
+  interface GuildFundsFieldRefs {
     readonly id: FieldRef<"GuildFunds", 'Int'>
     readonly year: FieldRef<"GuildFunds", 'Int'>
     readonly month: FieldRef<"GuildFunds", 'Int'>
@@ -20075,14 +20105,16 @@ export namespace Prisma {
   }
 
   type GetSalaryGroupByPayload<T extends SalaryGroupByArgs> = Prisma.PrismaPromise<
-    (PickEnumerable<SalaryGroupByOutputType, T['by']> &
+    Array<
+      PickEnumerable<SalaryGroupByOutputType, T['by']> &
         {
           [P in ((keyof T) & (keyof SalaryGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
               ? number
               : GetScalarType<T[P], SalaryGroupByOutputType[P]>
             : GetScalarType<T[P], SalaryGroupByOutputType[P]>
-        })[]
+        }
+      >
     >
 
 
@@ -20164,7 +20196,7 @@ export namespace Prisma {
       select?: SalaryCountAggregateInputType | true
     }
 
-  export type SalaryDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface SalaryDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Salary'], meta: { name: 'Salary' } }
     /**
      * Find zero or one Salary that matches the filter.
@@ -20545,7 +20577,7 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export type Prisma__SalaryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface Prisma__SalaryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
@@ -20568,7 +20600,7 @@ export namespace Prisma {
      * @returns A Promise for the completion of the callback.
      */
     finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  } & Prisma.PrismaPromise<T>
+  }
 
 
 
@@ -20576,7 +20608,7 @@ export namespace Prisma {
   /**
    * Fields of the Salary model
    */
-  type SalaryFieldRefs = {
+  interface SalaryFieldRefs {
     readonly id: FieldRef<"Salary", 'Int'>
     readonly year: FieldRef<"Salary", 'Int'>
     readonly month: FieldRef<"Salary", 'Int'>
@@ -21185,14 +21217,16 @@ export namespace Prisma {
   }
 
   type GetUserSalaryBonusGroupByPayload<T extends UserSalaryBonusGroupByArgs> = Prisma.PrismaPromise<
-    (PickEnumerable<UserSalaryBonusGroupByOutputType, T['by']> &
+    Array<
+      PickEnumerable<UserSalaryBonusGroupByOutputType, T['by']> &
         {
           [P in ((keyof T) & (keyof UserSalaryBonusGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
               ? number
               : GetScalarType<T[P], UserSalaryBonusGroupByOutputType[P]>
             : GetScalarType<T[P], UserSalaryBonusGroupByOutputType[P]>
-        })[]
+        }
+      >
     >
 
 
@@ -21264,7 +21298,7 @@ export namespace Prisma {
       select?: UserSalaryBonusCountAggregateInputType | true
     }
 
-  export type UserSalaryBonusDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface UserSalaryBonusDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['UserSalaryBonus'], meta: { name: 'UserSalaryBonus' } }
     /**
      * Find zero or one UserSalaryBonus that matches the filter.
@@ -21645,7 +21679,7 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export type Prisma__UserSalaryBonusClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface Prisma__UserSalaryBonusClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
@@ -21668,7 +21702,7 @@ export namespace Prisma {
      * @returns A Promise for the completion of the callback.
      */
     finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  } & Prisma.PrismaPromise<T>
+  }
 
 
 
@@ -21676,7 +21710,7 @@ export namespace Prisma {
   /**
    * Fields of the UserSalaryBonus model
    */
-  type UserSalaryBonusFieldRefs = {
+  interface UserSalaryBonusFieldRefs {
     readonly id: FieldRef<"UserSalaryBonus", 'Int'>
     readonly user_id: FieldRef<"UserSalaryBonus", 'Int'>
     readonly amount: FieldRef<"UserSalaryBonus", 'Int'>
@@ -22279,14 +22313,16 @@ export namespace Prisma {
   }
 
   type GetLinkTokenGroupByPayload<T extends LinkTokenGroupByArgs> = Prisma.PrismaPromise<
-    (PickEnumerable<LinkTokenGroupByOutputType, T['by']> &
+    Array<
+      PickEnumerable<LinkTokenGroupByOutputType, T['by']> &
         {
           [P in ((keyof T) & (keyof LinkTokenGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
               ? number
               : GetScalarType<T[P], LinkTokenGroupByOutputType[P]>
             : GetScalarType<T[P], LinkTokenGroupByOutputType[P]>
-        })[]
+        }
+      >
     >
 
 
@@ -22358,7 +22394,7 @@ export namespace Prisma {
       select?: LinkTokenCountAggregateInputType | true
     }
 
-  export type LinkTokenDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface LinkTokenDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['LinkToken'], meta: { name: 'LinkToken' } }
     /**
      * Find zero or one LinkToken that matches the filter.
@@ -22739,7 +22775,7 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export type Prisma__LinkTokenClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface Prisma__LinkTokenClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
@@ -22762,7 +22798,7 @@ export namespace Prisma {
      * @returns A Promise for the completion of the callback.
      */
     finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  } & Prisma.PrismaPromise<T>
+  }
 
 
 
@@ -22770,7 +22806,7 @@ export namespace Prisma {
   /**
    * Fields of the LinkToken model
    */
-  type LinkTokenFieldRefs = {
+  interface LinkTokenFieldRefs {
     readonly id: FieldRef<"LinkToken", 'Int'>
     readonly token: FieldRef<"LinkToken", 'String'>
     readonly userId: FieldRef<"LinkToken", 'Int'>
@@ -23376,14 +23412,16 @@ export namespace Prisma {
   }
 
   type GetNewsGroupByPayload<T extends NewsGroupByArgs> = Prisma.PrismaPromise<
-    (PickEnumerable<NewsGroupByOutputType, T['by']> &
+    Array<
+      PickEnumerable<NewsGroupByOutputType, T['by']> &
         {
           [P in ((keyof T) & (keyof NewsGroupByOutputType))]: P extends '_count'
             ? T[P] extends boolean
               ? number
               : GetScalarType<T[P], NewsGroupByOutputType[P]>
             : GetScalarType<T[P], NewsGroupByOutputType[P]>
-        })[]
+        }
+      >
     >
 
 
@@ -23446,7 +23484,7 @@ export namespace Prisma {
       select?: NewsCountAggregateInputType | true
     }
 
-  export type NewsDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface NewsDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
     [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['News'], meta: { name: 'News' } }
     /**
      * Find zero or one News that matches the filter.
@@ -23827,7 +23865,7 @@ export namespace Prisma {
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
-  export type Prisma__NewsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+  export interface Prisma__NewsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -23849,7 +23887,7 @@ export namespace Prisma {
      * @returns A Promise for the completion of the callback.
      */
     finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  } & Prisma.PrismaPromise<T>
+  }
 
 
 
@@ -23857,7 +23895,7 @@ export namespace Prisma {
   /**
    * Fields of the News model
    */
-  type NewsFieldRefs = {
+  interface NewsFieldRefs {
     readonly id: FieldRef<"News", 'Int'>
     readonly title: FieldRef<"News", 'String'>
     readonly content: FieldRef<"News", 'String'>
