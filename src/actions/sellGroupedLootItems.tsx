@@ -6,11 +6,8 @@ export async function sellGroupedLootItems({
   itemTypeId,
   status,
   quantity,
-  soldTo,
   soldToId,
   isFree,
-  comment,
-  price,
 }: {
   itemTypeId: number;
   status: string;
@@ -56,23 +53,6 @@ export async function sellGroupedLootItems({
       });
     }
 
-    // Создать проданную запись
-    const created = await prisma.loot.create({
-      data: {
-        itemTypeId: itemTypeId,
-        source: item.source,
-        acquired_at: item.acquired_at ?? new Date(),
-        quantity: takeQty,
-        sold_to: soldTo,
-        sold_to_user_id: soldToId,
-        sold_at: new Date(),
-        comment,
-        status: isFree ? "Выдано" : "Продано",
-        price: isFree ? 0 : price ?? item.itemType.price ?? 0,
-      },
-    });
-
-    // Добавить в инвентарь
     if (soldToId) {
       await prisma.userInventory.create({
         data: {

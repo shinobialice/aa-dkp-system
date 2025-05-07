@@ -32,7 +32,6 @@ export default function ActivitiesPage() {
   >([]);
 
   const [openDialog, setOpenDialog] = useState(false);
-  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const isAdmin = useUserTag("Администратор");
   const isModerator = useUserTag("Модератор");

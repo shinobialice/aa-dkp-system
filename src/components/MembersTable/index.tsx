@@ -10,7 +10,7 @@ export default function MembersTable({
 }: {
   users: any[];
 }) {
-  const [users, setUsers] = useState(initialUsers);
+  const [users] = useState(initialUsers);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 

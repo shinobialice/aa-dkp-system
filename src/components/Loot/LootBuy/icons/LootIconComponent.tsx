@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { getLootGradeUrl, getLootIconUrl } from "./LootIcons";
 
 interface LootIconProps {
@@ -21,14 +22,14 @@ export function LootIcon({
       className={`relative inline-block`}
       style={{ width: size, height: size }}
     >
-      <img
+      <Image
         src={iconUrl}
         alt={itemName}
         width={size}
         height={size}
         className={className}
       />
-      <img
+      <Image
         src={gradeUrl}
         alt="grade"
         width={size}

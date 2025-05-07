@@ -1,5 +1,4 @@
 "use server";
-import { prisma } from "@/lib/db";
 
 const getUserNotes = async (userId: number) => {
   const notes = [

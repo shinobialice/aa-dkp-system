@@ -23,11 +23,11 @@ export default function ProfileAdditionalInfo({
   const joinedDate = user.joined_at ? new Date(user.joined_at) : null;
   const now = new Date();
 
-  let years = joinedDate ? differenceInYears(now, joinedDate) : 0;
-  let months = joinedDate
+  const years = joinedDate ? differenceInYears(now, joinedDate) : 0;
+  const months = joinedDate
     ? differenceInMonths(now, joinedDate) - years * 12
     : 0;
-  let days = joinedDate
+    const days = joinedDate
     ? differenceInDays(
         now,
         new Date(

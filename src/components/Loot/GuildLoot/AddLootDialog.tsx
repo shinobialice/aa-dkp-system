@@ -11,7 +11,6 @@ import { Label } from "@/components/ui/label";
 import { LootItemSelector } from "./LootItemSelector";
 import { LootIcon } from "../LootBuy/icons/LootIconComponent";
 import { ItemType, NewLootItem } from "./LootTypes";
-import { on } from "events";
 import { DateTimePicker } from "@/components/ui/datetime-picker";
 
 export function AddLootDialog({

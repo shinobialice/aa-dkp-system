@@ -4,7 +4,6 @@ import { Loader } from "lucide-react";
 import { useEffect, useState, FC } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import getStats from "@/src/actions/getStats";
-import { Return } from "@prisma/client/runtime/library";
 
 type Stats = Awaited<ReturnType<typeof getStats>>;
 
@@ -41,8 +40,7 @@ const MainPageCards: FC = () => {
       try {
         const data = await getStats();
         setStats(data);
-      } catch (error) {
-      }
+      } catch {}
     };
 
     fetchStats();

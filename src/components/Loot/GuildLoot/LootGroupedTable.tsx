@@ -15,7 +15,7 @@ import { getActiveUsers } from "@/src/actions/getActiveUsers";
 import { getLoot } from "@/src/actions/lootActions";
 import { distributeLootItem } from "@/src/actions/distributeLootItems";
 import { deleteLootItem } from "@/src/actions/deleteLootItem";
-import { Pen, Trash2 } from "lucide-react";
+import { Pen } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -26,7 +26,6 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import { LootIcon } from "../LootBuy/icons/LootIconComponent";
-import { sellGroupedLootItems } from "@/src/actions/sellGroupedLootItems";
 import { useUserTag } from "@/src/hooks/useUserTag";
 
 export function LootGroupedTable({

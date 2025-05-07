@@ -11,14 +11,6 @@ import { LootGroupedTable } from "./LootGroupedTable";
 import { groupLootItems } from "./groupLootItems";
 import { useUserTag } from "@/src/hooks/useUserTag";
 
-type ExpenseItem = {
-  date: string;
-  amount: number;
-  target: string;
-  source: string;
-  comment: string;
-};
-
 export default function LootTable() {
   const [loot, setLoot] = useState<LootItem[]>([]);
   const [itemTypes, setItemTypes] = useState<ItemType[]>([]);

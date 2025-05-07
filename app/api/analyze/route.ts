@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
 
     let resultData;
     for (let i = 0; i < 10; i++) {
-      await new Promise((r) => setTimeout(r, 1000)); 
+      await new Promise((r) => setTimeout(r, 1000));
       const getRes = await axios.get(operationLocation, {
         headers: {
           "Ocp-Apim-Subscription-Key": process.env.AZURE_KEY!,
@@ -70,8 +70,14 @@ export async function POST(req: NextRequest) {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
-  } catch (err: any) {
-    return new Response(JSON.stringify({ error: err.message }), {
+  } catch (err: unknown) {
+    let message = "Unknown error";
+
+    if (err instanceof Error) {
+      message = err.message;
+    }
+
+    return new Response(JSON.stringify({ error: message }), {
       status: 500,
     });
   }

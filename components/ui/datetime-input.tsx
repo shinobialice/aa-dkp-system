@@ -1,3 +1,4 @@
+/* eslint-disable */
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
@@ -78,7 +79,6 @@ const segmentConfigs = [
     symbols: [" ", "/", "-", ":", ",", "."],
   },
 ];
-
 const mergeRefs = (...refs: any) => {
   return (node: any) => {
     for (const ref of refs) {
@@ -112,7 +112,6 @@ const DateTimeInput = React.forwardRef<HTMLInputElement, DateTimeInputProps>(
       }
     }, [form?.formState.isSubmitted]);
     useEffect(() => {
-      // console.error('valueChanged', {formatStr, inputStr, value});
       setSegments(parseFormat(formatStr, value));
     }, [formatStr, value]);
 

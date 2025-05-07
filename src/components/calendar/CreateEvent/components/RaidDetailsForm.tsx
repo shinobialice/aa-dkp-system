@@ -24,7 +24,6 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
 
 export function RaidDetailsForm({
-  users,
   setUsers,
   category,
   setCategory,

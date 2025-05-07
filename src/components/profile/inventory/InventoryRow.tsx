@@ -35,53 +35,50 @@ export default function InventoryRow({
   const isAdmin = useUserTag("Администратор");
 
   const handleChange = async (value: string) => {
-    try {
-      if (item.name === "Бафалка") {
-        if (value === "Нету") {
-          if (userItem) await deleteItemFromUserInventory(userItem.id);
-        } else {
-          const quality = value[0];
-          if (userItem) {
-            await setItemQuality(userItem.id, quality);
-          } else {
-            await addItemToUserInventory(userId, item.name, item.type, quality);
-          }
-        }
-      } else if (
-        [
-          "Коллеционный глайдер",
-          "Коллеционный глайдер т2",
-          "Коллекционный фамильяр",
-          "Коллекционный фамильяр т2",
-        ].includes(item.name)
-      ) {
-        if (value === "Нету") {
-          if (userItem) await deleteItemFromUserInventory(userItem.id);
-        } else {
-          const quality = value === "T1" ? "3" : value === "T2" ? "4" : null;
-          if (userItem) {
-            await setItemQuality(userItem.id, quality as string);
-          } else {
-            await addItemToUserInventory(userId, item.name, item.type, quality);
-          }
-        }
-      } else if (isDragon) {
-        if (value === "Нету") {
-          if (userItem) await deleteItemFromUserInventory(userItem.id);
-        } else {
-          if (userItem) await deleteItemFromUserInventory(userItem.id);
-          await addItemToUserInventory(userId, value, item.type, null);
-        }
+    if (item.name === "Бафалка") {
+      if (value === "Нету") {
+        if (userItem) await deleteItemFromUserInventory(userItem.id);
       } else {
-        if (value === "Есть" && !userItem) {
-          await addItemToUserInventory(userId, item.name, item.type, null);
-        } else if (value === "Нет" && userItem) {
-          await deleteItemFromUserInventory(userItem.id);
+        const quality = value[0];
+        if (userItem) {
+          await setItemQuality(userItem.id, quality);
+        } else {
+          await addItemToUserInventory(userId, item.name, item.type, quality);
         }
       }
-      onChange();
-    } catch (err) {
+    } else if (
+      [
+        "Коллеционный глайдер",
+        "Коллеционный глайдер т2",
+        "Коллекционный фамильяр",
+        "Коллекционный фамильяр т2",
+      ].includes(item.name)
+    ) {
+      if (value === "Нету") {
+        if (userItem) await deleteItemFromUserInventory(userItem.id);
+      } else {
+        const quality = value === "T1" ? "3" : value === "T2" ? "4" : null;
+        if (userItem) {
+          await setItemQuality(userItem.id, quality as string);
+        } else {
+          await addItemToUserInventory(userId, item.name, item.type, quality);
+        }
+      }
+    } else if (isDragon) {
+      if (value === "Нету") {
+        if (userItem) await deleteItemFromUserInventory(userItem.id);
+      } else {
+        if (userItem) await deleteItemFromUserInventory(userItem.id);
+        await addItemToUserInventory(userId, value, item.type, null);
+      }
+    } else {
+      if (value === "Есть" && !userItem) {
+        await addItemToUserInventory(userId, item.name, item.type, null);
+      } else if (value === "Нет" && userItem) {
+        await deleteItemFromUserInventory(userItem.id);
+      }
     }
+    onChange();
   };
 
   return (
@@ -111,7 +108,12 @@ export default function InventoryRow({
         </div>
       </TableCell>
       <TableCell>
-        <ItemSelector item={item} userItem={userItem} onChange={handleChange}  isAdmin={isAdmin}/>
+        <ItemSelector
+          item={item}
+          userItem={userItem}
+          onChange={handleChange}
+          isAdmin={isAdmin}
+        />
       </TableCell>
     </TableRow>
   );

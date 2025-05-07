@@ -22,7 +22,7 @@ export async function updateLootItem({
         acquired_at,
       },
     });
-  } catch (error) {
+  } catch {
     throw new Error("Не удалось обновить предмет");
   }
 }

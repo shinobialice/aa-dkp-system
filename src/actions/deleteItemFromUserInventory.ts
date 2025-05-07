@@ -7,7 +7,7 @@ const deleteItemFromUserInventory = async (id: number) => {
       where: { id },
     });
     return deletedItem;
-  } catch (error) {
+  } catch  {
     throw new Error("Failed to delete item from user inventory");
   }
 };

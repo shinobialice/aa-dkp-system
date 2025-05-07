@@ -2,7 +2,10 @@ import { prisma } from "@/lib/db";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export async function GET(req: NextRequest, context: any) {
+export async function GET(
+  req: NextRequest,
+  context: { params: { token: string } }
+) {
   const token = context.params.token;
 
   const result = await prisma.linkToken.findUnique({

@@ -7,7 +7,7 @@ const deleteUserTask = async (id: number) => {
       where: { id },
     });
     return deletedTask;
-  } catch (error) {
+  } catch  {
     throw new Error("Failed to delete task");
   }
 };

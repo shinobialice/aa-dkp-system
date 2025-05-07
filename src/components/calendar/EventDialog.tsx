@@ -18,7 +18,6 @@ import { RaidDetailsForm } from "./CreateEvent/components/RaidDetailsForm";
 import { ScreenshotOcr } from "./CreateEvent/components/ScreenshotOcr";
 import { SelectRaidList } from "./CreateEvent/components/SelectRaidList";
 import { SelectedRaidList } from "./CreateEvent/components/SelectedRaidList";
-import deleteEvent from "@/src/actions/deleteEvent";
 import { DeleteEventButton } from "./CreateEvent/components/DeleteEventButton";
 
 export function EventDialog({
@@ -44,7 +43,7 @@ export function EventDialog({
   const [rowSelection, setRowSelection] = useState<Record<number, boolean>>({});
   const [users, setUsers] = useState<any[]>([]);
   const [bosses, setBosses] = useState<any[]>([]);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [, setSuccess] = useState<string | null>(null);
   const [errors, setErrors] = useState({
     category: false,
     selectedBoss: false,
@@ -217,7 +216,10 @@ export function EventDialog({
             />
           )}
 
-          <Button onClick={handleSubmit} className="w-full cursor-pointer md:w-auto">
+          <Button
+            onClick={handleSubmit}
+            className="w-full cursor-pointer md:w-auto"
+          >
             {mode === "edit" ? "Изменить" : "Создать"}
           </Button>
         </DialogFooter>

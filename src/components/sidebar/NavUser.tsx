@@ -1,38 +1,11 @@
 'use client"';
 import Link from "next/link";
-import { signOut, useSession } from "next-auth/react";
-import { useTheme } from "next-themes";
+import { signOut } from "next-auth/react";
+import { ChevronsUpDown, BadgeCheck, LogOut } from "lucide-react";
 import {
-  Moon,
-  Sun,
-  ChevronUp,
-  ChevronDown,
-  LayoutDashboard,
-  Newspaper,
-  Users,
-  CalendarDays,
-  Trophy,
-  LineChart,
-  Settings,
-  User,
-  PiggyBank,
-  Gift,
-  BadgeDollarSign,
-  HandCoins,
-  ChevronsUpDown,
-  BadgeCheck,
-  LogOut,
-} from "lucide-react";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
 import {
@@ -43,11 +16,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Collapsible,
-  CollapsibleTrigger,
-  CollapsibleContent,
-} from "@radix-ui/react-collapsible";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function NavUser({
