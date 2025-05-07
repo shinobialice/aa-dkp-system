@@ -36,7 +36,7 @@ export default function ActivitiesPage() {
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const isAdmin = useUserTag("Администратор");
   const isModerator = useUserTag("Модератор");
-  const canEditEvents = isAdmin && isModerator;
+  const canEditEvents = isAdmin || isModerator;
 
   const handleEventClick = async (info: any) => {
     const fullEvent = await getRaidById(info.event.id);

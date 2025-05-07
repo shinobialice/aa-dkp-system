@@ -17,7 +17,7 @@ import {
 import * as React from "react";
 import { useTaskForm } from "./hooks/useTaskForm";
 import createUserTask from "@/src/actions/createUserTask";
-import { DatePicker } from "./TaskDatePicker";
+import { TaskDatePicker } from "./TaskDatePicker";
 
 interface CreateTaskPopoverProps {
   userId: number;
@@ -57,7 +57,7 @@ export function CreateTaskPopover({
           Добавить задание
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80">
+      <PopoverContent className="w-[400px]">
         <div className="grid gap-4">
           <div className="space-y-2">
             <h4 className="font-medium leading-none">Добавить задание</h4>
@@ -74,7 +74,7 @@ export function CreateTaskPopover({
             </div>
             <div className="grid grid-cols-3 items-center gap-4">
               <Label>Дата создания</Label>
-              <DatePicker
+              <TaskDatePicker
                 value={createdAt}
                 onChange={(date) => date && setCreatedAt(date)}
               />
@@ -98,13 +98,13 @@ export function CreateTaskPopover({
             </div>
             <div className="grid grid-cols-3 items-center gap-4">
               <Label>Дата завершения</Label>
-              <DatePicker
+              <TaskDatePicker
                 value={completedAt || undefined}
                 onChange={(date) => setCompletedAt(date ?? null)}
               />
             </div>
             <Button
-            className="cursor-pointer"
+              className="cursor-pointer"
               onClick={async () => {
                 await createUserTask(userId, name, createdAt, completedAt);
                 onChange();

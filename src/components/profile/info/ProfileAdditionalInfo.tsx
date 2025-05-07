@@ -5,8 +5,9 @@ import {
   differenceInYears,
 } from "date-fns";
 import { Input } from "@/components/ui/input";
-import { DatePicker } from "../tasks/TaskDatePicker";
+
 import { format } from "date-fns";
+import { DateTimePicker } from "@/components/ui/datetime-picker";
 
 export default function ProfileAdditionalInfo({
   user,
@@ -91,7 +92,9 @@ export default function ProfileAdditionalInfo({
         {(() => {
           if (editMode) {
             return (
-              <DatePicker
+              <DateTimePicker
+                classNames={{ trigger: "w-[245px]" }}
+                hideTime
                 value={
                   formData.joined_at ? new Date(formData.joined_at) : undefined
                 }

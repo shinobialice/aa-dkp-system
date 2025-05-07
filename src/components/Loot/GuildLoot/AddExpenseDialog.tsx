@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ExpenseItem } from "./ExpensesTypes";
+import { DateTimePicker } from "@/components/ui/datetime-picker";
 
 export function AddExpenseDialog({
   open,
@@ -47,7 +48,7 @@ export function AddExpenseDialog({
     onClose();
     setForm({
       date: new Date().toISOString().split("T")[0],
-      amount: "", 
+      amount: "",
       target: "",
       source: "",
       comment: "",
@@ -63,11 +64,15 @@ export function AddExpenseDialog({
 
         <div className="flex flex-col gap-2 py-4">
           <Label>Дата</Label>
-          <input
-            type="date"
-            value={form.date}
-            onChange={(e) => setForm({ ...form, date: e.target.value })}
-            className="border rounded px-2 py-1"
+          <DateTimePicker
+            hideTime
+            value={new Date(form.date)}
+            onChange={(date) =>
+              setForm({
+                ...form,
+                date: date ? date.toISOString().split("T")[0] : "",
+              })
+            }
           />
 
           <Label>Сумма</Label>
@@ -104,10 +109,16 @@ export function AddExpenseDialog({
         </div>
 
         <DialogFooter>
-          <Button className="cursor-pointer" variant="secondary" onClick={onClose}>
+          <Button
+            className="cursor-pointer"
+            variant="secondary"
+            onClick={onClose}
+          >
             Отмена
           </Button>
-          <Button className="cursor-pointer" onClick={handleSubmit}>Сохранить</Button>
+          <Button className="cursor-pointer" onClick={handleSubmit}>
+            Сохранить
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

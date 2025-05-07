@@ -1,5 +1,6 @@
 "use client";
-import { DateTimePicker as BaseDateTimePicker } from "@/components/ui/date-time-picker";
+
+import { DateTimePicker } from "@/components/ui/datetime-picker";
 import React from "react";
 
 type Props = {
@@ -9,11 +10,10 @@ type Props = {
 
 const DatetimePicker: React.FC<Props> = ({ value, onChange }) => {
   return (
-    <BaseDateTimePicker
-      value={value ?? undefined} 
-      onChange={(date: Date | undefined) => onChange(date ?? null)} 
-      defaultPopupValue={new Date()}
-      granularity="minute"
+    <DateTimePicker
+      value={value ?? undefined}
+      onChange={(date: Date | undefined) => onChange(date ?? null)}
+      timePicker={{ hour: true, minute: true, second: false }}
       className="w-[270px]"
     />
   );

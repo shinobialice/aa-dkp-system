@@ -12,6 +12,7 @@ import { LootItemSelector } from "./LootItemSelector";
 import { LootIcon } from "../LootBuy/icons/LootIconComponent";
 import { ItemType, NewLootItem } from "./LootTypes";
 import { on } from "events";
+import { DateTimePicker } from "@/components/ui/datetime-picker";
 
 export function AddLootDialog({
   open,
@@ -83,11 +84,15 @@ export function AddLootDialog({
           />
 
           <Label>Дата получения</Label>
-          <input
-            type="date"
-            value={form.acquired_at}
-            onChange={(e) => setForm({ ...form, acquired_at: e.target.value })}
-            className="border rounded px-2 py-1"
+          <DateTimePicker
+            hideTime
+            value={form.acquired_at ? new Date(form.acquired_at) : undefined}
+            onChange={(date) =>
+              setForm({
+                ...form,
+                acquired_at: date ? date.toISOString().split("T")[0] : "",
+              })
+            }
           />
 
           <Label>Количество</Label>
