@@ -1,11 +1,13 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { token: string } }
-) {
+type Params = {
+  params: {
+    token: string;
+  };
+};
+
+export async function GET(req: NextRequest, { params }: Params) {
   const token = params.token;
 
   const result = await prisma.linkToken.findUnique({
