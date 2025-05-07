@@ -10,6 +10,7 @@ import { deleteUserSalaryBonus } from "@/src/actions/addUserSalaryBonus";
 import { getUserSalaryBonus } from "@/src/actions/getUserSalaryBonus";
 import { UserTagsSection } from "./UserTagsSection";
 import { getUserTags } from "@/src/actions/userTagsActions";
+import { useUserTag } from "@/src/hooks/useUserTag";
 
 function UserBonusesSection({
   bonuses,
@@ -47,17 +48,19 @@ export default function UserNotes({
   user,
   initialTags,
   updateTags,
-  setUser, // ✅ добавляем сюда
+  setUser,
 }: {
   user: any;
   initialTags: { id: number; tag: string }[];
   updateTags: (tags: { id: number; tag: string }[]) => void;
-  setUser: (user: any) => void; // ✅ добавляем тип
+  setUser: (user: any) => void;
 }) {
   const [bonuses, setBonuses] = useState<any[]>([]);
   const [refreshToggle, setRefreshToggle] = useState(false);
   const [bonusDialogOpen, setBonusDialogOpen] = useState(false);
-  const [tags, setTags] = useState(initialTags); // ← ЛОКАЛЬНОЕ состояние
+  const [tags, setTags] = useState(initialTags);
+  const isAdmin = useUserTag("Администратор");
+  const isModerator = useUserTag("Модератор");
 
   useEffect(() => {
     const fetchBonuses = async () => {
@@ -71,7 +74,7 @@ export default function UserNotes({
     const fetchTags = async () => {
       const data = await getUserTags(user.id);
       setTags(data);
-      updateTags(data); // ← ОБНОВЛЯЕМ РОДИТЕЛЯ
+      updateTags(data);
     };
     fetchTags();
   }, [user.id]);
@@ -98,14 +101,16 @@ export default function UserNotes({
           <div className="flex-1 border-r pr-6">
             <div className="flex justify-between">
               <div className="text-xl font-bold mb-4">Бонусы к ЗП</div>
-              <Button
-                onClick={() => setBonusDialogOpen(true)}
-                variant="ghost"
-                className="flex size-8 text-muted-foreground data-[state=open]:bg-muted cursor-pointer"
-                size="icon"
-              >
-                <CirclePlus />
-              </Button>
+              {isAdmin && (
+                <Button
+                  onClick={() => setBonusDialogOpen(true)}
+                  variant="ghost"
+                  className="flex size-8 text-muted-foreground data-[state=open]:bg-muted cursor-pointer"
+                  size="icon"
+                >
+                  <CirclePlus />
+                </Button>
+              )}
             </div>
 
             <UserBonusesSection
@@ -129,7 +134,7 @@ export default function UserNotes({
                 setTags(newTags);
                 updateTags(newTags);
               }}
-              setUser={setUser} // ✅ это уже правильно
+              setUser={setUser} 
             />
           </div>
         </div>

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2, CirclePlus } from "lucide-react";
 import { toast } from "sonner";
 import { updateUser } from "@/src/actions/updateUser";
+import { useUserTag } from "@/src/hooks/useUserTag";
 import {
   deleteUserTag,
   getUserTags,
@@ -69,6 +70,8 @@ export function UserTagsSection({
   setUser: (user: any) => void; // ✅
 }) {
   const [updating, setUpdating] = useState(false);
+  const isAdmin = useUserTag("Администратор");
+  const isModerator = useUserTag("Модератор");
 
   async function toggleActive(newValue: boolean) {
     setUpdating(true);
@@ -115,12 +118,14 @@ export function UserTagsSection({
         >
           Активен
         </Badge>
-        <Switch
-          className="cursor-pointer"
-          checked={user.active}
-          onCheckedChange={toggleActive}
-          disabled={updating}
-        />
+        {isAdmin && (
+          <Switch
+            className="cursor-pointer"
+            checked={user.active}
+            onCheckedChange={toggleActive}
+            disabled={updating}
+          />
+        )}
       </div>
       <div className="flex justify-between items-center py-4">
         <Badge
@@ -129,12 +134,14 @@ export function UserTagsSection({
         >
           Получает зарплату
         </Badge>
-        <Switch
-          checked={user.is_eligible_for_salary}
-          onCheckedChange={toggleSalary}
-          disabled={updating}
-          className="cursor-pointer"
-        />
+        {isAdmin && (
+          <Switch
+            checked={user.is_eligible_for_salary}
+            onCheckedChange={toggleSalary}
+            disabled={updating}
+            className="cursor-pointer"
+          />
+        )}
       </div>
 
       {tags.map((tag) => (
@@ -147,30 +154,35 @@ export function UserTagsSection({
           >
             {tag.tag}
           </Badge>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleDeleteTag(tag.id)}
-            className="text-muted-foreground cursor-pointer"
-          >
-            <Trash2 />
-          </Button>
+          {isAdmin && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleDeleteTag(tag.id)}
+              className="text-muted-foreground cursor-pointer"
+            >
+              <Trash2 />
+            </Button>
+          )}
         </div>
       ))}
-
-      {availableTags.length > 0 && (
-        <div className="flex flex-wrap gap-2 pt-4">
-          {availableTags.map((tag) => (
-            <Button
-              key={tag}
-              variant="outline"
-              onClick={() => handleAddTag(tag)}
-              className="text-sm cursor-pointer"
-            >
-              <CirclePlus className="w-4 h-4 mr-1" />
-              {tag}
-            </Button>
-          ))}
+      {isAdmin && (
+        <div>
+          {availableTags.length > 0 && (
+            <div className="flex flex-wrap gap-2 pt-4">
+              {availableTags.map((tag) => (
+                <Button
+                  key={tag}
+                  variant="outline"
+                  onClick={() => handleAddTag(tag)}
+                  className="text-sm cursor-pointer"
+                >
+                  <CirclePlus className="w-4 h-4 mr-1" />
+                  {tag}
+                </Button>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
