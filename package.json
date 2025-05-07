@@ -53,6 +53,7 @@
     "tailwind-merge": "^3.2.0",
     "tw-animate-css": "^1.2.8",
     "postcss": "^8.5.3",
+    "autoprefixer": "^10.4.21",
     "tailwindcss": "^4.1.5"
   },
   "devDependencies": {
@@ -61,7 +62,6 @@
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
-    "autoprefixer": "^10.4.21",
     "dotenv-cli": "^8.0.0",
     "eslint-config-next": "15.3.2",
     "prisma": "^6.7.0",
