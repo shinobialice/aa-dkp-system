@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import editUser from "@/src/actions/editUser";
-import { useUserTag } from "@/src/hooks/useUserTag";
+import useUserTag from "@/src/hooks/useUserTag";
 
 const badgeColors: { [key: string]: string } = {
   Активен: "rgb(47, 158, 98)",
@@ -100,9 +100,8 @@ export default function ProfileHeader({
                 }
               />
             );
-          } 
-            return formData.username;
-          
+          }
+          return formData.username;
         })()}
       </CardTitle>
 

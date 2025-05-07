@@ -18,7 +18,7 @@ import {
   getSalariesForMonth,
 } from "@/src/actions/financeActions";
 import { generateGuildFunds } from "@/src/actions/generateGuildFunds";
-import { useUserTag } from "@/src/hooks/useUserTag";
+import useUserTag  from "@/src/hooks/useUserTag";
 
 export default function FinancePage() {
   const currentMonth = new Date().getMonth() + 1;

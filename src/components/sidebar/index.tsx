@@ -22,7 +22,7 @@ import {
   HandCoins,
 } from "lucide-react";
 import Link from "next/link";
-import {  useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { NavUser } from "./NavUser";
 import {
@@ -42,7 +42,7 @@ import {
   SidebarMenuItem,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { useUserTag } from "@/src/hooks/useUserTag";
+import useUserTag from "@/src/hooks/useUserTag";
 
 export function AppSidebar() {
   const { data: session } = useSession();
@@ -69,7 +69,9 @@ export function AppSidebar() {
   ];
 
   const visibleMenuItems = menuItems.filter((item) => {
-    if (item.url === "/settings" && !isAdmin) {return false;}
+    if (item.url === "/settings" && !isAdmin) {
+      return false;
+    }
     return true;
   });
 
@@ -116,18 +118,17 @@ export function AppSidebar() {
                       </Collapsible>
                     </SidebarMenuItem>
                   );
-                } 
-                  return (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild>
-                        <Link href={item.url}>
-                          <item.icon className="h-5 w-5" />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                
+                }
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <Link href={item.url}>
+                        <item.icon className="h-5 w-5" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
               })}
             </SidebarMenu>
           </SidebarGroupContent>

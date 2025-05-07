@@ -12,14 +12,14 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { deleteNews, updateNews } from "@/src/actions/news";
-import { useUserTag } from "@/src/hooks/useUserTag";
+import useUserTag from "@/src/hooks/useUserTag";
 
 type NewsItem = {
   id: number;
   title: string;
   date: string;
   content: string;
-}
+};
 
 export default function NewsCardList({
   items: initialItems,
@@ -36,7 +36,9 @@ export default function NewsCardList({
   };
 
   const handleUpdate = async (data: { title: string; content: string }) => {
-    if (!editing) {return;}
+    if (!editing) {
+      return;
+    }
     const updated = await updateNews(editing.id, data.title, data.content);
 
     const updatedFixed: NewsItem = {

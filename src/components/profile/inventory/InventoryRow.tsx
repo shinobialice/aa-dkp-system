@@ -6,7 +6,7 @@ import { TableRow, TableCell } from "@/components/ui/table";
 import addItemToUserInventory from "@/src/actions/addItemToUserInventory";
 import deleteItemFromUserInventory from "@/src/actions/deleteItemFromUserInventory";
 import setItemQuality from "@/src/actions/setItemQuality";
-import { useUserTag } from "@/src/hooks/useUserTag";
+import useUserTag from "@/src/hooks/useUserTag";
 
 export default function InventoryRow({
   item,
@@ -38,7 +38,9 @@ export default function InventoryRow({
   const handleChange = async (value: string) => {
     if (item.name === "Бафалка") {
       if (value === "Нету") {
-        if (userItem) {await deleteItemFromUserInventory(userItem.id);}
+        if (userItem) {
+          await deleteItemFromUserInventory(userItem.id);
+        }
       } else {
         const quality = value[0];
         if (userItem) {
@@ -56,7 +58,9 @@ export default function InventoryRow({
       ].includes(item.name)
     ) {
       if (value === "Нету") {
-        if (userItem) {await deleteItemFromUserInventory(userItem.id);}
+        if (userItem) {
+          await deleteItemFromUserInventory(userItem.id);
+        }
       } else {
         const quality = value === "T1" ? "3" : value === "T2" ? "4" : null;
         if (userItem) {
@@ -67,16 +71,20 @@ export default function InventoryRow({
       }
     } else if (isDragon) {
       if (value === "Нету") {
-        if (userItem) {await deleteItemFromUserInventory(userItem.id);}
+        if (userItem) {
+          await deleteItemFromUserInventory(userItem.id);
+        }
       } else {
-        if (userItem) {await deleteItemFromUserInventory(userItem.id);}
+        if (userItem) {
+          await deleteItemFromUserInventory(userItem.id);
+        }
         await addItemToUserInventory(userId, value, item.type, null);
       }
     } else if (value === "Есть" && !userItem) {
-        await addItemToUserInventory(userId, item.name, item.type, null);
-      } else if (value === "Нет" && userItem) {
-        await deleteItemFromUserInventory(userItem.id);
-      }
+      await addItemToUserInventory(userId, item.name, item.type, null);
+    } else if (value === "Нет" && userItem) {
+      await deleteItemFromUserInventory(userItem.id);
+    }
     onChange();
   };
 

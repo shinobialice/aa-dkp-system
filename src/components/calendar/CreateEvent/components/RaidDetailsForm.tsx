@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 
 import { getActiveUsers } from "@/src/actions/getActiveUsers";
-import { eventDkpCalculator } from "@/src/utils/eventDkpCalculator";
+import eventDkpCalculator from "@/src/utils/eventDkpCalculator";
 
 export function RaidDetailsForm({
   setUsers,

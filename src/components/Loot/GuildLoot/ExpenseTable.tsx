@@ -14,7 +14,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { getExpenses, addExpense } from "@/src/actions/expenseActions";
-import { useUserTag } from "@/src/hooks/useUserTag";
+import useUserTag from "@/src/hooks/useUserTag";
 
 export function ExpensesTable() {
   const [month, setMonth] = useState<number>(new Date().getMonth() + 1);

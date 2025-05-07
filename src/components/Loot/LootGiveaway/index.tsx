@@ -23,21 +23,21 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { saveGivenAwayLoot } from "@/src/actions/saveGivenAwayLoot";
-import { useUserTag } from "@/src/hooks/useUserTag";
+import useUserTag from "@/src/hooks/useUserTag";
 
 type LootItem = {
   name: string;
   date: string;
   comment?: string;
   status: string;
-}
+};
 
 type Player = {
   id: number;
   username: string;
   active: boolean;
   loot: LootItem[];
-}
+};
 
 export default function LootGiveaway({
   initialPlayers,
@@ -99,14 +99,21 @@ export default function LootGiveaway({
             "dd.MM.yyyy"
           )})`;
         }
-        if (loot.comment) {return loot.comment;}
-        if (dateValid) {return format(new Date(loot.date), "dd.MM.yyyy");}
+        if (loot.comment) {
+          return loot.comment;
+        }
+        if (dateValid) {
+          return format(new Date(loot.date), "dd.MM.yyyy");
+        }
         return "–";
       }
 
-      if (loot.status === "В наличии") {return "В наличии";}
-      if (loot.status === "Выдано" && dateValid)
-        {return `Выдано (${format(new Date(loot.date), "dd.MM.yyyy")})`;}
+      if (loot.status === "В наличии") {
+        return "В наличии";
+      }
+      if (loot.status === "Выдано" && dateValid) {
+        return `Выдано (${format(new Date(loot.date), "dd.MM.yyyy")})`;
+      }
       return "–";
     }
 

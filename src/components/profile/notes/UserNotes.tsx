@@ -10,7 +10,7 @@ import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { deleteUserSalaryBonus } from "@/src/actions/addUserSalaryBonus";
 import { getUserSalaryBonus } from "@/src/actions/getUserSalaryBonus";
 import { getUserTags } from "@/src/actions/userTagsActions";
-import { useUserTag } from "@/src/hooks/useUserTag";
+import useUserTag from "@/src/hooks/useUserTag";
 
 function UserBonusesSection({
   bonuses,
@@ -81,11 +81,15 @@ export default function UserNotes({
   }, [user.id]);
 
   function calculateGuildBonus(joinedAt: string | null) {
-    if (!joinedAt) {return 0;}
+    if (!joinedAt) {
+      return 0;
+    }
     const now = new Date();
     const joinedDate = new Date(joinedAt);
     const months = differenceInMonths(now, joinedDate);
-    if (months < 6) {return 0;}
+    if (months < 6) {
+      return 0;
+    }
     const extraPeriods = Math.floor((months - 6) / 6);
     return 10 + extraPeriods * 5;
   }

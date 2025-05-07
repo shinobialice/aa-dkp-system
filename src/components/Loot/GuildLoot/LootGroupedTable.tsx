@@ -26,7 +26,7 @@ import { deleteLootItem } from "@/src/actions/deleteLootItem";
 import { distributeLootItem } from "@/src/actions/distributeLootItems";
 import { getActiveUsers } from "@/src/actions/getActiveUsers";
 import { getLoot } from "@/src/actions/lootActions";
-import { useUserTag } from "@/src/hooks/useUserTag";
+import useUserTag from "@/src/hooks/useUserTag";
 
 export function LootGroupedTable({
   groupedLoot,
@@ -198,7 +198,9 @@ export function LootGroupedTable({
           quantity,
           isFree,
         }) => {
-          if (!selectedGroup) {return;}
+          if (!selectedGroup) {
+            return;
+          }
 
           const groupItems = loot.filter(
             (item) =>
@@ -212,7 +214,7 @@ export function LootGroupedTable({
           }
 
           await distributeLootItem({
-            lootId: groupItems[0]?.id ?? 0, 
+            lootId: groupItems[0]?.id ?? 0,
             soldTo,
             soldToId,
             quantity,

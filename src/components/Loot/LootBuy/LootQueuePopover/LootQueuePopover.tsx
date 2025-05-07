@@ -23,7 +23,7 @@ import { getActiveUsers } from "@/src/actions/getActiveUsers";
 import { getLootQueueByItemName } from "@/src/actions/getLootQueueByItemName";
 import { markQueueLootAsSold } from "@/src/actions/markQueueLootAsSold";
 import { updateLootQueueEntry } from "@/src/actions/updateLootQueueEntry";
-import { useUserTag } from "@/src/hooks/useUserTag";
+import useUserTag from "@/src/hooks/useUserTag";
 
 const extendedItems = ["Эссенция ярости", "Трофейная эссенция стихий"];
 
@@ -47,7 +47,9 @@ export function LootQueuePopover({
   const isExtended = extendedItems.includes(itemName);
 
   const handleAddToQueue = async () => {
-    if (!selectedUser) {return;}
+    if (!selectedUser) {
+      return;
+    }
     await addToLootQueue(selectedUser, itemName);
     const updatedQueue = await getLootQueueByItemName(itemName);
     setQueue({ [itemName]: updatedQueue });
@@ -72,7 +74,9 @@ export function LootQueuePopover({
     value: string | number
   ): Promise<void> => {
     const entry = queue[itemName]?.[index];
-    if (!entry) {return;}
+    if (!entry) {
+      return;
+    }
 
     let castedValue: string | number = value;
 
@@ -81,7 +85,9 @@ export function LootQueuePopover({
       typeof value === "string"
     ) {
       const parsed = parseInt(value);
-      if (isNaN(parsed)) {return;}
+      if (isNaN(parsed)) {
+        return;
+      }
       castedValue = parsed;
     }
 

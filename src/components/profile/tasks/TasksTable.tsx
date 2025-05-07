@@ -31,13 +31,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import deleteUserTask from "@/src/actions/deleteUserTask";
-import { useUserTag } from "@/src/hooks/useUserTag";
+import useUserTag from "@/src/hooks/useUserTag";
 
 type TasksTableClientProps = {
   tasks: Task[];
   userId: number;
   onChange: () => {};
-}
+};
 
 export default function TasksTable({
   tasks,
@@ -83,9 +83,8 @@ export default function TasksTable({
                             return (
                               <Badge className="bg-green-500">Выполнено</Badge>
                             );
-                          } 
-                            return <Badge variant="outline">В процессе</Badge>;
-                          
+                          }
+                          return <Badge variant="outline">В процессе</Badge>;
                         })()}
                       </TableCell>
                       <TableCell>
@@ -126,7 +125,9 @@ export default function TasksTable({
                         <AlertDialog
                           open={openDialogId === task.id}
                           onOpenChange={(open) => {
-                            if (!open) {setOpenDialogId(null);}
+                            if (!open) {
+                              setOpenDialogId(null);
+                            }
                           }}
                         >
                           <AlertDialogContent>
@@ -160,22 +161,23 @@ export default function TasksTable({
               </Table>
             </CardContent>
           );
-        } 
-          return (
-            <CardContent>
-              <div className="text-center py-8 text-muted-foreground">
-                Нет активных заданий
-              </div>
-            </CardContent>
-          );
-        
+        }
+        return (
+          <CardContent>
+            <div className="text-center py-8 text-muted-foreground">
+              Нет активных заданий
+            </div>
+          </CardContent>
+        );
       })()}
 
       {editDialogTask && (
         <EditTaskDialog
           open={!!editDialogTask}
           onOpenChangeAction={(open) => {
-            if (!open) {setEditDialogTask(null);}
+            if (!open) {
+              setEditDialogTask(null);
+            }
           }}
           task={editDialogTask}
           userId={userId}

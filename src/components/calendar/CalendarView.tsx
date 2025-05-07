@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/select";
 import { getRaids } from "@/src/actions/getEvents";
 import { getRaidById } from "@/src/actions/getRaidById";
-import { useUserTag } from "@/src/hooks/useUserTag";
+import useUserTag from "@/src/hooks/useUserTag";
 
 export default function ActivitiesPage() {
   const calendarRef = useRef<FullCalendar | null>(null);
@@ -65,13 +65,27 @@ export default function ActivitiesPage() {
     action: "prev" | "next" | "today" | "week" | "monthGrid" | "list"
   ) => {
     const api = calendarRef.current?.getApi();
-    if (!api) {return;}
-    if (action === "prev") {api.prev();}
-    if (action === "next") {api.next();}
-    if (action === "today") {api.today();}
-    if (action === "week") {api.changeView("timeGridWeek");}
-    if (action === "monthGrid") {api.changeView("dayGridMonth");}
-    if (action === "list") {api.changeView("listWeek");}
+    if (!api) {
+      return;
+    }
+    if (action === "prev") {
+      api.prev();
+    }
+    if (action === "next") {
+      api.next();
+    }
+    if (action === "today") {
+      api.today();
+    }
+    if (action === "week") {
+      api.changeView("timeGridWeek");
+    }
+    if (action === "monthGrid") {
+      api.changeView("dayGridMonth");
+    }
+    if (action === "list") {
+      api.changeView("listWeek");
+    }
   };
 
   return (
@@ -119,8 +133,12 @@ export default function ActivitiesPage() {
               <Select
                 defaultValue="weekGrid"
                 onValueChange={(value) => {
-                  if (value === "weekGrid") {handleNav("week");}
-                  if (value === "monthGrid") {handleNav("monthGrid");}
+                  if (value === "weekGrid") {
+                    handleNav("week");
+                  }
+                  if (value === "monthGrid") {
+                    handleNav("monthGrid");
+                  }
                 }}
               >
                 <SelectTrigger className="cursor-pointer">

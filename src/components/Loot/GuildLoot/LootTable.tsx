@@ -8,7 +8,7 @@ import { LootTableControls } from "./LootTableControls";
 import { LootItem, ItemType, NewLootItem } from "./LootTypes";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { getLoot, addLootItem, getItemTypes } from "@/src/actions/lootActions";
-import { useUserTag } from "@/src/hooks/useUserTag";
+import useUserTag from "@/src/hooks/useUserTag";
 
 export default function LootTable() {
   const [loot, setLoot] = useState<LootItem[]>([]);
