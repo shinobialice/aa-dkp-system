@@ -11,12 +11,14 @@ export default function ProfilePageWrapper({
   inventory,
   tasks,
   notes,
+  averageGuildGS
 }: {
   user: any;
   tags: { id: number; tag: string }[];
   inventory: any[];
   tasks: any[];
   notes: any[];
+  averageGuildGS: number;
 }) {
   const [user, setUser] = useState(initialUser);
   const [tags, setTags] = useState(initialTags);
@@ -43,6 +45,7 @@ export default function ProfilePageWrapper({
           tasks={tasks}
           tags={tags}
           setTags={setTags}
+          averageGuildGS={averageGuildGS}
         />
       </div>
     </div>

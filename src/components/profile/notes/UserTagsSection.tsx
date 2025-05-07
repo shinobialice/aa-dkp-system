@@ -8,11 +8,14 @@ import { Trash2, CirclePlus } from "lucide-react";
 import { toast } from "sonner";
 import { updateUser } from "@/src/actions/updateUser";
 import { useUserTag } from "@/src/hooks/useUserTag";
+import { getSalaryEligibilityErrors } from "@/src/utils/getSalaryEligibilityErrors";
+
 import {
   deleteUserTag,
   getUserTags,
   addUserTag,
 } from "@/src/actions/userTagsActions";
+import canReceiveSalary from "./canReveiceSalary";
 
 const badgeColors: Record<string, string> = {
   Активен: "rgb(47, 158, 98)",
@@ -38,36 +41,20 @@ const allPossibleTags = [
   "Деф",
 ];
 
-function canReceiveSalary(user: any): boolean {
-  if (!user.joined_at || !user.class || !user.class_gear_score) return false;
-
-  const now = new Date();
-  const joined = new Date(user.joined_at);
-  const day = joined.getDate();
-  const monthsPassed =
-    now.getFullYear() * 12 +
-    now.getMonth() -
-    (joined.getFullYear() * 12 + joined.getMonth());
-
-  const probationOver =
-    (day <= 20 && monthsPassed >= 1) || (day > 20 && monthsPassed >= 2);
-  const passesGearScore = true;
-
-  return probationOver && passesGearScore;
-}
-
 export function UserTagsSection({
   user,
   onUpdate,
   tags,
   setTags,
   setUser,
+  averageGuildGS,
 }: {
   user: any;
   onUpdate: () => void;
   tags: { id: number; tag: string }[];
   setTags: (tags: { id: number; tag: string }[]) => void;
   setUser: (user: any) => void;
+  averageGuildGS: number;
 }) {
   const [updating, setUpdating] = useState(false);
   const isAdmin = useUserTag("Администратор");
@@ -75,19 +62,31 @@ export function UserTagsSection({
   async function toggleActive(newValue: boolean) {
     setUpdating(true);
     await updateUser(user.id, { active: newValue });
-    setUser({ ...user, active: newValue }); 
+    setUser({ ...user, active: newValue });
     setUpdating(false);
     onUpdate();
   }
 
   async function toggleSalary(newValue: boolean) {
-    if (newValue && !canReceiveSalary(user)) {
-      toast.warning("Не выполнены условия для получения зарплаты");
-      return;
+    if (newValue) {
+      const errors = getSalaryEligibilityErrors(user, averageGuildGS, tags);
+      if (errors.length > 0) {
+        toast.error("Нельзя выдать зарплату", {
+          description: (
+            <ul className="list-disc list-inside space-y-1">
+              {errors.map((e, idx) => (
+                <li key={idx}>{e}</li>
+              ))}
+            </ul>
+          ),
+        });
+        return;
+      }
     }
+
     setUpdating(true);
     await updateUser(user.id, { is_eligible_for_salary: newValue });
-    setUser({ ...user, is_eligible_for_salary: newValue }); 
+    setUser({ ...user, is_eligible_for_salary: newValue });
     setUpdating(false);
     onUpdate();
   }

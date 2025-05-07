@@ -4,12 +4,14 @@ import { getUserTags } from "@/src/actions/userTagsActions";
 import getUserInventory from "@/src/actions/getUserInventory";
 import getTasks from "@/src/actions/getTasks";
 import getUserNotes from "@/src/actions/getUserNotes";
+import { getAverageGuildGS } from "@/src/actions/getAverageGuildGS";
 
 export default async function Page(p: {
   params: Promise<{ user_id: string }>;
 }) {
-  const { user_id } = await p.params; 
+  const { user_id } = await p.params;
   const userId = Number(user_id);
+  const averageGuildGS = await getAverageGuildGS();
 
   const [user, tags, inventory, tasks, notes] = await Promise.all([
     getUser(userId),
@@ -26,6 +28,7 @@ export default async function Page(p: {
       inventory={inventory}
       tasks={tasks}
       notes={notes}
+      averageGuildGS={averageGuildGS}
     />
   );
 }

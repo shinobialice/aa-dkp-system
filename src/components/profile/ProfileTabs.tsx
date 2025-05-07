@@ -13,14 +13,17 @@ export default function ProfileTabs({
   tasks: initialTasks,
   tags,
   setTags,
-  setUser, 
+  setUser,
+  averageGuildGS
+  
 }: {
   user: any;
   inventory: any[];
   tasks: any[];
   tags: any[];
   setTags: (tags: any[]) => void;
-  setUser: (user: any) => void; 
+  setUser: (user: any) => void;
+  averageGuildGS: number;
 }) {
   const [inventory, setInventory] = useState(initialInventory);
   const [tasks, setTasks] = useState(initialTasks);
@@ -68,7 +71,8 @@ export default function ProfileTabs({
           user={user}
           initialTags={tags}
           updateTags={setTags}
-          setUser={setUser} 
+          setUser={setUser}
+          averageGuildGS={averageGuildGS}
         />
       </TabsContent>
     </Tabs>

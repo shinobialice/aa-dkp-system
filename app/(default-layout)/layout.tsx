@@ -1,5 +1,6 @@
 "use client";
 
+import { Toaster } from "@/components/sonner";
 import { Separator } from "@/components/ui/separator";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AppSidebar from "@/src/components/sidebar";
@@ -19,9 +20,12 @@ export default function DefaultLayout({
             <header className="lg:hidden flex h-12 items-center gap-2 border-b px-4">
               <SidebarTrigger className="-ml-1" />
               <Separator orientation="vertical" className="mx-2 h-4" />
-              <h1 className="text-base font-medium">Documents</h1>
+              <h1 className="text-base font-medium">No Fear</h1>
             </header>
-            <main className="flex-1 p-8">{children}</main>
+            <main className="flex-1 p-8">
+              {children}
+              <Toaster richColors/>
+            </main>
           </div>
         </div>
       </SidebarProvider>

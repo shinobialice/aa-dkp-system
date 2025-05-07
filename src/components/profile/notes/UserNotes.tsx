@@ -49,11 +49,13 @@ export default function UserNotes({
   initialTags,
   updateTags,
   setUser,
+  averageGuildGS, // 👈 добавить сюда
 }: {
   user: any;
   initialTags: { id: number; tag: string }[];
   updateTags: (tags: { id: number; tag: string }[]) => void;
   setUser: (user: any) => void;
+  averageGuildGS: number; // 👈 тип указать
 }) {
   const [bonuses, setBonuses] = useState<any[]>([]);
   const [refreshToggle, setRefreshToggle] = useState(false);
@@ -133,7 +135,8 @@ export default function UserNotes({
                 setTags(newTags);
                 updateTags(newTags);
               }}
-              setUser={setUser} 
+              setUser={setUser}
+              averageGuildGS={averageGuildGS}
             />
           </div>
         </div>
