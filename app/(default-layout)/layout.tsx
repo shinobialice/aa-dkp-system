@@ -2,7 +2,7 @@ import { Toaster } from "@/components/sonner";
 import { Separator } from "@/components/ui/separator";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AppSidebar from "@/src/components/sidebar";
-import { ThemeProvider } from "@/src/components/theme-provider";
+import ThemeProvider from "@/src/components/theme-provider";
 
 export default function DefaultLayout({
   children,
@@ -22,7 +22,7 @@ export default function DefaultLayout({
             </header>
             <main className="flex-1 p-8">
               {children}
-              <Toaster richColors/>
+              <Toaster richColors />
             </main>
           </div>
         </div>
