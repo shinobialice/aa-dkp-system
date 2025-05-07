@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
+import { useUserTag } from "@/src/hooks/useUserTag";
 import {
   Moon,
   Sun,
@@ -49,6 +50,7 @@ export function AppSidebar() {
   const username = session?.user?.username ?? "Неизвестный пользователь";
   const { setTheme } = useTheme();
   const userId = session?.user?.id;
+  const isAdmin = useUserTag("Администратор");
   console.log("Session:", session);
 
   const menuItems = [
@@ -70,6 +72,11 @@ export function AppSidebar() {
     { title: "Настройки", url: "/settings", icon: Settings },
   ];
 
+  const visibleMenuItems = menuItems.filter((item) => {
+    if (item.url === "/settings" && !isAdmin) return false;
+    return true;
+  });
+
   return (
     <Sidebar>
       <SidebarContent>
@@ -81,7 +88,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Меню</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => {
+              {visibleMenuItems.map((item) => {
                 if (item.items) {
                   return (
                     <SidebarMenuItem key={item.title}>
