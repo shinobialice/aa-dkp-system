@@ -52,7 +52,10 @@ export function LootQueuePopover({
     }
     await addToLootQueue(selectedUser, itemName);
     const updatedQueue = await getLootQueueByItemName(itemName);
-    setQueue({ [itemName]: updatedQueue });
+    setQueue((prev) => ({
+      ...prev,
+      [itemName]: updatedQueue as LootQueueEntry[],
+    }));
     setSelectedUser("");
     setSearchUser("");
   };
@@ -65,7 +68,10 @@ export function LootQueuePopover({
       delivered: entry.delivered,
     });
     const updatedQueue = await getLootQueueByItemName(itemName);
-    setQueue({ [itemName]: updatedQueue });
+    setQueue((prev) => ({
+      ...prev,
+      [itemName]: updatedQueue as LootQueueEntry[],
+    }));
   };
 
   const handleChange = async (
@@ -98,7 +104,10 @@ export function LootQueuePopover({
 
     await updateLootQueueEntry(updated);
     const updatedQueue = await getLootQueueByItemName(itemName);
-    setQueue({ [itemName]: updatedQueue });
+    setQueue((prev) => ({
+      ...prev,
+      [itemName]: updatedQueue as LootQueueEntry[],
+    }));
   };
 
   useEffect(() => {
@@ -108,7 +117,10 @@ export function LootQueuePopover({
         getLootQueueByItemName(itemName),
       ]);
       setAllUsers(fetchedUsers.map((u: { username: string }) => u.username));
-      setQueue({ [itemName]: fetchedQueue });
+      setQueue((prev) => ({
+        ...prev,
+        [itemName]: fetchedQueue as LootQueueEntry[],
+      }));
     };
 
     loadData();

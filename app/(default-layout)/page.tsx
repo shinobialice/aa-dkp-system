@@ -1,6 +1,7 @@
-import { FC } from "react";
-import MainPageCards from "@/src/components/MainPageCards";
+"use client";
 
-const HomePage: FC = () => <MainPageCards />;
+import MainPageCardsClient from "@/src/components/MainPageCards/MainPageCardsClient";
 
-export default HomePage;
+export default function HomePage() {
+  return <MainPageCardsClient />;
+}

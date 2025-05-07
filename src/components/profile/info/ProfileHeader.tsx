@@ -1,3 +1,4 @@
+"use client";
 import { Pencil, Check } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";

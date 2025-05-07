@@ -4,6 +4,7 @@
  * Find the latest source code at https://github.com/huybuidac/shadcn-datetime-picker
  */
 /* eslint-disable */
+"use client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Popover,

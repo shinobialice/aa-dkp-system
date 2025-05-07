@@ -1,3 +1,4 @@
+"use client";
 import { useRef, useState } from "react";
 import { LootIcon } from "../LootBuy/icons/LootIconComponent";
 import { LootIcons } from "../LootBuy/icons/LootIcons";

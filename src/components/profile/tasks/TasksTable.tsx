@@ -1,3 +1,4 @@
+'use client";';
 import React from "react";
 import { MoreVerticalIcon } from "lucide-react";
 import { CreateTaskPopover } from "./CreateTaskPopover";
@@ -36,7 +37,7 @@ import useUserTag from "@/src/hooks/useUserTag";
 type TasksTableClientProps = {
   tasks: Task[];
   userId: number;
-  onChange: () => {};
+  onChange: () => void;
 };
 
 export default function TasksTable({
@@ -133,8 +134,9 @@ export default function TasksTable({
                           <AlertDialogContent>
                             <AlertDialogHeader>
                               <AlertDialogTitle>
-                                Вы уверены, что хотите удалить задание "
-                                {task.name || "Без названия"}"?
+                                Вы уверены, что хотите удалить задание &quot;
+                                {task.name || "Без названия"}
+                                &quot;?
                               </AlertDialogTitle>
                               <AlertDialogDescription>
                                 Это действие необратимо. Задание будет удалено

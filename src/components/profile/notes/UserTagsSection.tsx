@@ -11,6 +11,13 @@ import { deleteUserTag, addUserTag } from "@/src/actions/userTagsActions";
 import useUserTag from "@/src/hooks/useUserTag";
 import getSalaryEligibilityErrors from "@/src/utils/getSalaryEligibilityErrors";
 
+type UserType = {
+  id: number;
+  active: boolean;
+  is_eligible_for_salary: boolean;
+  joined_at: string | Date;
+};
+
 const badgeColors: Record<string, string> = {
   Активен: "rgb(47, 158, 98)",
   "Получает зарплату": "rgb(23, 133, 115)",
@@ -43,11 +50,11 @@ export function UserTagsSection({
   setUser,
   averageGuildGS,
 }: {
-  user: any;
+  user: UserType;
+  setUser: (user: UserType) => void;
   onUpdate: () => void;
   tags: { id: number; tag: string }[];
   setTags: (tags: { id: number; tag: string }[]) => void;
-  setUser: (user: any) => void;
   averageGuildGS: number;
 }) {
   const [updating, setUpdating] = useState(false);

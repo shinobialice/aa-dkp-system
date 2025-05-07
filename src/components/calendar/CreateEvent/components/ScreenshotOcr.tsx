@@ -1,3 +1,4 @@
+"use client";
 import * as React from "react";
 import { Loader } from "lucide-react";
 import Image from "next/image";

@@ -29,7 +29,7 @@ type EditTaskDialogProps = {
   onOpenChangeAction: (open: boolean) => void;
   task: Task;
   userId: number;
-  onChange: () => {};
+  onChange: () => void;
 }
 
 export function EditTaskDialog({

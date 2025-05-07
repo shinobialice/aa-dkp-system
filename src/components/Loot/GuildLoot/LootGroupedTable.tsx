@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useState } from "react";
 import { Pen } from "lucide-react";
 import { GroupedLootItem, LootItem } from "./LootTypes";

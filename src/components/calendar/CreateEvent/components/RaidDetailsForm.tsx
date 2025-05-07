@@ -1,3 +1,4 @@
+"use client";
 import * as React from "react";
 import { ChevronDown } from "lucide-react";
 import DatetimePicker from "./DateTimePicker";
@@ -205,37 +206,36 @@ export function RaidDetailsForm({
                 (() => {
                   if (name === "---") {
                     return <DropdownMenuSeparator key={`sep-${i}`} />;
-                  } 
-                    return (
-                      <DropdownMenuCheckboxItem
-                        key={name}
-                        onSelect={(event) => event.preventDefault()}
-                        checked={selectedBosses.some(
-                          (b) => b.boss_name === name
-                        )}
-                        onCheckedChange={(checked) => {
-                          const boss = bosses.find(
-                            (b) =>
-                              b.boss_name.trim().toLowerCase() ===
-                              name.trim().toLowerCase()
-                          );
-                          if (!boss) {return;}
+                  }
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={name}
+                      onSelect={(event) => event.preventDefault()}
+                      checked={selectedBosses.some((b) => b.boss_name === name)}
+                      onCheckedChange={(checked) => {
+                        const boss = bosses.find(
+                          (b) =>
+                            b.boss_name.trim().toLowerCase() ===
+                            name.trim().toLowerCase()
+                        );
+                        if (!boss) {
+                          return;
+                        }
 
-                          setSelectedBosses((prev) =>
-                            checked
-                              ? [...prev, boss]
-                              : prev.filter((b) => b.id !== boss.id)
-                          );
-                          setErrors((prev) => ({
-                            ...prev,
-                            selectedBoss: false,
-                          }));
-                        }}
-                      >
-                        {name}
-                      </DropdownMenuCheckboxItem>
-                    );
-                  
+                        setSelectedBosses((prev) =>
+                          checked
+                            ? [...prev, boss]
+                            : prev.filter((b) => b.id !== boss.id)
+                        );
+                        setErrors((prev) => ({
+                          ...prev,
+                          selectedBoss: false,
+                        }));
+                      }}
+                    >
+                      {name}
+                    </DropdownMenuCheckboxItem>
+                  );
                 })()
               )}
             </DropdownMenuContent>
@@ -253,7 +253,9 @@ export function RaidDetailsForm({
           disabled={isPvpLong}
           onCheckedChange={(checked) => {
             setIsPvp(checked === true);
-            if (checked) {setIsPvpLong(false);}
+            if (checked) {
+              setIsPvpLong(false);
+            }
           }}
         />
         <label htmlFor="pvp" className="text-sm">
@@ -269,7 +271,9 @@ export function RaidDetailsForm({
             disabled={isPvp}
             onCheckedChange={(checked) => {
               setIsPvpLong(checked === true);
-              if (checked) {setIsPvp(false);}
+              if (checked) {
+                setIsPvp(false);
+              }
             }}
           />
           <label htmlFor="long_pvp" className="text-sm">

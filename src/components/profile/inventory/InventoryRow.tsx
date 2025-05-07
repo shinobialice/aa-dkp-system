@@ -1,3 +1,4 @@
+'use client";';
 import Image from "next/image";
 import inventoryIcons from "./InventoryIcons";
 import ItemIcon from "./ItemIcon";

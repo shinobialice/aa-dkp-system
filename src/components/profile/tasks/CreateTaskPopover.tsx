@@ -1,3 +1,4 @@
+'use client";';
 import * as React from "react";
 import { useTaskForm } from "./hooks/useTaskForm";
 import { TaskDatePicker } from "./TaskDatePicker";
@@ -22,7 +23,7 @@ import createUserTask from "@/src/actions/createUserTask";
 type CreateTaskPopoverProps = {
   userId: number;
   onChange: () => void;
-}
+};
 
 export function CreateTaskPopover({
   userId,

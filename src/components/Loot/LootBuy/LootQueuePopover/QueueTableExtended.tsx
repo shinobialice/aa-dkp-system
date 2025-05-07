@@ -10,11 +10,17 @@ import {
   TableCell,
 } from "@/components/ui/table";
 
+type EditableField = "required" | "delivered" | "status" | "synth_target";
+
 type Props = {
   queue: LootQueueEntry[];
   editMode: boolean;
-  handleChange: (index: number, field: string, value: any) => void;
-  handleSold: (entry: LootQueueEntry) => void;
+  handleChange: (
+    index: number,
+    field: EditableField,
+    value: string | number
+  ) => Promise<void>;
+  handleSold: (entry: LootQueueEntry) => Promise<void>;
 };
 
 export function QueueTableExtended({
@@ -61,9 +67,8 @@ export function QueueTableExtended({
                           }
                         />
                       );
-                    } 
-                      return entry.required;
-                    
+                    }
+                    return entry.required;
                   })()}
                 </TableCell>
                 <TableCell>
@@ -83,15 +88,14 @@ export function QueueTableExtended({
                           }
                         />
                       );
-                    } 
-                      return (
-                        <span>
-                          {entry.delivered
-                            ?.toLocaleString("ru-RU")
-                            .replaceAll(",", " ") || "-"}
-                        </span>
-                      );
-                    
+                    }
+                    return (
+                      <span>
+                        {entry.delivered
+                          ?.toLocaleString("ru-RU")
+                          .replaceAll(",", " ") || "-"}
+                      </span>
+                    );
                   })()}
                 </TableCell>
                 <TableCell>
@@ -116,9 +120,8 @@ export function QueueTableExtended({
                           <option value="ожидание">Ожидание</option>
                         </select>
                       );
-                    } 
-                      return <span>{entry.status || "-"}</span>;
-                    
+                    }
+                    return <span>{entry.status || "-"}</span>;
                   })()}
                 </TableCell>
                 <TableCell>
@@ -132,13 +135,12 @@ export function QueueTableExtended({
                           }
                         />
                       );
-                    } 
-                      return (
-                        <span className="w-[80px] truncate inline-block">
-                          {entry.synth_target || "-"}
-                        </span>
-                      );
-                    
+                    }
+                    return (
+                      <span className="w-[80px] truncate inline-block">
+                        {entry.synth_target || "-"}
+                      </span>
+                    );
                   })()}
                 </TableCell>
                 {editMode && (

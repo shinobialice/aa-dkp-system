@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 
-type Params = {
-  params: {
-    token: string;
-  };
-};
+export async function GET(req: NextRequest) {
+  const token = req.nextUrl.pathname.split("/").pop();
 
-export async function GET(req: NextRequest, { params }: Params) {
-  const token = params.token;
+  if (!token) {
+    return NextResponse.json({ error: "Token not provided" }, { status: 400 });
+  }
 
   const result = await prisma.linkToken.findUnique({
     where: { token },

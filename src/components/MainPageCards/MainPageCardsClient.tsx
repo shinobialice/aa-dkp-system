@@ -1,5 +1,5 @@
 "use client";
-/* eslint-disable react-hooks/exhaustive-deps */
+
 import { useEffect, useState, FC } from "react";
 import { Loader } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,7 +32,7 @@ const InfoCard: FC<{ title: string; content: string }> = ({
   </Card>
 );
 
-const MainPageCards: FC = () => {
+const MainPageCardsClient: FC = () => {
   const [stats, setStats] = useState<Stats | null>(null);
 
   useEffect(() => {
@@ -88,4 +88,4 @@ const MainPageCards: FC = () => {
   );
 };
 
-export default MainPageCards;
+export default MainPageCardsClient;
