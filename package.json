@@ -55,12 +55,12 @@
     "sonner": "^2.0.3",
     "tailwind-merge": "^3.2.0",
     "tailwindcss": "^4.1.5",
-    "tw-animate-css": "^1.2.8"
+    "tw-animate-css": "^1.2.8",
+    "@types/node": "^22.15.15"
   },
   "devDependencies": {
     "@types/formidable": "^3.4.5",
     "@types/js-cookie": "^3.0.6",
-    "@types/node": "^22.15.15",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "dotenv-cli": "^8.0.0",
