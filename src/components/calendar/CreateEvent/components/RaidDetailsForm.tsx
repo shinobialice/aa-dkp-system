@@ -150,7 +150,10 @@ export function RaidDetailsForm({
           <Label>Босс</Label>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="w-[270px] justify-between cursor-pointer">
+              <Button
+                variant="outline"
+                className="w-[270px] justify-between cursor-pointer"
+              >
                 {selectedBoss || "Выберите босса"}
                 <ChevronDown className="ml-2" />
               </Button>
@@ -186,7 +189,10 @@ export function RaidDetailsForm({
           <Label>Боссы (можно выбрать нескольких)</Label>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="w-[270px] justify-between cursor-pointer">
+              <Button
+                variant="outline"
+                className="w-[270px] justify-between cursor-pointer"
+              >
                 <span className="truncate min-w-0 flex-1 text-left">
                   {selectedBosses.length > 0
                     ? selectedBosses.map((b) => b.boss_name).join(", ")
@@ -205,9 +211,15 @@ export function RaidDetailsForm({
                       <DropdownMenuCheckboxItem
                         key={name}
                         onSelect={(event) => event.preventDefault()}
-                        checked={selectedBosses.some((b) => b.boss_name === name)}
+                        checked={selectedBosses.some(
+                          (b) => b.boss_name === name
+                        )}
                         onCheckedChange={(checked) => {
-                          const boss = bosses.find((b) => b.boss_name === name);
+                          const boss = bosses.find(
+                            (b) =>
+                              b.boss_name.trim().toLowerCase() ===
+                              name.trim().toLowerCase()
+                          );
                           if (!boss) return;
 
                           setSelectedBosses((prev) =>
@@ -215,7 +227,10 @@ export function RaidDetailsForm({
                               ? [...prev, boss]
                               : prev.filter((b) => b.id !== boss.id)
                           );
-                          setErrors((prev) => ({ ...prev, selectedBoss: false }));
+                          setErrors((prev) => ({
+                            ...prev,
+                            selectedBoss: false,
+                          }));
                         }}
                       >
                         {name}
@@ -252,10 +267,10 @@ export function RaidDetailsForm({
           <Checkbox
             id="long_pvp"
             checked={isPvpLong}
-            disabled={isPvp} 
+            disabled={isPvp}
             onCheckedChange={(checked) => {
               setIsPvpLong(checked === true);
-              if (checked) setIsPvp(false); 
+              if (checked) setIsPvp(false);
             }}
           />
           <label htmlFor="long_pvp" className="text-sm">

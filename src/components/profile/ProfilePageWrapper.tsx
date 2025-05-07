@@ -11,7 +11,8 @@ export default function ProfilePageWrapper({
   inventory,
   tasks,
   notes,
-  averageGuildGS
+  averageGuildGS,
+  activity,
 }: {
   user: any;
   tags: { id: number; tag: string }[];
@@ -19,6 +20,12 @@ export default function ProfilePageWrapper({
   tasks: any[];
   notes: any[];
   averageGuildGS: number;
+  activity: {
+    aglPercent: number;
+    primePercent: number;
+    totalPercent: number;
+    dkp: number;
+  };
 }) {
   const [user, setUser] = useState(initialUser);
   const [tags, setTags] = useState(initialTags);
@@ -27,10 +34,10 @@ export default function ProfilePageWrapper({
     <div className="space-y-8 p-4">
       <div className="grid grid-cols-3 gap-6 lg:grid-cols-2 items-start">
         <UserMonthActivity
-          aglPercent={72}
-          primePercent={85}
-          totalPercent={80}
-          dkp={120}
+          aglPercent={activity.aglPercent}
+          primePercent={activity.primePercent}
+          totalPercent={activity.totalPercent}
+          dkp={activity.dkp}
         />
         <div>
           <UserActivityChart userId={user.id} />

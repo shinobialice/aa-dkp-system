@@ -96,7 +96,7 @@ export default function ActivitiesPage() {
           >
             <Calendar1 className="size-4" />
           </Button>
-          {isAdmin && isModerator && (
+          {isAdmin || isModerator ? (
             <Button
               className="cursor-pointer"
               variant="default"
@@ -107,7 +107,7 @@ export default function ActivitiesPage() {
             >
               Добавить активность
             </Button>
-          )}
+          ) : null}
         </div>
 
         <div className="space-y-2 mb-4">

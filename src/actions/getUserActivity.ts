@@ -16,7 +16,7 @@ export async function getUserActivity(userId: number) {
     if (!raid.start_date) return;
 
     const date = raid.start_date.toISOString().split("T")[0];
-    const type = raid.type?.toLowerCase() === "прайм" ? "праймы" : "агл";
+    const type = raid.type?.toLowerCase() === "Прайм" ? "праймы" : "агл";
 
     if (!grouped[date]) {
       grouped[date] = { праймы: 0, агл: 0 };

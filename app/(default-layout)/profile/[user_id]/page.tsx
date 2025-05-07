@@ -5,6 +5,7 @@ import getUserInventory from "@/src/actions/getUserInventory";
 import getTasks from "@/src/actions/getTasks";
 import getUserNotes from "@/src/actions/getUserNotes";
 import { getAverageGuildGS } from "@/src/actions/getAverageGuildGS";
+import { getUserMonthlyAttendance } from "@/src/actions/getUserMonthlyAttendance";
 
 export default async function Page(p: {
   params: Promise<{ user_id: string }>;
@@ -12,6 +13,11 @@ export default async function Page(p: {
   const { user_id } = await p.params;
   const userId = Number(user_id);
   const averageGuildGS = await getAverageGuildGS();
+  const activity = await getUserMonthlyAttendance(
+    userId,
+    new Date().getFullYear(),
+    new Date().getMonth() + 1
+  );
 
   const [user, tags, inventory, tasks, notes] = await Promise.all([
     getUser(userId),
@@ -29,6 +35,7 @@ export default async function Page(p: {
       tasks={tasks}
       notes={notes}
       averageGuildGS={averageGuildGS}
+      activity={activity} 
     />
   );
 }
