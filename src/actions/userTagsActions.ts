@@ -1,5 +1,5 @@
 "use server";
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 
 export async function getUserTags(userId: number) {
   return await prisma.userTags.findMany({

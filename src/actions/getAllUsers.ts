@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 
 export const getAllUsersWithInventory = async () => {
   const users = await prisma.user.findMany({
@@ -13,7 +13,7 @@ export const getAllUsersWithInventory = async () => {
         select: {
           name: true,
           type: true,
-          created_at: true, 
+          created_at: true,
         },
       },
     },

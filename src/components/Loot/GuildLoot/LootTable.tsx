@@ -3,7 +3,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useState, useEffect } from "react";
 import { getLoot, addLootItem, getItemTypes } from "@/src/actions/lootActions";
 import { LootItem, ItemType, NewLootItem } from "./LootTypes";
-import { groupLoot } from "./groupLoot";
 import { LootTableControls } from "./LootTableControls";
 import { AddLootDialog } from "./AddLootDialog";
 import { ExpensesTable } from "./ExpenseTable";

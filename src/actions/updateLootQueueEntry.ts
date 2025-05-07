@@ -1,6 +1,7 @@
 "use server";
 
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
+import type { Prisma } from "@prisma/client";
 
 export const updateLootQueueEntry = async ({
   id,
@@ -15,7 +16,7 @@ export const updateLootQueueEntry = async ({
   delivered?: number;
   required?: number;
 }) => {
-  const data: any = {};
+  const data: Prisma.LootQueueUpdateInput = {};
 
   if (status) data.status = status;
   if (synth_target !== undefined) data.synth_target = synth_target;

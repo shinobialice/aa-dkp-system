@@ -1,7 +1,18 @@
+type UserForEligibility = {
+  active: boolean;
+  joined_at: string | Date | null;
+  class?: string | null;
+  class_gear_score?: number | null;
+};
+
+type UserTag = {
+  tag: string;
+};
+
 export function getSalaryEligibilityErrors(
-  user: any,
+  user: UserForEligibility,
   averageGuildGS: number,
-  tags: { tag: string }[]
+  tags: UserTag[]
 ): string[] {
   const errors: string[] = [];
 

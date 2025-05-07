@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,12 +10,7 @@ import { updateUser } from "@/src/actions/updateUser";
 import { useUserTag } from "@/src/hooks/useUserTag";
 import { getSalaryEligibilityErrors } from "@/src/utils/getSalaryEligibilityErrors";
 
-import {
-  deleteUserTag,
-  getUserTags,
-  addUserTag,
-} from "@/src/actions/userTagsActions";
-import canReceiveSalary from "./canReveiceSalary";
+import { deleteUserTag, addUserTag } from "@/src/actions/userTagsActions";
 
 const badgeColors: Record<string, string> = {
   Активен: "rgb(47, 158, 98)",

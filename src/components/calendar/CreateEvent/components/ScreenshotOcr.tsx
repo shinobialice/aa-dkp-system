@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Loader } from "lucide-react";
 import { handleOcrUpload } from "@/src/utils/AI/handleOcrUpload";
 import { Label } from "@/components/ui/label";
+import Image from "next/image";
 
 export function ScreenshotOcr({
   users,
@@ -86,7 +87,9 @@ export function ScreenshotOcr({
                   </Button>
                 ))}
               </div>
-              <img
+              <Image
+                width={500}
+                height={500}
                 src={imagePreviews[activePreviewIndex]}
                 alt={`Рейд ${activePreviewIndex + 1}`}
                 className="max-w-full max-h-80 border rounded shadow mt-2"

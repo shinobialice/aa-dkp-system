@@ -1,6 +1,5 @@
 import { getActiveUsers } from "@/src/actions/getActiveUsers";
 import { analyzeImageFromFile } from "./analyzeImageFromFile";
-import { use } from "react";
 
 export const handleOcrUpload = async (file: File) => {
   const ocrResults = await analyzeImageFromFile(file);

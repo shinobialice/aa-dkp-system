@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 
 export const addToLootQueue = async (username: string, itemName: string) => {
   const user = await prisma.user.findFirst({ where: { username } });

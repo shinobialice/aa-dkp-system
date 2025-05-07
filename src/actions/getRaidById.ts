@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 
 export const getRaidById = async (id: string) => {
   const raid = await prisma.raid.findUnique({

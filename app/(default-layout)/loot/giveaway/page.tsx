@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 import LootGiveaway from "@/src/components/Loot/LootGiveaway";
 import { lootColumns } from "@/src/components/Loot/LootGiveaway/lootColumns";
 

@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 import { sourceMap } from "../components/Loot/priceSourceMap";
 import { getLootIconUrl } from "../components/Loot/LootBuy/icons/LootIcons";
 

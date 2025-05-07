@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 
 export const getItemTypes = async () => {
   return await prisma.itemType.findMany({
@@ -45,8 +45,7 @@ export const addLootItem = async ({
 
   await prisma.loot.update({
     where: { id: created.id },
-    data: {
-    },
+    data: {},
   });
 };
 

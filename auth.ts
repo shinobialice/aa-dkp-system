@@ -1,7 +1,7 @@
 import GoogleProvider from "next-auth/providers/google";
 import VkProvider from "next-auth/providers/vk";
 import MailRuProvider from "next-auth/providers/mailru";
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 import { cookies } from "next/headers";
 import type {
   NextAuthOptions,

@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 
 export const markLootAsGiven = async ({
   userId,
@@ -13,7 +13,7 @@ export const markLootAsGiven = async ({
     data: {
       user_id: userId,
       name: itemName,
-      type: "Выдано", 
+      type: "Выдано",
       created_at: new Date(),
     },
   });

@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 
 export async function getUserActivity(userId: number) {
   const attendances = await prisma.raidAttendance.findMany({

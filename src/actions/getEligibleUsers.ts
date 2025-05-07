@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 
 export async function getEligibleUsers() {
   const users = await prisma.user.findMany({

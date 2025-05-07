@@ -23,6 +23,7 @@ import {
 import { saveGivenAwayLoot } from "@/src/actions/saveGivenAwayLoot";
 import { lootColumns } from "./lootColumns";
 import { useUserTag } from "@/src/hooks/useUserTag";
+import type { Row } from "@tanstack/react-table";
 
 interface LootItem {
   name: string;
@@ -174,7 +175,7 @@ export default function LootGiveaway({
     ...lootColumns.map((col, lootIndex) => ({
       id: col,
       header: col,
-      cell: ({ row }: any) => {
+      cell: ({ row }: { row: Row<Player> }) => {
         const playerIndex = allPlayers.findIndex(
           (p) => p.id === row.original.id
         );

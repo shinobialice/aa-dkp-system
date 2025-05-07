@@ -1,5 +1,5 @@
 "use server";
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 
 export async function getAverageGuildGS() {
   const users = await prisma.user.findMany({

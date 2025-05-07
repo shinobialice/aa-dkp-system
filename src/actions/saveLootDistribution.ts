@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 
 type LootItem = {
   name: string;
@@ -9,7 +9,7 @@ type LootItem = {
 };
 
 type Player = {
-  id: number; 
+  id: number;
   loot: LootItem[];
 };
 

@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 
 export const getLootQueueByItemName = async (itemName: string) => {
   const item = await prisma.itemType.findUnique({

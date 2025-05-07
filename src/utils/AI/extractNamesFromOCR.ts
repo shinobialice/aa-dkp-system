@@ -1,13 +1,23 @@
-export function extractNamesFromReadOCR(data: any): string[] {
+type OCRLine = {
+  text: string;
+};
+
+type OCRPage = {
+  lines: OCRLine[];
+};
+
+type OCRReadResults = {
+  readResults?: OCRPage[];
+};
+
+export function extractNamesFromReadOCR(data: OCRReadResults): string[] {
   const words: string[] = [];
 
-  data?.readResults?.forEach((page: any) => {
-    page.lines.forEach((line: any) => {
+  data.readResults?.forEach((page) => {
+    page.lines.forEach((line) => {
       words.push(line.text);
     });
   });
 
-  return words.filter(
-    (w) => /^[A-Za-zА-Яа-яЁё0-9._-]{3,20}$/.test(w) 
-  );
+  return words.filter((w) => /^[A-Za-zА-Яа-яЁё0-9._-]{3,20}$/.test(w));
 }

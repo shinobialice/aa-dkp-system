@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 
 export const markLootItemAsSold = async ({
   lootId,
@@ -19,7 +19,6 @@ export const markLootItemAsSold = async ({
   quantity: number;
   isFree?: boolean;
 }) => {
-
   const loot = await prisma.loot.findUnique({
     where: { id: lootId },
     include: { itemType: true },
@@ -42,8 +41,7 @@ export const markLootItemAsSold = async ({
       status: remainingQuantity === 0 ? "Продано" : "В наличии",
     },
   });
-  
- 
+
   await prisma.loot.create({
     data: {
       itemTypeId: loot.itemTypeId,

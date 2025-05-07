@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 
 export async function sellGroupedLootItems({
   itemTypeId,
@@ -26,7 +26,7 @@ export async function sellGroupedLootItems({
       status,
     },
     orderBy: {
-      acquired_at: "asc", 
+      acquired_at: "asc",
     },
     include: {
       itemType: true,

@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 
 export async function distributeLootItem({
   lootId,
@@ -55,8 +55,7 @@ export async function distributeLootItem({
 
   await prisma.loot.update({
     where: { id: created.id },
-    data: {
-    },
+    data: {},
   });
 
   if (soldToId) {

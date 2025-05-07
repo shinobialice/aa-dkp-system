@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 interface ItemIconProps {
   itemName: string;
   itemIconUrl: string | null;
@@ -30,7 +32,7 @@ export default function ItemIcon({
       }}
     >
       {itemIconUrl && (
-        <img
+        <Image
           src={itemIconUrl}
           alt={itemName}
           width={40}
@@ -43,7 +45,7 @@ export default function ItemIcon({
         />
       )}
 
-      <img
+      <Image
         src={gradeUrl}
         alt="grade icon"
         width={40}

@@ -1,5 +1,5 @@
 "use server";
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 
 export const generateGuildFunds = async (month: number, year: number) => {
   const startDate = new Date(`${year}-${month}-01`);
@@ -14,7 +14,7 @@ export const generateGuildFunds = async (month: number, year: number) => {
         gte: startDate,
         lt: endDate,
       },
-      status: "Продано", 
+      status: "Продано",
     },
     include: {
       itemType: true,

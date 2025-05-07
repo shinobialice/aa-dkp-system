@@ -1,5 +1,5 @@
 "use server";
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 
 const deleteItemFromUserInventory = async (id: number) => {
   try {
@@ -7,7 +7,7 @@ const deleteItemFromUserInventory = async (id: number) => {
       where: { id },
     });
     return deletedItem;
-  } catch  {
+  } catch {
     throw new Error("Failed to delete item from user inventory");
   }
 };

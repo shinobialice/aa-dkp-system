@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 
 /**
  * Обновляет существующее событие по ID
@@ -40,7 +40,7 @@ const updateEvent = async (
         })),
       },
       raidBosses: {
-        deleteMany: {}, 
+        deleteMany: {},
         create: bossIds.map((boss_id) => ({
           boss_id,
         })),

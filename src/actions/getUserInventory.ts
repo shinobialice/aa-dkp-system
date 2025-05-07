@@ -1,5 +1,5 @@
 "use server";
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 
 const getUserInventory = async (userId: number) => {
   const inventory = await prisma.userInventory.findMany({

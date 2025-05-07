@@ -10,7 +10,6 @@ export default function ProfilePageWrapper({
   tags: initialTags,
   inventory,
   tasks,
-  notes,
   averageGuildGS,
   activity,
 }: {

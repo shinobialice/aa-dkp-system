@@ -1,5 +1,5 @@
 "use server";
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 
 const setItemQuality = async (itemId: number, quality: string) => {
   const updatedItem = await prisma.userInventory.update({

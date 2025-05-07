@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { signOut, useSession } from "next-auth/react";
+import {  useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { useUserTag } from "@/src/hooks/useUserTag";
 import {
@@ -15,7 +15,6 @@ import {
   Trophy,
   LineChart,
   Settings,
-  User,
   PiggyBank,
   Gift,
   BadgeDollarSign,
@@ -47,9 +46,7 @@ import { NavUser } from "./NavUser";
 
 export function AppSidebar() {
   const { data: session } = useSession();
-  const username = session?.user?.username ?? "Неизвестный пользователь";
   const { setTheme } = useTheme();
-  const userId = session?.user?.id;
   const isAdmin = useUserTag("Администратор");
 
   const menuItems = [

@@ -1,5 +1,5 @@
 "use server";
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 
 const getTasks = async (userId: number) => {
   const tasks = await prisma.tasks.findMany({

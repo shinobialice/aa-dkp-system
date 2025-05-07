@@ -6,6 +6,7 @@ import setItemQuality from "@/src/actions/setItemQuality";
 import inventoryIcons from "./InventoryIcons";
 import ItemIcon from "./ItemIcon";
 import { useUserTag } from "@/src/hooks/useUserTag";
+import Image from "next/image";
 
 export default function InventoryRow({
   item,
@@ -92,7 +93,9 @@ export default function InventoryRow({
               quality={userItem?.quality || null}
             />
             {isDragon && userItem && (
-              <img
+              <Image
+                width={40}
+                height={40}
                 src="https://archeagecodex.com/images/icon_grade6.png"
                 alt="legendary"
                 style={{

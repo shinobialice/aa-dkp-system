@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 
 export async function getUserByLinkToken(token: string) {
   const result = await prisma.linkToken.findUnique({

@@ -1,5 +1,5 @@
 "use server";
-import { prisma } from "@/lib/db";
+import prisma from "@/lib/db";
 
 export const getGuildFunds = async (month: number, year: number) => {
   return await prisma.guildFunds.findFirst({

@@ -42,12 +42,27 @@ export function EditGroupedLootDialog({
   const handleFieldChange = (
     index: number,
     field: keyof LootItem,
-    value: any
+    value: string
   ) => {
     const updated = [...editedItems];
-    if (field === "quantity") value = parseInt(value);
-    if (field === "acquired_at") value = new Date(value);
-    updated[index] = { ...updated[index], [field]: value };
+
+    if (field === "quantity") {
+      updated[index] = {
+        ...updated[index],
+        [field]: parseInt(value),
+      };
+    } else if (field === "acquired_at") {
+      updated[index] = {
+        ...updated[index],
+        [field]: new Date(value),
+      };
+    } else {
+      updated[index] = {
+        ...updated[index],
+        [field]: value,
+      };
+    }
+
     setEditedItems(updated);
   };
 

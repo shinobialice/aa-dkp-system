@@ -6,14 +6,11 @@ export function useUserTag(tag: string) {
 
   useEffect(() => {
     const checkTag = async () => {
-      try {
-        const res = await fetch(
-          `/api/user/has-tag?tag=${encodeURIComponent(tag)}`
-        );
-        const json = await res.json();
-        setHasTag(json.hasTag === true);
-      } catch (err) {
-      }
+      const res = await fetch(
+        `/api/user/has-tag?tag=${encodeURIComponent(tag)}`
+      );
+      const json = await res.json();
+      setHasTag(json.hasTag === true);
     };
     checkTag();
   }, [tag]);
