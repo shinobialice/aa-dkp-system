@@ -1,6 +1,5 @@
 "use server";
-
-import type { Prisma } from "@prisma/client";
+import { Prisma } from "@/prisma/generated/prisma-client";
 import prisma from "@/lib/db";
 
 export const updateLootQueueEntry = async ({
@@ -18,10 +17,18 @@ export const updateLootQueueEntry = async ({
 }) => {
   const data: Prisma.LootQueueUpdateInput = {};
 
-  if (status) {data.status = status;}
-  if (synth_target !== undefined) {data.synth_target = synth_target;}
-  if (required !== undefined) {data.required = required;}
-  if (delivered !== undefined) {data.delivered = delivered;}
+  if (status) {
+    data.status = status;
+  }
+  if (synth_target !== undefined) {
+    data.synth_target = synth_target;
+  }
+  if (required !== undefined) {
+    data.required = required;
+  }
+  if (delivered !== undefined) {
+    data.delivered = delivered;
+  }
 
   return prisma.lootQueue.update({
     where: { id },

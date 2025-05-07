@@ -41,7 +41,7 @@ type SelectRaidListProps = {
   setRowSelection: React.Dispatch<
     React.SetStateAction<Record<number, boolean>>
   >;
-}
+};
 
 const columns: ColumnDef<User>[] = [
   {
@@ -49,11 +49,12 @@ const columns: ColumnDef<User>[] = [
     header: ({ table }) => (
       <Checkbox
         checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
+          table.getIsAllPageRowsSelected()
+            ? true
+            : table.getIsSomePageRowsSelected()
+            ? "indeterminate"
+            : false
         }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
       />
     ),
     cell: ({ row }) => (
@@ -70,7 +71,7 @@ const columns: ColumnDef<User>[] = [
     accessorKey: "username",
     header: ({ column }) => (
       <Button
-      className="cursor-pointer"
+        className="cursor-pointer"
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
@@ -108,7 +109,10 @@ export function SelectRaidList({
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
 
-  const activeUsers = React.useMemo(() => users.filter((u) => u.active), [users]);
+  const activeUsers = React.useMemo(
+    () => users.filter((u) => u.active),
+    [users]
+  );
 
   const table = useReactTable({
     data: activeUsers,
@@ -184,18 +188,17 @@ export function SelectRaidList({
                       ))}
                     </TableRow>
                   ));
-                } 
-                  return (
-                    <TableRow>
-                      <TableCell
-                        colSpan={columns.length}
-                        className="h-24 text-center"
-                      >
-                        Нет результатов.
-                      </TableCell>
-                    </TableRow>
-                  );
-                
+                }
+                return (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center"
+                    >
+                      Нет результатов.
+                    </TableCell>
+                  </TableRow>
+                );
               })()}
             </TableBody>
           </Table>
