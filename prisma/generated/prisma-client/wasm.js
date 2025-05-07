@@ -209,7 +209,8 @@ exports.Prisma.LootScalarFieldEnum = {
   itemTypeId: 'itemTypeId',
   sold_to_user_id: 'sold_to_user_id',
   quantity: 'quantity',
-  price: 'price'
+  price: 'price',
+  group_id: 'group_id'
 };
 
 exports.Prisma.TasksUserScalarFieldEnum = {

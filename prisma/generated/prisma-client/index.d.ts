@@ -2509,6 +2509,7 @@ export namespace Prisma {
   export type UserCountOutputType = {
     salaries: number
     givenAwayLoot: number
+    linkTokens: number
     soldLoot: number
     lootQueue: number
     raidAttendance: number
@@ -2517,12 +2518,12 @@ export namespace Prisma {
     inventory: number
     salaryBonuses: number
     tags: number
-    linkTokens: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     salaries?: boolean | UserCountOutputTypeCountSalariesArgs
     givenAwayLoot?: boolean | UserCountOutputTypeCountGivenAwayLootArgs
+    linkTokens?: boolean | UserCountOutputTypeCountLinkTokensArgs
     soldLoot?: boolean | UserCountOutputTypeCountSoldLootArgs
     lootQueue?: boolean | UserCountOutputTypeCountLootQueueArgs
     raidAttendance?: boolean | UserCountOutputTypeCountRaidAttendanceArgs
@@ -2531,7 +2532,6 @@ export namespace Prisma {
     inventory?: boolean | UserCountOutputTypeCountInventoryArgs
     salaryBonuses?: boolean | UserCountOutputTypeCountSalaryBonusesArgs
     tags?: boolean | UserCountOutputTypeCountTagsArgs
-    linkTokens?: boolean | UserCountOutputTypeCountLinkTokensArgs
   }
 
   // Custom InputTypes
@@ -2557,6 +2557,13 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountGivenAwayLootArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: GivenAwayLootWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountLinkTokensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: LinkTokenWhereInput
   }
 
   /**
@@ -2613,13 +2620,6 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountTagsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: UserTagsWhereInput
-  }
-
-  /**
-   * UserCountOutputType without action
-   */
-  export type UserCountOutputTypeCountLinkTokensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: LinkTokenWhereInput
   }
 
 
@@ -3053,6 +3053,7 @@ export namespace Prisma {
     vkId?: boolean
     salaries?: boolean | User$salariesArgs<ExtArgs>
     givenAwayLoot?: boolean | User$givenAwayLootArgs<ExtArgs>
+    linkTokens?: boolean | User$linkTokensArgs<ExtArgs>
     soldLoot?: boolean | User$soldLootArgs<ExtArgs>
     lootQueue?: boolean | User$lootQueueArgs<ExtArgs>
     raidAttendance?: boolean | User$raidAttendanceArgs<ExtArgs>
@@ -3061,7 +3062,6 @@ export namespace Prisma {
     inventory?: boolean | User$inventoryArgs<ExtArgs>
     salaryBonuses?: boolean | User$salaryBonusesArgs<ExtArgs>
     tags?: boolean | User$tagsArgs<ExtArgs>
-    linkTokens?: boolean | User$linkTokensArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -3120,6 +3120,7 @@ export namespace Prisma {
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     salaries?: boolean | User$salariesArgs<ExtArgs>
     givenAwayLoot?: boolean | User$givenAwayLootArgs<ExtArgs>
+    linkTokens?: boolean | User$linkTokensArgs<ExtArgs>
     soldLoot?: boolean | User$soldLootArgs<ExtArgs>
     lootQueue?: boolean | User$lootQueueArgs<ExtArgs>
     raidAttendance?: boolean | User$raidAttendanceArgs<ExtArgs>
@@ -3128,7 +3129,6 @@ export namespace Prisma {
     inventory?: boolean | User$inventoryArgs<ExtArgs>
     salaryBonuses?: boolean | User$salaryBonusesArgs<ExtArgs>
     tags?: boolean | User$tagsArgs<ExtArgs>
-    linkTokens?: boolean | User$linkTokensArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -3139,6 +3139,7 @@ export namespace Prisma {
     objects: {
       salaries: Prisma.$SalaryPayload<ExtArgs>[]
       givenAwayLoot: Prisma.$GivenAwayLootPayload<ExtArgs>[]
+      linkTokens: Prisma.$LinkTokenPayload<ExtArgs>[]
       soldLoot: Prisma.$LootPayload<ExtArgs>[]
       lootQueue: Prisma.$LootQueuePayload<ExtArgs>[]
       raidAttendance: Prisma.$RaidAttendancePayload<ExtArgs>[]
@@ -3147,7 +3148,6 @@ export namespace Prisma {
       inventory: Prisma.$UserInventoryPayload<ExtArgs>[]
       salaryBonuses: Prisma.$UserSalaryBonusPayload<ExtArgs>[]
       tags: Prisma.$UserTagsPayload<ExtArgs>[]
-      linkTokens: Prisma.$LinkTokenPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -3560,6 +3560,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     salaries<T extends User$salariesArgs<ExtArgs> = {}>(args?: Subset<T, User$salariesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SalaryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     givenAwayLoot<T extends User$givenAwayLootArgs<ExtArgs> = {}>(args?: Subset<T, User$givenAwayLootArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$GivenAwayLootPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    linkTokens<T extends User$linkTokensArgs<ExtArgs> = {}>(args?: Subset<T, User$linkTokensArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LinkTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     soldLoot<T extends User$soldLootArgs<ExtArgs> = {}>(args?: Subset<T, User$soldLootArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LootPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     lootQueue<T extends User$lootQueueArgs<ExtArgs> = {}>(args?: Subset<T, User$lootQueueArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LootQueuePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     raidAttendance<T extends User$raidAttendanceArgs<ExtArgs> = {}>(args?: Subset<T, User$raidAttendanceArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RaidAttendancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -3568,7 +3569,6 @@ export namespace Prisma {
     inventory<T extends User$inventoryArgs<ExtArgs> = {}>(args?: Subset<T, User$inventoryArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserInventoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     salaryBonuses<T extends User$salaryBonusesArgs<ExtArgs> = {}>(args?: Subset<T, User$salaryBonusesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserSalaryBonusPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     tags<T extends User$tagsArgs<ExtArgs> = {}>(args?: Subset<T, User$tagsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserTagsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    linkTokens<T extends User$linkTokensArgs<ExtArgs> = {}>(args?: Subset<T, User$linkTokensArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LinkTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4048,6 +4048,30 @@ export namespace Prisma {
   }
 
   /**
+   * User.linkTokens
+   */
+  export type User$linkTokensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LinkToken
+     */
+    select?: LinkTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LinkToken
+     */
+    omit?: LinkTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LinkTokenInclude<ExtArgs> | null
+    where?: LinkTokenWhereInput
+    orderBy?: LinkTokenOrderByWithRelationInput | LinkTokenOrderByWithRelationInput[]
+    cursor?: LinkTokenWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: LinkTokenScalarFieldEnum | LinkTokenScalarFieldEnum[]
+  }
+
+  /**
    * User.soldLoot
    */
   export type User$soldLootArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4237,30 +4261,6 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: UserTagsScalarFieldEnum | UserTagsScalarFieldEnum[]
-  }
-
-  /**
-   * User.linkTokens
-   */
-  export type User$linkTokensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the LinkToken
-     */
-    select?: LinkTokenSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the LinkToken
-     */
-    omit?: LinkTokenOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: LinkTokenInclude<ExtArgs> | null
-    where?: LinkTokenWhereInput
-    orderBy?: LinkTokenOrderByWithRelationInput | LinkTokenOrderByWithRelationInput[]
-    cursor?: LinkTokenWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: LinkTokenScalarFieldEnum | LinkTokenScalarFieldEnum[]
   }
 
   /**
@@ -13162,6 +13162,7 @@ export namespace Prisma {
     sold_to_user_id: number | null
     quantity: number | null
     price: number | null
+    group_id: number | null
   }
 
   export type LootSumAggregateOutputType = {
@@ -13170,6 +13171,7 @@ export namespace Prisma {
     sold_to_user_id: number | null
     quantity: number | null
     price: number | null
+    group_id: number | null
   }
 
   export type LootMinAggregateOutputType = {
@@ -13185,6 +13187,7 @@ export namespace Prisma {
     sold_to_user_id: number | null
     quantity: number | null
     price: number | null
+    group_id: number | null
   }
 
   export type LootMaxAggregateOutputType = {
@@ -13200,6 +13203,7 @@ export namespace Prisma {
     sold_to_user_id: number | null
     quantity: number | null
     price: number | null
+    group_id: number | null
   }
 
   export type LootCountAggregateOutputType = {
@@ -13215,6 +13219,7 @@ export namespace Prisma {
     sold_to_user_id: number
     quantity: number
     price: number
+    group_id: number
     _all: number
   }
 
@@ -13225,6 +13230,7 @@ export namespace Prisma {
     sold_to_user_id?: true
     quantity?: true
     price?: true
+    group_id?: true
   }
 
   export type LootSumAggregateInputType = {
@@ -13233,6 +13239,7 @@ export namespace Prisma {
     sold_to_user_id?: true
     quantity?: true
     price?: true
+    group_id?: true
   }
 
   export type LootMinAggregateInputType = {
@@ -13248,6 +13255,7 @@ export namespace Prisma {
     sold_to_user_id?: true
     quantity?: true
     price?: true
+    group_id?: true
   }
 
   export type LootMaxAggregateInputType = {
@@ -13263,6 +13271,7 @@ export namespace Prisma {
     sold_to_user_id?: true
     quantity?: true
     price?: true
+    group_id?: true
   }
 
   export type LootCountAggregateInputType = {
@@ -13278,6 +13287,7 @@ export namespace Prisma {
     sold_to_user_id?: true
     quantity?: true
     price?: true
+    group_id?: true
     _all?: true
   }
 
@@ -13380,6 +13390,7 @@ export namespace Prisma {
     sold_to_user_id: number | null
     quantity: number
     price: number | null
+    group_id: number | null
     _count: LootCountAggregateOutputType | null
     _avg: LootAvgAggregateOutputType | null
     _sum: LootSumAggregateOutputType | null
@@ -13414,6 +13425,7 @@ export namespace Prisma {
     sold_to_user_id?: boolean
     quantity?: boolean
     price?: boolean
+    group_id?: boolean
     itemType?: boolean | ItemTypeDefaultArgs<ExtArgs>
     soldToUser?: boolean | Loot$soldToUserArgs<ExtArgs>
   }, ExtArgs["result"]["loot"]>
@@ -13431,6 +13443,7 @@ export namespace Prisma {
     sold_to_user_id?: boolean
     quantity?: boolean
     price?: boolean
+    group_id?: boolean
     itemType?: boolean | ItemTypeDefaultArgs<ExtArgs>
     soldToUser?: boolean | Loot$soldToUserArgs<ExtArgs>
   }, ExtArgs["result"]["loot"]>
@@ -13448,6 +13461,7 @@ export namespace Prisma {
     sold_to_user_id?: boolean
     quantity?: boolean
     price?: boolean
+    group_id?: boolean
     itemType?: boolean | ItemTypeDefaultArgs<ExtArgs>
     soldToUser?: boolean | Loot$soldToUserArgs<ExtArgs>
   }, ExtArgs["result"]["loot"]>
@@ -13465,9 +13479,10 @@ export namespace Prisma {
     sold_to_user_id?: boolean
     quantity?: boolean
     price?: boolean
+    group_id?: boolean
   }
 
-  export type LootOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "status" | "sold_at" | "sold_to" | "comment" | "created_at" | "source" | "acquired_at" | "itemTypeId" | "sold_to_user_id" | "quantity" | "price", ExtArgs["result"]["loot"]>
+  export type LootOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "status" | "sold_at" | "sold_to" | "comment" | "created_at" | "source" | "acquired_at" | "itemTypeId" | "sold_to_user_id" | "quantity" | "price" | "group_id", ExtArgs["result"]["loot"]>
   export type LootInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     itemType?: boolean | ItemTypeDefaultArgs<ExtArgs>
     soldToUser?: boolean | Loot$soldToUserArgs<ExtArgs>
@@ -13500,6 +13515,7 @@ export namespace Prisma {
       sold_to_user_id: number | null
       quantity: number
       price: number | null
+      group_id: number | null
     }, ExtArgs["result"]["loot"]>
     composites: {}
   }
@@ -13937,6 +13953,7 @@ export namespace Prisma {
     readonly sold_to_user_id: FieldRef<"Loot", 'Int'>
     readonly quantity: FieldRef<"Loot", 'Int'>
     readonly price: FieldRef<"Loot", 'Int'>
+    readonly group_id: FieldRef<"Loot", 'Int'>
   }
     
 
@@ -24381,7 +24398,8 @@ export namespace Prisma {
     itemTypeId: 'itemTypeId',
     sold_to_user_id: 'sold_to_user_id',
     quantity: 'quantity',
-    price: 'price'
+    price: 'price',
+    group_id: 'group_id'
   };
 
   export type LootScalarFieldEnum = (typeof LootScalarFieldEnum)[keyof typeof LootScalarFieldEnum]
@@ -24611,6 +24629,7 @@ export namespace Prisma {
     vkId?: StringNullableFilter<"User"> | string | null
     salaries?: SalaryListRelationFilter
     givenAwayLoot?: GivenAwayLootListRelationFilter
+    linkTokens?: LinkTokenListRelationFilter
     soldLoot?: LootListRelationFilter
     lootQueue?: LootQueueListRelationFilter
     raidAttendance?: RaidAttendanceListRelationFilter
@@ -24619,7 +24638,6 @@ export namespace Prisma {
     inventory?: UserInventoryListRelationFilter
     salaryBonuses?: UserSalaryBonusListRelationFilter
     tags?: UserTagsListRelationFilter
-    linkTokens?: LinkTokenListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -24639,6 +24657,7 @@ export namespace Prisma {
     vkId?: SortOrderInput | SortOrder
     salaries?: SalaryOrderByRelationAggregateInput
     givenAwayLoot?: GivenAwayLootOrderByRelationAggregateInput
+    linkTokens?: LinkTokenOrderByRelationAggregateInput
     soldLoot?: LootOrderByRelationAggregateInput
     lootQueue?: LootQueueOrderByRelationAggregateInput
     raidAttendance?: RaidAttendanceOrderByRelationAggregateInput
@@ -24647,7 +24666,6 @@ export namespace Prisma {
     inventory?: UserInventoryOrderByRelationAggregateInput
     salaryBonuses?: UserSalaryBonusOrderByRelationAggregateInput
     tags?: UserTagsOrderByRelationAggregateInput
-    linkTokens?: LinkTokenOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -24670,6 +24688,7 @@ export namespace Prisma {
     salaryBonus?: IntNullableFilter<"User"> | number | null
     salaries?: SalaryListRelationFilter
     givenAwayLoot?: GivenAwayLootListRelationFilter
+    linkTokens?: LinkTokenListRelationFilter
     soldLoot?: LootListRelationFilter
     lootQueue?: LootQueueListRelationFilter
     raidAttendance?: RaidAttendanceListRelationFilter
@@ -24678,7 +24697,6 @@ export namespace Prisma {
     inventory?: UserInventoryListRelationFilter
     salaryBonuses?: UserSalaryBonusListRelationFilter
     tags?: UserTagsListRelationFilter
-    linkTokens?: LinkTokenListRelationFilter
   }, "id" | "googleId" | "vkId">
 
   export type UserOrderByWithAggregationInput = {
@@ -25191,6 +25209,7 @@ export namespace Prisma {
     sold_to_user_id?: IntNullableFilter<"Loot"> | number | null
     quantity?: IntFilter<"Loot"> | number
     price?: IntNullableFilter<"Loot"> | number | null
+    group_id?: IntNullableFilter<"Loot"> | number | null
     itemType?: XOR<ItemTypeScalarRelationFilter, ItemTypeWhereInput>
     soldToUser?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
   }
@@ -25208,6 +25227,7 @@ export namespace Prisma {
     sold_to_user_id?: SortOrderInput | SortOrder
     quantity?: SortOrder
     price?: SortOrderInput | SortOrder
+    group_id?: SortOrderInput | SortOrder
     itemType?: ItemTypeOrderByWithRelationInput
     soldToUser?: UserOrderByWithRelationInput
   }
@@ -25228,6 +25248,7 @@ export namespace Prisma {
     sold_to_user_id?: IntNullableFilter<"Loot"> | number | null
     quantity?: IntFilter<"Loot"> | number
     price?: IntNullableFilter<"Loot"> | number | null
+    group_id?: IntNullableFilter<"Loot"> | number | null
     itemType?: XOR<ItemTypeScalarRelationFilter, ItemTypeWhereInput>
     soldToUser?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
   }, "id">
@@ -25245,6 +25266,7 @@ export namespace Prisma {
     sold_to_user_id?: SortOrderInput | SortOrder
     quantity?: SortOrder
     price?: SortOrderInput | SortOrder
+    group_id?: SortOrderInput | SortOrder
     _count?: LootCountOrderByAggregateInput
     _avg?: LootAvgOrderByAggregateInput
     _max?: LootMaxOrderByAggregateInput
@@ -25268,6 +25290,7 @@ export namespace Prisma {
     sold_to_user_id?: IntNullableWithAggregatesFilter<"Loot"> | number | null
     quantity?: IntWithAggregatesFilter<"Loot"> | number
     price?: IntNullableWithAggregatesFilter<"Loot"> | number | null
+    group_id?: IntNullableWithAggregatesFilter<"Loot"> | number | null
   }
 
   export type TasksUserWhereInput = {
@@ -25833,6 +25856,7 @@ export namespace Prisma {
   }
 
   export type UserCreateInput = {
+    id: number
     username: string
     class?: string | null
     secondary_class?: string | null
@@ -25848,6 +25872,7 @@ export namespace Prisma {
     vkId?: string | null
     salaries?: SalaryCreateNestedManyWithoutUserInput
     givenAwayLoot?: GivenAwayLootCreateNestedManyWithoutUserInput
+    linkTokens?: LinkTokenCreateNestedManyWithoutUserInput
     soldLoot?: LootCreateNestedManyWithoutSoldToUserInput
     lootQueue?: LootQueueCreateNestedManyWithoutUserInput
     raidAttendance?: RaidAttendanceCreateNestedManyWithoutUserInput
@@ -25856,11 +25881,10 @@ export namespace Prisma {
     inventory?: UserInventoryCreateNestedManyWithoutUserInput
     salaryBonuses?: UserSalaryBonusCreateNestedManyWithoutUserInput
     tags?: UserTagsCreateNestedManyWithoutUserInput
-    linkTokens?: LinkTokenCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
-    id?: number
+    id: number
     username: string
     class?: string | null
     secondary_class?: string | null
@@ -25876,6 +25900,7 @@ export namespace Prisma {
     vkId?: string | null
     salaries?: SalaryUncheckedCreateNestedManyWithoutUserInput
     givenAwayLoot?: GivenAwayLootUncheckedCreateNestedManyWithoutUserInput
+    linkTokens?: LinkTokenUncheckedCreateNestedManyWithoutUserInput
     soldLoot?: LootUncheckedCreateNestedManyWithoutSoldToUserInput
     lootQueue?: LootQueueUncheckedCreateNestedManyWithoutUserInput
     raidAttendance?: RaidAttendanceUncheckedCreateNestedManyWithoutUserInput
@@ -25884,10 +25909,10 @@ export namespace Prisma {
     inventory?: UserInventoryUncheckedCreateNestedManyWithoutUserInput
     salaryBonuses?: UserSalaryBonusUncheckedCreateNestedManyWithoutUserInput
     tags?: UserTagsUncheckedCreateNestedManyWithoutUserInput
-    linkTokens?: LinkTokenUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
     username?: StringFieldUpdateOperationsInput | string
     class?: NullableStringFieldUpdateOperationsInput | string | null
     secondary_class?: NullableStringFieldUpdateOperationsInput | string | null
@@ -25903,6 +25928,7 @@ export namespace Prisma {
     vkId?: NullableStringFieldUpdateOperationsInput | string | null
     salaries?: SalaryUpdateManyWithoutUserNestedInput
     givenAwayLoot?: GivenAwayLootUpdateManyWithoutUserNestedInput
+    linkTokens?: LinkTokenUpdateManyWithoutUserNestedInput
     soldLoot?: LootUpdateManyWithoutSoldToUserNestedInput
     lootQueue?: LootQueueUpdateManyWithoutUserNestedInput
     raidAttendance?: RaidAttendanceUpdateManyWithoutUserNestedInput
@@ -25911,7 +25937,6 @@ export namespace Prisma {
     inventory?: UserInventoryUpdateManyWithoutUserNestedInput
     salaryBonuses?: UserSalaryBonusUpdateManyWithoutUserNestedInput
     tags?: UserTagsUpdateManyWithoutUserNestedInput
-    linkTokens?: LinkTokenUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -25931,6 +25956,7 @@ export namespace Prisma {
     vkId?: NullableStringFieldUpdateOperationsInput | string | null
     salaries?: SalaryUncheckedUpdateManyWithoutUserNestedInput
     givenAwayLoot?: GivenAwayLootUncheckedUpdateManyWithoutUserNestedInput
+    linkTokens?: LinkTokenUncheckedUpdateManyWithoutUserNestedInput
     soldLoot?: LootUncheckedUpdateManyWithoutSoldToUserNestedInput
     lootQueue?: LootQueueUncheckedUpdateManyWithoutUserNestedInput
     raidAttendance?: RaidAttendanceUncheckedUpdateManyWithoutUserNestedInput
@@ -25939,11 +25965,10 @@ export namespace Prisma {
     inventory?: UserInventoryUncheckedUpdateManyWithoutUserNestedInput
     salaryBonuses?: UserSalaryBonusUncheckedUpdateManyWithoutUserNestedInput
     tags?: UserTagsUncheckedUpdateManyWithoutUserNestedInput
-    linkTokens?: LinkTokenUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
-    id?: number
+    id: number
     username: string
     class?: string | null
     secondary_class?: string | null
@@ -25960,6 +25985,7 @@ export namespace Prisma {
   }
 
   export type UserUpdateManyMutationInput = {
+    id?: IntFieldUpdateOperationsInput | number
     username?: StringFieldUpdateOperationsInput | string
     class?: NullableStringFieldUpdateOperationsInput | string | null
     secondary_class?: NullableStringFieldUpdateOperationsInput | string | null
@@ -26419,6 +26445,7 @@ export namespace Prisma {
     acquired_at?: Date | string | null
     quantity?: number
     price?: number | null
+    group_id?: number | null
     itemType: ItemTypeCreateNestedOneWithoutLootInput
     soldToUser?: UserCreateNestedOneWithoutSoldLootInput
   }
@@ -26436,6 +26463,7 @@ export namespace Prisma {
     sold_to_user_id?: number | null
     quantity?: number
     price?: number | null
+    group_id?: number | null
   }
 
   export type LootUpdateInput = {
@@ -26448,6 +26476,7 @@ export namespace Prisma {
     acquired_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     quantity?: IntFieldUpdateOperationsInput | number
     price?: NullableIntFieldUpdateOperationsInput | number | null
+    group_id?: NullableIntFieldUpdateOperationsInput | number | null
     itemType?: ItemTypeUpdateOneRequiredWithoutLootNestedInput
     soldToUser?: UserUpdateOneWithoutSoldLootNestedInput
   }
@@ -26465,6 +26494,7 @@ export namespace Prisma {
     sold_to_user_id?: NullableIntFieldUpdateOperationsInput | number | null
     quantity?: IntFieldUpdateOperationsInput | number
     price?: NullableIntFieldUpdateOperationsInput | number | null
+    group_id?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type LootCreateManyInput = {
@@ -26480,6 +26510,7 @@ export namespace Prisma {
     sold_to_user_id?: number | null
     quantity?: number
     price?: number | null
+    group_id?: number | null
   }
 
   export type LootUpdateManyMutationInput = {
@@ -26492,6 +26523,7 @@ export namespace Prisma {
     acquired_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     quantity?: IntFieldUpdateOperationsInput | number
     price?: NullableIntFieldUpdateOperationsInput | number | null
+    group_id?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type LootUncheckedUpdateManyInput = {
@@ -26507,6 +26539,7 @@ export namespace Prisma {
     sold_to_user_id?: NullableIntFieldUpdateOperationsInput | number | null
     quantity?: IntFieldUpdateOperationsInput | number
     price?: NullableIntFieldUpdateOperationsInput | number | null
+    group_id?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type TasksUserCreateInput = {
@@ -27143,6 +27176,12 @@ export namespace Prisma {
     none?: GivenAwayLootWhereInput
   }
 
+  export type LinkTokenListRelationFilter = {
+    every?: LinkTokenWhereInput
+    some?: LinkTokenWhereInput
+    none?: LinkTokenWhereInput
+  }
+
   export type LootListRelationFilter = {
     every?: LootWhereInput
     some?: LootWhereInput
@@ -27191,12 +27230,6 @@ export namespace Prisma {
     none?: UserTagsWhereInput
   }
 
-  export type LinkTokenListRelationFilter = {
-    every?: LinkTokenWhereInput
-    some?: LinkTokenWhereInput
-    none?: LinkTokenWhereInput
-  }
-
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -27207,6 +27240,10 @@ export namespace Prisma {
   }
 
   export type GivenAwayLootOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type LinkTokenOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -27239,10 +27276,6 @@ export namespace Prisma {
   }
 
   export type UserTagsOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type LinkTokenOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -27772,6 +27805,7 @@ export namespace Prisma {
     sold_to_user_id?: SortOrder
     quantity?: SortOrder
     price?: SortOrder
+    group_id?: SortOrder
   }
 
   export type LootAvgOrderByAggregateInput = {
@@ -27780,6 +27814,7 @@ export namespace Prisma {
     sold_to_user_id?: SortOrder
     quantity?: SortOrder
     price?: SortOrder
+    group_id?: SortOrder
   }
 
   export type LootMaxOrderByAggregateInput = {
@@ -27795,6 +27830,7 @@ export namespace Prisma {
     sold_to_user_id?: SortOrder
     quantity?: SortOrder
     price?: SortOrder
+    group_id?: SortOrder
   }
 
   export type LootMinOrderByAggregateInput = {
@@ -27810,6 +27846,7 @@ export namespace Prisma {
     sold_to_user_id?: SortOrder
     quantity?: SortOrder
     price?: SortOrder
+    group_id?: SortOrder
   }
 
   export type LootSumOrderByAggregateInput = {
@@ -27818,6 +27855,7 @@ export namespace Prisma {
     sold_to_user_id?: SortOrder
     quantity?: SortOrder
     price?: SortOrder
+    group_id?: SortOrder
   }
 
   export type TasksScalarRelationFilter = {
@@ -28215,6 +28253,13 @@ export namespace Prisma {
     connect?: GivenAwayLootWhereUniqueInput | GivenAwayLootWhereUniqueInput[]
   }
 
+  export type LinkTokenCreateNestedManyWithoutUserInput = {
+    create?: XOR<LinkTokenCreateWithoutUserInput, LinkTokenUncheckedCreateWithoutUserInput> | LinkTokenCreateWithoutUserInput[] | LinkTokenUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: LinkTokenCreateOrConnectWithoutUserInput | LinkTokenCreateOrConnectWithoutUserInput[]
+    createMany?: LinkTokenCreateManyUserInputEnvelope
+    connect?: LinkTokenWhereUniqueInput | LinkTokenWhereUniqueInput[]
+  }
+
   export type LootCreateNestedManyWithoutSoldToUserInput = {
     create?: XOR<LootCreateWithoutSoldToUserInput, LootUncheckedCreateWithoutSoldToUserInput> | LootCreateWithoutSoldToUserInput[] | LootUncheckedCreateWithoutSoldToUserInput[]
     connectOrCreate?: LootCreateOrConnectWithoutSoldToUserInput | LootCreateOrConnectWithoutSoldToUserInput[]
@@ -28271,13 +28316,6 @@ export namespace Prisma {
     connect?: UserTagsWhereUniqueInput | UserTagsWhereUniqueInput[]
   }
 
-  export type LinkTokenCreateNestedManyWithoutUserInput = {
-    create?: XOR<LinkTokenCreateWithoutUserInput, LinkTokenUncheckedCreateWithoutUserInput> | LinkTokenCreateWithoutUserInput[] | LinkTokenUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: LinkTokenCreateOrConnectWithoutUserInput | LinkTokenCreateOrConnectWithoutUserInput[]
-    createMany?: LinkTokenCreateManyUserInputEnvelope
-    connect?: LinkTokenWhereUniqueInput | LinkTokenWhereUniqueInput[]
-  }
-
   export type SalaryUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<SalaryCreateWithoutUserInput, SalaryUncheckedCreateWithoutUserInput> | SalaryCreateWithoutUserInput[] | SalaryUncheckedCreateWithoutUserInput[]
     connectOrCreate?: SalaryCreateOrConnectWithoutUserInput | SalaryCreateOrConnectWithoutUserInput[]
@@ -28290,6 +28328,13 @@ export namespace Prisma {
     connectOrCreate?: GivenAwayLootCreateOrConnectWithoutUserInput | GivenAwayLootCreateOrConnectWithoutUserInput[]
     createMany?: GivenAwayLootCreateManyUserInputEnvelope
     connect?: GivenAwayLootWhereUniqueInput | GivenAwayLootWhereUniqueInput[]
+  }
+
+  export type LinkTokenUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<LinkTokenCreateWithoutUserInput, LinkTokenUncheckedCreateWithoutUserInput> | LinkTokenCreateWithoutUserInput[] | LinkTokenUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: LinkTokenCreateOrConnectWithoutUserInput | LinkTokenCreateOrConnectWithoutUserInput[]
+    createMany?: LinkTokenCreateManyUserInputEnvelope
+    connect?: LinkTokenWhereUniqueInput | LinkTokenWhereUniqueInput[]
   }
 
   export type LootUncheckedCreateNestedManyWithoutSoldToUserInput = {
@@ -28348,11 +28393,12 @@ export namespace Prisma {
     connect?: UserTagsWhereUniqueInput | UserTagsWhereUniqueInput[]
   }
 
-  export type LinkTokenUncheckedCreateNestedManyWithoutUserInput = {
-    create?: XOR<LinkTokenCreateWithoutUserInput, LinkTokenUncheckedCreateWithoutUserInput> | LinkTokenCreateWithoutUserInput[] | LinkTokenUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: LinkTokenCreateOrConnectWithoutUserInput | LinkTokenCreateOrConnectWithoutUserInput[]
-    createMany?: LinkTokenCreateManyUserInputEnvelope
-    connect?: LinkTokenWhereUniqueInput | LinkTokenWhereUniqueInput[]
+  export type IntFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -28409,6 +28455,20 @@ export namespace Prisma {
     update?: GivenAwayLootUpdateWithWhereUniqueWithoutUserInput | GivenAwayLootUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: GivenAwayLootUpdateManyWithWhereWithoutUserInput | GivenAwayLootUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: GivenAwayLootScalarWhereInput | GivenAwayLootScalarWhereInput[]
+  }
+
+  export type LinkTokenUpdateManyWithoutUserNestedInput = {
+    create?: XOR<LinkTokenCreateWithoutUserInput, LinkTokenUncheckedCreateWithoutUserInput> | LinkTokenCreateWithoutUserInput[] | LinkTokenUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: LinkTokenCreateOrConnectWithoutUserInput | LinkTokenCreateOrConnectWithoutUserInput[]
+    upsert?: LinkTokenUpsertWithWhereUniqueWithoutUserInput | LinkTokenUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: LinkTokenCreateManyUserInputEnvelope
+    set?: LinkTokenWhereUniqueInput | LinkTokenWhereUniqueInput[]
+    disconnect?: LinkTokenWhereUniqueInput | LinkTokenWhereUniqueInput[]
+    delete?: LinkTokenWhereUniqueInput | LinkTokenWhereUniqueInput[]
+    connect?: LinkTokenWhereUniqueInput | LinkTokenWhereUniqueInput[]
+    update?: LinkTokenUpdateWithWhereUniqueWithoutUserInput | LinkTokenUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: LinkTokenUpdateManyWithWhereWithoutUserInput | LinkTokenUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: LinkTokenScalarWhereInput | LinkTokenScalarWhereInput[]
   }
 
   export type LootUpdateManyWithoutSoldToUserNestedInput = {
@@ -28523,28 +28583,6 @@ export namespace Prisma {
     deleteMany?: UserTagsScalarWhereInput | UserTagsScalarWhereInput[]
   }
 
-  export type LinkTokenUpdateManyWithoutUserNestedInput = {
-    create?: XOR<LinkTokenCreateWithoutUserInput, LinkTokenUncheckedCreateWithoutUserInput> | LinkTokenCreateWithoutUserInput[] | LinkTokenUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: LinkTokenCreateOrConnectWithoutUserInput | LinkTokenCreateOrConnectWithoutUserInput[]
-    upsert?: LinkTokenUpsertWithWhereUniqueWithoutUserInput | LinkTokenUpsertWithWhereUniqueWithoutUserInput[]
-    createMany?: LinkTokenCreateManyUserInputEnvelope
-    set?: LinkTokenWhereUniqueInput | LinkTokenWhereUniqueInput[]
-    disconnect?: LinkTokenWhereUniqueInput | LinkTokenWhereUniqueInput[]
-    delete?: LinkTokenWhereUniqueInput | LinkTokenWhereUniqueInput[]
-    connect?: LinkTokenWhereUniqueInput | LinkTokenWhereUniqueInput[]
-    update?: LinkTokenUpdateWithWhereUniqueWithoutUserInput | LinkTokenUpdateWithWhereUniqueWithoutUserInput[]
-    updateMany?: LinkTokenUpdateManyWithWhereWithoutUserInput | LinkTokenUpdateManyWithWhereWithoutUserInput[]
-    deleteMany?: LinkTokenScalarWhereInput | LinkTokenScalarWhereInput[]
-  }
-
-  export type IntFieldUpdateOperationsInput = {
-    set?: number
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
-  }
-
   export type SalaryUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<SalaryCreateWithoutUserInput, SalaryUncheckedCreateWithoutUserInput> | SalaryCreateWithoutUserInput[] | SalaryUncheckedCreateWithoutUserInput[]
     connectOrCreate?: SalaryCreateOrConnectWithoutUserInput | SalaryCreateOrConnectWithoutUserInput[]
@@ -28571,6 +28609,20 @@ export namespace Prisma {
     update?: GivenAwayLootUpdateWithWhereUniqueWithoutUserInput | GivenAwayLootUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: GivenAwayLootUpdateManyWithWhereWithoutUserInput | GivenAwayLootUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: GivenAwayLootScalarWhereInput | GivenAwayLootScalarWhereInput[]
+  }
+
+  export type LinkTokenUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<LinkTokenCreateWithoutUserInput, LinkTokenUncheckedCreateWithoutUserInput> | LinkTokenCreateWithoutUserInput[] | LinkTokenUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: LinkTokenCreateOrConnectWithoutUserInput | LinkTokenCreateOrConnectWithoutUserInput[]
+    upsert?: LinkTokenUpsertWithWhereUniqueWithoutUserInput | LinkTokenUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: LinkTokenCreateManyUserInputEnvelope
+    set?: LinkTokenWhereUniqueInput | LinkTokenWhereUniqueInput[]
+    disconnect?: LinkTokenWhereUniqueInput | LinkTokenWhereUniqueInput[]
+    delete?: LinkTokenWhereUniqueInput | LinkTokenWhereUniqueInput[]
+    connect?: LinkTokenWhereUniqueInput | LinkTokenWhereUniqueInput[]
+    update?: LinkTokenUpdateWithWhereUniqueWithoutUserInput | LinkTokenUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: LinkTokenUpdateManyWithWhereWithoutUserInput | LinkTokenUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: LinkTokenScalarWhereInput | LinkTokenScalarWhereInput[]
   }
 
   export type LootUncheckedUpdateManyWithoutSoldToUserNestedInput = {
@@ -28683,20 +28735,6 @@ export namespace Prisma {
     update?: UserTagsUpdateWithWhereUniqueWithoutUserInput | UserTagsUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: UserTagsUpdateManyWithWhereWithoutUserInput | UserTagsUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: UserTagsScalarWhereInput | UserTagsScalarWhereInput[]
-  }
-
-  export type LinkTokenUncheckedUpdateManyWithoutUserNestedInput = {
-    create?: XOR<LinkTokenCreateWithoutUserInput, LinkTokenUncheckedCreateWithoutUserInput> | LinkTokenCreateWithoutUserInput[] | LinkTokenUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: LinkTokenCreateOrConnectWithoutUserInput | LinkTokenCreateOrConnectWithoutUserInput[]
-    upsert?: LinkTokenUpsertWithWhereUniqueWithoutUserInput | LinkTokenUpsertWithWhereUniqueWithoutUserInput[]
-    createMany?: LinkTokenCreateManyUserInputEnvelope
-    set?: LinkTokenWhereUniqueInput | LinkTokenWhereUniqueInput[]
-    disconnect?: LinkTokenWhereUniqueInput | LinkTokenWhereUniqueInput[]
-    delete?: LinkTokenWhereUniqueInput | LinkTokenWhereUniqueInput[]
-    connect?: LinkTokenWhereUniqueInput | LinkTokenWhereUniqueInput[]
-    update?: LinkTokenUpdateWithWhereUniqueWithoutUserInput | LinkTokenUpdateWithWhereUniqueWithoutUserInput[]
-    updateMany?: LinkTokenUpdateManyWithWhereWithoutUserInput | LinkTokenUpdateManyWithWhereWithoutUserInput[]
-    deleteMany?: LinkTokenScalarWhereInput | LinkTokenScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutTagsInput = {
@@ -29487,6 +29525,29 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type LinkTokenCreateWithoutUserInput = {
+    token: string
+    expiresAt: Date | string
+    used?: boolean
+  }
+
+  export type LinkTokenUncheckedCreateWithoutUserInput = {
+    id?: number
+    token: string
+    expiresAt: Date | string
+    used?: boolean
+  }
+
+  export type LinkTokenCreateOrConnectWithoutUserInput = {
+    where: LinkTokenWhereUniqueInput
+    create: XOR<LinkTokenCreateWithoutUserInput, LinkTokenUncheckedCreateWithoutUserInput>
+  }
+
+  export type LinkTokenCreateManyUserInputEnvelope = {
+    data: LinkTokenCreateManyUserInput | LinkTokenCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
   export type LootCreateWithoutSoldToUserInput = {
     status?: string | null
     sold_at?: Date | string | null
@@ -29497,6 +29558,7 @@ export namespace Prisma {
     acquired_at?: Date | string | null
     quantity?: number
     price?: number | null
+    group_id?: number | null
     itemType: ItemTypeCreateNestedOneWithoutLootInput
   }
 
@@ -29512,6 +29574,7 @@ export namespace Prisma {
     itemTypeId: number
     quantity?: number
     price?: number | null
+    group_id?: number | null
   }
 
   export type LootCreateOrConnectWithoutSoldToUserInput = {
@@ -29690,29 +29753,6 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type LinkTokenCreateWithoutUserInput = {
-    token: string
-    expiresAt: Date | string
-    used?: boolean
-  }
-
-  export type LinkTokenUncheckedCreateWithoutUserInput = {
-    id?: number
-    token: string
-    expiresAt: Date | string
-    used?: boolean
-  }
-
-  export type LinkTokenCreateOrConnectWithoutUserInput = {
-    where: LinkTokenWhereUniqueInput
-    create: XOR<LinkTokenCreateWithoutUserInput, LinkTokenUncheckedCreateWithoutUserInput>
-  }
-
-  export type LinkTokenCreateManyUserInputEnvelope = {
-    data: LinkTokenCreateManyUserInput | LinkTokenCreateManyUserInput[]
-    skipDuplicates?: boolean
-  }
-
   export type SalaryUpsertWithWhereUniqueWithoutUserInput = {
     where: SalaryWhereUniqueInput
     update: XOR<SalaryUpdateWithoutUserInput, SalaryUncheckedUpdateWithoutUserInput>
@@ -29771,6 +29811,33 @@ export namespace Prisma {
     status?: StringNullableFilter<"GivenAwayLoot"> | string | null
   }
 
+  export type LinkTokenUpsertWithWhereUniqueWithoutUserInput = {
+    where: LinkTokenWhereUniqueInput
+    update: XOR<LinkTokenUpdateWithoutUserInput, LinkTokenUncheckedUpdateWithoutUserInput>
+    create: XOR<LinkTokenCreateWithoutUserInput, LinkTokenUncheckedCreateWithoutUserInput>
+  }
+
+  export type LinkTokenUpdateWithWhereUniqueWithoutUserInput = {
+    where: LinkTokenWhereUniqueInput
+    data: XOR<LinkTokenUpdateWithoutUserInput, LinkTokenUncheckedUpdateWithoutUserInput>
+  }
+
+  export type LinkTokenUpdateManyWithWhereWithoutUserInput = {
+    where: LinkTokenScalarWhereInput
+    data: XOR<LinkTokenUpdateManyMutationInput, LinkTokenUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type LinkTokenScalarWhereInput = {
+    AND?: LinkTokenScalarWhereInput | LinkTokenScalarWhereInput[]
+    OR?: LinkTokenScalarWhereInput[]
+    NOT?: LinkTokenScalarWhereInput | LinkTokenScalarWhereInput[]
+    id?: IntFilter<"LinkToken"> | number
+    token?: StringFilter<"LinkToken"> | string
+    userId?: IntFilter<"LinkToken"> | number
+    expiresAt?: DateTimeFilter<"LinkToken"> | Date | string
+    used?: BoolFilter<"LinkToken"> | boolean
+  }
+
   export type LootUpsertWithWhereUniqueWithoutSoldToUserInput = {
     where: LootWhereUniqueInput
     update: XOR<LootUpdateWithoutSoldToUserInput, LootUncheckedUpdateWithoutSoldToUserInput>
@@ -29803,6 +29870,7 @@ export namespace Prisma {
     sold_to_user_id?: IntNullableFilter<"Loot"> | number | null
     quantity?: IntFilter<"Loot"> | number
     price?: IntNullableFilter<"Loot"> | number | null
+    group_id?: IntNullableFilter<"Loot"> | number | null
   }
 
   export type LootQueueUpsertWithWhereUniqueWithoutUserInput = {
@@ -29995,34 +30063,8 @@ export namespace Prisma {
     created_at?: DateTimeFilter<"UserTags"> | Date | string
   }
 
-  export type LinkTokenUpsertWithWhereUniqueWithoutUserInput = {
-    where: LinkTokenWhereUniqueInput
-    update: XOR<LinkTokenUpdateWithoutUserInput, LinkTokenUncheckedUpdateWithoutUserInput>
-    create: XOR<LinkTokenCreateWithoutUserInput, LinkTokenUncheckedCreateWithoutUserInput>
-  }
-
-  export type LinkTokenUpdateWithWhereUniqueWithoutUserInput = {
-    where: LinkTokenWhereUniqueInput
-    data: XOR<LinkTokenUpdateWithoutUserInput, LinkTokenUncheckedUpdateWithoutUserInput>
-  }
-
-  export type LinkTokenUpdateManyWithWhereWithoutUserInput = {
-    where: LinkTokenScalarWhereInput
-    data: XOR<LinkTokenUpdateManyMutationInput, LinkTokenUncheckedUpdateManyWithoutUserInput>
-  }
-
-  export type LinkTokenScalarWhereInput = {
-    AND?: LinkTokenScalarWhereInput | LinkTokenScalarWhereInput[]
-    OR?: LinkTokenScalarWhereInput[]
-    NOT?: LinkTokenScalarWhereInput | LinkTokenScalarWhereInput[]
-    id?: IntFilter<"LinkToken"> | number
-    token?: StringFilter<"LinkToken"> | string
-    userId?: IntFilter<"LinkToken"> | number
-    expiresAt?: DateTimeFilter<"LinkToken"> | Date | string
-    used?: BoolFilter<"LinkToken"> | boolean
-  }
-
   export type UserCreateWithoutTagsInput = {
+    id: number
     username: string
     class?: string | null
     secondary_class?: string | null
@@ -30038,6 +30080,7 @@ export namespace Prisma {
     vkId?: string | null
     salaries?: SalaryCreateNestedManyWithoutUserInput
     givenAwayLoot?: GivenAwayLootCreateNestedManyWithoutUserInput
+    linkTokens?: LinkTokenCreateNestedManyWithoutUserInput
     soldLoot?: LootCreateNestedManyWithoutSoldToUserInput
     lootQueue?: LootQueueCreateNestedManyWithoutUserInput
     raidAttendance?: RaidAttendanceCreateNestedManyWithoutUserInput
@@ -30045,11 +30088,10 @@ export namespace Prisma {
     tasksAssigned?: TasksUserCreateNestedManyWithoutUserInput
     inventory?: UserInventoryCreateNestedManyWithoutUserInput
     salaryBonuses?: UserSalaryBonusCreateNestedManyWithoutUserInput
-    linkTokens?: LinkTokenCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutTagsInput = {
-    id?: number
+    id: number
     username: string
     class?: string | null
     secondary_class?: string | null
@@ -30065,6 +30107,7 @@ export namespace Prisma {
     vkId?: string | null
     salaries?: SalaryUncheckedCreateNestedManyWithoutUserInput
     givenAwayLoot?: GivenAwayLootUncheckedCreateNestedManyWithoutUserInput
+    linkTokens?: LinkTokenUncheckedCreateNestedManyWithoutUserInput
     soldLoot?: LootUncheckedCreateNestedManyWithoutSoldToUserInput
     lootQueue?: LootQueueUncheckedCreateNestedManyWithoutUserInput
     raidAttendance?: RaidAttendanceUncheckedCreateNestedManyWithoutUserInput
@@ -30072,7 +30115,6 @@ export namespace Prisma {
     tasksAssigned?: TasksUserUncheckedCreateNestedManyWithoutUserInput
     inventory?: UserInventoryUncheckedCreateNestedManyWithoutUserInput
     salaryBonuses?: UserSalaryBonusUncheckedCreateNestedManyWithoutUserInput
-    linkTokens?: LinkTokenUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutTagsInput = {
@@ -30092,6 +30134,7 @@ export namespace Prisma {
   }
 
   export type UserUpdateWithoutTagsInput = {
+    id?: IntFieldUpdateOperationsInput | number
     username?: StringFieldUpdateOperationsInput | string
     class?: NullableStringFieldUpdateOperationsInput | string | null
     secondary_class?: NullableStringFieldUpdateOperationsInput | string | null
@@ -30107,6 +30150,7 @@ export namespace Prisma {
     vkId?: NullableStringFieldUpdateOperationsInput | string | null
     salaries?: SalaryUpdateManyWithoutUserNestedInput
     givenAwayLoot?: GivenAwayLootUpdateManyWithoutUserNestedInput
+    linkTokens?: LinkTokenUpdateManyWithoutUserNestedInput
     soldLoot?: LootUpdateManyWithoutSoldToUserNestedInput
     lootQueue?: LootQueueUpdateManyWithoutUserNestedInput
     raidAttendance?: RaidAttendanceUpdateManyWithoutUserNestedInput
@@ -30114,7 +30158,6 @@ export namespace Prisma {
     tasksAssigned?: TasksUserUpdateManyWithoutUserNestedInput
     inventory?: UserInventoryUpdateManyWithoutUserNestedInput
     salaryBonuses?: UserSalaryBonusUpdateManyWithoutUserNestedInput
-    linkTokens?: LinkTokenUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTagsInput = {
@@ -30134,6 +30177,7 @@ export namespace Prisma {
     vkId?: NullableStringFieldUpdateOperationsInput | string | null
     salaries?: SalaryUncheckedUpdateManyWithoutUserNestedInput
     givenAwayLoot?: GivenAwayLootUncheckedUpdateManyWithoutUserNestedInput
+    linkTokens?: LinkTokenUncheckedUpdateManyWithoutUserNestedInput
     soldLoot?: LootUncheckedUpdateManyWithoutSoldToUserNestedInput
     lootQueue?: LootQueueUncheckedUpdateManyWithoutUserNestedInput
     raidAttendance?: RaidAttendanceUncheckedUpdateManyWithoutUserNestedInput
@@ -30141,10 +30185,10 @@ export namespace Prisma {
     tasksAssigned?: TasksUserUncheckedUpdateManyWithoutUserNestedInput
     inventory?: UserInventoryUncheckedUpdateManyWithoutUserNestedInput
     salaryBonuses?: UserSalaryBonusUncheckedUpdateManyWithoutUserNestedInput
-    linkTokens?: LinkTokenUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutInventoryInput = {
+    id: number
     username: string
     class?: string | null
     secondary_class?: string | null
@@ -30160,6 +30204,7 @@ export namespace Prisma {
     vkId?: string | null
     salaries?: SalaryCreateNestedManyWithoutUserInput
     givenAwayLoot?: GivenAwayLootCreateNestedManyWithoutUserInput
+    linkTokens?: LinkTokenCreateNestedManyWithoutUserInput
     soldLoot?: LootCreateNestedManyWithoutSoldToUserInput
     lootQueue?: LootQueueCreateNestedManyWithoutUserInput
     raidAttendance?: RaidAttendanceCreateNestedManyWithoutUserInput
@@ -30167,11 +30212,10 @@ export namespace Prisma {
     tasksAssigned?: TasksUserCreateNestedManyWithoutUserInput
     salaryBonuses?: UserSalaryBonusCreateNestedManyWithoutUserInput
     tags?: UserTagsCreateNestedManyWithoutUserInput
-    linkTokens?: LinkTokenCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutInventoryInput = {
-    id?: number
+    id: number
     username: string
     class?: string | null
     secondary_class?: string | null
@@ -30187,6 +30231,7 @@ export namespace Prisma {
     vkId?: string | null
     salaries?: SalaryUncheckedCreateNestedManyWithoutUserInput
     givenAwayLoot?: GivenAwayLootUncheckedCreateNestedManyWithoutUserInput
+    linkTokens?: LinkTokenUncheckedCreateNestedManyWithoutUserInput
     soldLoot?: LootUncheckedCreateNestedManyWithoutSoldToUserInput
     lootQueue?: LootQueueUncheckedCreateNestedManyWithoutUserInput
     raidAttendance?: RaidAttendanceUncheckedCreateNestedManyWithoutUserInput
@@ -30194,7 +30239,6 @@ export namespace Prisma {
     tasksAssigned?: TasksUserUncheckedCreateNestedManyWithoutUserInput
     salaryBonuses?: UserSalaryBonusUncheckedCreateNestedManyWithoutUserInput
     tags?: UserTagsUncheckedCreateNestedManyWithoutUserInput
-    linkTokens?: LinkTokenUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutInventoryInput = {
@@ -30214,6 +30258,7 @@ export namespace Prisma {
   }
 
   export type UserUpdateWithoutInventoryInput = {
+    id?: IntFieldUpdateOperationsInput | number
     username?: StringFieldUpdateOperationsInput | string
     class?: NullableStringFieldUpdateOperationsInput | string | null
     secondary_class?: NullableStringFieldUpdateOperationsInput | string | null
@@ -30229,6 +30274,7 @@ export namespace Prisma {
     vkId?: NullableStringFieldUpdateOperationsInput | string | null
     salaries?: SalaryUpdateManyWithoutUserNestedInput
     givenAwayLoot?: GivenAwayLootUpdateManyWithoutUserNestedInput
+    linkTokens?: LinkTokenUpdateManyWithoutUserNestedInput
     soldLoot?: LootUpdateManyWithoutSoldToUserNestedInput
     lootQueue?: LootQueueUpdateManyWithoutUserNestedInput
     raidAttendance?: RaidAttendanceUpdateManyWithoutUserNestedInput
@@ -30236,7 +30282,6 @@ export namespace Prisma {
     tasksAssigned?: TasksUserUpdateManyWithoutUserNestedInput
     salaryBonuses?: UserSalaryBonusUpdateManyWithoutUserNestedInput
     tags?: UserTagsUpdateManyWithoutUserNestedInput
-    linkTokens?: LinkTokenUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutInventoryInput = {
@@ -30256,6 +30301,7 @@ export namespace Prisma {
     vkId?: NullableStringFieldUpdateOperationsInput | string | null
     salaries?: SalaryUncheckedUpdateManyWithoutUserNestedInput
     givenAwayLoot?: GivenAwayLootUncheckedUpdateManyWithoutUserNestedInput
+    linkTokens?: LinkTokenUncheckedUpdateManyWithoutUserNestedInput
     soldLoot?: LootUncheckedUpdateManyWithoutSoldToUserNestedInput
     lootQueue?: LootQueueUncheckedUpdateManyWithoutUserNestedInput
     raidAttendance?: RaidAttendanceUncheckedUpdateManyWithoutUserNestedInput
@@ -30263,10 +30309,10 @@ export namespace Prisma {
     tasksAssigned?: TasksUserUncheckedUpdateManyWithoutUserNestedInput
     salaryBonuses?: UserSalaryBonusUncheckedUpdateManyWithoutUserNestedInput
     tags?: UserTagsUncheckedUpdateManyWithoutUserNestedInput
-    linkTokens?: LinkTokenUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutTasksInput = {
+    id: number
     username: string
     class?: string | null
     secondary_class?: string | null
@@ -30282,6 +30328,7 @@ export namespace Prisma {
     vkId?: string | null
     salaries?: SalaryCreateNestedManyWithoutUserInput
     givenAwayLoot?: GivenAwayLootCreateNestedManyWithoutUserInput
+    linkTokens?: LinkTokenCreateNestedManyWithoutUserInput
     soldLoot?: LootCreateNestedManyWithoutSoldToUserInput
     lootQueue?: LootQueueCreateNestedManyWithoutUserInput
     raidAttendance?: RaidAttendanceCreateNestedManyWithoutUserInput
@@ -30289,11 +30336,10 @@ export namespace Prisma {
     inventory?: UserInventoryCreateNestedManyWithoutUserInput
     salaryBonuses?: UserSalaryBonusCreateNestedManyWithoutUserInput
     tags?: UserTagsCreateNestedManyWithoutUserInput
-    linkTokens?: LinkTokenCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutTasksInput = {
-    id?: number
+    id: number
     username: string
     class?: string | null
     secondary_class?: string | null
@@ -30309,6 +30355,7 @@ export namespace Prisma {
     vkId?: string | null
     salaries?: SalaryUncheckedCreateNestedManyWithoutUserInput
     givenAwayLoot?: GivenAwayLootUncheckedCreateNestedManyWithoutUserInput
+    linkTokens?: LinkTokenUncheckedCreateNestedManyWithoutUserInput
     soldLoot?: LootUncheckedCreateNestedManyWithoutSoldToUserInput
     lootQueue?: LootQueueUncheckedCreateNestedManyWithoutUserInput
     raidAttendance?: RaidAttendanceUncheckedCreateNestedManyWithoutUserInput
@@ -30316,7 +30363,6 @@ export namespace Prisma {
     inventory?: UserInventoryUncheckedCreateNestedManyWithoutUserInput
     salaryBonuses?: UserSalaryBonusUncheckedCreateNestedManyWithoutUserInput
     tags?: UserTagsUncheckedCreateNestedManyWithoutUserInput
-    linkTokens?: LinkTokenUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutTasksInput = {
@@ -30354,6 +30400,7 @@ export namespace Prisma {
   }
 
   export type UserUpdateWithoutTasksInput = {
+    id?: IntFieldUpdateOperationsInput | number
     username?: StringFieldUpdateOperationsInput | string
     class?: NullableStringFieldUpdateOperationsInput | string | null
     secondary_class?: NullableStringFieldUpdateOperationsInput | string | null
@@ -30369,6 +30416,7 @@ export namespace Prisma {
     vkId?: NullableStringFieldUpdateOperationsInput | string | null
     salaries?: SalaryUpdateManyWithoutUserNestedInput
     givenAwayLoot?: GivenAwayLootUpdateManyWithoutUserNestedInput
+    linkTokens?: LinkTokenUpdateManyWithoutUserNestedInput
     soldLoot?: LootUpdateManyWithoutSoldToUserNestedInput
     lootQueue?: LootQueueUpdateManyWithoutUserNestedInput
     raidAttendance?: RaidAttendanceUpdateManyWithoutUserNestedInput
@@ -30376,7 +30424,6 @@ export namespace Prisma {
     inventory?: UserInventoryUpdateManyWithoutUserNestedInput
     salaryBonuses?: UserSalaryBonusUpdateManyWithoutUserNestedInput
     tags?: UserTagsUpdateManyWithoutUserNestedInput
-    linkTokens?: LinkTokenUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTasksInput = {
@@ -30396,6 +30443,7 @@ export namespace Prisma {
     vkId?: NullableStringFieldUpdateOperationsInput | string | null
     salaries?: SalaryUncheckedUpdateManyWithoutUserNestedInput
     givenAwayLoot?: GivenAwayLootUncheckedUpdateManyWithoutUserNestedInput
+    linkTokens?: LinkTokenUncheckedUpdateManyWithoutUserNestedInput
     soldLoot?: LootUncheckedUpdateManyWithoutSoldToUserNestedInput
     lootQueue?: LootQueueUncheckedUpdateManyWithoutUserNestedInput
     raidAttendance?: RaidAttendanceUncheckedUpdateManyWithoutUserNestedInput
@@ -30403,7 +30451,6 @@ export namespace Prisma {
     inventory?: UserInventoryUncheckedUpdateManyWithoutUserNestedInput
     salaryBonuses?: UserSalaryBonusUncheckedUpdateManyWithoutUserNestedInput
     tags?: UserTagsUncheckedUpdateManyWithoutUserNestedInput
-    linkTokens?: LinkTokenUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type TasksUserUpsertWithWhereUniqueWithoutTaskInput = {
@@ -30662,6 +30709,7 @@ export namespace Prisma {
   }
 
   export type UserCreateWithoutRaidAttendanceInput = {
+    id: number
     username: string
     class?: string | null
     secondary_class?: string | null
@@ -30677,6 +30725,7 @@ export namespace Prisma {
     vkId?: string | null
     salaries?: SalaryCreateNestedManyWithoutUserInput
     givenAwayLoot?: GivenAwayLootCreateNestedManyWithoutUserInput
+    linkTokens?: LinkTokenCreateNestedManyWithoutUserInput
     soldLoot?: LootCreateNestedManyWithoutSoldToUserInput
     lootQueue?: LootQueueCreateNestedManyWithoutUserInput
     tasks?: TasksCreateNestedManyWithoutUserInput
@@ -30684,11 +30733,10 @@ export namespace Prisma {
     inventory?: UserInventoryCreateNestedManyWithoutUserInput
     salaryBonuses?: UserSalaryBonusCreateNestedManyWithoutUserInput
     tags?: UserTagsCreateNestedManyWithoutUserInput
-    linkTokens?: LinkTokenCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutRaidAttendanceInput = {
-    id?: number
+    id: number
     username: string
     class?: string | null
     secondary_class?: string | null
@@ -30704,6 +30752,7 @@ export namespace Prisma {
     vkId?: string | null
     salaries?: SalaryUncheckedCreateNestedManyWithoutUserInput
     givenAwayLoot?: GivenAwayLootUncheckedCreateNestedManyWithoutUserInput
+    linkTokens?: LinkTokenUncheckedCreateNestedManyWithoutUserInput
     soldLoot?: LootUncheckedCreateNestedManyWithoutSoldToUserInput
     lootQueue?: LootQueueUncheckedCreateNestedManyWithoutUserInput
     tasks?: TasksUncheckedCreateNestedManyWithoutUserInput
@@ -30711,7 +30760,6 @@ export namespace Prisma {
     inventory?: UserInventoryUncheckedCreateNestedManyWithoutUserInput
     salaryBonuses?: UserSalaryBonusUncheckedCreateNestedManyWithoutUserInput
     tags?: UserTagsUncheckedCreateNestedManyWithoutUserInput
-    linkTokens?: LinkTokenUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutRaidAttendanceInput = {
@@ -30763,6 +30811,7 @@ export namespace Prisma {
   }
 
   export type UserUpdateWithoutRaidAttendanceInput = {
+    id?: IntFieldUpdateOperationsInput | number
     username?: StringFieldUpdateOperationsInput | string
     class?: NullableStringFieldUpdateOperationsInput | string | null
     secondary_class?: NullableStringFieldUpdateOperationsInput | string | null
@@ -30778,6 +30827,7 @@ export namespace Prisma {
     vkId?: NullableStringFieldUpdateOperationsInput | string | null
     salaries?: SalaryUpdateManyWithoutUserNestedInput
     givenAwayLoot?: GivenAwayLootUpdateManyWithoutUserNestedInput
+    linkTokens?: LinkTokenUpdateManyWithoutUserNestedInput
     soldLoot?: LootUpdateManyWithoutSoldToUserNestedInput
     lootQueue?: LootQueueUpdateManyWithoutUserNestedInput
     tasks?: TasksUpdateManyWithoutUserNestedInput
@@ -30785,7 +30835,6 @@ export namespace Prisma {
     inventory?: UserInventoryUpdateManyWithoutUserNestedInput
     salaryBonuses?: UserSalaryBonusUpdateManyWithoutUserNestedInput
     tags?: UserTagsUpdateManyWithoutUserNestedInput
-    linkTokens?: LinkTokenUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutRaidAttendanceInput = {
@@ -30805,6 +30854,7 @@ export namespace Prisma {
     vkId?: NullableStringFieldUpdateOperationsInput | string | null
     salaries?: SalaryUncheckedUpdateManyWithoutUserNestedInput
     givenAwayLoot?: GivenAwayLootUncheckedUpdateManyWithoutUserNestedInput
+    linkTokens?: LinkTokenUncheckedUpdateManyWithoutUserNestedInput
     soldLoot?: LootUncheckedUpdateManyWithoutSoldToUserNestedInput
     lootQueue?: LootQueueUncheckedUpdateManyWithoutUserNestedInput
     tasks?: TasksUncheckedUpdateManyWithoutUserNestedInput
@@ -30812,7 +30862,6 @@ export namespace Prisma {
     inventory?: UserInventoryUncheckedUpdateManyWithoutUserNestedInput
     salaryBonuses?: UserSalaryBonusUncheckedUpdateManyWithoutUserNestedInput
     tags?: UserTagsUncheckedUpdateManyWithoutUserNestedInput
-    linkTokens?: LinkTokenUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type LootCreateWithoutItemTypeInput = {
@@ -30825,6 +30874,7 @@ export namespace Prisma {
     acquired_at?: Date | string | null
     quantity?: number
     price?: number | null
+    group_id?: number | null
     soldToUser?: UserCreateNestedOneWithoutSoldLootInput
   }
 
@@ -30840,6 +30890,7 @@ export namespace Prisma {
     sold_to_user_id?: number | null
     quantity?: number
     price?: number | null
+    group_id?: number | null
   }
 
   export type LootCreateOrConnectWithoutItemTypeInput = {
@@ -30934,6 +30985,7 @@ export namespace Prisma {
   }
 
   export type UserCreateWithoutSoldLootInput = {
+    id: number
     username: string
     class?: string | null
     secondary_class?: string | null
@@ -30949,6 +31001,7 @@ export namespace Prisma {
     vkId?: string | null
     salaries?: SalaryCreateNestedManyWithoutUserInput
     givenAwayLoot?: GivenAwayLootCreateNestedManyWithoutUserInput
+    linkTokens?: LinkTokenCreateNestedManyWithoutUserInput
     lootQueue?: LootQueueCreateNestedManyWithoutUserInput
     raidAttendance?: RaidAttendanceCreateNestedManyWithoutUserInput
     tasks?: TasksCreateNestedManyWithoutUserInput
@@ -30956,11 +31009,10 @@ export namespace Prisma {
     inventory?: UserInventoryCreateNestedManyWithoutUserInput
     salaryBonuses?: UserSalaryBonusCreateNestedManyWithoutUserInput
     tags?: UserTagsCreateNestedManyWithoutUserInput
-    linkTokens?: LinkTokenCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutSoldLootInput = {
-    id?: number
+    id: number
     username: string
     class?: string | null
     secondary_class?: string | null
@@ -30976,6 +31028,7 @@ export namespace Prisma {
     vkId?: string | null
     salaries?: SalaryUncheckedCreateNestedManyWithoutUserInput
     givenAwayLoot?: GivenAwayLootUncheckedCreateNestedManyWithoutUserInput
+    linkTokens?: LinkTokenUncheckedCreateNestedManyWithoutUserInput
     lootQueue?: LootQueueUncheckedCreateNestedManyWithoutUserInput
     raidAttendance?: RaidAttendanceUncheckedCreateNestedManyWithoutUserInput
     tasks?: TasksUncheckedCreateNestedManyWithoutUserInput
@@ -30983,7 +31036,6 @@ export namespace Prisma {
     inventory?: UserInventoryUncheckedCreateNestedManyWithoutUserInput
     salaryBonuses?: UserSalaryBonusUncheckedCreateNestedManyWithoutUserInput
     tags?: UserTagsUncheckedCreateNestedManyWithoutUserInput
-    linkTokens?: LinkTokenUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutSoldLootInput = {
@@ -31027,6 +31079,7 @@ export namespace Prisma {
   }
 
   export type UserUpdateWithoutSoldLootInput = {
+    id?: IntFieldUpdateOperationsInput | number
     username?: StringFieldUpdateOperationsInput | string
     class?: NullableStringFieldUpdateOperationsInput | string | null
     secondary_class?: NullableStringFieldUpdateOperationsInput | string | null
@@ -31042,6 +31095,7 @@ export namespace Prisma {
     vkId?: NullableStringFieldUpdateOperationsInput | string | null
     salaries?: SalaryUpdateManyWithoutUserNestedInput
     givenAwayLoot?: GivenAwayLootUpdateManyWithoutUserNestedInput
+    linkTokens?: LinkTokenUpdateManyWithoutUserNestedInput
     lootQueue?: LootQueueUpdateManyWithoutUserNestedInput
     raidAttendance?: RaidAttendanceUpdateManyWithoutUserNestedInput
     tasks?: TasksUpdateManyWithoutUserNestedInput
@@ -31049,7 +31103,6 @@ export namespace Prisma {
     inventory?: UserInventoryUpdateManyWithoutUserNestedInput
     salaryBonuses?: UserSalaryBonusUpdateManyWithoutUserNestedInput
     tags?: UserTagsUpdateManyWithoutUserNestedInput
-    linkTokens?: LinkTokenUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSoldLootInput = {
@@ -31069,6 +31122,7 @@ export namespace Prisma {
     vkId?: NullableStringFieldUpdateOperationsInput | string | null
     salaries?: SalaryUncheckedUpdateManyWithoutUserNestedInput
     givenAwayLoot?: GivenAwayLootUncheckedUpdateManyWithoutUserNestedInput
+    linkTokens?: LinkTokenUncheckedUpdateManyWithoutUserNestedInput
     lootQueue?: LootQueueUncheckedUpdateManyWithoutUserNestedInput
     raidAttendance?: RaidAttendanceUncheckedUpdateManyWithoutUserNestedInput
     tasks?: TasksUncheckedUpdateManyWithoutUserNestedInput
@@ -31076,7 +31130,6 @@ export namespace Prisma {
     inventory?: UserInventoryUncheckedUpdateManyWithoutUserNestedInput
     salaryBonuses?: UserSalaryBonusUncheckedUpdateManyWithoutUserNestedInput
     tags?: UserTagsUncheckedUpdateManyWithoutUserNestedInput
-    linkTokens?: LinkTokenUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type TasksCreateWithoutAssignedToInput = {
@@ -31100,6 +31153,7 @@ export namespace Prisma {
   }
 
   export type UserCreateWithoutTasksAssignedInput = {
+    id: number
     username: string
     class?: string | null
     secondary_class?: string | null
@@ -31115,6 +31169,7 @@ export namespace Prisma {
     vkId?: string | null
     salaries?: SalaryCreateNestedManyWithoutUserInput
     givenAwayLoot?: GivenAwayLootCreateNestedManyWithoutUserInput
+    linkTokens?: LinkTokenCreateNestedManyWithoutUserInput
     soldLoot?: LootCreateNestedManyWithoutSoldToUserInput
     lootQueue?: LootQueueCreateNestedManyWithoutUserInput
     raidAttendance?: RaidAttendanceCreateNestedManyWithoutUserInput
@@ -31122,11 +31177,10 @@ export namespace Prisma {
     inventory?: UserInventoryCreateNestedManyWithoutUserInput
     salaryBonuses?: UserSalaryBonusCreateNestedManyWithoutUserInput
     tags?: UserTagsCreateNestedManyWithoutUserInput
-    linkTokens?: LinkTokenCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutTasksAssignedInput = {
-    id?: number
+    id: number
     username: string
     class?: string | null
     secondary_class?: string | null
@@ -31142,6 +31196,7 @@ export namespace Prisma {
     vkId?: string | null
     salaries?: SalaryUncheckedCreateNestedManyWithoutUserInput
     givenAwayLoot?: GivenAwayLootUncheckedCreateNestedManyWithoutUserInput
+    linkTokens?: LinkTokenUncheckedCreateNestedManyWithoutUserInput
     soldLoot?: LootUncheckedCreateNestedManyWithoutSoldToUserInput
     lootQueue?: LootQueueUncheckedCreateNestedManyWithoutUserInput
     raidAttendance?: RaidAttendanceUncheckedCreateNestedManyWithoutUserInput
@@ -31149,7 +31204,6 @@ export namespace Prisma {
     inventory?: UserInventoryUncheckedCreateNestedManyWithoutUserInput
     salaryBonuses?: UserSalaryBonusUncheckedCreateNestedManyWithoutUserInput
     tags?: UserTagsUncheckedCreateNestedManyWithoutUserInput
-    linkTokens?: LinkTokenUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutTasksAssignedInput = {
@@ -31195,6 +31249,7 @@ export namespace Prisma {
   }
 
   export type UserUpdateWithoutTasksAssignedInput = {
+    id?: IntFieldUpdateOperationsInput | number
     username?: StringFieldUpdateOperationsInput | string
     class?: NullableStringFieldUpdateOperationsInput | string | null
     secondary_class?: NullableStringFieldUpdateOperationsInput | string | null
@@ -31210,6 +31265,7 @@ export namespace Prisma {
     vkId?: NullableStringFieldUpdateOperationsInput | string | null
     salaries?: SalaryUpdateManyWithoutUserNestedInput
     givenAwayLoot?: GivenAwayLootUpdateManyWithoutUserNestedInput
+    linkTokens?: LinkTokenUpdateManyWithoutUserNestedInput
     soldLoot?: LootUpdateManyWithoutSoldToUserNestedInput
     lootQueue?: LootQueueUpdateManyWithoutUserNestedInput
     raidAttendance?: RaidAttendanceUpdateManyWithoutUserNestedInput
@@ -31217,7 +31273,6 @@ export namespace Prisma {
     inventory?: UserInventoryUpdateManyWithoutUserNestedInput
     salaryBonuses?: UserSalaryBonusUpdateManyWithoutUserNestedInput
     tags?: UserTagsUpdateManyWithoutUserNestedInput
-    linkTokens?: LinkTokenUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTasksAssignedInput = {
@@ -31237,6 +31292,7 @@ export namespace Prisma {
     vkId?: NullableStringFieldUpdateOperationsInput | string | null
     salaries?: SalaryUncheckedUpdateManyWithoutUserNestedInput
     givenAwayLoot?: GivenAwayLootUncheckedUpdateManyWithoutUserNestedInput
+    linkTokens?: LinkTokenUncheckedUpdateManyWithoutUserNestedInput
     soldLoot?: LootUncheckedUpdateManyWithoutSoldToUserNestedInput
     lootQueue?: LootQueueUncheckedUpdateManyWithoutUserNestedInput
     raidAttendance?: RaidAttendanceUncheckedUpdateManyWithoutUserNestedInput
@@ -31244,7 +31300,6 @@ export namespace Prisma {
     inventory?: UserInventoryUncheckedUpdateManyWithoutUserNestedInput
     salaryBonuses?: UserSalaryBonusUncheckedUpdateManyWithoutUserNestedInput
     tags?: UserTagsUncheckedUpdateManyWithoutUserNestedInput
-    linkTokens?: LinkTokenUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type ItemTypeCreateWithoutLootQueueInput = {
@@ -31266,6 +31321,7 @@ export namespace Prisma {
   }
 
   export type UserCreateWithoutLootQueueInput = {
+    id: number
     username: string
     class?: string | null
     secondary_class?: string | null
@@ -31281,6 +31337,7 @@ export namespace Prisma {
     vkId?: string | null
     salaries?: SalaryCreateNestedManyWithoutUserInput
     givenAwayLoot?: GivenAwayLootCreateNestedManyWithoutUserInput
+    linkTokens?: LinkTokenCreateNestedManyWithoutUserInput
     soldLoot?: LootCreateNestedManyWithoutSoldToUserInput
     raidAttendance?: RaidAttendanceCreateNestedManyWithoutUserInput
     tasks?: TasksCreateNestedManyWithoutUserInput
@@ -31288,11 +31345,10 @@ export namespace Prisma {
     inventory?: UserInventoryCreateNestedManyWithoutUserInput
     salaryBonuses?: UserSalaryBonusCreateNestedManyWithoutUserInput
     tags?: UserTagsCreateNestedManyWithoutUserInput
-    linkTokens?: LinkTokenCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutLootQueueInput = {
-    id?: number
+    id: number
     username: string
     class?: string | null
     secondary_class?: string | null
@@ -31308,6 +31364,7 @@ export namespace Prisma {
     vkId?: string | null
     salaries?: SalaryUncheckedCreateNestedManyWithoutUserInput
     givenAwayLoot?: GivenAwayLootUncheckedCreateNestedManyWithoutUserInput
+    linkTokens?: LinkTokenUncheckedCreateNestedManyWithoutUserInput
     soldLoot?: LootUncheckedCreateNestedManyWithoutSoldToUserInput
     raidAttendance?: RaidAttendanceUncheckedCreateNestedManyWithoutUserInput
     tasks?: TasksUncheckedCreateNestedManyWithoutUserInput
@@ -31315,7 +31372,6 @@ export namespace Prisma {
     inventory?: UserInventoryUncheckedCreateNestedManyWithoutUserInput
     salaryBonuses?: UserSalaryBonusUncheckedCreateNestedManyWithoutUserInput
     tags?: UserTagsUncheckedCreateNestedManyWithoutUserInput
-    linkTokens?: LinkTokenUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutLootQueueInput = {
@@ -31359,6 +31415,7 @@ export namespace Prisma {
   }
 
   export type UserUpdateWithoutLootQueueInput = {
+    id?: IntFieldUpdateOperationsInput | number
     username?: StringFieldUpdateOperationsInput | string
     class?: NullableStringFieldUpdateOperationsInput | string | null
     secondary_class?: NullableStringFieldUpdateOperationsInput | string | null
@@ -31374,6 +31431,7 @@ export namespace Prisma {
     vkId?: NullableStringFieldUpdateOperationsInput | string | null
     salaries?: SalaryUpdateManyWithoutUserNestedInput
     givenAwayLoot?: GivenAwayLootUpdateManyWithoutUserNestedInput
+    linkTokens?: LinkTokenUpdateManyWithoutUserNestedInput
     soldLoot?: LootUpdateManyWithoutSoldToUserNestedInput
     raidAttendance?: RaidAttendanceUpdateManyWithoutUserNestedInput
     tasks?: TasksUpdateManyWithoutUserNestedInput
@@ -31381,7 +31439,6 @@ export namespace Prisma {
     inventory?: UserInventoryUpdateManyWithoutUserNestedInput
     salaryBonuses?: UserSalaryBonusUpdateManyWithoutUserNestedInput
     tags?: UserTagsUpdateManyWithoutUserNestedInput
-    linkTokens?: LinkTokenUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutLootQueueInput = {
@@ -31401,6 +31458,7 @@ export namespace Prisma {
     vkId?: NullableStringFieldUpdateOperationsInput | string | null
     salaries?: SalaryUncheckedUpdateManyWithoutUserNestedInput
     givenAwayLoot?: GivenAwayLootUncheckedUpdateManyWithoutUserNestedInput
+    linkTokens?: LinkTokenUncheckedUpdateManyWithoutUserNestedInput
     soldLoot?: LootUncheckedUpdateManyWithoutSoldToUserNestedInput
     raidAttendance?: RaidAttendanceUncheckedUpdateManyWithoutUserNestedInput
     tasks?: TasksUncheckedUpdateManyWithoutUserNestedInput
@@ -31408,10 +31466,10 @@ export namespace Prisma {
     inventory?: UserInventoryUncheckedUpdateManyWithoutUserNestedInput
     salaryBonuses?: UserSalaryBonusUncheckedUpdateManyWithoutUserNestedInput
     tags?: UserTagsUncheckedUpdateManyWithoutUserNestedInput
-    linkTokens?: LinkTokenUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutGivenAwayLootInput = {
+    id: number
     username: string
     class?: string | null
     secondary_class?: string | null
@@ -31426,6 +31484,7 @@ export namespace Prisma {
     googleId?: string | null
     vkId?: string | null
     salaries?: SalaryCreateNestedManyWithoutUserInput
+    linkTokens?: LinkTokenCreateNestedManyWithoutUserInput
     soldLoot?: LootCreateNestedManyWithoutSoldToUserInput
     lootQueue?: LootQueueCreateNestedManyWithoutUserInput
     raidAttendance?: RaidAttendanceCreateNestedManyWithoutUserInput
@@ -31434,11 +31493,10 @@ export namespace Prisma {
     inventory?: UserInventoryCreateNestedManyWithoutUserInput
     salaryBonuses?: UserSalaryBonusCreateNestedManyWithoutUserInput
     tags?: UserTagsCreateNestedManyWithoutUserInput
-    linkTokens?: LinkTokenCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutGivenAwayLootInput = {
-    id?: number
+    id: number
     username: string
     class?: string | null
     secondary_class?: string | null
@@ -31453,6 +31511,7 @@ export namespace Prisma {
     googleId?: string | null
     vkId?: string | null
     salaries?: SalaryUncheckedCreateNestedManyWithoutUserInput
+    linkTokens?: LinkTokenUncheckedCreateNestedManyWithoutUserInput
     soldLoot?: LootUncheckedCreateNestedManyWithoutSoldToUserInput
     lootQueue?: LootQueueUncheckedCreateNestedManyWithoutUserInput
     raidAttendance?: RaidAttendanceUncheckedCreateNestedManyWithoutUserInput
@@ -31461,7 +31520,6 @@ export namespace Prisma {
     inventory?: UserInventoryUncheckedCreateNestedManyWithoutUserInput
     salaryBonuses?: UserSalaryBonusUncheckedCreateNestedManyWithoutUserInput
     tags?: UserTagsUncheckedCreateNestedManyWithoutUserInput
-    linkTokens?: LinkTokenUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutGivenAwayLootInput = {
@@ -31481,6 +31539,7 @@ export namespace Prisma {
   }
 
   export type UserUpdateWithoutGivenAwayLootInput = {
+    id?: IntFieldUpdateOperationsInput | number
     username?: StringFieldUpdateOperationsInput | string
     class?: NullableStringFieldUpdateOperationsInput | string | null
     secondary_class?: NullableStringFieldUpdateOperationsInput | string | null
@@ -31495,6 +31554,7 @@ export namespace Prisma {
     googleId?: NullableStringFieldUpdateOperationsInput | string | null
     vkId?: NullableStringFieldUpdateOperationsInput | string | null
     salaries?: SalaryUpdateManyWithoutUserNestedInput
+    linkTokens?: LinkTokenUpdateManyWithoutUserNestedInput
     soldLoot?: LootUpdateManyWithoutSoldToUserNestedInput
     lootQueue?: LootQueueUpdateManyWithoutUserNestedInput
     raidAttendance?: RaidAttendanceUpdateManyWithoutUserNestedInput
@@ -31503,7 +31563,6 @@ export namespace Prisma {
     inventory?: UserInventoryUpdateManyWithoutUserNestedInput
     salaryBonuses?: UserSalaryBonusUpdateManyWithoutUserNestedInput
     tags?: UserTagsUpdateManyWithoutUserNestedInput
-    linkTokens?: LinkTokenUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutGivenAwayLootInput = {
@@ -31522,6 +31581,7 @@ export namespace Prisma {
     googleId?: NullableStringFieldUpdateOperationsInput | string | null
     vkId?: NullableStringFieldUpdateOperationsInput | string | null
     salaries?: SalaryUncheckedUpdateManyWithoutUserNestedInput
+    linkTokens?: LinkTokenUncheckedUpdateManyWithoutUserNestedInput
     soldLoot?: LootUncheckedUpdateManyWithoutSoldToUserNestedInput
     lootQueue?: LootQueueUncheckedUpdateManyWithoutUserNestedInput
     raidAttendance?: RaidAttendanceUncheckedUpdateManyWithoutUserNestedInput
@@ -31530,10 +31590,10 @@ export namespace Prisma {
     inventory?: UserInventoryUncheckedUpdateManyWithoutUserNestedInput
     salaryBonuses?: UserSalaryBonusUncheckedUpdateManyWithoutUserNestedInput
     tags?: UserTagsUncheckedUpdateManyWithoutUserNestedInput
-    linkTokens?: LinkTokenUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutSalariesInput = {
+    id: number
     username: string
     class?: string | null
     secondary_class?: string | null
@@ -31548,6 +31608,7 @@ export namespace Prisma {
     googleId?: string | null
     vkId?: string | null
     givenAwayLoot?: GivenAwayLootCreateNestedManyWithoutUserInput
+    linkTokens?: LinkTokenCreateNestedManyWithoutUserInput
     soldLoot?: LootCreateNestedManyWithoutSoldToUserInput
     lootQueue?: LootQueueCreateNestedManyWithoutUserInput
     raidAttendance?: RaidAttendanceCreateNestedManyWithoutUserInput
@@ -31556,11 +31617,10 @@ export namespace Prisma {
     inventory?: UserInventoryCreateNestedManyWithoutUserInput
     salaryBonuses?: UserSalaryBonusCreateNestedManyWithoutUserInput
     tags?: UserTagsCreateNestedManyWithoutUserInput
-    linkTokens?: LinkTokenCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutSalariesInput = {
-    id?: number
+    id: number
     username: string
     class?: string | null
     secondary_class?: string | null
@@ -31575,6 +31635,7 @@ export namespace Prisma {
     googleId?: string | null
     vkId?: string | null
     givenAwayLoot?: GivenAwayLootUncheckedCreateNestedManyWithoutUserInput
+    linkTokens?: LinkTokenUncheckedCreateNestedManyWithoutUserInput
     soldLoot?: LootUncheckedCreateNestedManyWithoutSoldToUserInput
     lootQueue?: LootQueueUncheckedCreateNestedManyWithoutUserInput
     raidAttendance?: RaidAttendanceUncheckedCreateNestedManyWithoutUserInput
@@ -31583,7 +31644,6 @@ export namespace Prisma {
     inventory?: UserInventoryUncheckedCreateNestedManyWithoutUserInput
     salaryBonuses?: UserSalaryBonusUncheckedCreateNestedManyWithoutUserInput
     tags?: UserTagsUncheckedCreateNestedManyWithoutUserInput
-    linkTokens?: LinkTokenUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutSalariesInput = {
@@ -31603,6 +31663,7 @@ export namespace Prisma {
   }
 
   export type UserUpdateWithoutSalariesInput = {
+    id?: IntFieldUpdateOperationsInput | number
     username?: StringFieldUpdateOperationsInput | string
     class?: NullableStringFieldUpdateOperationsInput | string | null
     secondary_class?: NullableStringFieldUpdateOperationsInput | string | null
@@ -31617,6 +31678,7 @@ export namespace Prisma {
     googleId?: NullableStringFieldUpdateOperationsInput | string | null
     vkId?: NullableStringFieldUpdateOperationsInput | string | null
     givenAwayLoot?: GivenAwayLootUpdateManyWithoutUserNestedInput
+    linkTokens?: LinkTokenUpdateManyWithoutUserNestedInput
     soldLoot?: LootUpdateManyWithoutSoldToUserNestedInput
     lootQueue?: LootQueueUpdateManyWithoutUserNestedInput
     raidAttendance?: RaidAttendanceUpdateManyWithoutUserNestedInput
@@ -31625,7 +31687,6 @@ export namespace Prisma {
     inventory?: UserInventoryUpdateManyWithoutUserNestedInput
     salaryBonuses?: UserSalaryBonusUpdateManyWithoutUserNestedInput
     tags?: UserTagsUpdateManyWithoutUserNestedInput
-    linkTokens?: LinkTokenUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSalariesInput = {
@@ -31644,6 +31705,7 @@ export namespace Prisma {
     googleId?: NullableStringFieldUpdateOperationsInput | string | null
     vkId?: NullableStringFieldUpdateOperationsInput | string | null
     givenAwayLoot?: GivenAwayLootUncheckedUpdateManyWithoutUserNestedInput
+    linkTokens?: LinkTokenUncheckedUpdateManyWithoutUserNestedInput
     soldLoot?: LootUncheckedUpdateManyWithoutSoldToUserNestedInput
     lootQueue?: LootQueueUncheckedUpdateManyWithoutUserNestedInput
     raidAttendance?: RaidAttendanceUncheckedUpdateManyWithoutUserNestedInput
@@ -31652,10 +31714,10 @@ export namespace Prisma {
     inventory?: UserInventoryUncheckedUpdateManyWithoutUserNestedInput
     salaryBonuses?: UserSalaryBonusUncheckedUpdateManyWithoutUserNestedInput
     tags?: UserTagsUncheckedUpdateManyWithoutUserNestedInput
-    linkTokens?: LinkTokenUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutSalaryBonusesInput = {
+    id: number
     username: string
     class?: string | null
     secondary_class?: string | null
@@ -31671,6 +31733,7 @@ export namespace Prisma {
     vkId?: string | null
     salaries?: SalaryCreateNestedManyWithoutUserInput
     givenAwayLoot?: GivenAwayLootCreateNestedManyWithoutUserInput
+    linkTokens?: LinkTokenCreateNestedManyWithoutUserInput
     soldLoot?: LootCreateNestedManyWithoutSoldToUserInput
     lootQueue?: LootQueueCreateNestedManyWithoutUserInput
     raidAttendance?: RaidAttendanceCreateNestedManyWithoutUserInput
@@ -31678,11 +31741,10 @@ export namespace Prisma {
     tasksAssigned?: TasksUserCreateNestedManyWithoutUserInput
     inventory?: UserInventoryCreateNestedManyWithoutUserInput
     tags?: UserTagsCreateNestedManyWithoutUserInput
-    linkTokens?: LinkTokenCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutSalaryBonusesInput = {
-    id?: number
+    id: number
     username: string
     class?: string | null
     secondary_class?: string | null
@@ -31698,6 +31760,7 @@ export namespace Prisma {
     vkId?: string | null
     salaries?: SalaryUncheckedCreateNestedManyWithoutUserInput
     givenAwayLoot?: GivenAwayLootUncheckedCreateNestedManyWithoutUserInput
+    linkTokens?: LinkTokenUncheckedCreateNestedManyWithoutUserInput
     soldLoot?: LootUncheckedCreateNestedManyWithoutSoldToUserInput
     lootQueue?: LootQueueUncheckedCreateNestedManyWithoutUserInput
     raidAttendance?: RaidAttendanceUncheckedCreateNestedManyWithoutUserInput
@@ -31705,7 +31768,6 @@ export namespace Prisma {
     tasksAssigned?: TasksUserUncheckedCreateNestedManyWithoutUserInput
     inventory?: UserInventoryUncheckedCreateNestedManyWithoutUserInput
     tags?: UserTagsUncheckedCreateNestedManyWithoutUserInput
-    linkTokens?: LinkTokenUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutSalaryBonusesInput = {
@@ -31725,6 +31787,7 @@ export namespace Prisma {
   }
 
   export type UserUpdateWithoutSalaryBonusesInput = {
+    id?: IntFieldUpdateOperationsInput | number
     username?: StringFieldUpdateOperationsInput | string
     class?: NullableStringFieldUpdateOperationsInput | string | null
     secondary_class?: NullableStringFieldUpdateOperationsInput | string | null
@@ -31740,6 +31803,7 @@ export namespace Prisma {
     vkId?: NullableStringFieldUpdateOperationsInput | string | null
     salaries?: SalaryUpdateManyWithoutUserNestedInput
     givenAwayLoot?: GivenAwayLootUpdateManyWithoutUserNestedInput
+    linkTokens?: LinkTokenUpdateManyWithoutUserNestedInput
     soldLoot?: LootUpdateManyWithoutSoldToUserNestedInput
     lootQueue?: LootQueueUpdateManyWithoutUserNestedInput
     raidAttendance?: RaidAttendanceUpdateManyWithoutUserNestedInput
@@ -31747,7 +31811,6 @@ export namespace Prisma {
     tasksAssigned?: TasksUserUpdateManyWithoutUserNestedInput
     inventory?: UserInventoryUpdateManyWithoutUserNestedInput
     tags?: UserTagsUpdateManyWithoutUserNestedInput
-    linkTokens?: LinkTokenUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSalaryBonusesInput = {
@@ -31767,6 +31830,7 @@ export namespace Prisma {
     vkId?: NullableStringFieldUpdateOperationsInput | string | null
     salaries?: SalaryUncheckedUpdateManyWithoutUserNestedInput
     givenAwayLoot?: GivenAwayLootUncheckedUpdateManyWithoutUserNestedInput
+    linkTokens?: LinkTokenUncheckedUpdateManyWithoutUserNestedInput
     soldLoot?: LootUncheckedUpdateManyWithoutSoldToUserNestedInput
     lootQueue?: LootQueueUncheckedUpdateManyWithoutUserNestedInput
     raidAttendance?: RaidAttendanceUncheckedUpdateManyWithoutUserNestedInput
@@ -31774,10 +31838,10 @@ export namespace Prisma {
     tasksAssigned?: TasksUserUncheckedUpdateManyWithoutUserNestedInput
     inventory?: UserInventoryUncheckedUpdateManyWithoutUserNestedInput
     tags?: UserTagsUncheckedUpdateManyWithoutUserNestedInput
-    linkTokens?: LinkTokenUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutLinkTokensInput = {
+    id: number
     username: string
     class?: string | null
     secondary_class?: string | null
@@ -31804,7 +31868,7 @@ export namespace Prisma {
   }
 
   export type UserUncheckedCreateWithoutLinkTokensInput = {
-    id?: number
+    id: number
     username: string
     class?: string | null
     secondary_class?: string | null
@@ -31847,6 +31911,7 @@ export namespace Prisma {
   }
 
   export type UserUpdateWithoutLinkTokensInput = {
+    id?: IntFieldUpdateOperationsInput | number
     username?: StringFieldUpdateOperationsInput | string
     class?: NullableStringFieldUpdateOperationsInput | string | null
     secondary_class?: NullableStringFieldUpdateOperationsInput | string | null
@@ -31917,6 +31982,13 @@ export namespace Prisma {
     status?: string | null
   }
 
+  export type LinkTokenCreateManyUserInput = {
+    id?: number
+    token: string
+    expiresAt: Date | string
+    used?: boolean
+  }
+
   export type LootCreateManySoldToUserInput = {
     id?: number
     status?: string | null
@@ -31929,6 +32001,7 @@ export namespace Prisma {
     itemTypeId: number
     quantity?: number
     price?: number | null
+    group_id?: number | null
   }
 
   export type LootQueueCreateManyUserInput = {
@@ -31979,13 +32052,6 @@ export namespace Prisma {
     id?: number
     tag: string
     created_at?: Date | string
-  }
-
-  export type LinkTokenCreateManyUserInput = {
-    id?: number
-    token: string
-    expiresAt: Date | string
-    used?: boolean
   }
 
   export type SalaryUpdateWithoutUserInput = {
@@ -32040,6 +32106,26 @@ export namespace Prisma {
     status?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
+  export type LinkTokenUpdateWithoutUserInput = {
+    token?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    used?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type LinkTokenUncheckedUpdateWithoutUserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    token?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    used?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type LinkTokenUncheckedUpdateManyWithoutUserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    token?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    used?: BoolFieldUpdateOperationsInput | boolean
+  }
+
   export type LootUpdateWithoutSoldToUserInput = {
     status?: NullableStringFieldUpdateOperationsInput | string | null
     sold_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -32050,6 +32136,7 @@ export namespace Prisma {
     acquired_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     quantity?: IntFieldUpdateOperationsInput | number
     price?: NullableIntFieldUpdateOperationsInput | number | null
+    group_id?: NullableIntFieldUpdateOperationsInput | number | null
     itemType?: ItemTypeUpdateOneRequiredWithoutLootNestedInput
   }
 
@@ -32065,6 +32152,7 @@ export namespace Prisma {
     itemTypeId?: IntFieldUpdateOperationsInput | number
     quantity?: IntFieldUpdateOperationsInput | number
     price?: NullableIntFieldUpdateOperationsInput | number | null
+    group_id?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type LootUncheckedUpdateManyWithoutSoldToUserInput = {
@@ -32079,6 +32167,7 @@ export namespace Prisma {
     itemTypeId?: IntFieldUpdateOperationsInput | number
     quantity?: IntFieldUpdateOperationsInput | number
     price?: NullableIntFieldUpdateOperationsInput | number | null
+    group_id?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type LootQueueUpdateWithoutUserInput = {
@@ -32227,26 +32316,6 @@ export namespace Prisma {
     created_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type LinkTokenUpdateWithoutUserInput = {
-    token?: StringFieldUpdateOperationsInput | string
-    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    used?: BoolFieldUpdateOperationsInput | boolean
-  }
-
-  export type LinkTokenUncheckedUpdateWithoutUserInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    token?: StringFieldUpdateOperationsInput | string
-    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    used?: BoolFieldUpdateOperationsInput | boolean
-  }
-
-  export type LinkTokenUncheckedUpdateManyWithoutUserInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    token?: StringFieldUpdateOperationsInput | string
-    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    used?: BoolFieldUpdateOperationsInput | boolean
-  }
-
   export type TasksUserCreateManyTaskInput = {
     user_id: number
   }
@@ -32330,6 +32399,7 @@ export namespace Prisma {
     sold_to_user_id?: number | null
     quantity?: number
     price?: number | null
+    group_id?: number | null
   }
 
   export type LootQueueCreateManyItemTypeInput = {
@@ -32353,6 +32423,7 @@ export namespace Prisma {
     acquired_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     quantity?: IntFieldUpdateOperationsInput | number
     price?: NullableIntFieldUpdateOperationsInput | number | null
+    group_id?: NullableIntFieldUpdateOperationsInput | number | null
     soldToUser?: UserUpdateOneWithoutSoldLootNestedInput
   }
 
@@ -32368,6 +32439,7 @@ export namespace Prisma {
     sold_to_user_id?: NullableIntFieldUpdateOperationsInput | number | null
     quantity?: IntFieldUpdateOperationsInput | number
     price?: NullableIntFieldUpdateOperationsInput | number | null
+    group_id?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type LootUncheckedUpdateManyWithoutItemTypeInput = {
@@ -32382,6 +32454,7 @@ export namespace Prisma {
     sold_to_user_id?: NullableIntFieldUpdateOperationsInput | number | null
     quantity?: IntFieldUpdateOperationsInput | number
     price?: NullableIntFieldUpdateOperationsInput | number | null
+    group_id?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type LootQueueUpdateWithoutItemTypeInput = {

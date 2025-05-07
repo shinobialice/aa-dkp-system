@@ -9,7 +9,7 @@ datasource db {
 }
 
 model User {
-id Int @id @default(autoincrement())
+  id                         Int               @id
   username                   String
   class                      String?
   secondary_class            String?
@@ -21,11 +21,11 @@ id Int @id @default(autoincrement())
   joined_at                  DateTime?
   created_at                 DateTime
   salaryBonus                Int?              @default(0)
-  googleId                   String?           @unique @map("google_id")
-  vkId                       String?           @unique @map("vk_id")
-
+  googleId                   String?           @unique(map: "user_googleId_key") @map("google_id") @db.VarChar
+  vkId                       String?           @unique(map: "user_vkId_key") @map("vk_id") @db.VarChar
   salaries                   Salary[]
   givenAwayLoot              GivenAwayLoot[]
+  linkTokens                 LinkToken[]       @relation("UserToLinkTokens")
   soldLoot                   Loot[]            @relation("UserSoldLoot")
   lootQueue                  LootQueue[]
   raidAttendance             RaidAttendance[]
@@ -34,11 +34,9 @@ id Int @id @default(autoincrement())
   inventory                  UserInventory[]
   salaryBonuses              UserSalaryBonus[]
   tags                       UserTags[]        @relation("UserTags")
-  linkTokens                 LinkToken[]       @relation("UserToLinkTokens")
 
   @@map("user")
 }
-
 
 model UserTags {
   id         Int      @id @default(autoincrement())
@@ -137,12 +135,13 @@ model Loot {
   sold_to         String?
   comment         String?
   created_at      DateTime  @default(now())
-  source          String  ?   @db.VarChar(255)
+  source          String?   @db.VarChar(255)
   acquired_at     DateTime? @db.Timestamp(6)
   itemTypeId      Int       @map("item_type_id")
   sold_to_user_id Int?
   quantity        Int       @default(1)
   price           Int?
+  group_id        Int?
   itemType        ItemType  @relation(fields: [itemTypeId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_item_type")
   soldToUser      User?     @relation("UserSoldLoot", fields: [sold_to_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_sold_to_user")
 
@@ -233,11 +232,11 @@ model UserSalaryBonus {
 
 model LinkToken {
   id        Int      @id @default(autoincrement())
-  token     String   @unique
-  user      User     @relation("UserToLinkTokens", fields: [userId], references: [id])
+  token     String   @unique @db.VarChar
   userId    Int
-  expiresAt DateTime
+  expiresAt DateTime @db.Timestamp(6)
   used      Boolean  @default(false)
+  user      User     @relation("UserToLinkTokens", fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@map("link_token")
 }
@@ -246,7 +245,7 @@ model News {
   id        Int      @id @default(autoincrement())
   title     String
   content   String
-  date      DateTime @default(now())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  date      DateTime @default(now()) @db.Timestamp(6)
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  updatedAt DateTime @default(now()) @updatedAt @db.Timestamp(6)
 }
