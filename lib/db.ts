@@ -6,9 +6,7 @@ const globalForPrisma = globalThis as unknown as {
   prisma: ReturnType<PrismaClient["$extends"]> | undefined;
 };
 
-const prismaClient = new PrismaClient().$extends(withAccelerate());
-
-export const prisma = globalForPrisma.prisma ?? prismaClient;
+export const prisma = new PrismaClient().$extends(withAccelerate());
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;

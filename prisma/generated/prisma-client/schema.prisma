@@ -9,7 +9,7 @@ datasource db {
 }
 
 model User {
-id Int @id @default(autoincrement())
+  id                         Int       @id @default(autoincrement())
   username                   String
   class                      String?
   secondary_class            String?
@@ -20,25 +20,24 @@ id Int @id @default(autoincrement())
   is_eligible_for_salary     Boolean
   joined_at                  DateTime?
   created_at                 DateTime
-  salaryBonus                Int?              @default(0)
-  googleId                   String?           @unique @map("google_id")
-  vkId                       String?           @unique @map("vk_id")
+  salaryBonus                Int?      @default(0)
+  googleId                   String?   @unique @map("google_id")
+  vkId                       String?   @unique @map("vk_id")
 
-  salaries                   Salary[]
-  givenAwayLoot              GivenAwayLoot[]
-  soldLoot                   Loot[]            @relation("UserSoldLoot")
-  lootQueue                  LootQueue[]
-  raidAttendance             RaidAttendance[]
-  tasks                      Tasks[]
-  tasksAssigned              TasksUser[]
-  inventory                  UserInventory[]
-  salaryBonuses              UserSalaryBonus[]
-  tags                       UserTags[]        @relation("UserTags")
-  linkTokens                 LinkToken[]       @relation("UserToLinkTokens")
+  salaries       Salary[]
+  givenAwayLoot  GivenAwayLoot[]
+  soldLoot       Loot[]            @relation("UserSoldLoot")
+  lootQueue      LootQueue[]
+  raidAttendance RaidAttendance[]
+  tasks          Tasks[]
+  tasksAssigned  TasksUser[]
+  inventory      UserInventory[]
+  salaryBonuses  UserSalaryBonus[]
+  tags           UserTags[]        @relation("UserTags")
+  linkTokens     LinkToken[]       @relation("UserToLinkTokens")
 
   @@map("user")
 }
-
 
 model UserTags {
   id         Int      @id @default(autoincrement())
@@ -137,7 +136,7 @@ model Loot {
   sold_to         String?
   comment         String?
   created_at      DateTime  @default(now())
-  source          String  ?   @db.VarChar(255)
+  source          String?   @db.VarChar(255)
   acquired_at     DateTime? @db.Timestamp(6)
   itemTypeId      Int       @map("item_type_id")
   sold_to_user_id Int?
