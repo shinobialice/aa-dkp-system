@@ -4,9 +4,9 @@ import prisma from "@/lib/db";
 
 export async function GET(
   req: NextRequest,
-  context: { params: { token: string } }
+  { params }: { params: { token: string } }
 ) {
-  const token = context.params.token;
+  const token = params.token;
 
   const result = await prisma.linkToken.findUnique({
     where: { token },

@@ -34,7 +34,8 @@ async function analyzeImageFromFile(
 
       const ctx = canvas.getContext("2d", { willReadFrequently: true });
       if (!ctx) {
-        return resolve([]);
+        resolve([]);
+        return; // ✅ добавлено
       }
 
       ctx.drawImage(img, 0, 0);
@@ -44,9 +45,7 @@ async function analyzeImageFromFile(
           page.lines
             .filter((line) => {
               const text = line.text.replace(/[.]/g, "").trim();
-              if (/^\d+$/.test(text)) {
-                return false;
-              }
+              if (/^\d+$/.test(text)) {return false;}
 
               const nonWordRatio =
                 text.replace(/[a-zA-Zа-яА-ЯёЁ0-9]/g, "").length / text.length;
@@ -59,6 +58,7 @@ async function analyzeImageFromFile(
         ) ?? [];
 
       resolve(results);
+       
     };
   });
 }

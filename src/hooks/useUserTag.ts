@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 
-export function useUserTag(tag: string) {
+function useUserTag(tag: string) {
   const [hasTag, setHasTag] = useState<boolean>(false);
 
   useEffect(() => {
@@ -17,3 +17,5 @@ export function useUserTag(tag: string) {
 
   return hasTag;
 }
+
+export default useUserTag;
