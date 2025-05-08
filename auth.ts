@@ -1,16 +1,8 @@
 import { cookies } from "next/headers";
-import type {
-  NextAuthOptions,
-  Account,
-  Session,
-  User as NextAuthUser,
-} from "next-auth";
+import type { NextAuthOptions, Account, Session } from "next-auth";
 import type { JWT } from "next-auth/jwt";
 import GoogleProvider from "next-auth/providers/google";
-import MailRuProvider from "next-auth/providers/mailru";
-import VkProvider from "next-auth/providers/vk";
 import supabase from "./lib/supabase";
-
 
 const authConfig: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
@@ -18,14 +10,6 @@ const authConfig: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
-    VkProvider({
-      clientId: process.env.VK_CLIENT_ID!,
-      clientSecret: process.env.VK_CLIENT_SECRET!,
-    }),
-    MailRuProvider({
-      clientId: process.env.MAILRU_CLIENT_ID!,
-      clientSecret: process.env.MAILRU_CLIENT_SECRET!,
     }),
   ],
   callbacks: {
