@@ -185,7 +185,6 @@ export default function ActivitiesPage() {
             nowIndicator
             slotDuration="00:30:00"
             slotLabelFormat={{
-              hour: "2-digit",
               minute: "2-digit",
               hour12: false,
             }}

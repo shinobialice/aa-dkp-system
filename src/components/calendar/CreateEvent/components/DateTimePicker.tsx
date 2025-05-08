@@ -9,12 +9,13 @@ type Props = {
 };
 
 const DatetimePicker: React.FC<Props> = ({ value, onChange }) => (
-    <DateTimePicker
-      value={value ?? undefined}
-      onChange={(date: Date | undefined) => onChange(date ?? null)}
-      timePicker={{ hour: true, minute: true, second: false }}
-      className="w-[270px]"
-    />
-  );
+  <DateTimePicker
+    timezone="Europe/Moscow" // ✅ вот ключ
+    value={value ?? undefined}
+    onChange={(date: Date | undefined) => onChange(date ?? null)}
+    timePicker={{ hour: true, minute: true, second: false }}
+    className="w-[270px]"
+  />
+);
 
 export default DatetimePicker;

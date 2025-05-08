@@ -1,6 +1,17 @@
 "use server";
 import supabase from "@/lib/supabase";
 
+function getMoscowISOString(date: Date): string {
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const day = date.getDate().toString().padStart(2, "0");
+  const hour = date.getHours().toString().padStart(2, "0");
+  const minute = date.getMinutes().toString().padStart(2, "0");
+  const second = date.getSeconds().toString().padStart(2, "0");
+
+  return `${year}-${month}-${day}T${hour}:${minute}:${second}`;
+}
+
 const createRaidEvent = async (
   type: string,
   dkp_summary: number,
@@ -17,7 +28,7 @@ const createRaidEvent = async (
       {
         type,
         dkp_summary,
-        start_date: start_date.toISOString(),
+        start_date: getMoscowISOString(start_date),
         created_at: new Date().toISOString(),
         is_pvp,
         is_pvp_long,
