@@ -2,30 +2,52 @@
 
 import supabase from "@/lib/supabase";
 
-export const getRaids = async () => {
-  const { data: raids, error } = await supabase
-    .from("raid")
-    .select("id, start_date, type, raid_boss(boss(id, boss_name))");
+type Boss = {
+  id: number;
+  boss_name: string;
+};
 
-  if (error || !raids) {
+type Raid = {
+  id: number;
+  start_date: string;
+  type: string;
+  raid_boss: {
+    boss: Boss[]; 
+  }[];
+};
+
+export const getRaids = async () => {
+  const { data, error } = await supabase.from("raid").select(`
+    id,
+    start_date,
+    type,
+    raid_boss(
+      boss:boss_id(
+        id,
+        boss_name
+      )
+    )
+  `);
+
+  if (error || !data) {
     console.error("Ошибка при получении рейдов:", error);
     throw new Error("Не удалось загрузить рейды");
   }
 
+  const raids = data as unknown as Raid[]; 
+
   return raids
     .filter((r) => r.start_date)
     .map((raid) => {
-      const start = new Date(raid.start_date!);
+      const start = new Date(raid.start_date);
       const end = new Date(start.getTime() + 60 * 60 * 1000);
 
-      // raid.raid_boss: { boss: { id, boss_name }[] }[]
       const title =
         raid.raid_boss
-          ?.map((rb) => rb.boss?.boss_name) // ✅ теперь это просто объект
+          ?.flatMap((rb) => rb.boss || [])
+          .map((b) => b.boss_name)
           .filter(Boolean)
           .join(", ") || "Unknown Boss";
-
-      console.log(JSON.stringify(raid.raid_boss, null, 2));
 
       let color = "gray";
       if (raid.type === "Прайм") color = "rgb(90, 54, 165)";

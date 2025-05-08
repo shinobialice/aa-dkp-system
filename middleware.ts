@@ -10,7 +10,7 @@ export async function middleware(request: NextRequest) {
 
   const isAuthPage =
     request.nextUrl.pathname === "/login" ||
-    request.nextUrl.pathname === "/auth/error" || 
+    request.nextUrl.pathname === "/auth/error" ||
     request.nextUrl.pathname.startsWith("/link-account");
 
   if (!token && !isAuthPage) {
@@ -25,5 +25,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|images).*)"],
 };
