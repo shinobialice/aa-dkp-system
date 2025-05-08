@@ -1,23 +1,50 @@
 "use server";
 
-import prisma from "@/lib/db";
+import supabase from "@/lib/supabase";
 
 export const addToLootQueue = async (username: string, itemName: string) => {
-  const user = await prisma.user.findFirst({ where: { username } });
-  const item = await prisma.itemType.findUnique({ where: { name: itemName } });
+  // Fetch user by username
+  const { data: users, error: userError } = await supabase
+    .from("user")
+    .select("id")
+    .eq("username", username)
+    .maybeSingle();
 
-  if (!user || !item) {
-    throw new Error("User or item not found");
+  if (userError || !users) {
+    throw new Error("User not found");
   }
 
-  return prisma.lootQueue.create({
-    data: {
-      userId: user.id,
-      itemTypeId: item.id,
-      status: "ожидание",
-      required: 1,
-      delivered: 0,
-      synth_target: "",
-    },
-  });
+  // Fetch itemType by name
+  const { data: item, error: itemError } = await supabase
+    .from("item_type")
+    .select("id")
+    .eq("name", itemName)
+    .maybeSingle();
+
+  if (itemError || !item) {
+    throw new Error("Item not found");
+  }
+
+  // Insert into loot_queue
+  const { data: newEntry, error: insertError } = await supabase
+    .from("loot_queue")
+    .insert([
+      {
+        user_id: users.id,
+        item_type_id: item.id,
+        status: "ожидание",
+        required: 1,
+        delivered: 0,
+        synth_target: "",
+        created_at: new Date().toISOString(),
+      },
+    ])
+    .select()
+    .maybeSingle();
+
+  if (insertError || !newEntry) {
+    throw new Error("Failed to insert into loot queue");
+  }
+
+  return newEntry;
 };

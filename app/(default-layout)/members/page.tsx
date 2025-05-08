@@ -1,14 +1,18 @@
-import prisma from "@/lib/db";
+import supabase from "@/lib/supabase";
 import MembersTable from "@/src/components/MembersTable";
 
 const MembersPage = async () => {
-  const users = await prisma.user.findMany({
-    orderBy: [
-      { active: "desc" },
-      { is_eligible_for_salary: "desc" },
-      { joined_at: "asc" },
-    ],
-  });
+  const { data: users, error } = await supabase
+    .from("user")
+    .select("*")
+    .order("joined_at", { ascending: true })
+    .order("is_eligible_for_salary", { ascending: false })
+    .order("active", { ascending: false });
+
+  if (error || !users) {
+    console.error("Error loading users:", error);
+    return <div>Ошибка загрузки списка игроков</div>;
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-onBackground p-8">
@@ -17,4 +21,5 @@ const MembersPage = async () => {
     </div>
   );
 };
+
 export default MembersPage;

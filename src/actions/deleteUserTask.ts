@@ -1,14 +1,19 @@
 "use server";
-import prisma from "@/lib/db";
+import supabase from "@/lib/supabase";
 
 const deleteUserTask = async (id: number) => {
-  try {
-    const deletedTask = await prisma.tasks.delete({
-      where: { id },
-    });
-    return deletedTask;
-  } catch {
+  const { data, error } = await supabase
+    .from("tasks")
+    .delete()
+    .eq("id", id)
+    .select()
+    .maybeSingle();
+
+  if (error || !data) {
     throw new Error("Failed to delete task");
   }
+
+  return data;
 };
+
 export default deleteUserTask;

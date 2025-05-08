@@ -1,17 +1,16 @@
 "use server";
-import prisma from "@/lib/db";
+import supabase from "@/lib/supabase";
 
 const getTasks = async (userId: number) => {
-  const tasks = await prisma.tasks.findMany({
-    where: { user_id: Number(userId) },
-    select: {
-      id: true,
-      user_id: true,
-      name: true,
-      created_at: true,
-      completed_at: true,
-    },
-  });
+  const { data: tasks, error } = await supabase
+    .from("tasks")
+    .select("id, user_id, name, created_at, completed_at")
+    .eq("user_id", userId);
+
+  if (error) {
+    console.error("Ошибка при получении задач:", error);
+    throw new Error("Не удалось загрузить задачи");
+  }
 
   return tasks;
 };

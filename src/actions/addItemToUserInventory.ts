@@ -1,5 +1,5 @@
 "use server";
-import prisma from "@/lib/db";
+import supabase from "@/lib/supabase";
 
 const addItemToUserInventory = async (
   userId: number,
@@ -7,15 +7,26 @@ const addItemToUserInventory = async (
   type: string,
   quality: string | null
 ) => {
-  const newInventoryItem = await prisma.userInventory.create({
-    data: {
-      user_id: userId,
-      name,
-      type,
-      quality: quality || null,
-      created_at: new Date(),
-    },
-  });
-  return newInventoryItem;
+  const { data, error } = await supabase
+    .from("user_inventory")
+    .insert([
+      {
+        user_id: userId,
+        name,
+        type,
+        quality,
+        created_at: new Date().toISOString(),
+      },
+    ])
+    .select()
+    .maybeSingle();
+
+  if (error) {
+    console.error("Failed to insert inventory item:", error);
+    throw new Error("Error inserting inventory item");
+  }
+
+  return data;
 };
+
 export default addItemToUserInventory;

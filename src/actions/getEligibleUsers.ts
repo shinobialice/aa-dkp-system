@@ -1,21 +1,19 @@
 "use server";
 
-import prisma from "@/lib/db";
+import supabase from "@/lib/supabase";
 
 export async function getEligibleUsers() {
-  const users = await prisma.user.findMany({
-    where: {
-      googleId: null,
-      active: true,
-    },
-    select: {
-      id: true,
-      username: true,
-    },
-    orderBy: {
-      username: "asc",
-    },
-  });
+  const { data: users, error } = await supabase
+    .from("user")
+    .select("id, username")
+    .eq("active", true)
+    .is("google_id", null)
+    .order("username", { ascending: true });
+
+  if (error || !users) {
+    console.error("Ошибка при получении eligible пользователей:", error);
+    throw new Error("Не удалось загрузить пользователей");
+  }
 
   return users;
 }

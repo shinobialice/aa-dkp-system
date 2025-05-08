@@ -1,10 +1,19 @@
 "use server";
-import prisma from "@/lib/db";
+import supabase from "@/lib/supabase";
 
 const getStats = async () => {
-  const users = await prisma.user.findMany({
-    where: { active: true },
-  });
+  // 1. Get all active users
+  const { data: users, error: usersError } = await supabase
+    .from("user")
+    .select("id, username, class, joined_at")
+    .eq("active", true);
+
+  if (usersError || !users) {
+    console.error("Ошибка при загрузке пользователей:", usersError);
+    throw new Error("Не удалось получить список пользователей");
+  }
+
+  // 2. Filter stats
   const stats = {
     activePlayers: users.length,
     dds: users.filter(
@@ -17,15 +26,14 @@ const getStats = async () => {
     dancers: users.filter((user) => user.class?.includes("Танцор")).length,
     bards: users.filter((user) => user.class?.includes("Бард")).length,
     tacticians: users.filter((user) => user.class?.includes("Тактик")).length,
-    recentMembers: await prisma.user.findMany({
-      where: { active: true },
-      orderBy: { joined_at: "desc" },
-      take: 5,
-      select: {
-        id: true,
-        username: true,
-      },
-    }),
+    recentMembers: users
+      .filter((u) => u.joined_at)
+      .sort(
+        (a, b) =>
+          new Date(b.joined_at!).getTime() - new Date(a.joined_at!).getTime()
+      )
+      .slice(0, 5)
+      .map((u) => ({ id: u.id, username: u.username })),
   };
 
   return stats;

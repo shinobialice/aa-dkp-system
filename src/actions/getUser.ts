@@ -1,23 +1,32 @@
 "use server";
 
-import prisma from "@/lib/db";
+import supabase from "@/lib/supabase";
 
 const getUser = async (userId: number) => {
-  const user = await prisma.user.findUnique({
-    where: { id: Number(userId) },
-    select: {
-      id: true,
-      username: true,
-      class: true,
-      class_gear_score: true,
-      secondary_class: true,
-      secondary_class_gear_score: true,
-      vk_name: true,
-      active: true,
-      is_eligible_for_salary: true,
-      joined_at: true,
-    },
-  });
+  const { data: user, error } = await supabase
+    .from("user")
+    .select(
+      `
+      id,
+      username,
+      class,
+      class_gear_score,
+      secondary_class,
+      secondary_class_gear_score,
+      vk_name,
+      active,
+      is_eligible_for_salary,
+      joined_at
+    `
+    )
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Ошибка при получении пользователя:", error);
+    throw new Error("Не удалось получить данные пользователя");
+  }
+
   return user;
 };
 

@@ -1,5 +1,5 @@
 "use server";
-import prisma from "@/lib/db";
+import supabase from "@/lib/supabase";
 
 const editUserTask = async (
   userId: number,
@@ -8,17 +8,24 @@ const editUserTask = async (
   createdAt: Date,
   completedAt: Date | null
 ) => {
-  const updatedTask = await prisma.tasks.update({
-    where: {
-      id: taskId,
-      user_id: userId,
-    },
-    data: {
+  const { data: updatedTask, error } = await supabase
+    .from("tasks")
+    .update({
       name,
-      created_at: createdAt,
-      completed_at: completedAt,
-    },
-  });
+      created_at: createdAt.toISOString(),
+      completed_at: completedAt ? completedAt.toISOString() : null,
+    })
+    .eq("id", taskId)
+    .eq("user_id", userId)
+    .select()
+    .maybeSingle();
+
+  if (error || !updatedTask) {
+    console.error("Failed to update task:", error);
+    throw new Error("Ошибка при обновлении задачи");
+  }
+
   return updatedTask;
 };
+
 export default editUserTask;

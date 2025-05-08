@@ -1,16 +1,16 @@
 "use server";
-import prisma from "@/lib/db";
+import supabase from "@/lib/supabase";
 
 export async function getAverageGuildGS() {
-  const users = await prisma.user.findMany({
-    where: {
-      active: true,
-      class_gear_score: { not: null },
-    },
-    select: { class_gear_score: true },
-  });
+  const { data: users, error } = await supabase
+    .from("user")
+    .select("class_gear_score")
+    .eq("active", true)
+    .not("class_gear_score", "is", null);
 
-  if (users.length === 0) {return 0;}
+  if (error || !users || users.length === 0) {
+    return 0;
+  }
 
   const sum = users.reduce((acc, u) => acc + (u.class_gear_score ?? 0), 0);
   const avg = sum / users.length;

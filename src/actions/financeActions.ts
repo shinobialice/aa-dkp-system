@@ -1,62 +1,104 @@
 "use server";
-import prisma from "@/lib/db";
+import supabase from "@/lib/supabase";
 
-export const getGuildFunds = async (month: number, year: number) => await prisma.guildFunds.findFirst({
-    where: { month, year },
-  });
+// 1. Get guild funds for a given month/year
+export const getGuildFunds = async (month: number, year: number) => {
+  const { data, error } = await supabase
+    .from("guild_funds")
+    .select("*")
+    .eq("month", month)
+    .eq("year", year)
+    .maybeSingle();
 
+  if (error) {
+    console.error("Error loading guild funds:", error);
+    throw new Error("Ошибка при получении фонда");
+  }
+
+  return data;
+};
+
+// 2. Get salaries with user info for the month
 export const getSalariesForMonth = async (month: number, year: number) => {
-  const result = await prisma.salary.findMany({
-    where: { month, year },
-    include: {
-      user: true,
-    },
-  });
+  const { data, error } = await supabase
+    .from("salary")
+    .select("user_id, amount, bonus, total, user(username)")
+    .eq("month", month)
+    .eq("year", year);
 
-  return result.map((s) => ({
-    userId: s.userId,
-    username: s.user.username,
+  if (error || !data) {
+    console.error("Error fetching salaries:", error);
+    throw new Error("Ошибка при получении зарплат");
+  }
+
+  return data.map((s) => ({
+    userId: s.user_id,
+    username: s.user?.username,
     amount: s.amount,
     bonus: s.bonus,
     total: s.total,
   }));
 };
 
+// 3. Generate salaries
 export const generateSalaries = async (month: number, year: number) => {
-  const fund = await prisma.guildFunds.findFirst({ where: { month, year } });
-  if (!fund) {throw new Error("Сначала нужно сгенерировать фонд");}
+  // Get salary budget
+  const { data: fund, error: fundError } = await supabase
+    .from("guild_funds")
+    .select("*")
+    .eq("month", month)
+    .eq("year", year)
+    .maybeSingle();
 
-  const users = await prisma.user.findMany({
-    where: {
-      active: true,
-      is_eligible_for_salary: true,
-    },
-  });
+  if (fundError || !fund) {
+    throw new Error("Сначала нужно сгенерировать фонд");
+  }
 
-  if (users.length === 0)
-    {throw new Error("Нет активных сотрудников для выплаты");}
+  // Get eligible users
+  const { data: users, error: usersError } = await supabase
+    .from("user")
+    .select("id, salary_bonus")
+    .eq("active", true)
+    .eq("is_eligible_for_salary", true);
 
-  const baseAmount = Math.floor(fund.salaryBudget / users.length);
-  await prisma.salary.deleteMany({
-    where: {
-      year,
-      month,
-    },
-  });
+  if (usersError || !users || users.length === 0) {
+    throw new Error("Нет активных сотрудников для выплаты");
+  }
 
-  for (const user of users) {
-    const bonus = user.salaryBonus ?? 0;
+  // Calculate base salary
+  const baseAmount = Math.floor(fund.salary_budget / users.length);
+
+  // Delete existing salaries for that month
+  const { error: deleteError } = await supabase
+    .from("salary")
+    .delete()
+    .eq("month", month)
+    .eq("year", year);
+
+  if (deleteError) {
+    throw new Error("Ошибка при удалении предыдущих зарплат");
+  }
+
+  // Insert new salary records
+  const salaryRows = users.map((user) => {
+    const bonus = user.salary_bonus ?? 0;
     const total = baseAmount + bonus;
 
-    await prisma.salary.create({
-      data: {
-        year,
-        month,
-        userId: user.id,
-        amount: baseAmount,
-        bonus,
-        total,
-      },
-    });
+    return {
+      year,
+      month,
+      user_id: user.id,
+      amount: baseAmount,
+      bonus,
+      total,
+    };
+  });
+
+  const { error: insertError } = await supabase
+    .from("salary")
+    .insert(salaryRows);
+
+  if (insertError) {
+    throw new Error("Ошибка при генерации зарплат");
   }
 };

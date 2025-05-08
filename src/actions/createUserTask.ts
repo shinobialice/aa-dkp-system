@@ -1,5 +1,5 @@
 "use server";
-import prisma from "@/lib/db";
+import supabase from "@/lib/supabase";
 
 const createUserTask = async (
   userId: number,
@@ -7,14 +7,25 @@ const createUserTask = async (
   createdAt: Date,
   completedAt: Date | null
 ) => {
-  const task = await prisma.tasks.create({
-    data: {
-      user_id: userId,
-      name,
-      created_at: createdAt,
-      completed_at: completedAt,
-    },
-  });
+  const { data: task, error } = await supabase
+    .from("tasks")
+    .insert([
+      {
+        user_id: userId,
+        name,
+        created_at: createdAt.toISOString(),
+        completed_at: completedAt ? completedAt.toISOString() : null,
+      },
+    ])
+    .select()
+    .maybeSingle();
+
+  if (error || !task) {
+    console.error("Error creating task:", error);
+    throw new Error("Ошибка при создании задачи");
+  }
+
   return task;
 };
+
 export default createUserTask;

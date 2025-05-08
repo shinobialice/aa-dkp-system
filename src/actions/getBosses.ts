@@ -1,12 +1,16 @@
 "use server";
 
-import prisma from "@/lib/db";
+import supabase from "@/lib/supabase";
 
-export const getBosses = async () => await prisma.boss.findMany({
-    select: {
-      id: true,
-      boss_name: true,
-      dkp_points: true,
-      category: true,
-    },
-  });
+export const getBosses = async () => {
+  const { data: bosses, error } = await supabase
+    .from("boss")
+    .select("id, boss_name, dkp_points, category");
+
+  if (error || !bosses) {
+    console.error("Ошибка при получении списка боссов:", error);
+    throw new Error("Не удалось загрузить боссов");
+  }
+
+  return bosses;
+};

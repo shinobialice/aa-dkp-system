@@ -1,23 +1,18 @@
 "use server";
 
-import prisma from "@/lib/db";
+import supabase from "@/lib/supabase";
 
 export const getAllUsersWithInventory = async () => {
-  const users = await prisma.user.findMany({
-    select: {
-      id: true,
-      username: true,
-      class: true,
-      active: true,
-      inventory: {
-        select: {
-          name: true,
-          type: true,
-          created_at: true,
-        },
-      },
-    },
-  });
+  const { data: users, error } = await supabase
+    .from("user")
+    .select(
+      "id, username, class, active, user_inventory(name, type, created_at)"
+    );
+
+  if (error || !users) {
+    console.error("Ошибка при получении пользователей с инвентарём:", error);
+    throw new Error("Не удалось загрузить список пользователей с инвентарем");
+  }
 
   return users;
 };

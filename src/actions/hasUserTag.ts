@@ -1,16 +1,22 @@
 import { getServerSession } from "next-auth";
 import authOptions from "@/auth";
-import prisma from "@/lib/db";
+import supabase from "@/lib/supabase";
 
 export async function hasUserTag(tag: string): Promise<boolean> {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {return false;}
+  if (!session?.user?.id) {
+    return false;
+  }
 
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    include: { tags: true },
-  });
+  const { data, error } = await supabase
+    .from("user_tags")
+    .select("tag")
+    .eq("user_id", session.user.id);
 
-  if (!user) {return false;}
-  return user.tags.some((t) => t.tag === tag);
+  if (error) {
+    console.error("Ошибка при получении тэгов пользователя:", error);
+    return false;
+  }
+
+  return data?.some((t) => t.tag === tag) ?? false;
 }

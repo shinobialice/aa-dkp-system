@@ -1,6 +1,6 @@
 "use server";
 
-import prisma from "@/lib/db";
+import supabase from "@/lib/supabase";
 
 export async function updateLootItem({
   id,
@@ -13,16 +13,17 @@ export async function updateLootItem({
   source: string;
   acquired_at: Date;
 }) {
-  try {
-    await prisma.loot.update({
-      where: { id },
-      data: {
-        quantity,
-        source,
-        acquired_at,
-      },
-    });
-  } catch {
+  const { error } = await supabase
+    .from("loot")
+    .update({
+      quantity,
+      source,
+      acquired_at: acquired_at.toISOString(),
+    })
+    .eq("id", id);
+
+  if (error) {
+    console.error("Ошибка при обновлении предмета:", error);
     throw new Error("Не удалось обновить предмет");
   }
 }

@@ -9,7 +9,8 @@ import type { JWT } from "next-auth/jwt";
 import GoogleProvider from "next-auth/providers/google";
 import MailRuProvider from "next-auth/providers/mailru";
 import VkProvider from "next-auth/providers/vk";
-import prisma from "@/lib/db";
+import supabase from "./lib/supabase";
+
 
 const authConfig: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
@@ -29,40 +30,41 @@ const authConfig: NextAuthOptions = {
   ],
   callbacks: {
     async signIn({ account }: { account: Account | null }) {
-      if (!account?.provider || !account.providerAccountId) {return false;}
+      if (!account?.provider || !account.providerAccountId) {
+        return false;
+      }
 
-      const cookieStore = cookies();
-      const token = (await cookieStore).get("link-token")?.value;
+      const cookieStore = await cookies();
+      const token = cookieStore.get("link-token")?.value;
 
       if (token) {
-        const linkToken = await prisma.linkToken.findFirst({
-          where: {
-            token,
-            used: false,
-            expiresAt: { gt: new Date() },
-          },
-          include: { user: true },
-        });
+        const { data: linkToken } = await supabase
+          .from("link_token")
+          .select("*, user(*)")
+          .eq("token", token)
+          .eq("used", false)
+          .gt("expiresAt", new Date().toISOString())
+          .maybeSingle();
 
         if (linkToken) {
-          await prisma.user.update({
-            where: { id: linkToken.userId },
-            data: {
-              googleId:
+          await supabase
+            .from("user")
+            .update({
+              google_id:
                 account.provider === "google"
                   ? account.providerAccountId
                   : undefined,
-              vkId:
+              vk_id:
                 account.provider === "vk"
                   ? account.providerAccountId
                   : undefined,
-            },
-          });
+            })
+            .eq("id", linkToken.user_id);
 
-          await prisma.linkToken.update({
-            where: { id: linkToken.id },
-            data: { used: true },
-          });
+          await supabase
+            .from("link_token")
+            .update({ used: true })
+            .eq("id", linkToken.id);
 
           return true;
         }
@@ -70,67 +72,51 @@ const authConfig: NextAuthOptions = {
         return false;
       }
 
-      const existingUser = await prisma.user.findFirst({
-        where: {
-          active: true,
-          OR: [
-            {
-              googleId:
-                account.provider === "google"
-                  ? account.providerAccountId
-                  : undefined,
-            },
-            {
-              vkId:
-                account.provider === "vk"
-                  ? account.providerAccountId
-                  : undefined,
-            },
-            {
-              vkId:
-                account.provider === "mailru"
-                  ? account.providerAccountId
-                  : undefined,
-            },
-          ],
-        },
-      });
+      const { data: existingUsers } = await supabase
+        .from("user")
+        .select("*")
+        .eq("active", true)
+        .or(
+          [
+            account.provider === "google"
+              ? `google_id.eq.${account.providerAccountId}`
+              : "",
+            account.provider === "vk"
+              ? `vk_id.eq.${account.providerAccountId}`
+              : "",
+            account.provider === "mailru"
+              ? `vk_id.eq.${account.providerAccountId}`
+              : "",
+          ]
+            .filter(Boolean)
+            .join(",")
+        );
 
-      return !!existingUser;
+      return !!existingUsers?.[0];
     },
 
     async jwt({ token, user, account }) {
-      if (user) {
-        const dbUser = await prisma.user.findFirst({
-          where: {
-            OR: [
-              {
-                googleId:
-                  account?.provider === "google"
-                    ? account.providerAccountId
-                    : undefined,
-              },
-              {
-                vkId:
-                  account?.provider === "vk"
-                    ? account.providerAccountId
-                    : undefined,
-              },
-              {
-                vkId:
-                  account?.provider === "mailru"
-                    ? account.providerAccountId
-                    : undefined,
-              },
-            ],
-          },
-          select: {
-            id: true,
-            active: true,
-            username: true,
-          },
-        });
+      if (user && account?.provider && account.providerAccountId) {
+        const { data: dbUsers } = await supabase
+          .from("user")
+          .select("id, active, username")
+          .or(
+            [
+              account.provider === "google"
+                ? `google_id.eq.${account.providerAccountId}`
+                : "",
+              account.provider === "vk"
+                ? `vk_id.eq.${account.providerAccountId}`
+                : "",
+              account.provider === "mailru"
+                ? `vk_id.eq.${account.providerAccountId}`
+                : "",
+            ]
+              .filter(Boolean)
+              .join(",")
+          );
 
+        const dbUser = dbUsers?.[0];
         if (dbUser) {
           token.id = dbUser.id;
           token.active = dbUser.active;

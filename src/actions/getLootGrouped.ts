@@ -1,9 +1,16 @@
 import { getLootIconUrl } from "../components/Loot/LootBuy/icons/LootIcons";
 import { sourceMap } from "../components/Loot/priceSourceMap";
-import prisma from "@/lib/db";
+import supabase from "@/lib/supabase";
 
 export async function getLootGrouped() {
-  const items = await prisma.itemType.findMany();
+  const { data: items, error } = await supabase
+    .from("item_type")
+    .select("name, price");
+
+  if (error || !items) {
+    console.error("Ошибка при загрузке предметов:", error);
+    throw new Error("Не удалось получить список предметов");
+  }
 
   const grouped: Record<
     string,
@@ -20,7 +27,9 @@ export async function getLootGrouped() {
 
     const icon = getLootIconUrl(item.name);
 
-    if (!grouped[source]) {grouped[source] = [];}
+    if (!grouped[source]) {
+      grouped[source] = [];
+    }
 
     grouped[source].push({
       name: item.name,

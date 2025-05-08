@@ -1,23 +1,35 @@
 "use server";
 
-import prisma from "@/lib/db";
+import supabase from "@/lib/supabase";
 
-export const getItemTypes = async () => await prisma.itemType.findMany({
-    select: {
-      id: true,
-      name: true,
-    },
-  });
+// Get list of item types
+export const getItemTypes = async () => {
+  const { data, error } = await supabase.from("item_type").select("id, name");
 
-export const getLoot = async () => await prisma.loot.findMany({
-    include: {
-      itemType: true,
-    },
-    orderBy: {
-      acquired_at: "desc",
-    },
-  });
+  if (error || !data) {
+    console.error("Ошибка при получении типов предметов:", error);
+    throw new Error("Не удалось загрузить типы предметов");
+  }
 
+  return data;
+};
+
+// Get loot list with itemType
+export const getLoot = async () => {
+  const { data, error } = await supabase
+    .from("loot")
+    .select("*, item_type(name, price)")
+    .order("acquired_at", { ascending: false });
+
+  if (error || !data) {
+    console.error("Ошибка при получении лута:", error);
+    throw new Error("Не удалось загрузить список лута");
+  }
+
+  return data;
+};
+
+// Add loot item
 export const addLootItem = async ({
   itemTypeId,
   source,
@@ -29,27 +41,35 @@ export const addLootItem = async ({
   acquired_at: string;
   quantity?: number;
 }) => {
-  const created = await prisma.loot.create({
-    data: {
-      itemTypeId,
+  const { error } = await supabase.from("loot").insert([
+    {
+      item_type_id: itemTypeId,
       status: "В наличии",
       source,
-      acquired_at: new Date(acquired_at),
+      acquired_at: new Date(acquired_at).toISOString(),
       quantity: quantity ?? 1,
+      created_at: new Date().toISOString(),
     },
-  });
+  ]);
 
-  await prisma.loot.update({
-    where: { id: created.id },
-    data: {},
-  });
+  if (error) {
+    console.error("Ошибка при добавлении лута:", error);
+    throw new Error("Не удалось добавить предмет");
+  }
 };
 
+// Get loot quantity by ID
 export async function getLootQuantity(lootId: number) {
-  const loot = await prisma.loot.findUnique({
-    where: { id: lootId },
-    select: { quantity: true },
-  });
+  const { data, error } = await supabase
+    .from("loot")
+    .select("quantity")
+    .eq("id", lootId)
+    .maybeSingle();
 
-  return loot?.quantity ?? 0;
+  if (error || !data) {
+    console.error("Ошибка при получении количества лута:", error);
+    return 0;
+  }
+
+  return data.quantity ?? 0;
 }

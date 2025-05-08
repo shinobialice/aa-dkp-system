@@ -1,5 +1,5 @@
 "use server";
-import prisma from "@/lib/db";
+import supabase from "@/lib/supabase";
 
 export const generateGuildFunds = async (month: number, year: number) => {
   const startDate = new Date(`${year}-${month}-01`);
@@ -8,45 +8,74 @@ export const generateGuildFunds = async (month: number, year: number) => {
       ? new Date(`${year + 1}-01-01`)
       : new Date(`${year}-${month + 1}-01`);
 
-  const loot = await prisma.loot.findMany({
-    where: {
-      acquired_at: {
-        gte: startDate,
-        lt: endDate,
-      },
-      status: "Продано",
-    },
-    include: {
-      itemType: true,
-    },
-  });
+  const startIso = startDate.toISOString();
+  const endIso = endDate.toISOString();
 
+  // 1. Fetch sold loot with itemType joined
+  const { data: loot, error: lootError } = await supabase
+    .from("loot")
+    .select("quantity, item_type(price)")
+    .eq("status", "Продано")
+    .gte("acquired_at", startIso)
+    .lt("acquired_at", endIso);
+
+  if (lootError || !loot) {
+    console.error("Ошибка при получении лута:", lootError);
+    throw new Error("Не удалось загрузить проданный лут");
+  }
+
+  // 2. Calculate total income
   const totalIncome = loot.reduce((sum, item) => {
-    const price = item.itemType?.price ?? 0;
+    const price = item.item_type?.price ?? 0;
     return sum + price * item.quantity;
   }, 0);
 
-  const expenses = await prisma.expense.aggregate({
-    _sum: { amount: true },
-    where: { date: { gte: startDate, lt: endDate } },
-  });
+  // 3. Fetch expenses
+  const { data: expenses, error: expensesError } = await supabase
+    .from("expense")
+    .select("amount")
+    .gte("date", startIso)
+    .lt("date", endIso);
 
-  const totalExpenses = expenses._sum.amount ?? 0;
+  if (expensesError || !expenses) {
+    console.error("Ошибка при получении расходов:", expensesError);
+    throw new Error("Не удалось загрузить расходы");
+  }
+
+  const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+
+  // 4. Calculate profit, budget, treasury
   const profit = totalIncome - totalExpenses;
   const salaryBudget = Math.floor(profit * 0.7);
   const treasuryLeft = profit - salaryBudget;
 
-  await prisma.guildFunds.deleteMany({ where: { year, month } });
+  // 5. Delete previous fund record for the month
+  const { error: deleteError } = await supabase
+    .from("guild_funds")
+    .delete()
+    .eq("year", year)
+    .eq("month", month);
 
-  await prisma.guildFunds.create({
-    data: {
+  if (deleteError) {
+    console.error("Ошибка при удалении предыдущего фонда:", deleteError);
+    throw new Error("Не удалось очистить старые данные фонда");
+  }
+
+  // 6. Insert new guild fund record
+  const { error: insertError } = await supabase.from("guild_funds").insert([
+    {
       year,
       month,
-      totalIncome: Math.round(totalIncome),
-      totalExpenses,
+      total_income: Math.round(totalIncome),
+      total_expenses: totalExpenses,
       profit,
-      salaryBudget,
-      treasuryLeft,
+      salary_budget: salaryBudget,
+      treasury_left: treasuryLeft,
     },
-  });
+  ]);
+
+  if (insertError) {
+    console.error("Ошибка при создании фонда:", insertError);
+    throw new Error("Не удалось создать фонд гильдии");
+  }
 };

@@ -1,11 +1,21 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import prisma from "@/lib/db";
+import supabase from "@/lib/supabase";
 
-export const getExpenses = async () => await prisma.expense.findMany({
-    orderBy: { date: "desc" },
-  });
+export const getExpenses = async () => {
+  const { data, error } = await supabase
+    .from("expense")
+    .select("*")
+    .order("date", { ascending: false });
+
+  if (error) {
+    console.error("Ошибка при получении расходов:", error);
+    throw new Error("Не удалось получить расходы");
+  }
+
+  return data;
+};
 
 export const addExpense = async ({
   date,
@@ -20,15 +30,20 @@ export const addExpense = async ({
   source: string;
   comment?: string;
 }) => {
-  await prisma.expense.create({
-    data: {
-      date: new Date(date),
+  const { error } = await supabase.from("expense").insert([
+    {
+      date: new Date(date).toISOString(),
       amount,
       target,
       source,
       comment,
     },
-  });
+  ]);
+
+  if (error) {
+    console.error("Ошибка при добавлении расхода:", error);
+    throw new Error("Не удалось добавить расход");
+  }
 
   revalidatePath("/loot");
 };

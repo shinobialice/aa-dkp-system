@@ -1,26 +1,30 @@
 "use server";
 
-import prisma from "@/lib/db";
+import supabase from "@/lib/supabase";
 
 export async function getUserActivity(userId: number) {
-  const attendances = await prisma.raidAttendance.findMany({
-    where: { user_id: userId },
-    include: {
-      raid: true,
-    },
-  });
+  const { data: attendances, error } = await supabase
+    .from("raid_attendance")
+    .select("raid(start_date, type)")
+    .eq("user_id", userId);
+
+  if (error || !attendances) {
+    console.error("Ошибка при получении активности пользователя:", error);
+    throw new Error("Не удалось получить активность пользователя");
+  }
 
   const grouped: Record<string, { праймы: number; агл: number }> = {};
 
   attendances.forEach(({ raid }) => {
-    if (!raid.start_date) {return;}
+    if (!raid?.start_date) return;
 
-    const date = raid.start_date.toISOString().split("T")[0];
-    const type = raid.type?.toLowerCase() === "Прайм" ? "праймы" : "агл";
+    const date = raid.start_date.split("T")[0];
+    const type = raid.type === "Прайм" ? "праймы" : "агл";
 
     if (!grouped[date]) {
       grouped[date] = { праймы: 0, агл: 0 };
     }
+
     grouped[date][type]++;
   });
 

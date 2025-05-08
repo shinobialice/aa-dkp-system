@@ -1,6 +1,5 @@
 "use server";
-import { Prisma } from "@/prisma/generated/prisma-client";
-import prisma from "@/lib/db";
+import supabase from "@/lib/supabase";
 
 export const updateLootQueueEntry = async ({
   id,
@@ -15,23 +14,24 @@ export const updateLootQueueEntry = async ({
   delivered?: number;
   required?: number;
 }) => {
-  const data: Prisma.LootQueueUpdateInput = {};
+  const updateData: Record<string, unknown> = {};
 
-  if (status) {
-    data.status = status;
-  }
-  if (synth_target !== undefined) {
-    data.synth_target = synth_target;
-  }
-  if (required !== undefined) {
-    data.required = required;
-  }
-  if (delivered !== undefined) {
-    data.delivered = delivered;
+  if (status !== undefined) updateData.status = status;
+  if (synth_target !== undefined) updateData.synth_target = synth_target;
+  if (delivered !== undefined) updateData.delivered = delivered;
+  if (required !== undefined) updateData.required = required;
+
+  const { data, error } = await supabase
+    .from("loot_queue")
+    .update(updateData)
+    .eq("id", id)
+    .select()
+    .maybeSingle();
+
+  if (error || !data) {
+    console.error("Ошибка при обновлении очереди на лут:", error);
+    throw new Error("Не удалось обновить запись очереди");
   }
 
-  return prisma.lootQueue.update({
-    where: { id },
-    data,
-  });
+  return data;
 };

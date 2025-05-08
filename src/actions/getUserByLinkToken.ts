@@ -1,27 +1,25 @@
 "use server";
 
-import prisma from "@/lib/db";
+import supabase from "@/lib/supabase";
 
 export async function getUserByLinkToken(token: string) {
-  const result = await prisma.linkToken.findUnique({
-    where: { token },
-    include: { user: true },
-  });
+  const { data: result, error } = await supabase
+    .from("link_token")
+    .select("token, used, expiresAt, user(username)")
+    .eq("token", token)
+    .maybeSingle();
 
-  if (!result) {
+  if (error) {
+    console.error("Ошибка при получении linkToken:", error);
     return null;
   }
 
-  if (result.used) {
-    return null;
-  }
-
-  if (result.expiresAt < new Date()) {
+  if (!result || result.used || new Date(result.expiresAt) < new Date()) {
     return null;
   }
 
   return {
-    username: result.user.username,
-    expiresAt: result.expiresAt.toISOString(),
+    username: result.user?.username,
+    expiresAt: new Date(result.expiresAt).toISOString(),
   };
 }

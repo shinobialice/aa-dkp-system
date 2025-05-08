@@ -1,5 +1,5 @@
 "use server";
-import prisma from "@/lib/db";
+import supabase from "@/lib/supabase";
 
 const createRaidEvent = async (
   type: string,
@@ -10,32 +10,59 @@ const createRaidEvent = async (
   is_pvp: boolean,
   is_pvp_long: boolean
 ) => {
-  const event = await prisma.raid.create({
-    data: {
-      type,
-      dkp_summary,
-      start_date,
-      created_at: new Date(),
-      is_pvp,
-      is_pvp_long,
-      attendance: {
-        create: userIds.map((user_id) => ({
-          user_id,
-          created_at: new Date(),
-        })),
+  // 1. Create the raid
+  const { data: raid, error: raidError } = await supabase
+    .from("raid")
+    .insert([
+      {
+        type,
+        dkp_summary,
+        start_date: start_date.toISOString(),
+        created_at: new Date().toISOString(),
+        is_pvp,
+        is_pvp_long,
       },
-    },
-  });
+    ])
+    .select()
+    .maybeSingle();
 
-  await prisma.raidBoss.createMany({
-    data: bossIds.map((boss_id) => ({
-      raid_id: event.id,
-      boss_id,
-    })),
-    skipDuplicates: true,
-  });
+  if (raidError || !raid) {
+    console.error("Failed to create raid:", raidError);
+    throw new Error("Ошибка при создании рейда");
+  }
 
-  return event;
+  // 2. Create raid_attendance entries
+  const attendanceData = userIds.map((user_id) => ({
+    raid_id: raid.id,
+    user_id,
+    created_at: new Date().toISOString(),
+  }));
+
+  const { error: attendanceError } = await supabase
+    .from("raid_attendance")
+    .insert(attendanceData);
+
+  if (attendanceError) {
+    console.error("Failed to insert raid attendance:", attendanceError);
+    throw new Error("Ошибка при добавлении участников");
+  }
+
+  // 3. Create raid_boss entries
+  const bossData = bossIds.map((boss_id) => ({
+    raid_id: raid.id,
+    boss_id,
+  }));
+
+  const { error: bossError } = await supabase
+    .from("raid_boss")
+    .insert(bossData); // Removed invalid 'upsert' option
+
+  if (bossError) {
+    console.error("Failed to insert raid bosses:", bossError);
+    throw new Error("Ошибка при добавлении боссов");
+  }
+
+  return raid;
 };
 
 export default createRaidEvent;

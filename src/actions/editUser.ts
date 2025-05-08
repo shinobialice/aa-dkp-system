@@ -1,5 +1,5 @@
 "use server";
-import prisma from "@/lib/db";
+import supabase from "@/lib/supabase";
 
 const editUser = async (
   userId: number,
@@ -11,19 +11,27 @@ const editUser = async (
   vkName: string,
   joined_at: Date | string
 ) => {
-  const user = await prisma.user.update({
-    where: { id: Number(userId) },
-    data: {
+  const { data: user, error } = await supabase
+    .from("user")
+    .update({
       username,
       class: className,
       class_gear_score: classGearScore,
       secondary_class: secondaryClassName,
       secondary_class_gear_score: secondaryClassGearScore,
       vk_name: vkName,
-      joined_at: new Date(joined_at),
-    },
-  });
+      joined_at: new Date(joined_at).toISOString(),
+    })
+    .eq("id", userId)
+    .select()
+    .maybeSingle();
+
+  if (error || !user) {
+    console.error("Failed to update user:", error);
+    throw new Error("Ошибка при обновлении игрока");
+  }
 
   return user;
 };
+
 export default editUser;

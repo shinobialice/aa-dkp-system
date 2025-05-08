@@ -1,14 +1,19 @@
 "use server";
-import prisma from "@/lib/db";
+import supabase from "@/lib/supabase";
 
 const deleteItemFromUserInventory = async (id: number) => {
-  try {
-    const deletedItem = await prisma.userInventory.delete({
-      where: { id },
-    });
-    return deletedItem;
-  } catch {
+  const { data, error } = await supabase
+    .from("user_inventory")
+    .delete()
+    .eq("id", id)
+    .select()
+    .maybeSingle();
+
+  if (error || !data) {
     throw new Error("Failed to delete item from user inventory");
   }
+
+  return data;
 };
+
 export default deleteItemFromUserInventory;

@@ -1,60 +1,101 @@
 "use server";
 
-import prisma from "@/lib/db";
+import supabase from "@/lib/supabase";
 
 export const saveGivenAwayLoot = async (
   userId: number,
   item: { name: string; date: string; comment?: string; status: string }
 ) => {
-  const dateObj = new Date(item.date);
+  const dateObj = new Date(item.date).toISOString();
 
-  await prisma.givenAwayLoot.upsert({
-    where: {
-      user_id_name: {
-        user_id: userId,
-        name: item.name,
-      },
-    },
-    update: {
-      date: dateObj,
-      comment: item.comment,
-      status: item.status,
-    },
-    create: {
-      user_id: userId,
-      name: item.name,
-      date: dateObj,
-      comment: item.comment,
-      status: item.status,
-    },
-  });
+  // 1. Check if givenawayloot entry already exists
+  const { data: existing, error: findError } = await supabase
+    .from("givenawayloot")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("name", item.name)
+    .maybeSingle();
 
-  if (item.status === "Выдано") {
-    const exists = await prisma.userInventory.findFirst({
-      where: {
-        user_id: userId,
-        name: item.name,
-        type: "Выдано",
-      },
-    });
+  if (findError) {
+    console.error("Ошибка при поиске записи givenawayloot:", findError);
+    throw new Error("Не удалось сохранить выданный лут");
+  }
 
-    if (!exists) {
-      await prisma.userInventory.create({
-        data: {
-          user_id: userId,
-          name: item.name,
-          type: "Выдано",
-          created_at: dateObj,
-        },
-      });
+  if (existing) {
+    // 2. Update existing entry
+    const { error: updateError } = await supabase
+      .from("givenawayloot")
+      .update({
+        date: dateObj,
+        comment: item.comment,
+        status: item.status,
+      })
+      .eq("id", existing.id);
+
+    if (updateError) {
+      throw new Error("Ошибка при обновлении выданного лута");
     }
   } else {
-    await prisma.userInventory.deleteMany({
-      where: {
+    // 3. Insert new entry
+    const { error: insertError } = await supabase.from("givenawayloot").insert([
+      {
         user_id: userId,
         name: item.name,
-        type: "Выдано",
+        date: dateObj,
+        comment: item.comment,
+        status: item.status,
+        created_at: new Date().toISOString(),
       },
-    });
+    ]);
+
+    if (insertError) {
+      throw new Error("Ошибка при создании выданного лута");
+    }
+  }
+
+  // 4. Handle userInventory
+  if (item.status === "Выдано") {
+    // Check if it already exists
+    const { data: existingInventory, error: inventoryFindError } =
+      await supabase
+        .from("user_inventory")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("name", item.name)
+        .eq("type", "Выдано")
+        .maybeSingle();
+
+    if (inventoryFindError) {
+      console.error("Ошибка при поиске инвентаря:", inventoryFindError);
+      throw new Error("Не удалось проверить инвентарь");
+    }
+
+    if (!existingInventory) {
+      const { error: insertInventoryError } = await supabase
+        .from("user_inventory")
+        .insert([
+          {
+            user_id: userId,
+            name: item.name,
+            type: "Выдано",
+            created_at: dateObj,
+          },
+        ]);
+
+      if (insertInventoryError) {
+        throw new Error("Ошибка при добавлении предмета в инвентарь");
+      }
+    }
+  } else {
+    const { error: deleteError } = await supabase
+      .from("user_inventory")
+      .delete()
+      .eq("user_id", userId)
+      .eq("name", item.name)
+      .eq("type", "Выдано");
+
+    if (deleteError) {
+      throw new Error("Ошибка при удалении предмета из инвентаря");
+    }
   }
 };

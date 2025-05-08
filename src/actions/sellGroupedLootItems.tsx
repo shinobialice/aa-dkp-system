@@ -1,6 +1,6 @@
 "use server";
 
-import prisma from "@/lib/db";
+import supabase from "@/lib/supabase";
 
 export async function sellGroupedLootItems({
   itemTypeId,
@@ -20,20 +20,21 @@ export async function sellGroupedLootItems({
 }) {
   let left = quantity;
 
-  const items = await prisma.loot.findMany({
-    where: {
-      itemTypeId,
-      status,
-    },
-    orderBy: {
-      acquired_at: "asc",
-    },
-    include: {
-      itemType: true,
-    },
-  });
+  // 1. Fetch loot with itemType
+  const { data: items, error: fetchError } = await supabase
+    .from("loot")
+    .select("*, item_type(name)")
+    .eq("item_type_id", itemTypeId)
+    .eq("status", status)
+    .order("acquired_at", { ascending: true });
 
-  if (items.reduce((sum, i) => sum + (i.quantity ?? 1), 0) < quantity) {
+  if (fetchError || !items) {
+    console.error("Ошибка при получении лута:", fetchError);
+    throw new Error("Не удалось загрузить предметы");
+  }
+
+  const totalAvailable = items.reduce((sum, i) => sum + (i.quantity ?? 1), 0);
+  if (totalAvailable < quantity) {
     throw new Error("Недостаточно предметов для продажи");
   }
 
@@ -41,31 +42,47 @@ export async function sellGroupedLootItems({
     const availableQty = item.quantity ?? 1;
     const takeQty = Math.min(left, availableQty);
 
-    // Обновить или удалить исходную запись
+    // 2. Update or delete the source loot entry
     if (takeQty === availableQty) {
-      await prisma.loot.delete({ where: { id: item.id } });
+      const { error: deleteError } = await supabase
+        .from("loot")
+        .delete()
+        .eq("id", item.id);
+
+      if (deleteError) {
+        throw new Error("Ошибка при удалении лута");
+      }
     } else {
-      await prisma.loot.update({
-        where: { id: item.id },
-        data: {
-          quantity: availableQty - takeQty,
-        },
-      });
+      const { error: updateError } = await supabase
+        .from("loot")
+        .update({ quantity: availableQty - takeQty })
+        .eq("id", item.id);
+
+      if (updateError) {
+        throw new Error("Ошибка при обновлении количества лута");
+      }
     }
 
+    // 3. Add to user inventory
     if (soldToId) {
-      await prisma.userInventory.create({
-        data: {
-          user_id: soldToId,
-          name: item.itemType.name,
-          type: isFree ? "Выдано" : "Куплено",
-          created_at: new Date(),
-          quantity: takeQty,
-        },
-      });
+      const { error: insertError } = await supabase
+        .from("user_inventory")
+        .insert([
+          {
+            user_id: soldToId,
+            name: item.item_type.name,
+            type: isFree ? "Выдано" : "Куплено",
+            quantity: takeQty,
+            created_at: new Date().toISOString(),
+          },
+        ]);
+
+      if (insertError) {
+        throw new Error("Ошибка при добавлении в инвентарь");
+      }
     }
 
     left -= takeQty;
-    if (left <= 0) {break;}
+    if (left <= 0) break;
   }
 }

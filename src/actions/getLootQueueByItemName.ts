@@ -1,26 +1,38 @@
 "use server";
 
-import prisma from "@/lib/db";
+import supabase from "@/lib/supabase";
 
 export const getLootQueueByItemName = async (itemName: string) => {
-  const item = await prisma.itemType.findUnique({
-    where: { name: itemName },
-    include: {
-      lootQueue: {
-        include: {
-          user: true,
-        },
-        orderBy: { created_at: "asc" },
-      },
-    },
-  });
+  // Step 1: get item by name
+  const { data: item, error: itemError } = await supabase
+    .from("item_type")
+    .select("id")
+    .eq("name", itemName)
+    .maybeSingle();
 
-  if (!item) {return [];}
+  if (itemError || !item) {
+    console.error("Item not found or error:", itemError);
+    return [];
+  }
 
-  return item.lootQueue.map((entry) => ({
+  // Step 2: get loot queue entries for this item with user info
+  const { data: queue, error: queueError } = await supabase
+    .from("loot_queue")
+    .select(
+      "id, user_id, status, synth_target, required, delivered, created_at, user(username)"
+    )
+    .eq("item_type_id", item.id)
+    .order("created_at", { ascending: true });
+
+  if (queueError || !queue) {
+    console.error("Queue load error:", queueError);
+    return [];
+  }
+
+  return queue.map((entry) => ({
     id: entry.id,
-    userId: entry.userId,
-    username: entry.user.username,
+    userId: entry.user_id,
+    username: entry.user?.username,
     status: entry.status,
     synth_target: entry.synth_target,
     required: entry.required ?? 0,
