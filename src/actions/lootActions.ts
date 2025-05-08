@@ -15,19 +15,23 @@ export const getItemTypes = async () => {
 };
 
 // Get loot list with itemType
-export const getLoot = async () => {
-  const { data, error } = await supabase
-    .from("loot")
-    .select("*, item_type(name, price)")
-    .order("acquired_at", { ascending: false });
+export async function getLoot() {
+  const { data, error } = await supabase.from("loot").select(`
+      *,
+      itemType: item_type (
+        id,
+        name,
+        price
+      )
+    `);
 
-  if (error || !data) {
-    console.error("Ошибка при получении лута:", error);
-    throw new Error("Не удалось загрузить список лута");
+  if (error) {
+    console.error("Ошибка при загрузке лута:", error);
+    return [];
   }
 
   return data;
-};
+}
 
 // Add loot item
 export const addLootItem = async ({

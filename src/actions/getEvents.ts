@@ -21,10 +21,11 @@ export const getRaids = async () => {
       // raid.raid_boss: { boss: { id, boss_name }[] }[]
       const title =
         raid.raid_boss
-          ?.map((rb) => rb.boss[0]?.boss_name) // <- take boss[0]
-          .filter(Boolean) // drop any undefined
-          .join(", ") || // join into string
-        "Unknown Boss";
+          ?.map((rb) => rb.boss?.boss_name) // ✅ теперь это просто объект
+          .filter(Boolean)
+          .join(", ") || "Unknown Boss";
+
+      console.log(JSON.stringify(raid.raid_boss, null, 2));
 
       let color = "gray";
       if (raid.type === "Прайм") color = "rgb(90, 54, 165)";
