@@ -87,7 +87,7 @@ export const LootIcons: { [key: string]: string | number } = {
   "Средоточие морей": 4770, //+рамка //archeagecodex.com/images/icon_grade5.png
   "Глаз Левиафана": "https://archeagecodex.com/items/icon_item_0184.png", //+рамка //archeagecodex.com/images/icon_grade6.png
   "Каменное сердце Морфеоса":
-    "//archeagecodex.com/items/quest/icon_item_quest028.png", //+рамка //archeagecodex.com/images/icon_grade5.png
+    "https://archeagecodex.com/items/quest/icon_item_quest028.png",
   "Эссенция ярости": 4687, //+рамка //archeagecodex.com/images/icon_grade5.png
   "Трофейная эссенция стихий": 3094, //+рамка //archeagecodex.com/images/icon_grade12.png
   "Свиток пробудившихся мифов": 4893, //+рамка //archeagecodex.com/images/icon_grade6.png
@@ -112,8 +112,12 @@ export const LootIcons: { [key: string]: string | number } = {
 
 export function getLootIconUrl(itemName: string): string {
   const value = LootIcons[itemName];
-  if (!value) {return "/icons/placeholder.png";}
-  if (typeof value === "number") {return `${BASE_URL}${value}.png`;}
+  if (!value) {
+    return "/icons/placeholder.png";
+  }
+  if (typeof value === "number") {
+    return `${BASE_URL}${value}.png`;
+  }
   return value;
 }
 

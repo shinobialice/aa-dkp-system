@@ -4,10 +4,9 @@ import type { Database } from "@/types/supabase";
 
 type RaidRow = Database["public"]["Tables"]["raid"]["Row"];
 
-// What Supabase actually returns for the joins
 type RaidWithRelations = RaidRow & {
-  raid_bosses: Array<{
-    boss: Database["public"]["Tables"]["boss"]["Row"][]; // always an array
+  raid_boss: Array<{
+    boss: Database["public"]["Tables"]["boss"]["Row"]; // boss — это объект
   }>;
   raid_attendance: Array<{
     user_id: number;
@@ -29,7 +28,7 @@ export async function getUserMonthlyAttendance(
       id,
       type,
       start_date,
-      raid_bosses(boss(dkp_points)),
+      raid_boss(boss(dkp_points)),
       raid_attendance(user_id)
     `
     )
@@ -41,8 +40,7 @@ export async function getUserMonthlyAttendance(
     throw new Error("Не удалось загрузить рейды");
   }
 
-  // 3. Cast to our explicit type
-  const raids = data as RaidWithRelations[];
+  const raids = data as unknown as RaidWithRelations[];
 
   let totalAgl = 0;
   let totalPrime = 0;
@@ -50,10 +48,8 @@ export async function getUserMonthlyAttendance(
   let userPrime = 0;
 
   for (const raid of raids) {
-    // Now TS knows raid.raid_bosses is Array<{ boss: Row[] }>
-    const dkp = raid.raid_bosses.reduce((sum, rb) => {
-      const bossArray = rb.boss;
-      const points = bossArray[0]?.dkp_points ?? 0;
+    const dkp = raid.raid_boss.reduce((sum, rb) => {
+      const points = rb.boss?.dkp_points ?? 0;
       return sum + points;
     }, 0);
 

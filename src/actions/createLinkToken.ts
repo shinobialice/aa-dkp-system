@@ -5,19 +5,22 @@ import supabase from "@/lib/supabase";
 
 export async function createLinkToken(userId: number) {
   const token = randomUUID();
+  // Build the insert object to match your TS types exactly:
+  const insertObj = {
+    token,
+    userId, // <-- camelCase
+    expiresAt: new Date(Date.now() + 86400_000).toISOString(),
+    used: false,
+  };
 
-  const { error } = await supabase.from("link_token").insert([
-    {
-      token,
-      user_id: userId,
-      expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(), // 24h
-      used: false,
-      created_at: new Date().toISOString(),
-    },
-  ]);
+  const { data, error } = await supabase
+    .from("link_token")
+    .insert([insertObj])
+    .select() // if you want the row back
+    .maybeSingle();
 
-  if (error) {
-    console.error("Error creating link token:", error);
+  if (error || !data) {
+    console.error("Error creating link token:", error || "no data");
     throw new Error("Не удалось создать токен привязки");
   }
 

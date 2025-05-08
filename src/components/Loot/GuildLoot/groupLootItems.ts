@@ -4,7 +4,10 @@ export function groupLootItems(loot: LootItem[]): GroupedLootItem[] {
   const grouped = new Map<string, GroupedLootItem>();
 
   for (const item of loot) {
-    const dateKey = item.sold_at?.toISOString().split("T")[0] || "";
+    const dateKey = item.sold_at
+      ? new Date(item.sold_at).toISOString().split("T")[0]
+      : "";
+
     const key = `${item.itemTypeId}-${item.status}-${item.sold_to ?? ""}-${
       item.source ?? ""
     }-${dateKey}`;
@@ -13,7 +16,7 @@ export function groupLootItems(loot: LootItem[]): GroupedLootItem[] {
       grouped.set(key, {
         id: item.itemTypeId * 1000 + Math.floor(Math.random() * 1000),
         itemTypeId: item.itemTypeId,
-        name: item.itemType.name,
+        name: item.itemType?.name ?? "Неизвестно",
         total: item.quantity ?? 1,
         status: item.status ?? "Неизвестно",
         source: item.source,
@@ -35,7 +38,9 @@ export function groupLootItems(loot: LootItem[]): GroupedLootItem[] {
           ? item.quantity ?? 1
           : 0;
       group.sold_to.add(item.sold_to ?? "");
-      if (item.comment) {group.comments.add(item.comment);}
+      if (item.comment) {
+        group.comments.add(item.comment);
+      }
 
       if (
         item.sold_at &&
