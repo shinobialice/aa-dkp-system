@@ -1,6 +1,18 @@
 "use server";
-
 import supabase from "@/lib/supabase";
+import type { Database } from "@/types/supabase";
+
+type RaidRow = Database["public"]["Tables"]["raid"]["Row"];
+
+// What Supabase actually returns for the joins
+type RaidWithRelations = RaidRow & {
+  raid_bosses: Array<{
+    boss: Database["public"]["Tables"]["boss"]["Row"][]; // always an array
+  }>;
+  raid_attendance: Array<{
+    user_id: number;
+  }>;
+};
 
 export async function getUserMonthlyAttendance(
   userId: number,
@@ -10,8 +22,7 @@ export async function getUserMonthlyAttendance(
   const startDate = new Date(year, month - 1, 1).toISOString();
   const endDate = new Date(year, month, 1).toISOString();
 
-  // Fetch raids with bosses and attendance
-  const { data: raids, error } = await supabase
+  const { data, error } = await supabase
     .from("raid")
     .select(
       `
@@ -25,10 +36,13 @@ export async function getUserMonthlyAttendance(
     .gte("start_date", startDate)
     .lt("start_date", endDate);
 
-  if (error || !raids) {
+  if (error || !data) {
     console.error("Ошибка при получении рейдов:", error);
     throw new Error("Не удалось загрузить рейды");
   }
+
+  // 3. Cast to our explicit type
+  const raids = data as RaidWithRelations[];
 
   let totalAgl = 0;
   let totalPrime = 0;
@@ -36,13 +50,14 @@ export async function getUserMonthlyAttendance(
   let userPrime = 0;
 
   for (const raid of raids) {
-    const dkp = (raid.raid_bosses ?? []).reduce(
-      (sum, rb) => sum + (rb.boss?.dkp_points || 0),
-      0
-    );
-    const attended = (raid.raid_attendance ?? []).some(
-      (a) => a.user_id === userId
-    );
+    // Now TS knows raid.raid_bosses is Array<{ boss: Row[] }>
+    const dkp = raid.raid_bosses.reduce((sum, rb) => {
+      const bossArray = rb.boss;
+      const points = bossArray[0]?.dkp_points ?? 0;
+      return sum + points;
+    }, 0);
+
+    const attended = raid.raid_attendance.some((a) => a.user_id === userId);
 
     if (raid.type === "Прайм") {
       totalPrime += dkp;

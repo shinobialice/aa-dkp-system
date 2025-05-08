@@ -16,22 +16,20 @@ export async function getUserActivity(userId: number) {
   const grouped: Record<string, { праймы: number; агл: number }> = {};
 
   attendances.forEach(({ raid }) => {
-    if (!raid?.start_date) return;
+    // raid is an array, so grab the first element
+    const r = Array.isArray(raid) ? raid[0] : raid;
+    if (!r?.start_date) return;
 
-    const date = raid.start_date.split("T")[0];
-    const type = raid.type === "Прайм" ? "праймы" : "агл";
+    const date = r.start_date.split("T")[0];
+    const type = r.type === "Прайм" ? "праймы" : "агл";
 
     if (!grouped[date]) {
       grouped[date] = { праймы: 0, агл: 0 };
     }
-
     grouped[date][type]++;
   });
 
   return Object.entries(grouped)
-    .map(([date, data]) => ({
-      date,
-      ...data,
-    }))
+    .map(([date, data]) => ({ date, ...data }))
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 }

@@ -1,5 +1,6 @@
 "use server";
 import supabase from "@/lib/supabase";
+import type { Database } from "@/types/supabase";
 
 // 1. Get guild funds for a given month/year
 export const getGuildFunds = async (month: number, year: number) => {
@@ -19,25 +20,43 @@ export const getGuildFunds = async (month: number, year: number) => {
 };
 
 // 2. Get salaries with user info for the month
+
 export const getSalariesForMonth = async (month: number, year: number) => {
   const { data, error } = await supabase
     .from("salary")
-    .select("user_id, amount, bonus, total, user(username)")
+    .select(
+      `
+    id,
+    userId,
+    amount,
+    bonus,
+    total,
+    month,
+    year,
+    user (
+      username
+    )
+  `
+    )
     .eq("month", month)
     .eq("year", year);
 
   if (error || !data) {
-    console.error("Error fetching salaries:", error);
     throw new Error("Ошибка при получении зарплат");
   }
 
-  return data.map((s) => ({
-    userId: s.user_id,
-    username: s.user?.username,
-    amount: s.amount,
-    bonus: s.bonus,
-    total: s.total,
-  }));
+  return (data as any[]).map((s) => {
+    const username = Array.isArray(s.user)
+      ? s.user[0]?.username
+      : s.user?.username;
+    return {
+      userId: s.userId,
+      username: username ?? "Неизвестно",
+      amount: s.amount,
+      bonus: s.bonus,
+      total: s.total,
+    };
+  });
 };
 
 // 3. Generate salaries

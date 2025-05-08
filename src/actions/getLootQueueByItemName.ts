@@ -32,7 +32,8 @@ export const getLootQueueByItemName = async (itemName: string) => {
   return queue.map((entry) => ({
     id: entry.id,
     userId: entry.user_id,
-    username: entry.user?.username,
+    // grab the first user object in the array:
+    username: entry.user?.[0]?.username ?? null,
     status: entry.status,
     synth_target: entry.synth_target,
     required: entry.required ?? 0,

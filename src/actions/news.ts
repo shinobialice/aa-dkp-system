@@ -4,7 +4,7 @@ import supabase from "@/lib/supabase";
 
 export async function getNews() {
   const { data, error } = await supabase
-    .from("news")
+    .from("News")
     .select("*")
     .order("date", { ascending: false });
 
@@ -18,7 +18,7 @@ export async function getNews() {
 
 export async function createNews(title: string, content: string) {
   const { data, error } = await supabase
-    .from("news")
+    .from("News")
     .insert([{ title, content }])
     .select()
     .maybeSingle();
@@ -33,7 +33,7 @@ export async function createNews(title: string, content: string) {
 
 export async function updateNews(id: number, title: string, content: string) {
   const { data, error } = await supabase
-    .from("news")
+    .from("News")
     .update({ title, content })
     .eq("id", id)
     .select()
@@ -48,7 +48,7 @@ export async function updateNews(id: number, title: string, content: string) {
 }
 
 export async function deleteNews(id: number) {
-  const { error } = await supabase.from("news").delete().eq("id", id);
+  const { error } = await supabase.from("News").delete().eq("id", id);
 
   if (error) {
     console.error("Ошибка при удалении новости:", error);
