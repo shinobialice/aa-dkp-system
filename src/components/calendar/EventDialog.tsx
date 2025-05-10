@@ -78,7 +78,7 @@ export function EventDialog({
     if (mode === "edit" && selectedEvent && users.length > 0) {
       const selection: Record<number, boolean> = {};
       const selectedIds =
-        selectedEvent.attendance?.map((a: any) => a.user_id) || [];
+        selectedEvent.raid_attendance?.map((a: any) => a.user.id) || [];
 
       selectedIds.forEach((id: number) => {
         const userIndex = users.findIndex((u) => u.id === id);
@@ -119,7 +119,9 @@ export function EventDialog({
     setErrors(newErrors);
 
     const hasErrors = Object.values(newErrors).some(Boolean);
-    if (hasErrors) {return;}
+    if (hasErrors) {
+      return;
+    }
 
     const userIds = selectedUsers.map((u) => u.id);
     const bossIds = selectedBosses.map((b) => b.id);
@@ -149,7 +151,9 @@ export function EventDialog({
 
     setSuccess(mode === "edit" ? "Обновлено!" : "Создано!");
     setOpen(false);
-    if (onComplete) {onComplete();}
+    if (onComplete) {
+      onComplete();
+    }
   };
 
   return (
