@@ -3,37 +3,37 @@
 import supabase from "@/lib/supabase";
 
 export const getLootQueueByItemName = async (itemName: string) => {
-  // Step 1: get item by name
   const { data: item, error: itemError } = await supabase
     .from("item_type")
-    .select("id")
+    .select(
+      `
+        id,
+        loot_queue (
+          id,
+          user_id,
+          status,
+          synth_target,
+          required,
+          delivered,
+          created_at,
+          user (
+            username
+          )
+        )
+      `
+    )
     .eq("name", itemName)
-    .maybeSingle();
+    .single();
 
   if (itemError || !item) {
-    console.error("Item not found or error:", itemError);
+    console.error(itemError);
     return [];
   }
 
-  // Step 2: get loot queue entries for this item with user info
-  const { data: queue, error: queueError } = await supabase
-    .from("loot_queue")
-    .select(
-      "id, user_id, status, synth_target, required, delivered, created_at, user(username)"
-    )
-    .eq("item_type_id", item.id)
-    .order("created_at", { ascending: true });
-
-  if (queueError || !queue) {
-    console.error("Queue load error:", queueError);
-    return [];
-  }
-
-  return queue.map((entry) => ({
+  return (item.loot_queue || []).map((entry: any) => ({
     id: entry.id,
     userId: entry.user_id,
-    // grab the first user object in the array:
-    username: entry.user?.[0]?.username ?? null,
+    username: entry.user?.username || "Unknown",
     status: entry.status,
     synth_target: entry.synth_target,
     required: entry.required ?? 0,
