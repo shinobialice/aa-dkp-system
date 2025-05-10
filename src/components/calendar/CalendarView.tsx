@@ -184,10 +184,12 @@ export default function ActivitiesPage() {
             eventDisplay="block"
             nowIndicator
             slotDuration="00:30:00"
-            slotLabelFormat={{
-              minute: "2-digit",
-              hour12: false,
-            }}
+            slotLabelFormat={[
+              {
+                hour: "2-digit",
+                hour12: false,
+              },
+            ]}
             dayHeaderFormat={{
               weekday: "short",
               day: "2-digit",
