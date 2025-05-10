@@ -238,7 +238,7 @@ export function UserActivityChart({ userId }: { userId: number }) {
                 <ChartTooltipContent
                   labelFormatter={(value) => {
                     if (selectedMonth === null) {
-                      return value; // Название месяца
+                      return value;
                     }
                     return new Date(value).toLocaleDateString("ru-RU", {
                       month: "short",
