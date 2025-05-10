@@ -94,7 +94,12 @@ export function UserActivityChart({ userId }: { userId: number }) {
       );
     })
     .map((item) => {
-      const filteredEntry: Record<string, any> = { date: item.date };
+      const date = new Date(item.date);
+      const month = months[date.getMonth()];
+      const filteredEntry: Record<string, any> = {
+        date: item.date,
+        month,
+      };
       types.forEach((type) => {
         if (item[type] !== undefined) {
           filteredEntry[type] = item[type];
@@ -211,31 +216,40 @@ export function UserActivityChart({ userId }: { userId: number }) {
             </defs>
             <CartesianGrid vertical={false} />
             <XAxis
-              dataKey="date"
+              dataKey={selectedMonth === null ? "month" : "date"}
               tickLine={false}
               axisLine={false}
               tickMargin={8}
               minTickGap={32}
               tickFormatter={(value) => {
+                if (selectedMonth === null) {
+                  return value; // Уже название месяца
+                }
                 const date = new Date(value);
-                return date.toLocaleDateString("en-US", {
-                  month: "short",
+                return date.toLocaleDateString("ru-RU", {
                   day: "numeric",
                 });
               }}
             />
+
             <ChartTooltip
               cursor={false}
               content={
                 <ChartTooltipContent
-                  labelFormatter={(value) => new Date(value).toLocaleDateString("en-US", {
+                  labelFormatter={(value) => {
+                    if (selectedMonth === null) {
+                      return value; // Название месяца
+                    }
+                    return new Date(value).toLocaleDateString("ru-RU", {
                       month: "short",
                       day: "numeric",
-                    })}
+                    });
+                  }}
                   indicator="dot"
                 />
               }
             />
+
             {types.includes("агл") && (
               <Area
                 dataKey="агл"
