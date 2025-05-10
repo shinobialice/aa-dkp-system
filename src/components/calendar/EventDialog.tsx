@@ -65,7 +65,7 @@ export function EventDialog({
       setIsPvp(selectedEvent.is_pvp);
       setIsPvpLong(selectedEvent.is_pvp_long);
 
-      const bosses = selectedEvent.raidBosses?.map((rb: any) => rb.boss) || [];
+      const bosses = selectedEvent.raid_boss?.map((rb: any) => rb.boss) || [];
       setSelectedBosses(bosses);
 
       if (selectedEvent.type === "Прайм" && bosses.length > 0) {
