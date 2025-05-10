@@ -9,11 +9,11 @@ import {
   Sun,
   ChevronUp,
   ChevronDown,
-  LayoutDashboard,
   Newspaper,
   Users,
   CalendarDays,
   Trophy,
+  Calendar,
   LineChart,
   Settings,
   PiggyBank,
@@ -43,6 +43,7 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 import useUserTag from "@/src/hooks/useUserTag";
+import Image from "next/image";
 
 export function AppSidebar() {
   const { data: session } = useSession();
@@ -50,11 +51,10 @@ export function AppSidebar() {
   const isAdmin = useUserTag("Администратор");
 
   const menuItems = [
-    { title: "Панель", url: "/", icon: LayoutDashboard },
     { title: "Новости", url: "/news", icon: Newspaper },
     { title: "Участники", url: "/members", icon: Users },
     { title: "Активности", url: "/activities", icon: CalendarDays },
-    { title: "Расписание", url: "/schedule", icon: CalendarDays },
+    { title: "Расписание", url: "/schedule", icon: Calendar },
     {
       title: "Добыча",
       icon: Trophy,
@@ -79,9 +79,19 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarContent>
-        <div className="text-center mb-6 border-b border-border pb-4 pt-4">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-3 mb-6 border-b border-border pb-4 pt-4 pl-8"
+        >
+          <Image
+            src="/images/logo.png"
+            alt="No Fear"
+            width={50}
+            height={50}
+            className="mb-0"
+          />
           <h2 className="text-2xl font-bold text-primary">No Fear</h2>
-        </div>
+        </Link>
 
         <SidebarGroup>
           <SidebarGroupLabel>Меню</SidebarGroupLabel>
