@@ -24,7 +24,6 @@ const VKProvider = (): OAuthConfig<any> => ({
   },
   clientId: process.env.VK_CLIENT_ID!,
   clientSecret: process.env.VK_CLIENT_SECRET!,
-  checks: ["pkce", "state"],
   profile: (profile) => {
     return {
       id: profile.id,
