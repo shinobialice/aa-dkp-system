@@ -2,10 +2,13 @@
 import supabase from "@/lib/supabase";
 import type { Database } from "@/types/supabase";
 
+type SalaryInsert = Database["public"]["Tables"]["Salary"]["Insert"];
+
+
 // 1. Get guild funds for a given month/year
 export const getGuildFunds = async (month: number, year: number) => {
   const { data, error } = await supabase
-    .from("guild_funds")
+    .from("GuildFunds")
     .select("*")
     .eq("month", month)
     .eq("year", year)
@@ -23,7 +26,7 @@ export const getGuildFunds = async (month: number, year: number) => {
 
 export const getSalariesForMonth = async (month: number, year: number) => {
   const { data, error } = await supabase
-    .from("salary")
+    .from("Salary")
     .select(
       `
     id,
@@ -46,9 +49,7 @@ export const getSalariesForMonth = async (month: number, year: number) => {
   }
 
   return (data as any[]).map((s) => {
-    const username = Array.isArray(s.user)
-      ? s.user[0]?.username
-      : s.user?.username;
+    const username = s.user?.username ?? "Неизвестно";
     return {
       userId: s.userId,
       username: username ?? "Неизвестно",
@@ -63,7 +64,7 @@ export const getSalariesForMonth = async (month: number, year: number) => {
 export const generateSalaries = async (month: number, year: number) => {
   // Get salary budget
   const { data: fund, error: fundError } = await supabase
-    .from("guild_funds")
+    .from("GuildFunds")
     .select("*")
     .eq("month", month)
     .eq("year", year)
@@ -76,7 +77,7 @@ export const generateSalaries = async (month: number, year: number) => {
   // Get eligible users
   const { data: users, error: usersError } = await supabase
     .from("user")
-    .select("id, salary_bonus")
+    .select("id, salaryBonus")
     .eq("active", true)
     .eq("is_eligible_for_salary", true);
 
@@ -85,11 +86,11 @@ export const generateSalaries = async (month: number, year: number) => {
   }
 
   // Calculate base salary
-  const baseAmount = Math.floor(fund.salary_budget / users.length);
+  const baseAmount = Math.floor(fund.salaryBudget / users.length);
 
   // Delete existing salaries for that month
   const { error: deleteError } = await supabase
-    .from("salary")
+    .from("Salary")
     .delete()
     .eq("month", month)
     .eq("year", year);
@@ -99,22 +100,18 @@ export const generateSalaries = async (month: number, year: number) => {
   }
 
   // Insert new salary records
-  const salaryRows = users.map((user) => {
-    const bonus = user.salary_bonus ?? 0;
-    const total = baseAmount + bonus;
-
-    return {
-      year,
-      month,
-      user_id: user.id,
-      amount: baseAmount,
-      bonus,
-      total,
-    };
-  });
+  const salaryRows: SalaryInsert[] = users.map((user) => ({
+    year,
+    month,
+    userId: user.id,
+    amount: baseAmount,
+    bonus: user.salaryBonus ?? 0,
+    total: baseAmount + (user.salaryBonus ?? 0),
+  }));
+  
 
   const { error: insertError } = await supabase
-    .from("salary")
+    .from("Salary")
     .insert(salaryRows);
 
   if (insertError) {

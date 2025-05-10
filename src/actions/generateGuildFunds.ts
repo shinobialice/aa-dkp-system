@@ -14,7 +14,7 @@ export const generateGuildFunds = async (month: number, year: number) => {
   // 1. Fetch sold loot with itemType joined
   const { data: loot, error: lootError } = await supabase
     .from("loot")
-    .select("quantity, item_type:price") 
+    .select("quantity, item_type:price")
     .eq("status", "Продано")
     .gte("acquired_at", startIso)
     .lt("acquired_at", endIso);
@@ -26,13 +26,13 @@ export const generateGuildFunds = async (month: number, year: number) => {
 
   // 2. Calculate total income
   const totalIncome = loot.reduce((sum, item) => {
-    const price = item.item_type?.price ?? 0; 
+    const price = item.item_type?.price ?? 0;
     return sum + price * item.quantity;
   }, 0);
 
   // 3. Fetch expenses
   const { data: expenses, error: expensesError } = await supabase
-    .from("expense")
+    .from("Expense")
     .select("amount")
     .gte("date", startIso)
     .lt("date", endIso);
@@ -51,7 +51,7 @@ export const generateGuildFunds = async (month: number, year: number) => {
 
   // 5. Delete previous fund record for the month
   const { error: deleteError } = await supabase
-    .from("guild_funds")
+    .from("GuildFunds")
     .delete()
     .eq("year", year)
     .eq("month", month);
@@ -62,15 +62,15 @@ export const generateGuildFunds = async (month: number, year: number) => {
   }
 
   // 6. Insert new guild fund record
-  const { error: insertError } = await supabase.from("guild_funds").insert([
+  const { error: insertError } = await supabase.from("GuildFunds").insert([
     {
       year,
       month,
-      total_income: Math.round(totalIncome),
-      total_expenses: totalExpenses,
+      totalIncome: Math.round(totalIncome),
+      totalExpenses: totalExpenses,
       profit,
-      salary_budget: salaryBudget,
-      treasury_left: treasuryLeft,
+      salaryBudget: salaryBudget,
+      treasuryLeft: treasuryLeft,
     },
   ]);
 

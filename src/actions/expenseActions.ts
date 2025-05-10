@@ -5,7 +5,7 @@ import supabase from "@/lib/supabase";
 
 export const getExpenses = async () => {
   const { data, error } = await supabase
-    .from("expense")
+    .from("Expense")
     .select("*")
     .order("date", { ascending: false });
 
@@ -30,7 +30,7 @@ export const addExpense = async ({
   source: string;
   comment?: string;
 }) => {
-  const { error } = await supabase.from("expense").insert([
+  const { error } = await supabase.from("Expense").insert([
     {
       date: new Date(date).toISOString(),
       amount,
