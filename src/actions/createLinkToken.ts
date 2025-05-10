@@ -5,10 +5,9 @@ import supabase from "@/lib/supabase";
 
 export async function createLinkToken(userId: number) {
   const token = randomUUID();
-  // Build the insert object to match your TS types exactly:
   const insertObj = {
     token,
-    userId, // <-- camelCase
+    userId,
     expiresAt: new Date(Date.now() + 86400_000).toISOString(),
     used: false,
   };
@@ -16,7 +15,7 @@ export async function createLinkToken(userId: number) {
   const { data, error } = await supabase
     .from("link_token")
     .insert([insertObj])
-    .select() // if you want the row back
+    .select()
     .maybeSingle();
 
   if (error || !data) {

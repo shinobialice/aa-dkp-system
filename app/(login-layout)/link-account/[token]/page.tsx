@@ -89,7 +89,7 @@ export default function LinkAccountPage() {
 
             <Button
               onClick={() =>
-                signIn("yandex", { callbackUrl: "/link-account/complete" })
+                signIn("mailru", { callbackUrl: "/link-account/complete" })
               }
               className="w-full gap-2"
               variant="outline"

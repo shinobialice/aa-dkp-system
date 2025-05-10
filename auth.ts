@@ -3,6 +3,39 @@ import type { NextAuthOptions, Account, Session } from "next-auth";
 import type { JWT } from "next-auth/jwt";
 import GoogleProvider from "next-auth/providers/google";
 import supabase from "./lib/supabase";
+import { OAuthConfig } from "next-auth/providers/oauth";
+
+const VKProvider = (): OAuthConfig<any> => ({
+  id: "vk",
+  name: "VK",
+  type: "oauth",
+  authorization: {
+    url: "https://id.vk.com/auth",
+    params: {
+      scope: "openid",
+      response_type: "code",
+    },
+  },
+  token: {
+    url: "https://api.vk.com/oauth/token",
+  },
+  userinfo: {
+    url: "https://api.vk.com/openid/userinfo",
+  },
+  clientId: process.env.VK_CLIENT_ID!,
+  clientSecret: process.env.VK_CLIENT_SECRET!,
+  checks: ["pkce", "state"],
+  profile: (profile) => {
+    return {
+      id: profile.id,
+      name: profile.name,
+      email: profile.email,
+      image: profile.picture,
+      active: true,
+      username: profile.username,
+    };
+  },
+});
 
 const authConfig: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
@@ -11,6 +44,7 @@ const authConfig: NextAuthOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
+    VKProvider(),
   ],
   callbacks: {
     async signIn({ account }: { account: Account | null }) {
@@ -20,6 +54,8 @@ const authConfig: NextAuthOptions = {
 
       const cookieStore = await cookies();
       const token = cookieStore.get("link-token")?.value;
+      const providerId = account.provider;
+      const providerAccountId = account.providerAccountId;
 
       if (token) {
         const { data: linkToken } = await supabase
@@ -35,9 +71,8 @@ const authConfig: NextAuthOptions = {
             .from("user")
             .update({
               google_id:
-                account.provider === "google"
-                  ? account.providerAccountId
-                  : undefined,
+                providerId === "google" ? providerAccountId : undefined,
+              vk_id: providerId === "vk" ? providerAccountId : undefined,
             })
             .eq("id", linkToken.user_id);
 
@@ -58,9 +93,8 @@ const authConfig: NextAuthOptions = {
         .eq("active", true)
         .or(
           [
-            account.provider === "google"
-              ? `google_id.eq.${account.providerAccountId}`
-              : "",
+            providerId === "google" ? `google_id.eq.${providerAccountId}` : "",
+            providerId === "vk" ? `vk_id.eq.${providerAccountId}` : "",
           ]
             .filter(Boolean)
             .join(",")
@@ -78,6 +112,9 @@ const authConfig: NextAuthOptions = {
             [
               account.provider === "google"
                 ? `google_id.eq.${account.providerAccountId}`
+                : "",
+              account.provider === "vk"
+                ? `vk_id.eq.${account.providerAccountId}`
                 : "",
             ]
               .filter(Boolean)
