@@ -54,6 +54,7 @@ export function AppSidebar() {
     { title: "Новости", url: "/news", icon: Newspaper },
     { title: "Участники", url: "/members", icon: Users },
     { title: "Активности", url: "/activities", icon: CalendarDays },
+    { title: "Расписание", url: "/schedule", icon: CalendarDays },
     {
       title: "Добыча",
       icon: Trophy,
