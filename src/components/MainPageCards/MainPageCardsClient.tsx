@@ -5,6 +5,8 @@ import { Loader } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import getStats from "@/src/actions/getStats";
 import Image from "next/image";
+import MainPageClock from "./MainPageClock";
+import UpcomingEvents from "./UpcomingEvents";
 
 type Stats = Awaited<ReturnType<typeof getStats>>;
 
@@ -104,7 +106,17 @@ const MainPageCardsClient: FC = () => {
         </div>
       ),
     },
-    { title: "Предстоящие мероприятия", content: "АГЛ" },
+    {
+      title: "Предстоящие мероприятия",
+      content: (
+        <div>
+          <MainPageClock />
+          <div className="w-full p-4">
+            <UpcomingEvents />
+          </div>
+        </div>
+      ),
+    },
   ];
 
   return (
