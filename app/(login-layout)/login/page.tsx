@@ -7,6 +7,10 @@ import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { GoogleIcon } from "@/src/components/login/authIcons";
 import { VKIDWidget } from "@/src/components/login/VKIDWidget";
+// login.tsx
+const VK_CLIENT_ID = process.env.VK_CLIENT_ID!;
+const VK_REDIRECT_URI = process.env.VK_REDIRECT_URI!;
+const vkAuthUrl = `https://oauth.vk.com/authorize?client_id=${VK_CLIENT_ID}&display=page&redirect_uri=${VK_REDIRECT_URI}&scope=photos&response_type=code&v=5.199`;
 
 export default function LoginPage() {
   return (
@@ -34,7 +38,9 @@ export default function LoginPage() {
               <GoogleIcon />
               Войти через Google
             </Button>
-
+            <a href={vkAuthUrl}>
+              <button>Войти через VK</button>
+            </a>
             <VKIDWidget mode="login" />
           </div>
         </div>

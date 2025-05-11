@@ -13,7 +13,7 @@ import { VKIDWidget } from "@/src/components/login/VKIDWidget";
 
 export default function LinkAccountPage() {
   const params = useParams();
-  const token = params.token as string;
+  const token = params?.token as string;
   const [loading, setLoading] = useState(true);
   const [userInfo, setUserInfo] = useState<{
     username: string;
