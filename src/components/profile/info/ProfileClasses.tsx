@@ -72,13 +72,12 @@ export default function ProfileClasses({
                   </SelectContent>
                 </Select>
               );
-            } 
-              return (
-                <>
-                  {classIcons[formData.class] ?? "❓"} {formData.class ?? "—"}
-                </>
-              );
-            
+            }
+            return (
+              <>
+                {classIcons[formData.class] ?? "❓"} {formData.class ?? "—"}
+              </>
+            );
           })()}
         </div>
 
@@ -88,7 +87,7 @@ export default function ProfileClasses({
             if (editMode) {
               return (
                 <Input
-                  className="text-center w-[100px]"
+                  className="text-center text-white w-[100px]"
                   value={formData.classGearScore ?? ""}
                   onChange={(e) =>
                     setFormData((prev: any) => ({
@@ -98,9 +97,8 @@ export default function ProfileClasses({
                   }
                 />
               );
-            } 
-              return formData.classGearScore ?? "Нет данных";
-            
+            }
+            return formData.classGearScore ?? "Нет данных";
           })()}
         </div>
       </div>
@@ -138,14 +136,13 @@ export default function ProfileClasses({
                     </SelectContent>
                   </Select>
                 );
-              } 
-                return (
-                  <>
-                    {classIcons[formData.secondaryClass] ?? "❓"}{" "}
-                    {formData.secondaryClass ?? "Нет данных"}
-                  </>
-                );
-              
+              }
+              return (
+                <>
+                  {classIcons[formData.secondaryClass] ?? "❓"}{" "}
+                  {formData.secondaryClass ?? "Нет данных"}
+                </>
+              );
             })()}
           </div>
 
@@ -166,9 +163,8 @@ export default function ProfileClasses({
                     disabled={!formData.secondaryClass}
                   />
                 );
-              } 
-                return formData.secondaryClassGearScore ?? "Нет данных";
-              
+              }
+              return formData.secondaryClassGearScore ?? "Нет данных";
             })()}
           </div>
         </div>
