@@ -22,9 +22,8 @@ import {
   HandCoins,
 } from "lucide-react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+
 import { useTheme } from "next-themes";
-import { NavUser } from "./NavUser";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,7 +45,6 @@ import useUserTag from "@/src/hooks/useUserTag";
 import Image from "next/image";
 
 export function AppSidebar() {
-  const { data: session } = useSession();
   const { setTheme } = useTheme();
   const isAdmin = useUserTag("Администратор");
 
@@ -177,15 +175,6 @@ export function AppSidebar() {
           </SidebarMenuItem>
 
           {/* NavUser — теперь снизу */}
-          {session?.user?.id && session.user.email && session.user.name && (
-            <NavUser
-              user={{
-                id: session.user.id,
-                name: session.user.username || session.user.name,
-                avatar: session.user.image || "",
-              }}
-            />
-          )}
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
