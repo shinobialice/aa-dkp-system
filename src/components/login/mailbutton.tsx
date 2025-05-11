@@ -1,11 +1,14 @@
-import { MailIcon } from "./authIcons";
-import { Button } from "@/components/ui/button";
+"use client";
+
 import Cookies from "js-cookie";
+import { MailIcon } from "./authIcons"; // если есть
+import { Button } from "@/components/ui/button";
 
 export default function MailLoginButton() {
   const handleLogin = () => {
     const state = crypto.randomUUID();
 
+    // сохраняем state в куку
     Cookies.set("mailru_state", state, {
       path: "/",
       expires: 0.1,
@@ -29,7 +32,7 @@ export default function MailLoginButton() {
       variant="outline"
     >
       <MailIcon />
-      Войти через Mail
+      Войти через Mail.ru
     </Button>
   );
 }
