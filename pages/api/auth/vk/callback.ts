@@ -18,7 +18,7 @@ export default async function handler(
   const body = new URLSearchParams({
     grant_type: "authorization_code",
     client_id: process.env.VK_CLIENT_ID!,
-    redirect_uri: "https://your.site/api/auth/vk/callback",
+    redirect_uri: "https://aa-dkp-system.vercel.app/api/auth/vk/callback",
     code,
     code_verifier: codeVerifier!,
     device_id: deviceId,
@@ -47,6 +47,10 @@ export default async function handler(
       client_id: process.env.VK_CLIENT_ID!,
     }),
   });
+
+  const { user } = await userInfoRes.json();
+
+  console.log("VK Avatar:", user.avatar);
 
   const userInfo = await userInfoRes.json();
 

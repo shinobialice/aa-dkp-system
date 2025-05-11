@@ -14,8 +14,7 @@ export default function VkLoginButton() {
     const params = new URLSearchParams({
       response_type: "code",
       client_id: process.env.NEXT_PUBLIC_VK_CLIENT_ID!,
-      redirect_uri: "https://your.site/api/auth/vk/callback",
-      scope: "email phone",
+      redirect_uri: "https://aa-dkp-system.vercel.app/api/auth/vk/callback",
       code_challenge: codeChallenge,
       code_challenge_method: "S256",
       state,
