@@ -159,5 +159,5 @@ export default async function handler(
   res.setHeader("Set-Cookie", cookie);
 
   // ✅ Обычный вход через VK завершён
-  res.redirect("/dashboard");
+  res.redirect("/");
 }
