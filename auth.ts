@@ -19,7 +19,7 @@ const authConfig: NextAuthOptions = {
         clientSecret: process.env.VK_CLIENT_SECRET!,
       }), // Fix: PKCE is unsupported for server-side authorization
       token: {
-        url: "https://oauth.vk.com/access_token?v=5.131",
+        url: "https://oauth.vk.com/access_token?v=5.199",
         conform: async (response) => {
           const data = await response.json();
           return new Response(
