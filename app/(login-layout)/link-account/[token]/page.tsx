@@ -20,13 +20,17 @@ export default function LinkAccountPage() {
   } | null>(null);
 
   useEffect(() => {
-    if (!token) {return;}
+    if (!token) {
+      return;
+    }
 
     Cookies.set("link-token", token, { expires: 0.1 });
 
     fetch(`/api/link-token/${token}`)
       .then((res) => {
-        if (!res.ok) {throw new Error("Token not valid");}
+        if (!res.ok) {
+          throw new Error("Token not valid");
+        }
         return res.json();
       })
       .then((data) => {
@@ -38,7 +42,9 @@ export default function LinkAccountPage() {
       .finally(() => setLoading(false));
   }, [token]);
 
-  if (loading) {return <p className="p-4 text-center">Загрузка...</p>;}
+  if (loading) {
+    return <p className="p-4 text-center">Загрузка...</p>;
+  }
 
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
