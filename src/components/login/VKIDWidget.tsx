@@ -65,7 +65,7 @@ export function VKIDWidget({ mode }: Props) {
 
                 const result = await res.json();
                 setDebug(result);
-                alert(JSON.stringify(result, undefined, 2));
+                alert(JSON.stringify({ vk_id, ...data }, undefined, 2));
 
                 if (!result.success) {
                   throw new Error();
