@@ -1,5 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { parse } from "cookie";
+import { parse, serialize } from "cookie";
+
+import crypto from "crypto";
+
+function generateSessionToken() {
+  return crypto.randomBytes(32).toString("hex");
+}
 
 export default async function handler(
   req: NextApiRequest,
@@ -23,7 +29,6 @@ export default async function handler(
     return res.status(400).send("Invalid state or verifier");
   }
 
-  // Exchange code for access_token
   const tokenRes = await fetch("https://id.vk.com/oauth2/auth", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -40,13 +45,11 @@ export default async function handler(
   const tokenData = await tokenRes.json();
 
   if (!tokenData.access_token) {
-    return res.status(400).json({
-      error: "Token exchange failed",
-      data: tokenData,
-    });
+    return res
+      .status(400)
+      .json({ error: "Token exchange failed", data: tokenData });
   }
 
-  // Optionally fetch user info (avatar, name)
   const userInfoRes = await fetch("https://id.vk.com/oauth2/user_info", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -58,9 +61,24 @@ export default async function handler(
 
   const { user } = await userInfoRes.json();
 
-  // 👇 Здесь можно авторизовать или создать пользователя в БД
-  console.log("VK User:", user);
+  // 🔒 Генерация токена сессии
+  const sessionToken = crypto.randomBytes(32).toString("hex");
 
-  // Простой редирект в личный кабинет (или куда хочешь)
+  // 💾 Сохрани пользователя и сессию в базу (в зависимости от твоей БД):
+  // await db.user.upsert({ vk_id: user.user_id, ... })
+  // await db.session.create({ token: sessionToken, user_id: user.user_id, expires_at: ... })
+
+  // 🍪 Устанавливаем куку
+  const cookie = serialize("session_token", sessionToken, {
+    path: "/",
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 7, // 1 неделя
+  });
+
+  res.setHeader("Set-Cookie", cookie);
+
+  // ✅ Редирект в личный кабинет
   res.redirect("/dashboard");
 }
