@@ -5,8 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import { GoogleIcon } from "@/src/components/login/authIcons";
-import { VKIDWidget } from "@/src/components/login/VKIDWidget";
+import { GoogleIcon, VkIcon } from "@/src/components/login/authIcons";
 
 export default function LoginPage() {
   return (
@@ -25,17 +24,22 @@ export default function LoginPage() {
             <h1 className="text-2xl font-bold text-center pb-3">
               Вход в систему
             </h1>
-
             <Button
-              onClick={() => signIn("google", { callbackUrl: "/" })}
+              onClick={() => signIn("google")}
               className="w-full gap-2 cursor-pointer"
               variant="outline"
             >
               <GoogleIcon />
               Войти через Google
             </Button>
-
-            <VKIDWidget mode="login" />
+            <Button
+              onClick={() => signIn("vk")}
+              className="w-full gap-2 cursor-pointer"
+              variant="outline"
+            >
+              <VkIcon />
+              Войти через VK
+            </Button>
           </div>
         </div>
       </div>
