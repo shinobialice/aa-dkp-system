@@ -34,23 +34,57 @@ export default function LoginPage() {
               Войти через Google
             </Button>
 
-            <Button
-              onClick={() => signIn("vk", { callbackUrl: "/" })}
-              className="w-full gap-2 cursor-pointer"
-              variant="outline"
-            >
-              <VkIcon />
-              Войти через VK
-            </Button>
+            <div>
+              <script src="https://unpkg.com/@vkid/sdk@<3.0.0/dist-sdk/umd/index.js"></script>
+              <script
+                type="text/javascript"
+                dangerouslySetInnerHTML={{
+                  __html: `
+                  if ('VKIDSDK' in window) {
+                    console.log("VK loaded")
+                    const VKID = window.VKIDSDK;
 
-            <Button
-              onClick={() => signIn("mailru", { callbackUrl: "/" })}
-              className="w-full gap-2 cursor-pointer"
-              variant="outline"
-            >
-              <MailIcon />
-              Войти через Mail.ru
-            </Button>
+                    VKID.Config.init({
+                      app: 53496711,
+                      redirectUrl: 'https://aa-dkp-system.vercel.app/',
+                      responseMode: VKID.ConfigResponseMode.Callback,
+                      source: VKID.ConfigSource.LOWCODE,
+                      scope: '', // Complete the necessary accesses as needed
+                    });
+
+                    const oAuth = new VKID.OAuthList();
+
+                    oAuth.render({
+                      container: document.currentScript.parentElement,
+                      scheme: 'dark',
+                      oauthList: [
+                        'vkid',
+                        'mail_ru'
+                      ]
+                    })
+                    .on(VKID.WidgetEvents.ERROR, vkidOnError)
+                    .on(VKID.OAuthListInternalEvents.LOGIN_SUCCESS, function (payload) {
+                      const code = payload.code;
+                      const deviceId = payload.device_id;
+
+                      VKID.Auth.exchangeCode(code, deviceId)
+                        .then(vkidOnSuccess)
+                        .catch(vkidOnError);
+                    });
+                  
+                    function vkidOnSuccess(data) {
+                      // Processing result
+                    }
+                  
+                    function vkidOnError(error) {
+                      // Processing error
+                      console.error('Error:', error);
+                    }
+                  }
+                  `,
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>
