@@ -1,30 +1,28 @@
-// pages/login-vk.tsx
-import { generateCodeChallenge, generateCodeVerifier } from "@/src/utils/pkce";
+"use client";
+
 import Cookies from "js-cookie";
-import { VkIcon } from "./authIcons";
+import { MailIcon } from "./authIcons"; // если есть
 import { Button } from "@/components/ui/button";
 
-export default function VkLoginButton() {
-  const handleLogin = async () => {
-    const codeVerifier = generateCodeVerifier();
-    const codeChallenge = await generateCodeChallenge(codeVerifier);
+export default function MailLoginButton() {
+  const handleLogin = () => {
     const state = crypto.randomUUID();
 
-    localStorage.setItem("vk_code_verifier", codeVerifier);
-    localStorage.setItem("vk_state", state);
+    // сохраняем state в куку
+    Cookies.set("mailru_state", state, {
+      path: "/",
+      expires: 0.1,
+    });
 
     const params = new URLSearchParams({
       response_type: "code",
-      client_id: process.env.NEXT_PUBLIC_VK_CLIENT_ID!,
-      redirect_uri: "https://aa-dkp-system.vercel.app/api/auth/vk/callback",
-      code_challenge: codeChallenge,
-      code_challenge_method: "S256",
+      client_id: process.env.NEXT_PUBLIC_MAILRU_CLIENT_ID!,
+      redirect_uri: "https://aa-dkp-system.vercel.app/api/auth/mailru/callback",
       state,
+      scope: "userinfo",
     });
 
-    window.location.href = `https://id.vk.com/authorize?${params}`;
-    Cookies.set("vk_code_verifier", codeVerifier);
-    Cookies.set("vk_state", state);
+    window.location.href = `https://oauth.mail.ru/login?${params}`;
   };
 
   return (
@@ -33,8 +31,8 @@ export default function VkLoginButton() {
       className="w-full gap-2 cursor-pointer"
       variant="outline"
     >
-      <VkIcon />
-      Войти через VK
+      <MailIcon />
+      Войти через Mail.ru
     </Button>
   );
 }
