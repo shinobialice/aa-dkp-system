@@ -13,6 +13,9 @@ export function middleware(req: NextRequest) {
     "/api/link-token",
     "/robots.txt",
     "/images",
+    "/_next/static",
+    "/_next/image",
+    "/api/auth/vk/callback",
   ];
 
   const isPublic = publicPaths.some((path) =>

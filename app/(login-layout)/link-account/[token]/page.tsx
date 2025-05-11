@@ -5,10 +5,10 @@ import { Heart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { GoogleIcon } from "@/src/components/login/authIcons";
 import VkLoginButton from "@/src/components/login/vkbutton";
 import Cookies from "js-cookie";
+import MailLoginButton from "@/src/components/login/mailbutton";
+import GoogleLoginButton from "@/src/components/login/googlebutton";
 
 export default function LinkAccountPage() {
   const params = useParams();
@@ -72,14 +72,9 @@ export default function LinkAccountPage() {
               </span>
             </p>
 
-            {/* Вход через Google */}
-            <Button className="w-full gap-2" variant="outline">
-              <GoogleIcon />
-              Войти через Google
-            </Button>
-
-            {/* Вход через VK */}
+            <GoogleLoginButton />
             <VkLoginButton />
+            <MailLoginButton />
           </div>
         </div>
       </div>

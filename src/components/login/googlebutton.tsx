@@ -1,10 +1,10 @@
 // pages/login-vk.tsx
 import { generateCodeChallenge, generateCodeVerifier } from "@/src/utils/pkce";
 import Cookies from "js-cookie";
-import { VkIcon } from "./authIcons";
+import { GoogleIcon, VkIcon } from "./authIcons";
 import { Button } from "@/components/ui/button";
 
-export default function VkLoginButton() {
+export default function GoogleLoginButton() {
   const handleLogin = async () => {
     const codeVerifier = generateCodeVerifier();
     const codeChallenge = await generateCodeChallenge(codeVerifier);
@@ -33,8 +33,8 @@ export default function VkLoginButton() {
       className="w-full gap-2 cursor-pointer"
       variant="outline"
     >
-      <VkIcon />
-      Войти через VK
+      <GoogleIcon />
+      Войти через Google
     </Button>
   );
 }
