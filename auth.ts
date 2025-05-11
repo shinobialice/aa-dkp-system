@@ -5,6 +5,8 @@ import GoogleProvider from "next-auth/providers/google";
 import VK from "next-auth/providers/vk";
 import supabase from "./lib/supabase";
 
+const apiVersion = "5.199"; // https://vk.com/dev/versions
+
 const authConfig: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   providers: [
@@ -18,8 +20,10 @@ const authConfig: NextAuthOptions = {
         clientId: process.env.VK_CLIENT_ID!,
         clientSecret: process.env.VK_CLIENT_SECRET!,
       }), // Fix: PKCE is unsupported for server-side authorization
+      authorization: `https://oauth.vk.com/authorize?scope=email&v=${apiVersion}`,
+      userinfo: `https://api.vk.com/method/users.get?fields=photo_100&v=${apiVersion}`,
       token: {
-        url: "https://oauth.vk.com/access_token?v=5.195",
+        url: `https://oauth.vk.com/access_token?v=${apiVersion}`,
         conform: async (response) => {
           const data = await response.json();
           return new Response(
@@ -113,7 +117,7 @@ const authConfig: NextAuthOptions = {
                 ? `google_id.eq.${account.providerAccountId}`
                 : "",
               account.provider === "vk"
-                ? `vk_id.eq.${account.providerAccountId}`
+                ? `_id.eq.${account.providerAccountId}`
                 : "",
             ]
               .filter(Boolean)
