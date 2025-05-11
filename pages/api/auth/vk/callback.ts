@@ -83,21 +83,39 @@ export default async function handler(
       return res.status(400).send("Link token expired or invalid");
     }
 
+    const sessionToken = generateSessionToken();
+
+    // 🔗 Привязываем VK к существующему пользователю и сохраняем session_token
+    const { error: userUpdateError } = await supabase
+      .from("user")
+      .update({
+        vk_id: user.user_id,
+        session_token: sessionToken,
+      })
+      .eq("id", linkRow.userId);
+
+    if (userUpdateError) {
+      console.error("Ошибка при обновлении пользователя:", userUpdateError);
+      return res.status(500).send("Failed to link VK account");
+    }
+
+    // ✅ Помечаем токен как использованный
     await supabase
       .from("link_token")
       .update({ used: true })
       .eq("token", linkToken);
 
-    await supabase.from("link_tokens").delete().eq("token", linkToken);
-
-    // очистка куки
-    res.setHeader(
-      "Set-Cookie",
-      serialize("link-token", "", {
+    // 🍪 Устанавливаем куку
+    res.setHeader("Set-Cookie", [
+      serialize("link-token", "", { path: "/", maxAge: -1 }),
+      serialize("session_token", sessionToken, {
         path: "/",
-        maxAge: -1,
-      })
-    );
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+        maxAge: 60 * 60 * 24 * 7,
+      }),
+    ]);
 
     return res.redirect("/link-account/complete");
   }
