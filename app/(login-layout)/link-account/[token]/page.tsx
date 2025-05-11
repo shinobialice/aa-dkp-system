@@ -8,7 +8,8 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import { GoogleIcon, MailIcon, VkIcon } from "@/src/components/login/authIcons";
+import { GoogleIcon } from "@/src/components/login/authIcons";
+import { VKIDWidget } from "@/src/components/login/VKIDWidget";
 
 export default function LinkAccountPage() {
   const params = useParams();
@@ -82,27 +83,7 @@ export default function LinkAccountPage() {
               Войти через Google
             </Button>
 
-            <Button
-              onClick={() =>
-                signIn("vk", { callbackUrl: "/link-account/complete" })
-              }
-              className="w-full gap-2"
-              variant="outline"
-            >
-              <VkIcon />
-              Войти через VK
-            </Button>
-
-            <Button
-              onClick={() =>
-                signIn("yandex", { callbackUrl: "/link-account/complete" })
-              }
-              className="w-full gap-2"
-              variant="outline"
-            >
-              <MailIcon />
-              Войти через Mail.ru
-            </Button>
+            <VKIDWidget mode="link" />
           </div>
         </div>
       </div>

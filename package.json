@@ -40,6 +40,7 @@
     "date-fns": "^2.30.0",
     "formidable": "^3.5.4",
     "js-cookie": "^3.0.5",
+    "jwt-decode": "^4.0.0",
     "lucide-react": "^0.503.0",
     "next": "latest",
     "next-auth": "^4.24.11",
@@ -60,6 +61,7 @@
   "devDependencies": {
     "@types/formidable": "^3.4.5",
     "@types/js-cookie": "^3.0.6",
+    "@types/jsonwebtoken": "^9.0.9",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "dotenv-cli": "^8.0.0",

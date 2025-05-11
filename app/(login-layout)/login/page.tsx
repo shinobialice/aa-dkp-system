@@ -5,7 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import { GoogleIcon, MailIcon, VkIcon } from "@/src/components/login/authIcons";
+import { GoogleIcon } from "@/src/components/login/authIcons";
+import { VKIDWidget } from "@/src/components/login/VKIDWidget";
 
 export default function LoginPage() {
   return (
@@ -34,57 +35,7 @@ export default function LoginPage() {
               Войти через Google
             </Button>
 
-            <div>
-              <script src="https://unpkg.com/@vkid/sdk@<3.0.0/dist-sdk/umd/index.js"></script>
-              <script
-                type="text/javascript"
-                dangerouslySetInnerHTML={{
-                  __html: `
-                  if ('VKIDSDK' in window) {
-                    console.log("VK loaded")
-                    const VKID = window.VKIDSDK;
-
-                    VKID.Config.init({
-                      app: 53496711,
-                      redirectUrl: 'https://aa-dkp-system.vercel.app/',
-                      responseMode: VKID.ConfigResponseMode.Callback,
-                      source: VKID.ConfigSource.LOWCODE,
-                      scope: '', // Complete the necessary accesses as needed
-                    });
-
-                    const oAuth = new VKID.OAuthList();
-
-                    oAuth.render({
-                      container: document.currentScript.parentElement,
-                      scheme: 'dark',
-                      oauthList: [
-                        'vkid',
-                        'mail_ru'
-                      ]
-                    })
-                    .on(VKID.WidgetEvents.ERROR, vkidOnError)
-                    .on(VKID.OAuthListInternalEvents.LOGIN_SUCCESS, function (payload) {
-                      const code = payload.code;
-                      const deviceId = payload.device_id;
-
-                      VKID.Auth.exchangeCode(code, deviceId)
-                        .then(vkidOnSuccess)
-                        .catch(vkidOnError);
-                    });
-                  
-                    function vkidOnSuccess(data) {
-                      // Processing result
-                    }
-                  
-                    function vkidOnError(error) {
-                      // Processing error
-                      console.error('Error:', error);
-                    }
-                  }
-                  `,
-                }}
-              />
-            </div>
+            <VKIDWidget mode="login" />
           </div>
         </div>
       </div>
