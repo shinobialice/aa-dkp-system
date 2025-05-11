@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/sidebar";
 import useUserTag from "@/src/hooks/useUserTag";
 import Image from "next/image";
+import { NavUser } from "./NavUser";
 
 export function AppSidebar() {
   const { setTheme } = useTheme();
@@ -174,7 +175,7 @@ export function AppSidebar() {
             </DropdownMenu>
           </SidebarMenuItem>
 
-          {/* NavUser — теперь снизу */}
+          <NavUser />
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
