@@ -43,11 +43,8 @@ import {
 } from "@/components/ui/sidebar";
 import useUserTag from "@/src/hooks/useUserTag";
 import Image from "next/image";
-import { NavUser } from "./NavUser";
-import useCurrentUser from "@/src/hooks/useCurrentUser";
 
 export function AppSidebar() {
-  const user = useCurrentUser();
   const { setTheme } = useTheme();
   const isAdmin = useUserTag("Администратор");
 
@@ -176,7 +173,8 @@ export function AppSidebar() {
               </DropdownMenuContent>
             </DropdownMenu>
           </SidebarMenuItem>
-          {user && <NavUser user={user} />}
+
+          {/* NavUser — теперь снизу */}
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
