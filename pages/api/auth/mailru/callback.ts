@@ -138,5 +138,5 @@ export default async function handler(
     })
   );
 
-  return res.redirect("/dashboard");
+  return res.redirect("/");
 }
