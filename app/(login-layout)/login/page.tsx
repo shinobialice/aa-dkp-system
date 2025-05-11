@@ -8,9 +8,15 @@ import { Button } from "@/components/ui/button";
 import { GoogleIcon } from "@/src/components/login/authIcons";
 import { VKIDWidget } from "@/src/components/login/VKIDWidget";
 // login.tsx
-const VK_CLIENT_ID = process.env.VK_CLIENT_ID!;
-const VK_REDIRECT_URI = process.env.VK_REDIRECT_URI!;
-const vkAuthUrl = `https://oauth.vk.com/authorize?client_id=${VK_CLIENT_ID}&display=page&redirect_uri=${VK_REDIRECT_URI}&scope=photos&response_type=code&v=5.199`;
+
+const vkUrl = new URL("https://oauth.vk.com/authorize");
+vkUrl.searchParams.set("client_id", process.env.VK_CLIENT_ID!);
+vkUrl.searchParams.set(
+  "redirect_uri",
+  "https://aa-dkp-system.vercel.app/api/vk/callback"
+);
+vkUrl.searchParams.set("response_type", "code");
+vkUrl.searchParams.set("v", "5.199");
 
 export default function LoginPage() {
   return (
@@ -38,9 +44,7 @@ export default function LoginPage() {
               <GoogleIcon />
               Войти через Google
             </Button>
-            <a href={vkAuthUrl}>
-              <button>Войти через VK</button>
-            </a>
+            <a href={vkUrl.toString()}>Войти через VK</a>
             <VKIDWidget mode="login" />
           </div>
         </div>
