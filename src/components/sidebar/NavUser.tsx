@@ -21,6 +21,12 @@ import {
 import useCurrentUser from "@/src/hooks/useCurrentUser";
 import { Button } from "@/components/ui/button";
 
+function logout() {
+  document.cookie = "session_token=; path=/; max-age=0; SameSite=Lax; secure";
+  document.cookie = "link-token=; path=/; max-age=0; SameSite=Lax; secure";
+  window.location.href = "/login";
+}
+
 export function NavUser() {
   const { isMobile } = useSidebar();
   const user = useCurrentUser();
@@ -63,14 +69,7 @@ export function NavUser() {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="cursor-pointer"
-              onClick={() => {
-                // можно сделать кастомный logout здесь
-                document.cookie = "session_token=; Max-Age=0; path=/";
-                location.href = "/login";
-              }}
-            >
+            <DropdownMenuItem className="cursor-pointer" onClick={logout}>
               <LogOut className="mr-2 h-4 w-4" />
               Выйти
             </DropdownMenuItem>
