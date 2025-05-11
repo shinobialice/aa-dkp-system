@@ -3,20 +3,9 @@
 import { Heart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { GoogleIcon } from "@/src/components/login/authIcons";
-import { VKIDWidget } from "@/src/components/login/VKIDWidget";
-// login.tsx
-
-const vkUrl = new URL("https://oauth.vk.com/authorize");
-vkUrl.searchParams.set("client_id", process.env.VK_CLIENT_ID!);
-vkUrl.searchParams.set(
-  "redirect_uri",
-  "https://aa-dkp-system.vercel.app/api/vk/callback"
-);
-vkUrl.searchParams.set("response_type", "code");
-vkUrl.searchParams.set("v", "5.199");
+import VkLoginButton from "@/src/components/login/vkbutton";
 
 export default function LoginPage() {
   return (
@@ -36,16 +25,11 @@ export default function LoginPage() {
               Вход в систему
             </h1>
 
-            <Button
-              onClick={() => signIn("google", { callbackUrl: "/" })}
-              className="w-full gap-2 cursor-pointer"
-              variant="outline"
-            >
+            <Button className="w-full gap-2 cursor-pointer" variant="outline">
               <GoogleIcon />
               Войти через Google
             </Button>
-            <a href={vkUrl.toString()}>Войти через VK</a>
-            <VKIDWidget mode="login" />
+            <VkLoginButton />
           </div>
         </div>
       </div>
