@@ -1,30 +1,29 @@
-// pages/login-vk.tsx
-import { generateCodeChallenge, generateCodeVerifier } from "@/src/utils/pkce";
+"use client";
+
 import Cookies from "js-cookie";
-import { GoogleIcon, VkIcon } from "./authIcons";
+import { GoogleIcon } from "./authIcons";
 import { Button } from "@/components/ui/button";
 
 export default function GoogleLoginButton() {
-  const handleLogin = async () => {
-    const codeVerifier = generateCodeVerifier();
-    const codeChallenge = await generateCodeChallenge(codeVerifier);
+  const handleLogin = () => {
     const state = crypto.randomUUID();
 
-    localStorage.setItem("vk_code_verifier", codeVerifier);
-    localStorage.setItem("vk_state", state);
+    Cookies.set("google_state", state, {
+      path: "/",
+      expires: 0.1,
+    });
 
     const params = new URLSearchParams({
+      client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
+      redirect_uri: "https://aa-dkp-system.vercel.app/api/auth/google/callback",
       response_type: "code",
-      client_id: process.env.NEXT_PUBLIC_VK_CLIENT_ID!,
-      redirect_uri: "https://aa-dkp-system.vercel.app/api/auth/vk/callback",
-      code_challenge: codeChallenge,
-      code_challenge_method: "S256",
+      scope: "openid email profile",
+      access_type: "offline", // чтобы получить refresh_token
+      include_granted_scopes: "true",
       state,
     });
 
-    window.location.href = `https://id.vk.com/authorize?${params}`;
-    Cookies.set("vk_code_verifier", codeVerifier);
-    Cookies.set("vk_state", state);
+    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
   };
 
   return (
