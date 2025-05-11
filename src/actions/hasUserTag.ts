@@ -1,9 +1,10 @@
-import { getServerSession } from "next-auth";
-import authOptions from "@/auth";
+"use server";
+
+import { auth } from "@/auth";
 import supabase from "@/lib/supabase";
 
 export async function hasUserTag(tag: string): Promise<boolean> {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   if (!session?.user?.id) {
     return false;
   }
