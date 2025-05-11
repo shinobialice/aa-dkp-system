@@ -1,3 +1,0 @@
-export async function hasUserTag(tag: string): Promise<boolean> {
-  return false;
-}

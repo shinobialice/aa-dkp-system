@@ -28,6 +28,6 @@
       "@/*": ["./*"],
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "____tailwind.config.js", "src/actions/hasUserTag.disabled.ts", "src/actions/hasUserTag.ts.disabled"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "____tailwind.config.js", "src/actions/hasUserTag.disabled.ts", "src/actions/hasUserTag.ts"],
   "exclude": ["node_modules", "components/**/*.tsx"]
 }

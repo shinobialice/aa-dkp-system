@@ -2,12 +2,9 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { parse, serialize } from "cookie";
 import crypto from "crypto";
 import { createClient } from "@supabase/supabase-js";
+import supabase from "@/lib/supabase";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL!;
 function generateSessionToken() {
   return crypto.randomBytes(32).toString("hex");
 }
@@ -38,7 +35,7 @@ export default async function handler(
       code,
       client_id: process.env.GOOGLE_CLIENT_ID!,
       client_secret: process.env.GOOGLE_CLIENT_SECRET!,
-      redirect_uri: "https://aa-dkp-system.vercel.app/api/auth/google/callback",
+      redirect_uri: `${baseUrl}/api/auth/google/callback`,
       grant_type: "authorization_code",
     }),
   });
