@@ -1,6 +1,6 @@
 // pages/login-vk.tsx
 import { generateCodeChallenge, generateCodeVerifier } from "@/src/utils/pkce";
-import { useEffect } from "react";
+import Cookies from "js-cookie";
 
 export default function VkLoginButton() {
   const handleLogin = async () => {
@@ -21,6 +21,8 @@ export default function VkLoginButton() {
     });
 
     window.location.href = `https://id.vk.com/authorize?${params}`;
+    Cookies.set("vk_code_verifier", codeVerifier);
+    Cookies.set("vk_state", state);
   };
 
   return <button onClick={handleLogin}>Войти через VK</button>;

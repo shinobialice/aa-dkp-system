@@ -1,13 +1,15 @@
 // pages/api/auth/vk/callback.ts
 import type { NextApiRequest, NextApiResponse } from "next";
+import { parse } from "cookie";
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
   const { code, state } = req.query;
-  const savedState = req.cookies["vk_state"];
-  const codeVerifier = req.cookies["vk_code_verifier"];
+  const cookies = parse(req.headers.cookie || "");
+  const savedState = cookies.vk_state;
+  const codeVerifier = cookies.vk_code_verifier;
 
   if (!code || typeof code !== "string" || state !== savedState) {
     return res.status(400).send("Invalid state");
