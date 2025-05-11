@@ -133,19 +133,11 @@ export default async function handler(
   let userId: number;
 
   if (!existingUser) {
-    const { data: newUser } = await supabase
-      .from("user")
-      .insert({
-        vk_id: user.user_id,
-        first_name: user.first_name,
-        last_name: user.last_name,
-        avatar_url: user.avatar,
-        session_token: sessionToken,
-      })
-      .select()
-      .single();
-
-    userId = newUser.id;
+    return res
+      .status(403)
+      .send(
+        "VK-аккаунт не привязан ни к одному пользователю. Войдите по ссылке."
+      );
   } else {
     await supabase
       .from("user")
