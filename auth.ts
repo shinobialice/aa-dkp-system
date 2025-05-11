@@ -64,6 +64,10 @@ const authConfig: NextAuthOptions = {
                 account.provider === "google"
                   ? account.providerAccountId
                   : undefined,
+              vk:
+                account.provider === "vk"
+                  ? account.providerAccountId
+                  : undefined,
             })
             .eq("id", linkToken.user_id);
 
@@ -87,6 +91,9 @@ const authConfig: NextAuthOptions = {
             account.provider === "google"
               ? `google_id.eq.${account.providerAccountId}`
               : "",
+            account.provider === "vk"
+              ? `vk_id.eq.${account.providerAccountId}`
+              : "",
           ]
             .filter(Boolean)
             .join(",")
@@ -104,6 +111,9 @@ const authConfig: NextAuthOptions = {
             [
               account.provider === "google"
                 ? `google_id.eq.${account.providerAccountId}`
+                : "",
+              account.provider === "vk"
+                ? `vk_id.eq.${account.providerAccountId}`
                 : "",
             ]
               .filter(Boolean)
