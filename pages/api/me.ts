@@ -1,0 +1,32 @@
+import { parse } from "cookie";
+import type { NextApiRequest, NextApiResponse } from "next";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  const cookies = parse(req.headers.cookie || "");
+  const token = cookies.session_token;
+
+  if (!token) return res.status(401).send("Not authenticated");
+
+  const { data: user } = await supabase
+    .from("user")
+    .select("id, username")
+    .eq("session_token", token)
+    .single();
+
+  if (!user) return res.status(401).send("Invalid token");
+
+  return res.status(200).json({
+    id: user.id,
+    name: user.username,
+    avatar: `https://api.dicebear.com/7.x/identicon/svg?seed=${user.id}`,
+  });
+}
