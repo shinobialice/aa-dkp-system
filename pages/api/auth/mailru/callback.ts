@@ -117,9 +117,7 @@ export default async function handler(
     .single();
 
   if (!existingUser) {
-    return res
-      .status(403)
-      .send("Mail.ru аккаунт не привязан ни к одному пользователю.");
+    return res.redirect("/login-error");
   }
 
   await supabase

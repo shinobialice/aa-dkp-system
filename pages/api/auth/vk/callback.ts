@@ -133,11 +133,7 @@ export default async function handler(
   let userId: number;
 
   if (!existingUser) {
-    return res
-      .status(403)
-      .send(
-        "VK-аккаунт не привязан ни к одному пользователю. Войдите по ссылке."
-      );
+    return res.redirect("/login-error");
   } else {
     await supabase
       .from("user")
