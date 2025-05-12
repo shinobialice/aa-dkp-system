@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/select";
 import { createLinkToken } from "@/src/actions/createLinkToken";
 import { getEligibleUsers } from "@/src/actions/getEligibleUsers";
+import { CreateUserForm } from "./CreateUserForm";
+
 
 type UserOption = {
   id: number;
@@ -42,7 +44,7 @@ function CopyableLink({ link }: { link: string }) {
   );
 }
 
-export function LinkGeneratorClient() {
+export function SettingsPageContainer() {
   const [users, setUsers] = useState<UserOption[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [link, setLink] = useState<string | null>(null);
@@ -60,35 +62,48 @@ export function LinkGeneratorClient() {
   };
 
   return (
-    <CardContent>
-      <h2 className="text-xl font-bold mb-4">Сгенерировать ссылку для входа</h2>
-      <div className="space-y-2">
-        <Select onValueChange={(value) => setSelectedUserId(Number(value))}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Выберите пользователя" />
-          </SelectTrigger>
-          <SelectContent>
-            {users.map((user) => (
-              <SelectItem key={user.id} value={String(user.id)}>
-                {user.username} (id: {user.id})
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Button
-          onClick={handleGenerate}
-          disabled={isPending || !selectedUserId}
-        >
-          {isPending ? "Генерация..." : "Создать ссылку"}
-        </Button>
-      </div>
+    <div className="space-y-6">
+      <CardContent className="border rounded-lg p-4">
+        <h2 className="text-xl font-bold mb-4">
+          Сгенерировать ссылку для входа
+        </h2>
+        <div className="space-y-2">
+          <Select onValueChange={(value) => setSelectedUserId(Number(value))}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Выберите пользователя" />
+            </SelectTrigger>
+            <SelectContent>
+              {users.map((user) => (
+                <SelectItem key={user.id} value={String(user.id)}>
+                  {user.username} (id: {user.id})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            onClick={handleGenerate}
+            disabled={isPending || !selectedUserId}
+          >
+            {isPending ? "Генерация..." : "Создать ссылку"}
+          </Button>
+        </div>
 
-      {link && (
-        <>
-          <p className="font-semibold mt-4">Ссылка для отправки:</p>
-          <CopyableLink link={link} />
-        </>
-      )}
-    </CardContent>
+        {link && (
+          <>
+            <p className="font-semibold mt-4">Ссылка для отправки:</p>
+            <CopyableLink link={link} />
+          </>
+        )}
+      </CardContent>
+
+      <CardContent className="border rounded-lg p-4">
+        <CreateUserForm
+          onUserCreated={(newUser) => {
+            setUsers((prev) => [...prev, newUser]);
+            setSelectedUserId(newUser.id);
+          }}
+        />
+      </CardContent>
+    </div>
   );
 }
