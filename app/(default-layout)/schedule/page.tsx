@@ -59,6 +59,18 @@ const bossColors: Record<string, string> = {
   Кошка: "var(--accent-foreground)",
 };
 
+// Получаем имя текущего дня
+const weekdayNames = [
+  "Воскресенье",
+  "Понедельник",
+  "Вторник",
+  "Среда",
+  "Четверг",
+  "Пятница",
+  "Суббота",
+];
+const todayName = weekdayNames[new Date().getDay()];
+
 // Объединяем базу + АГЛ + Кошка и сортируем по времени
 function getFullSchedule(): Record<string, [string, string][]> {
   const full: Record<string, [string, string][]> = {};
@@ -85,7 +97,9 @@ export default function WeeklyBossSchedule() {
             {days.map((day) => (
               <TableHead
                 key={day}
-                className="text-center border border-[--color-border] bg-[--card] text-[--card-foreground]"
+                className={`text-center border border-[--color-border] bg-[--card] text-[--card-foreground] ${
+                  day === todayName ? "bg-green-100 dark:bg-green-900/40" : ""
+                }`}
               >
                 {day}
               </TableHead>
@@ -101,7 +115,11 @@ export default function WeeklyBossSchedule() {
                 return (
                   <TableCell
                     key={day + rowIdx}
-                    className="border border-[--color-border] text-center align-top"
+                    className={`border border-[--color-border] text-center align-top ${
+                      day === todayName
+                        ? "bg-green-50 dark:bg-green-900/10"
+                        : ""
+                    }`}
                   >
                     {event && (
                       <>
