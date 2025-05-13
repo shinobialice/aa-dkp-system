@@ -8,14 +8,14 @@ export const columns: ColumnDef<any>[] = [
   {
     accessorKey: "username",
     header: ({ column }) => (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Ник
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Ник
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
     cell: ({ row }) => (
       <Link href={`/profile/${row.original.id}`} className=" underline">
         {row.original.username}
@@ -83,5 +83,98 @@ export const columns: ColumnDef<any>[] = [
       </Button>
     ),
     cell: ({ row }) => row.original.daysInGuild,
+  },
+  {
+    accessorKey: "primePercent",
+    header: ({ column }) => (
+      <Button
+        className="cursor-pointer"
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Прайм %
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => {
+      const value: number = row.original.primePercent ?? 0;
+
+      const hue = Math.round((value / 100) * 120); // от 0 (красный) до 120 (зелёный)
+      const color = `hsl(${hue}, 70%, 60%)`;
+
+      return (
+        <div
+          className="text-center font-medium rounded px-1"
+          style={{
+            backgroundColor: color,
+            color: "black",
+          }}
+        >
+          {`${value.toFixed(0)}%`}
+        </div>
+      );
+    },
+    sortingFn: "basic",
+  },
+  {
+    accessorKey: "aglPercent",
+    header: ({ column }) => (
+      <Button
+        className="cursor-pointer"
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        АГЛ %
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => {
+      const value: number = row.original.aglPercent ?? 0;
+      const hue = Math.round((value / 100) * 120);
+      const color = `hsl(${hue}, 70%, 60%)`;
+
+      return (
+        <div
+          className="text-center font-medium rounded px-1"
+          style={{
+            backgroundColor: color,
+            color: "black",
+          }}
+        >
+          {`${value.toFixed(0)}%`}
+        </div>
+      );
+    },
+    sortingFn: "basic",
+  },
+  {
+    accessorKey: "totalPercent",
+    header: ({ column }) => (
+      <Button
+        className="cursor-pointer"
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Итого %
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => {
+      const value: number = row.original.totalPercent ?? 0;
+      const hue = Math.round((value / 100) * 120);
+      const color = `hsl(${hue}, 70%, 60%)`;
+      return (
+        <div
+          className="text-center font-medium rounded px-1"
+          style={{
+            backgroundColor: color,
+            color: "black",
+          }}
+        >
+          {`${value.toFixed(0)}%`}
+        </div>
+      );
+    },
+    sortingFn: "basic",
   },
 ];
