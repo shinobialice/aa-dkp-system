@@ -21,7 +21,20 @@ const createRaidEvent = async (
   is_pvp: boolean,
   is_pvp_long: boolean
 ) => {
-  // 1. Create the raid
+  // 1. Получить текущее количество активных пользователей
+  const { data: activeUsers, error: activeError } = await supabase
+    .from("user")
+    .select("id")
+    .eq("active", true);
+
+  if (activeError || !activeUsers) {
+    console.error("Failed to fetch active users:", activeError);
+    throw new Error("Ошибка при определении активного состава");
+  }
+
+  const active_user_count = activeUsers.length;
+
+  // 2. Создать рейд с этим числом
   const { data: raid, error: raidError } = await supabase
     .from("raid")
     .insert([
@@ -32,6 +45,7 @@ const createRaidEvent = async (
         created_at: new Date().toISOString(),
         is_pvp,
         is_pvp_long,
+        active_user_count, // 👈 добавлено
       },
     ])
     .select()
@@ -42,7 +56,7 @@ const createRaidEvent = async (
     throw new Error("Ошибка при создании рейда");
   }
 
-  // 2. Create raid_attendance entries
+  // 3. Участники
   const attendanceData = userIds.map((user_id) => ({
     raid_id: raid.id,
     user_id,
@@ -58,7 +72,7 @@ const createRaidEvent = async (
     throw new Error("Ошибка при добавлении участников");
   }
 
-  // 3. Create raid_boss entries
+  // 4. Боссы
   const bossData = bossIds.map((boss_id) => ({
     raid_id: raid.id,
     boss_id,
@@ -66,7 +80,7 @@ const createRaidEvent = async (
 
   const { error: bossError } = await supabase
     .from("raid_boss")
-    .insert(bossData); // Removed invalid 'upsert' option
+    .insert(bossData);
 
   if (bossError) {
     console.error("Failed to insert raid bosses:", bossError);
