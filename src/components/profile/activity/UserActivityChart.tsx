@@ -37,11 +37,11 @@ import { getUserActivity } from "@/src/actions/getUserActivity";
 
 const chartConfig = {
   праймы: {
-    label: "праймы",
+    label: "Прайм",
     color: "hsl(var(--chart-1))",
   },
   агл: {
-    label: "агл",
+    label: "АГЛ",
     color: "hsl(var(--chart-2))",
   },
 } satisfies ChartConfig;
