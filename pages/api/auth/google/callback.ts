@@ -27,7 +27,6 @@ export default async function handler(
     return res.status(400).send("Invalid state");
   }
 
-  // Получаем access_token
   const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -48,7 +47,6 @@ export default async function handler(
       .json({ error: "Token exchange failed", data: tokenData });
   }
 
-  // Получаем инфу о пользователе
   const userInfoRes = await fetch(
     "https://www.googleapis.com/oauth2/v2/userinfo",
     {
@@ -64,7 +62,6 @@ export default async function handler(
     return res.status(400).send("Failed to fetch user profile");
   }
 
-  // 🎯 Привязка по link-token
   if (linkToken) {
     const { data: linkRow } = await supabase
       .from("link_token")
@@ -107,7 +104,6 @@ export default async function handler(
     return res.redirect("/link-account/complete");
   }
 
-  // 🧍‍♂️ Обычный вход (без привязки)
   const sessionToken = generateSessionToken();
 
   const { data: existingUser } = await supabase

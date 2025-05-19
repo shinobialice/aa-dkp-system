@@ -5,7 +5,7 @@ export default async function NewsPage() {
   const rawItems = await getNews();
   const newsItems = rawItems.map((item) => ({
     ...item,
-    date: item.date, // already an ISO string
+    date: item.date, 
   }));
 
   return <NewsPageClient items={newsItems} />;

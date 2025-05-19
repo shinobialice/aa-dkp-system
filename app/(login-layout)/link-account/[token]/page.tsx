@@ -23,9 +23,8 @@ export default function LinkAccountPage() {
   useEffect(() => {
     if (!token) return;
 
-    // ⬇️ Сохраняем link-token в куку
     Cookies.set("link-token", token, {
-      expires: 0.1, // ~2.4 часа
+      expires: 0.1, 
       path: "/",
     });
 

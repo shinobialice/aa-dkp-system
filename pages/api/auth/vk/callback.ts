@@ -35,7 +35,6 @@ export default async function handler(
     return res.status(400).send("Invalid state or verifier");
   }
 
-  // Exchange code for access_token
   const tokenRes = await fetch("https://id.vk.com/oauth2/auth", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -57,7 +56,6 @@ export default async function handler(
       .json({ error: "Token exchange failed", data: tokenData });
   }
 
-  // Get user info from VK
   const userInfoRes = await fetch("https://id.vk.com/oauth2/user_info", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -69,7 +67,6 @@ export default async function handler(
 
   const { user } = await userInfoRes.json();
 
-  // 👇 Если есть link-token — привязываем VK к существующему пользователю
   if (linkToken) {
     const { data: linkRow } = await supabase
       .from("link_token")
@@ -99,13 +96,11 @@ export default async function handler(
       return res.status(500).send("Failed to link VK account");
     }
 
-    // ✅ Помечаем токен как использованный
     await supabase
       .from("link_token")
       .update({ used: true })
       .eq("token", linkToken);
 
-    // 🍪 Устанавливаем куку
     res.setHeader("Set-Cookie", [
       serialize("link-token", "", { path: "/", maxAge: -1 }),
       serialize("session_token", sessionToken, {
@@ -120,10 +115,8 @@ export default async function handler(
     return res.redirect("/link-account/complete");
   }
 
-  // 🔒 Генерация токена сессии (если обычная авторизация)
   const sessionToken = generateSessionToken();
 
-  // 🔄 Находим или создаём пользователя
   const { data: existingUser } = await supabase
     .from("user")
     .select("*")
@@ -143,17 +136,15 @@ export default async function handler(
     userId = existingUser.id;
   }
 
-  // 🍪 Устанавливаем сессионную куку
   const cookie = serialize("session_token", sessionToken, {
     path: "/",
     httpOnly: true,
     secure: true,
     sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 7, // 1 неделя
+    maxAge: 60 * 60 * 24 * 7, 
   });
 
   res.setHeader("Set-Cookie", cookie);
 
-  // ✅ Обычный вход через VK завершён
   res.redirect("/");
 }

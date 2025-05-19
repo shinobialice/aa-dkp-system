@@ -1,4 +1,3 @@
-// app/stats/page.tsx
 "use client";
 
 import DailyAttendanceChart from "@/src/components/statCharts/dailyAttendanceChart";

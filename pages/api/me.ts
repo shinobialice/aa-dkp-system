@@ -1,4 +1,3 @@
-// pages/api/me.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import { parse } from "cookie";
 import supabase from "@/lib/supabase";

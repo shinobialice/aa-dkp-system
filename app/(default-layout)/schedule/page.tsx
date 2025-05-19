@@ -59,7 +59,6 @@ const bossColors: Record<string, string> = {
   Кошка: "var(--accent-foreground)",
 };
 
-// Получаем имя текущего дня
 const weekdayNames = [
   "Воскресенье",
   "Понедельник",
@@ -71,7 +70,6 @@ const weekdayNames = [
 ];
 const todayName = weekdayNames[new Date().getDay()];
 
-// Объединяем базу + АГЛ + Кошка и сортируем по времени
 function getFullSchedule(): Record<string, [string, string][]> {
   const full: Record<string, [string, string][]> = {};
   for (const [day, events] of Object.entries(baseSchedule)) {
