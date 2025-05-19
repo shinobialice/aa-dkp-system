@@ -55,13 +55,16 @@ const columns: ColumnDef<User>[] = [
             ? "indeterminate"
             : false
         }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Выбрать все строки"
+        className="cursor-pointer"
       />
     ),
     cell: ({ row }) => (
       <Checkbox
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
+        aria-label="Выбрать строку"
       />
     ),
     enableSorting: false,

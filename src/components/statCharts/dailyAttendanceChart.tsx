@@ -26,6 +26,7 @@ import {
   getGuildAttendanceAgl,
   getGuildAttendancePrime,
 } from "@/src/actions/guildStats";
+import { RoundedTooltipContent } from "./RoundedTooltipContent";
 
 const months = [
   "Январь",
@@ -165,7 +166,10 @@ export default function DailyAttendanceChart({
               </defs>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
-              <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
+              <YAxis
+                domain={[0, 100]}
+                tickFormatter={(v) => `${Math.round(v)}%`}
+              />
               <Area
                 type="monotone"
                 dataKey="prime"
@@ -180,7 +184,7 @@ export default function DailyAttendanceChart({
               />
               <ChartTooltip
                 content={
-                  <ChartTooltipContent
+                  <RoundedTooltipContent
                     labelFormatter={(val) => `Дата: ${val}`}
                   />
                 }

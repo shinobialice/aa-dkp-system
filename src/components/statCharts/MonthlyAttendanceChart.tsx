@@ -26,6 +26,7 @@ import {
   getGuildPrimeStatsByYear,
   getGuildAglStatsByYear,
 } from "@/src/actions/guildStats";
+import { RoundedTooltipContent } from "./RoundedTooltipContent";
 
 const chartConfig = {
   prime: {
@@ -113,7 +114,10 @@ export default function MonthlyAttendanceChart({
               </defs>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
-              <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
+              <YAxis
+                domain={[0, 100]}
+                tickFormatter={(v) => `${Math.round(v)}%`}
+              />
               <Area
                 type="natural"
                 dataKey="prime"
@@ -128,7 +132,7 @@ export default function MonthlyAttendanceChart({
               />
               <ChartTooltip
                 content={
-                  <ChartTooltipContent
+                  <RoundedTooltipContent
                     labelFormatter={(val) => `Месяц: ${val}`}
                   />
                 }
