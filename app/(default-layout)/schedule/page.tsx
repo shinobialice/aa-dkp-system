@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import {
   Table,
   TableBody,
@@ -8,42 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-const baseSchedule: Record<string, [string, string][]> = {
-  Понедельник: [
-    ["19:30", "Кракен"],
-    ["20:30", "Калидис"],
-    ["21:30", "Анталлон"],
-  ],
-  Вторник: [
-    ["19:30", "Ксанатос"],
-    ["20:30", "Левиафан"],
-    ["21:30", "Фесаникс"],
-  ],
-  Среда: [["21:00", "Осада замка"]],
-  Четверг: [
-    ["19:30", "Кракен"],
-    ["20:30", "Левиафан"],
-  ],
-  Пятница: [
-    ["19:30", "Ксанатос"],
-    ["20:30", "Калидис"],
-    ["21:30", "Анталлон"],
-  ],
-  Суббота: [
-    ["19:30", "Кракен"],
-    ["21:00", "Калидис"],
-  ],
-  Воскресенье: [
-    ["18:30", "Фесаникс"],
-    ["19:30", "Ксанатос"],
-    ["19:50", "Анталлон"],
-    ["20:30", "Левиафан"],
-  ],
-};
-
-const aglTimes = ["07:20", "11:20", "15:20", "19:20", "23:20", "03:20"];
-const catTimes = ["10:00", "22:00"];
+import { getWeeklySchedule } from "@/src/actions/getWeeklySchedule";
 
 const bossColors: Record<string, string> = {
   Кракен: "var(--chart-1)",
@@ -70,22 +37,19 @@ const weekdayNames = [
 ];
 const todayName = weekdayNames[new Date().getDay()];
 
-function getFullSchedule(): Record<string, [string, string][]> {
-  const full: Record<string, [string, string][]> = {};
-  for (const [day, events] of Object.entries(baseSchedule)) {
-    const extra: [string, string][] = [
-      ...aglTimes.map((t): [string, string] => [t, "АГЛ"]),
-      ...catTimes.map((t): [string, string] => [t, "Кошка"]),
-    ];
-    full[day] = [...events, ...extra].sort((a, b) => a[0].localeCompare(b[0]));
-  }
-  return full;
-}
-
 export default function WeeklyBossSchedule() {
-  const schedule = getFullSchedule();
+  const [schedule, setSchedule] = useState<Record<string, [string, string][]>>(
+    {}
+  );
+
+  useEffect(() => {
+    getWeeklySchedule().then(setSchedule);
+  }, []);
+
   const days = Object.keys(schedule);
-  const maxRows = Math.max(...Object.values(schedule).map((e) => e.length));
+  const maxRows = Math.max(
+    ...Object.values(schedule).map((e) => e.length || 0)
+  );
 
   return (
     <div className="overflow-x-auto p-4">
@@ -108,7 +72,7 @@ export default function WeeklyBossSchedule() {
           {Array.from({ length: maxRows }).map((_, rowIdx) => (
             <TableRow key={rowIdx}>
               {days.map((day) => {
-                const event = schedule[day][rowIdx];
+                const event = schedule[day]?.[rowIdx];
                 const [time, boss] = event || [];
                 return (
                   <TableCell

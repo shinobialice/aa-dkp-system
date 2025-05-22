@@ -46,7 +46,6 @@ export function LootGroupedTable({
   const [dialogInitialPrice, setDialogInitialPrice] = useState<number>(0);
   const [maxQuantity, setMaxQuantity] = useState<number>(1);
   const [lootToDelete, setLootToDelete] = useState<LootItem | null>(null);
-
   const [selectedItemName, setSelectedItemName] = useState<
     string | undefined
   >();
@@ -61,6 +60,8 @@ export function LootGroupedTable({
     { id: number; username: string }[]
   >([]);
 
+
+  
   useEffect(() => {
     const loadUsers = async () => {
       const users = await getActiveUsers();
