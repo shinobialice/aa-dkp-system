@@ -14,8 +14,7 @@ export default function ProfileTabs({
   tags,
   setTags,
   setUser,
-  averageGuildGS
-  
+  averageGuildGS,
 }: {
   user: any;
   inventory: any[];
@@ -39,9 +38,15 @@ export default function ProfileTabs({
   return (
     <Tabs defaultValue="inventory">
       <TabsList className="mb-4">
-        <TabsTrigger value="inventory">Инвентарь</TabsTrigger>
-        <TabsTrigger value="tasks">Задания</TabsTrigger>
-        <TabsTrigger value="notes">Заметки</TabsTrigger>
+        <TabsTrigger className="cursor-pointer" value="inventory">
+          Инвентарь
+        </TabsTrigger>
+        <TabsTrigger className="cursor-pointer" value="tasks">
+          Задания
+        </TabsTrigger>
+        <TabsTrigger className="cursor-pointer" value="notes">
+          Заметки
+        </TabsTrigger>
       </TabsList>
 
       <TabsContent value="inventory">

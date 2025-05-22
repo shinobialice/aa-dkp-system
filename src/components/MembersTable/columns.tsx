@@ -9,6 +9,7 @@ export const columns: ColumnDef<any>[] = [
     accessorKey: "username",
     header: ({ column }) => (
       <Button
+        className="cursor-pointer"
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >

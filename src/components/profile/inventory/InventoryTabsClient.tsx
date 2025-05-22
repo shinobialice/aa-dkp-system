@@ -21,7 +21,7 @@ export default function InventoryTabsClient({
           <TabsList className="mb-4">
             {["Техника", "Глайдеры", "Петы", "Куплено", "Выдано"].map(
               (type) => (
-                <TabsTrigger key={type} value={type}>
+                <TabsTrigger className="cursor-pointer" key={type} value={type}>
                   {type}
                 </TabsTrigger>
               )

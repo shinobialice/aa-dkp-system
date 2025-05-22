@@ -12,7 +12,7 @@ import {
 
 type ClassFilterProps<TData> = {
   table: Table<TData>;
-}
+};
 
 export function ClassFilter<TData>({ table }: ClassFilterProps<TData>) {
   const selectedClasses =
@@ -46,9 +46,10 @@ export function ClassFilter<TData>({ table }: ClassFilterProps<TData>) {
           <ChevronDown />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent>
+      <DropdownMenuContent className=" w-[170px]">
         {availableClasses.map((className) => (
           <DropdownMenuCheckboxItem
+            className="cursor-pointer"
             key={className}
             checked={selectedClasses.includes(className)}
             onSelect={(event) => {
