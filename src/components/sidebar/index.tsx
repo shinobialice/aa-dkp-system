@@ -158,17 +158,23 @@ export function AppSidebar() {
                   <ChevronUp className="ml-auto" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
-              <DropdownMenuContent
-                side="top"
-                className="w-[--radix-popper-anchor-width]"
-              >
-                <DropdownMenuItem onClick={() => setTheme("light")}>
+              <DropdownMenuContent side="top" className="w-[250px]">
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() => setTheme("light")}
+                >
                   Светлая
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme("dark")}>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() => setTheme("dark")}
+                >
                   Тёмная
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme("system")}>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() => setTheme("system")}
+                >
                   Системная
                 </DropdownMenuItem>
               </DropdownMenuContent>
