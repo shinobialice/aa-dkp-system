@@ -1,9 +1,9 @@
 "use server";
 import supabase from "@/lib/supabase";
 import type { Database } from "@/types/supabase";
+import { differenceInMonths } from "date-fns";
 
 type SalaryInsert = Database["public"]["Tables"]["Salary"]["Insert"];
-
 
 // 1. Get guild funds for a given month/year
 export const getGuildFunds = async (month: number, year: number) => {
@@ -61,8 +61,36 @@ export const getSalariesForMonth = async (month: number, year: number) => {
 };
 
 // 3. Generate salaries
+// Функция расчёта бонуса за срок в гильдии
+function calculateGuildBonus(joinedAt: string | null): number {
+  if (!joinedAt) return 0;
+  const now = new Date();
+  const joinedDate = new Date(joinedAt);
+  const months = differenceInMonths(now, joinedDate);
+  if (months < 6) return 0;
+  const extraPeriods = Math.floor((months - 6) / 6);
+  return 10 + extraPeriods * 5;
+}
+
+// Функция получения кастомного бонуса
+async function getCustomBonus(userId: number): Promise<number> {
+  const { data, error } = await supabase
+    .from("user_salary_bonus")
+    .select("bonus")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.error(`Ошибка при получении бонуса для user ${userId}:`, error);
+    return 0;
+  }
+
+  return data?.bonus ?? 0;
+}
+
 export const generateSalaries = async (month: number, year: number) => {
-  // Get salary budget
   const { data: fund, error: fundError } = await supabase
     .from("GuildFunds")
     .select("*")
@@ -74,10 +102,9 @@ export const generateSalaries = async (month: number, year: number) => {
     throw new Error("Сначала нужно сгенерировать фонд");
   }
 
-  // Get eligible users
   const { data: users, error: usersError } = await supabase
     .from("user")
-    .select("id, salaryBonus")
+    .select("id, joined_at")
     .eq("active", true)
     .eq("is_eligible_for_salary", true);
 
@@ -85,10 +112,8 @@ export const generateSalaries = async (month: number, year: number) => {
     throw new Error("Нет активных сотрудников для выплаты");
   }
 
-  // Calculate base salary
   const baseAmount = Math.floor(fund.salaryBudget / users.length);
 
-  // Delete existing salaries for that month
   const { error: deleteError } = await supabase
     .from("Salary")
     .delete()
@@ -99,16 +124,22 @@ export const generateSalaries = async (month: number, year: number) => {
     throw new Error("Ошибка при удалении предыдущих зарплат");
   }
 
-  // Insert new salary records
-  const salaryRows: SalaryInsert[] = users.map((user) => ({
-    year,
-    month,
-    userId: user.id,
-    amount: baseAmount,
-    bonus: user.salaryBonus ?? 0,
-    total: baseAmount + (user.salaryBonus ?? 0),
-  }));
-  
+  const salaryRows = await Promise.all(
+    users.map(async (user) => {
+      const guildBonus = calculateGuildBonus(user.joined_at);
+      const customBonus = await getCustomBonus(user.id);
+      const totalBonusPercent = guildBonus + customBonus;
+      const bonusAmount = Math.round((baseAmount * totalBonusPercent) / 100);
+      return {
+        year,
+        month,
+        userId: user.id,
+        amount: baseAmount,
+        bonus: bonusAmount,
+        total: baseAmount + bonusAmount,
+      };
+    })
+  );
 
   const { error: insertError } = await supabase
     .from("Salary")
