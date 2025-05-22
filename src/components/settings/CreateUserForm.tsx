@@ -56,7 +56,11 @@ export function CreateUserForm({
         onChange={(e) => setNewUsername(e.target.value)}
       />
       {error && <p className="text-red-500 text-sm">{error}</p>}
-      <Button onClick={handleCreateUser} disabled={isPending}>
+      <Button
+        className="cursor-pointer"
+        onClick={handleCreateUser}
+        disabled={isPending}
+      >
         {isPending ? "Создание..." : "Создать пользователя"}
       </Button>
     </div>

@@ -35,8 +35,8 @@ export function SellLootDialog({
   initialPrice,
   users = [],
   maxQuantity,
-  editMode, 
-  initialValues, 
+  editMode,
+  initialValues,
   itemName,
 }: {
   open: boolean;
@@ -60,7 +60,7 @@ export function SellLootDialog({
     price?: number;
     comment?: string;
   };
-  itemName?: string; 
+  itemName?: string;
 }) {
   const [soldTo, setSoldTo] = useState("");
   const [soldToId, setSoldToId] = useState<number | undefined>(undefined);
@@ -106,38 +106,25 @@ export function SellLootDialog({
   }, [open, editMode, initialValues, initialPrice]);
 
   const handleSubmit = () => {
-    
-
-
-    
-    
-    
-    
-    
-    
-
     if (
       !soldTo ||
       quantity < 1 ||
       quantity > effectiveMaxQuantity ||
       (!isFree && price <= 0)
     ) {
-      
       alert("Проверьте данные перед сохранением");
       return;
     }
 
-    
     onConfirm({
       soldTo,
       soldToId,
-      price: isFree ? 0 : price, 
+      price: isFree ? 0 : price,
       comment,
       quantity,
       isFree,
     });
 
-    
     onClose();
     setSoldTo("");
     setSoldToId(undefined);
@@ -236,7 +223,7 @@ export function SellLootDialog({
           <Input
             type="number"
             min={1}
-            max={effectiveMaxQuantity} 
+            max={effectiveMaxQuantity}
             value={quantity === 0 ? "" : quantity}
             onChange={(e) => {
               const val = Number(e.target.value);
@@ -254,10 +241,14 @@ export function SellLootDialog({
             value={price > 0 ? price : ""}
             disabled={isFree}
             onChange={(e) => {
-              if (isFree) {return;}
+              if (isFree) {
+                return;
+              }
               setManualPriceEdit(true);
               const val = Number(e.target.value);
-              if (!Number.isNaN(val)) {setPrice(val);}
+              if (!Number.isNaN(val)) {
+                setPrice(val);
+              }
             }}
             onBlur={() => {
               if (!price || price < 1) {

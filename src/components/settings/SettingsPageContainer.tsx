@@ -14,7 +14,7 @@ import {
 import { createLinkToken } from "@/src/actions/createLinkToken";
 import { getEligibleUsers } from "@/src/actions/getEligibleUsers";
 import { CreateUserForm } from "./CreateUserForm";
-
+import { UserSelect } from "./UserSelect";
 
 type UserOption = {
   id: number;
@@ -68,19 +68,14 @@ export function SettingsPageContainer() {
           Сгенерировать ссылку для входа
         </h2>
         <div className="space-y-2">
-          <Select onValueChange={(value) => setSelectedUserId(Number(value))}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Выберите пользователя" />
-            </SelectTrigger>
-            <SelectContent>
-              {users.map((user) => (
-                <SelectItem key={user.id} value={String(user.id)}>
-                  {user.username} (id: {user.id})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <UserSelect
+            users={users}
+            selectedUserId={selectedUserId}
+            setSelectedUserId={setSelectedUserId}
+          />
+
           <Button
+            className="cursor-pointer"
             onClick={handleGenerate}
             disabled={isPending || !selectedUserId}
           >
