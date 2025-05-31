@@ -1,14 +1,15 @@
+// components/LootTable.tsx
 "use client";
 import { useState, useEffect } from "react";
 import { AddLootDialog } from "./AddLootDialog";
 import { ExpensesTable } from "./ExpenseTable";
-import { groupLootItems } from "./groupLootItems";
-import { LootGroupedTable } from "./LootGroupedTable";
-import { LootTableControls } from "./LootTableControls";
 import { LootItem, ItemType, NewLootItem } from "./LootTypes";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { getLoot, addLootItem, getItemTypes } from "@/src/actions/lootActions";
+import { deleteLootItem } from "@/src/actions/deleteLootItem";
 import useUserTag from "@/src/hooks/useUserTag";
+import { LootRawTable } from "./LootRawTable";
+import { Button } from "@/components/ui/button";
 
 export default function LootTable() {
   const [loot, setLoot] = useState<LootItem[]>([]);
@@ -31,34 +32,36 @@ export default function LootTable() {
     setLoot(await getLoot());
   };
 
-  const groupedLoot = groupLootItems(loot);
+  const handleDelete = async (item: LootItem) => {
+    await deleteLootItem(item.id);
+    setLoot(await getLoot());
+  };
 
   return (
     <Tabs defaultValue="income" className="w-full">
       <TabsList className="mb-4">
-        <TabsTrigger value="income">Доходы</TabsTrigger>
-        <TabsTrigger value="expenses">Расходы</TabsTrigger>
+        <TabsTrigger className="cursor-pointer" value="income">
+          Доходы
+        </TabsTrigger>
+        <TabsTrigger className="cursor-pointer" value="expenses">
+          Расходы
+        </TabsTrigger>
       </TabsList>
-      {/* Доходы */}
       <TabsContent value="income">
-        <div>
-          <div className="space-y-4">
-            {isAdmin && (
-              <LootTableControls
-                month={month}
-                year={year}
-                onMonthChange={setMonth}
-                onYearChange={setYear}
-                onAddClick={() => setShowDialog(true)}
-                label="Добавить доход"
-              />
-            )}
-            <LootGroupedTable
-              groupedLoot={groupedLoot}
-              loot={loot}
-              setLoot={setLoot}
-            />
-          </div>
+        <div className="space-y-4">
+          {isAdmin && (
+            <Button
+              onClick={() => setShowDialog(true)}
+              className="bg-primary cursor-pointer px-4 py-2 rounded"
+            >
+              Добавить доход
+            </Button>
+          )}
+          <LootRawTable
+            loot={loot}
+            onDelete={handleDelete}
+            onSell={(item) => {}}
+          />
         </div>
         <AddLootDialog
           open={showDialog}
@@ -67,14 +70,8 @@ export default function LootTable() {
           itemTypes={itemTypes}
         />
       </TabsContent>
-      {/* Расходы */}
-
       <TabsContent value="expenses">
-        <div>
-          <div>
-            <ExpensesTable />
-          </div>
-        </div>
+        <ExpensesTable />
       </TabsContent>
     </Tabs>
   );

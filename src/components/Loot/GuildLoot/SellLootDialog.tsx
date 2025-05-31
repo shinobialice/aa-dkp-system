@@ -151,7 +151,7 @@ export function SellLootDialog({
               <button
                 type="button"
                 className={cn(
-                  "w-full justify-between border rounded px-3 py-2 text-sm flex items-center",
+                  "cursor-pointer w-full justify-between border rounded px-3 py-2 text-sm flex items-center",
                   !soldTo && "text-muted-foreground"
                 )}
               >
@@ -159,7 +159,7 @@ export function SellLootDialog({
                 <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
               </button>
             </PopoverTrigger>
-            <PopoverContent className="w-[300px] p-0">
+            <PopoverContent className="w-[350px] p-0">
               <Command>
                 <CommandInput
                   placeholder="Поиск..."
@@ -173,6 +173,7 @@ export function SellLootDialog({
                 <CommandList>
                   {users.map((user) => (
                     <CommandItem
+                      className="cursor-pointer"
                       key={user.id}
                       value={user.username}
                       onSelect={() => {
@@ -184,7 +185,7 @@ export function SellLootDialog({
                     >
                       <Check
                         className={cn(
-                          "mr-2 h-4 w-4",
+                          "mr-2 h-4 w-4 ",
                           soldTo === user.username ? "opacity-100" : "opacity-0"
                         )}
                       />
@@ -198,6 +199,7 @@ export function SellLootDialog({
 
           <Label className="flex items-center gap-2 mt-2">
             <input
+              className="cursor-pointer"
               type="checkbox"
               checked={isFree}
               onChange={(e) => {
@@ -263,10 +265,16 @@ export function SellLootDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="secondary" onClick={onClose}>
+          <Button
+            className="cursor-pointer"
+            variant="secondary"
+            onClick={onClose}
+          >
             Отмена
           </Button>
-          <Button onClick={handleSubmit}>Сохранить</Button>
+          <Button className="cursor-pointer" onClick={handleSubmit}>
+            Сохранить
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
