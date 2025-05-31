@@ -33,18 +33,21 @@ export async function distributeLootItem({
   const remainingQuantity = loot.quantity - quantity;
 
   // 2. Update remaining loot quantity and status
-  const { error: updateOriginalError } = await supabase
+  let newStatus = loot.status;
+
+  if (remainingQuantity === 0) {
+    if (loot.status === "В наличии" || loot.status === "Продаётся") {
+      newStatus = "Распродано";
+    }
+  }
+
+  await supabase
     .from("loot")
     .update({
       quantity: remainingQuantity,
-      status: remainingQuantity === 0 ? "Продано" : "В наличии",
+      status: newStatus,
     })
     .eq("id", lootId);
-
-  if (updateOriginalError) {
-    console.error(updateOriginalError);
-    throw new Error("Ошибка при обновлении остатка лута");
-  }
 
   // 3. Insert new loot record for the distributed portion
   const { data: created, error: createError } = await supabase
