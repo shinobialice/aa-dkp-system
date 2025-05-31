@@ -14,7 +14,7 @@ export const generateGuildFunds = async (month: number, year: number) => {
   // 1. Fetch sold loot with itemType joined
   const { data: loot, error: lootError } = await supabase
     .from("loot")
-    .select("quantity, item_type:price")
+    .select("quantity, price")
     .eq("status", "Продано")
     .gte("acquired_at", startIso)
     .lt("acquired_at", endIso);
@@ -26,7 +26,7 @@ export const generateGuildFunds = async (month: number, year: number) => {
 
   // 2. Calculate total income
   const totalIncome = loot.reduce((sum, item) => {
-    const price = item.item_type?.price ?? 0;
+    const price = item.price ?? 0;
     return sum + price * item.quantity;
   }, 0);
 
