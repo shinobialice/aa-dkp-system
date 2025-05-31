@@ -34,7 +34,7 @@ export default function LoginPage() {
       <div className="relative hidden bg-muted lg:block">
         <Image
           fill
-          src="/images/login_banner.jpg"
+          src="/images/login_banner.png"
           alt="Login Image"
           className="object-cover dark:brightness-[0.2] dark:grayscale"
         />

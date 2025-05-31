@@ -80,7 +80,7 @@ export default function LinkAccountPage() {
 
       <div className="relative hidden bg-muted lg:block">
         <Image
-          src="/images/login_banner.jpg"
+          src="/images/login_banner.png"
           alt="Login Image"
           fill
           className="object-cover dark:brightness-[0.2] dark:grayscale"
