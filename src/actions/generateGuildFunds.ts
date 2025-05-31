@@ -26,8 +26,7 @@ export const generateGuildFunds = async (month: number, year: number) => {
 
   // 2. Calculate total income
   const totalIncome = loot.reduce((sum, item) => {
-    const price = item.price ?? 0;
-    return sum + price * item.quantity;
+    return sum + (item.price ?? 0); // ✅ price — это уже итоговая сумма продажи
   }, 0);
 
   // 3. Fetch expenses
