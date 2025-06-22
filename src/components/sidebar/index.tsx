@@ -67,7 +67,7 @@ export const AppSidebar: FC<Props> = ({ isAdmin }) => {
       ],
     },
     { title: "Статистика", url: "/stats", icon: LineChart },
-    { title: "Киллкаунт", url: "/kill_counr", icon: Swords },
+    { title: "Киллкаунт", url: "/kill_counter", icon: Swords },
     { title: "Настройки", url: "/settings", icon: Settings },
   ];
 
