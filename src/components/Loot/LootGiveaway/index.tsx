@@ -24,7 +24,6 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { saveGivenAwayLoot } from "@/src/actions/saveGivenAwayLoot";
-import useUserTag from "@/src/hooks/useUserTag";
 
 type LootItem = {
   name: string;
@@ -40,16 +39,19 @@ type Player = {
   loot: LootItem[];
 };
 
+type LootGiveawayProps = {
+  initialPlayers: Player[];
+  isAdmin: boolean; // Add isAdmin prop
+};
+
 export default function LootGiveaway({
   initialPlayers,
-}: {
-  initialPlayers: Player[];
-}) {
+  isAdmin,
+}: LootGiveawayProps) {
   const [allPlayers, setAllPlayers] = useState<Player[]>(initialPlayers);
   const [editMode, setEditMode] = useState(false);
   const [showInactive, setShowInactive] = useState(false);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const isAdmin = useUserTag("Администратор");
 
   const displayedPlayers = useMemo(
     () => allPlayers.filter((p) => p.active || showInactive),

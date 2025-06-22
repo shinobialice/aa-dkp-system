@@ -14,14 +14,14 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { getExpenses, addExpense } from "@/src/actions/expenseActions";
-import useUserTag from "@/src/hooks/useUserTag";
 
-export function ExpensesTable() {
+type Props = { isAdmin: boolean };
+
+export default function ExpensesTable({ isAdmin }: Props) {
   const [month, setMonth] = useState<number>(new Date().getMonth() + 1);
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [expenses, setExpenses] = useState<ExpenseItem[]>([]);
   const [showDialog, setShowDialog] = useState(false);
-  const isAdmin = useUserTag("Администратор");
 
   useEffect(() => {
     const load = async () => {

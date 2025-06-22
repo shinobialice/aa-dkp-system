@@ -4,8 +4,10 @@ import getUser from "@/src/actions/getUser";
 import getUserInventory from "@/src/actions/getUserInventory";
 import { getUserMonthlyAttendance } from "@/src/actions/getUserMonthlyAttendance";
 import getUserNotes from "@/src/actions/getUserNotes";
+import { hasTag } from "@/src/actions/hasTag";
 import { getUserTags } from "@/src/actions/userTagsActions";
 import ProfilePageWrapper from "@/src/components/profile/ProfilePageWrapper";
+import { cookies } from "next/headers";
 
 export default async function Page(p: {
   params: Promise<{ user_id: string }>;
@@ -27,15 +29,19 @@ export default async function Page(p: {
     getUserNotes(userId),
   ]);
 
+  const sessionToken = (await cookies()).get("session_token").value;
+  const isAdmin = await hasTag(sessionToken, ["Администратор"]);
+
   return (
     <ProfilePageWrapper
+      isAdmin={isAdmin}
       user={user}
       tags={tags}
       inventory={inventory}
       tasks={tasks}
       notes={notes}
       averageGuildGS={averageGuildGS}
-      activity={activity} 
+      activity={activity}
     />
   );
 }

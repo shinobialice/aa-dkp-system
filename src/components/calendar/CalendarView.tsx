@@ -16,9 +16,13 @@ import {
 } from "@/components/ui/select";
 import { getRaids } from "@/src/actions/getEvents";
 import { getRaidById } from "@/src/actions/getRaidById";
-import useUserTag from "@/src/hooks/useUserTag";
 
-export default function ActivitiesPage() {
+type Props = {
+  isAdmin?: boolean;
+  isModerator?: boolean;
+};
+
+export default function CalendarView({ isAdmin, isModerator }: Props) {
   const calendarRef = useRef<FullCalendar | null>(null);
   const [currentRange, setCurrentRange] = useState("...");
   const [events, setEvents] = useState<
@@ -33,9 +37,6 @@ export default function ActivitiesPage() {
 
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
-  const isAdmin = useUserTag("Администратор");
-  const isModerator = useUserTag("Модератор");
-  const canEditEvents = isAdmin || isModerator;
 
   const handleEventClick = async (info: any) => {
     const fullEvent = await getRaidById(info.event.id);
@@ -87,6 +88,8 @@ export default function ActivitiesPage() {
       api.changeView("listWeek");
     }
   };
+
+  const canEditEvents = isAdmin || isModerator;
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-onBackground">

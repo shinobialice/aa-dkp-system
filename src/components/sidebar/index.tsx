@@ -41,13 +41,14 @@ import {
   SidebarMenuItem,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import useUserTag from "@/src/hooks/useUserTag";
 import Image from "next/image";
 import { NavUser } from "./NavUser";
+import { FC } from "react";
 
-export function AppSidebar() {
+type Props = { isAdmin?: boolean };
+
+export const AppSidebar: FC<Props> = ({ isAdmin }) => {
   const { setTheme } = useTheme();
-  const isAdmin = useUserTag("Администратор");
 
   const menuItems = [
     { title: "Новости", url: "/news", icon: Newspaper },
@@ -147,7 +148,6 @@ export function AppSidebar() {
 
       <SidebarFooter>
         <SidebarMenu>
-          {/* Переключатель темы — теперь сверху */}
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -186,6 +186,6 @@ export function AppSidebar() {
       </SidebarFooter>
     </Sidebar>
   );
-}
+};
 
 export default AppSidebar;

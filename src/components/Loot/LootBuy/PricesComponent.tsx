@@ -1,3 +1,5 @@
+"use server";
+import { cookies } from "next/headers";
 import { LootIcon } from "./icons/LootIconComponent";
 import { LootQueuePopover } from "./LootQueuePopover";
 import {
@@ -8,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { hasTag } from "@/src/actions/hasTag";
 
 export type LootItem = {
   name: string;
@@ -15,7 +18,9 @@ export type LootItem = {
   icon: string;
 };
 
-export function PricesComponent({ items }: { items: LootItem[] }) {
+export async function PricesComponent({ items }: { items: LootItem[] }) {
+  const sessionToken = (await cookies()).get("session_token").value;
+  const isAdmin = await hasTag(sessionToken, ["Администратор"]);
   return (
     <Table>
       <TableHeader>
@@ -26,7 +31,11 @@ export function PricesComponent({ items }: { items: LootItem[] }) {
       </TableHeader>
       <TableBody>
         {items.map((item) => (
-          <LootQueuePopover key={item.name} itemName={item.name}>
+          <LootQueuePopover
+            isAdmin={isAdmin}
+            key={item.name}
+            itemName={item.name}
+          >
             <TableRow className="hover:bg-muted cursor-pointer">
               <TableCell>
                 <div className="flex items-center gap-2">

@@ -12,6 +12,7 @@ export default function ProfilePageWrapper({
   tasks,
   averageGuildGS,
   activity,
+  isAdmin,
 }: {
   user: any;
   tags: { id: number; tag: string }[];
@@ -25,6 +26,7 @@ export default function ProfilePageWrapper({
     totalPercent: number;
     dkp: number;
   };
+  isAdmin?: boolean;
 }) {
   const [user, setUser] = useState(initialUser);
   const [tags, setTags] = useState(initialTags);
@@ -52,6 +54,7 @@ export default function ProfilePageWrapper({
           tags={tags}
           setTags={setTags}
           averageGuildGS={averageGuildGS}
+          isAdmin={isAdmin}
         />
       </div>
     </div>

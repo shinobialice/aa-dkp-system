@@ -32,22 +32,22 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import deleteUserTask from "@/src/actions/deleteUserTask";
-import useUserTag from "@/src/hooks/useUserTag";
 
-type TasksTableClientProps = {
+type Props = {
   tasks: Task[];
   userId: number;
   onChange: () => void;
+  isAdmin?: boolean;
 };
 
 export default function TasksTable({
   tasks,
   userId,
   onChange,
-}: TasksTableClientProps) {
+  isAdmin,
+}: Props) {
   const [openDialogId, setOpenDialogId] = React.useState<number | null>(null);
   const [editDialogTask, setEditDialogTask] = React.useState<Task | null>(null);
-  const isAdmin = useUserTag("Администратор");
 
   return (
     <Card>

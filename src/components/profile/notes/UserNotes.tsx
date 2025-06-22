@@ -10,7 +10,6 @@ import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { deleteUserSalaryBonus } from "@/src/actions/addUserSalaryBonus";
 import { getUserSalaryBonus } from "@/src/actions/getUserSalaryBonus";
 import { getUserTags } from "@/src/actions/userTagsActions";
-import useUserTag from "@/src/hooks/useUserTag";
 
 function UserBonusesSection({
   bonuses,
@@ -49,19 +48,20 @@ export default function UserNotes({
   initialTags,
   updateTags,
   setUser,
-  averageGuildGS, // 👈 добавить сюда
+  averageGuildGS,
+  isAdmin,
 }: {
   user: any;
   initialTags: { id: number; tag: string }[];
   updateTags: (tags: { id: number; tag: string }[]) => void;
   setUser: (user: any) => void;
-  averageGuildGS: number; // 👈 тип указать
+  averageGuildGS: number;
+  isAdmin?: boolean;
 }) {
   const [bonuses, setBonuses] = useState<any[]>([]);
   const [refreshToggle, setRefreshToggle] = useState(false);
   const [bonusDialogOpen, setBonusDialogOpen] = useState(false);
   const [tags, setTags] = useState(initialTags);
-  const isAdmin = useUserTag("Администратор");
 
   useEffect(() => {
     const fetchBonuses = async () => {

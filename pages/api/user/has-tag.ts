@@ -1,7 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { parse } from "cookie";
-import { createClient } from "@supabase/supabase-js";
-import supabase from "@/lib/supabase";
+import { hasTag } from "@/src/actions/hasTag";
 
 export default async function handler(
   req: NextApiRequest,
@@ -14,31 +13,15 @@ export default async function handler(
     return res.status(401).json({ hasTag: false, error: "Missing token" });
   }
 
-  const { data: user, error: userError } = await supabase
-    .from("user")
-    .select("id")
-    .eq("session_token", token)
-    .single();
-
-  if (!user || userError) {
-    return res.status(401).json({ hasTag: false, error: "Invalid session" });
-  }
-
   const tag = req.query.tag as string;
   if (!tag) {
     return res.status(400).json({ hasTag: false, error: "Missing tag param" });
   }
 
-  const { data: tagRow, error: tagError } = await supabase
-    .from("user_tags")
-    .select("tag")
-    .eq("user_id", user.id)
-    .eq("tag", tag)
-    .maybeSingle();
-
-  if (tagError) {
-    return res.status(500).json({ hasTag: false, error: tagError.message });
+  try {
+    const isValid = await hasTag(token, ["ADMIN"]);
+    return res.status(200).json({ hasTag: isValid });
+  } catch (error) {
+    return res.status(500).json({ hasTag: false, error });
   }
-
-  return res.status(200).json({ hasTag: !!tagRow });
 }

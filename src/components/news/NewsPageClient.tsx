@@ -5,19 +5,24 @@ import NewsCardList from "./NewsCardsList";
 import { NewsFormDialog } from "./NewsFormDialog";
 import { Button } from "@/components/ui/button";
 import { createNews } from "@/src/actions/news";
-import useUserTag from "@/src/hooks/useUserTag";
 
 type NewsItem = {
   id: number;
   title: string;
   content: string;
   date: string;
+  isAdmin: boolean;
 };
 
-export default function NewsPageClient({ items }: { items: NewsItem[] }) {
+export default function NewsPageClient({
+  items,
+  isAdmin,
+}: {
+  items: NewsItem[];
+  isAdmin: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const [news, setNews] = useState(items);
-  const isAdmin = useUserTag("Администратор");
 
   const handleCreate = async (data: { title: string; content: string }) => {
     const newItem = await createNews(data.title, data.content);
@@ -40,7 +45,7 @@ export default function NewsPageClient({ items }: { items: NewsItem[] }) {
             </Button>
           )}
         </div>
-        <NewsCardList items={news} />
+        <NewsCardList isAdmin={isAdmin} items={news} />
         <NewsFormDialog
           open={open}
           onClose={() => setOpen(false)}

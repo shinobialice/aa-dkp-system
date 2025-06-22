@@ -2,22 +2,24 @@
 "use client";
 import { useState, useEffect } from "react";
 import { AddLootDialog } from "./AddLootDialog";
-import { ExpensesTable } from "./ExpenseTable";
+
 import { LootItem, ItemType, NewLootItem } from "./LootTypes";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { getLoot, addLootItem, getItemTypes } from "@/src/actions/lootActions";
 import { deleteLootItem } from "@/src/actions/deleteLootItem";
-import useUserTag from "@/src/hooks/useUserTag";
+
 import { LootRawTable } from "./LootRawTable";
 import { Button } from "@/components/ui/button";
+import ExpensesTable from "./ExpenseTable";
 
-export default function LootTable() {
+type Props = {
+  isAdmin: boolean; // Add isAdmin prop
+};
+
+export default function LootTable({ isAdmin }: Props) {
   const [loot, setLoot] = useState<LootItem[]>([]);
   const [itemTypes, setItemTypes] = useState<ItemType[]>([]);
-  const [month, setMonth] = useState<number>(new Date().getMonth() + 1);
-  const [year, setYear] = useState<number>(new Date().getFullYear());
   const [showDialog, setShowDialog] = useState(false);
-  const isAdmin = useUserTag("Администратор");
 
   useEffect(() => {
     const loadData = async () => {
@@ -58,6 +60,7 @@ export default function LootTable() {
             </Button>
           )}
           <LootRawTable
+            isAdmin={isAdmin}
             loot={loot}
             onDelete={handleDelete}
             onSell={(item) => {}}
@@ -71,7 +74,7 @@ export default function LootTable() {
         />
       </TabsContent>
       <TabsContent value="expenses">
-        <ExpensesTable />
+        <ExpensesTable isAdmin={isAdmin} />
       </TabsContent>
     </Tabs>
   );

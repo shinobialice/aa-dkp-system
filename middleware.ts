@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { verifySessionToken } from "./src/actions/verifySessionToken";
 
-export function middleware(req: NextRequest) {
-  const sessionToken = req.cookies.get("session_token");
+export async function middleware(req: NextRequest) {
+  const sessionToken = req.cookies.get("session_token")?.value;
 
   const publicPaths = [
     "/login",
@@ -27,6 +28,13 @@ export function middleware(req: NextRequest) {
     const loginUrl = new URL("/login", req.url);
     return NextResponse.redirect(loginUrl);
   }
+
+  // const isValidSession = await verifySessionToken(sessionToken);
+  // if (!isValidSession) {
+  //   const loginUrl = new URL("/login", req.url);
+  //   return NextResponse.redirect(loginUrl);
+  // } 
+  // чето надо придумать бляха муха
 
   return NextResponse.next();
 }

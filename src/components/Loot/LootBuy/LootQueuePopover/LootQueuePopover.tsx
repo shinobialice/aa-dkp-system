@@ -23,27 +23,23 @@ import { getActiveUsers } from "@/src/actions/getActiveUsers";
 import { getLootQueueByItemName } from "@/src/actions/getLootQueueByItemName";
 import { markQueueLootAsSold } from "@/src/actions/markQueueLootAsSold";
 import { updateLootQueueEntry } from "@/src/actions/updateLootQueueEntry";
-import useUserTag from "@/src/hooks/useUserTag";
 
 const extendedItems = ["Эссенция ярости", "Трофейная эссенция стихий"];
 
-type LootQueuePopoverProps = {
+type Props = {
   itemName: string;
   children: React.ReactNode;
+  isAdmin?: boolean;
 };
 
 type EditableField = "required" | "delivered" | "status" | "synth_target";
 
-export function LootQueuePopover({
-  itemName,
-  children,
-}: LootQueuePopoverProps) {
+export function LootQueuePopover({ itemName, children, isAdmin }: Props) {
   const [searchUser, setSearchUser] = useState("");
   const [selectedUser, setSelectedUser] = useState("");
   const [queue, setQueue] = useState<Record<string, LootQueueEntry[]>>({});
   const [editMode, setEditMode] = useState(false);
   const [allUsers, setAllUsers] = useState<string[]>([]);
-  const isAdmin = useUserTag("Администратор");
   const isExtended = extendedItems.includes(itemName);
 
   const handleAddToQueue = async () => {

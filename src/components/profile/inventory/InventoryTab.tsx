@@ -1,3 +1,5 @@
+"use server";
+import { cookies } from "next/headers";
 import inventoryItems from "./InventoryItems";
 import InventoryRow from "./InventoryRow";
 import {
@@ -8,9 +10,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { hasTag } from "@/src/actions/hasTag";
 
-
-export default function InventoryTab({
+export default async function InventoryTab({
   type,
   inventory,
   userId,
@@ -21,6 +23,8 @@ export default function InventoryTab({
   userId: number;
   onChange: () => void;
 }) {
+  const sessionToken = (await cookies()).get("session_token").value;
+  const isAdmin = await hasTag(sessionToken, ["Администратор"]);
   if (type === "Куплено") {
     const lootItems = inventory.filter((inv) => inv.type === "Куплено");
     return (
@@ -83,29 +87,34 @@ export default function InventoryTab({
       if (
         item.name === "Коллеционный глайдер" &&
         inventory.find((inv) => inv.name === "Коллеционный глайдер т2")
-      )
-        {return false;}
+      ) {
+        return false;
+      }
       if (
         item.name === "Коллеционный глайдер т2" &&
         !inventory.find((inv) => inv.name === "Коллеционный глайдер т2")
-      )
-        {return false;}
+      ) {
+        return false;
+      }
       if (
         item.name === "Коллекционный фамильяр" &&
         inventory.find((inv) => inv.name === "Коллекционный фамильяр т2")
-      )
-        {return false;}
+      ) {
+        return false;
+      }
       if (
         item.name === "Коллекционный фамильяр т2" &&
         !inventory.find((inv) => inv.name === "Коллекционный фамильяр т2")
-      )
-        {return false;}
+      ) {
+        return false;
+      }
       if (
         ["Красный Дракон", "Черный Дракон", "Зеленый Дракон"].includes(
           item.name
         )
-      )
-        {return false;}
+      ) {
+        return false;
+      }
       return true;
     });
 

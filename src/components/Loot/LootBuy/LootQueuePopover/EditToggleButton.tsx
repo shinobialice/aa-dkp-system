@@ -1,18 +1,20 @@
 "use client";
 import { Pen } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import useUserTag from "@/src/hooks/useUserTag";
+
 
 export function EditToggleButton({
   editMode,
   toggle,
   classname,
+  isAdmin
 }: {
   editMode: boolean;
   toggle: () => void;
   classname?: string;
+  isAdmin?: boolean;
 }) {
-  const isAdmin = useUserTag("Администратор");
+
   return (
     <div className={`${classname}`}>
       {isAdmin && (

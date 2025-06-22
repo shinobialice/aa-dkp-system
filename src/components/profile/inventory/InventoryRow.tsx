@@ -7,18 +7,19 @@ import { TableRow, TableCell } from "@/components/ui/table";
 import addItemToUserInventory from "@/src/actions/addItemToUserInventory";
 import deleteItemFromUserInventory from "@/src/actions/deleteItemFromUserInventory";
 import setItemQuality from "@/src/actions/setItemQuality";
-import useUserTag from "@/src/hooks/useUserTag";
 
 export default function InventoryRow({
   item,
   inventory,
   userId,
   onChange,
+  isAdmin,
 }: {
   item: any;
   inventory: any[];
   userId: number;
   onChange: () => void;
+  isAdmin?: boolean;
 }) {
   const isDragon = item.name === "Дракон";
 
@@ -34,7 +35,6 @@ export default function InventoryRow({
 
   const displayIconName = isDragon && userItem ? userItem.name : item.name;
   const itemIconUrl = inventoryIcons[displayIconName] || null;
-  const isAdmin = useUserTag("Администратор");
 
   const handleChange = async (value: string) => {
     if (item.name === "Бафалка") {

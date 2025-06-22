@@ -1,5 +1,6 @@
 "use server";
 import supabase from "@/lib/supabase";
+import ensurePrivilieges from "./ensurePrivilieges";
 
 function getMoscowISOString(date: Date): string {
   const year = date.getFullYear();
@@ -21,6 +22,8 @@ const createRaidEvent = async (
   is_pvp: boolean,
   is_pvp_long: boolean
 ) => {
+  await ensurePrivilieges(["Администратор", "Raid Manager"]);
+
   // 1. Получить текущее количество активных пользователей
   const { data: activeUsers, error: activeError } = await supabase
     .from("user")
@@ -45,7 +48,7 @@ const createRaidEvent = async (
         created_at: new Date().toISOString(),
         is_pvp,
         is_pvp_long,
-        active_user_count, // 👈 добавлено
+        active_user_count, 
       },
     ])
     .select()

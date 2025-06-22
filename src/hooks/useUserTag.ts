@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 
+// TODO Remove this hook and use and get this info from the nearest parent server component
 function useUserTag(tag: string) {
   const [hasTag, setHasTag] = useState<boolean>(false);
 
@@ -9,7 +10,7 @@ function useUserTag(tag: string) {
       try {
         const res = await fetch(
           `/api/user/has-tag?tag=${encodeURIComponent(tag)}`,
-          { credentials: "include" } // 👈 добавь это
+          { credentials: "include" }
         );
         if (!res.ok) return;
         const json = await res.json();

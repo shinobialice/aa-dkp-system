@@ -17,20 +17,20 @@ import {
   getSalariesForMonth,
 } from "@/src/actions/financeActions";
 import { generateGuildFunds } from "@/src/actions/generateGuildFunds";
-import useUserTag from "@/src/hooks/useUserTag";
 
 export default function FinanceClient({
   currentMonth,
   currentYear,
+  isAdmin,
 }: {
   currentMonth: number;
   currentYear: number;
+  isAdmin: boolean;
 }) {
   const [month, setMonth] = useState(currentMonth);
   const [year, setYear] = useState(currentYear);
   const [loadingFund, setLoadingFund] = useState(false);
   const [loadingSalaries, setLoadingSalaries] = useState(false);
-  const isAdmin = useUserTag("Администратор");
 
   const [fund, setFund] = useState<null | {
     totalIncome: number;

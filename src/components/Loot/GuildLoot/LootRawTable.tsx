@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import useUserTag from "@/src/hooks/useUserTag";
 import { SellLootDialog } from "./SellLootDialog";
 import { getActiveUsers } from "@/src/actions/getActiveUsers";
 import { distributeLootItem } from "@/src/actions/distributeLootItems";
@@ -23,12 +22,13 @@ export function LootRawTable({
   loot,
   onDelete,
   onSell,
+  isAdmin,
 }: {
   loot: LootItem[];
   onDelete: (loot: LootItem) => void;
   onSell: (loot: LootItem) => void;
+  isAdmin: boolean;
 }) {
-  const isAdmin = useUserTag("Администратор");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<LootItem | null>(null);
   const [activeUsers, setActiveUsers] = useState<

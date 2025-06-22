@@ -2,8 +2,10 @@
 
 import supabase from "@/lib/supabase";
 import { revalidatePath } from "next/cache";
+import ensurePrivilieges from "./ensurePrivilieges";
 
 export async function createUser(username: string) {
+  await ensurePrivilieges(["Администратор"]);
   const { data, error } = await supabase
     .from("user")
     .insert({
@@ -20,6 +22,6 @@ export async function createUser(username: string) {
     throw new Error("Не удалось создать пользователя");
   }
 
-  revalidatePath("/settings"); // или нужный путь
+  revalidatePath("/settings");
   return data;
 }

@@ -15,6 +15,7 @@ export default function ProfileTabs({
   setTags,
   setUser,
   averageGuildGS,
+  isAdmin,
 }: {
   user: any;
   inventory: any[];
@@ -23,6 +24,7 @@ export default function ProfileTabs({
   setTags: (tags: any[]) => void;
   setUser: (user: any) => void;
   averageGuildGS: number;
+  isAdmin: boolean;
 }) {
   const [inventory, setInventory] = useState(initialInventory);
   const [tasks, setTasks] = useState(initialTasks);
@@ -62,6 +64,7 @@ export default function ProfileTabs({
 
       <TabsContent value="tasks">
         <TasksTable
+          isAdmin={isAdmin}
           tasks={tasks}
           userId={user.id}
           onChange={async () => {
@@ -73,6 +76,7 @@ export default function ProfileTabs({
 
       <TabsContent value="notes">
         <UserNotes
+          isAdmin={isAdmin}
           user={user}
           initialTags={tags}
           updateTags={setTags}

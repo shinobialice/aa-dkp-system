@@ -143,7 +143,7 @@ export default function UpcomingEvents() {
   >([]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    const checkEvents = () => {
       const msk = getMoscowTime();
       setNow(msk);
 
@@ -183,8 +183,10 @@ export default function UpcomingEvents() {
       }
 
       setEvents(result.slice(0, 4));
-    }, 10_000);
+    };
 
+    checkEvents();
+    const interval = setInterval(checkEvents, 10_000);
     return () => clearInterval(interval);
   }, []);
 

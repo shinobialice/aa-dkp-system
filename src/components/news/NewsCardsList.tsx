@@ -12,23 +12,24 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { deleteNews, updateNews } from "@/src/actions/news";
-import useUserTag from "@/src/hooks/useUserTag";
 
 type NewsItem = {
   id: number;
   title: string;
   date: string;
   content: string;
+  isAdmin?: boolean;
 };
 
 export default function NewsCardList({
   items: initialItems,
+  isAdmin,
 }: {
   items: NewsItem[];
+  isAdmin?: boolean;
 }) {
   const [items, setItems] = useState(initialItems);
   const [editing, setEditing] = useState<NewsItem | null>(null);
-  const isAdmin = useUserTag("Администратор");
 
   const handleDelete = async (id: number) => {
     await deleteNews(id);
