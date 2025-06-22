@@ -27,6 +27,7 @@ export default function ProfileHeader({
   editMode,
   setEditMode,
   tags,
+  isAdmin,
 }: {
   user: any;
   formData: any;
@@ -34,6 +35,7 @@ export default function ProfileHeader({
   editMode: boolean;
   setEditMode: (v: boolean) => void;
   tags: { id: number; tag: string }[];
+  isAdmin?: boolean;
 }) {
   return (
     <CardHeader className="flex flex-col items-center">
@@ -64,14 +66,16 @@ export default function ProfileHeader({
             </Button>
           )}
 
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8 text-muted-foreground cursor-pointer"
-            onClick={() => setEditMode(!editMode)}
-          >
-            <Pencil />
-          </Button>
+          {isAdmin && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8 text-muted-foreground cursor-pointer"
+              onClick={() => setEditMode(!editMode)}
+            >
+              <Pencil />
+            </Button>
+          )}
         </div>
 
         <Avatar className="h-20 w-20 mb-4">

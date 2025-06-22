@@ -8,9 +8,11 @@ import { Card, CardContent } from "@/components/ui/card";
 export default function ProfileInfoClient({
   user,
   tags: initialTags,
+  isAdmin,
 }: {
   user: any;
   tags: any[];
+  isAdmin?: boolean;
 }) {
   const [tags, setTags] = useState(initialTags);
   const [editMode, setEditMode] = useState(false);
@@ -33,7 +35,9 @@ export default function ProfileInfoClient({
 
   useEffect(() => {
     const fetchVkName = async () => {
-      if (!formData.vkName) {return;}
+      if (!formData.vkName) {
+        return;
+      }
 
       const res = await fetch(`/api/vk-name?username=${formData.vkName}`);
       const data = await res.json();
@@ -49,6 +53,7 @@ export default function ProfileInfoClient({
   return (
     <Card>
       <ProfileHeader
+        isAdmin={isAdmin}
         user={user}
         formData={formData}
         setFormData={setFormData}

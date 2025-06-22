@@ -4,8 +4,6 @@ import InventoryTabsClient from "./inventory/InventoryTabsClient";
 import UserNotes from "./notes/UserNotes";
 import TasksTable from "./tasks/TasksTable";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import getUserInventory from "@/src/actions/getUserInventory";
-import getUserTasks from "@/src/actions/getUserTasks";
 
 export default function ProfileTabs({
   user,
@@ -50,14 +48,12 @@ export default function ProfileTabs({
           Заметки
         </TabsTrigger>
       </TabsList>
-
       <TabsContent value="inventory">
         <InventoryTabsClient
           inventory={inventory}
           userId={user.id}
-          onChange={async () => {
-            const updatedInventory = await getUserInventory(user.id);
-            setInventory(updatedInventory);
+          onChange={() => {
+            // Handle inventory updates passed from parent
           }}
         />
       </TabsContent>
@@ -67,9 +63,8 @@ export default function ProfileTabs({
           isAdmin={isAdmin}
           tasks={tasks}
           userId={user.id}
-          onChange={async () => {
-            const updatedTasks = await getUserTasks(user.id);
-            setTasks(updatedTasks);
+          onChange={() => {
+            // Handle tasks updates passed from parent
           }}
         />
       </TabsContent>

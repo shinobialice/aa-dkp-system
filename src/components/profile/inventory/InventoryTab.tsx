@@ -1,5 +1,3 @@
-"use server";
-import { cookies } from "next/headers";
 import inventoryItems from "./InventoryItems";
 import InventoryRow from "./InventoryRow";
 import {
@@ -10,9 +8,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { hasTag } from "@/src/actions/hasTag";
 
-export default async function InventoryTab({
+export default function InventoryTab({
   type,
   inventory,
   userId,
@@ -23,8 +20,6 @@ export default async function InventoryTab({
   userId: number;
   onChange: () => void;
 }) {
-  const sessionToken = (await cookies()).get("session_token").value;
-  const isAdmin = await hasTag(sessionToken, ["Администратор"]);
   if (type === "Куплено") {
     const lootItems = inventory.filter((inv) => inv.type === "Куплено");
     return (
