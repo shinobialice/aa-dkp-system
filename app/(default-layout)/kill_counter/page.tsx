@@ -91,7 +91,7 @@ export default function KillCounterPage() {
       <Accordion type="single" collapsible>
         {primes.map((prime) => (
           <AccordionItem key={prime.date} value={prime.date}>
-            <AccordionTrigger className="cursor-pointer">{`Прайм: ${prime.date}`}</AccordionTrigger>
+            <AccordionTrigger className="cursor-pointer border p-3">{`Прайм: ${prime.date}`}</AccordionTrigger>
             <AccordionContent>
               <Table>
                 <TableHeader>
