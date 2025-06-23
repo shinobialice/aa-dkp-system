@@ -1,7 +1,9 @@
 "use server";
 import supabase from "@/lib/supabase";
+import ensurePrivilieges from "./ensurePrivilieges";
 
 const deleteUserTask = async (id: number) => {
+  await ensurePrivilieges(["Администратор"]);
   const { data, error } = await supabase
     .from("tasks")
     .delete()

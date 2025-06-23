@@ -1,6 +1,7 @@
 "use server";
 
 import supabase from "@/lib/supabase";
+import ensurePrivilieges from "./ensurePrivilieges";
 
 /**
  * Обновляет существующее событие по ID
@@ -15,6 +16,7 @@ const updateEvent = async (
   is_pvp: boolean,
   is_pvp_long: boolean
 ) => {
+  await ensurePrivilieges(["Администратор", "Модератор"]);
   // 1. Update the raid event itself
   const { error: updateError } = await supabase
     .from("raid")

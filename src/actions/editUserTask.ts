@@ -1,5 +1,6 @@
 "use server";
 import supabase from "@/lib/supabase";
+import ensurePrivilieges from "./ensurePrivilieges";
 
 const editUserTask = async (
   userId: number,
@@ -8,6 +9,7 @@ const editUserTask = async (
   createdAt: Date,
   completedAt: Date | null
 ) => {
+  await ensurePrivilieges(["Администратор"]);
   const { data: updatedTask, error } = await supabase
     .from("tasks")
     .update({

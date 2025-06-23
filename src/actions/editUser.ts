@@ -1,5 +1,6 @@
 "use server";
 import supabase from "@/lib/supabase";
+import ensurePrivilieges from "./ensurePrivilieges";
 
 const editUser = async (
   userId: number,
@@ -11,6 +12,7 @@ const editUser = async (
   vkName: string,
   joined_at: Date | string
 ) => {
+  await ensurePrivilieges(["Администратор"]);
   const { data: user, error } = await supabase
     .from("user")
     .update({

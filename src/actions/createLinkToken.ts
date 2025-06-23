@@ -2,8 +2,10 @@
 
 import { randomUUID } from "crypto";
 import supabase from "@/lib/supabase";
+import ensurePrivilieges from "./ensurePrivilieges";
 
 export async function createLinkToken(userId: number) {
+  await ensurePrivilieges(["Администратор"]);
   const token = randomUUID();
   // Build the insert object to match your TS types exactly:
   const insertObj = {

@@ -22,7 +22,7 @@ const createRaidEvent = async (
   is_pvp: boolean,
   is_pvp_long: boolean
 ) => {
-  await ensurePrivilieges(["Администратор", "Raid Manager"]);
+  await ensurePrivilieges(["Администратор", "Модератор"]);
 
   // 1. Получить текущее количество активных пользователей
   const { data: activeUsers, error: activeError } = await supabase
@@ -48,7 +48,7 @@ const createRaidEvent = async (
         created_at: new Date().toISOString(),
         is_pvp,
         is_pvp_long,
-        active_user_count, 
+        active_user_count,
       },
     ])
     .select()

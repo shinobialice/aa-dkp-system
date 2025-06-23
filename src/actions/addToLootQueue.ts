@@ -1,8 +1,10 @@
 "use server";
 
 import supabase from "@/lib/supabase";
+import ensurePrivilieges from "./ensurePrivilieges";
 
 export const addToLootQueue = async (username: string, itemName: string) => {
+  await ensurePrivilieges(["Администратор"]);
   // Fetch user by username
   const { data: users, error: userError } = await supabase
     .from("user")

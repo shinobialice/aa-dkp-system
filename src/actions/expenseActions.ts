@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import supabase from "@/lib/supabase";
+import ensurePrivilieges from "./ensurePrivilieges";
 
 export const getExpenses = async () => {
   const { data, error } = await supabase
@@ -30,6 +31,7 @@ export const addExpense = async ({
   source: string;
   comment?: string;
 }) => {
+  await ensurePrivilieges(["Администратор"]);
   const { error } = await supabase.from("Expense").insert([
     {
       date: new Date(date).toISOString(),

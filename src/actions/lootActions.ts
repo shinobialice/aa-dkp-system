@@ -1,6 +1,7 @@
 "use server";
 
 import supabase from "@/lib/supabase";
+import ensurePrivilieges from "./ensurePrivilieges";
 
 // Get list of item types
 export const getItemTypes = async () => {
@@ -45,6 +46,7 @@ export const addLootItem = async ({
   acquired_at: string;
   quantity?: number;
 }) => {
+  await ensurePrivilieges(["Администратор"]);
   const { error } = await supabase.from("loot").insert([
     {
       item_type_id: itemTypeId,

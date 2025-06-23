@@ -1,6 +1,7 @@
 "use server";
 
 import supabase from "@/lib/supabase";
+import ensurePrivilieges from "./ensurePrivilieges";
 
 export async function addUserSalaryBonus({
   userId,
@@ -11,6 +12,7 @@ export async function addUserSalaryBonus({
   amount: number;
   reason: string;
 }) {
+  await ensurePrivilieges(["Администратор"]);
   if (amount <= 0) {
     throw new Error("Бонус должен быть больше 0%");
   }

@@ -1,5 +1,6 @@
 "use server";
 import supabase from "@/lib/supabase";
+import ensurePrivilieges from "./ensurePrivilieges";
 
 const addItemToUserInventory = async (
   userId: number,
@@ -7,6 +8,7 @@ const addItemToUserInventory = async (
   type: string,
   quality: string | null
 ) => {
+  await ensurePrivilieges(["Администратор"]);
   const { data, error } = await supabase
     .from("user_inventory")
     .insert([
