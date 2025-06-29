@@ -18,7 +18,7 @@ import { getRaids } from "@/src/actions/getEvents";
 import { getRaidById } from "@/src/actions/getRaidById";
 
 type Props = {
-  isAdmin?: boolean;
+  isAdmin: boolean;
   isModerator?: boolean;
 };
 

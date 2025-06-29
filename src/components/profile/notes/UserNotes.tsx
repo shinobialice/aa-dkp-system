@@ -56,7 +56,7 @@ export default function UserNotes({
   updateTags: (tags: { id: number; tag: string }[]) => void;
   setUser: (user: any) => void;
   averageGuildGS: number;
-  isAdmin?: boolean;
+  isAdmin: boolean;
 }) {
   const [bonuses, setBonuses] = useState<any[]>([]);
   const [refreshToggle, setRefreshToggle] = useState(false);

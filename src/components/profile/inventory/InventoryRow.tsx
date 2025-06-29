@@ -19,7 +19,7 @@ export default function InventoryRow({
   inventory: any[];
   userId: number;
   onChange: () => void;
-  isAdmin?: boolean;
+  isAdmin: boolean;
 }) {
   const isDragon = item.name === "Дракон";
 

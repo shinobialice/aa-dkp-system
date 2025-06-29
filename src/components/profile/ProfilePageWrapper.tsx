@@ -26,7 +26,7 @@ export default function ProfilePageWrapper({
     totalPercent: number;
     dkp: number;
   };
-  isAdmin?: boolean;
+  isAdmin: boolean;
 }) {
   const [user, setUser] = useState(initialUser);
   const [tags, setTags] = useState(initialTags);
@@ -45,7 +45,7 @@ export default function ProfilePageWrapper({
         </div>
       </div>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 items-start">
-        <ProfileInfoClient user={user} tags={tags} />
+        <ProfileInfoClient isAdmin={isAdmin} user={user} tags={tags} />
         <ProfileTabs
           user={user}
           setUser={setUser}

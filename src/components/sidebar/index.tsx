@@ -46,7 +46,7 @@ import Image from "next/image";
 import { NavUser } from "./NavUser";
 import { FC } from "react";
 
-type Props = { isAdmin?: boolean };
+type Props = { isAdmin: boolean };
 
 export const AppSidebar: FC<Props> = ({ isAdmin }) => {
   const { setTheme } = useTheme();

@@ -12,7 +12,7 @@ export default function ProfileInfoClient({
 }: {
   user: any;
   tags: any[];
-  isAdmin?: boolean;
+  isAdmin: boolean;
 }) {
   const [tags, setTags] = useState(initialTags);
   const [editMode, setEditMode] = useState(false);

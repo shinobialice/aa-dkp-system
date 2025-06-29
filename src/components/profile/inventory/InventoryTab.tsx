@@ -1,3 +1,4 @@
+"use client";
 import inventoryItems from "./InventoryItems";
 import InventoryRow from "./InventoryRow";
 import {
@@ -14,11 +15,13 @@ export default function InventoryTab({
   inventory,
   userId,
   onChange,
+  isAdmin,
 }: {
   type: string;
   inventory: any[];
   userId: number;
   onChange: () => void;
+  isAdmin: boolean;
 }) {
   if (type === "Куплено") {
     const lootItems = inventory.filter((inv) => inv.type === "Куплено");
@@ -125,6 +128,7 @@ export default function InventoryTab({
         <TableBody>
           {filteredItems.map((item) => (
             <InventoryRow
+              isAdmin={isAdmin}
               key={item.name}
               item={item}
               inventory={inventory}

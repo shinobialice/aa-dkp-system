@@ -29,7 +29,7 @@ const extendedItems = ["Эссенция ярости", "Трофейная эс
 type Props = {
   itemName: string;
   children: React.ReactNode;
-  isAdmin?: boolean;
+  isAdmin: boolean;
 };
 
 type EditableField = "required" | "delivered" | "status" | "synth_target";
@@ -146,6 +146,7 @@ export function LootQueuePopover({ itemName, children, isAdmin }: Props) {
           <div className="flex items-center justify-between mb-2">
             <div className="text-sm font-semibold">Очередь на: {itemName}</div>
             <EditToggleButton
+              isAdmin={isAdmin}
               editMode={editMode}
               toggle={() => setEditMode((prev) => !prev)}
             />
@@ -168,6 +169,7 @@ export function LootQueuePopover({ itemName, children, isAdmin }: Props) {
             </DialogTitle>
             {isAdmin && (
               <EditToggleButton
+                isAdmin={isAdmin}
                 classname="mr-4"
                 editMode={editMode}
                 toggle={() => setEditMode((prev) => !prev)}

@@ -6,10 +6,12 @@ export default function InventoryTabsClient({
   inventory,
   userId,
   onChange,
+  isAdmin,
 }: {
   inventory: any[];
   userId: number;
   onChange: () => void;
+  isAdmin: boolean;
 }) {
   return (
     <Card>
@@ -31,6 +33,7 @@ export default function InventoryTabsClient({
           {["Техника", "Глайдеры", "Петы", "Куплено", "Выдано"].map((type) => (
             <TabsContent key={type} value={type}>
               <InventoryTab
+                isAdmin={isAdmin}
                 type={type}
                 inventory={inventory}
                 userId={userId}

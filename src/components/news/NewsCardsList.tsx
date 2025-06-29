@@ -18,7 +18,7 @@ type NewsItem = {
   title: string;
   date: string;
   content: string;
-  isAdmin?: boolean;
+  isAdmin: boolean;
 };
 
 export default function NewsCardList({
@@ -26,7 +26,7 @@ export default function NewsCardList({
   isAdmin,
 }: {
   items: NewsItem[];
-  isAdmin?: boolean;
+  isAdmin: boolean;
 }) {
   const [items, setItems] = useState(initialItems);
   const [editing, setEditing] = useState<NewsItem | null>(null);

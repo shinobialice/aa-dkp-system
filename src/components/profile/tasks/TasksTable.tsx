@@ -37,7 +37,7 @@ type Props = {
   tasks: Task[];
   userId: number;
   onChange: () => void;
-  isAdmin?: boolean;
+  isAdmin: boolean;
 };
 
 export default function TasksTable({

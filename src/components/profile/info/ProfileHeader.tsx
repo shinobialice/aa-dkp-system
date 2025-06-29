@@ -35,7 +35,7 @@ export default function ProfileHeader({
   editMode: boolean;
   setEditMode: (v: boolean) => void;
   tags: { id: number; tag: string }[];
-  isAdmin?: boolean;
+  isAdmin: boolean;
 }) {
   return (
     <CardHeader className="flex flex-col items-center">

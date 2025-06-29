@@ -2,19 +2,17 @@
 import { Pen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-
 export function EditToggleButton({
   editMode,
   toggle,
   classname,
-  isAdmin
+  isAdmin,
 }: {
   editMode: boolean;
   toggle: () => void;
   classname?: string;
-  isAdmin?: boolean;
+  isAdmin: boolean;
 }) {
-
   return (
     <div className={`${classname}`}>
       {isAdmin && (

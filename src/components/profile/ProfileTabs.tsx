@@ -50,6 +50,7 @@ export default function ProfileTabs({
       </TabsList>
       <TabsContent value="inventory">
         <InventoryTabsClient
+          isAdmin={isAdmin}
           inventory={inventory}
           userId={user.id}
           onChange={() => {
