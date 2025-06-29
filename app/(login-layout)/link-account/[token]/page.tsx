@@ -1,5 +1,5 @@
 "use client";
-
+import React from "react";
 import { useEffect, useState } from "react";
 import { Heart } from "lucide-react";
 import Image from "next/image";
@@ -24,7 +24,7 @@ export default function LinkAccountPage() {
     if (!token) return;
 
     Cookies.set("link-token", token, {
-      expires: 0.1, 
+      expires: 0.1,
       path: "/",
     });
 

@@ -4,13 +4,6 @@ import { useEffect, useState, useTransition } from "react";
 import { Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CardContent } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { createLinkToken } from "@/src/actions/createLinkToken";
 import { getEligibleUsers } from "@/src/actions/getEligibleUsers";
 import { CreateUserForm } from "./CreateUserForm";

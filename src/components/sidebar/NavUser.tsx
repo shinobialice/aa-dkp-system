@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { ChevronsUpDown, BadgeCheck, LogOut } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -19,7 +18,6 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import useCurrentUser from "@/src/hooks/useCurrentUser";
-import { Button } from "@/components/ui/button";
 
 function logout() {
   document.cookie = "session_token=; path=/; max-age=0; SameSite=Lax; secure";

@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -9,11 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
+import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import {
   AreaChart,
   Area,
@@ -54,7 +51,9 @@ export default function DailyAttendanceChart({
   setYear: (val: number) => void;
   setMonth: (val: number) => void;
 }) {
-  const [chartData, setChartData] = useState<any[]>([]);
+  const [chartData, setChartData] = useState<
+    { date: string; prime: number; agl: number }[]
+  >([]);
 
   useEffect(() => {
     Promise.all([

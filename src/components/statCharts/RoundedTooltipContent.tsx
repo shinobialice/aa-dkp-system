@@ -1,10 +1,11 @@
 "use client";
 
+import React from "react";
 import { ChartTooltipContent } from "@/components/ui/chart";
 
 type Props = {
   payload?: { value: number }[];
-  [key: string]: any;
+  [key: string]: unknown;
 };
 
 export function RoundedTooltipContent(props: Props) {
