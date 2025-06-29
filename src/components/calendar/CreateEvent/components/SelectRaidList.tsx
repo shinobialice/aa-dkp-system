@@ -65,6 +65,7 @@ const columns: ColumnDef<User>[] = [
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
         aria-label="Выбрать строку"
+        className="cursor-pointer"
       />
     ),
     enableSorting: false,
@@ -182,7 +183,7 @@ export function SelectRaidList({
                       }}
                     >
                       {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>
+                        <TableCell className="cursor-pointer" key={cell.id}>
                           {flexRender(
                             cell.column.columnDef.cell,
                             cell.getContext()

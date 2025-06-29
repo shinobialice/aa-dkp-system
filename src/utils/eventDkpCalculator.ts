@@ -5,20 +5,35 @@ type Boss = {
   dkp_points: number;
 };
 
-function eventDkpCalculator(
-  selectedBosses: Boss[],
+const bossGroups = [
+  ["Ашьяра", "Гленн и Лорея"], // Группа, которая дает 1 балл
+];
+
+export default function eventDkpCalculator(
+  selectedBosses: any[],
   isPvp: boolean,
   isPvpLong: boolean
-): number {
-  const bossPoints = selectedBosses.reduce(
-    (sum, boss) => sum + boss.dkp_points,
-    0
-  );
+) {
+  const uniqueGroups = new Set();
 
-  const pvpBonus = isPvp ? 1 : 0;
-  const longPvpBonus = isPvpLong ? 3 : 0;
+  selectedBosses.forEach((boss) => {
+    const group = bossGroups.find((group) => group.includes(boss.boss_name));
+    if (group) {
+      uniqueGroups.add(group); // Добавляем группу в Set
+    } else {
+      uniqueGroups.add(boss.boss_name); // Если босс не в группе, добавляем его имя
+    }
+  });
 
-  return bossPoints + pvpBonus + longPvpBonus;
+  const basePoints = uniqueGroups.size; // Количество уникальных групп и одиночных боссов
+
+  // Дополнительная логика для ПВП
+  if (isPvp) {
+    return basePoints + 2; // Например, добавляем 2 балла за ПВП
+  }
+  if (isPvpLong) {
+    return basePoints + 1; // Например, добавляем 1 балл за длительное ПВП
+  }
+
+  return basePoints;
 }
-
-export default eventDkpCalculator;

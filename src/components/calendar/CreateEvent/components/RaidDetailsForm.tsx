@@ -1,26 +1,11 @@
 "use client";
-import * as React from "react";
-import { ChevronDown } from "lucide-react";
+import React from "react";
+import CategorySelector from "./CategorySelector";
+import BossSelector from "./BossSelector";
 import DatetimePicker from "./DateTimePicker";
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuCheckboxItem,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
-
+import { Input } from "@/components/ui/input";
 import { getActiveUsers } from "@/src/actions/getActiveUsers";
 import eventDkpCalculator from "@/src/utils/eventDkpCalculator";
 
@@ -50,44 +35,15 @@ export function RaidDetailsForm({
   setCategory: (value: string | null) => void;
   selectedBoss: string | null;
   setSelectedBoss: (value: string | null) => void;
-  selectedBosses: {
-    id: number;
-    boss_name: string;
-    category: string;
-    dkp_points: number;
-  }[];
-  setSelectedBosses: React.Dispatch<
-    React.SetStateAction<
-      {
-        id: number;
-        boss_name: string;
-        category: string;
-        dkp_points: number;
-      }[]
-    >
-  >;
+  selectedBosses: any[];
+  setSelectedBosses: React.Dispatch<React.SetStateAction<any[]>>;
   dkpPoints: number;
   setDkpPoints: (value: number) => void;
   selectedDate: Date | null;
   setSelectedDate: (value: Date | null) => void;
-  errors: {
-    category: boolean;
-    selectedBoss: boolean;
-    selectedDate: boolean;
-  };
-  setErrors: React.Dispatch<
-    React.SetStateAction<{
-      category: boolean;
-      selectedBoss: boolean;
-      selectedDate: boolean;
-    }>
-  >;
-  bosses: {
-    id: number;
-    boss_name: string;
-    dkp_points: number;
-    category: string;
-  }[];
+  errors: any;
+  setErrors: React.Dispatch<React.SetStateAction<any>>;
+  bosses: any[];
   isPvp: boolean;
   setIsPvp: (val: boolean) => void;
   isPvpLong: boolean;
@@ -103,169 +59,36 @@ export function RaidDetailsForm({
 
   React.useEffect(() => {
     const total = eventDkpCalculator(selectedBosses, isPvp, isPvpLong);
-    setDkpPoints(total);
+    setDkpPoints(total); // Обновляем состояние с правильным значением
   }, [selectedBosses, isPvp, isPvpLong]);
-
-  const aglBossOrder = [
-    "Ашьяра",
-    "Ашьяра Прок",
-    "Гленн и Лорея",
-    "Гленн и Лорея Прок",
-    "---",
-    "Морф",
-    "Марли",
-    "Марли Прок",
-    "---",
-    "Кошка",
-  ];
 
   return (
     <div className="flex flex-col h-full space-y-4">
-      <Label>Категория</Label>
-      <Select
-        onValueChange={(value) => {
-          setCategory(value);
-          setSelectedBoss(null);
-          setSelectedBosses([]);
-          setIsPvp(false);
-          setIsPvpLong(false);
-          setErrors((prev) => ({ ...prev, category: false }));
-        }}
-        value={category ?? undefined}
-      >
-        <SelectTrigger className="w-[270px] cursor-pointer">
-          <SelectValue placeholder="Выберите категорию события" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="Прайм">Прайм</SelectItem>
-          <SelectItem value="АГЛ">АГЛ</SelectItem>
-        </SelectContent>
-      </Select>
-      {errors.category && (
-        <p className="text-sm text-red-500">Обязательное поле</p>
-      )}
-
-      {category === "Прайм" && (
-        <>
-          <Label>Босс</Label>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                className="w-[270px] justify-between cursor-pointer"
-              >
-                {selectedBoss || "Выберите босса"}
-                <ChevronDown className="ml-2" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-[270px] max-h-80 overflow-y-auto">
-              {bosses
-                .filter((boss) => boss.category === "Прайм")
-                .map((boss) => (
-                  <DropdownMenuCheckboxItem
-                    key={boss.id}
-                    checked={selectedBoss === boss.boss_name}
-                    onSelect={(e) => e.preventDefault()}
-                    onCheckedChange={() => {
-                      setSelectedBoss(boss.boss_name);
-                      setSelectedBosses([boss]);
-                      setErrors((prev) => ({ ...prev, selectedBoss: false }));
-                    }}
-                  >
-                    {boss.boss_name}
-                  </DropdownMenuCheckboxItem>
-                ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {errors.selectedBoss && (
-            <p className="text-sm text-red-500">Обязательное поле</p>
-          )}
-        </>
-      )}
-
-      {category === "АГЛ" && (
-        <>
-          <Label>Боссы (можно выбрать нескольких)</Label>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                className="w-[270px] justify-between cursor-pointer"
-              >
-                <span className="truncate min-w-0 flex-1 text-left">
-                  {selectedBosses.length > 0
-                    ? selectedBosses.map((b) => b.boss_name).join(", ")
-                    : "Выберите боссов"}
-                </span>
-                <ChevronDown className="ml-2" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-64 max-h-80 overflow-y-auto">
-              {aglBossOrder.map((name, i) =>
-                (() => {
-                  if (name === "---") {
-                    return <DropdownMenuSeparator key={`sep-${i}`} />;
-                  }
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={name}
-                      onSelect={(event) => event.preventDefault()}
-                      checked={selectedBosses.some((b) => b.boss_name === name)}
-                      onCheckedChange={(checked) => {
-                        const boss = bosses.find(
-                          (b) =>
-                            b.boss_name.trim().toLowerCase() ===
-                            name.trim().toLowerCase()
-                        );
-                        if (!boss) {
-                          return;
-                        }
-
-                        setSelectedBosses((prev) =>
-                          checked
-                            ? [...prev, boss]
-                            : prev.filter((b) => b.id !== boss.id)
-                        );
-                        setErrors((prev) => ({
-                          ...prev,
-                          selectedBoss: false,
-                        }));
-                      }}
-                    >
-                      {name}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })()
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          {errors.selectedBoss && (
-            <p className="text-sm text-red-500">Обязательное поле</p>
-          )}
-        </>
-      )}
-
-      <div className="flex items-center space-x-2">
-        <Checkbox
-          id="pvp"
-          checked={isPvp}
-          disabled={isPvpLong}
-          onCheckedChange={(checked) => {
-            setIsPvp(checked === true);
-            if (checked) {
-              setIsPvpLong(false);
-            }
-          }}
-        />
-        <label htmlFor="pvp" className="text-sm">
-          ПВП
-        </label>
-      </div>
+      <CategorySelector
+        category={category}
+        setCategory={setCategory}
+        setSelectedBoss={setSelectedBoss}
+        setSelectedBosses={setSelectedBosses}
+        setIsPvp={setIsPvp}
+        setIsPvpLong={setIsPvpLong}
+        setErrors={setErrors}
+        errors={errors}
+      />
+      <BossSelector
+        category={category}
+        bosses={bosses}
+        selectedBoss={selectedBoss}
+        setSelectedBoss={setSelectedBoss}
+        selectedBosses={selectedBosses}
+        setSelectedBosses={setSelectedBosses}
+        setErrors={setErrors}
+        errors={errors}
+      />
 
       {category === "АГЛ" && (
         <div className="flex items-center space-x-2">
           <Checkbox
+            className="cursor-pointer"
             id="long_pvp"
             checked={isPvpLong}
             disabled={isPvp}

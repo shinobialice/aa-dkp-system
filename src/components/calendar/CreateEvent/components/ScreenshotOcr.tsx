@@ -26,7 +26,9 @@ export function ScreenshotOcr({
   );
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files?.length) {return;}
+    if (!e.target.files?.length) {
+      return;
+    }
     const files = Array.from(e.target.files);
     setLoading(true);
     setError("");
@@ -64,6 +66,7 @@ export function ScreenshotOcr({
     <div className="space-y-4">
       <Label>Распознавание рейда по скриншоту</Label>
       <Input
+        className="cursor-pointer"
         id="picture"
         type="file"
         accept="image/*"
