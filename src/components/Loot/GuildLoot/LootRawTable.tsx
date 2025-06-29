@@ -91,7 +91,11 @@ export function LootRawTable({
                   <TableCell>
                     <div className="flex gap-2">
                       <Button
-                        className="cursor-pointer"
+                        className={`cursor-pointer ${
+                          item.sold_to
+                            ? ""
+                            : "bg-yellow-500 hover:bg-yellow-600 w-[100px]"
+                        }`}
                         onClick={() => {
                           setSelectedItem(item);
                           setEditMode(!!item.sold_to);
