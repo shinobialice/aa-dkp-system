@@ -2,10 +2,10 @@
 import supabase from "@/lib/supabase";
 import type { Database } from "@/types/supabase";
 import { differenceInMonths } from "date-fns";
+import { getUserMonthlyAttendance } from "./getUserMonthlyAttendance";
 
 type SalaryInsert = Database["public"]["Tables"]["Salary"]["Insert"];
 
-// 1. Get guild funds for a given month/year
 export const getGuildFunds = async (month: number, year: number) => {
   const { data, error } = await supabase
     .from("GuildFunds")
@@ -15,14 +15,11 @@ export const getGuildFunds = async (month: number, year: number) => {
     .maybeSingle();
 
   if (error) {
-    console.error("Error loading guild funds:", error);
     throw new Error("Ошибка при получении фонда");
   }
 
   return data;
 };
-
-// 2. Get salaries with user info for the month
 
 export const getSalariesForMonth = async (month: number, year: number) => {
   const { data, error } = await supabase
@@ -50,18 +47,18 @@ export const getSalariesForMonth = async (month: number, year: number) => {
 
   return (data as any[]).map((s) => {
     const username = s.user?.username ?? "Неизвестно";
+    const bonusPercent = s.bonus ? Math.round((s.bonus / s.amount) * 100) : 0;
     return {
       userId: s.userId,
       username: username ?? "Неизвестно",
       amount: s.amount,
       bonus: s.bonus,
+      bonusPercent,
       total: s.total,
     };
   });
 };
 
-// 3. Generate salaries
-// Функция расчёта бонуса за срок в гильдии
 function calculateGuildBonus(joinedAt: string | null): number {
   if (!joinedAt) return 0;
   const now = new Date();
@@ -72,22 +69,19 @@ function calculateGuildBonus(joinedAt: string | null): number {
   return 10 + extraPeriods * 5;
 }
 
-// Функция получения кастомного бонуса
 async function getCustomBonus(userId: number): Promise<number> {
   const { data, error } = await supabase
     .from("user_salary_bonus")
-    .select("bonus")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .select("amount")
+    .eq("user_id", userId);
 
   if (error) {
-    console.error(`Ошибка при получении бонуса для user ${userId}:`, error);
     return 0;
   }
 
-  return data?.bonus ?? 0;
+  const totalBonus =
+    data?.reduce((sum, bonus) => sum + (bonus.amount || 0), 0) ?? 0;
+  return totalBonus;
 }
 
 export const generateSalaries = async (month: number, year: number) => {
@@ -112,7 +106,18 @@ export const generateSalaries = async (month: number, year: number) => {
     throw new Error("Нет активных сотрудников для выплаты");
   }
 
-  const baseAmount = Math.floor(fund.salaryBudget / users.length);
+  const attendanceData = await Promise.all(
+    users.map(async (user) => {
+      const attendance = await getUserMonthlyAttendance(user.id, year, month);
+      return { userId: user.id, dkp: attendance.dkp };
+    })
+  );
+
+  const totalDKP = attendanceData.reduce((sum, user) => sum + user.dkp, 0);
+
+  if (totalDKP === 0) {
+    throw new Error("Нет данных DKP за указанный месяц");
+  }
 
   const { error: deleteError } = await supabase
     .from("Salary")
@@ -126,10 +131,15 @@ export const generateSalaries = async (month: number, year: number) => {
 
   const salaryRows = await Promise.all(
     users.map(async (user) => {
+      const userDKP =
+        attendanceData.find((data) => data.userId === user.id)?.dkp || 0;
+      const baseAmount = Math.round((userDKP / totalDKP) * fund.salaryBudget);
+
       const guildBonus = calculateGuildBonus(user.joined_at);
       const customBonus = await getCustomBonus(user.id);
       const totalBonusPercent = guildBonus + customBonus;
       const bonusAmount = Math.round((baseAmount * totalBonusPercent) / 100);
+
       return {
         year,
         month,

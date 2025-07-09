@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -47,6 +48,7 @@ export default function FinanceClient({
       amount: number;
       bonus: number | null;
       total: number;
+      bonusPercent: number;
     }[]
   >([]);
 
@@ -172,6 +174,7 @@ export default function FinanceClient({
               <TableRow>
                 <TableHead>Игрок</TableHead>
                 <TableHead>Базовая сумма</TableHead>
+                <TableHead>Бонус %</TableHead>
                 <TableHead>Бонус</TableHead>
                 <TableHead>Итого</TableHead>
               </TableRow>
@@ -181,6 +184,7 @@ export default function FinanceClient({
                 <TableRow key={s.userId}>
                   <TableCell>{s.username}</TableCell>
                   <TableCell>{s.amount}</TableCell>
+                  <TableCell>{s.bonusPercent ?? 0}%</TableCell>{" "}
                   <TableCell>{s.bonus ?? 0}</TableCell>
                   <TableCell>{s.total}</TableCell>
                 </TableRow>
