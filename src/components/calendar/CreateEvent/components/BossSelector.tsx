@@ -10,23 +10,8 @@ import {
 import { Label } from "@/components/ui/label";
 import { ChevronDown } from "lucide-react";
 
-const bossGroups = [
-  ["Ашьяра", "Гленн и Лорея"], // Группа, которая дает 1 балл
-];
-
 function calculatePoints(selectedBosses: any[]) {
-  const uniqueGroups = new Set();
-
-  selectedBosses.forEach((boss) => {
-    const group = bossGroups.find((group) => group.includes(boss.boss_name));
-    if (group) {
-      uniqueGroups.add(group); // Добавляем группу в Set
-    } else {
-      uniqueGroups.add(boss.boss_name); // Если босс не в группе, добавляем его имя
-    }
-  });
-
-  return uniqueGroups.size; // Количество уникальных групп и одиночных боссов
+  return selectedBosses.reduce((sum, boss) => sum + (boss.dkp_points || 0), 0);
 }
 
 export default function BossSelector({
@@ -48,18 +33,7 @@ export default function BossSelector({
   setErrors: React.Dispatch<React.SetStateAction<any>>;
   errors: { selectedBoss: boolean };
 }) {
-  const aglBossOrder = [
-    "Ашьяра",
-    "Ашьяра Прок",
-    "Гленн и Лорея",
-    "Гленн и Лорея Прок",
-    "---",
-    "Морф",
-    "Марли",
-    "Марли Прок",
-    "---",
-    "Кошка",
-  ];
+  const aglBossOrder = ["АГЛ", "Прок", "---", "Морф", "Марли Прок", "---", "Кошка"];
 
   if (category === "Прайм") {
     return (
@@ -104,7 +78,7 @@ export default function BossSelector({
   if (category === "АГЛ") {
     return (
       <>
-        <Label>Боссы (можно выбрать нескольких)</Label>
+        <Label>Боссы </Label>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button

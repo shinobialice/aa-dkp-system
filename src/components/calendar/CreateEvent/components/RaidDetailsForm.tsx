@@ -58,9 +58,16 @@ export function RaidDetailsForm({
   }, [setUsers]);
 
   React.useEffect(() => {
-    const dkp = eventDkpCalculator(selectedBosses[0], isPvp, isPvpLong);
-    setDkpPoints(dkp); // Обновляем состояние с правильным значением
-  }, [selectedBosses, isPvp, isPvpLong]);
+    let dkp = 0;
+    if (category === "АГЛ") {
+      dkp = selectedBosses.reduce((sum, boss) => sum + (boss.dkp_points || 0), 0);
+      if (isPvp) dkp += 2;
+      else if (isPvpLong) dkp += 1;
+    } else {
+      dkp = eventDkpCalculator(selectedBosses[0], isPvp, isPvpLong);
+    }
+    setDkpPoints(dkp);
+  }, [selectedBosses, isPvp, isPvpLong, category]);
 
   return (
     <div className="flex flex-col h-full space-y-4">
