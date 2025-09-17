@@ -58,8 +58,8 @@ export function RaidDetailsForm({
   }, [setUsers]);
 
   React.useEffect(() => {
-    const total = eventDkpCalculator(selectedBosses, isPvp, isPvpLong);
-    setDkpPoints(total); // Обновляем состояние с правильным значением
+    const dkp = eventDkpCalculator(selectedBosses[0], isPvp, isPvpLong);
+    setDkpPoints(dkp); // Обновляем состояние с правильным значением
   }, [selectedBosses, isPvp, isPvpLong]);
 
   return (

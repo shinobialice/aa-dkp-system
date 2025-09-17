@@ -9,31 +9,21 @@ const bossGroups = [
   ["Ашьяра", "Гленн и Лорея"], // Группа, которая дает 1 балл
 ];
 
+
 export default function eventDkpCalculator(
-  selectedBosses: any[],
+  selectedBoss: Boss | null,
   isPvp: boolean,
   isPvpLong: boolean
 ) {
-  const uniqueGroups = new Set();
+  if (!selectedBoss) return 0;
 
-  selectedBosses.forEach((boss) => {
-    const group = bossGroups.find((group) => group.includes(boss.boss_name));
-    if (group) {
-      uniqueGroups.add(group); // Добавляем группу в Set
-    } else {
-      uniqueGroups.add(boss.boss_name); // Если босс не в группе, добавляем его имя
-    }
-  });
+  let dkp = selectedBoss.dkp_points;
 
-  const basePoints = uniqueGroups.size; // Количество уникальных групп и одиночных боссов
-
-  // Дополнительная логика для ПВП
   if (isPvp) {
-    return basePoints + 2; // Например, добавляем 2 балла за ПВП
-  }
-  if (isPvpLong) {
-    return basePoints + 1; // Например, добавляем 1 балл за длительное ПВП
+    dkp += 2;
+  } else if (isPvpLong) {
+    dkp += 1;
   }
 
-  return basePoints;
+  return dkp;
 }
