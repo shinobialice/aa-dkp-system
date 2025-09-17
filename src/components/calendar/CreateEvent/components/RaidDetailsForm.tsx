@@ -61,8 +61,8 @@ export function RaidDetailsForm({
     let dkp = 0;
     if (category === "АГЛ") {
       dkp = selectedBosses.reduce((sum, boss) => sum + (boss.dkp_points || 0), 0);
-      if (isPvp) dkp += 2;
-      else if (isPvpLong) dkp += 1;
+      if (isPvp) dkp += 1;
+      else if (isPvpLong) dkp += 3;
     } else {
       dkp = eventDkpCalculator(selectedBosses[0], isPvp, isPvpLong);
     }
@@ -93,21 +93,56 @@ export function RaidDetailsForm({
       />
 
       {category === "АГЛ" && (
+        <>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              className="cursor-pointer"
+              id="pvp_agl"
+              checked={isPvp}
+              disabled={isPvpLong}
+              onCheckedChange={(checked) => {
+                setIsPvp(checked === true);
+                if (checked) {
+                  setIsPvpLong(false);
+                }
+              }}
+            />
+            <label htmlFor="pvp_agl" className="text-sm">
+              ПВП
+            </label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              className="cursor-pointer"
+              id="long_pvp_agl"
+              checked={isPvpLong}
+              disabled={isPvp}
+              onCheckedChange={(checked) => {
+                setIsPvpLong(checked === true);
+                if (checked) {
+                  setIsPvp(false);
+                }
+              }}
+            />
+            <label htmlFor="long_pvp_agl" className="text-sm">
+              ПВП дольше 30 минут
+            </label>
+          </div>
+        </>
+      )}
+
+      {category === "Прайм" && (
         <div className="flex items-center space-x-2">
           <Checkbox
             className="cursor-pointer"
-            id="long_pvp"
-            checked={isPvpLong}
-            disabled={isPvp}
+            id="pvp_prime"
+            checked={isPvp}
             onCheckedChange={(checked) => {
-              setIsPvpLong(checked === true);
-              if (checked) {
-                setIsPvp(false);
-              }
+              setIsPvp(checked === true);
             }}
           />
-          <label htmlFor="long_pvp" className="text-sm">
-            ПВП дольше 30 минут
+          <label htmlFor="pvp_prime" className="text-sm">
+            ПВП
           </label>
         </div>
       )}
