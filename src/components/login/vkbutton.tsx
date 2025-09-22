@@ -22,7 +22,7 @@ export default function VkLoginButton() {
       state,
     });
 
-    window.location.href = `https://id.vk.com/authorize?${params}`;
+    window.location.href = `https://id.vk.ru/authorize?${params}`;
     Cookies.set("vk_code_verifier", codeVerifier);
     Cookies.set("vk_state", state);
   };

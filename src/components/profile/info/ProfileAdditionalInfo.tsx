@@ -76,7 +76,7 @@ export default function ProfileAdditionalInfo({
           } else if (user.vk_name) {
             return (
               <a
-                href={`https://vk.com/${formData.vkName}`}
+                href={`https://vk.ru/${formData.vkName}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-500 hover:underline"
