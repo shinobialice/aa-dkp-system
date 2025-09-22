@@ -1,11 +1,10 @@
-import type { NextApiRequest, NextApiResponse } from "next";
-import { parse } from "cookie";
 import { hasTag } from "@/actions/hasTag";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
-export async function GET(req: NextApiRequest, res: NextApiResponse) {
-  const cookies = parse(req.headers.cookie || "");
-  const token = cookies["session_token"];
+export async function GET(req: NextRequest) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("session_token").value;
 
   if (!token) {
     return NextResponse.json(
@@ -14,7 +13,9 @@ export async function GET(req: NextApiRequest, res: NextApiResponse) {
     );
   }
 
-  const tag = req.query.tag as string;
+  const { searchParams } = new URL(req.url);
+  const tag = searchParams.get("tag");
+
   if (!tag) {
     return NextResponse.json(
       { hasTag: false, error: "Missing tag param" },
