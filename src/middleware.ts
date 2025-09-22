@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { verifySessionToken } from "./src/actions/verifySessionToken";
+import { verifySessionToken } from "./actions/verifySessionToken";
 
 export async function middleware(req: NextRequest) {
   const sessionToken = req.cookies.get("session_token")?.value;
@@ -27,7 +27,6 @@ export async function middleware(req: NextRequest) {
   }
 
   if (!sessionToken) {
-    console.log("sessionToken", sessionToken);
     const loginUrl = new URL("/login", req.url);
     return NextResponse.redirect(loginUrl);
   }
