@@ -1,30 +1,30 @@
-import type { NextApiRequest, NextApiResponse } from "next";
-import { parse, serialize } from "cookie";
 import crypto from "crypto";
-import { createClient } from "@supabase/supabase-js";
 import supabase from "@/shared/lib/supabase";
+import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
 const baseUrl = process.env.NEXT_PUBLIC_BASE_URL!;
 function generateSessionToken() {
   return crypto.randomBytes(32).toString("hex");
 }
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
-  const { code, state } = req.query;
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+
+  const code = searchParams.get("code");
+  const state = searchParams.get("state");
 
   if (typeof code !== "string" || typeof state !== "string") {
-    return res.status(400).send("Missing query params");
+    return NextResponse.json("Missing query params", { status: 400 });
   }
 
-  const cookies = parse(req.headers.cookie || "");
-  const linkToken = cookies["link-token"];
-  const savedState = cookies["google_state"];
+  const cookieStore = await cookies();
+
+  const linkToken = cookieStore.get("link-token").value;
+  const savedState = cookieStore.get("google_state").value;
 
   if (state !== savedState) {
-    return res.status(400).send("Invalid state");
+    return NextResponse.json("Invalid state", { status: 400 });
   }
 
   const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
@@ -42,9 +42,10 @@ export default async function handler(
   const tokenData = await tokenRes.json();
 
   if (!tokenData.access_token) {
-    return res
-      .status(400)
-      .json({ error: "Token exchange failed", data: tokenData });
+    return NextResponse.json(
+      { error: "Token exchange failed", data: tokenData },
+      { status: 400 },
+    );
   }
 
   const userInfoRes = await fetch(
@@ -59,7 +60,7 @@ export default async function handler(
   const profile = await userInfoRes.json();
 
   if (!profile.id) {
-    return res.status(400).send("Failed to fetch user profile");
+    return NextResponse.json("Failed to fetch user profile", { status: 400 });
   }
 
   if (linkToken) {
@@ -72,7 +73,9 @@ export default async function handler(
       .single();
 
     if (!linkRow) {
-      return res.status(400).send("Link token expired or invalid");
+      return NextResponse.json("Link token expired or invalid", {
+        status: 400,
+      });
     }
 
     const sessionToken = generateSessionToken();
@@ -90,18 +93,18 @@ export default async function handler(
       .update({ used: true })
       .eq("token", linkToken);
 
-    res.setHeader("Set-Cookie", [
-      serialize("link-token", "", { path: "/", maxAge: -1 }),
-      serialize("session_token", sessionToken, {
-        path: "/",
-        httpOnly: true,
-        secure: true,
-        sameSite: "lax",
-        maxAge: 60 * 60 * 24 * 7,
-      }),
-    ]);
+    const response = NextResponse.redirect("/link-account/complete");
 
-    return res.redirect("/link-account/complete");
+    response.cookies.set("link-token", "", { path: "/", maxAge: -1 });
+    response.cookies.set("session_token-token", sessionToken, {
+      path: "/",
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
+    return response;
   }
 
   const sessionToken = generateSessionToken();
@@ -113,7 +116,7 @@ export default async function handler(
     .single();
 
   if (!existingUser) {
-    return res.redirect("/login-error");
+    return NextResponse.redirect("/login-error");
   }
 
   await supabase
@@ -121,16 +124,15 @@ export default async function handler(
     .update({ session_token: sessionToken })
     .eq("id", existingUser.id);
 
-  res.setHeader(
-    "Set-Cookie",
-    serialize("session_token", sessionToken, {
-      path: "/",
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7,
-    }),
-  );
+  const response = NextResponse.redirect("/");
 
-  return res.redirect("/");
+  response.cookies.set("session_token", sessionToken, {
+    path: "/",
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 7,
+  });
+
+  return response;
 }
