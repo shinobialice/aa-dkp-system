@@ -66,13 +66,13 @@ export function SimpleTimePicker({
       use12HourFormat
         ? "yyyy-MM-dd hh:mm:ss.SSS a xxxx"
         : "yyyy-MM-dd HH:mm:ss.SSS xxxx",
-    [use12HourFormat]
+    [use12HourFormat],
   );
   const [ampm, setAmpm] = useState(
-    format(value, "a") === "AM" ? AM_VALUE : PM_VALUE
+    format(value, "a") === "AM" ? AM_VALUE : PM_VALUE,
   );
   const [hour, setHour] = useState(
-    use12HourFormat ? +format(value, "hh") : value.getHours()
+    use12HourFormat ? +format(value, "hh") : value.getHours(),
   );
   const [minute, setMinute] = useState(value.getMinutes());
   const [second, setSecond] = useState(value.getSeconds());
@@ -87,7 +87,7 @@ export function SimpleTimePicker({
         minute,
         second,
         ampm,
-      })
+      }),
     );
   }, [hour, minute, second, ampm, formatStr, use12HourFormat]);
 
@@ -111,7 +111,7 @@ export function SimpleTimePicker({
           disabled,
         };
       }),
-    [value, min, max, use12HourFormat, ampm]
+    [value, min, max, use12HourFormat, ampm],
   );
   const minutes: SimpleTimeOption[] = useMemo(() => {
     const anchorDate = setHours(value, _hourIn24h);
@@ -132,7 +132,7 @@ export function SimpleTimePicker({
   const seconds: SimpleTimeOption[] = useMemo(() => {
     const anchorDate = setMilliseconds(
       setMinutes(setHours(value, _hourIn24h), minute),
-      0
+      0,
     );
     const _min = min ? setMilliseconds(min, 0) : undefined;
     const _max = max ? setMilliseconds(max, 0) : undefined;
@@ -215,7 +215,7 @@ export function SimpleTimePicker({
       }
       setHour(v.value);
     },
-    [setHour, use12HourFormat, value, formatStr, minute, second, ampm]
+    [setHour, use12HourFormat, value, formatStr, minute, second, ampm],
   );
 
   const onMinuteChange = useCallback(
@@ -250,7 +250,7 @@ export function SimpleTimePicker({
       }
       setMinute(v.value);
     },
-    [setMinute, use12HourFormat, value, formatStr, hour, second, ampm]
+    [setMinute, use12HourFormat, value, formatStr, hour, second, ampm],
   );
 
   const onAmpmChange = useCallback(
@@ -291,7 +291,17 @@ export function SimpleTimePicker({
       }
       setAmpm(v.value);
     },
-    [setAmpm, use12HourFormat, value, formatStr, hour, minute, second, min, max]
+    [
+      setAmpm,
+      use12HourFormat,
+      value,
+      formatStr,
+      hour,
+      minute,
+      second,
+      min,
+      max,
+    ],
   );
 
   const display = useMemo(() => {
@@ -306,7 +316,7 @@ export function SimpleTimePicker({
           aria-expanded={open}
           className={cn(
             "flex h-9 px-3 items-center justify-between cursor-pointer font-normal border border-input rounded-md text-sm shadow-sm",
-            disabled && "opacity-50 cursor-not-allowed"
+            disabled && "opacity-50 cursor-not-allowed",
           )}
           tabIndex={0}
         >
@@ -461,7 +471,7 @@ function buildTime(options: BuildTimeOptions) {
   } else {
     date = setHours(
       setMinutes(setSeconds(setMilliseconds(value, 0), second), minute),
-      hour
+      hour,
     );
   }
   return date;

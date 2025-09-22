@@ -14,7 +14,7 @@ export const getRaidById = async (id: string) => {
       raid_attendance(
         user(id, username, active, class)
       )
-    `
+    `,
     )
     .eq("id", parseInt(id))
     .maybeSingle();

@@ -18,7 +18,7 @@ type Props = {
   handleChange: (
     index: number,
     field: EditableField,
-    value: string | number
+    value: string | number,
   ) => Promise<void>;
   handleSold: (entry: LootQueueEntry) => Promise<void>;
 };
@@ -62,7 +62,7 @@ export function QueueTableExtended({
                             handleChange(
                               index,
                               "required",
-                              Number(e.target.value)
+                              Number(e.target.value),
                             )
                           }
                         />
@@ -83,7 +83,7 @@ export function QueueTableExtended({
                             handleChange(
                               index,
                               "delivered",
-                              Number(e.target.value)
+                              Number(e.target.value),
                             )
                           }
                         />

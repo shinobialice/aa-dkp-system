@@ -7,7 +7,7 @@ type LootIconProps = {
   itemName: string;
   size?: number;
   className?: string;
-}
+};
 
 export function LootIcon({
   itemName,

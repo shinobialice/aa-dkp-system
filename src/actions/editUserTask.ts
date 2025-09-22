@@ -6,7 +6,7 @@ const editUserTask = async (
   taskId: number,
   name: string,
   createdAt: Date,
-  completedAt: Date | null
+  completedAt: Date | null,
 ) => {
   const { data: updatedTask, error } = await supabase
     .from("tasks")

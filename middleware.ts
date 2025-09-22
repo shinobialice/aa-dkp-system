@@ -19,7 +19,7 @@ export async function middleware(req: NextRequest) {
   ];
 
   const isPublic = publicPaths.some((path) =>
-    req.nextUrl.pathname.startsWith(path)
+    req.nextUrl.pathname.startsWith(path),
   );
 
   if (isPublic) return NextResponse.next();
@@ -33,7 +33,7 @@ export async function middleware(req: NextRequest) {
   // if (!isValidSession) {
   //   const loginUrl = new URL("/login", req.url);
   //   return NextResponse.redirect(loginUrl);
-  // } 
+  // }
   // чето надо придумать бляха муха
 
   return NextResponse.next();

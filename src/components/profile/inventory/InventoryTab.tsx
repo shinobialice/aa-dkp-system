@@ -108,7 +108,7 @@ export default function InventoryTab({
       }
       if (
         ["Красный Дракон", "Черный Дракон", "Зеленый Дракон"].includes(
-          item.name
+          item.name,
         )
       ) {
         return false;

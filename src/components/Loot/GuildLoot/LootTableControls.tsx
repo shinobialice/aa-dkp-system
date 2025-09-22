@@ -41,7 +41,9 @@ export function LootTableControls({
         ))}
       </select>
 
-      <Button className="cursor-pointer" onClick={onAddClick}>{label}</Button>
+      <Button className="cursor-pointer" onClick={onAddClick}>
+        {label}
+      </Button>
     </div>
   );
 }

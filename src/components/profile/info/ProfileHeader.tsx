@@ -57,7 +57,7 @@ export default function ProfileHeader({
                     ? Number(formData.secondaryClassGearScore)
                     : null,
                   formData.vkName,
-                  formData.joined_at
+                  formData.joined_at,
                 );
                 setEditMode(false);
               }}

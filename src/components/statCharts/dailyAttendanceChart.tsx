@@ -79,7 +79,7 @@ export default function DailyAttendanceChart({
           agl: values.agl ?? 0,
         }))
         .sort(
-          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
         );
 
       setChartData(merged);

@@ -159,7 +159,7 @@ export default function UpcomingEvents() {
 
           const isNow = msk >= start && msk < end;
           const startsInMin = Math.floor(
-            (start.getTime() - msk.getTime()) / 60000
+            (start.getTime() - msk.getTime()) / 60000,
           );
           const endsInMin = isNow
             ? Math.ceil((end.getTime() - msk.getTime()) / 60000)

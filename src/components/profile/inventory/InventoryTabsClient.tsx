@@ -26,7 +26,7 @@ export default function InventoryTabsClient({
                 <TabsTrigger className="cursor-pointer" key={type} value={type}>
                   {type}
                 </TabsTrigger>
-              )
+              ),
             )}
           </TabsList>
 

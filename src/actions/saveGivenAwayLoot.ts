@@ -4,7 +4,7 @@ import supabase from "@/lib/supabase";
 
 export const saveGivenAwayLoot = async (
   userId: number,
-  item: { name: string; date: string; comment?: string; status: string }
+  item: { name: string; date: string; comment?: string; status: string },
 ) => {
   const dateObj = new Date(item.date).toISOString();
 

@@ -63,7 +63,7 @@ export async function distributeLootItem({
         sold_at: new Date().toISOString(),
         comment,
         status: isFree ? "Выдано" : "Продано",
-        price: isFree ? 0 : price ?? loot.item_type?.price ?? 0,
+        price: isFree ? 0 : (price ?? loot.item_type?.price ?? 0),
         created_at: new Date().toISOString(),
       },
     ])

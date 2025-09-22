@@ -28,7 +28,7 @@ type DataTableProps<TData, TValue> = {
   setSorting: (updater: any) => void;
   columnFilters: any;
   setColumnFilters: (updater: any) => void;
-}
+};
 
 export function DataTable<TData, TValue>({
   columns,
@@ -43,7 +43,7 @@ export function DataTable<TData, TValue>({
     columns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(), 
+    getFilteredRowModel: getFilteredRowModel(),
     state: { sorting, columnFilters },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -77,7 +77,7 @@ export function DataTable<TData, TValue>({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   ))}
@@ -93,24 +93,23 @@ export function DataTable<TData, TValue>({
                         <TableCell key={cell.id}>
                           {flexRender(
                             cell.column.columnDef.cell,
-                            cell.getContext()
+                            cell.getContext(),
                           )}
                         </TableCell>
                       ))}
                     </TableRow>
                   ));
-                } 
-                  return (
-                    <TableRow>
-                      <TableCell
-                        colSpan={columns.length}
-                        className="h-24 text-center"
-                      >
-                        No results.
-                      </TableCell>
-                    </TableRow>
-                  );
-                
+                }
+                return (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center"
+                    >
+                      No results.
+                    </TableCell>
+                  </TableRow>
+                );
               })()}
             </TableBody>
           </Table>

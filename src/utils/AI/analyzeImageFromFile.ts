@@ -11,7 +11,7 @@ type OCRResult = {
 };
 
 async function analyzeImageFromFile(
-  file: File
+  file: File,
 ): Promise<{ name: string; className?: string }[]> {
   const formData = new FormData();
   formData.append("image", file);
@@ -45,7 +45,9 @@ async function analyzeImageFromFile(
           page.lines
             .filter((line) => {
               const text = line.text.replace(/[.]/g, "").trim();
-              if (/^\d+$/.test(text)) {return false;}
+              if (/^\d+$/.test(text)) {
+                return false;
+              }
 
               const nonWordRatio =
                 text.replace(/[a-zA-Zа-яА-ЯёЁ0-9]/g, "").length / text.length;
@@ -54,11 +56,10 @@ async function analyzeImageFromFile(
             .map((line) => {
               const name = line.text.replace(/[.]/g, "").trim();
               return { name };
-            })
+            }),
         ) ?? [];
 
       resolve(results);
-       
     };
   });
 }

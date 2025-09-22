@@ -73,7 +73,7 @@ export function LootQueuePopover({ itemName, children, isAdmin }: Props) {
   const handleChange = async (
     index: number,
     field: EditableField,
-    value: string | number
+    value: string | number,
   ): Promise<void> => {
     const entry = queue[itemName]?.[index];
     if (!entry) {

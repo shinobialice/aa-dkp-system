@@ -22,7 +22,7 @@ export function ScreenshotOcr({
 
   const activeUsers = React.useMemo(
     () => users.filter((u) => u.active),
-    [users]
+    [users],
   );
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -36,7 +36,7 @@ export function ScreenshotOcr({
 
     try {
       const allResults = await Promise.all(
-        files.map((file) => handleOcrUpload(file))
+        files.map((file) => handleOcrUpload(file)),
       );
 
       const matchedSet = new Set<string>();

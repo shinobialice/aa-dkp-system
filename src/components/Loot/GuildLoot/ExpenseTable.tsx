@@ -86,7 +86,7 @@ export default function ExpensesTable({ isAdmin }: Props) {
                   <TableRow key={i}>
                     <TableCell>
                       {new Intl.DateTimeFormat("ru-RU").format(
-                        new Date(exp.date)
+                        new Date(exp.date),
                       )}
                     </TableCell>
                     <TableCell>{exp.amount}</TableCell>

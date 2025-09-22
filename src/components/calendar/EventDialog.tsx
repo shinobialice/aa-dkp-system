@@ -60,7 +60,7 @@ export function EventDialog({
     if (mode === "edit" && selectedEvent) {
       setCategory(selectedEvent.type || null);
       setSelectedDate(
-        selectedEvent.start_date ? new Date(selectedEvent.start_date) : null
+        selectedEvent.start_date ? new Date(selectedEvent.start_date) : null,
       );
       setIsPvp(selectedEvent.is_pvp);
       setIsPvpLong(selectedEvent.is_pvp_long);
@@ -134,7 +134,7 @@ export function EventDialog({
         userIds,
         bossIds,
         isPvp,
-        isPvpLong
+        isPvpLong,
       );
     } else if (mode === "edit" && selectedEvent) {
       await updateEvent(
@@ -145,7 +145,7 @@ export function EventDialog({
         userIds,
         bossIds,
         isPvp,
-        isPvpLong
+        isPvpLong,
       );
     }
 

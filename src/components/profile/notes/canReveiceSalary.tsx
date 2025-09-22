@@ -7,7 +7,7 @@ type User = {
 export default function canReceiveSalary(
   user: User,
   averageGuildGS: number,
-  tags: { tag: string }[]
+  tags: { tag: string }[],
 ): boolean {
   if (!user.joined_at || !user.class || !user.class_gear_score) return false;
 

@@ -28,8 +28,8 @@ export default function InventoryRow({
         (inv) =>
           inv.type === item.type &&
           ["Красный Дракон", "Черный Дракон", "Зеленый Дракон"].includes(
-            inv.name
-          )
+            inv.name,
+          ),
       )
     : inventory.find((inv) => inv.name === item.name && inv.type === item.type);
 

@@ -13,7 +13,7 @@ export default function GoogleLoginButton() {
       expires: 0.1,
     });
     const origin = process.env.NEXT_PUBLIC_BASE_URL!;
-    
+
     const params = new URLSearchParams({
       client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
       redirect_uri: `${origin}/api/auth/google/callback`,

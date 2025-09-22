@@ -41,7 +41,7 @@ export default async function LootBuyComponent() {
           <PricesComponent items={miscLoot} />
           {miscLoot.some(
             (i) =>
-              i.name.includes("Средоточие") && i.price === "Идут в комплекте"
+              i.name.includes("Средоточие") && i.price === "Идут в комплекте",
           )}
         </CardContent>
       </Card>

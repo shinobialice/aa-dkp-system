@@ -5,7 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
 function generateSessionToken() {
@@ -14,7 +14,7 @@ function generateSessionToken() {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   const { code, state, device_id } = req.query;
 
@@ -141,7 +141,7 @@ export default async function handler(
     httpOnly: true,
     secure: true,
     sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 7, 
+    maxAge: 60 * 60 * 24 * 7,
   });
 
   res.setHeader("Set-Cookie", cookie);

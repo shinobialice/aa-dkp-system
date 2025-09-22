@@ -78,10 +78,7 @@
   --chart-3: 30 80% 55%;
   --chart-4: 280 65% 60%;
   --chart-5: 340 75% 55%;
-
 }
-
-
 
 @theme inline {
   --color-background: var(--background);
@@ -122,27 +119,27 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-.fc-scrollgrid, 
-.fc-scrollgrid td, 
+.fc-scrollgrid,
+.fc-scrollgrid td,
 .fc-scrollgrid th {
-  border-color: var(--color-border) !important; 
+  border-color: var(--color-border) !important;
 }
 
 .fc-event {
-  border: none !important; 
-  box-shadow: none !important; 
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .fc-timegrid-col {
-  border-right: 1px solid var(--color-border) !important; 
+  border-right: 1px solid var(--color-border) !important;
 }
 
 .fc-timegrid-slot {
-  border-top: 1px solid var(--color-border) !important; 
+  border-top: 1px solid var(--color-border) !important;
 }
 
 .fc-timegrid-slot-minor {
-  border-top: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent) !important; 
+  border-top: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent) !important;
 }
 
 .fc-timegrid-now-indicator-line {
@@ -151,12 +148,16 @@
 }
 
 .fc .fc-list-day-cushion {
-  background-color: var(--color-primary) !important; /* Match the row background */
+  background-color: var(
+    --color-primary
+  ) !important; /* Match the row background */
   color: var(--color-primary-foreground) !important; /* Match the text color */
 }
 
 .fc-list-table .fc-list-event:hover td {
-  background-color: var(--color-sidebar) !important; /* Match the row background */
+  background-color: var(
+    --color-sidebar
+  ) !important; /* Match the row background */
 }
 
 .fc-timegrid-now-indicator-arrow {
@@ -171,11 +172,10 @@
 .fc-col-header-cell {
   background-color: var(--color-card) !important;
   color: var(--color-card-foreground) !important;
-  font-weight: 600; 
+  font-weight: 600;
   text-align: center;
   border: 1px solid var(--color-border) !important;
 }
-
 
 @layer base {
   * {

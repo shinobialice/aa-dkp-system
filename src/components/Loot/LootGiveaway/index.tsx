@@ -55,13 +55,13 @@ export default function LootGiveaway({
 
   const displayedPlayers = useMemo(
     () => allPlayers.filter((p) => p.active || showInactive),
-    [allPlayers, showInactive]
+    [allPlayers, showInactive],
   );
 
   const updateLoot = (
     playerIndex: number,
     lootIndex: number,
-    changes: Partial<LootItem>
+    changes: Partial<LootItem>,
   ) => {
     const updated = [...allPlayers];
     const loot = updated[playerIndex].loot[lootIndex];
@@ -90,7 +90,7 @@ export default function LootGiveaway({
     loot: LootItem,
     isEditMode: boolean,
     playerIndex: number,
-    lootIndex: number
+    lootIndex: number,
   ) => {
     const dateValid = loot.date && !isNaN(Date.parse(loot.date));
 
@@ -99,7 +99,7 @@ export default function LootGiveaway({
         if (loot.comment && dateValid) {
           return `${loot.comment} (${format(
             new Date(loot.date),
-            "dd.MM.yyyy"
+            "dd.MM.yyyy",
           )})`;
         }
         if (loot.comment) {
@@ -187,7 +187,7 @@ export default function LootGiveaway({
       header: col,
       cell: ({ row }: { row: Row<Player> }) => {
         const playerIndex = allPlayers.findIndex(
-          (p) => p.id === row.original.id
+          (p) => p.id === row.original.id,
         );
         const loot = row.original.loot[lootIndex];
         return renderLootCell(loot, editMode, playerIndex, lootIndex);
@@ -250,7 +250,7 @@ export default function LootGiveaway({
                 <TableHead key={header.id}>
                   {flexRender(
                     header.column.columnDef.header,
-                    header.getContext()
+                    header.getContext(),
                   )}
                 </TableHead>
               ))}

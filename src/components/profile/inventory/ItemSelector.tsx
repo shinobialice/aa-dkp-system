@@ -11,7 +11,7 @@ type ItemSelectorProps = {
   userItem: any;
   onChange: (value: string) => void;
   isAdmin: boolean;
-}
+};
 
 export default function ItemSelector({
   item,
@@ -34,12 +34,12 @@ export default function ItemSelector({
       return !userItem
         ? "Нету"
         : userItem.quality === "3"
-        ? "3 эпоха"
-        : userItem.quality === "4"
-        ? "4 эпоха"
-        : userItem.quality === "5"
-        ? "5 эпоха"
-        : "Нету";
+          ? "3 эпоха"
+          : userItem.quality === "4"
+            ? "4 эпоха"
+            : userItem.quality === "5"
+              ? "5 эпоха"
+              : "Нету";
     }
 
     if (isDragon) {
@@ -50,10 +50,10 @@ export default function ItemSelector({
       return !userItem
         ? "Нету"
         : userItem.quality === "3"
-        ? "T1"
-        : userItem.quality === "4"
-        ? "T2"
-        : "Нету";
+          ? "T1"
+          : userItem.quality === "4"
+            ? "T2"
+            : "Нету";
     }
 
     return userItem ? "Есть" : "Нет";
@@ -74,12 +74,12 @@ export default function ItemSelector({
           !userItem
             ? "Нету"
             : userItem.quality === "3"
-            ? "3 эпоха"
-            : userItem.quality === "4"
-            ? "4 эпоха"
-            : userItem.quality === "5"
-            ? "5 эпоха"
-            : "Нету"
+              ? "3 эпоха"
+              : userItem.quality === "4"
+                ? "4 эпоха"
+                : userItem.quality === "5"
+                  ? "5 эпоха"
+                  : "Нету"
         }
         onValueChange={onChange}
       >
@@ -122,10 +122,10 @@ export default function ItemSelector({
           !userItem
             ? "Нету"
             : userItem.quality === "3"
-            ? "T1"
-            : userItem.quality === "4"
-            ? "T2"
-            : "Нету"
+              ? "T1"
+              : userItem.quality === "4"
+                ? "T2"
+                : "Нету"
         }
         onValueChange={onChange}
       >

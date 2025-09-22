@@ -52,8 +52,8 @@ const columns: ColumnDef<User>[] = [
           table.getIsAllPageRowsSelected()
             ? true
             : table.getIsSomePageRowsSelected()
-            ? "indeterminate"
-            : false
+              ? "indeterminate"
+              : false
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Выбрать все строки"
@@ -108,14 +108,14 @@ export function SelectRaidList({
 }: SelectRaidListProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
+    [],
   );
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
 
   const activeUsers = React.useMemo(
     () => users.filter((u) => u.active),
-    [users]
+    [users],
   );
 
   const table = useReactTable({
@@ -164,7 +164,7 @@ export function SelectRaidList({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   ))}
@@ -186,7 +186,7 @@ export function SelectRaidList({
                         <TableCell className="cursor-pointer" key={cell.id}>
                           {flexRender(
                             cell.column.columnDef.cell,
-                            cell.getContext()
+                            cell.getContext(),
                           )}
                         </TableCell>
                       ))}

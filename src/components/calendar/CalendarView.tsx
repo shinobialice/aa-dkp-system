@@ -63,7 +63,7 @@ export default function CalendarView({ isAdmin, isModerator }: Props) {
   };
 
   const handleNav = (
-    action: "prev" | "next" | "today" | "week" | "monthGrid" | "list"
+    action: "prev" | "next" | "today" | "week" | "monthGrid" | "list",
   ) => {
     const api = calendarRef.current?.getApi();
     if (!api) {

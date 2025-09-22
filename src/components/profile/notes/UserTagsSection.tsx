@@ -107,7 +107,7 @@ export function UserTagsSection({
   }
 
   const availableTags = allPossibleTags.filter(
-    (tag) => !tags.some((t) => t.tag === tag)
+    (tag) => !tags.some((t) => t.tag === tag),
   );
 
   return (

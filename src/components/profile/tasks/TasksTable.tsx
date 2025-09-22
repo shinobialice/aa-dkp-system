@@ -91,7 +91,7 @@ export default function TasksTable({
                       <TableCell>
                         {task.completed_at
                           ? new Date(task.completed_at).toLocaleDateString(
-                              "ru-RU"
+                              "ru-RU",
                             )
                           : "—"}
                       </TableCell>

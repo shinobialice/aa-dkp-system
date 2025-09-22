@@ -12,7 +12,7 @@ export function generateCodeVerifier(length = 64): string {
 }
 
 export async function generateCodeChallenge(
-  codeVerifier: string
+  codeVerifier: string,
 ): Promise<string> {
   const encoder = new TextEncoder();
   const data = encoder.encode(codeVerifier);

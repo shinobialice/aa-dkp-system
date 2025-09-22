@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -28,7 +27,9 @@ export function NewsFormDialog({
   const [content, setContent] = useState(initialData?.content || "");
 
   const handleSubmit = () => {
-    if (!title || !content) {return;}
+    if (!title || !content) {
+      return;
+    }
     onSubmit({ title, content });
     onClose();
   };

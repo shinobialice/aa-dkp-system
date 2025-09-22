@@ -34,7 +34,7 @@ export type User = {
 
 type SelectRaidListProps = {
   users: User[];
-}
+};
 
 const columns: ColumnDef<User>[] = [
   {
@@ -70,12 +70,15 @@ const columns: ColumnDef<User>[] = [
 export function SelectedRaidList({ users }: SelectRaidListProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
+    [],
   );
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
 
-  const activeUsers = React.useMemo(() => users.filter((u) => u.active), [users]);
+  const activeUsers = React.useMemo(
+    () => users.filter((u) => u.active),
+    [users],
+  );
 
   const table = useReactTable({
     data: activeUsers,
@@ -108,7 +111,7 @@ export function SelectedRaidList({ users }: SelectRaidListProps) {
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   ))}
@@ -130,24 +133,23 @@ export function SelectedRaidList({ users }: SelectRaidListProps) {
                         <TableCell key={cell.id}>
                           {flexRender(
                             cell.column.columnDef.cell,
-                            cell.getContext()
+                            cell.getContext(),
                           )}
                         </TableCell>
                       ))}
                     </TableRow>
                   ));
-                } 
-                  return (
-                    <TableRow>
-                      <TableCell
-                        colSpan={columns.length}
-                        className="h-24 text-center"
-                      >
-                        Нет результатов.
-                      </TableCell>
-                    </TableRow>
-                  );
-                
+                }
+                return (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center"
+                    >
+                      Нет результатов.
+                    </TableCell>
+                  </TableRow>
+                );
               })()}
             </TableBody>
           </Table>

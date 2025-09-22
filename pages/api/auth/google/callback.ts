@@ -11,7 +11,7 @@ function generateSessionToken() {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   const { code, state } = req.query;
 
@@ -53,7 +53,7 @@ export default async function handler(
       headers: {
         Authorization: `Bearer ${tokenData.access_token}`,
       },
-    }
+    },
   );
 
   const profile = await userInfoRes.json();
@@ -129,7 +129,7 @@ export default async function handler(
       secure: true,
       sameSite: "lax",
       maxAge: 60 * 60 * 24 * 7,
-    })
+    }),
   );
 
   return res.redirect("/");

@@ -34,7 +34,7 @@ export function AddToQueueForm({
               key={u}
               className={cn(
                 "cursor-pointer px-2 py-1 rounded hover:bg-muted",
-                u === selectedUser && "bg-muted"
+                u === selectedUser && "bg-muted",
               )}
               onClick={() => setSelectedUser(u)}
             >

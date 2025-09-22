@@ -27,26 +27,29 @@ export default function ProfileAdditionalInfo({
   const months = joinedDate
     ? differenceInMonths(now, joinedDate) - years * 12
     : 0;
-    const days = joinedDate
+  const days = joinedDate
     ? differenceInDays(
         now,
         new Date(
           joinedDate.getFullYear() + years,
           joinedDate.getMonth() + months,
-          joinedDate.getDate()
-        )
+          joinedDate.getDate(),
+        ),
       )
     : 0;
 
   const parts = [];
-  if (years > 0)
-    {parts.push(`${years} ${years === 1 ? "год" : years < 5 ? "года" : "лет"}`);}
-  if (months > 0)
-    {parts.push(
-      `${months} ${months === 1 ? "месяц" : months < 5 ? "месяца" : "месяцев"}`
-    );}
-  if (days > 0)
-    {parts.push(`${days} ${days === 1 ? "день" : days < 5 ? "дня" : "дней"}`);}
+  if (years > 0) {
+    parts.push(`${years} ${years === 1 ? "год" : years < 5 ? "года" : "лет"}`);
+  }
+  if (months > 0) {
+    parts.push(
+      `${months} ${months === 1 ? "месяц" : months < 5 ? "месяца" : "месяцев"}`,
+    );
+  }
+  if (days > 0) {
+    parts.push(`${days} ${days === 1 ? "день" : days < 5 ? "дня" : "дней"}`);
+  }
 
   return (
     <div className="pt-2 border-t">
@@ -81,9 +84,8 @@ export default function ProfileAdditionalInfo({
                 {formData.vkRealName ? formData.vkRealName : "—"}
               </a>
             );
-          } 
-            return "Нет данных";
-          
+          }
+          return "Нет данных";
         })()}
       </div>
 
@@ -108,9 +110,8 @@ export default function ProfileAdditionalInfo({
             );
           } else if (formData.joined_at) {
             return new Date(formData.joined_at).toLocaleDateString("ru-RU");
-          } 
-            return "Неизвестно";
-          
+          }
+          return "Неизвестно";
         })()}
       </div>
 

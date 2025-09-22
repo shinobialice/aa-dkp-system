@@ -30,7 +30,7 @@ type EditTaskDialogProps = {
   task: Task;
   userId: number;
   onChange: () => void;
-}
+};
 
 export function EditTaskDialog({
   open,

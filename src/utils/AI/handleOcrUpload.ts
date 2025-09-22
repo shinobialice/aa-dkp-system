@@ -1,4 +1,3 @@
-
 import analyzeImageFromFile from "./analyzeImageFromFile";
 import { getActiveUsers } from "@/src/actions/getActiveUsers";
 
@@ -15,12 +14,12 @@ const handleOcrUpload = async (file: File) => {
       const ocrName = ocr.name.toLowerCase();
 
       const matchedCandidates = normalizedUserNames.filter((username) =>
-        username.startsWith(ocrName)
+        username.startsWith(ocrName),
       );
 
       if (matchedCandidates.length === 1) {
         const originalName = userNames.find(
-          (u) => u.toLowerCase() === matchedCandidates[0]
+          (u) => u.toLowerCase() === matchedCandidates[0],
         );
         if (originalName) {
           acc.matchedUserNames.push(originalName);
@@ -31,7 +30,7 @@ const handleOcrUpload = async (file: File) => {
 
       return acc;
     },
-    { matchedUserNames: [] as string[], unmatchedUserNames: [] as string[] }
+    { matchedUserNames: [] as string[], unmatchedUserNames: [] as string[] },
   );
 
   return { matchedUserNames, unmatchedUserNames };

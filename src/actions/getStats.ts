@@ -20,7 +20,7 @@ const getStats = async () => {
       (user) =>
         user.class?.includes("Милик") ||
         user.class?.includes("Лук") ||
-        user.class?.includes("Маг")
+        user.class?.includes("Маг"),
     ).length,
     healers: users.filter((user) => user.class?.includes("Хил")).length,
     dancers: users.filter((user) => user.class?.includes("Танцор")).length,
@@ -30,7 +30,7 @@ const getStats = async () => {
       .filter((u) => u.joined_at)
       .sort(
         (a, b) =>
-          new Date(b.joined_at!).getTime() - new Date(a.joined_at!).getTime()
+          new Date(b.joined_at!).getTime() - new Date(a.joined_at!).getTime(),
       )
       .slice(0, 5)
       .map((u) => ({ id: u.id, username: u.username })),

@@ -152,7 +152,7 @@ export function SellLootDialog({
                 type="button"
                 className={cn(
                   "cursor-pointer w-full justify-between border rounded px-3 py-2 text-sm flex items-center",
-                  !soldTo && "text-muted-foreground"
+                  !soldTo && "text-muted-foreground",
                 )}
               >
                 {soldTo || "Выберите или введите игрока"}
@@ -186,7 +186,9 @@ export function SellLootDialog({
                       <Check
                         className={cn(
                           "mr-2 h-4 w-4 ",
-                          soldTo === user.username ? "opacity-100" : "opacity-0"
+                          soldTo === user.username
+                            ? "opacity-100"
+                            : "opacity-0",
                         )}
                       />
                       {user.username}

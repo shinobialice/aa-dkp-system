@@ -5,7 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
 function generateSessionToken() {
@@ -14,7 +14,7 @@ function generateSessionToken() {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   const { code, state } = req.query;
 
@@ -37,7 +37,7 @@ export default async function handler(
       Authorization:
         "Basic " +
         Buffer.from(
-          `${process.env.MAILRU_CLIENT_ID}:${process.env.MAILRU_CLIENT_SECRET}`
+          `${process.env.MAILRU_CLIENT_ID}:${process.env.MAILRU_CLIENT_SECRET}`,
         ).toString("base64"),
       "Content-Type": "application/x-www-form-urlencoded",
     },
@@ -58,7 +58,7 @@ export default async function handler(
 
   // Получаем данные пользователя
   const userInfoRes = await fetch(
-    `https://oauth.mail.ru/userinfo?access_token=${tokenData.access_token}`
+    `https://oauth.mail.ru/userinfo?access_token=${tokenData.access_token}`,
   );
   const profile = await userInfoRes.json();
 
@@ -133,7 +133,7 @@ export default async function handler(
       secure: true,
       sameSite: "lax",
       maxAge: 60 * 60 * 24 * 7,
-    })
+    }),
   );
 
   return res.redirect("/");

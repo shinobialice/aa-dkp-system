@@ -39,7 +39,7 @@ const todayName = weekdayNames[new Date().getDay()];
 
 export default function WeeklyBossSchedule() {
   const [schedule, setSchedule] = useState<Record<string, [string, string][]>>(
-    {}
+    {},
   );
 
   useEffect(() => {
@@ -48,7 +48,7 @@ export default function WeeklyBossSchedule() {
 
   const days = Object.keys(schedule);
   const maxRows = Math.max(
-    ...Object.values(schedule).map((e) => e.length || 0)
+    ...Object.values(schedule).map((e) => e.length || 0),
   );
 
   return (

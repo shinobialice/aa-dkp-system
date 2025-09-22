@@ -5,7 +5,7 @@ const createUserTask = async (
   userId: number,
   name: string,
   createdAt: Date,
-  completedAt: Date | null
+  completedAt: Date | null,
 ) => {
   const { data: task, error } = await supabase
     .from("tasks")

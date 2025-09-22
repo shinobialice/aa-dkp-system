@@ -20,7 +20,7 @@ export const getLootQueueByItemName = async (itemName: string) => {
             username
           )
         )
-      `
+      `,
     )
     .eq("name", itemName)
     .single();

@@ -33,7 +33,15 @@ export default function BossSelector({
   setErrors: React.Dispatch<React.SetStateAction<any>>;
   errors: { selectedBoss: boolean };
 }) {
-  const aglBossOrder = ["АГЛ", "Прок", "---", "Морф", "Марли Прок", "---", "Кошка"];
+  const aglBossOrder = [
+    "АГЛ",
+    "Прок",
+    "---",
+    "Морф",
+    "Марли Прок",
+    "---",
+    "Кошка",
+  ];
 
   if (category === "Прайм") {
     return (
@@ -107,7 +115,7 @@ export default function BossSelector({
                     const boss = bosses.find(
                       (b) =>
                         b.boss_name.trim().toLowerCase() ===
-                        name.trim().toLowerCase()
+                        name.trim().toLowerCase(),
                     );
                     if (!boss) return;
 
@@ -126,7 +134,7 @@ export default function BossSelector({
                 >
                   {name}
                 </DropdownMenuCheckboxItem>
-              )
+              ),
             )}
           </DropdownMenuContent>
         </DropdownMenu>

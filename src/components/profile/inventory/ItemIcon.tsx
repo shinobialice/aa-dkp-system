@@ -4,7 +4,7 @@ type ItemIconProps = {
   itemName: string;
   itemIconUrl: string | null;
   quality?: string | null;
-}
+};
 
 export default function ItemIcon({
   itemName,

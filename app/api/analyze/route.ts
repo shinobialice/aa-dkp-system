@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
           "Ocp-Apim-Subscription-Key": process.env.AZURE_KEY!,
           "Content-Type": "application/octet-stream",
         },
-      }
+      },
     );
 
     const operationLocation = postRes.headers["operation-location"];
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     if (!operationLocation) {
       return new Response(
         JSON.stringify({ error: "No operation location returned" }),
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
     if (!resultData) {
       return new Response(
         JSON.stringify({ error: "Timed out waiting for OCR result" }),
-        { status: 504 }
+        { status: 504 },
       );
     }
 

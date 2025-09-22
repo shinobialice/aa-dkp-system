@@ -12,7 +12,7 @@ type Raid = {
   start_date: string;
   type: string;
   raid_boss: {
-    boss: Boss[]; 
+    boss: Boss[];
   }[];
 };
 
@@ -34,7 +34,7 @@ export const getRaids = async () => {
     throw new Error("Не удалось загрузить рейды");
   }
 
-  const raids = data as unknown as Raid[]; 
+  const raids = data as unknown as Raid[];
 
   return raids
     .filter((r) => r.start_date)

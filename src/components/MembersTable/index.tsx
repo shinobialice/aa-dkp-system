@@ -31,7 +31,7 @@ export default function MembersTable({
         const daysInGuild = user.joined_at
           ? Math.floor(
               (new Date().getTime() - new Date(user.joined_at).getTime()) /
-                (1000 * 3600 * 24)
+                (1000 * 3600 * 24),
             )
           : 0;
 

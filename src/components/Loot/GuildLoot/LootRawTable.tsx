@@ -64,7 +64,7 @@ export function LootRawTable({
                 <TableCell>
                   {!item.sold_to && item.acquired_at
                     ? new Intl.DateTimeFormat("ru-RU").format(
-                        new Date(item.acquired_at)
+                        new Date(item.acquired_at),
                       )
                     : "—"}
                 </TableCell>
@@ -81,7 +81,7 @@ export function LootRawTable({
                 <TableCell>
                   {item.sold_at
                     ? new Intl.DateTimeFormat("ru-RU").format(
-                        new Date(item.sold_at)
+                        new Date(item.sold_at),
                       )
                     : "—"}
                 </TableCell>

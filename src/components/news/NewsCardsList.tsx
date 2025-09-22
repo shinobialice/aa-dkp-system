@@ -48,7 +48,7 @@ export default function NewsCardList({
     };
 
     setItems((prev) =>
-      prev.map((n) => (n.id === editing.id ? updatedFixed : n))
+      prev.map((n) => (n.id === editing.id ? updatedFixed : n)),
     );
     setEditing(null);
   };

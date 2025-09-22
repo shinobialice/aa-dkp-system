@@ -42,7 +42,7 @@ export function EditGroupedLootDialog({
   const handleFieldChange = (
     index: number,
     field: keyof LootItem,
-    value: string
+    value: string,
   ) => {
     const updated = [...editedItems];
 

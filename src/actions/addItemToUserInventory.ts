@@ -5,7 +5,7 @@ const addItemToUserInventory = async (
   userId: number,
   name: string,
   type: string,
-  quality: string | null
+  quality: string | null,
 ) => {
   const { data, error } = await supabase
     .from("user_inventory")

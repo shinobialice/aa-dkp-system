@@ -65,10 +65,10 @@ export function UserActivityChart({ userId }: { userId: number }) {
   const [chartData, setChartData] = React.useState<any[]>([]);
   const [types, setTypes] = React.useState<string[]>(["праймы", "агл"]);
   const [selectedYear, setSelectedYear] = React.useState<number>(
-    new Date().getFullYear()
+    new Date().getFullYear(),
   );
   const [selectedMonth, setSelectedMonth] = React.useState<number | null>(
-    new Date().getMonth()
+    new Date().getMonth(),
   );
 
   const dateRange = React.useMemo(() => {
@@ -134,7 +134,9 @@ export function UserActivityChart({ userId }: { userId: number }) {
                   checked={types.includes(type)}
                   onCheckedChange={(checked) => {
                     setTypes((prev) =>
-                      checked ? [...prev, type] : prev.filter((t) => t !== type)
+                      checked
+                        ? [...prev, type]
+                        : prev.filter((t) => t !== type),
                     );
                   }}
                 >

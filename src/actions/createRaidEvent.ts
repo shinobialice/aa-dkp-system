@@ -20,7 +20,7 @@ const createRaidEvent = async (
   userIds: number[],
   bossIds: number[],
   is_pvp: boolean,
-  is_pvp_long: boolean
+  is_pvp_long: boolean,
 ) => {
   await ensurePrivilieges(["Администратор", "Raid Manager"]);
 
@@ -48,7 +48,7 @@ const createRaidEvent = async (
         created_at: new Date().toISOString(),
         is_pvp,
         is_pvp_long,
-        active_user_count, 
+        active_user_count,
       },
     ])
     .select()

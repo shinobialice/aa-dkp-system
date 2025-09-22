@@ -32,7 +32,7 @@ export async function getAttendances() {
 
 export async function calculateDailyAverage(
   raids: { id: number; start_date: string; active_user_count: number | null }[],
-  attendances: { user_id: number; raid_id: number }[]
+  attendances: { user_id: number; raid_id: number }[],
 ) {
   const raidMap = new Map<number, string>();
   const dailyMap = new Map<string, Set<number>>();

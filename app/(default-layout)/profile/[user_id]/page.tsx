@@ -18,7 +18,7 @@ export default async function Page(p: {
   const activity = await getUserMonthlyAttendance(
     userId,
     new Date().getFullYear(),
-    new Date().getMonth() + 1
+    new Date().getMonth() + 1,
   );
 
   const [user, tags, inventory, tasks, notes] = await Promise.all([

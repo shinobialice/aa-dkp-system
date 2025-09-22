@@ -24,7 +24,9 @@ export function DeleteEventButton({
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button className="cursor-pointer" variant="destructive">Удалить</Button>
+        <Button className="cursor-pointer" variant="destructive">
+          Удалить
+        </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>

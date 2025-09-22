@@ -24,7 +24,7 @@ export default function LinkAccountPage() {
     if (!token) return;
 
     Cookies.set("link-token", token, {
-      expires: 0.1, 
+      expires: 0.1,
       path: "/",
     });
 

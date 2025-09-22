@@ -7,5 +7,5 @@ export type LootQueueEntry = {
   required: number;
   delivered: number;
   createdAt: Date;
-  quantity?: number; 
+  quantity?: number;
 };

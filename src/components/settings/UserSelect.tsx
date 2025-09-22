@@ -66,7 +66,7 @@ export function UserSelect({
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4",
-                    selectedUserId === user.id ? "opacity-100" : "opacity-0"
+                    selectedUserId === user.id ? "opacity-100" : "opacity-0",
                   )}
                 />
                 {user.username} (id: {user.id})

@@ -17,7 +17,7 @@ const getUser = async (userId: number) => {
       active,
       is_eligible_for_salary,
       joined_at
-    `
+    `,
     )
     .eq("id", userId)
     .maybeSingle();

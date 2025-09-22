@@ -4,7 +4,7 @@ import { hasTag } from "@/src/actions/hasTag";
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   const cookies = parse(req.headers.cookie || "");
   const token = cookies["session_token"];

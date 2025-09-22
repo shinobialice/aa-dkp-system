@@ -60,7 +60,10 @@ export function RaidDetailsForm({
   React.useEffect(() => {
     let dkp = 0;
     if (category === "АГЛ") {
-      dkp = selectedBosses.reduce((sum, boss) => sum + (boss.dkp_points || 0), 0);
+      dkp = selectedBosses.reduce(
+        (sum, boss) => sum + (boss.dkp_points || 0),
+        0,
+      );
       if (isPvp) dkp += 1;
       else if (isPvpLong) dkp += 3;
     } else {

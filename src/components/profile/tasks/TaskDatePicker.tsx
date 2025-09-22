@@ -10,7 +10,7 @@ type DatePickerProps = {
   onChange?: (date: Date | undefined) => void;
   disabled?: boolean;
   className?: string;
-}
+};
 
 export function TaskDatePicker({
   value,
