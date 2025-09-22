@@ -23,6 +23,8 @@ export async function GET(req: NextRequest) {
   const linkToken = cookieStore.get("link-token").value;
   const savedState = cookieStore.get("google_state").value;
 
+  console.log("state, savedState", state, savedState);
+
   if (state !== savedState) {
     return NextResponse.json("Invalid state", { status: 400 });
   }
