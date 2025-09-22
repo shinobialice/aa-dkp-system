@@ -1,4 +1,5 @@
-import supabase from "@/lib/supabase";
+import supabase from "@/shared/lib/supabase";
+import { redirect } from "next/navigation";
 
 export const hasTag = async (sessionToken: string, tags: string[]) => {
   const { data: user, error: userError } = await supabase
@@ -8,7 +9,7 @@ export const hasTag = async (sessionToken: string, tags: string[]) => {
     .single();
 
   if (!user || userError) {
-    throw new Error("Invalid session");
+    redirect("login");
   }
 
   const { data: tagRow, error: tagError } = await supabase

@@ -22,9 +22,12 @@ export async function middleware(req: NextRequest) {
     req.nextUrl.pathname.startsWith(path),
   );
 
-  if (isPublic) return NextResponse.next();
+  if (isPublic) {
+    return NextResponse.next();
+  }
 
   if (!sessionToken) {
+    console.log("sessionToken", sessionToken);
     const loginUrl = new URL("/login", req.url);
     return NextResponse.redirect(loginUrl);
   }

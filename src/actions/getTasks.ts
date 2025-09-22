@@ -1,5 +1,5 @@
 "use server";
-import supabase from "@/lib/supabase";
+import supabase from "@/shared/lib/supabase";
 
 const getTasks = async (userId: number) => {
   const { data: tasks, error } = await supabase

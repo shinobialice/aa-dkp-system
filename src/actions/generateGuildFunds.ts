@@ -1,5 +1,5 @@
 "use server";
-import supabase from "@/lib/supabase";
+import supabase from "@/shared/lib/supabase";
 
 export const generateGuildFunds = async (month: number, year: number) => {
   const startDate = new Date(`${year}-${month}-01`);

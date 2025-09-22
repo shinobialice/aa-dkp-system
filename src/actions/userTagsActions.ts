@@ -1,5 +1,5 @@
 "use server";
-import supabase from "@/lib/supabase";
+import supabase from "@/shared/lib/supabase";
 
 // 1. Get user tags
 export async function getUserTags(userId: number) {

@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/lib/supabase";
+import supabase from "@/shared/lib/supabase";
 
 export const getUserSalaryBonus = async (userId: number) => {
   const { data, error } = await supabase

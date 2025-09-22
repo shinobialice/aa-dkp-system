@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/lib/supabase";
+import supabase from "@/shared/lib/supabase";
 
 export const getBosses = async () => {
   const { data: bosses, error } = await supabase
