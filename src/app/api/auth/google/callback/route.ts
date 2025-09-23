@@ -20,10 +20,8 @@ export async function GET(req: NextRequest) {
 
   const cookieStore = await cookies();
 
-  const linkToken = cookieStore.get("link-token").value;
-  const savedState = cookieStore.get("google_state").value;
-
-  console.log("state, savedState", state, savedState);
+  const linkToken = cookieStore.get("link-token")?.value;
+  const savedState = cookieStore.get("google_state")?.value;
 
   if (state !== savedState) {
     return NextResponse.json("Invalid state", { status: 400 });

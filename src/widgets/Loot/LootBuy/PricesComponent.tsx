@@ -19,7 +19,7 @@ export type LootItem = {
 };
 
 export async function PricesComponent({ items }: { items: LootItem[] }) {
-  const sessionToken = (await cookies()).get("session_token").value;
+  const sessionToken = (await cookies()).get("session_token")?.value ?? "";
   const isAdmin = await hasTag(sessionToken, ["Администратор"]);
   return (
     <Table>

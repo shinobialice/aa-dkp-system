@@ -6,7 +6,7 @@ import { lootColumns } from "@/widgets/Loot/LootGiveaway/lootColumns";
 import { cookies } from "next/headers";
 
 export default async function Page() {
-  const sessionToken = (await cookies()).get("session_token").value;
+  const sessionToken = (await cookies()).get("session_token")?.value ?? "";
   const isAdmin = await hasTag(sessionToken, ["Администратор"]);
 
   const { data: users, error } = await supabase

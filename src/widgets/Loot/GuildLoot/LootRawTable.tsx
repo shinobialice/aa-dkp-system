@@ -136,7 +136,7 @@ export function LootRawTable({
             editMode
               ? {
                   soldTo: selectedItem.sold_to ?? "",
-                  soldToId: selectedItem.sold_to_user_id,
+                  soldToId: selectedItem.sold_to_user_id || undefined,
                   quantity: selectedItem.quantity,
                   price:
                     selectedItem.price ?? selectedItem.itemType?.price ?? 0,

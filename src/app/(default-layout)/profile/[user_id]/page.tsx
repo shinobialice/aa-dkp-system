@@ -29,7 +29,7 @@ export default async function Page(p: {
     getUserNotes(userId),
   ]);
 
-  const sessionToken = (await cookies()).get("session_token").value;
+  const sessionToken = (await cookies()).get("session_token")?.value ?? "";
   const isAdmin = await hasTag(sessionToken, ["Администратор"]);
 
   return (

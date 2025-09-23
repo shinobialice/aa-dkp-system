@@ -1,20 +1,15 @@
 {
   "compilerOptions": {
     "target": "es2024",
-    "lib": ["DOM", "ESNext"],
-    "downlevelIteration": true,
-    "noImplicitAny": false,
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": false,
-    "strictNullChecks": false,
+    "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
-    "exactOptionalPropertyTypes": false,
     "module": "esnext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
-    "typeRoots": ["src/types", "./node_modules/@types"],
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
@@ -28,14 +23,6 @@
       "@/*": ["*"]
     }
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts",
-    "____tailwind.config.js",
-    "src/actions/hasUserTag.disabled.ts",
-    "src/actions/hasUserTag.ts"
-  ],
-  "exclude": ["node_modules", "components/**/*.tsx"]
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
 }

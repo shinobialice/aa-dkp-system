@@ -3,7 +3,7 @@ import CalendarView from "@/widgets/calendar/CalendarView";
 import { cookies } from "next/headers";
 
 const ActivitiesPage = async () => {
-  const sessionToken = (await cookies()).get("session_token")?.value; // Ensure safe access to value
+  const sessionToken = (await cookies()).get("session_token")?.value ?? ""; // Ensure safe access to value
   const isAdmin = await hasTag(sessionToken, ["Администратор"]);
   const isModerator = await hasTag(sessionToken, ["Модератор"]);
 

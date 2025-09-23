@@ -68,7 +68,10 @@ export default function BossSelector({
                   onCheckedChange={() => {
                     setSelectedBoss(boss.boss_name);
                     setSelectedBosses([boss]);
-                    setErrors((prev) => ({ ...prev, selectedBoss: false }));
+                    setErrors((prev: any) => ({
+                      ...prev,
+                      selectedBoss: false,
+                    }));
                   }}
                 >
                   {boss.boss_name}
@@ -124,7 +127,7 @@ export default function BossSelector({
                       : selectedBosses.filter((b) => b.id !== boss.id);
 
                     setSelectedBosses(updatedBosses);
-                    setErrors((prev) => ({
+                    setErrors((prev: any) => ({
                       ...prev,
                       selectedBoss: false,
                     }));

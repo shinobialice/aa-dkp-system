@@ -155,7 +155,7 @@ export function RaidDetailsForm({
           value={selectedDate}
           onChange={(date) => {
             setSelectedDate(date);
-            setErrors((prev) => ({ ...prev, selectedDate: false }));
+            setErrors((prev: any) => ({ ...prev, selectedDate: false }));
           }}
         />
         {errors.selectedDate && (

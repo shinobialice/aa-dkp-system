@@ -181,7 +181,7 @@ export default function DailyAttendanceChart({
               <ChartTooltip
                 content={
                   <RoundedTooltipContent
-                    labelFormatter={(val) => `Дата: ${val}`}
+                    labelFormatter={(val: any) => `Дата: ${val}`}
                   />
                 }
               />

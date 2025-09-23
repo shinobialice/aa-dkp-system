@@ -13,7 +13,7 @@ export default async function DefaultLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const sessionToken = (await cookies())?.get("session_token")?.value;
+  const sessionToken = (await cookies())?.get("session_token")?.value ?? "";
   const isAdmin = await hasTag(sessionToken, ["Администратор"]);
   return (
     <SidebarProvider defaultOpen>

@@ -129,7 +129,7 @@ export default function MonthlyAttendanceChart({
               <ChartTooltip
                 content={
                   <RoundedTooltipContent
-                    labelFormatter={(val) => `Месяц: ${val}`}
+                    labelFormatter={(val: any) => `Месяц: ${val}`}
                   />
                 }
               />

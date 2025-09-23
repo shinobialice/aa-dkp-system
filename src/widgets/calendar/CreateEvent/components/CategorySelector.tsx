@@ -37,7 +37,7 @@ export default function CategorySelector({
           setSelectedBosses([]);
           setIsPvp(false);
           setIsPvpLong(false);
-          setErrors((prev) => ({ ...prev, category: false }));
+          setErrors((prev: any) => ({ ...prev, category: false }));
         }}
         value={category ?? undefined}
       >
