@@ -1,10 +1,12 @@
 {
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbo",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "format:fix": "prettier . --write",
+    "format:lint": "prettier . --check"
   },
   "dependencies": {
     "@fullcalendar/core": "^6.1.17",
@@ -68,6 +70,8 @@
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "dotenv-cli": "^8.0.0",
-    "eslint-config-next": "15.3.2"
+    "eslint-config-next": "15.3.2",
+    "prettier": "3.6.2",
+    "typescript": "5.9.2"
   }
 }

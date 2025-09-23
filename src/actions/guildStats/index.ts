@@ -17,7 +17,7 @@ export async function getGuildAttendancePrime({
   month: number;
 }) {
   const raids = (await getRaidData(year, month)).filter(
-    (r) => r.type === "Прайм"
+    (r) => r.type === "Прайм",
   );
   const attendances = await getAttendances();
   return calculateDailyAverage(raids, attendances);
@@ -31,7 +31,7 @@ export async function getGuildAttendanceAgl({
   month: number;
 }) {
   const raids = (await getRaidData(year, month)).filter(
-    (r) => r.type === "АГЛ"
+    (r) => r.type === "АГЛ",
   );
   const attendances = await getAttendances();
   return calculateDailyAverage(raids, attendances);

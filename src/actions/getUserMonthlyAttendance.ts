@@ -1,5 +1,5 @@
 "use server";
-import supabase from "@/lib/supabase";
+import supabase from "@/shared/lib/supabase";
 import type { Database } from "@/types/supabase";
 
 type RaidRow = Database["public"]["Tables"]["raid"]["Row"];
@@ -16,7 +16,7 @@ type RaidWithRelations = RaidRow & {
 export async function getUserMonthlyAttendance(
   userId: number,
   year: number,
-  month: number
+  month: number,
 ) {
   const startDate = new Date(year, month - 1, 1).toISOString();
   const endDate = new Date(year, month, 1).toISOString();
@@ -30,7 +30,7 @@ export async function getUserMonthlyAttendance(
       start_date,
       raid_boss(boss(dkp_points)),
       raid_attendance(user_id)
-    `
+    `,
     )
     .gte("start_date", startDate)
     .lt("start_date", endDate);

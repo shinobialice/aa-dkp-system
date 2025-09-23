@@ -12,7 +12,7 @@ type UserTag = {
 function getSalaryEligibilityErrors(
   user: UserForEligibility,
   averageGuildGS: number,
-  tags: UserTag[]
+  tags: UserTag[],
 ): string[] {
   const errors: string[] = [];
 
@@ -37,7 +37,7 @@ function getSalaryEligibilityErrors(
     if (!probationOver) {
       const needMonths = day <= 20 ? 1 : 2;
       errors.push(
-        `Испытательный срок не завершён: прошло ${monthsPassed} мес., нужно ≥ ${needMonths}`
+        `Испытательный срок не завершён: прошло ${monthsPassed} мес., нужно ≥ ${needMonths}`,
       );
     }
   }
@@ -58,7 +58,7 @@ function getSalaryEligibilityErrors(
   const actualGS = user.class_gear_score ?? 0;
   if (actualGS < requiredGS) {
     errors.push(
-      `Недостаточный ГС: у игрока ${actualGS}, требуется ≥ ${requiredGS}`
+      `Недостаточный ГС: у игрока ${actualGS}, требуется ≥ ${requiredGS}`,
     );
   }
 

@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/lib/supabase";
+import supabase from "@/shared/lib/supabase";
 
 const getUser = async (userId: number) => {
   const { data: user, error } = await supabase
@@ -17,7 +17,7 @@ const getUser = async (userId: number) => {
       active,
       is_eligible_for_salary,
       joined_at
-    `
+    `,
     )
     .eq("id", userId)
     .maybeSingle();

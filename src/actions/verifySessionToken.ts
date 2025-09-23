@@ -1,4 +1,4 @@
-import supabase from "@/lib/supabase";
+import supabase from "@/shared/lib/supabase";
 
 export async function verifySessionToken(token: string): Promise<boolean> {
   if (!token) return false;
@@ -14,5 +14,5 @@ export async function verifySessionToken(token: string): Promise<boolean> {
     return false;
   }
 
-  return !!session; 
+  return !!session;
 }

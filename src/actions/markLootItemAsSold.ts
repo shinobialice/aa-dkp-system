@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/lib/supabase";
+import supabase from "@/shared/lib/supabase";
 
 export const markLootItemAsSold = async ({
   lootId,
@@ -32,7 +32,7 @@ export const markLootItemAsSold = async ({
 
   if (quantity > loot.quantity) {
     throw new Error(
-      `Нельзя продать ${quantity} шт — в наличии только ${loot.quantity}`
+      `Нельзя продать ${quantity} шт — в наличии только ${loot.quantity}`,
     );
   }
 

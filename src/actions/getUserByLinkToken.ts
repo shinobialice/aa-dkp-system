@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/lib/supabase";
+import supabase from "@/shared/lib/supabase";
 import type { Database } from "@/types/supabase";
 
 // Define the shape you actually get back from that join

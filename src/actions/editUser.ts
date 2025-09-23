@@ -1,5 +1,5 @@
 "use server";
-import supabase from "@/lib/supabase";
+import supabase from "@/shared/lib/supabase";
 
 const editUser = async (
   userId: number,
@@ -9,7 +9,7 @@ const editUser = async (
   secondaryClassName: string | null,
   secondaryClassGearScore: number | null,
   vkName: string,
-  joined_at: Date | string
+  joined_at: Date | string,
 ) => {
   const { data: user, error } = await supabase
     .from("user")

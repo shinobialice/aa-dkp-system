@@ -1,5 +1,5 @@
 "use server";
-import supabase from "@/lib/supabase";
+import supabase from "@/shared/lib/supabase";
 
 const setItemQuality = async (itemId: number, quality: string) => {
   const { data, error } = await supabase

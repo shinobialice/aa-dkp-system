@@ -1,11 +1,11 @@
 "use server";
-import supabase from "@/lib/supabase";
+import supabase from "@/shared/lib/supabase";
 
 const addItemToUserInventory = async (
   userId: number,
   name: string,
   type: string,
-  quality: string | null
+  quality: string | null,
 ) => {
   const { data, error } = await supabase
     .from("user_inventory")

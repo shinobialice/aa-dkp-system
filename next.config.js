@@ -1,10 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['archeagecodex.com'],
-  },
-  experimental: {
-    serverActions: true,
+    domains: ["archeagecodex.com"],
   },
 };
 

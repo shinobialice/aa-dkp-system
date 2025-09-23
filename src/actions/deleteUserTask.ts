@@ -1,5 +1,5 @@
 "use server";
-import supabase from "@/lib/supabase";
+import supabase from "@/shared/lib/supabase";
 
 const deleteUserTask = async (id: number) => {
   const { data, error } = await supabase

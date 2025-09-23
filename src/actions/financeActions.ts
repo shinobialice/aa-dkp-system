@@ -1,5 +1,5 @@
 "use server";
-import supabase from "@/lib/supabase";
+import supabase from "@/shared/lib/supabase";
 import type { Database } from "@/types/supabase";
 import { differenceInMonths } from "date-fns";
 import { getUserMonthlyAttendance } from "./getUserMonthlyAttendance";
@@ -36,7 +36,7 @@ export const getSalariesForMonth = async (month: number, year: number) => {
     user (
       username
     )
-  `
+  `,
     )
     .eq("month", month)
     .eq("year", year);
@@ -110,7 +110,7 @@ export const generateSalaries = async (month: number, year: number) => {
     users.map(async (user) => {
       const attendance = await getUserMonthlyAttendance(user.id, year, month);
       return { userId: user.id, dkp: attendance.dkp };
-    })
+    }),
   );
 
   const totalDKP = attendanceData.reduce((sum, user) => sum + user.dkp, 0);
@@ -148,7 +148,7 @@ export const generateSalaries = async (month: number, year: number) => {
         bonus: bonusAmount,
         total: baseAmount + bonusAmount,
       };
-    })
+    }),
   );
 
   const { error: insertError } = await supabase

@@ -1,10 +1,11 @@
 "use server";
-import supabase from "@/lib/supabase";
+import supabase from "@/shared/lib/supabase";
 
 const getUserInventory = async (userId: number) => {
   const { data: inventory, error } = await supabase
     .from("user_inventory")
-    .select(`
+    .select(
+      `
       id,
       user_id,
       type,
@@ -12,7 +13,8 @@ const getUserInventory = async (userId: number) => {
       quality,
       created_at,
       quantity
-    `)
+    `,
+    )
     .eq("user_id", userId);
 
   if (error) {

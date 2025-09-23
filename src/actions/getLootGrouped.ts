@@ -1,6 +1,6 @@
-import { getLootIconUrl } from "../components/Loot/LootBuy/icons/LootIcons";
-import { sourceMap } from "../components/Loot/priceSourceMap";
-import supabase from "@/lib/supabase";
+import { getLootIconUrl } from "../widgets/Loot/LootBuy/icons/LootIcons";
+import { sourceMap } from "../widgets/Loot/priceSourceMap";
+import supabase from "@/shared/lib/supabase";
 
 export async function getLootGrouped() {
   const { data: items, error } = await supabase

@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/lib/supabase";
+import supabase from "@/shared/lib/supabase";
 
 export const removeFromLootQueue = async (id: number) => {
   const { error } = await supabase.from("loot_queue").delete().eq("id", id);

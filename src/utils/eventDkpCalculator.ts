@@ -9,11 +9,10 @@ const bossGroups = [
   ["Ашьяра", "Гленн и Лорея"], // Группа, которая дает 1 балл
 ];
 
-
 export default function eventDkpCalculator(
   selectedBoss: Boss | null,
   isPvp: boolean,
-  isPvpLong: boolean
+  isPvpLong: boolean,
 ) {
   if (!selectedBoss) return 0;
 
