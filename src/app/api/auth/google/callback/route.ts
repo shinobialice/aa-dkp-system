@@ -20,8 +20,11 @@ export async function GET(req: NextRequest) {
 
   const cookieStore = await cookies();
 
-  const linkToken = cookieStore.get("link-token").value;
-  const savedState = cookieStore.get("google_state").value;
+  const linkTokenCookie = cookieStore.get("link-token");
+  const linkToken = linkTokenCookie ? linkTokenCookie.value : undefined;
+
+  const savedStateCookie = cookieStore.get("google_state");
+  const savedState = savedStateCookie ? savedStateCookie.value : undefined;
 
   console.log("state, savedState", state, savedState);
 
@@ -126,7 +129,7 @@ export async function GET(req: NextRequest) {
     .update({ session_token: sessionToken })
     .eq("id", existingUser.id);
 
-  const response = NextResponse.redirect("/");
+  const response = NextResponse.redirect(`${baseUrl}/`);
 
   response.cookies.set("session_token", sessionToken, {
     path: "/",
