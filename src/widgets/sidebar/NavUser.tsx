@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { ChevronsUpDown, BadgeCheck, LogOut } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui";
@@ -19,13 +18,7 @@ import {
   useSidebar,
 } from "@/shared/ui";
 import useCurrentUser from "@/hooks/useCurrentUser";
-import { Button } from "@/shared/ui";
-
-function logout() {
-  document.cookie = "session_token=; path=/; max-age=0; SameSite=Lax; secure";
-  document.cookie = "link-token=; path=/; max-age=0; SameSite=Lax; secure";
-  window.location.href = "/login";
-}
+import { logout } from "@/actions/logout";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
