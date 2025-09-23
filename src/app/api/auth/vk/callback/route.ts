@@ -2,6 +2,8 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { parse, serialize } from "cookie";
 import crypto from "crypto";
 import { createClient } from "@supabase/supabase-js";
+import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,27 +14,29 @@ function generateSessionToken() {
   return crypto.randomBytes(32).toString("hex");
 }
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-) {
-  const { code, state, device_id } = req.query;
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+
+  const code = searchParams.get("code");
+  const state = searchParams.get("state");
+  const device_id = searchParams.get("device_id");
 
   if (
     typeof code !== "string" ||
     typeof state !== "string" ||
     typeof device_id !== "string"
   ) {
-    return res.status(400).send("Missing query params");
+    return NextResponse.json("Missing query params", { status: 400 });
   }
 
-  const cookies = parse(req.headers.cookie || "");
-  const savedState = cookies.vk_state;
-  const codeVerifier = cookies.vk_code_verifier;
-  const linkToken = cookies["link-token"];
+  const cookieStore = await cookies();
+
+  const savedState = cookieStore.get("vk_state")?.value;
+  const codeVerifier = cookieStore.get("codeVerifier")?.value;
+  const linkToken = cookieStore.get("link-token")?.value;
 
   if (!savedState || !codeVerifier || state !== savedState) {
-    return res.status(400).send("Invalid state or verifier");
+    return NextResponse.json("Invalid state or verifier", { status: 400 });
   }
 
   const tokenRes = await fetch("https://id.vk.ru/oauth2/auth", {
@@ -51,9 +55,10 @@ export default async function handler(
   const tokenData = await tokenRes.json();
 
   if (!tokenData.access_token) {
-    return res
-      .status(400)
-      .json({ error: "Token exchange failed", data: tokenData });
+    return NextResponse.json(
+      { error: "Token exchange failed", data: tokenData },
+      { status: 400 },
+    );
   }
 
   const userInfoRes = await fetch("https://id.vk.ru/oauth2/user_info", {
@@ -77,7 +82,9 @@ export default async function handler(
       .single();
 
     if (!linkRow) {
-      return res.status(400).send("Link token expired or invalid");
+      return NextResponse.json("Link token expired or invalid", {
+        status: 400,
+      });
     }
 
     const sessionToken = generateSessionToken();
@@ -93,7 +100,7 @@ export default async function handler(
 
     if (userUpdateError) {
       console.error("Ошибка при обновлении пользователя:", userUpdateError);
-      return res.status(500).send("Failed to link VK account");
+      return NextResponse.json("Failed to link VK account", { status: 500 });
     }
 
     await supabase
@@ -101,18 +108,20 @@ export default async function handler(
       .update({ used: true })
       .eq("token", linkToken);
 
-    res.setHeader("Set-Cookie", [
-      serialize("link-token", "", { path: "/", maxAge: -1 }),
-      serialize("session_token", sessionToken, {
-        path: "/",
-        httpOnly: true,
-        secure: true,
-        sameSite: "lax",
-        maxAge: 60 * 60 * 24 * 7,
-      }),
-    ]);
+    const response = NextResponse.redirect(
+      new URL("/link-account/complete", req.url),
+    );
 
-    return res.redirect("/link-account/complete");
+    response.cookies.set("link-token", "", { path: "/", maxAge: -1 });
+    response.cookies.set("session_token", sessionToken, {
+      path: "/",
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
+    return response;
   }
 
   const sessionToken = generateSessionToken();
@@ -126,7 +135,7 @@ export default async function handler(
   let userId: number;
 
   if (!existingUser) {
-    return res.redirect("/login-error");
+    return NextResponse.redirect(new URL("/login-error", req.url));
   } else {
     await supabase
       .from("user")
@@ -136,7 +145,9 @@ export default async function handler(
     userId = existingUser.id;
   }
 
-  const cookie = serialize("session_token", sessionToken, {
+  const response = NextResponse.redirect(new URL("/", req.url));
+
+  response.cookies.set("session_token", sessionToken, {
     path: "/",
     httpOnly: true,
     secure: true,
@@ -144,7 +155,5 @@ export default async function handler(
     maxAge: 60 * 60 * 24 * 7,
   });
 
-  res.setHeader("Set-Cookie", cookie);
-
-  res.redirect("/");
+  return response;
 }
