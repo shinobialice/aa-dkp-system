@@ -39,16 +39,21 @@ export const addLootItem = async ({
   source,
   acquired_at,
   quantity,
+  status,
+  sold_at,
 }: {
   itemTypeId: number;
   source?: string;
   acquired_at: string;
   quantity?: number;
+  status?: string;
+  sold_at?: string;
 }) => {
   const { error } = await supabase.from("loot").insert([
     {
       item_type_id: itemTypeId,
-      status: "В наличии",
+      status: status ?? "В наличии",
+      sold_at: sold_at ?? null,
       source,
       acquired_at: new Date(acquired_at).toISOString(),
       quantity: quantity ?? 1,
