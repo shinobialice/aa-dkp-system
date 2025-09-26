@@ -4,103 +4,76 @@ import supabase from "@/shared/lib/supabase";
 
 export async function getAllUsersActivityWithPercent() {
   const now = new Date();
-  const currentMonth = now.getMonth();
+  const currentMonth = now.getMonth() + 1;
   const currentYear = now.getFullYear();
+  const startDate = new Date(currentYear, currentMonth - 1, 1).toISOString();
+  const endDate = new Date(currentYear, currentMonth, 1).toISOString();
 
-  // 1. Получаем все рейды за текущий месяц
-  const { data: allRaids, error: raidsError } = await supabase
+  const { data: raids, error: raidsError } = await supabase
     .from("raid")
-    .select("id, start_date, type, dkp_summary");
+    .select(`id, type, start_date, raid_boss(boss(dkp_points)), raid_attendance(user_id)`)
+    .gte("start_date", startDate)
+    .lt("start_date", endDate);
 
-  if (raidsError || !allRaids) {
+  if (raidsError || !raids) {
     console.error("Ошибка при получении рейдов:", raidsError);
     throw new Error("Не удалось получить рейды");
   }
 
-  // Фильтруем только текущий месяц
-  const raidsThisMonth = allRaids.filter((raid) => {
-    if (!raid.start_date) return false;
-    const date = new Date(raid.start_date);
-    return (
-      date.getMonth() === currentMonth && date.getFullYear() === currentYear
-    );
-  });
+  let totalAgl = 0;
+  let totalPrime = 0;
+  const userScores: Record<number, { agl: number; prime: number }> = {};
 
-  // 2. Считаем общее возможное DKP по типам
-  let totalPrimeDkp = 0;
-  let totalAglDkp = 0;
+  for (const raid of raids) {
+    const dkp = Array.isArray(raid.raid_boss)
+      ? raid.raid_boss.reduce((sum, rb) => {
+          if (Array.isArray(rb.boss)) {
+            return sum + rb.boss.reduce((bSum, bossObj) => bSum + (bossObj.dkp_points ?? 0), 0);
+          } else {
+            const bossObj = rb.boss as { dkp_points?: number };
+            return sum + (bossObj.dkp_points ?? 0);
+          }
+        }, 0)
+      : 0;
 
-  const raidDkpMap = new Map<number, { type: string; dkp: number }>();
+    if (raid.type === "Прайм") totalPrime += dkp;
+    else if (raid.type === "АГЛ") totalAgl += dkp;
 
-  for (const raid of raidsThisMonth) {
-    const dkp = raid.dkp_summary ?? 0;
-    const type = raid.type;
-
-    raidDkpMap.set(raid.id, { type, dkp });
-
-    if (type === "Прайм") totalPrimeDkp += dkp;
-    if (type === "АГЛ") totalAglDkp += dkp;
-  }
-
-  const totalMaxDkp = totalPrimeDkp + totalAglDkp;
-
-  // 3. Получаем посещения всех пользователей в этих рейдах
-  const raidIds = Array.from(raidDkpMap.keys());
-
-  const { data: attendances, error: attError } = await supabase
-    .from("raid_attendance")
-    .select("user_id, raid_id");
-
-  if (attError || !attendances) {
-    console.error("Ошибка при получении посещений:", attError);
-    throw new Error("Не удалось получить активности");
-  }
-
-  // 4. Считаем сколько DKP получил каждый пользователь
-  const userScores: Record<number, { prime: number; agl: number }> = {};
-
-  for (const att of attendances) {
-    const raid = raidDkpMap.get(att.raid_id);
-    if (!raid) continue;
-
-    const type = raid.type;
-    const dkp = raid.dkp;
-
-    if (!userScores[att.user_id]) {
-      userScores[att.user_id] = { prime: 0, agl: 0 };
-    }
-
-    if (type === "Прайм") {
-      userScores[att.user_id].prime += dkp;
-    } else if (type === "АГЛ") {
-      userScores[att.user_id].agl += dkp;
+    if (Array.isArray(raid.raid_attendance)) {
+      for (const att of raid.raid_attendance) {
+        if (!userScores[att.user_id]) {
+          userScores[att.user_id] = { agl: 0, prime: 0 };
+        }
+        if (raid.type === "Прайм") userScores[att.user_id].prime += dkp;
+        else if (raid.type === "АГЛ") userScores[att.user_id].agl += dkp;
+      }
     }
   }
 
-  // 5. Переводим в проценты
+  const totalDKP = totalAgl + totalPrime;
+
   const result: Record<
     number,
     {
       primePercent: number;
       aglPercent: number;
       totalPercent: number;
+      dkp: number;
     }
   > = {};
 
   for (const [userIdStr, scores] of Object.entries(userScores)) {
     const userId = Number(userIdStr);
-    const primePercent = totalPrimeDkp
-      ? (scores.prime / totalPrimeDkp) * 100
-      : 0;
-    const aglPercent = totalAglDkp ? (scores.agl / totalAglDkp) * 100 : 0;
-    const totalPercent = totalMaxDkp
-      ? ((scores.prime + scores.agl) / totalMaxDkp) * 100
-      : 0;
+    const userDKP = scores.agl + scores.prime;
+    const aglPercent = totalAgl ? (scores.agl / totalAgl) * 100 : 0;
+    const primePercent = totalPrime ? (scores.prime / totalPrime) * 100 : 0;
+    const totalPercent = totalDKP ? (userDKP / totalDKP) * 100 : 0;
 
     result[userId] = {
-      primePercent,
       aglPercent,
+      primePercent,
       totalPercent,
+      dkp: userDKP,
     };
   }
 
