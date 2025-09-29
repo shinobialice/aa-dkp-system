@@ -229,7 +229,9 @@ const AppSidebar: FC<Props> = ({
             <SidebarMenuItem>
               <div
                 className={`flex items-center gap-2 rounded-md p-2 text-sm ${
-                  checked ? "bg-sidebar-accent text-sidebar-accent-foreground" : ""
+                  checked
+                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                    : ""
                 }`}
               >
                 {checked ? (
