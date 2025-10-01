@@ -11,7 +11,6 @@ export const generateGuildFunds = async (month: number, year: number, advanceSen
   const startIso = startDate.toISOString();
   const endIso = endDate.toISOString();
 
-  // 1. Fetch sold loot with itemType joined
   const { data: loot, error: lootError } = await supabase
     .from("loot")
     .select("quantity, price")
@@ -24,12 +23,10 @@ export const generateGuildFunds = async (month: number, year: number, advanceSen
     throw new Error("Не удалось загрузить проданный лут");
   }
 
-  // 2. Calculate total income
   const totalIncome = loot.reduce((sum, item) => {
     return sum + (item.price ?? 0); // ✅ price — это уже итоговая сумма продажи
   }, 0);
 
-  // 2.1. Fetch all "В казну" поступления за месяц
   const { data: treasuryIncome, error: treasuryError } = await supabase
     .from("loot")
     .select("price")
@@ -47,7 +44,6 @@ export const generateGuildFunds = async (month: number, year: number, advanceSen
     0
   );
 
-  // 3. Fetch expenses
   const { data: expenses, error: expensesError } = await supabase
     .from("Expense")
     .select("amount")
@@ -61,12 +57,10 @@ export const generateGuildFunds = async (month: number, year: number, advanceSen
 
   const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
 
-  // 4. Calculate profit, budget, treasury
   const salaryBudget = Math.floor(totalIncome * 0.7);
   const treasuryBudget = Math.floor(totalIncome * 0.3);
   const inTreasury = totalIncome + treasuryIncomeSum - totalExpenses;
 
-  // 5. Delete previous fund record for the month
   const { error: deleteError } = await supabase
     .from("GuildFunds")
     .delete()
@@ -78,7 +72,6 @@ export const generateGuildFunds = async (month: number, year: number, advanceSen
     throw new Error("Не удалось очистить старые данные фонда");
   }
 
-  // 6. Insert new guild fund record
   const { error: insertError } = await supabase.from("GuildFunds").insert([
     {
       year,
