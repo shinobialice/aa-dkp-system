@@ -1,7 +1,7 @@
 "use server";
 import supabase from "@/shared/lib/supabase";
 
-export const generateGuildFunds = async (month: number, year: number) => {
+export const generateGuildFunds = async (month: number, year: number, advanceSent: number = 0) => {
   const startDate = new Date(`${year}-${month}-01`);
   const endDate =
     month === 12
@@ -29,6 +29,24 @@ export const generateGuildFunds = async (month: number, year: number) => {
     return sum + (item.price ?? 0); // ✅ price — это уже итоговая сумма продажи
   }, 0);
 
+  // 2.1. Fetch all "В казну" поступления за месяц
+  const { data: treasuryIncome, error: treasuryError } = await supabase
+    .from("loot")
+    .select("price")
+    .eq("status", "В казну")
+    .gte("sold_at", startIso)
+    .lt("sold_at", endIso);
+
+  if (treasuryError || !treasuryIncome) {
+    console.error("Ошибка при получении поступлений в казну:", treasuryError);
+    throw new Error("Не удалось загрузить поступления в казну");
+  }
+
+  const treasuryIncomeSum = treasuryIncome.reduce(
+    (sum, item) => sum + (item.price ?? 0),
+    0
+  );
+
   // 3. Fetch expenses
   const { data: expenses, error: expensesError } = await supabase
     .from("Expense")
@@ -44,9 +62,9 @@ export const generateGuildFunds = async (month: number, year: number) => {
   const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
 
   // 4. Calculate profit, budget, treasury
-  const profit = totalIncome - totalExpenses;
-  const salaryBudget = Math.floor(profit * 0.7);
-  const treasuryLeft = profit - salaryBudget;
+  const salaryBudget = Math.floor(totalIncome * 0.7);
+  const treasuryBudget = Math.floor(totalIncome * 0.3);
+  const inTreasury = totalIncome + treasuryIncomeSum - totalExpenses;
 
   // 5. Delete previous fund record for the month
   const { error: deleteError } = await supabase
@@ -67,9 +85,10 @@ export const generateGuildFunds = async (month: number, year: number) => {
       month,
       totalIncome: Math.round(totalIncome),
       totalExpenses: totalExpenses,
-      profit,
       salaryBudget: salaryBudget,
-      treasuryLeft: treasuryLeft,
+      inTreasury: inTreasury,
+      advanceSent: advanceSent,
+      treasuryBudget: treasuryBudget,
     },
   ]);
 
