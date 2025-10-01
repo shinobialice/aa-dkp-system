@@ -65,7 +65,14 @@ export function LootRawTable({
           <TableBody>
             {loot
               .filter((item) => {
-                if (item.status === "В наличии" || item.status === "В казну") return true;
+                if (item.status === "В наличии") return true;
+                if (item.status === "В казну" && item.sold_at) {
+                  const treasuryDate = new Date(item.sold_at);
+                  return (
+                    treasuryDate.getMonth() + 1 === selectedMonth &&
+                    treasuryDate.getFullYear() === selectedYear
+                  );
+                }
                 if (item.status === "Распродано") return false;
                 if (item.status === "Продано" && item.sold_at) {
                   const soldDate = new Date(item.sold_at);
