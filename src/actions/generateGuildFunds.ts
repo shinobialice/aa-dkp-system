@@ -16,8 +16,8 @@ export const generateGuildFunds = async (month: number, year: number) => {
     .from("loot")
     .select("quantity, price")
     .eq("status", "Продано")
-    .gte("acquired_at", startIso)
-    .lt("acquired_at", endIso);
+    .gte("sold_at", startIso)
+    .lt("sold_at", endIso);
 
   if (lootError || !loot) {
     console.error("Ошибка при получении лута:", lootError);

@@ -20,6 +20,9 @@ export default function LootTable({ isAdmin }: Props) {
   const [loot, setLoot] = useState<LootItem[]>([]);
   const [itemTypes, setItemTypes] = useState<ItemType[]>([]);
   const [showDialog, setShowDialog] = useState(false);
+  const now = new Date();
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(now.getFullYear());
 
   useEffect(() => {
     const loadData = async () => {
@@ -59,11 +62,41 @@ export default function LootTable({ isAdmin }: Props) {
               Добавить доход
             </Button>
           )}
+          <div className="flex gap-4 items-center mb-2">
+            <label>
+              Месяц:
+              <select
+                value={selectedMonth}
+                onChange={e => setSelectedMonth(Number(e.target.value))}
+                className="ml-2 border rounded px-2 py-1"
+              >
+                {[...Array(12)].map((_, i) => (
+                  <option key={i + 1} value={i + 1}>
+                    {new Date(2000, i).toLocaleString('ru-RU', { month: 'long' })}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Год:
+              <select
+                value={selectedYear}
+                onChange={e => setSelectedYear(Number(e.target.value))}
+                className="ml-2 border rounded px-2 py-1"
+              >
+                {Array.from({ length: 6 }, (_, i) => now.getFullYear() - i).map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
+            </label>
+          </div>
           <LootRawTable
             isAdmin={isAdmin}
             loot={loot}
             onDelete={handleDelete}
             onSell={(item) => {}}
+            selectedMonth={selectedMonth}
+            selectedYear={selectedYear}
           />
         </div>
         <AddLootDialog

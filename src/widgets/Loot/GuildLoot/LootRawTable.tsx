@@ -23,11 +23,15 @@ export function LootRawTable({
   onDelete,
   onSell,
   isAdmin,
+  selectedMonth,
+  selectedYear,
 }: {
   loot: LootItem[];
   onDelete: (loot: LootItem) => void;
   onSell: (loot: LootItem) => void;
   isAdmin: boolean;
+  selectedMonth: number; 
+  selectedYear: number;
 }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<LootItem | null>(null);
@@ -59,8 +63,21 @@ export function LootRawTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loot.map((item) => (
-              <TableRow key={item.id}>
+            {loot
+              .filter((item) => {
+                if (item.status === "В наличии" || item.status === "В казну") return true;
+                if (item.status === "Распродано") return false;
+                if (item.status === "Продано" && item.sold_at) {
+                  const soldDate = new Date(item.sold_at);
+                  return (
+                    soldDate.getMonth() + 1 === selectedMonth &&
+                    soldDate.getFullYear() === selectedYear
+                  );
+                }
+                return false;
+              })
+              .map((item) => (
+                <TableRow key={item.id}>
                 <TableCell>
                   {!item.sold_to && item.acquired_at
                     ? new Intl.DateTimeFormat("ru-RU").format(

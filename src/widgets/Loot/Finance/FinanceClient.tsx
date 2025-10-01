@@ -164,6 +164,9 @@ export default function FinanceClient({
           <div>
             🏦 Казна (30%): <strong>{fund.treasuryLeft}</strong>
           </div>
+             <div>
+            🏦 Казна : <strong>{fund.treasuryLeft}</strong>
+          </div>
         </div>
       )}
 
