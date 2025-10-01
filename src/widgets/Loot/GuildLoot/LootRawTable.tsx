@@ -114,20 +114,22 @@ export function LootRawTable({
                 {isAdmin && (
                   <TableCell>
                     <div className="flex gap-2">
-                      <Button
-                        className={`cursor-pointer ${
-                          item.sold_to
-                            ? ""
-                            : "bg-yellow-500 hover:bg-yellow-600 w-[100px]"
-                        }`}
-                        onClick={() => {
-                          setSelectedItem(item);
-                          setEditMode(!!item.sold_to);
-                          setDialogOpen(true);
-                        }}
-                      >
-                        {item.sold_to ? "Изменить" : "Продать"}
-                      </Button>
+                        {item.status !== "В казну" && (
+                          <Button
+                            className={`cursor-pointer ${
+                              item.sold_to
+                                ? ""
+                                : "bg-yellow-500 hover:bg-yellow-600 w-[100px]"
+                            }`}
+                            onClick={() => {
+                              setSelectedItem(item);
+                              setEditMode(!!item.sold_to);
+                              setDialogOpen(true);
+                            }}
+                          >
+                            {item.sold_to ? "Изменить" : "Продать"}
+                          </Button>
+                        )}
                       <Button
                         className="cursor-pointer"
                         onClick={() => onDelete(item)}

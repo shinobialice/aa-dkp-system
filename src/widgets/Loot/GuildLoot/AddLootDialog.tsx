@@ -37,7 +37,7 @@ export function AddLootDialog({
   const getItemTypeIdByName = (name: string): number | undefined =>
     itemTypes.find((item) => item.name === name)?.id;
 
-  const isOtherType = form.itemName === "Другое";
+  const isOtherType = form.itemName === "В казну";
 
   const handleSelect = (name: string) => {
     const id = getItemTypeIdByName(name);
@@ -55,7 +55,7 @@ export function AddLootDialog({
     if (isOtherType) {
       itemToAdd = {
         ...itemToAdd,
-        status: "Продано",
+        status: "В казну",
         sold_at: new Date().toISOString(),
       };
     }
