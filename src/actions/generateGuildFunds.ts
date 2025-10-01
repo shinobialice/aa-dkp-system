@@ -59,7 +59,7 @@ export const generateGuildFunds = async (month: number, year: number, advanceSen
 
   const salaryBudget = Math.floor(totalIncome * 0.7);
   const treasuryBudget = Math.floor(totalIncome * 0.3);
-  const inTreasury = totalIncome + treasuryIncomeSum - totalExpenses;
+  const inTreasury = totalIncome + treasuryIncomeSum - totalExpenses - advanceSent;
 
   const { error: deleteError } = await supabase
     .from("GuildFunds")

@@ -57,6 +57,7 @@ export function AddLootDialog({
         ...itemToAdd,
         status: "В казну",
         sold_at: new Date().toISOString(),
+        price: form.quantity,
       };
     }
     await onAdd(itemToAdd);
