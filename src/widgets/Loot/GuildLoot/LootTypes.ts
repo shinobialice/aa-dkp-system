@@ -41,4 +41,7 @@ export type NewLootItem = {
   acquired_at: string;
   quantity: number;
   itemName: string;
+  status?: string;
+  sold_at?: string;
+  price?: number;
 };

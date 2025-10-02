@@ -23,11 +23,15 @@ export function LootRawTable({
   onDelete,
   onSell,
   isAdmin,
+  selectedMonth,
+  selectedYear,
 }: {
   loot: LootItem[];
   onDelete: (loot: LootItem) => void;
   onSell: (loot: LootItem) => void;
   isAdmin: boolean;
+  selectedMonth: number; 
+  selectedYear: number;
 }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<LootItem | null>(null);
@@ -59,8 +63,28 @@ export function LootRawTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loot.map((item) => (
-              <TableRow key={item.id}>
+            {loot
+              .filter((item) => {
+                if (item.status === "В наличии") return true;
+                if (item.status === "В казну" && item.sold_at) {
+                  const treasuryDate = new Date(item.sold_at);
+                  return (
+                    treasuryDate.getMonth() + 1 === selectedMonth &&
+                    treasuryDate.getFullYear() === selectedYear
+                  );
+                }
+                if (item.status === "Распродано") return false;
+                if (item.status === "Продано" && item.sold_at) {
+                  const soldDate = new Date(item.sold_at);
+                  return (
+                    soldDate.getMonth() + 1 === selectedMonth &&
+                    soldDate.getFullYear() === selectedYear
+                  );
+                }
+                return false;
+              })
+              .map((item) => (
+                <TableRow key={item.id}>
                 <TableCell>
                   {!item.sold_to && item.acquired_at
                     ? new Intl.DateTimeFormat("ru-RU").format(
@@ -90,20 +114,22 @@ export function LootRawTable({
                 {isAdmin && (
                   <TableCell>
                     <div className="flex gap-2">
-                      <Button
-                        className={`cursor-pointer ${
-                          item.sold_to
-                            ? ""
-                            : "bg-yellow-500 hover:bg-yellow-600 w-[100px]"
-                        }`}
-                        onClick={() => {
-                          setSelectedItem(item);
-                          setEditMode(!!item.sold_to);
-                          setDialogOpen(true);
-                        }}
-                      >
-                        {item.sold_to ? "Изменить" : "Продать"}
-                      </Button>
+                        {item.status !== "В казну" && (
+                          <Button
+                            className={`cursor-pointer ${
+                              item.sold_to
+                                ? ""
+                                : "bg-yellow-500 hover:bg-yellow-600 w-[100px]"
+                            }`}
+                            onClick={() => {
+                              setSelectedItem(item);
+                              setEditMode(!!item.sold_to);
+                              setDialogOpen(true);
+                            }}
+                          >
+                            {item.sold_to ? "Изменить" : "Продать"}
+                          </Button>
+                        )}
                       <Button
                         className="cursor-pointer"
                         onClick={() => onDelete(item)}

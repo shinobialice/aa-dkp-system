@@ -23,6 +23,7 @@ const LootGrade: { [key: string]: number } = {
 };
 
 export const LootIcons: { [key: string]: string | number } = {
+  "В казну": 4383,
   "Глайдер «Крылья небесного стража»": 4312,
   "Аметистовая гравировка северной звезды": 4190,
   "Средоточие безумия": 4773,

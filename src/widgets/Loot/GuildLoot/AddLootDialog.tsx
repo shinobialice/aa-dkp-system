@@ -37,6 +37,8 @@ export function AddLootDialog({
   const getItemTypeIdByName = (name: string): number | undefined =>
     itemTypes.find((item) => item.name === name)?.id;
 
+  const isOtherType = form.itemName === "В казну";
+
   const handleSelect = (name: string) => {
     const id = getItemTypeIdByName(name);
     if (!id) {
@@ -49,7 +51,16 @@ export function AddLootDialog({
     if (!form.itemTypeId) {
       return alert("Выберите предмет из списка!");
     }
-    await onAdd(form);
+    let itemToAdd = { ...form };
+    if (isOtherType) {
+      itemToAdd = {
+        ...itemToAdd,
+        status: "В казну",
+        sold_at: new Date().toISOString(),
+        price: form.quantity,
+      };
+    }
+    await onAdd(itemToAdd);
     onClose();
     setForm({
       itemTypeId: 0,
@@ -99,7 +110,7 @@ export function AddLootDialog({
             }
           />
 
-          <Label>Количество</Label>
+          <Label>{isOtherType ? "Сумма дохода" : "Количество"}</Label>
           <input
             type="number"
             min={1}
@@ -108,6 +119,7 @@ export function AddLootDialog({
               setForm({ ...form, quantity: parseInt(e.target.value) })
             }
             className="border rounded px-2 py-1"
+            placeholder={isOtherType ? "Введите сумму дохода" : "Количество"}
           />
         </div>
         <DialogFooter>
