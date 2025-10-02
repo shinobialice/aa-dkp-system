@@ -11,6 +11,11 @@ import {
   TableHead,
   TableCell,
   TableBody,
+  Select,
+  SelectItem,
+  SelectContent,
+  SelectTrigger,
+  SelectValue,
 } from "@/shared/ui";
 import {
   generateSalaries,
@@ -82,28 +87,38 @@ export default function FinanceClient({
       </h1>
       {isAdmin && (
         <div className="flex items-center gap-4">
-          <select
-            value={month}
-            onChange={(e) => setMonth(+e.target.value)}
-            className="border rounded px-2 py-1"
+          <Select
+            value={month.toString()}
+            onValueChange={(value) => setMonth(+value)}
           >
-            {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-              <option key={m} value={m}>
-                {new Date(0, m - 1).toLocaleString("ru-RU", { month: "long" })}
-              </option>
-            ))}
-          </select>
-          <select
-            value={year}
-            onChange={(e) => setYear(+e.target.value)}
-            className="border rounded px-2 py-1"
+            <SelectTrigger className="border rounded px-2 py-1 w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+                <SelectItem key={m} value={m.toString()}>
+                  {new Date(0, m - 1).toLocaleString("ru-RU", {
+                    month: "long",
+                  })}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
+            value={year.toString()}
+            onValueChange={(value) => setYear(+value)}
           >
-            {[2024, 2025, 2026].map((y) => (
-              <option key={y} value={y}>
-                {y}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="border rounded px-2 py-1 w-20">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {[2024, 2025, 2026].map((y) => (
+                <SelectItem key={y} value={y.toString()}>
+                  {y}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Button
             onClick={async () => {
               setLoadingFund(true);
@@ -166,7 +181,8 @@ export default function FinanceClient({
             💰 В казне: <strong>{fund.inTreasury}</strong>
           </div>
           <div>
-            📈 "Свободная" голда в казне: <strong>{fund.inTreasury - fund.salaryBudget}</strong>
+            📈 "Свободная" голда в казне:{" "}
+            <strong>{fund.inTreasury - fund.salaryBudget}</strong>
           </div>
         </div>
       )}
