@@ -55,6 +55,10 @@ export default function FinanceClient({
       bonus: number | null;
       total: number;
       bonusPercent: number;
+      totalSalaryPercent: number;
+      guildBonus: number;
+      customBonus: number;
+      attendancePercent: number;
     }[]
   >([]);
 
@@ -194,8 +198,10 @@ export default function FinanceClient({
               <TableRow>
                 <TableHead>Игрок</TableHead>
                 <TableHead>Базовая сумма</TableHead>
-                <TableHead>Бонус %</TableHead>
-                <TableHead>Бонус</TableHead>
+                <TableHead>Бонус за стаж %</TableHead>
+                <TableHead>Доп. бонус %</TableHead>
+                <TableHead>Посещаемость %</TableHead>
+                <TableHead>Итоговый %</TableHead>
                 <TableHead>Итого</TableHead>
               </TableRow>
             </TableHeader>
@@ -204,8 +210,10 @@ export default function FinanceClient({
                 <TableRow key={s.userId}>
                   <TableCell>{s.username}</TableCell>
                   <TableCell>{s.amount}</TableCell>
-                  <TableCell>{s.bonusPercent ?? 0}%</TableCell>{" "}
-                  <TableCell>{s.bonus ?? 0}</TableCell>
+                  <TableCell>{s.guildBonus ?? 0}%</TableCell>
+                  <TableCell>{s.customBonus ?? 0}%</TableCell>
+                  <TableCell>{s.attendancePercent ?? 0}%</TableCell>
+                  <TableCell>{s.totalSalaryPercent ?? 0}%</TableCell>
                   <TableCell>{s.total}</TableCell>
                 </TableRow>
               ))}

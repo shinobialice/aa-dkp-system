@@ -34,7 +34,9 @@ export const getSalariesForMonth = async (month: number, year: number) => {
     month,
     year,
     user (
-      username
+      username,
+      class,
+      joined_at
     )
   `,
     )
@@ -45,28 +47,73 @@ export const getSalariesForMonth = async (month: number, year: number) => {
     throw new Error("Ошибка при получении зарплат");
   }
 
-  return (data as any[]).map((s) => {
-    const username = s.user?.username ?? "Неизвестно";
-    const bonusPercent = s.bonus ? Math.round((s.bonus / s.amount) * 100) : 0;
-    return {
-      userId: s.userId,
-      username: username ?? "Неизвестно",
-      amount: s.amount,
-      bonus: s.bonus,
-      bonusPercent,
-      total: s.total,
-    };
-  });
+  const classOrder = ['Бард', 'Лук', 'Маг', 'Милик', 'Тактик', 'Танцор', 'Хил'];
+
+  return await Promise.all(
+    (data as any[])
+      .map(async (s) => {
+        const username = s.user?.username ?? "Неизвестно";
+        const userClass = s.user?.class ?? "";
+        const joinedAt = s.user?.joined_at;
+        
+        const guildBonus = calculateGuildBonus(joinedAt);
+        const customBonus = await getCustomBonus(s.userId);
+        const attendance = await getUserMonthlyAttendance(s.userId, year, month);
+        const attendancePercent = Math.round(attendance.totalPercent);
+        const totalSalaryPercent = guildBonus + customBonus + attendancePercent;
+        const bonusPercent = s.bonus ? Math.round((s.bonus / s.amount) * 100) : totalSalaryPercent;
+        
+        return {
+          userId: s.userId,
+          username: username ?? "Неизвестно",
+          class: userClass,
+          amount: s.amount,
+          bonus: s.bonus,
+          bonusPercent,
+          total: s.total,
+          guildBonus,
+          customBonus,
+          attendancePercent,
+          totalSalaryPercent,
+        };
+      })
+  ).then(results => 
+    results.sort((a, b) => {
+      const aIndex = classOrder.indexOf(a.class);
+      const bIndex = classOrder.indexOf(b.class);
+      const aOrder = aIndex === -1 ? 999 : aIndex;
+      const bOrder = bIndex === -1 ? 999 : bIndex;
+      return aOrder - bOrder;
+    })
+  );
 };
 
 function calculateGuildBonus(joinedAt: string | null): number {
   if (!joinedAt) return 0;
   const now = new Date();
   const joinedDate = new Date(joinedAt);
-  const months = differenceInMonths(now, joinedDate);
-  if (months < 6) return 0;
-  const extraPeriods = Math.floor((months - 6) / 6);
-  return 10 + extraPeriods * 5;
+  
+  // Количество дней с даты вступления
+  const diffTime = now.getTime() - joinedDate.getTime();
+  const days = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  
+  // Если меньше 6 месяцев (182 дня), то бонус 0%
+  if (days < 182) return 0;
+  
+  let bonus = 0;
+  
+  // Первая часть: ЕСЛИ(I4>30,5; (I4/30,5)*0,01-0,01; '')
+  if (days > 30.5) {
+    bonus += (days / 30.5) * 0.01 - 0.01;
+  }
+  
+  // Вторая часть: ЕСЛИ(I4>182; 0,05; '')
+  if (days > 182) {
+    bonus += 0.05;
+  }
+  
+  // Возвращаем процент (умножаем на 100)
+  return Math.round(bonus * 100);
 }
 
 async function getCustomBonus(userId: number): Promise<number> {
