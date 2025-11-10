@@ -1,12 +1,16 @@
 "use client";
 
 import { useEffect, useState, FC, ReactNode } from "react";
+import supabase from "@/shared/lib/supabase";
+import useCurrentUser from "@/hooks/useCurrentUser";
 import { Loader } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
 import getStats from "@/actions/getStats";
 import Image from "next/image";
 import MainPageClock from "./MainPageClock";
 import UpcomingEvents from "./UpcomingEvents";
+import RespawnTracker from "./RespawnTracker";
+import BossRespawnHistory from "./BossRespawnHistory";
 
 type Stats = Awaited<ReturnType<typeof getStats>>;
 
@@ -68,42 +72,12 @@ const MainPageCardsClient: FC = () => {
 
   const infoItems = [
     {
-      title: "Последние новости",
+      title: "Трекер респауна боссов",
       content: (
-        <div>
-          <div className="text-[14px]">
-            <ul>📅 Распорядок по боссам начинается с понедельника!</ul>
-            <ul>
-              Каждый АГЛ собираете свой рейд и кидаетe союзку только БСам — весь
-              лут ставите на себя.
-            </ul>
-            <ul>
-              ⚠️ Утренний Морф будет проблемным, поэтому не просим помощи и
-              стараемся закрыть сами.
-            </ul>
-            <ul>🎯 Цель — вытащить максимум с сервера за фришку.</ul>
-            <ul>
-              🗓 Распределение составлено на 2 недели, чтобы каждый забрал по 3
-              босса.
-            </ul>
-            <ul>
-              📌 Учитывалось, чтобы у кого-то были полностью свободны четверг и
-              суббота.
-            </ul>
-            <ul>
-              🎁 Лут также распределён: кому с каких боссов перепадает, всё
-              указано.
-            </ul>
-          </div>
-          <div className="pt-6">
-            <Image
-              src="/images/raspredeleine.jpg"
-              alt="shared"
-              width={800}
-              height={100}
-            />
-          </div>
-        </div>
+        <>
+          <RespawnTracker />
+          <BossRespawnHistory />
+        </>
       ),
     },
     {
