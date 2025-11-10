@@ -141,6 +141,14 @@ const RespawnTracker: FC = () => {
     setPopoverDate((prev) => ({ ...prev, [boss]: null }));
   }
 
+  function getStatusColor(status: string) {
+    if (status.startsWith("Ожидание (")) return "text-yellow-500 font-semibold";
+    if (status === "Возможен респаун!") return "text-green-600 font-bold";
+    if (status === "Ожидание убийства") return "text-blue-500 font-semibold";
+    if (status === "Нет данных") return "text-gray-400";
+    return "text-gray-700";
+  }
+
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full text-sm border">
@@ -162,7 +170,11 @@ const RespawnTracker: FC = () => {
               <tr key={boss}>
                 <td className="p-2 border font-bold">{boss}</td>
                 <td className="p-2 border">12 ч. (+ 1 ч. промежуток)</td>
-                <td className="p-2 border">{info.status}</td>
+                <td className={`p-2 border`}>
+                  <span className={getStatusColor(info.status)}>
+                    {info.status}
+                  </span>
+                </td>
                 <td className="p-2 border">{info.nextRespawn}</td>
                 <td className="p-2 border">{info.lastKillDisplay}</td>
                 <td className="p-2 border">
