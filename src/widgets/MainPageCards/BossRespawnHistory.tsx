@@ -2,6 +2,15 @@
 
 import { useEffect, useState } from "react";
 import supabase from "@/shared/lib/supabase";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+  PaginationEllipsis,
+} from "@/shared/ui/pagination";
 
 interface HistoryRow {
   id: number;
@@ -121,25 +130,59 @@ export default function BossRespawnHistory() {
           </tbody>
         </table>
       </div>
-      <div className="flex gap-2 mt-2 items-center">
-        <button
-          className="px-2 py-1 border rounded disabled:opacity-50"
-          onClick={() => setPage((p) => Math.max(1, p - 1))}
-          disabled={page === 1}
-        >
-          «
-        </button>
-        <span>
-          Стр. {page} / {Math.max(1, Math.ceil(total / PAGE_SIZE))}
-        </span>
-        <button
-          className="px-2 py-1 border rounded disabled:opacity-50"
-          onClick={() => setPage((p) => p + 1)}
-          disabled={page * PAGE_SIZE >= total}
-        >
-          »
-        </button>
-      </div>
+      {/* Advanced pagination using shadcn primitives */}
+      <Pagination className="mt-3">
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                setPage((p) => Math.max(1, p - 1));
+              }}
+              aria-disabled={page === 1}
+              className={page === 1 ? "pointer-events-none opacity-50" : ""}
+            />
+          </PaginationItem>
+          {getPaginationItems(
+            page,
+            Math.max(1, Math.ceil(total / PAGE_SIZE)),
+          ).map((item, idx) => (
+            <PaginationItem key={idx}>
+              {item.type === "ellipsis" ? (
+                <PaginationEllipsis />
+              ) : (
+                <PaginationLink
+                  href="#"
+                  isActive={item.page === page}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setPage(item.page);
+                  }}
+                >
+                  {item.page}
+                </PaginationLink>
+              )}
+            </PaginationItem>
+          ))}
+          <PaginationItem>
+            <PaginationNext
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                const maxPage = Math.max(1, Math.ceil(total / PAGE_SIZE));
+                setPage((p) => Math.min(maxPage, p + 1));
+              }}
+              aria-disabled={page * PAGE_SIZE >= total}
+              className={
+                page * PAGE_SIZE >= total
+                  ? "pointer-events-none opacity-50"
+                  : ""
+              }
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
     </div>
   );
 }
@@ -151,4 +194,27 @@ function formatDT(dt: string) {
       timeZone: "Europe/Moscow",
     }) + " (МСК)"
   );
+}
+
+type PageItem = { type: "page"; page: number } | { type: "ellipsis" };
+function getPaginationItems(current: number, total: number): PageItem[] {
+  const pages: PageItem[] = [];
+  const addPage = (p: number) => pages.push({ type: "page", page: p });
+  if (total <= 7) {
+    for (let i = 1; i <= total; i++) addPage(i);
+  } else {
+    const first = 1;
+    const last = total;
+    const window: number[] = [];
+    for (let i = current - 1; i <= current + 1; i++) {
+      if (i > first && i < last) window.push(i);
+    }
+    addPage(first);
+    if (window[0] && window[0] > first + 1) pages.push({ type: "ellipsis" });
+    window.forEach((w) => addPage(w));
+    if (window[window.length - 1] && window[window.length - 1] < last - 1)
+      pages.push({ type: "ellipsis" });
+    addPage(last);
+  }
+  return pages;
 }
