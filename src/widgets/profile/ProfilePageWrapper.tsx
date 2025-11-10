@@ -34,12 +34,7 @@ export default function ProfilePageWrapper({
   return (
     <div className="space-y-8 p-4">
       <div className="grid grid-cols-3 gap-6 lg:grid-cols-2 items-start">
-        <UserMonthActivity
-          aglPercent={activity.aglPercent}
-          primePercent={activity.primePercent}
-          totalPercent={activity.totalPercent}
-          dkp={activity.dkp}
-        />
+        <UserMonthActivity userId={user.id} />
         <div>
           <UserActivityChart userId={user.id} />
         </div>
