@@ -31,12 +31,11 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // const isValidSession = await verifySessionToken(sessionToken);
-  // if (!isValidSession) {
-  //   const loginUrl = new URL("/login", req.url);
-  //   return NextResponse.redirect(loginUrl);
-  // }
-  // чето надо придумать бляха муха
+  const isValidSession = await verifySessionToken(sessionToken);
+  if (!isValidSession) {
+    const loginUrl = new URL("/login", req.url);
+    return NextResponse.redirect(loginUrl);
+  }
 
   return NextResponse.next();
 }

@@ -30,7 +30,18 @@ export const getLootQueueByItemName = async (itemName: string) => {
     return [];
   }
 
-  return (item.loot_queue || []).map((entry: any) => ({
+  type LootQueueEntry = {
+    id: number;
+    user_id: number;
+    status: string;
+    synth_target: string | null;
+    required: number | null;
+    delivered: number | null;
+    created_at: string;
+    user: { username: string } | null;
+  };
+
+  return (item.loot_queue || []).map((entry: LootQueueEntry) => ({
     id: entry.id,
     userId: entry.user_id,
     username: entry.user?.username || "Unknown",

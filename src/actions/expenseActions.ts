@@ -30,6 +30,19 @@ export const addExpense = async ({
   source: string;
   comment?: string;
 }) => {
+  if (amount <= 0) {
+    throw new Error("Сумма расхода должна быть больше 0");
+  }
+  if (!date) {
+    throw new Error("Дата обязательна");
+  }
+  if (!target.trim()) {
+    throw new Error("Получатель обязателен");
+  }
+  if (!source.trim()) {
+    throw new Error("Источник обязателен");
+  }
+
   const { error } = await supabase.from("Expense").insert([
     {
       date: new Date(date).toISOString(),

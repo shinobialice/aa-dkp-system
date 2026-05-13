@@ -98,7 +98,7 @@ export async function GET(req: NextRequest) {
     );
 
     response.cookies.set("link-token", "", { path: "/", maxAge: -1 });
-    response.cookies.set("session_token-token", sessionToken, {
+    response.cookies.set("session_token", sessionToken, {
       path: "/",
       httpOnly: true,
       secure: true,
