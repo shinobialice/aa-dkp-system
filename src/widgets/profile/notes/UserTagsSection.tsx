@@ -29,6 +29,7 @@ const badgeColors: Record<string, string> = {
   Двурук: "rgb(0, 148, 168)",
   Каст: "rgb(157, 41, 41)",
   Деф: "rgb(40, 111, 180)",
+  АФК: "rgb(120, 120, 120)",
 };
 
 const allPossibleTags = [
@@ -40,6 +41,7 @@ const allPossibleTags = [
   "Двурук",
   "Каст",
   "Деф",
+  "АФК",
 ];
 
 export function UserTagsSection({

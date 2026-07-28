@@ -1,15 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { differenceInMonths } from "date-fns";
 import { Trash2, CirclePlus } from "lucide-react";
+import calculateGuildTenureBonus from "@/utils/calculateGuildTenureBonus";
 import AddSalaryBonusDialog from "./AddSalaryBonusDialog";
+import AddPenaltyPointsDialog from "./AddPenaltyPointsDialog";
 import { UserTagsSection } from "./UserTagsSection";
 import { Button } from "@/shared/ui";
 import { Card, CardHeader, CardContent, CardTitle } from "@/shared/ui";
 import { deleteUserSalaryBonus } from "@/actions/addUserSalaryBonus";
 import { getUserSalaryBonus } from "@/actions/getUserSalaryBonus";
 import { getUserTags } from "@/actions/userTagsActions";
+import {
+  getUserPenaltyPoints,
+  deleteUserPenaltyPoints,
+} from "@/actions/penaltyActions";
 
 function UserBonusesSection({
   bonuses,
@@ -43,6 +48,38 @@ function UserBonusesSection({
   );
 }
 
+function UserPenaltiesSection({
+  penalties,
+  onRemove,
+}: {
+  penalties: any[];
+  onRemove: () => void;
+}) {
+  return (
+    <div className="flex flex-col divide-y">
+      {penalties.map((penalty) => (
+        <div key={penalty.id} className="flex justify-between items-center py-4">
+          <div className="text-sm font-medium">{penalty.reason}</div>
+          <div className="flex items-center gap-2">
+            <div className="text-lg font-semibold">{penalty.amount}</div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-muted-foreground"
+              onClick={async () => {
+                await deleteUserPenaltyPoints(penalty.id);
+                onRemove();
+              }}
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function UserNotes({
   user,
   initialTags,
@@ -59,8 +96,10 @@ export default function UserNotes({
   isAdmin: boolean;
 }) {
   const [bonuses, setBonuses] = useState<any[]>([]);
+  const [penalties, setPenalties] = useState<any[]>([]);
   const [refreshToggle, setRefreshToggle] = useState(false);
   const [bonusDialogOpen, setBonusDialogOpen] = useState(false);
+  const [penaltyDialogOpen, setPenaltyDialogOpen] = useState(false);
   const [tags, setTags] = useState(initialTags);
 
   useEffect(() => {
@@ -72,6 +111,14 @@ export default function UserNotes({
   }, [user.id, refreshToggle]);
 
   useEffect(() => {
+    const fetchPenalties = async () => {
+      const data = await getUserPenaltyPoints(user.id);
+      setPenalties(data);
+    };
+    fetchPenalties();
+  }, [user.id, refreshToggle]);
+
+  useEffect(() => {
     const fetchTags = async () => {
       const data = await getUserTags(user.id);
       setTags(data);
@@ -80,21 +127,7 @@ export default function UserNotes({
     fetchTags();
   }, [user.id]);
 
-  function calculateGuildBonus(joinedAt: string | null) {
-    if (!joinedAt) {
-      return 0;
-    }
-    const now = new Date();
-    const joinedDate = new Date(joinedAt);
-    const months = differenceInMonths(now, joinedDate);
-    if (months < 6) {
-      return 0;
-    }
-    const extraPeriods = Math.floor((months - 6) / 6);
-    return 10 + extraPeriods * 5;
-  }
-
-  const guildBonus = calculateGuildBonus(user?.joined_at || null);
+  const guildBonus = calculateGuildTenureBonus(user?.joined_at || null);
 
   return (
     <Card>
@@ -125,8 +158,31 @@ export default function UserNotes({
 
             <div className="flex justify-between items-center py-4">
               <div className="text-sm font-medium">Бонус за стаж в гильдии</div>
-              <div className="text-lg font-semibold">{guildBonus}%</div>
+              <div className="text-lg font-semibold">
+                {Math.round(guildBonus)}%
+              </div>
             </div>
+          </div>
+
+          <div className="flex-1 border-r px-6">
+            <div className="flex justify-between">
+              <div className="text-xl font-bold mb-4">Штрафы</div>
+              {isAdmin && (
+                <Button
+                  onClick={() => setPenaltyDialogOpen(true)}
+                  variant="ghost"
+                  className="flex size-8 text-muted-foreground data-[state=open]:bg-muted cursor-pointer"
+                  size="icon"
+                >
+                  <CirclePlus />
+                </Button>
+              )}
+            </div>
+
+            <UserPenaltiesSection
+              penalties={penalties}
+              onRemove={() => setRefreshToggle(!refreshToggle)}
+            />
           </div>
 
           <div className="flex-1 pl-6">
@@ -149,6 +205,13 @@ export default function UserNotes({
       <AddSalaryBonusDialog
         open={bonusDialogOpen}
         onClose={() => setBonusDialogOpen(false)}
+        userId={user.id}
+        onAdded={() => setRefreshToggle(!refreshToggle)}
+      />
+
+      <AddPenaltyPointsDialog
+        open={penaltyDialogOpen}
+        onClose={() => setPenaltyDialogOpen(false)}
         userId={user.id}
         onAdded={() => setRefreshToggle(!refreshToggle)}
       />

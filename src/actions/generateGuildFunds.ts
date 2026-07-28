@@ -2,11 +2,8 @@
 import supabase from "@/shared/lib/supabase";
 
 export const generateGuildFunds = async (month: number, year: number, advanceSent: number = 0) => {
-  const startDate = new Date(`${year}-${month}-01`);
-  const endDate =
-    month === 12
-      ? new Date(`${year + 1}-01-01`)
-      : new Date(`${year}-${month + 1}-01`);
+  const startDate = new Date(Date.UTC(year, month - 1, 1));
+  const endDate = new Date(Date.UTC(month === 12 ? year + 1 : year, month % 12, 1));
 
   const startIso = startDate.toISOString();
   const endIso = endDate.toISOString();

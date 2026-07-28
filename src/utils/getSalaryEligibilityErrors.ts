@@ -1,3 +1,5 @@
+import isProbationOver from "./isProbationOver";
+
 type UserForEligibility = {
   active: boolean;
   joined_at: string | Date | null;
@@ -20,26 +22,12 @@ function getSalaryEligibilityErrors(
     errors.push("Игрок не активен");
   }
 
-  const now = new Date();
-  const joined = user.joined_at ? new Date(user.joined_at) : null;
-  if (!joined) {
+  if (!user.joined_at) {
     errors.push("Дата вступления не указана");
-  } else {
-    const day = joined.getDate();
-    const monthsPassed =
-      now.getFullYear() * 12 +
-      now.getMonth() -
-      (joined.getFullYear() * 12 + joined.getMonth());
-
-    const probationOver =
-      (day <= 20 && monthsPassed >= 1) || (day > 20 && monthsPassed >= 2);
-
-    if (!probationOver) {
-      const needMonths = day <= 20 ? 1 : 2;
-      errors.push(
-        `Испытательный срок не завершён: прошло ${monthsPassed} мес., нужно ≥ ${needMonths}`,
-      );
-    }
+  } else if (!isProbationOver(user.joined_at)) {
+    const day = new Date(user.joined_at).getDate();
+    const needMonths = day <= 20 ? 1 : 2;
+    errors.push(`Испытательный срок не завершён: нужно ≥ ${needMonths} мес.`);
   }
 
   const isTwoHanded = tags.some((t) => t.tag === "Двурук");
