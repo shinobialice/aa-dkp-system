@@ -39,8 +39,21 @@ export const getRaids = async () => {
   return raids
     .filter((r) => r.start_date)
     .map((raid) => {
-      const start = new Date(raid.start_date);
-      const end = new Date(start.getTime() + 60 * 60 * 1000);
+      // raid.start_date хранится как naive-строка без таймзоны (например
+      // "2026-07-06T19:30:00"). Строим end так же, наивно, без прогона
+      // через new Date()/toISOString() — это меняет смысл времени в
+      // зависимости от таймзоны сервера/браузера.
+      const [datePart, timePart] = raid.start_date.split("T");
+      const [year, month, day] = datePart.split("-").map(Number);
+      const [hh, mm, ss] = timePart.split(":").map(Number);
+
+      const endMoment = new Date(Date.UTC(year, month - 1, day, hh, mm, ss));
+      endMoment.setUTCHours(endMoment.getUTCHours() + 1);
+      const endDatePart = endMoment.toISOString().slice(0, 10);
+      const endTime = endMoment.toISOString().slice(11, 19);
+
+      const start = raid.start_date;
+      const end = `${endDatePart}T${endTime}`;
 
       const title =
         raid.raid_boss
@@ -57,8 +70,8 @@ export const getRaids = async () => {
       return {
         id: raid.id.toString(),
         title,
-        start: start.toISOString(),
-        end: end.toISOString(),
+        start,
+        end,
         color,
       };
     });

@@ -28,6 +28,10 @@ export function RaidDetailsForm({
   setIsPvp,
   isPvpLong,
   setIsPvpLong,
+  isProc,
+  setIsProc,
+  isDoubleProc,
+  setIsDoubleProc,
 }: {
   users: any[];
   setUsers: (users: any[]) => void;
@@ -48,6 +52,10 @@ export function RaidDetailsForm({
   setIsPvp: (val: boolean) => void;
   isPvpLong: boolean;
   setIsPvpLong: (val: boolean) => void;
+  isProc: boolean;
+  setIsProc: (val: boolean) => void;
+  isDoubleProc: boolean;
+  setIsDoubleProc: (val: boolean) => void;
 }) {
   React.useEffect(() => {
     async function fetchUsers() {
@@ -66,11 +74,13 @@ export function RaidDetailsForm({
       );
       if (isPvp) dkp += 1;
       else if (isPvpLong) dkp += 3;
+      if (isProc) dkp += 1;
+      if (isDoubleProc) dkp += 1;
     } else {
       dkp = eventDkpCalculator(selectedBosses[0], isPvp, isPvpLong);
     }
     setDkpPoints(dkp);
-  }, [selectedBosses, isPvp, isPvpLong, category]);
+  }, [selectedBosses, isPvp, isPvpLong, isProc, isDoubleProc, category]);
 
   return (
     <div className="flex flex-col h-full space-y-4">
@@ -129,6 +139,28 @@ export function RaidDetailsForm({
             />
             <label htmlFor="long_pvp_agl" className="text-sm">
               ПВП дольше 30 минут
+            </label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              className="cursor-pointer"
+              id="proc_agl"
+              checked={isProc}
+              onCheckedChange={(checked) => setIsProc(checked === true)}
+            />
+            <label htmlFor="proc_agl" className="text-sm">
+              Прок
+            </label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              className="cursor-pointer"
+              id="double_proc_agl"
+              checked={isDoubleProc}
+              onCheckedChange={(checked) => setIsDoubleProc(checked === true)}
+            />
+            <label htmlFor="double_proc_agl" className="text-sm">
+              х2 Прок
             </label>
           </div>
         </>

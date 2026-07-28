@@ -40,6 +40,8 @@ export function EventDialog({
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isPvp, setIsPvp] = useState(false);
   const [isPvpLong, setIsPvpLong] = useState(false);
+  const [isProc, setIsProc] = useState(false);
+  const [isDoubleProc, setIsDoubleProc] = useState(false);
   const [rowSelection, setRowSelection] = useState<Record<number, boolean>>({});
   const [users, setUsers] = useState<any[]>([]);
   const [bosses, setBosses] = useState<any[]>([]);
@@ -64,6 +66,8 @@ export function EventDialog({
       );
       setIsPvp(selectedEvent.is_pvp);
       setIsPvpLong(selectedEvent.is_pvp_long);
+      setIsProc(selectedEvent.is_proc ?? false);
+      setIsDoubleProc(selectedEvent.is_double_proc ?? false);
 
       const bosses = selectedEvent.raid_boss?.map((rb: any) => rb.boss) || [];
       setSelectedBosses(bosses);
@@ -100,6 +104,8 @@ export function EventDialog({
       setSelectedDate(null);
       setIsPvp(false);
       setIsPvpLong(false);
+      setIsProc(false);
+      setIsDoubleProc(false);
       setRowSelection({});
       setUsers([]);
       setErrors({
@@ -135,6 +141,8 @@ export function EventDialog({
         bossIds,
         isPvp,
         isPvpLong,
+        isProc,
+        isDoubleProc,
       );
     } else if (mode === "edit" && selectedEvent) {
       await updateEvent(
@@ -146,6 +154,8 @@ export function EventDialog({
         bossIds,
         isPvp,
         isPvpLong,
+        isProc,
+        isDoubleProc,
       );
     }
 
@@ -192,6 +202,10 @@ export function EventDialog({
               setIsPvp={setIsPvp}
               isPvpLong={isPvpLong}
               setIsPvpLong={setIsPvpLong}
+              isProc={isProc}
+              setIsProc={setIsProc}
+              isDoubleProc={isDoubleProc}
+              setIsDoubleProc={setIsDoubleProc}
             />
           </div>
           <div className="md:border-r md:pr-4">

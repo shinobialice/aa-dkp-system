@@ -14,6 +14,8 @@ const updateEvent = async (
   bossIds: number[],
   is_pvp: boolean,
   is_pvp_long: boolean,
+  is_proc: boolean = false,
+  is_double_proc: boolean = false,
 ) => {
   // 1. Update the raid event itself
   const { error: updateError } = await supabase
@@ -24,6 +26,8 @@ const updateEvent = async (
       start_date: start_date.toISOString(),
       is_pvp,
       is_pvp_long,
+      is_proc,
+      is_double_proc,
     })
     .eq("id", id);
 

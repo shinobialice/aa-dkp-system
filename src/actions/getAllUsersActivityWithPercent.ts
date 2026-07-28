@@ -2,16 +2,25 @@
 
 import supabase from "@/shared/lib/supabase";
 
+// Босс-события "Кошка"/"Морф" не учитываются в проценте учёта баллов.
+const EXCLUDED_FROM_POINTS_ACCOUNTING_BOSS_IDS = [14, 11];
+
 export async function getAllUsersActivityWithPercent() {
   const now = new Date();
   const currentMonth = now.getMonth() + 1;
   const currentYear = now.getFullYear();
-  const startDate = new Date(currentYear, currentMonth - 1, 1).toISOString();
-  const endDate = new Date(currentYear, currentMonth, 1).toISOString();
+  const startDate = new Date(
+    Date.UTC(currentYear, currentMonth - 1, 1),
+  ).toISOString();
+  const endDate = new Date(
+    Date.UTC(currentMonth === 12 ? currentYear + 1 : currentYear, currentMonth % 12, 1),
+  ).toISOString();
 
   const { data: raids, error: raidsError } = await supabase
     .from("raid")
-    .select(`id, type, start_date, raid_boss(boss(dkp_points)), raid_attendance(user_id)`)
+    .select(
+      `id, type, start_date, dkp_summary, raid_boss(boss_id), raid_attendance(user_id)`,
+    )
     .gte("start_date", startDate)
     .lt("start_date", endDate);
 
@@ -20,37 +29,47 @@ export async function getAllUsersActivityWithPercent() {
     throw new Error("Не удалось получить рейды");
   }
 
-  let totalAgl = 0;
-  let totalPrime = 0;
-  const userScores: Record<number, { agl: number; prime: number }> = {};
+  // Праймы/АГЛ % — доля посещённых рейдов от общего числа рейдов этого типа.
+  let totalPrimeRaids = 0;
+  let totalAglRaids = 0;
+
+  // Учёт баллов % — доля набранных DKP от общего числа доступных за месяц
+  // (без Кошки/Морфа).
+  let totalPointsAvailable = 0;
+
+  const userScores: Record<
+    number,
+    { primeRaids: number; aglRaids: number; pointsEarned: number; dkp: number }
+  > = {};
 
   for (const raid of raids) {
-    const dkp = Array.isArray(raid.raid_boss)
-      ? raid.raid_boss.reduce((sum, rb) => {
-          if (Array.isArray(rb.boss)) {
-            return sum + rb.boss.reduce((bSum, bossObj) => bSum + (bossObj.dkp_points ?? 0), 0);
-          } else {
-            const bossObj = rb.boss as { dkp_points?: number };
-            return sum + (bossObj.dkp_points ?? 0);
-          }
-        }, 0)
-      : 0;
+    const dkp = raid.dkp_summary ?? 0;
+    const bossId = (raid.raid_boss as { boss_id: number }[])?.[0]?.boss_id;
+    const excludedFromAccounting =
+      EXCLUDED_FROM_POINTS_ACCOUNTING_BOSS_IDS.includes(bossId as number);
 
-    if (raid.type === "Прайм") totalPrime += dkp;
-    else if (raid.type === "АГЛ") totalAgl += dkp;
+    if (raid.type === "Прайм") totalPrimeRaids += 1;
+    else if (raid.type === "АГЛ") totalAglRaids += 1;
+    if (!excludedFromAccounting) totalPointsAvailable += dkp;
 
     if (Array.isArray(raid.raid_attendance)) {
       for (const att of raid.raid_attendance) {
         if (!userScores[att.user_id]) {
-          userScores[att.user_id] = { agl: 0, prime: 0 };
+          userScores[att.user_id] = {
+            primeRaids: 0,
+            aglRaids: 0,
+            pointsEarned: 0,
+            dkp: 0,
+          };
         }
-        if (raid.type === "Прайм") userScores[att.user_id].prime += dkp;
-        else if (raid.type === "АГЛ") userScores[att.user_id].agl += dkp;
+        const score = userScores[att.user_id];
+        if (raid.type === "Прайм") score.primeRaids += 1;
+        else if (raid.type === "АГЛ") score.aglRaids += 1;
+        score.dkp += dkp;
+        if (!excludedFromAccounting) score.pointsEarned += dkp;
       }
     }
   }
-
-  const totalDKP = totalAgl + totalPrime;
 
   const result: Record<
     number,
@@ -62,18 +81,18 @@ export async function getAllUsersActivityWithPercent() {
     }
   > = {};
 
-  for (const [userIdStr, scores] of Object.entries(userScores)) {
+  for (const [userIdStr, score] of Object.entries(userScores)) {
     const userId = Number(userIdStr);
-    const userDKP = scores.agl + scores.prime;
-    const aglPercent = totalAgl ? (scores.agl / totalAgl) * 100 : 0;
-    const primePercent = totalPrime ? (scores.prime / totalPrime) * 100 : 0;
-    const totalPercent = totalDKP ? (userDKP / totalDKP) * 100 : 0;
 
     result[userId] = {
-      aglPercent,
-      primePercent,
-      totalPercent,
-      dkp: userDKP,
+      primePercent: totalPrimeRaids
+        ? (score.primeRaids / totalPrimeRaids) * 100
+        : 0,
+      aglPercent: totalAglRaids ? (score.aglRaids / totalAglRaids) * 100 : 0,
+      totalPercent: totalPointsAvailable
+        ? (score.pointsEarned / totalPointsAvailable) * 100
+        : 0,
+      dkp: score.dkp,
     };
   }
 
