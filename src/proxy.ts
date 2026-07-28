@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifySessionToken } from "./actions/verifySessionToken";
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const sessionToken = req.cookies.get("session_token")?.value;
 
   const publicPaths = [
