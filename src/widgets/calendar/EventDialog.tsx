@@ -43,6 +43,7 @@ export function EventDialog({
   const [isProc, setIsProc] = useState(false);
   const [isDoubleProc, setIsDoubleProc] = useState(false);
   const [rowSelection, setRowSelection] = useState<Record<number, boolean>>({});
+  const [lateUserIds, setLateUserIds] = useState<Record<number, boolean>>({});
   const [users, setUsers] = useState<any[]>([]);
   const [bosses, setBosses] = useState<any[]>([]);
   const [, setSuccess] = useState<string | null>(null);
@@ -81,17 +82,22 @@ export function EventDialog({
   useEffect(() => {
     if (mode === "edit" && selectedEvent && users.length > 0) {
       const selection: Record<number, boolean> = {};
-      const selectedIds =
-        selectedEvent.raid_attendance?.map((a: any) => a.user.id) || [];
+      const attendance = selectedEvent.raid_attendance || [];
 
-      selectedIds.forEach((id: number) => {
-        const userIndex = users.findIndex((u) => u.id === id);
+      attendance.forEach((a: any) => {
+        const userIndex = users.findIndex((u) => u.id === a.user.id);
         if (userIndex !== -1) {
           selection[userIndex] = true;
         }
       });
 
       setRowSelection(selection);
+
+      const late: Record<number, boolean> = {};
+      attendance.forEach((a: any) => {
+        if (a.is_late) late[a.user.id] = true;
+      });
+      setLateUserIds(late);
     }
   }, [mode, selectedEvent, users]);
 
@@ -107,6 +113,7 @@ export function EventDialog({
       setIsProc(false);
       setIsDoubleProc(false);
       setRowSelection({});
+      setLateUserIds({});
       setUsers([]);
       setErrors({
         category: false,
@@ -131,6 +138,7 @@ export function EventDialog({
 
     const userIds = selectedUsers.map((u) => u.id);
     const bossIds = selectedBosses.map((b) => b.id);
+    const lateIds = userIds.filter((id) => lateUserIds[id]);
 
     if (mode === "create") {
       await createEvent(
@@ -143,6 +151,7 @@ export function EventDialog({
         isPvpLong,
         isProc,
         isDoubleProc,
+        lateIds,
       );
     } else if (mode === "edit" && selectedEvent) {
       await updateEvent(
@@ -156,6 +165,7 @@ export function EventDialog({
         isPvpLong,
         isProc,
         isDoubleProc,
+        lateIds,
       );
     }
 
@@ -219,7 +229,11 @@ export function EventDialog({
             />
           </div>
           <div>
-            <SelectedRaidList users={selectedUsers} />
+            <SelectedRaidList
+              users={selectedUsers}
+              lateUserIds={lateUserIds}
+              setLateUserIds={setLateUserIds}
+            />
           </div>
         </div>
 

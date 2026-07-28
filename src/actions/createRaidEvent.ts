@@ -23,6 +23,7 @@ const createRaidEvent = async (
   is_pvp_long: boolean,
   is_proc: boolean = false,
   is_double_proc: boolean = false,
+  lateUserIds: number[] = [],
 ) => {
   await ensurePrivilieges(["Администратор", "Raid Manager"]);
 
@@ -68,6 +69,7 @@ const createRaidEvent = async (
     raid_id: raid.id,
     user_id,
     created_at: new Date().toISOString(),
+    is_late: lateUserIds.includes(user_id),
   }));
 
   const { error: attendanceError } = await supabase

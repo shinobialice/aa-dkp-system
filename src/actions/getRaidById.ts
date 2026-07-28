@@ -12,6 +12,7 @@ export const getRaidById = async (id: string) => {
         boss(id, boss_name, dkp_points, category)
       ),
       raid_attendance(
+        is_late,
         user(id, username, active, class)
       )
     `,

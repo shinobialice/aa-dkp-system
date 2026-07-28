@@ -14,6 +14,7 @@ import {
 } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/shared/ui";
+import { Checkbox } from "@/shared/ui";
 import { Label } from "@/shared/ui";
 import { ScrollArea } from "@/shared/ui";
 import {
@@ -34,40 +35,73 @@ export type User = {
 
 type SelectRaidListProps = {
   users: User[];
+  lateUserIds: Record<number, boolean>;
+  setLateUserIds: React.Dispatch<React.SetStateAction<Record<number, boolean>>>;
 };
 
-const columns: ColumnDef<User>[] = [
-  {
-    accessorKey: "username",
-    header: ({ column }) => (
-      <Button
-        className="cursor-pointer"
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Ник
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => <div>{row.getValue("username")}</div>,
-  },
-  {
-    accessorKey: "class",
-    header: ({ column }) => (
-      <Button
-        className="cursor-pointer"
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Класс
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => <div>{row.getValue("class")}</div>,
-  },
-];
+function buildColumns(
+  lateUserIds: Record<number, boolean>,
+  setLateUserIds: React.Dispatch<React.SetStateAction<Record<number, boolean>>>,
+): ColumnDef<User>[] {
+  return [
+    {
+      accessorKey: "username",
+      header: ({ column }) => (
+        <Button
+          className="cursor-pointer"
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Ник
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => <div>{row.getValue("username")}</div>,
+    },
+    {
+      accessorKey: "class",
+      header: ({ column }) => (
+        <Button
+          className="cursor-pointer"
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Класс
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => <div>{row.getValue("class")}</div>,
+    },
+    {
+      id: "late",
+      header: "Опоздал",
+      cell: ({ row }) => {
+        const userId = row.original.id;
+        return (
+          <Checkbox
+            className="cursor-pointer"
+            checked={!!lateUserIds[userId]}
+            onCheckedChange={(checked) =>
+              setLateUserIds((prev) => ({ ...prev, [userId]: checked === true }))
+            }
+            onClick={(e) => e.stopPropagation()}
+          />
+        );
+      },
+      enableSorting: false,
+    },
+  ];
+}
 
-export function SelectedRaidList({ users }: SelectRaidListProps) {
+export function SelectedRaidList({
+  users,
+  lateUserIds,
+  setLateUserIds,
+}: SelectRaidListProps) {
+  const columns = React.useMemo(
+    () => buildColumns(lateUserIds, setLateUserIds),
+    [lateUserIds, setLateUserIds],
+  );
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],

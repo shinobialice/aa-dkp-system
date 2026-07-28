@@ -50,13 +50,14 @@ console.log(
   allRaids.reduce((s, r) => s + r.attendees.length, 0),
 );
 
-// 3. Preview per-user total DKP for July (using dkp_summary * attendance)
+// 3. Preview per-user total DKP for July (using dkp_summary * attendance, half if late)
 const userDkpPreview = new Map();
 for (const raid of allRaids) {
-  for (const username of raid.attendees) {
+  for (const att of raid.attendees) {
+    const earned = att.late ? raid.dkp_summary / 2 : raid.dkp_summary;
     userDkpPreview.set(
-      username,
-      (userDkpPreview.get(username) || 0) + raid.dkp_summary,
+      att.username,
+      (userDkpPreview.get(att.username) || 0) + earned,
     );
   }
 }
@@ -127,10 +128,11 @@ for (const raid of allRaids) {
   if (bossErr) throw bossErr;
 
   if (raid.attendees.length) {
-    const attendanceRows = raid.attendees.map((username) => ({
+    const attendanceRows = raid.attendees.map((att) => ({
       raid_id: newRaid.id,
-      user_id: usernameToId.get(username),
+      user_id: usernameToId.get(att.username),
       created_at: new Date().toISOString(),
+      is_late: att.late,
     }));
     const { error: attErr } = await supabase
       .from("raid_attendance")

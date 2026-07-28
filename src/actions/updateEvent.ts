@@ -16,6 +16,7 @@ const updateEvent = async (
   is_pvp_long: boolean,
   is_proc: boolean = false,
   is_double_proc: boolean = false,
+  lateUserIds: number[] = [],
 ) => {
   // 1. Update the raid event itself
   const { error: updateError } = await supabase
@@ -57,6 +58,7 @@ const updateEvent = async (
       raid_id: id,
       user_id,
       created_at: new Date().toISOString(),
+      is_late: lateUserIds.includes(user_id),
     }));
 
     const { error: attendanceInsertError } = await supabase

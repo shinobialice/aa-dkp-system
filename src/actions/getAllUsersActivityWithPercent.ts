@@ -19,7 +19,7 @@ export async function getAllUsersActivityWithPercent() {
   const { data: raids, error: raidsError } = await supabase
     .from("raid")
     .select(
-      `id, type, start_date, dkp_summary, raid_boss(boss_id), raid_attendance(user_id)`,
+      `id, type, start_date, dkp_summary, raid_boss(boss_id), raid_attendance(user_id, is_late)`,
     )
     .gte("start_date", startDate)
     .lt("start_date", endDate);
@@ -34,7 +34,7 @@ export async function getAllUsersActivityWithPercent() {
   let totalAglRaids = 0;
 
   // Учёт баллов % — доля набранных DKP от общего числа доступных за месяц
-  // (без Кошки/Морфа).
+  // (без Кошки/Морфа). Опоздание даёт половину очков за рейд.
   let totalPointsAvailable = 0;
 
   const userScores: Record<
@@ -53,7 +53,10 @@ export async function getAllUsersActivityWithPercent() {
     if (!excludedFromAccounting) totalPointsAvailable += dkp;
 
     if (Array.isArray(raid.raid_attendance)) {
-      for (const att of raid.raid_attendance) {
+      for (const att of raid.raid_attendance as {
+        user_id: number;
+        is_late: boolean;
+      }[]) {
         if (!userScores[att.user_id]) {
           userScores[att.user_id] = {
             primeRaids: 0,
@@ -63,10 +66,12 @@ export async function getAllUsersActivityWithPercent() {
           };
         }
         const score = userScores[att.user_id];
+        const earnedDkp = att.is_late ? dkp / 2 : dkp;
+
         if (raid.type === "Прайм") score.primeRaids += 1;
         else if (raid.type === "АГЛ") score.aglRaids += 1;
-        score.dkp += dkp;
-        if (!excludedFromAccounting) score.pointsEarned += dkp;
+        score.dkp += earnedDkp;
+        if (!excludedFromAccounting) score.pointsEarned += earnedDkp;
       }
     }
   }

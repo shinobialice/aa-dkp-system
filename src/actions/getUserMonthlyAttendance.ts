@@ -11,6 +11,7 @@ type RaidWithRelations = RaidRow & {
   raid_boss: Array<{ boss_id: number }>;
   raid_attendance: Array<{
     user_id: number;
+    is_late: boolean;
   }>;
 };
 
@@ -33,7 +34,7 @@ export async function getUserMonthlyAttendance(
       start_date,
       dkp_summary,
       raid_boss(boss_id),
-      raid_attendance(user_id)
+      raid_attendance(user_id, is_late)
     `,
     )
     .gte("start_date", startDate)
@@ -46,14 +47,15 @@ export async function getUserMonthlyAttendance(
 
   const raids = data as unknown as RaidWithRelations[];
 
-  // Праймы/АГЛ % — доля посещённых рейдов от общего числа рейдов этого типа.
+  // Праймы/АГЛ % — доля посещённых рейдов от общего числа рейдов этого типа
+  // (опоздание всё ещё считается посещением).
   let totalPrimeRaids = 0;
   let userPrimeRaids = 0;
   let totalAglRaids = 0;
   let userAglRaids = 0;
 
   // Учёт баллов % — доля набранных DKP от общего числа доступных за месяц
-  // (без Кошки/Морфа — они не считаются "полноценными" рейдами для этого показателя).
+  // (без Кошки/Морфа). Опоздание даёт половину очков за рейд.
   let totalPointsAvailable = 0;
   let userPointsEarned = 0;
 
@@ -61,7 +63,9 @@ export async function getUserMonthlyAttendance(
 
   for (const raid of raids) {
     const dkp = raid.dkp_summary ?? 0;
-    const attended = raid.raid_attendance.some((a) => a.user_id === userId);
+    const attendance = raid.raid_attendance.find((a) => a.user_id === userId);
+    const attended = !!attendance;
+    const earnedDkp = attendance ? (attendance.is_late ? dkp / 2 : dkp) : 0;
     const bossId = raid.raid_boss[0]?.boss_id;
     const excludedFromAccounting =
       EXCLUDED_FROM_POINTS_ACCOUNTING_BOSS_IDS.includes(bossId as number);
@@ -74,11 +78,11 @@ export async function getUserMonthlyAttendance(
       if (attended) userAglRaids += 1;
     }
 
-    if (attended) userDkp += dkp;
+    userDkp += earnedDkp;
 
     if (!excludedFromAccounting) {
       totalPointsAvailable += dkp;
-      if (attended) userPointsEarned += dkp;
+      userPointsEarned += earnedDkp;
     }
   }
 
