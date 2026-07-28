@@ -6,6 +6,7 @@ import {
 } from "@/shared/ui";
 import { hasTag } from "@/actions/hasTag";
 import AppSidebar from "@/widgets/sidebar";
+import { HeartbeatTracker } from "@/widgets/sidebar/HeartbeatTracker";
 import { cookies } from "next/headers";
 
 export default async function DefaultLayout({
@@ -17,6 +18,7 @@ export default async function DefaultLayout({
   const isAdmin = await hasTag(sessionToken, ["Администратор"]);
   return (
     <SidebarProvider defaultOpen>
+      <HeartbeatTracker />
       <div className="flex bg-background text-foreground w-full">
         <AppSidebar isAdmin={isAdmin} />
         <div className="flex flex-col flex-1">

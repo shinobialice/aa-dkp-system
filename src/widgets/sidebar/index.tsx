@@ -44,6 +44,7 @@ import {
 } from "@/shared/ui";
 import Image from "next/image";
 import { NavUser } from "./NavUser";
+import { OnlineUsersWidget } from "./OnlineUsersWidget";
 import { FC } from "react";
 
 type Props = { isAdmin: boolean };
@@ -150,6 +151,8 @@ export const AppSidebar: FC<Props> = ({ isAdmin }) => {
 
       <SidebarFooter>
         <SidebarMenu>
+          <OnlineUsersWidget />
+
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
