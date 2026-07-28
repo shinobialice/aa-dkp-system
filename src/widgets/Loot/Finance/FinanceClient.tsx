@@ -17,10 +17,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/ui";
+import { Input, Checkbox } from "@/shared/ui";
 import {
   generateSalaries,
   getGuildFunds,
   getSalariesForMonth,
+  updateSalaryAdvance,
 } from "@/actions/financeActions";
 import { generateGuildFunds } from "@/actions/generateGuildFunds";
 
@@ -45,16 +47,22 @@ export default function FinanceClient({
     salaryBudget: number;
     treasuryBudget: number;
     inTreasury: number;
+    advanceSent: number;
   }>(null);
+
+  const [advanceInput, setAdvanceInput] = useState(0);
 
   const [salaries, setSalaries] = useState<
     {
+      id: number;
       userId: number;
       username: string;
       amount: number;
       bonus: number | null;
       total: number;
       bonusPercent: number;
+      sentAmount: number;
+      sent: boolean;
     }[]
   >([]);
 
@@ -62,14 +70,26 @@ export default function FinanceClient({
     const load = async () => {
       const result = await getGuildFunds(month, year);
       setFund(result);
+      setAdvanceInput(result?.advanceSent ?? 0);
       const sal = await getSalariesForMonth(month, year);
       setSalaries(sal);
     };
     load();
   }, [month, year]);
 
+  const handleAdvanceChange = async (
+    salaryId: number,
+    sentAmount: number,
+    sent: boolean,
+  ) => {
+    setSalaries((prev) =>
+      prev.map((s) => (s.id === salaryId ? { ...s, sentAmount, sent } : s)),
+    );
+    await updateSalaryAdvance(salaryId, sentAmount, sent);
+  };
+
   const handleGenerateFund = async () => {
-    await generateGuildFunds(month, year);
+    await generateGuildFunds(month, year, advanceInput);
     const updated = await getGuildFunds(month, year);
     setFund(updated);
   };
@@ -119,6 +139,13 @@ export default function FinanceClient({
               ))}
             </SelectContent>
           </Select>
+          <Input
+            type="number"
+            value={advanceInput}
+            onChange={(e) => setAdvanceInput(+e.target.value)}
+            placeholder="Выслано авансом"
+            className="w-40"
+          />
           <Button
             onClick={async () => {
               setLoadingFund(true);
@@ -163,29 +190,52 @@ export default function FinanceClient({
         </div>
       )}
 
-      {fund && (
-        <div className="grid grid-cols-2 gap-4 border rounded-md p-4 bg-muted/30">
-          <div>
-            💰 Доходы (Продано): <strong>{fund.totalIncome}</strong>
-          </div>
-          <div>
-            📤 Расходы: <strong>{fund.totalExpenses}</strong>
-          </div>
-          <div>
-            👥 Зарплатный фонд (70%): <strong>{fund.salaryBudget}</strong>
-          </div>
-          <div>
-            🏦 Казна (30%): <strong>{fund.treasuryBudget}</strong>
-          </div>
-          <div>
-            💰 В казне: <strong>{fund.inTreasury}</strong>
-          </div>
-          <div>
-            📈 "Свободная" голда в казне:{" "}
-            <strong>{fund.inTreasury - fund.salaryBudget}</strong>
-          </div>
-        </div>
-      )}
+      {fund &&
+        (() => {
+          const totalSalaries = salaries.length
+            ? salaries.reduce((sum, s) => sum + s.total, 0)
+            : fund.salaryBudget;
+          const liveAdvanceSent = salaries.length
+            ? salaries.reduce((sum, s) => sum + (s.sentAmount ?? 0), 0)
+            : (fund.advanceSent ?? 0);
+          const effectiveInTreasury =
+            fund.inTreasury - (fund.advanceSent ?? 0) + liveAdvanceSent;
+          const remainingSalaries = totalSalaries - liveAdvanceSent;
+          const freeGold = effectiveInTreasury - remainingSalaries;
+
+          return (
+            <div className="grid grid-cols-2 gap-4 border rounded-md p-4 bg-muted/30">
+              <div>
+                💰 Доходы (Продано): <strong>{fund.totalIncome}</strong>
+              </div>
+              <div>
+                📤 Расходы: <strong>{fund.totalExpenses}</strong>
+              </div>
+              <div>
+                👥 Зарплатный фонд (70%): <strong>{fund.salaryBudget}</strong>
+              </div>
+              <div>
+                🏦 Доход казны (30%): <strong>{fund.treasuryBudget}</strong>
+              </div>
+              <div>
+                💰 Сейчас в казне: <strong>{effectiveInTreasury}</strong>
+              </div>
+              <div>
+                📈 "Свободная" голда в казне: <strong>{freeGold}</strong>
+              </div>
+              <div>
+                🧾 Суммарные З/П за месяц: <strong>{totalSalaries}</strong>
+              </div>
+              <div>
+                📨 Выслано авансом: <strong>{liveAdvanceSent}</strong>
+              </div>
+              <div>
+                ⏳ Оставшиеся З/П на месяц:{" "}
+                <strong>{remainingSalaries}</strong>
+              </div>
+            </div>
+          );
+        })()}
 
       {salaries.length > 0 && (
         <div className="border rounded-md overflow-auto">
@@ -197,6 +247,9 @@ export default function FinanceClient({
                 <TableHead>Бонус %</TableHead>
                 <TableHead>Бонус</TableHead>
                 <TableHead>Итого</TableHead>
+                <TableHead>Выслано</TableHead>
+                <TableHead>Сумма аванса</TableHead>
+                <TableHead>Остаток</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -204,9 +257,32 @@ export default function FinanceClient({
                 <TableRow key={s.userId}>
                   <TableCell>{s.username}</TableCell>
                   <TableCell>{s.amount}</TableCell>
-                  <TableCell>{s.bonusPercent ?? 0}%</TableCell>{" "}
+                  <TableCell>{s.bonusPercent ?? 0}%</TableCell>
                   <TableCell>{s.bonus ?? 0}</TableCell>
                   <TableCell>{s.total}</TableCell>
+                  <TableCell>
+                    <Checkbox
+                      checked={s.sent}
+                      onCheckedChange={(checked) =>
+                        handleAdvanceChange(
+                          s.id,
+                          s.sentAmount,
+                          checked === true,
+                        )
+                      }
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Input
+                      type="number"
+                      value={s.sentAmount}
+                      onChange={(e) =>
+                        handleAdvanceChange(s.id, +e.target.value, s.sent)
+                      }
+                      className="w-28"
+                    />
+                  </TableCell>
+                  <TableCell>{s.total - s.sentAmount}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

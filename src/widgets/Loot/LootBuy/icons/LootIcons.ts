@@ -20,6 +20,7 @@ const LootGrade: { [key: string]: number } = {
   "Свиток пробудившихся мифов": 6,
   "Свиток пробуждения драконоборца": 5,
   "Кристалл властелина морей": 7,
+  "Застывшее пламя": 10,
 };
 
 export const LootIcons: { [key: string]: string | number } = {
@@ -109,6 +110,9 @@ export const LootIcons: { [key: string]: string | number } = {
   "Сапоги иферийского советника":
     "https://archeagecodex.com/items/nu_f_bo_cloth185.png",
   "Лоскут кожи Калидиса": 4813,
+  "Застывшее пламя": "https://archeagecodex.com/items/icon_item_6015.png", 
+  "Глайдер «Властелин морей»": "https://archeagecodex.com/items/icon_item_1205.png",
+  "Корона":"https://archeagecodex.com/items/costume_hm/nu_m_hm_leather076.png",
 };
 
 export function getLootIconUrl(itemName: string): string {

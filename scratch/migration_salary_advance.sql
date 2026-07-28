@@ -1,0 +1,3 @@
+ALTER TABLE "Salary"
+  ADD COLUMN IF NOT EXISTS "sentAmount" integer NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS "sent" boolean NOT NULL DEFAULT false;

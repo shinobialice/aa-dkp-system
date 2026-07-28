@@ -34,6 +34,8 @@ export const getSalariesForMonth = async (month: number, year: number) => {
     amount,
     bonus,
     total,
+    sentAmount,
+    sent,
     month,
     year,
     user (
@@ -52,14 +54,32 @@ export const getSalariesForMonth = async (month: number, year: number) => {
     const username = s.user?.username ?? "Неизвестно";
     const bonusPercent = s.amount ? Math.round((s.bonus / s.amount) * 100) : 0;
     return {
+      id: s.id,
       userId: s.userId,
       username: username ?? "Неизвестно",
       amount: s.amount,
       bonus: s.bonus,
       bonusPercent,
       total: s.total,
+      sentAmount: s.sentAmount ?? 0,
+      sent: s.sent ?? false,
     };
   });
+};
+
+export const updateSalaryAdvance = async (
+  salaryId: number,
+  sentAmount: number,
+  sent: boolean,
+) => {
+  const { error } = await supabase
+    .from("Salary")
+    .update({ sentAmount, sent })
+    .eq("id", salaryId);
+
+  if (error) {
+    throw new Error("Ошибка при обновлении аванса");
+  }
 };
 
 async function getCustomBonus(userId: number): Promise<number> {
@@ -123,7 +143,7 @@ export const generateSalaries = async (month: number, year: number) => {
         tags,
         primePercent: attendance.primePercent,
         totalPercent: attendance.totalPercent,
-        basePoints: attendance.dkp,
+        basePoints: attendance.totalPercent,
         tenureBonusPercent,
         individualBonusPercent,
         penaltyPoints,
@@ -131,7 +151,7 @@ export const generateSalaries = async (month: number, year: number) => {
 
       return {
         userId: user.id,
-        basePoints: attendance.dkp,
+        basePoints: attendance.totalPercent,
         ...weightResult,
       };
     }),
@@ -150,6 +170,19 @@ export const generateSalaries = async (month: number, year: number) => {
     );
   }
 
+  const { data: existingSalaries } = await supabase
+    .from("Salary")
+    .select("userId, sentAmount, sent")
+    .eq("month", month)
+    .eq("year", year);
+
+  const advanceByUserId = new Map(
+    (existingSalaries ?? []).map((s) => [
+      s.userId,
+      { sentAmount: s.sentAmount ?? 0, sent: s.sent ?? false },
+    ]),
+  );
+
   const { error: deleteError } = await supabase
     .from("Salary")
     .delete()
@@ -161,8 +194,21 @@ export const generateSalaries = async (month: number, year: number) => {
   }
 
   const salaryRows = userRows.map((r) => {
+    const prevAdvance = advanceByUserId.get(r.userId) ?? {
+      sentAmount: 0,
+      sent: false,
+    };
+
     if (!r.eligible) {
-      return { year, month, userId: r.userId, amount: 0, bonus: 0, total: 0 };
+      return {
+        year,
+        month,
+        userId: r.userId,
+        amount: 0,
+        bonus: 0,
+        total: 0,
+        ...prevAdvance,
+      };
     }
 
     // amount — базовая доля фонда без учёта бонусов/штрафов (для сравнения в UI),
@@ -179,6 +225,7 @@ export const generateSalaries = async (month: number, year: number) => {
       amount,
       bonus: total - amount,
       total,
+      ...prevAdvance,
     };
   });
 
