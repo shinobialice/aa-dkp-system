@@ -6,6 +6,6 @@ export type LootQueueEntry = {
   synth_target?: string;
   required: number;
   delivered: number;
-  createdAt: Date;
+  createdAt: string;
   quantity?: number;
 };

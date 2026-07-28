@@ -38,13 +38,13 @@ export const getLootQueueByItemName = async (itemName: string) => {
     required: number | null;
     delivered: number | null;
     created_at: string;
-    user: { username: string } | null;
+    user: { username: string }[] | null;
   };
 
   return (item.loot_queue || []).map((entry: LootQueueEntry) => ({
     id: entry.id,
     userId: entry.user_id,
-    username: entry.user?.username || "Unknown",
+    username: entry.user?.[0]?.username || "Unknown",
     status: entry.status,
     synth_target: entry.synth_target,
     required: entry.required ?? 0,
