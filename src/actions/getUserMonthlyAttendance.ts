@@ -20,10 +20,28 @@ export async function getUserMonthlyAttendance(
   year: number,
   month: number,
 ) {
-  const startDate = new Date(Date.UTC(year, month - 1, 1)).toISOString();
+  const monthStart = new Date(Date.UTC(year, month - 1, 1));
   const endDate = new Date(
     Date.UTC(month === 12 ? year + 1 : year, month % 12, 1),
   ).toISOString();
+
+  const { data: userRow, error: userError } = await supabase
+    .from("user")
+    .select("joined_at")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (userError) {
+    console.error("Ошибка при получении пользователя:", userError);
+    throw new Error("Не удалось загрузить пользователя");
+  }
+
+  // Если вступил в гильдию в течение расчётного месяца — считаем только с
+  // даты вступления, а не с начала месяца.
+  const joinedAt = userRow?.joined_at ? new Date(userRow.joined_at) : null;
+  const effectiveStart =
+    joinedAt && joinedAt > monthStart ? joinedAt : monthStart;
+  const startDate = effectiveStart.toISOString();
 
   const { data, error } = await supabase
     .from("raid")
@@ -48,7 +66,8 @@ export async function getUserMonthlyAttendance(
   const raids = data as unknown as RaidWithRelations[];
 
   // Праймы/АГЛ % — доля посещённых рейдов от общего числа рейдов этого типа
-  // (опоздание всё ещё считается посещением).
+  // (с даты вступления, если она позже начала месяца).
+  // Опоздание (is_late) считается за половину посещения, не за полное.
   let totalPrimeRaids = 0;
   let userPrimeRaids = 0;
   let totalAglRaids = 0;
@@ -64,18 +83,19 @@ export async function getUserMonthlyAttendance(
   for (const raid of raids) {
     const dkp = raid.dkp_summary ?? 0;
     const attendance = raid.raid_attendance.find((a) => a.user_id === userId);
-    const attended = !!attendance;
     const earnedDkp = attendance ? (attendance.is_late ? dkp / 2 : dkp) : 0;
     const bossId = raid.raid_boss[0]?.boss_id;
     const excludedFromAccounting =
       EXCLUDED_FROM_POINTS_ACCOUNTING_BOSS_IDS.includes(bossId as number);
 
+    const attendanceWeight = attendance ? (attendance.is_late ? 0.5 : 1) : 0;
+
     if (raid.type === "Прайм") {
       totalPrimeRaids += 1;
-      if (attended) userPrimeRaids += 1;
+      userPrimeRaids += attendanceWeight;
     } else if (raid.type === "АГЛ") {
       totalAglRaids += 1;
-      if (attended) userAglRaids += 1;
+      userAglRaids += attendanceWeight;
     }
 
     userDkp += earnedDkp;

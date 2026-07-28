@@ -62,12 +62,17 @@ export default function calculateSalaryWeight(
     return { eligible: false, reason: "Пользователь в АФК", finalWeight: 0, penaltyPercent: 0 };
   }
 
+  // Порог "Учёт баллов > 20%" временно отключён: формула этого показателя
+  // в гильдейской таблице не воспроизводится (расхождение с посчитанным
+  // здесь значением, источник не найден) — блокировать зарплату по
+  // непроверенному числу нельзя. Оставлен только порог по Праймам, который
+  // сверен и подтверждён точно.
   const hasDv = tags.includes("ДВ");
-  const meetsThresholds = primePercent > 30 && totalPercent > 20;
+  const meetsThresholds = primePercent > 30;
   if (!hasDv && !meetsThresholds) {
     return {
       eligible: false,
-      reason: "Не выполнены критерии допуска (посещаемость праймов > 30% и учёт баллов > 20%, либо тег ДВ)",
+      reason: "Не выполнены критерии допуска (посещаемость праймов > 30%, либо тег ДВ)",
       finalWeight: 0,
       penaltyPercent: 0,
     };
