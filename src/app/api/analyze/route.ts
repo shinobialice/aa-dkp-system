@@ -16,53 +16,42 @@ export async function POST(req: NextRequest) {
     }
 
     const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    const base64Image = Buffer.from(arrayBuffer).toString("base64");
 
-    const postRes = await axios.post(
-      `${process.env.AZURE_ENDPOINT}/vision/v3.2/read/analyze`,
-      buffer,
+    const visionRes = await axios.post(
+      `https://vision.googleapis.com/v1/images:annotate?key=${process.env.GOOGLE_VISION_API_KEY}`,
       {
-        headers: {
-          "Ocp-Apim-Subscription-Key": process.env.AZURE_KEY!,
-          "Content-Type": "application/octet-stream",
-        },
+        requests: [
+          {
+            image: { content: base64Image },
+            features: [{ type: "TEXT_DETECTION" }],
+            imageContext: { languageHints: ["ru", "en"] },
+          },
+        ],
       },
     );
 
-    const operationLocation = postRes.headers["operation-location"];
+    const annotation = visionRes.data.responses?.[0];
 
-    if (!operationLocation) {
+    if (annotation?.error) {
       return new Response(
-        JSON.stringify({ error: "No operation location returned" }),
+        JSON.stringify({
+          error: annotation.error.message ?? "Vision API error",
+        }),
         { status: 500 },
       );
     }
 
-    let resultData;
-    for (let i = 0; i < 10; i++) {
-      await new Promise((r) => setTimeout(r, 1000));
-      const getRes = await axios.get(operationLocation, {
-        headers: {
-          "Ocp-Apim-Subscription-Key": process.env.AZURE_KEY!,
+    const words: { description: string }[] =
+      annotation?.textAnnotations?.slice(1) ?? [];
+
+    const resultData = {
+      readResults: [
+        {
+          lines: words.map((w) => ({ text: w.description })),
         },
-      });
-
-      if (getRes.data.status === "succeeded") {
-        resultData = getRes.data.analyzeResult;
-        break;
-      } else if (getRes.data.status === "failed") {
-        return new Response(JSON.stringify({ error: "OCR failed" }), {
-          status: 500,
-        });
-      }
-    }
-
-    if (!resultData) {
-      return new Response(
-        JSON.stringify({ error: "Timed out waiting for OCR result" }),
-        { status: 504 },
-      );
-    }
+      ],
+    };
 
     const names = extractNamesFromReadOCR(resultData);
 
