@@ -17,6 +17,7 @@ export const hasTag = async (sessionToken: string, tags: string[]) => {
     .select("tag")
     .eq("user_id", user.id)
     .in("tag", tags)
+    .is("removed_at", null)
     .maybeSingle();
 
   if (tagError) {

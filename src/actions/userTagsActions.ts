@@ -3,12 +3,24 @@ import supabase from "@/shared/lib/supabaseAdmin";
 import ensurePrivilieges from "./ensurePrivilieges";
 
 // 1. Get user tags
-export async function getUserTags(userId: number) {
-  const { data, error } = await supabase
-    .from("user_tags")
-    .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
+// Без asOf — только тэги, действующие прямо сейчас (для отображения в UI).
+// С asOf — тэги, действовавшие на указанный момент (для перегенерации ЗП за
+// прошлый месяц, чтобы более поздние снятия/добавления тэга её не меняли).
+export async function getUserTags(userId: number, asOf?: Date) {
+  let query = supabase.from("user_tags").select("*").eq("user_id", userId);
+
+  if (asOf) {
+    const asOfIso = asOf.toISOString();
+    query = query
+      .lte("created_at", asOfIso)
+      .or(`removed_at.is.null,removed_at.gt.${asOfIso}`);
+  } else {
+    query = query.is("removed_at", null);
+  }
+
+  const { data, error } = await query.order("created_at", {
+    ascending: false,
+  });
 
   if (error) {
     console.error("Ошибка при получении тэгов:", error);
@@ -36,11 +48,14 @@ export async function addUserTag(userId: number, tag: string) {
   return data;
 }
 
-// 3. Delete tag by ID
+// 3. Remove tag by ID (soft delete — сохраняем историю, см. removed_at)
 export async function deleteUserTag(tagId: number) {
   await ensurePrivilieges(["Администратор"]);
 
-  const { error } = await supabase.from("user_tags").delete().eq("id", tagId);
+  const { error } = await supabase
+    .from("user_tags")
+    .update({ removed_at: new Date().toISOString() })
+    .eq("id", tagId);
 
   if (error) {
     console.error("Ошибка при удалении тэга:", error);

@@ -139,15 +139,15 @@ export async function computeUserSalaryWeight(
   month: number,
   year: number,
 ) {
+  const asOf = getSalaryAsOfDate(month, year);
   const [attendance, tagRows, penaltyRows, individualBonusPercent] =
     await Promise.all([
       getUserMonthlyAttendance(user.id, year, month),
-      getUserTags(user.id),
+      getUserTags(user.id, asOf),
       getUserPenaltyPoints(user.id),
       getCustomBonus(user.id),
     ]);
 
-  const asOf = getSalaryAsOfDate(month, year);
   const tags = (tagRows ?? []).map((t) => t.tag);
   const penaltyPoints = (penaltyRows ?? []).reduce(
     (sum, p) => sum + (p.amount || 0),

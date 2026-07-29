@@ -646,18 +646,21 @@ export type Database = {
         Row: {
           created_at: string;
           id: number;
+          removed_at: string | null;
           tag: string;
           user_id: number;
         };
         Insert: {
           created_at?: string;
           id?: never;
+          removed_at?: string | null;
           tag: string;
           user_id: number;
         };
         Update: {
           created_at?: string;
           id?: never;
+          removed_at?: string | null;
           tag?: string;
           user_id?: number;
         };
