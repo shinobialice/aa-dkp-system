@@ -24,6 +24,9 @@ const LootGrade: { [key: string]: number } = {
 };
 
 export const LootIcons: { [key: string]: string | number } = {
+  "Эссенции акхиума": "https://archeagecodex.com/items/icon_item_0371.png",
+  "Всякие мелочи": "https://archeagecodex.com/items/icon_item_1190.png",
+  "Всякие мелочи 2": "https://archeagecodex.com/items/icon_item_3921.png",
   "В казну": 4383,
   "Глайдер «Крылья небесного стража»": 4312,
   "Аметистовая гравировка северной звезды": 4190,
@@ -96,8 +99,6 @@ export const LootIcons: { [key: string]: string | number } = {
   "Свиток пробуждения драконоборца": 4446, //+рамка //archeagecodex.com/images/icon_grade5.png
   "Акхиумная сфера": 4790,
   "Акхиумный раствор": 4457,
-  "Эссенция звездного акхиума":
-    "https://archeagecodex.com/items/icon_item_0371.png",
   "Кристалл властелина морей": 4768, //+рамка //archeagecodex.com/images/icon_grade7.png
   "Капюшон иферийского советника":
     "https://archeagecodex.com/items/nu_f_hm_cloth185.png",

@@ -2,6 +2,12 @@ import { getLootIconUrl } from "../widgets/Loot/LootBuy/icons/LootIcons";
 import { sourceMap } from "../widgets/Loot/priceSourceMap";
 import supabase from "@/shared/lib/supabaseAdmin";
 
+const HIDDEN_FROM_BUY = new Set([
+  "Всякие мелочи",
+  "Всякие мелочи 2",
+  "В казну",
+]);
+
 export async function getLootGrouped() {
   const { data: items, error } = await supabase
     .from("item_type")
@@ -18,6 +24,7 @@ export async function getLootGrouped() {
   > = {};
 
   for (const item of items) {
+    if (HIDDEN_FROM_BUY.has(item.name)) continue;
     const source = sourceMap[item.name] || "Разное";
     const icon = getLootIconUrl(item.name);
 
