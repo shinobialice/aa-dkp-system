@@ -26,6 +26,7 @@ import {
 } from "@/actions/financeActions";
 import { generateGuildFunds } from "@/actions/generateGuildFunds";
 import { classColors, classIcons } from "@/widgets/MembersTable/classStyles";
+import { getYearOptions } from "@/utils/getYearOptions";
 
 const AUTO_REFRESH_MS = 60 * 1000;
 
@@ -222,7 +223,7 @@ export default function FinanceClient({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {[2024, 2025, 2026].map((y) => (
+              {getYearOptions().map((y) => (
                 <SelectItem key={y} value={y.toString()}>
                   {y}
                 </SelectItem>

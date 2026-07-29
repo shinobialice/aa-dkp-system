@@ -34,6 +34,7 @@ import {
   SelectValue,
 } from "@/shared/ui";
 import { getUserActivity } from "@/actions/getUserActivity";
+import { getYearOptions } from "@/utils/getYearOptions";
 
 const chartConfig = {
   праймы: {
@@ -155,7 +156,7 @@ export function UserActivityChart({ userId }: { userId: number }) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {[2023, 2024, 2025].map((year) => (
+              {getYearOptions().map((year) => (
                 <SelectItem key={year} value={String(year)}>
                   {year}
                 </SelectItem>

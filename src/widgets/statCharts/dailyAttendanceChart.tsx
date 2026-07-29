@@ -23,6 +23,7 @@ import {
   getGuildAttendancePrime,
 } from "@/actions/guildStats";
 import { RoundedTooltipContent } from "./RoundedTooltipContent";
+import { getYearOptions } from "@/utils/getYearOptions";
 
 const months = [
   "Январь",
@@ -106,7 +107,7 @@ export default function DailyAttendanceChart({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {[2023, 2024, 2025].map((y) => (
+              {getYearOptions().map((y) => (
                 <SelectItem key={y} value={String(y)}>
                   {y}
                 </SelectItem>
