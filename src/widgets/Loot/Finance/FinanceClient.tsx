@@ -83,6 +83,7 @@ export default function FinanceClient({
     async (m: number, y: number, opts?: { silent?: boolean }) => {
       if (opts?.silent) setRefreshing(true);
       try {
+        // Первый проход — считаем доход/фонд (нужен generateSalaries).
         await generateGuildFunds(m, y);
         try {
           await generateSalaries(m, y);
@@ -90,6 +91,9 @@ export default function FinanceClient({
           // Нет допущенных пользователей за месяц (например, ещё нет данных) —
           // фонд всё равно должен отобразиться.
         }
+        // Второй проход — пересчитываем "В казне" с учётом реального аванса
+        // по игрокам (Salary.sentAmount), который появился только что.
+        await generateGuildFunds(m, y);
         const [fundResult, salariesResult] = await Promise.all([
           getGuildFunds(m, y),
           getSalariesForMonth(m, y),
@@ -131,12 +135,8 @@ export default function FinanceClient({
   const totalSalaries = salaries.length
     ? salaries.reduce((sum, s) => sum + s.total, 0)
     : (fund?.salaryBudget ?? 0);
-  const liveAdvanceSent = salaries.length
-    ? salaries.reduce((sum, s) => sum + (s.sentAmount ?? 0), 0)
-    : (fund?.advanceSent ?? 0);
-  const effectiveInTreasury = fund
-    ? fund.inTreasury - (fund.advanceSent ?? 0) + liveAdvanceSent
-    : 0;
+  const liveAdvanceSent = fund?.advanceSent ?? 0;
+  const effectiveInTreasury = fund?.inTreasury ?? 0;
   const remainingSalaries = totalSalaries - liveAdvanceSent;
   const freeGold = effectiveInTreasury - remainingSalaries;
 

@@ -39,21 +39,21 @@ async function getCarryOverFromPreviousMonth(
   return prevFund.inTreasury - remainingSalaries;
 }
 
-export const generateGuildFunds = async (
-  month: number,
-  year: number,
-  explicitAdvanceSent?: number,
-) => {
-  let advanceSent: number = explicitAdvanceSent ?? 0;
-  if (explicitAdvanceSent === undefined) {
-    const { data: existingFund } = await supabase
-      .from("GuildFunds")
-      .select("advanceSent")
-      .eq("month", month)
-      .eq("year", year)
-      .maybeSingle();
-    advanceSent = existingFund?.advanceSent ?? 0;
-  }
+// Аванс за месяц считается только от реальных отметок по игрокам
+// (Salary.sentAmount) — никакого отдельно хранимого значения, которое
+// могло бы разойтись с реальностью.
+async function getLiveAdvanceSent(month: number, year: number): Promise<number> {
+  const { data: salaries } = await supabase
+    .from("Salary")
+    .select("sentAmount")
+    .eq("month", month)
+    .eq("year", year);
+
+  return (salaries ?? []).reduce((sum, s) => sum + (s.sentAmount ?? 0), 0);
+}
+
+export const generateGuildFunds = async (month: number, year: number) => {
+  const advanceSent = await getLiveAdvanceSent(month, year);
 
   const startDate = new Date(Date.UTC(year, month - 1, 1));
   const endDate = new Date(Date.UTC(month === 12 ? year + 1 : year, month % 12, 1));
