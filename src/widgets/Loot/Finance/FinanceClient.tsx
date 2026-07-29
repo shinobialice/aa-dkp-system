@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import { useState, useEffect, useCallback, useRef } from "react";
-import { Loader2, RefreshCw } from "lucide-react";
-import { Button } from "@/shared/ui";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { ArrowUpDown, Loader2, RefreshCw } from "lucide-react";
+import { Badge, Button } from "@/shared/ui";
 import {
   Table,
   TableHeader,
@@ -25,6 +25,7 @@ import {
   updateSalaryAdvance,
 } from "@/actions/financeActions";
 import { generateGuildFunds } from "@/actions/generateGuildFunds";
+import { classColors, classIcons } from "@/widgets/MembersTable/classStyles";
 
 const AUTO_REFRESH_MS = 60 * 1000;
 
@@ -43,6 +44,7 @@ type SalaryRow = {
   id: number;
   userId: number;
   username: string;
+  class: string | null;
   amount: number;
   bonus: number | null;
   total: number;
@@ -74,6 +76,43 @@ export default function FinanceClient({
 
   const [fund, setFund] = useState<Fund | null>(null);
   const [salaries, setSalaries] = useState<SalaryRow[]>([]);
+
+  const [sortKey, setSortKey] = useState<keyof SalaryRow>("total");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+
+  const toggleSort = (key: keyof SalaryRow) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
+
+  const sortHeader = (label: string, field: keyof SalaryRow) => (
+    <Button
+      className="cursor-pointer"
+      variant="ghost"
+      onClick={() => toggleSort(field)}
+    >
+      {label}
+      <ArrowUpDown className="ml-2 h-4 w-4" />
+    </Button>
+  );
+
+  const sortedSalaries = useMemo(() => {
+    return [...salaries].sort((a, b) => {
+      const aVal = a[sortKey];
+      const bVal = b[sortKey];
+      if (typeof aVal === "string" || typeof bVal === "string") {
+        const cmp = String(aVal ?? "").localeCompare(String(bVal ?? ""));
+        return sortDir === "asc" ? cmp : -cmp;
+      }
+      const an = Number(aVal ?? 0);
+      const bn = Number(bVal ?? 0);
+      return sortDir === "asc" ? an - bn : bn - an;
+    });
+  }, [salaries, sortKey, sortDir]);
 
   // Отслеживаем, редактирует ли админ поле аванса прямо сейчас, чтобы
   // фоновое авто-обновление не перетирало недописанное значение.
@@ -249,63 +288,78 @@ export default function FinanceClient({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Игрок</TableHead>
-                <TableHead>АГЛ</TableHead>
-                <TableHead>Прайм</TableHead>
-                <TableHead>Общий</TableHead>
-                <TableHead>%t (гильдия)</TableHead>
-                <TableHead>Доп (бонус)</TableHead>
-                <TableHead>Штр (штраф)</TableHead>
-                <TableHead>%Итог</TableHead>
-                <TableHead>Итого</TableHead>
-                <TableHead>Выслано</TableHead>
-                <TableHead>Сумма аванса</TableHead>
+                <TableHead>{sortHeader("Игрок", "username")}</TableHead>
+                <TableHead>{sortHeader("Класс", "class")}</TableHead>
+                <TableHead>{sortHeader("АГЛ", "aglPercent")}</TableHead>
+                <TableHead>{sortHeader("Прайм", "primePercent")}</TableHead>
+                <TableHead>{sortHeader("Общий", "totalPercent")}</TableHead>
+                <TableHead>{sortHeader("%t (гильдия)", "tenurePercent")}</TableHead>
+                <TableHead>{sortHeader("Доп (бонус)", "customBonusPercent")}</TableHead>
+                <TableHead>{sortHeader("Штр (штраф)", "penaltyPercent")}</TableHead>
+                <TableHead>{sortHeader("%Итог", "weightPercent")}</TableHead>
+                <TableHead>{sortHeader("Итого", "total")}</TableHead>
+                <TableHead>{sortHeader("Выслано", "sent")}</TableHead>
+                <TableHead>{sortHeader("Сумма аванса", "sentAmount")}</TableHead>
                 <TableHead>Остаток</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {[...salaries]
-                .sort((a, b) => b.total - a.total)
-                .map((s) => (
-                  <TableRow key={s.userId}>
-                    <TableCell>{s.username}</TableCell>
-                    <TableCell>{s.aglPercent.toFixed(2)}%</TableCell>
-                    <TableCell>{s.primePercent.toFixed(2)}%</TableCell>
-                    <TableCell>{s.totalPercent.toFixed(2)}%</TableCell>
-                    <TableCell>{s.tenurePercent.toFixed(2)}%</TableCell>
-                    <TableCell>{s.customBonusPercent.toFixed(2)}%</TableCell>
-                    <TableCell>{s.penaltyPercent.toFixed(2)}%</TableCell>
-                    <TableCell>{s.weightPercent.toFixed(2)}%</TableCell>
-                    <TableCell>{s.total}</TableCell>
-                    <TableCell>
-                      <Checkbox
-                        checked={s.sent}
-                        disabled={!isAdmin}
-                        onCheckedChange={(checked) =>
-                          handleAdvanceChange(
-                            s.id,
-                            s.sentAmount,
-                            checked === true,
-                          )
-                        }
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Input
-                        type="number"
-                        value={s.sentAmount}
-                        disabled={!isAdmin}
-                        onFocus={() => (editingSalaryId.current = s.id)}
-                        onBlur={() => (editingSalaryId.current = null)}
-                        onChange={(e) =>
-                          handleAdvanceChange(s.id, +e.target.value, s.sent)
-                        }
-                        className="w-28"
-                      />
-                    </TableCell>
-                    <TableCell>{s.total - s.sentAmount}</TableCell>
-                  </TableRow>
-                ))}
+              {sortedSalaries.map((s) => (
+                <TableRow key={s.userId}>
+                  <TableCell>{s.username}</TableCell>
+                  <TableCell>
+                    {s.class ? (
+                      <Badge
+                        className="text-background gap-1"
+                        style={{
+                          backgroundColor:
+                            classColors[s.class] ?? "rgb(120,120,120)",
+                        }}
+                      >
+                        {classIcons[s.class]}
+                        {s.class}
+                      </Badge>
+                    ) : (
+                      "—"
+                    )}
+                  </TableCell>
+                  <TableCell>{s.aglPercent.toFixed(2)}%</TableCell>
+                  <TableCell>{s.primePercent.toFixed(2)}%</TableCell>
+                  <TableCell>{s.totalPercent.toFixed(2)}%</TableCell>
+                  <TableCell>{s.tenurePercent.toFixed(2)}%</TableCell>
+                  <TableCell>{s.customBonusPercent.toFixed(2)}%</TableCell>
+                  <TableCell>{s.penaltyPercent.toFixed(2)}%</TableCell>
+                  <TableCell>{s.weightPercent.toFixed(2)}%</TableCell>
+                  <TableCell>{s.total}</TableCell>
+                  <TableCell>
+                    <Checkbox
+                      checked={s.sent}
+                      disabled={!isAdmin}
+                      onCheckedChange={(checked) =>
+                        handleAdvanceChange(
+                          s.id,
+                          s.sentAmount,
+                          checked === true,
+                        )
+                      }
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Input
+                      type="number"
+                      value={s.sentAmount}
+                      disabled={!isAdmin}
+                      onFocus={() => (editingSalaryId.current = s.id)}
+                      onBlur={() => (editingSalaryId.current = null)}
+                      onChange={(e) =>
+                        handleAdvanceChange(s.id, +e.target.value, s.sent)
+                      }
+                      className="w-28"
+                    />
+                  </TableCell>
+                  <TableCell>{s.total - s.sentAmount}</TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </div>

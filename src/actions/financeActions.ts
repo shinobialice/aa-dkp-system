@@ -47,7 +47,8 @@ export const getSalariesForMonth = async (month: number, year: number) => {
     month,
     year,
     user (
-      username
+      username,
+      class
     )
   `,
     )
@@ -64,6 +65,7 @@ export const getSalariesForMonth = async (month: number, year: number) => {
       id: s.id,
       userId: s.userId,
       username: username ?? "Неизвестно",
+      class: s.user?.class ?? null,
       amount: s.amount,
       bonus: s.bonus,
       total: s.total,
