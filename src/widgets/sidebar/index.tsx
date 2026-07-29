@@ -9,7 +9,7 @@ import {
   Sun,
   ChevronUp,
   ChevronDown,
-  Newspaper,
+  Info,
   Users,
   CalendarDays,
   Trophy,
@@ -53,7 +53,7 @@ export const AppSidebar: FC<Props> = ({ isAdmin }) => {
   const { setTheme } = useTheme();
 
   const menuItems = [
-    { title: "Новости", url: "/news", icon: Newspaper },
+    { title: "Основная информация", url: "/news", icon: Info },
     { title: "Участники", url: "/members", icon: Users },
     { title: "Активности", url: "/activities", icon: CalendarDays },
     { title: "Расписание", url: "/schedule", icon: Calendar },

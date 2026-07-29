@@ -1,16 +1,15 @@
-import { hasTag } from "@/actions/hasTag";
-import { getNews } from "@/actions/news";
-import NewsPageClient from "@/widgets/news/NewsPageClient";
-import { cookies } from "next/headers";
+import { getSalaryEligibilitySettings } from "@/actions/salaryEligibilitySettings";
+import GuildInfoContent from "@/widgets/info/GuildInfoContent";
 
-export default async function NewsPage() {
-  const sessionToken = (await cookies()).get("session_token")?.value ?? "";
-  const isAdmin = await hasTag(sessionToken, ["Администратор"]);
-  const rawItems = await getNews();
-  const newsItems = rawItems.map((item) => ({
-    ...item,
-    date: item.date,
-  }));
+export default async function GuildInfoPage() {
+  const settings = await getSalaryEligibilitySettings();
 
-  return <NewsPageClient isAdmin={isAdmin} items={newsItems} />;
+  return (
+    <div className="flex min-h-screen flex-col bg-background text-onBackground p-8">
+      <h1 className="text-3xl font-bold mb-6 text-primary">
+        Основная информация
+      </h1>
+      <GuildInfoContent settings={settings} />
+    </div>
+  );
 }
