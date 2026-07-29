@@ -1,7 +1,7 @@
-"use server";
 import { cookies } from "next/headers";
 import { LootIcon } from "./icons/LootIconComponent";
 import { LootQueuePopover } from "./LootQueuePopover";
+import { EditablePriceCell } from "./EditablePriceCell";
 import {
   Table,
   TableBody,
@@ -14,7 +14,7 @@ import { hasTag } from "@/actions/hasTag";
 
 export type LootItem = {
   name: string;
-  price: number | string | null;
+  price: number | null;
   icon: string;
 };
 
@@ -44,7 +44,11 @@ export async function PricesComponent({ items }: { items: LootItem[] }) {
                 </div>
               </TableCell>
               <TableCell className="text-yellow-600 font-semibold">
-                {item.price}
+                <EditablePriceCell
+                  itemName={item.name}
+                  initialPrice={item.price}
+                  isAdmin={isAdmin}
+                />
               </TableCell>
             </TableRow>
           </LootQueuePopover>

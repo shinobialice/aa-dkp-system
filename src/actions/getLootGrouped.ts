@@ -14,17 +14,11 @@ export async function getLootGrouped() {
 
   const grouped: Record<
     string,
-    { name: string; price: string | number | null; icon: string }[]
+    { name: string; price: number | null; icon: string }[]
   > = {};
 
   for (const item of items) {
     const source = sourceMap[item.name] || "Разное";
-
-    const displayPrice =
-      item.name.includes("Средоточие") && item.price === null
-        ? "Идут в комплекте"
-        : item.price;
-
     const icon = getLootIconUrl(item.name);
 
     if (!grouped[source]) {
@@ -33,7 +27,7 @@ export async function getLootGrouped() {
 
     grouped[source].push({
       name: item.name,
-      price: displayPrice,
+      price: item.price,
       icon,
     });
   }
