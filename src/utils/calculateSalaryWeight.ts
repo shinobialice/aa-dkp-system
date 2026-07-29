@@ -21,6 +21,7 @@ type SalaryWeightInput = {
   tenureBonusPercent: number;
   individualBonusPercent: number;
   penaltyPoints: number;
+  asOf?: Date;
 };
 
 type SalaryWeightResult = {
@@ -44,6 +45,7 @@ export default function calculateSalaryWeight(
     tenureBonusPercent,
     individualBonusPercent,
     penaltyPoints,
+    asOf,
   } = input;
 
   if (!active) {
@@ -59,7 +61,7 @@ export default function calculateSalaryWeight(
     };
   }
 
-  if (!isProbationOver(joinedAt)) {
+  if (!isProbationOver(joinedAt, asOf)) {
     return { eligible: false, reason: "Испытательный срок не завершён", finalWeight: 0, penaltyPercent: 0 };
   }
 

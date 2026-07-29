@@ -114,6 +114,21 @@ async function getCustomBonus(userId: number): Promise<number> {
   return totalBonus;
 }
 
+// Момент, на который считаются стаж и испытательный срок при генерации ЗП.
+// Для завершившегося месяца — это его последний момент (граница со следующим
+// месяцем), зафиксированный навсегда. Для текущего (ещё не закончившегося)
+// месяца — реальное "сейчас", как и раньше. Без этого перегенерация ЗП за
+// прошлый месяц спустя время задним числом увеличивала бы бонус за стаж
+// (он растёт без потолка) и могла бы задним числом "закрывать" испытательный
+// срок, меняя уже выплаченные исторические суммы.
+function getSalaryAsOfDate(month: number, year: number): Date {
+  const startOfNextMonth = new Date(
+    Date.UTC(month === 12 ? year + 1 : year, month % 12, 1),
+  );
+  const now = new Date();
+  return now < startOfNextMonth ? now : startOfNextMonth;
+}
+
 export async function computeUserSalaryWeight(
   user: {
     id: number;
@@ -132,12 +147,13 @@ export async function computeUserSalaryWeight(
       getCustomBonus(user.id),
     ]);
 
+  const asOf = getSalaryAsOfDate(month, year);
   const tags = (tagRows ?? []).map((t) => t.tag);
   const penaltyPoints = (penaltyRows ?? []).reduce(
     (sum, p) => sum + (p.amount || 0),
     0,
   );
-  const tenureBonusPercent = calculateGuildTenureBonus(user.joined_at);
+  const tenureBonusPercent = calculateGuildTenureBonus(user.joined_at, asOf);
 
   const weightResult = calculateSalaryWeight({
     active: user.active,
@@ -150,6 +166,7 @@ export async function computeUserSalaryWeight(
     tenureBonusPercent,
     individualBonusPercent,
     penaltyPoints,
+    asOf,
   });
 
   return {

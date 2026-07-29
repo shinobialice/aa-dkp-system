@@ -3,11 +3,12 @@
 // Источник: (days>30.5 ? (days/30.5)*1% - 1% : 0) + (days>182 ? 5% : 0), days — дней с даты вступления.
 export default function calculateGuildTenureBonus(
   joinedAt: string | Date | null,
+  asOf: Date = new Date(),
 ): number {
   if (!joinedAt) return 0;
 
   const joined = new Date(joinedAt);
-  const now = new Date();
+  const now = asOf;
   const days = Math.floor(
     (now.getTime() - joined.getTime()) / (1000 * 60 * 60 * 24),
   );
