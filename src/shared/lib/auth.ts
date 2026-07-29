@@ -1,6 +1,6 @@
 import { parse } from "cookie";
 import { NextRequest } from "next/server";
-import supabase from "./supabase";
+import supabase from "./supabaseAdmin";
 
 export async function getUserFromRequest(req: NextRequest) {
   const cookies = parse(req.headers.get("cookie") || "");

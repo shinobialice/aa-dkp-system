@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/shared/lib/supabase";
+import supabase from "@/shared/lib/supabaseAdmin";
 
 type LootItem = {
   name: string;

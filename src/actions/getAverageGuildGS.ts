@@ -1,5 +1,5 @@
 "use server";
-import supabase from "@/shared/lib/supabase";
+import supabase from "@/shared/lib/supabaseAdmin";
 
 export async function getAverageGuildGS() {
   const { data: users, error } = await supabase

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import supabase from "@/shared/lib/supabase";
+import { getUsernamesByIds } from "@/actions/getUsernamesByIds";
 import {
   Pagination,
   PaginationContent,
@@ -55,15 +56,7 @@ export default function BossRespawnHistory() {
           new Set(data.map((row: any) => row.user_id)),
         );
         // Fetch usernames for those ids
-        const { data: users } = await supabase
-          .from("user")
-          .select("id,username")
-          .in("id", userIds);
-        if (users) {
-          users.forEach((u: any) => {
-            userMap[u.id] = u.username;
-          });
-        }
+        userMap = await getUsernamesByIds(userIds);
       }
       if (isMounted && data) {
         setRows(

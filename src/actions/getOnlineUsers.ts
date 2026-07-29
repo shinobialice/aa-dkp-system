@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/shared/lib/supabase";
+import supabase from "@/shared/lib/supabaseAdmin";
 
 const ONLINE_THRESHOLD_MS = 2 * 60 * 1000; // 2 минуты без heartbeat = не в сети
 

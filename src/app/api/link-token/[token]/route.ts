@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import supabase from "@/shared/lib/supabase";
+import supabase from "@/shared/lib/supabaseAdmin";
 
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.pathname.split("/").pop();

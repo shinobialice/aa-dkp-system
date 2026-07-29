@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/shared/lib/supabase";
+import supabase from "@/shared/lib/supabaseAdmin";
 import { revalidatePath } from "next/cache";
 import ensurePrivilieges from "./ensurePrivilieges";
 

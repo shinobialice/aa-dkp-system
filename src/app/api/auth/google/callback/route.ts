@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import supabase from "@/shared/lib/supabase";
+import supabase from "@/shared/lib/supabaseAdmin";
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 

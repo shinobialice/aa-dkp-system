@@ -1,5 +1,5 @@
 "use server";
-import supabase from "@/shared/lib/supabase";
+import supabase from "@/shared/lib/supabaseAdmin";
 
 export async function getCurrentMonthSalaries() {
   const now = new Date();

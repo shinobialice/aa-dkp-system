@@ -1,5 +1,5 @@
 "use server";
-import supabase from "@/shared/lib/supabase";
+import supabase from "@/shared/lib/supabaseAdmin";
 import type { Database } from "@/types/supabase";
 
 type RaidRow = Database["public"]["Tables"]["raid"]["Row"];

@@ -1,5 +1,5 @@
 "use server";
-import supabase from "@/shared/lib/supabase";
+import supabase from "@/shared/lib/supabaseAdmin";
 import ensurePrivilieges from "./ensurePrivilieges";
 
 function getMoscowISOString(date: Date): string {

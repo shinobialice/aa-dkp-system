@@ -1,4 +1,4 @@
-import supabase from "@/shared/lib/supabase";
+import supabase from "@/shared/lib/supabaseAdmin";
 import MembersTable from "@/widgets/MembersTable";
 
 const MembersPage = async () => {

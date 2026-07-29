@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, FC, ReactNode } from "react";
-import supabase from "@/shared/lib/supabase";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import { Loader } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";

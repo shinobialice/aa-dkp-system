@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/shared/lib/supabase";
+import supabase from "@/shared/lib/supabaseAdmin";
 
 // Босс-события "Кошка"/"Морф" не учитываются в проценте учёта баллов.
 const EXCLUDED_FROM_POINTS_ACCOUNTING_BOSS_IDS = [14, 11];

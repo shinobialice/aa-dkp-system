@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/shared/lib/supabase";
+import supabase from "@/shared/lib/supabaseAdmin";
 
 export const getAllUsersWithInventory = async () => {
   const { data: users, error } = await supabase

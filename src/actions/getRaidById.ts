@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/shared/lib/supabase";
+import supabase from "@/shared/lib/supabaseAdmin";
 
 export const getRaidById = async (id: string) => {
   const { data: raid, error } = await supabase

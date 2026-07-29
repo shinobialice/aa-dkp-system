@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/shared/lib/supabase";
+import supabase from "@/shared/lib/supabaseAdmin";
 
 export async function getRaidData(year: number, month?: number) {
   const { data: raids, error } = await supabase

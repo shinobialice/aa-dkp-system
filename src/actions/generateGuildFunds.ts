@@ -1,5 +1,5 @@
 "use server";
-import supabase from "@/shared/lib/supabase";
+import supabase from "@/shared/lib/supabaseAdmin";
 
 // Остаток ("свободная" голда) предыдущего месяца — то, что не занято под
 // ещё не выплаченные ЗП этого месяца. Именно эта сумма становится

@@ -1,4 +1,6 @@
-import supabase from "@/shared/lib/supabase";
+"use server";
+
+import supabase from "@/shared/lib/supabaseAdmin";
 
 export async function getWeeklySchedule() {
   const { data, error } = await supabase

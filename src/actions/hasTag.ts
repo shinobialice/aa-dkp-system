@@ -1,4 +1,4 @@
-import supabase from "@/shared/lib/supabase";
+import supabase from "@/shared/lib/supabaseAdmin";
 import { redirect } from "next/navigation";
 
 export const hasTag = async (sessionToken: string, tags: string[]) => {

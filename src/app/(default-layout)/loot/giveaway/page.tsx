@@ -1,5 +1,5 @@
 "use server";
-import supabase from "@/shared/lib/supabase";
+import supabase from "@/shared/lib/supabaseAdmin";
 import { hasTag } from "@/actions/hasTag";
 import LootGiveaway from "@/widgets/Loot/LootGiveaway";
 import { lootColumns } from "@/widgets/Loot/LootGiveaway/lootColumns";

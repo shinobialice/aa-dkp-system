@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/shared/lib/supabase";
+import supabase from "@/shared/lib/supabaseAdmin";
 
 export const getLootQueueByItemName = async (itemName: string) => {
   const { data: item, error: itemError } = await supabase

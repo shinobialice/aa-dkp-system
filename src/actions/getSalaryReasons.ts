@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/shared/lib/supabase";
+import supabase from "@/shared/lib/supabaseAdmin";
 import { computeUserSalaryWeight } from "./financeActions";
 
 export async function getSalaryReasons(month: number, year: number) {
