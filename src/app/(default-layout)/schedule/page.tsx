@@ -18,7 +18,6 @@ const bossColors: Record<string, string> = {
   Левиафан: "var(--chart-2)",
   Калидис: "var(--chart-3)",
   Анталлон: "var(--chart-4)",
-  Фесаникс: "var(--chart-2)",
   "Оборона Ифнира": "var(--chart-5)",
   "Великий луг": "var(--chart-1)",
   "Осада замка": "var(--foreground)",

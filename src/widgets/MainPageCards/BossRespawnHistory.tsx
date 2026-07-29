@@ -22,6 +22,7 @@ interface HistoryRow {
   user_id: number;
   created_at: string;
   username: string;
+  packs_needed: number | null;
 }
 
 const PAGE_SIZE = 15;
@@ -43,7 +44,7 @@ export default function BossRespawnHistory() {
       const { data } = await supabase
         .from("boss_respawn_history")
         .select(
-          "id,boss_name,action,kill_time,prev_kill_time,next_respawn,user_id,created_at",
+          "id,boss_name,action,kill_time,prev_kill_time,next_respawn,user_id,created_at,packs_needed",
         )
         .order("id", { ascending: false })
         .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
@@ -93,6 +94,7 @@ export default function BossRespawnHistory() {
               <th className="p-2 border">Время убийства</th>
               <th className="p-2 border">Предыдущее время</th>
               <th className="p-2 border">Следующий респаун</th>
+              <th className="p-2 border">Паков</th>
               <th className="p-2 border">Кто установил</th>
               <th className="p-2 border">Когда установлено</th>
             </tr>
@@ -100,13 +102,13 @@ export default function BossRespawnHistory() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={7} className="text-center p-4">
+                <td colSpan={8} className="text-center p-4">
                   Загрузка...
                 </td>
               </tr>
             ) : rows.length === 0 ? (
               <tr>
-                <td colSpan={7} className="text-center p-4">
+                <td colSpan={8} className="text-center p-4">
                   Нет записей
                 </td>
               </tr>
@@ -122,6 +124,7 @@ export default function BossRespawnHistory() {
                   <td className="p-2 border">
                     {row.next_respawn ? formatDT(row.next_respawn) : "-"}
                   </td>
+                  <td className="p-2 border">{row.packs_needed ?? "-"}</td>
                   <td className="p-2 border">{row.username}</td>
                   <td className="p-2 border">{formatDT(row.created_at)}</td>
                 </tr>
@@ -192,6 +195,11 @@ function formatDT(dt: string) {
     new Date(dt).toLocaleString("ru-RU", {
       hour12: false,
       timeZone: "Europe/Moscow",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
     }) + " (МСК)"
   );
 }

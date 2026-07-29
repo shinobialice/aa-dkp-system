@@ -29,12 +29,12 @@ const InfoCard: FC<{ title: string; content: ReactNode }> = ({
   title,
   content,
 }) => (
-  <Card>
+  <Card className="min-w-0">
     <CardHeader>
       <CardTitle>{title}</CardTitle>
     </CardHeader>
-    <CardContent>
-      <div>{content}</div>
+    <CardContent className="min-w-0">
+      <div className="min-w-0">{content}</div>
     </CardContent>
   </Card>
 );

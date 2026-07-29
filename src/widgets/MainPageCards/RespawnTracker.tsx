@@ -2,20 +2,45 @@
 
 import { useEffect, useState, FC } from "react";
 import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui";
 import supabase from "@/shared/lib/supabase";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import { DateTimePopover } from "./DateTimePopover";
 
-type BossName = "Марли" | "Морф";
+type BossName = "Марли" | "Морф" | "Кириос";
 type BossState = {
   lastKill: string | null; // ISO string
+  packsNeeded: number | null;
 };
-const respawnHours = 12;
-const respawnWindow = 1; // hours
-const bosses: BossName[] = ["Марли", "Морф"];
+
+const respawnWindow = 1; // hours, общий "промежуток" для всех боссов
+const respawnHoursByBoss: Record<BossName, number> = {
+  Марли: 12,
+  Морф: 12,
+  Кириос: 2,
+};
+const bosses: BossName[] = ["Марли", "Морф", "Кириос"];
+
+const emptyStates: Record<BossName, BossState> = {
+  Марли: { lastKill: null, packsNeeded: null },
+  Морф: { lastKill: null, packsNeeded: null },
+  Кириос: { lastKill: null, packsNeeded: null },
+};
+
+function formatMoscowDateTime(date: Date): string {
+  return date.toLocaleString("ru-RU", {
+    hour12: false,
+    timeZone: "Europe/Moscow",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
 
 const RespawnTracker: FC = () => {
-  function getRespawnInfo(lastKill: string | null) {
+  function getRespawnInfo(lastKill: string | null, respawnHours: number) {
     if (!lastKill)
       return {
         status: "Нет данных",
@@ -38,24 +63,22 @@ const RespawnTracker: FC = () => {
     if (now < respawnStart) {
       waiting = true;
       const ms = respawnStart.getTime() - now.getTime();
-      const h = Math.floor(ms / 3600000);
-      const m = Math.floor((ms % 3600000) / 60000);
-      const s = Math.floor((ms % 60000) / 1000);
-      timeLeft = `${h > 0 ? h + "ч " : ""}${m > 0 ? m + "мин " : ""}${s}с`;
+      const totalMinutes = Math.ceil(ms / 60000);
+      const h = Math.floor(totalMinutes / 60);
+      const m = totalMinutes % 60;
+      timeLeft = `${h > 0 ? h + "ч " : ""}${m}мин`;
       status = `Ожидание (${timeLeft})`;
     } else if (now >= respawnStart && now <= respawnEnd) {
       status = "Возможен респаун!";
     } else {
       status = "Ожидание убийства";
     }
-    const nextRespawn = `${respawnStart.toLocaleString("ru-RU", { hour12: false, timeZone: "Europe/Moscow" })} (МСК)`;
-    const lastKillDisplay = `${killDate.toLocaleString("ru-RU", { hour12: false, timeZone: "Europe/Moscow" })} (МСК)`;
+    const nextRespawn = `${formatMoscowDateTime(respawnStart)} (МСК)`;
+    const lastKillDisplay = `${formatMoscowDateTime(killDate)} (МСК)`;
     return { status, nextRespawn, lastKillDisplay, waiting, timeLeft };
   }
-  const [bossStates, setBossStates] = useState<Record<BossName, BossState>>({
-    Марли: { lastKill: null },
-    Морф: { lastKill: null },
-  });
+  const [bossStates, setBossStates] =
+    useState<Record<BossName, BossState>>(emptyStates);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<BossName | null>(null);
   const [tick, setTick] = useState(0);
@@ -66,16 +89,22 @@ const RespawnTracker: FC = () => {
       setLoading(true);
       const { data } = await supabase
         .from("boss_respawn")
-        .select("boss_name,last_kill")
+        .select("boss_name,last_kill,packs_needed")
         .in("boss_name", bosses);
       if (data) {
-        const loaded: Record<BossName, BossState> = {
-          Марли: { lastKill: null },
-          Морф: { lastKill: null },
-        };
-        data.forEach((row: { boss_name: BossName; last_kill: string }) => {
-          loaded[row.boss_name] = { lastKill: row.last_kill };
-        });
+        const loaded: Record<BossName, BossState> = { ...emptyStates };
+        data.forEach(
+          (row: {
+            boss_name: BossName;
+            last_kill: string | null;
+            packs_needed: number | null;
+          }) => {
+            loaded[row.boss_name] = {
+              lastKill: row.last_kill,
+              packsNeeded: row.packs_needed,
+            };
+          },
+        );
         setBossStates(loaded);
       }
       setLoading(false);
@@ -108,7 +137,7 @@ const RespawnTracker: FC = () => {
     const prevKill = bossStates[boss].lastKill;
     const killDate = new Date(iso);
     const nextRespawn = new Date(
-      killDate.getTime() + respawnHours * 60 * 60 * 1000,
+      killDate.getTime() + respawnHoursByBoss[boss] * 60 * 60 * 1000,
     );
     await supabase.from("boss_respawn_history").insert({
       boss_name: boss,
@@ -118,9 +147,26 @@ const RespawnTracker: FC = () => {
       next_respawn: nextRespawn.toISOString(),
       user_id: user.id,
       created_at: new Date().toISOString(),
+      packs_needed: bossStates[boss].packsNeeded,
     });
-    setBossStates((prev) => ({ ...prev, [boss]: { lastKill: iso } }));
+    setBossStates((prev) => ({
+      ...prev,
+      [boss]: { ...prev[boss], lastKill: iso },
+    }));
     setSaving(null);
+  }
+
+  async function handlePacksChange(boss: BossName, value: number | null) {
+    setBossStates((prev) => ({
+      ...prev,
+      [boss]: { ...prev[boss], packsNeeded: value },
+    }));
+    await supabase
+      .from("boss_respawn")
+      .upsert(
+        { boss_name: boss, packs_needed: value },
+        { onConflict: "boss_name" },
+      );
   }
 
   function handleKilledNow(boss: BossName) {
@@ -132,6 +178,7 @@ const RespawnTracker: FC = () => {
     {
       Марли: null,
       Морф: null,
+      Кириос: null,
     },
   );
   function handleSetTime(boss: BossName, date: Date | null) {
@@ -151,25 +198,29 @@ const RespawnTracker: FC = () => {
 
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-full text-sm border">
+      <table className="w-full table-fixed text-sm border">
         <thead>
           <tr className="bg-muted">
-            <th className="p-2 border">Название</th>
-            <th className="p-2 border">Время респауна</th>
-            <th className="p-2 border">Статус</th>
-            <th className="p-2 border">Следующий респаун</th>
-            <th className="p-2 border">Последнее убийство</th>
-            <th className="p-2 border">Действия</th>
+            <th className="p-2 border w-[80px]">Название</th>
+            <th className="p-2 border w-[125px]">Время респауна</th>
+            <th className="p-2 border w-[125px]">Статус</th>
+            <th className="p-2 border w-[125px]">Следующий респаун</th>
+            <th className="p-2 border w-[125px]">Последнее убийство</th>
+            <th className="p-2 border w-[60px]">Паков</th>
+            <th className="p-2 border w-[136px]">Действия</th>
           </tr>
         </thead>
         <tbody>
           {bosses.map((boss) => {
             const state = bossStates[boss];
-            const info = getRespawnInfo(state.lastKill);
+            const respawnHours = respawnHoursByBoss[boss];
+            const info = getRespawnInfo(state.lastKill, respawnHours);
             return (
               <tr key={boss}>
                 <td className="p-2 border font-bold">{boss}</td>
-                <td className="p-2 border">12 ч. (+ 1 ч. промежуток)</td>
+                <td className="p-2 border">
+                  {respawnHours} ч. (+ {respawnWindow} ч. промежуток)
+                </td>
                 <td className={`p-2 border`}>
                   <span className={getStatusColor(info.status)}>
                     {info.status}
@@ -178,9 +229,26 @@ const RespawnTracker: FC = () => {
                 <td className="p-2 border">{info.nextRespawn}</td>
                 <td className="p-2 border">{info.lastKillDisplay}</td>
                 <td className="p-2 border">
+                  {boss === "Кириос" ? (
+                    <Input
+                      type="number"
+                      value={state.packsNeeded ?? ""}
+                      onChange={(e) =>
+                        handlePacksChange(
+                          boss,
+                          e.target.value === "" ? null : Number(e.target.value),
+                        )
+                      }
+                      className="w-12 px-1"
+                    />
+                  ) : (
+                    "-"
+                  )}
+                </td>
+                <td className="p-2 border">
                   <div className="flex flex-col items-center gap-2">
                     <Button
-                      className="w-[150px] cursor-pointer"
+                      className="w-[120px] cursor-pointer text-xs px-1"
                       onClick={() => handleKilledNow(boss)}
                       disabled={saving === boss || loading}
                     >
@@ -194,7 +262,7 @@ const RespawnTracker: FC = () => {
                       }}
                     >
                       <Button
-                        className="w-[150px] cursor-pointer"
+                        className="w-[120px] cursor-pointer text-xs px-1"
                         variant="outline"
                         disabled={saving === boss || loading}
                         onClick={() => {}}
