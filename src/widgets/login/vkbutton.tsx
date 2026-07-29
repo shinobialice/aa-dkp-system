@@ -10,9 +10,6 @@ export default function VkLoginButton() {
     const codeChallenge = await generateCodeChallenge(codeVerifier);
     const state = crypto.randomUUID();
 
-    localStorage.setItem("vk_code_verifier", codeVerifier);
-    localStorage.setItem("vk_state", state);
-
     const params = new URLSearchParams({
       response_type: "code",
       client_id: process.env.NEXT_PUBLIC_VK_CLIENT_ID!,
@@ -22,9 +19,9 @@ export default function VkLoginButton() {
       state,
     });
 
-    window.location.href = `https://id.vk.ru/authorize?${params}`;
     Cookies.set("vk_code_verifier", codeVerifier);
     Cookies.set("vk_state", state);
+    window.location.href = `https://id.vk.ru/authorize?${params}`;
   };
 
   return (

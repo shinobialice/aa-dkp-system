@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
   const cookieStore = await cookies();
 
   const savedState = cookieStore.get("vk_state")?.value;
-  const codeVerifier = cookieStore.get("codeVerifier")?.value;
+  const codeVerifier = cookieStore.get("vk_code_verifier")?.value;
   const linkToken = cookieStore.get("link-token")?.value;
 
   if (!savedState || !codeVerifier || state !== savedState) {
