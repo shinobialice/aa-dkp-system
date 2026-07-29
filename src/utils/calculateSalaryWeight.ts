@@ -51,7 +51,12 @@ export default function calculateSalaryWeight(
   }
 
   if (!isEligibleForSalary) {
-    return { eligible: false, reason: "Нет права на зарплату", finalWeight: 0, penaltyPercent: 0 };
+    return {
+      eligible: false,
+      reason: "Лох, ГМ забрал зарплату у тебя",
+      finalWeight: 0,
+      penaltyPercent: 0,
+    };
   }
 
   if (!isProbationOver(joinedAt)) {

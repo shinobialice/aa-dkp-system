@@ -112,6 +112,56 @@ async function getCustomBonus(userId: number): Promise<number> {
   return totalBonus;
 }
 
+export async function computeUserSalaryWeight(
+  user: {
+    id: number;
+    joined_at: string | null;
+    active: boolean;
+    is_eligible_for_salary: boolean;
+  },
+  month: number,
+  year: number,
+) {
+  const [attendance, tagRows, penaltyRows, individualBonusPercent] =
+    await Promise.all([
+      getUserMonthlyAttendance(user.id, year, month),
+      getUserTags(user.id),
+      getUserPenaltyPoints(user.id),
+      getCustomBonus(user.id),
+    ]);
+
+  const tags = (tagRows ?? []).map((t) => t.tag);
+  const penaltyPoints = (penaltyRows ?? []).reduce(
+    (sum, p) => sum + (p.amount || 0),
+    0,
+  );
+  const tenureBonusPercent = calculateGuildTenureBonus(user.joined_at);
+
+  const weightResult = calculateSalaryWeight({
+    active: user.active,
+    isEligibleForSalary: user.is_eligible_for_salary,
+    joinedAt: user.joined_at,
+    tags,
+    primePercent: attendance.primePercent,
+    totalPercent: attendance.totalPercent,
+    basePoints: attendance.totalPercent,
+    tenureBonusPercent,
+    individualBonusPercent,
+    penaltyPoints,
+  });
+
+  return {
+    userId: user.id,
+    basePoints: attendance.totalPercent,
+    tenureBonusPercent,
+    individualBonusPercent,
+    aglPercent: attendance.aglPercent,
+    primePercent: attendance.primePercent,
+    totalPercent: attendance.totalPercent,
+    ...weightResult,
+  };
+}
+
 export const generateSalaries = async (month: number, year: number) => {
   const { data: fund, error: fundError } = await supabase
     .from("GuildFunds")
@@ -135,46 +185,13 @@ export const generateSalaries = async (month: number, year: number) => {
   }
 
   const userRows = await Promise.all(
-    users.map(async (user) => {
-      const [attendance, tagRows, penaltyRows, individualBonusPercent] =
-        await Promise.all([
-          getUserMonthlyAttendance(user.id, year, month),
-          getUserTags(user.id),
-          getUserPenaltyPoints(user.id),
-          getCustomBonus(user.id),
-        ]);
-
-      const tags = (tagRows ?? []).map((t) => t.tag);
-      const penaltyPoints = (penaltyRows ?? []).reduce(
-        (sum, p) => sum + (p.amount || 0),
-        0,
-      );
-      const tenureBonusPercent = calculateGuildTenureBonus(user.joined_at);
-
-      const weightResult = calculateSalaryWeight({
-        active: true,
-        isEligibleForSalary: true,
-        joinedAt: user.joined_at,
-        tags,
-        primePercent: attendance.primePercent,
-        totalPercent: attendance.totalPercent,
-        basePoints: attendance.totalPercent,
-        tenureBonusPercent,
-        individualBonusPercent,
-        penaltyPoints,
-      });
-
-      return {
-        userId: user.id,
-        basePoints: attendance.totalPercent,
-        tenureBonusPercent,
-        individualBonusPercent,
-        aglPercent: attendance.aglPercent,
-        primePercent: attendance.primePercent,
-        totalPercent: attendance.totalPercent,
-        ...weightResult,
-      };
-    }),
+    users.map((user) =>
+      computeUserSalaryWeight(
+        { ...user, active: true, is_eligible_for_salary: true },
+        month,
+        year,
+      ),
+    ),
   );
 
   const eligibleRows = userRows.filter((r) => r.eligible);

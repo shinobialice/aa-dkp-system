@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { getAllUsersActivityWithPercent } from "@/actions/getAllUsersActivityWithPercent";
+import { getCurrentMonthSalaries } from "@/actions/getCurrentMonthSalaries";
+import { getSalaryReasons } from "@/actions/getSalaryReasons";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
 import { SortingState, ColumnFiltersState } from "@tanstack/react-table";
@@ -20,7 +22,12 @@ export default function MembersTable({
 
   useEffect(() => {
     async function load() {
-      const activity = await getAllUsersActivityWithPercent();
+      const now = new Date();
+      const [activity, salaries, salaryReasons] = await Promise.all([
+        getAllUsersActivityWithPercent(),
+        getCurrentMonthSalaries(),
+        getSalaryReasons(now.getMonth() + 1, now.getFullYear()),
+      ]);
       const tableData = initialUsers.map((user) => {
         const act = activity[user.id] ?? {
           primePercent: 0,
@@ -41,6 +48,8 @@ export default function MembersTable({
           joinedAtFormatted: user.joined_at
             ? new Date(user.joined_at).toLocaleDateString("ru-RU")
             : "-",
+          salary: salaries[user.id] ?? null,
+          salaryReason: salaryReasons[user.id] ?? null,
           ...act,
         };
       });

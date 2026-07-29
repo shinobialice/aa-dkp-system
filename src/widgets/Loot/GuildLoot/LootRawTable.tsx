@@ -18,6 +18,16 @@ import { getActiveUsers } from "@/actions/getActiveUsers";
 import { distributeLootItem } from "@/actions/distributeLootItems";
 import { getLoot } from "@/actions/lootActions";
 
+function isSameMonth(date: Date, month: number, year: number) {
+  return date.getMonth() + 1 === month && date.getFullYear() === year;
+}
+
+function isOnOrBeforeMonth(date: Date, month: number, year: number) {
+  const y = date.getFullYear();
+  const m = date.getMonth() + 1;
+  return y < year || (y === year && m <= month);
+}
+
 export function LootRawTable({
   loot,
   onDelete,
@@ -30,7 +40,7 @@ export function LootRawTable({
   onDelete: (loot: LootItem) => void;
   onSell: (loot: LootItem) => void;
   isAdmin: boolean;
-  selectedMonth: number; 
+  selectedMonth: number;
   selectedYear: number;
 }) {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -65,22 +75,31 @@ export function LootRawTable({
           <TableBody>
             {loot
               .filter((item) => {
-                if (item.status === "В наличии") return true;
-                if (item.status === "В казну" && item.sold_at) {
-                  const treasuryDate = new Date(item.sold_at);
-                  return (
-                    treasuryDate.getMonth() + 1 === selectedMonth &&
-                    treasuryDate.getFullYear() === selectedYear
-                  );
-                }
                 if (item.status === "Распродано") return false;
-                if (item.status === "Продано" && item.sold_at) {
-                  const soldDate = new Date(item.sold_at);
-                  return (
-                    soldDate.getMonth() + 1 === selectedMonth &&
-                    soldDate.getFullYear() === selectedYear
-                  );
+
+                const acquired = item.acquired_at
+                  ? new Date(item.acquired_at)
+                  : null;
+                const acquiredThisMonth = acquired
+                  ? isSameMonth(acquired, selectedMonth, selectedYear)
+                  : false;
+
+                if (item.status === "В наличии") {
+                  // Ещё не продано — переносим из прошлых месяцев, пока не продастся
+                  return acquired
+                    ? isOnOrBeforeMonth(acquired, selectedMonth, selectedYear)
+                    : false;
                 }
+
+                if (item.status === "В казну" || item.status === "Продано") {
+                  const sold = item.sold_at ? new Date(item.sold_at) : null;
+                  const soldThisMonth = sold
+                    ? isSameMonth(sold, selectedMonth, selectedYear)
+                    : false;
+                  // Показываем, если получено в этом месяце или продано в этом месяце
+                  return acquiredThisMonth || soldThisMonth;
+                }
+
                 return false;
               })
               .map((item) => (

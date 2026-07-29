@@ -1,8 +1,11 @@
 import * as React from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, Info } from "lucide-react";
 import Link from "next/link";
+import { classColors, classIcons } from "./classStyles";
+import { Badge } from "@/shared/ui";
 import { Button } from "@/shared/ui";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/ui";
 
 export const columns: ColumnDef<any>[] = [
   {
@@ -35,7 +38,19 @@ export const columns: ColumnDef<any>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => row.original.class,
+    cell: ({ row }) => {
+      const cls: string | null = row.original.class;
+      if (!cls) return "—";
+      return (
+        <Badge
+          className="text-background gap-1"
+          style={{ backgroundColor: classColors[cls] ?? "rgb(120,120,120)" }}
+        >
+          {classIcons[cls]}
+          {cls}
+        </Badge>
+      );
+    },
     filterFn: (row, columnId, filterValue) => {
       if (!filterValue || filterValue.length === 0) {
         return true;
@@ -173,6 +188,37 @@ export const columns: ColumnDef<any>[] = [
           }}
         >
           {`${value.toFixed(0)}%`}
+        </div>
+      );
+    },
+    sortingFn: "basic",
+  },
+  {
+    accessorKey: "salary",
+    header: ({ column }) => (
+      <Button
+        className="cursor-pointer"
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Зарплата
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => {
+      const value: number | null = row.original.salary;
+      const reason: string | null = row.original.salaryReason;
+      return (
+        <div className="flex items-center gap-1">
+          <span>{value != null ? value.toLocaleString("ru-RU") : "—"}</span>
+          {reason && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="size-3.5 text-muted-foreground cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent>{reason}</TooltipContent>
+            </Tooltip>
+          )}
         </div>
       );
     },

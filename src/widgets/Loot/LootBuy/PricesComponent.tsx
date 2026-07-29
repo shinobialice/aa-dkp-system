@@ -18,7 +18,13 @@ export type LootItem = {
   icon: string;
 };
 
-export async function PricesComponent({ items }: { items: LootItem[] }) {
+export async function PricesComponent({
+  items,
+  stock,
+}: {
+  items: LootItem[];
+  stock?: Record<string, number>;
+}) {
   const sessionToken = (await cookies()).get("session_token")?.value ?? "";
   const isAdmin = await hasTag(sessionToken, ["Администратор"]);
   return (
@@ -27,6 +33,7 @@ export async function PricesComponent({ items }: { items: LootItem[] }) {
         <TableRow>
           <TableHead>Название</TableHead>
           <TableHead>Цена</TableHead>
+          <TableHead>В наличии</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -50,6 +57,7 @@ export async function PricesComponent({ items }: { items: LootItem[] }) {
                   isAdmin={isAdmin}
                 />
               </TableCell>
+              <TableCell>{stock?.[item.name] || "—"}</TableCell>
             </TableRow>
           </LootQueuePopover>
         ))}
