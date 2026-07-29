@@ -1,7 +1,60 @@
 "use server";
 import supabase from "@/shared/lib/supabase";
 
-export const generateGuildFunds = async (month: number, year: number, advanceSent: number = 0) => {
+// Остаток ("свободная" голда) предыдущего месяца — то, что не занято под
+// ещё не выплаченные ЗП этого месяца. Именно эта сумма становится
+// стартовым остатком нового месяца, если для предыдущего уже есть фонд.
+async function getCarryOverFromPreviousMonth(
+  month: number,
+  year: number,
+): Promise<number> {
+  const prevMonth = month === 1 ? 12 : month - 1;
+  const prevYear = month === 1 ? year - 1 : year;
+
+  const { data: prevFund } = await supabase
+    .from("GuildFunds")
+    .select("inTreasury")
+    .eq("month", prevMonth)
+    .eq("year", prevYear)
+    .maybeSingle();
+
+  if (!prevFund) return 0;
+
+  const { data: prevSalaries } = await supabase
+    .from("Salary")
+    .select("total, sentAmount")
+    .eq("month", prevMonth)
+    .eq("year", prevYear);
+
+  const totalSalaries = (prevSalaries ?? []).reduce(
+    (sum, s) => sum + (s.total ?? 0),
+    0,
+  );
+  const sentAmount = (prevSalaries ?? []).reduce(
+    (sum, s) => sum + (s.sentAmount ?? 0),
+    0,
+  );
+  const remainingSalaries = totalSalaries - sentAmount;
+
+  return prevFund.inTreasury - remainingSalaries;
+}
+
+export const generateGuildFunds = async (
+  month: number,
+  year: number,
+  explicitAdvanceSent?: number,
+) => {
+  let advanceSent: number = explicitAdvanceSent ?? 0;
+  if (explicitAdvanceSent === undefined) {
+    const { data: existingFund } = await supabase
+      .from("GuildFunds")
+      .select("advanceSent")
+      .eq("month", month)
+      .eq("year", year)
+      .maybeSingle();
+    advanceSent = existingFund?.advanceSent ?? 0;
+  }
+
   const startDate = new Date(Date.UTC(year, month - 1, 1));
   const endDate = new Date(Date.UTC(month === 12 ? year + 1 : year, month % 12, 1));
 
@@ -54,9 +107,12 @@ export const generateGuildFunds = async (month: number, year: number, advanceSen
 
   const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
 
+  const carryOver = await getCarryOverFromPreviousMonth(month, year);
+
   const salaryBudget = Math.floor(totalIncome * 0.7);
   const treasuryBudget = Math.floor(totalIncome * 0.3);
-  const inTreasury = totalIncome + treasuryIncomeSum - totalExpenses - advanceSent;
+  const inTreasury =
+    carryOver + totalIncome + treasuryIncomeSum - totalExpenses - advanceSent;
 
   const { error: deleteError } = await supabase
     .from("GuildFunds")
@@ -79,6 +135,7 @@ export const generateGuildFunds = async (month: number, year: number, advanceSen
       inTreasury: inTreasury,
       advanceSent: advanceSent,
       treasuryBudget: treasuryBudget,
+      carryOver: carryOver,
     },
   ]);
 

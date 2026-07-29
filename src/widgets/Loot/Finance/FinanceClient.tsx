@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { useState, useEffect } from "react";
-import { Loader2 } from "lucide-react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/shared/ui";
 import {
   Table,
@@ -26,6 +26,37 @@ import {
 } from "@/actions/financeActions";
 import { generateGuildFunds } from "@/actions/generateGuildFunds";
 
+const AUTO_REFRESH_MS = 60 * 1000;
+
+type Fund = {
+  totalIncome: number;
+  totalExpenses: number;
+  profit: number;
+  salaryBudget: number;
+  treasuryBudget: number;
+  inTreasury: number;
+  advanceSent: number;
+  carryOver: number;
+};
+
+type SalaryRow = {
+  id: number;
+  userId: number;
+  username: string;
+  amount: number;
+  bonus: number | null;
+  total: number;
+  sentAmount: number;
+  sent: boolean;
+  tenurePercent: number;
+  customBonusPercent: number;
+  penaltyPercent: number;
+  weightPercent: number;
+  aglPercent: number;
+  primePercent: number;
+  totalPercent: number;
+};
+
 export default function FinanceClient({
   currentMonth,
   currentYear,
@@ -37,45 +68,54 @@ export default function FinanceClient({
 }) {
   const [month, setMonth] = useState(currentMonth);
   const [year, setYear] = useState(currentYear);
-  const [loadingFund, setLoadingFund] = useState(false);
-  const [loadingSalaries, setLoadingSalaries] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  const [fund, setFund] = useState<null | {
-    totalIncome: number;
-    totalExpenses: number;
-    profit: number;
-    salaryBudget: number;
-    treasuryBudget: number;
-    inTreasury: number;
-    advanceSent: number;
-  }>(null);
+  const [fund, setFund] = useState<Fund | null>(null);
+  const [salaries, setSalaries] = useState<SalaryRow[]>([]);
 
-  const [advanceInput, setAdvanceInput] = useState(0);
+  // Отслеживаем, редактирует ли админ поле аванса прямо сейчас, чтобы
+  // фоновое авто-обновление не перетирало недописанное значение.
+  const editingSalaryId = useRef<number | null>(null);
 
-  const [salaries, setSalaries] = useState<
-    {
-      id: number;
-      userId: number;
-      username: string;
-      amount: number;
-      bonus: number | null;
-      total: number;
-      bonusPercent: number;
-      sentAmount: number;
-      sent: boolean;
-    }[]
-  >([]);
+  const refresh = useCallback(
+    async (m: number, y: number, opts?: { silent?: boolean }) => {
+      if (opts?.silent) setRefreshing(true);
+      try {
+        await generateGuildFunds(m, y);
+        try {
+          await generateSalaries(m, y);
+        } catch {
+          // Нет допущенных пользователей за месяц (например, ещё нет данных) —
+          // фонд всё равно должен отобразиться.
+        }
+        const [fundResult, salariesResult] = await Promise.all([
+          getGuildFunds(m, y),
+          getSalariesForMonth(m, y),
+        ]);
+        setFund(fundResult);
+        if (editingSalaryId.current === null) {
+          setSalaries(salariesResult);
+        }
+        setLastUpdated(new Date());
+      } finally {
+        setRefreshing(false);
+        setInitialLoading(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
-    const load = async () => {
-      const result = await getGuildFunds(month, year);
-      setFund(result);
-      setAdvanceInput(result?.advanceSent ?? 0);
-      const sal = await getSalariesForMonth(month, year);
-      setSalaries(sal);
-    };
-    load();
-  }, [month, year]);
+    setInitialLoading(true);
+    refresh(month, year);
+    const interval = setInterval(
+      () => refresh(month, year, { silent: true }),
+      AUTO_REFRESH_MS,
+    );
+    return () => clearInterval(interval);
+  }, [month, year, refresh]);
 
   const handleAdvanceChange = async (
     salaryId: number,
@@ -88,23 +128,34 @@ export default function FinanceClient({
     await updateSalaryAdvance(salaryId, sentAmount, sent);
   };
 
-  const handleGenerateFund = async () => {
-    await generateGuildFunds(month, year, advanceInput);
-    const updated = await getGuildFunds(month, year);
-    setFund(updated);
-  };
-
-  const handleGenerateSalaries = async () => {
-    await generateSalaries(month, year);
-    const updated = await getSalariesForMonth(month, year);
-    setSalaries(updated);
-  };
+  const totalSalaries = salaries.length
+    ? salaries.reduce((sum, s) => sum + s.total, 0)
+    : (fund?.salaryBudget ?? 0);
+  const liveAdvanceSent = salaries.length
+    ? salaries.reduce((sum, s) => sum + (s.sentAmount ?? 0), 0)
+    : (fund?.advanceSent ?? 0);
+  const effectiveInTreasury = fund
+    ? fund.inTreasury - (fund.advanceSent ?? 0) + liveAdvanceSent
+    : 0;
+  const remainingSalaries = totalSalaries - liveAdvanceSent;
+  const freeGold = effectiveInTreasury - remainingSalaries;
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">
-        Финансы гильдии — {month}/{year}
-      </h1>
+      <div className="flex items-center gap-3">
+        <h1 className="text-2xl font-bold">
+          Финансы гильдии — {month}/{year}
+        </h1>
+        <span className="text-xs text-muted-foreground flex items-center gap-1">
+          {refreshing ? (
+            <>
+              <Loader2 className="animate-spin w-3 h-3" /> обновление…
+            </>
+          ) : lastUpdated ? (
+            `обновлено в ${lastUpdated.toLocaleTimeString("ru-RU")}`
+          ) : null}
+        </span>
+      </div>
       {isAdmin && (
         <div className="flex items-center gap-4">
           <Select
@@ -139,103 +190,59 @@ export default function FinanceClient({
               ))}
             </SelectContent>
           </Select>
-          <Input
-            type="number"
-            value={advanceInput}
-            onChange={(e) => setAdvanceInput(+e.target.value)}
-            placeholder="Выслано авансом"
-            className="w-40"
-          />
           <Button
-            onClick={async () => {
-              setLoadingFund(true);
-              try {
-                await handleGenerateFund();
-              } finally {
-                setLoadingFund(false);
-              }
-            }}
+            onClick={() => refresh(month, year)}
+            variant="outline"
             className="cursor-pointer"
-            disabled={loadingFund}
+            disabled={refreshing}
+            title="Пересчитать сейчас"
           >
-            {loadingFund ? (
-              <Loader2 className="animate-spin w-4 h-4 mr-2" />
-            ) : (
-              "Сгенерировать фонд"
-            )}
-          </Button>
-
-          <Button
-            onClick={async () => {
-              setLoadingSalaries(true);
-              try {
-                await handleGenerateSalaries();
-              } finally {
-                setLoadingSalaries(false);
-              }
-            }}
-            disabled={!fund || loadingSalaries}
-            className={
-              !fund || loadingSalaries
-                ? "cursor-not-allowed opacity-50"
-                : "cursor-pointer"
-            }
-          >
-            {loadingSalaries ? (
-              <Loader2 className="animate-spin w-4 h-4 mr-2" />
-            ) : (
-              "Распределить зарплаты"
-            )}
+            <RefreshCw className={refreshing ? "animate-spin w-4 h-4" : "w-4 h-4"} />
           </Button>
         </div>
       )}
 
-      {fund &&
-        (() => {
-          const totalSalaries = salaries.length
-            ? salaries.reduce((sum, s) => sum + s.total, 0)
-            : fund.salaryBudget;
-          const liveAdvanceSent = salaries.length
-            ? salaries.reduce((sum, s) => sum + (s.sentAmount ?? 0), 0)
-            : (fund.advanceSent ?? 0);
-          const effectiveInTreasury =
-            fund.inTreasury - (fund.advanceSent ?? 0) + liveAdvanceSent;
-          const remainingSalaries = totalSalaries - liveAdvanceSent;
-          const freeGold = effectiveInTreasury - remainingSalaries;
+      {initialLoading && (
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Loader2 className="animate-spin w-4 h-4" /> Загрузка…
+        </div>
+      )}
 
-          return (
-            <div className="grid grid-cols-2 gap-4 border rounded-md p-4 bg-muted/30">
-              <div>
-                💰 Доходы (Продано): <strong>{fund.totalIncome}</strong>
-              </div>
-              <div>
-                📤 Расходы: <strong>{fund.totalExpenses}</strong>
-              </div>
-              <div>
-                👥 Зарплатный фонд (70%): <strong>{fund.salaryBudget}</strong>
-              </div>
-              <div>
-                🏦 Доход казны (30%): <strong>{fund.treasuryBudget}</strong>
-              </div>
-              <div>
-                💰 Сейчас в казне: <strong>{effectiveInTreasury}</strong>
-              </div>
-              <div>
-                📈 "Свободная" голда в казне: <strong>{freeGold}</strong>
-              </div>
-              <div>
-                🧾 Суммарные З/П за месяц: <strong>{totalSalaries}</strong>
-              </div>
-              <div>
-                📨 Выслано авансом: <strong>{liveAdvanceSent}</strong>
-              </div>
-              <div>
-                ⏳ Оставшиеся З/П на месяц:{" "}
-                <strong>{remainingSalaries}</strong>
-              </div>
-            </div>
-          );
-        })()}
+      {fund && (
+        <div className="grid grid-cols-2 gap-4 border rounded-md p-4 bg-muted/30">
+          <div>
+            💰 Доходы (Продано): <strong>{fund.totalIncome}</strong>
+          </div>
+          <div>
+            📤 Расходы: <strong>{fund.totalExpenses}</strong>
+          </div>
+          <div>
+            🔁 Перенесено с прошлого месяца:{" "}
+            <strong>{fund.carryOver ?? 0}</strong>
+          </div>
+          <div>
+            👥 Зарплатный фонд (70%): <strong>{fund.salaryBudget}</strong>
+          </div>
+          <div>
+            🏦 Доход казны (30%): <strong>{fund.treasuryBudget}</strong>
+          </div>
+          <div>
+            💰 Сейчас в казне: <strong>{effectiveInTreasury}</strong>
+          </div>
+          <div>
+            📈 "Свободная" голда в казне: <strong>{freeGold}</strong>
+          </div>
+          <div>
+            🧾 Суммарные З/П за месяц: <strong>{totalSalaries}</strong>
+          </div>
+          <div>
+            📨 Выслано авансом: <strong>{liveAdvanceSent}</strong>
+          </div>
+          <div>
+            ⏳ Оставшиеся З/П на месяц: <strong>{remainingSalaries}</strong>
+          </div>
+        </div>
+      )}
 
       {salaries.length > 0 && (
         <div className="border rounded-md overflow-auto">
@@ -243,9 +250,13 @@ export default function FinanceClient({
             <TableHeader>
               <TableRow>
                 <TableHead>Игрок</TableHead>
-                <TableHead>Базовая сумма</TableHead>
-                <TableHead>Бонус %</TableHead>
-                <TableHead>Бонус</TableHead>
+                <TableHead>АГЛ</TableHead>
+                <TableHead>Прайм</TableHead>
+                <TableHead>Общий</TableHead>
+                <TableHead>%t (гильдия)</TableHead>
+                <TableHead>Доп (бонус)</TableHead>
+                <TableHead>Штр (штраф)</TableHead>
+                <TableHead>%Итог</TableHead>
                 <TableHead>Итого</TableHead>
                 <TableHead>Выслано</TableHead>
                 <TableHead>Сумма аванса</TableHead>
@@ -253,38 +264,46 @@ export default function FinanceClient({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {salaries.map((s) => (
-                <TableRow key={s.userId}>
-                  <TableCell>{s.username}</TableCell>
-                  <TableCell>{s.amount}</TableCell>
-                  <TableCell>{s.bonusPercent ?? 0}%</TableCell>
-                  <TableCell>{s.bonus ?? 0}</TableCell>
-                  <TableCell>{s.total}</TableCell>
-                  <TableCell>
-                    <Checkbox
-                      checked={s.sent}
-                      onCheckedChange={(checked) =>
-                        handleAdvanceChange(
-                          s.id,
-                          s.sentAmount,
-                          checked === true,
-                        )
-                      }
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Input
-                      type="number"
-                      value={s.sentAmount}
-                      onChange={(e) =>
-                        handleAdvanceChange(s.id, +e.target.value, s.sent)
-                      }
-                      className="w-28"
-                    />
-                  </TableCell>
-                  <TableCell>{s.total - s.sentAmount}</TableCell>
-                </TableRow>
-              ))}
+              {[...salaries]
+                .sort((a, b) => b.total - a.total)
+                .map((s) => (
+                  <TableRow key={s.userId}>
+                    <TableCell>{s.username}</TableCell>
+                    <TableCell>{s.aglPercent.toFixed(2)}%</TableCell>
+                    <TableCell>{s.primePercent.toFixed(2)}%</TableCell>
+                    <TableCell>{s.totalPercent.toFixed(2)}%</TableCell>
+                    <TableCell>{s.tenurePercent.toFixed(2)}%</TableCell>
+                    <TableCell>{s.customBonusPercent.toFixed(2)}%</TableCell>
+                    <TableCell>{s.penaltyPercent.toFixed(2)}%</TableCell>
+                    <TableCell>{s.weightPercent.toFixed(2)}%</TableCell>
+                    <TableCell>{s.total}</TableCell>
+                    <TableCell>
+                      <Checkbox
+                        checked={s.sent}
+                        onCheckedChange={(checked) =>
+                          handleAdvanceChange(
+                            s.id,
+                            s.sentAmount,
+                            checked === true,
+                          )
+                        }
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Input
+                        type="number"
+                        value={s.sentAmount}
+                        onFocus={() => (editingSalaryId.current = s.id)}
+                        onBlur={() => (editingSalaryId.current = null)}
+                        onChange={(e) =>
+                          handleAdvanceChange(s.id, +e.target.value, s.sent)
+                        }
+                        className="w-28"
+                      />
+                    </TableCell>
+                    <TableCell>{s.total - s.sentAmount}</TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
         </div>

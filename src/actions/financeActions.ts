@@ -36,6 +36,13 @@ export const getSalariesForMonth = async (month: number, year: number) => {
     total,
     sentAmount,
     sent,
+    tenurePercent,
+    customBonusPercent,
+    penaltyPercent,
+    weightPercent,
+    aglPercent,
+    primePercent,
+    totalPercent,
     month,
     year,
     user (
@@ -52,17 +59,22 @@ export const getSalariesForMonth = async (month: number, year: number) => {
 
   return (data as any[]).map((s) => {
     const username = s.user?.username ?? "Неизвестно";
-    const bonusPercent = s.amount ? Math.round((s.bonus / s.amount) * 100) : 0;
     return {
       id: s.id,
       userId: s.userId,
       username: username ?? "Неизвестно",
       amount: s.amount,
       bonus: s.bonus,
-      bonusPercent,
       total: s.total,
       sentAmount: s.sentAmount ?? 0,
       sent: s.sent ?? false,
+      tenurePercent: s.tenurePercent ?? 0,
+      customBonusPercent: s.customBonusPercent ?? 0,
+      penaltyPercent: s.penaltyPercent ?? 0,
+      weightPercent: s.weightPercent ?? 0,
+      aglPercent: s.aglPercent ?? 0,
+      primePercent: s.primePercent ?? 0,
+      totalPercent: s.totalPercent ?? 0,
     };
   });
 };
@@ -152,6 +164,11 @@ export const generateSalaries = async (month: number, year: number) => {
       return {
         userId: user.id,
         basePoints: attendance.totalPercent,
+        tenureBonusPercent,
+        individualBonusPercent,
+        aglPercent: attendance.aglPercent,
+        primePercent: attendance.primePercent,
+        totalPercent: attendance.totalPercent,
         ...weightResult,
       };
     }),
@@ -207,6 +224,13 @@ export const generateSalaries = async (month: number, year: number) => {
         amount: 0,
         bonus: 0,
         total: 0,
+        tenurePercent: r.tenureBonusPercent,
+        customBonusPercent: r.individualBonusPercent,
+        penaltyPercent: r.penaltyPercent,
+        weightPercent: 0,
+        aglPercent: r.aglPercent,
+        primePercent: r.primePercent,
+        totalPercent: r.totalPercent,
         ...prevAdvance,
       };
     }
@@ -225,6 +249,13 @@ export const generateSalaries = async (month: number, year: number) => {
       amount,
       bonus: total - amount,
       total,
+      tenurePercent: r.tenureBonusPercent,
+      customBonusPercent: r.individualBonusPercent,
+      penaltyPercent: r.penaltyPercent,
+      weightPercent: r.finalWeight,
+      aglPercent: r.aglPercent,
+      primePercent: r.primePercent,
+      totalPercent: r.totalPercent,
       ...prevAdvance,
     };
   });

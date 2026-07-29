@@ -1,0 +1,2 @@
+ALTER TABLE "GuildFunds"
+  ADD COLUMN IF NOT EXISTS "carryOver" numeric NOT NULL DEFAULT 0;
