@@ -8,7 +8,6 @@ import { Button } from "@/shared/ui";
 import { Switch } from "@/shared/ui";
 import { updateUser } from "@/actions/updateUser";
 import { deleteUserTag, addUserTag } from "@/actions/userTagsActions";
-// import useUserTag from "@/hooks/useUserTag";
 import getSalaryEligibilityErrors from "@/utils/getSalaryEligibilityErrors";
 
 type UserType = {
@@ -51,6 +50,7 @@ export function UserTagsSection({
   setTags,
   setUser,
   averageGuildGS,
+  isAdmin,
 }: {
   user: UserType;
   setUser: (user: UserType) => void;
@@ -58,9 +58,9 @@ export function UserTagsSection({
   tags: { id: number; tag: string }[];
   setTags: (tags: { id: number; tag: string }[]) => void;
   averageGuildGS: number;
+  isAdmin: boolean;
 }) {
   const [updating, setUpdating] = useState(false);
-  // const isAdmin = useUserTag("Администратор");
 
   async function toggleActive(newValue: boolean) {
     setUpdating(true);
@@ -157,37 +157,37 @@ export function UserTagsSection({
           >
             {tag.tag}
           </Badge>
-          {/* {isAdmin && ( */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleDeleteTag(tag.id)}
-            className="text-muted-foreground cursor-pointer"
-          >
-            <Trash2 />
-          </Button>
-          {/* )} */}
+          {isAdmin && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleDeleteTag(tag.id)}
+              className="text-muted-foreground cursor-pointer"
+            >
+              <Trash2 />
+            </Button>
+          )}
         </div>
       ))}
-      {/* {isAdmin && ( */}
-      <div>
-        {availableTags.length > 0 && (
-          <div className="flex flex-wrap gap-2 pt-4">
-            {availableTags.map((tag) => (
-              <Button
-                key={tag}
-                variant="outline"
-                onClick={() => handleAddTag(tag)}
-                className="text-sm cursor-pointer"
-              >
-                <CirclePlus className="w-4 h-4 mr-1" />
-                {tag}
-              </Button>
-            ))}
-          </div>
-        )}
-      </div>
-      {/* )} */}
+      {isAdmin && (
+        <div>
+          {availableTags.length > 0 && (
+            <div className="flex flex-wrap gap-2 pt-4">
+              {availableTags.map((tag) => (
+                <Button
+                  key={tag}
+                  variant="outline"
+                  onClick={() => handleAddTag(tag)}
+                  className="text-sm cursor-pointer"
+                >
+                  <CirclePlus className="w-4 h-4 mr-1" />
+                  {tag}
+                </Button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

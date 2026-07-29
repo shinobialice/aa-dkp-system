@@ -1,6 +1,7 @@
 "use server";
 import supabase from "@/shared/lib/supabase";
 import type { Database } from "@/types/supabase";
+import ensurePrivilieges from "./ensurePrivilieges";
 import { getUserMonthlyAttendance } from "./getUserMonthlyAttendance";
 import { getUserTags } from "./userTagsActions";
 import { getUserPenaltyPoints } from "./penaltyActions";
@@ -84,6 +85,8 @@ export const updateSalaryAdvance = async (
   sentAmount: number,
   sent: boolean,
 ) => {
+  await ensurePrivilieges(["Администратор"]);
+
   const { error } = await supabase
     .from("Salary")
     .update({ sentAmount, sent })

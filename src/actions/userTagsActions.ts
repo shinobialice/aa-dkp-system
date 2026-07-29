@@ -1,5 +1,6 @@
 "use server";
 import supabase from "@/shared/lib/supabase";
+import ensurePrivilieges from "./ensurePrivilieges";
 
 // 1. Get user tags
 export async function getUserTags(userId: number) {
@@ -19,6 +20,8 @@ export async function getUserTags(userId: number) {
 
 // 2. Add a new tag
 export async function addUserTag(userId: number, tag: string) {
+  await ensurePrivilieges(["Администратор"]);
+
   const { data, error } = await supabase
     .from("user_tags")
     .insert([{ user_id: userId, tag }])
@@ -35,6 +38,8 @@ export async function addUserTag(userId: number, tag: string) {
 
 // 3. Delete tag by ID
 export async function deleteUserTag(tagId: number) {
+  await ensurePrivilieges(["Администратор"]);
+
   const { error } = await supabase.from("user_tags").delete().eq("id", tagId);
 
   if (error) {

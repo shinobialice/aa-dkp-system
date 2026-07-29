@@ -197,6 +197,7 @@ export default function UserNotes({
               }}
               setUser={setUser}
               averageGuildGS={averageGuildGS}
+              isAdmin={isAdmin}
             />
           </div>
         </div>

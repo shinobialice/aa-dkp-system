@@ -280,6 +280,7 @@ export default function FinanceClient({
                     <TableCell>
                       <Checkbox
                         checked={s.sent}
+                        disabled={!isAdmin}
                         onCheckedChange={(checked) =>
                           handleAdvanceChange(
                             s.id,
@@ -293,6 +294,7 @@ export default function FinanceClient({
                       <Input
                         type="number"
                         value={s.sentAmount}
+                        disabled={!isAdmin}
                         onFocus={() => (editingSalaryId.current = s.id)}
                         onBlur={() => (editingSalaryId.current = null)}
                         onChange={(e) =>
