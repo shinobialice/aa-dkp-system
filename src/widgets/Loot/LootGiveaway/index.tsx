@@ -114,8 +114,10 @@ export default function LootGiveaway({
       if (loot.status === "В наличии") {
         return "В наличии";
       }
-      if (loot.status === "Выдано" && dateValid) {
-        return `Выдано (${format(new Date(loot.date), "dd.MM.yyyy")})`;
+      if (loot.status === "Выдано") {
+        return dateValid
+          ? `Выдано (${format(new Date(loot.date), "dd.MM.yyyy")})`
+          : "Выдано";
       }
       return "–";
     }
