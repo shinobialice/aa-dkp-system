@@ -19,7 +19,7 @@ export async function getGuildAttendancePrime({
   const raids = (await getRaidData(year, month)).filter(
     (r) => r.type === "Прайм",
   );
-  const attendances = await getAttendances();
+  const attendances = await getAttendances(raids.map((r) => r.id));
   return calculateDailyAverage(raids, attendances);
 }
 
@@ -33,6 +33,6 @@ export async function getGuildAttendanceAgl({
   const raids = (await getRaidData(year, month)).filter(
     (r) => r.type === "АГЛ",
   );
-  const attendances = await getAttendances();
+  const attendances = await getAttendances(raids.map((r) => r.id));
   return calculateDailyAverage(raids, attendances);
 }

@@ -17,7 +17,7 @@ const MONTHS = [
 
 export async function getGuildPrimeStatsByYear(year: number) {
   const raids = (await getRaidData(year)).filter((r) => r.type === "Прайм");
-  const attendances = await getAttendances();
+  const attendances = await getAttendances(raids.map((r) => r.id));
 
   const primeByMonth = new Array(12)
     .fill(0)
@@ -57,7 +57,7 @@ export async function getGuildPrimeStatsByYear(year: number) {
 
 export async function getGuildAglStatsByYear(year: number) {
   const raids = (await getRaidData(year)).filter((r) => r.type === "АГЛ");
-  const attendances = await getAttendances();
+  const attendances = await getAttendances(raids.map((r) => r.id));
 
   const aglByMonth = new Array(12)
     .fill(0)
