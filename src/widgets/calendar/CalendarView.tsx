@@ -6,6 +6,7 @@ import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import { ChevronLeft, ChevronRight, Table, Calendar1 } from "lucide-react";
 import { EventDialog } from "./EventDialog";
+import { RaidInfoDialog } from "./RaidInfoDialog";
 import { Button } from "@/shared/ui";
 import {
   Select,
@@ -36,12 +37,19 @@ export default function CalendarView({ isAdmin, isModerator }: Props) {
   >([]);
 
   const [openDialog, setOpenDialog] = useState(false);
+  const [infoDialogOpen, setInfoDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
+
+  const canEditEvents = isAdmin || isModerator;
 
   const handleEventClick = async (info: any) => {
     const fullEvent = await getRaidById(info.event.id);
     setSelectedEvent(fullEvent);
-    setOpenDialog(true);
+    if (canEditEvents) {
+      setOpenDialog(true);
+    } else {
+      setInfoDialogOpen(true);
+    }
   };
 
   useEffect(() => {
@@ -88,8 +96,6 @@ export default function CalendarView({ isAdmin, isModerator }: Props) {
       api.changeView("listWeek");
     }
   };
-
-  const canEditEvents = isAdmin || isModerator;
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-onBackground">
@@ -180,7 +186,7 @@ export default function CalendarView({ isAdmin, isModerator }: Props) {
             plugins={[dayGridPlugin, timeGridPlugin, listPlugin]}
             initialView="timeGridWeek"
             events={events}
-            eventClick={canEditEvents ? handleEventClick : undefined}
+            eventClick={handleEventClick}
             headerToolbar={false}
             height="100%"
             locale="ru-RU"
@@ -236,6 +242,12 @@ export default function CalendarView({ isAdmin, isModerator }: Props) {
             }}
           />
         )}
+
+        <RaidInfoDialog
+          open={infoDialogOpen}
+          setOpen={setInfoDialogOpen}
+          raid={selectedEvent}
+        />
       </div>
     </div>
   );
