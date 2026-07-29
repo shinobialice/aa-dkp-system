@@ -1,5 +1,5 @@
 "use server";
-import supabase from "@/shared/lib/supabase";
+import supabase from "@/shared/lib/supabaseAdmin";
 
 const editUser = async (
   userId: number,
@@ -11,6 +11,12 @@ const editUser = async (
   vkName: string,
   joined_at: Date | string,
 ) => {
+  const { data: existing } = await supabase
+    .from("user")
+    .select("username")
+    .eq("id", userId)
+    .maybeSingle();
+
   const { data: user, error } = await supabase
     .from("user")
     .update({
@@ -29,6 +35,20 @@ const editUser = async (
   if (error || !user) {
     console.error("Failed to update user:", error);
     throw new Error("Ошибка при обновлении игрока");
+  }
+
+  if (existing?.username && existing.username !== username) {
+    const { error: historyError } = await supabase
+      .from("user_username_history")
+      .insert({
+        user_id: userId,
+        old_username: existing.username,
+        new_username: username,
+      });
+
+    if (historyError) {
+      console.error("Failed to log username change:", historyError);
+    }
   }
 
   return user;

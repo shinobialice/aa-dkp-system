@@ -10,6 +10,7 @@ export default function ProfilePageWrapper({
   tags: initialTags,
   inventory,
   tasks,
+  usernameHistory: initialUsernameHistory,
   averageGuildGS,
   activity,
   isAdmin,
@@ -19,6 +20,7 @@ export default function ProfilePageWrapper({
   inventory: any[];
   tasks: any[];
   notes: any[];
+  usernameHistory: { id: number; old_username: string; new_username: string; changed_at: string }[];
   averageGuildGS: number;
   activity: {
     aglPercent: number;
@@ -30,6 +32,9 @@ export default function ProfilePageWrapper({
 }) {
   const [user, setUser] = useState(initialUser);
   const [tags, setTags] = useState(initialTags);
+  const [usernameHistory, setUsernameHistory] = useState(
+    initialUsernameHistory,
+  );
 
   return (
     <div className="space-y-8 p-4">
@@ -40,7 +45,12 @@ export default function ProfilePageWrapper({
         </div>
       </div>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 items-start">
-        <ProfileInfoClient isAdmin={isAdmin} user={user} tags={tags} />
+        <ProfileInfoClient
+          isAdmin={isAdmin}
+          user={user}
+          tags={tags}
+          setUsernameHistory={setUsernameHistory}
+        />
         <ProfileTabs
           user={user}
           setUser={setUser}
@@ -48,6 +58,7 @@ export default function ProfilePageWrapper({
           tasks={tasks}
           tags={tags}
           setTags={setTags}
+          usernameHistory={usernameHistory}
           averageGuildGS={averageGuildGS}
           isAdmin={isAdmin}
         />

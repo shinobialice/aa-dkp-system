@@ -6,6 +6,7 @@ import { Button } from "@/shared/ui";
 import { CardHeader, CardTitle } from "@/shared/ui";
 import { Input } from "@/shared/ui";
 import editUser from "@/actions/editUser";
+import { getUsernameHistory } from "@/actions/usernameHistoryActions";
 
 const badgeColors: { [key: string]: string } = {
   Активен: "rgb(47, 158, 98)",
@@ -27,6 +28,7 @@ export default function ProfileHeader({
   editMode,
   setEditMode,
   tags,
+  setUsernameHistory,
   isAdmin,
 }: {
   user: any;
@@ -35,6 +37,14 @@ export default function ProfileHeader({
   editMode: boolean;
   setEditMode: (v: boolean) => void;
   tags: { id: number; tag: string }[];
+  setUsernameHistory: (
+    history: {
+      id: number;
+      old_username: string;
+      new_username: string;
+      changed_at: string;
+    }[],
+  ) => void;
   isAdmin: boolean;
 }) {
   return (
@@ -46,8 +56,8 @@ export default function ProfileHeader({
               variant="ghost"
               size="icon"
               className="size-8 text-green-500 cursor-pointer"
-              onClick={() => {
-                editUser(
+              onClick={async () => {
+                await editUser(
                   user.id,
                   formData.username,
                   formData.class,
@@ -59,6 +69,7 @@ export default function ProfileHeader({
                   formData.vkName,
                   formData.joined_at,
                 );
+                setUsernameHistory(await getUsernameHistory(user.id));
                 setEditMode(false);
               }}
             >

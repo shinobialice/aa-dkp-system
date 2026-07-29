@@ -6,6 +6,7 @@ import { getUserMonthlyAttendance } from "@/actions/getUserMonthlyAttendance";
 import getUserNotes from "@/actions/getUserNotes";
 import { hasTag } from "@/actions/hasTag";
 import { getUserTags } from "@/actions/userTagsActions";
+import { getUsernameHistory } from "@/actions/usernameHistoryActions";
 import ProfilePageWrapper from "@/widgets/profile/ProfilePageWrapper";
 import { cookies } from "next/headers";
 
@@ -21,13 +22,15 @@ export default async function Page(p: {
     new Date().getMonth() + 1,
   );
 
-  const [user, tags, inventory, tasks, notes] = await Promise.all([
-    getUser(userId),
-    getUserTags(userId),
-    getUserInventory(userId),
-    getTasks(userId),
-    getUserNotes(userId),
-  ]);
+  const [user, tags, inventory, tasks, notes, usernameHistory] =
+    await Promise.all([
+      getUser(userId),
+      getUserTags(userId),
+      getUserInventory(userId),
+      getTasks(userId),
+      getUserNotes(userId),
+      getUsernameHistory(userId),
+    ]);
 
   const sessionToken = (await cookies()).get("session_token")?.value ?? "";
   const isAdmin = await hasTag(sessionToken, ["Администратор"]);
@@ -40,6 +43,7 @@ export default async function Page(p: {
       inventory={inventory}
       tasks={tasks}
       notes={notes}
+      usernameHistory={usernameHistory}
       averageGuildGS={averageGuildGS}
       activity={activity}
     />

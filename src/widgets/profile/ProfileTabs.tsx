@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import InventoryTabsClient from "./inventory/InventoryTabsClient";
 import UserNotes from "./notes/UserNotes";
 import TasksTable from "./tasks/TasksTable";
+import UsernameHistoryTab from "./usernameHistory/UsernameHistoryTab";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/ui";
 
 export default function ProfileTabs({
@@ -12,6 +13,7 @@ export default function ProfileTabs({
   tags,
   setTags,
   setUser,
+  usernameHistory,
   averageGuildGS,
   isAdmin,
 }: {
@@ -21,6 +23,12 @@ export default function ProfileTabs({
   tags: any[];
   setTags: (tags: any[]) => void;
   setUser: (user: any) => void;
+  usernameHistory: {
+    id: number;
+    old_username: string;
+    new_username: string;
+    changed_at: string;
+  }[];
   averageGuildGS: number;
   isAdmin: boolean;
 }) {
@@ -46,6 +54,9 @@ export default function ProfileTabs({
         </TabsTrigger>
         <TabsTrigger className="cursor-pointer" value="notes">
           Заметки
+        </TabsTrigger>
+        <TabsTrigger className="cursor-pointer" value="username-history">
+          История ников
         </TabsTrigger>
       </TabsList>
       <TabsContent value="inventory">
@@ -79,6 +90,10 @@ export default function ProfileTabs({
           setUser={setUser}
           averageGuildGS={averageGuildGS}
         />
+      </TabsContent>
+
+      <TabsContent value="username-history">
+        <UsernameHistoryTab history={usernameHistory} />
       </TabsContent>
     </Tabs>
   );

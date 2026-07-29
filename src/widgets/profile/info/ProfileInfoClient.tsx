@@ -8,10 +8,19 @@ import { Card, CardContent } from "@/shared/ui";
 export default function ProfileInfoClient({
   user,
   tags: initialTags,
+  setUsernameHistory,
   isAdmin,
 }: {
   user: any;
   tags: any[];
+  setUsernameHistory: (
+    history: {
+      id: number;
+      old_username: string;
+      new_username: string;
+      changed_at: string;
+    }[],
+  ) => void;
   isAdmin: boolean;
 }) {
   const [tags, setTags] = useState(initialTags);
@@ -60,6 +69,7 @@ export default function ProfileInfoClient({
         editMode={editMode}
         setEditMode={setEditMode}
         tags={tags}
+        setUsernameHistory={setUsernameHistory}
       />
       <CardContent className="space-y-4">
         <ProfileClasses
