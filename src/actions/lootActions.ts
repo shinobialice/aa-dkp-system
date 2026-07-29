@@ -66,19 +66,3 @@ export const addLootItem = async ({
     throw new Error("Не удалось добавить предмет");
   }
 };
-
-// Get loot quantity by ID
-export async function getLootQuantity(lootId: number) {
-  const { data, error } = await supabase
-    .from("loot")
-    .select("quantity")
-    .eq("id", lootId)
-    .maybeSingle();
-
-  if (error || !data) {
-    console.error("Ошибка при получении количества лута:", error);
-    return 0;
-  }
-
-  return data.quantity ?? 0;
-}

@@ -49,7 +49,7 @@ import { FC } from "react";
 
 type Props = { isAdmin: boolean };
 
-export const AppSidebar: FC<Props> = ({ isAdmin }) => {
+const AppSidebar: FC<Props> = ({ isAdmin }) => {
   const { setTheme } = useTheme();
 
   const menuItems = [
