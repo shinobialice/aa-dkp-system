@@ -1,1 +1,0 @@
-ALTER TABLE givenawayloot ALTER COLUMN date DROP NOT NULL;

@@ -1,4 +1,0 @@
-ALTER TABLE "Salary"
-  ADD COLUMN IF NOT EXISTS "aglPercent" numeric NOT NULL DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS "primePercent" numeric NOT NULL DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS "totalPercent" numeric NOT NULL DEFAULT 0;

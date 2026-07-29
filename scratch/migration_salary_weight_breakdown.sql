@@ -1,5 +1,0 @@
-ALTER TABLE "Salary"
-  ADD COLUMN IF NOT EXISTS "tenurePercent" numeric NOT NULL DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS "customBonusPercent" numeric NOT NULL DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS "penaltyPercent" numeric NOT NULL DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS "weightPercent" numeric NOT NULL DEFAULT 0;
