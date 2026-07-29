@@ -3,7 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { Copy, Check } from "lucide-react";
 import { Button } from "@/shared/ui";
-import { CardContent } from "@/shared/ui";
+import { Card } from "@/shared/ui";
 import {
   Select,
   SelectContent,
@@ -16,6 +16,7 @@ import { getEligibleUsers } from "@/actions/getEligibleUsers";
 import { CreateUserForm } from "./CreateUserForm";
 import { UserSelect } from "./UserSelect";
 import { SalaryEligibilitySettingsForm } from "./SalaryEligibilitySettingsForm";
+import { BossPointsSettingsForm } from "./BossPointsSettingsForm";
 
 type UserOption = {
   id: number;
@@ -63,47 +64,53 @@ export function SettingsPageContainer() {
   };
 
   return (
-    <div className="space-y-6">
-      <CardContent className="border rounded-lg p-4">
-        <h2 className="text-xl font-bold mb-4">
-          Сгенерировать ссылку для входа
-        </h2>
-        <div className="space-y-2">
-          <UserSelect
-            users={users}
-            selectedUserId={selectedUserId}
-            setSelectedUserId={setSelectedUserId}
-          />
+    <div className="flex flex-col lg:flex-row gap-6 items-start">
+      <Card className="p-4 space-y-6 flex-1 w-full">
+        <div>
+          <h2 className="text-xl font-bold mb-4">
+            Сгенерировать ссылку для входа
+          </h2>
+          <div className="space-y-2">
+            <UserSelect
+              users={users}
+              selectedUserId={selectedUserId}
+              setSelectedUserId={setSelectedUserId}
+            />
 
-          <Button
-            className="cursor-pointer"
-            onClick={handleGenerate}
-            disabled={isPending || !selectedUserId}
-          >
-            {isPending ? "Генерация..." : "Создать ссылку"}
-          </Button>
+            <Button
+              className="cursor-pointer"
+              onClick={handleGenerate}
+              disabled={isPending || !selectedUserId}
+            >
+              {isPending ? "Генерация..." : "Создать ссылку"}
+            </Button>
+          </div>
+
+          {link && (
+            <>
+              <p className="font-semibold mt-4">Ссылка для отправки:</p>
+              <CopyableLink link={link} />
+            </>
+          )}
         </div>
 
-        {link && (
-          <>
-            <p className="font-semibold mt-4">Ссылка для отправки:</p>
-            <CopyableLink link={link} />
-          </>
-        )}
-      </CardContent>
+        <div className="border-t pt-6">
+          <CreateUserForm
+            onUserCreated={(newUser) => {
+              setUsers((prev) => [...prev, newUser]);
+              setSelectedUserId(newUser.id);
+            }}
+          />
+        </div>
+      </Card>
 
-      <CardContent className="border rounded-lg p-4">
-        <CreateUserForm
-          onUserCreated={(newUser) => {
-            setUsers((prev) => [...prev, newUser]);
-            setSelectedUserId(newUser.id);
-          }}
-        />
-      </CardContent>
-
-      <CardContent className="border rounded-lg p-4">
+      <Card className="p-4 flex-1 w-full">
         <SalaryEligibilitySettingsForm />
-      </CardContent>
+      </Card>
+
+      <Card className="p-4 flex-1 w-full">
+        <BossPointsSettingsForm />
+      </Card>
     </div>
   );
 }
