@@ -31,24 +31,23 @@ export function RaidInfoDialog({
   }
 
   const bosses =
-    raid.raid_boss
-      ?.map((rb: any) => rb.boss?.boss_name)
-      .filter(Boolean) ?? [];
+    raid.raid_boss?.map((rb: any) => rb.boss?.boss_name).filter(Boolean) ??
+    [];
   const attendance = raid.raid_attendance ?? [];
   const date = raid.start_date ? new Date(raid.start_date) : null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
+      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col overflow-hidden">
+        <DialogHeader className="shrink-0">
           <DialogTitle>
             {raid.type}
             {bosses.length > 0 ? ` — ${bosses.join(", ")}` : ""}
           </DialogTitle>
           <DialogDescription>Информация об активности</DialogDescription>
         </DialogHeader>
-        <Separator />
-        <div className="grid grid-cols-2 gap-4 text-sm">
+        <Separator className="shrink-0" />
+        <div className="grid grid-cols-2 gap-4 text-sm shrink-0">
           <div>
             <span className="text-muted-foreground">Дата и время (МСК): </span>
             <strong>
@@ -69,9 +68,9 @@ export function RaidInfoDialog({
           </div>
         </div>
 
-        <div className="rounded-md border">
+        <div className="rounded-md border flex-1 min-h-0 overflow-y-auto">
           <Table>
-            <TableHeader>
+            <TableHeader className="sticky top-0 z-1 bg-background">
               <TableRow>
                 <TableHead>Ник</TableHead>
                 <TableHead>Класс</TableHead>
