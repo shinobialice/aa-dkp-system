@@ -15,6 +15,7 @@ import { createLinkToken } from "@/actions/createLinkToken";
 import { getEligibleUsers } from "@/actions/getEligibleUsers";
 import { CreateUserForm } from "./CreateUserForm";
 import { UserSelect } from "./UserSelect";
+import { SalaryEligibilitySettingsForm } from "./SalaryEligibilitySettingsForm";
 
 type UserOption = {
   id: number;
@@ -98,6 +99,10 @@ export function SettingsPageContainer() {
             setSelectedUserId(newUser.id);
           }}
         />
+      </CardContent>
+
+      <CardContent className="border rounded-lg p-4">
+        <SalaryEligibilitySettingsForm />
       </CardContent>
     </div>
   );

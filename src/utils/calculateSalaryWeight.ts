@@ -22,6 +22,19 @@ type SalaryWeightInput = {
   individualBonusPercent: number;
   penaltyPoints: number;
   asOf?: Date;
+  // Критерии допуска — редактируются админом в Настройках, см.
+  // salaryEligibilitySettings.ts.
+  primeEnabled: boolean;
+  primeThresholdPercent: number;
+  pointsEnabled: boolean;
+  pointsThresholdPercent: number;
+  dvBypassEnabled: boolean;
+  // ГС: включается отдельным тумблером, не обходится тегом ДВ — это
+  // проверка снаряжения, а не посещаемости. requiredGearScore уже посчитан
+  // вызывающей стороной по формуле гильдии (calculateRequiredGearScore).
+  gsEnabled: boolean;
+  classGearScore: number | null;
+  requiredGearScore: number | null;
 };
 
 type SalaryWeightResult = {
@@ -46,6 +59,14 @@ export default function calculateSalaryWeight(
     individualBonusPercent,
     penaltyPoints,
     asOf,
+    primeEnabled,
+    primeThresholdPercent,
+    pointsEnabled,
+    pointsThresholdPercent,
+    dvBypassEnabled,
+    gsEnabled,
+    classGearScore,
+    requiredGearScore,
   } = input;
 
   if (!active) {
@@ -69,20 +90,44 @@ export default function calculateSalaryWeight(
     return { eligible: false, reason: "Пользователь в АФК", finalWeight: 0, penaltyPercent: 0 };
   }
 
-  // Порог "Учёт баллов > 20%" временно отключён: формула этого показателя
-  // в гильдейской таблице не воспроизводится (расхождение с посчитанным
-  // здесь значением, источник не найден) — блокировать зарплату по
-  // непроверенному числу нельзя. Оставлен только порог по Праймам, который
-  // сверен и подтверждён точно.
+  // Пороги допуска включаются/выключаются и настраиваются админом (см.
+  // salaryEligibilitySettings.ts). Если оба порога выключены — критериев нет,
+  // проверка проходит автоматически. Включённые пороги проверяются все разом
+  // (И): например, если включены и Праймы, и Баллы, нужно пройти оба.
   const hasDv = tags.includes("ДВ");
-  const meetsThresholds = primePercent > 30;
-  if (!hasDv && !meetsThresholds) {
+  const thresholdChecks: boolean[] = [];
+  if (primeEnabled) thresholdChecks.push(primePercent > primeThresholdPercent);
+  if (pointsEnabled) thresholdChecks.push(totalPercent > pointsThresholdPercent);
+  const meetsThresholds = thresholdChecks.every(Boolean);
+  const bypassedByDv = dvBypassEnabled && hasDv;
+
+  if (!bypassedByDv && !meetsThresholds) {
+    const parts: string[] = [];
+    if (primeEnabled) parts.push(`посещаемость праймов > ${primeThresholdPercent}%`);
+    if (pointsEnabled) parts.push(`учёт баллов > ${pointsThresholdPercent}%`);
+    const criteria = parts.join(" и ");
     return {
       eligible: false,
-      reason: "Не выполнены критерии допуска (посещаемость праймов > 30%, либо тег ДВ)",
+      reason: dvBypassEnabled
+        ? `Не выполнены критерии допуска (${criteria}, либо тег ДВ)`
+        : `Не выполнены критерии допуска (${criteria})`,
       finalWeight: 0,
       penaltyPercent: 0,
     };
+  }
+
+  // ГС — не обходится тегом ДВ, это про снаряжение, а не про посещаемость.
+  if (gsEnabled) {
+    const requiredGS = requiredGearScore ?? 0;
+    const actualGS = classGearScore ?? 0;
+    if (actualGS < requiredGS) {
+      return {
+        eligible: false,
+        reason: `Недостаточный ГС (${actualGS} < ${requiredGS})`,
+        finalWeight: 0,
+        penaltyPercent: 0,
+      };
+    }
   }
 
   if (penaltyPoints >= PENALTY_BLOCK_THRESHOLD) {

@@ -1,4 +1,5 @@
 import isProbationOver from "./isProbationOver";
+import calculateRequiredGearScore from "./calculateRequiredGearScore";
 
 type UserForEligibility = {
   active: boolean;
@@ -11,46 +12,53 @@ type UserTag = {
   tag: string;
 };
 
+export type SalaryEligibilityCheck = {
+  // Жёсткие блокеры — переключатель не сработает, пока они есть.
+  hardErrors: string[];
+  // ГС — не жёсткий блокер: показывается как предупреждение с
+  // подтверждением ("ты уверен?"), которое админ может обойти. Присутствует
+  // только если проверка ГС включена в настройках (gsEnabled).
+  gsWarning: string | null;
+};
+
 function getSalaryEligibilityErrors(
   user: UserForEligibility,
   averageGuildGS: number,
   tags: UserTag[],
-): string[] {
-  const errors: string[] = [];
+  gsEnabled: boolean,
+): SalaryEligibilityCheck {
+  const hardErrors: string[] = [];
 
   if (!user.active) {
-    errors.push("Игрок не активен");
+    hardErrors.push("Игрок не активен");
   }
 
   if (!user.joined_at) {
-    errors.push("Дата вступления не указана");
+    hardErrors.push("Дата вступления не указана");
   } else if (!isProbationOver(user.joined_at)) {
     const day = new Date(user.joined_at).getDate();
     const needMonths = day <= 20 ? 1 : 2;
-    errors.push(`Испытательный срок не завершён: нужно ≥ ${needMonths} мес.`);
-  }
-
-  const isTwoHanded = tags.some((t) => t.tag === "Двурук");
-  const className = user.class?.toLowerCase() || "";
-  const roundedGS = Math.floor(averageGuildGS / 500) * 500;
-  let requiredGS = roundedGS;
-
-  if (["тактик", "бард", "танцор"].some((c) => className.includes(c))) {
-    requiredGS -= 2000;
-  } else if (["хил", "целитель"].some((c) => className.includes(c))) {
-    requiredGS += isTwoHanded ? -500 : 0;
-  } else if (["маг", "милик", "лучник"].some((c) => className.includes(c))) {
-    requiredGS += isTwoHanded ? -500 : 500;
-  }
-
-  const actualGS = user.class_gear_score ?? 0;
-  if (actualGS < requiredGS) {
-    errors.push(
-      `Недостаточный ГС: у игрока ${actualGS}, требуется ≥ ${requiredGS}`,
+    hardErrors.push(
+      `Испытательный срок не завершён: нужно ≥ ${needMonths} мес.`,
     );
   }
 
-  return errors;
+  let gsWarning: string | null = null;
+  if (gsEnabled) {
+    const isTwoHanded = tags.some((t) => t.tag === "Двурук");
+    const requiredGS = calculateRequiredGearScore(
+      user.class,
+      averageGuildGS,
+      isTwoHanded,
+    );
+
+    const actualGS = user.class_gear_score ?? 0;
+    if (actualGS < requiredGS) {
+      gsWarning = `Недостаточный ГС: у игрока ${actualGS}, требуется ≥ ${requiredGS}`;
+    }
+  }
+
+  return { hardErrors, gsWarning };
 }
 
 export default getSalaryEligibilityErrors;

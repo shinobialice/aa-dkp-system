@@ -7,6 +7,12 @@ import { getUserTags } from "./userTagsActions";
 import { getUserPenaltyPoints } from "./penaltyActions";
 import calculateSalaryWeight from "@/utils/calculateSalaryWeight";
 import calculateGuildTenureBonus from "@/utils/calculateGuildTenureBonus";
+import calculateRequiredGearScore from "@/utils/calculateRequiredGearScore";
+import { getAverageGuildGS } from "./getAverageGuildGS";
+import {
+  getSalaryEligibilitySettings,
+  type SalaryEligibilitySettings,
+} from "./salaryEligibilitySettings";
 
 type SalaryInsert = Database["public"]["Tables"]["Salary"]["Insert"];
 
@@ -129,15 +135,33 @@ function getSalaryAsOfDate(month: number, year: number): Date {
   return now < startOfNextMonth ? now : startOfNextMonth;
 }
 
+// Критерии допуска + средний ГС по гильдии считаются один раз на весь
+// generateSalaries/getSalaryReasons, а не на каждого игрока — иначе это N
+// одинаковых запросов настроек и N пересчётов среднего ГС по всей гильдии.
+export type SalaryEligibilityContext = {
+  settings: SalaryEligibilitySettings;
+  averageGuildGS: number;
+};
+
+export async function getSalaryEligibilityContext(): Promise<SalaryEligibilityContext> {
+  const settings = await getSalaryEligibilitySettings();
+  const averageGuildGS = settings.gsEnabled ? await getAverageGuildGS() : 0;
+
+  return { settings, averageGuildGS };
+}
+
 export async function computeUserSalaryWeight(
   user: {
     id: number;
     joined_at: string | null;
     active: boolean;
     is_eligible_for_salary: boolean;
+    class?: string | null;
+    class_gear_score?: number | null;
   },
   month: number,
   year: number,
+  context: SalaryEligibilityContext,
 ) {
   const asOf = getSalaryAsOfDate(month, year);
   const [attendance, tagRows, penaltyRows, individualBonusPercent] =
@@ -154,6 +178,11 @@ export async function computeUserSalaryWeight(
     0,
   );
   const tenureBonusPercent = calculateGuildTenureBonus(user.joined_at, asOf);
+  const { settings } = context;
+  const isTwoHanded = tags.includes("Двурук");
+  const requiredGearScore = settings.gsEnabled
+    ? calculateRequiredGearScore(user.class, context.averageGuildGS, isTwoHanded)
+    : null;
 
   const weightResult = calculateSalaryWeight({
     active: user.active,
@@ -167,6 +196,14 @@ export async function computeUserSalaryWeight(
     individualBonusPercent,
     penaltyPoints,
     asOf,
+    primeEnabled: settings.primeEnabled,
+    primeThresholdPercent: settings.primeThresholdPercent,
+    pointsEnabled: settings.pointsEnabled,
+    pointsThresholdPercent: settings.pointsThresholdPercent,
+    dvBypassEnabled: settings.dvBypassEnabled,
+    gsEnabled: settings.gsEnabled,
+    classGearScore: user.class_gear_score ?? null,
+    requiredGearScore,
   });
 
   return {
@@ -195,7 +232,7 @@ export const generateSalaries = async (month: number, year: number) => {
 
   const { data: users, error: usersError } = await supabase
     .from("user")
-    .select("id, joined_at")
+    .select("id, joined_at, class, class_gear_score")
     .eq("active", true)
     .eq("is_eligible_for_salary", true);
 
@@ -203,12 +240,15 @@ export const generateSalaries = async (month: number, year: number) => {
     throw new Error("Нет активных сотрудников для выплаты");
   }
 
+  const context = await getSalaryEligibilityContext();
+
   const userRows = await Promise.all(
     users.map((user) =>
       computeUserSalaryWeight(
         { ...user, active: true, is_eligible_for_salary: true },
         month,
         year,
+        context,
       ),
     ),
   );

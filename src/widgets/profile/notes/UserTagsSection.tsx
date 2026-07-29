@@ -1,13 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Trash2, CirclePlus } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/shared/ui";
 import { Button } from "@/shared/ui";
 import { Switch } from "@/shared/ui";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/shared/ui";
 import { updateUser } from "@/actions/updateUser";
 import { deleteUserTag, addUserTag } from "@/actions/userTagsActions";
+import { getSalaryEligibilitySettings } from "@/actions/salaryEligibilitySettings";
 import getSalaryEligibilityErrors from "@/utils/getSalaryEligibilityErrors";
 
 type UserType = {
@@ -61,6 +72,12 @@ export function UserTagsSection({
   isAdmin: boolean;
 }) {
   const [updating, setUpdating] = useState(false);
+  const [gsEnabled, setGsEnabled] = useState(false);
+  const [gsWarning, setGsWarning] = useState<string | null>(null);
+
+  useEffect(() => {
+    getSalaryEligibilitySettings().then((s) => setGsEnabled(s.gsEnabled));
+  }, []);
 
   async function toggleActive(newValue: boolean) {
     setUpdating(true);
@@ -70,14 +87,27 @@ export function UserTagsSection({
     onUpdate();
   }
 
+  async function applySalaryToggle(newValue: boolean) {
+    setUpdating(true);
+    await updateUser(user.id, { is_eligible_for_salary: newValue });
+    setUser({ ...user, is_eligible_for_salary: newValue });
+    setUpdating(false);
+    onUpdate();
+  }
+
   async function toggleSalary(newValue: boolean) {
     if (newValue) {
-      const errors = getSalaryEligibilityErrors(user, averageGuildGS, tags);
-      if (errors.length > 0) {
+      const { hardErrors, gsWarning } = getSalaryEligibilityErrors(
+        user,
+        averageGuildGS,
+        tags,
+        gsEnabled,
+      );
+      if (hardErrors.length > 0) {
         toast.error("Нельзя выдать зарплату", {
           description: (
             <ul className="list-disc list-inside space-y-1">
-              {errors.map((e, idx) => (
+              {hardErrors.map((e, idx) => (
                 <li key={idx}>{e}</li>
               ))}
             </ul>
@@ -85,13 +115,13 @@ export function UserTagsSection({
         });
         return;
       }
+      if (gsWarning) {
+        setGsWarning(gsWarning);
+        return;
+      }
     }
 
-    setUpdating(true);
-    await updateUser(user.id, { is_eligible_for_salary: newValue });
-    setUser({ ...user, is_eligible_for_salary: newValue });
-    setUpdating(false);
-    onUpdate();
+    await applySalaryToggle(newValue);
   }
 
   async function handleDeleteTag(tagId: number) {
@@ -188,6 +218,29 @@ export function UserTagsSection({
           )}
         </div>
       )}
+
+      <AlertDialog
+        open={gsWarning !== null}
+        onOpenChange={(open) => !open && setGsWarning(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Ты уверен?</AlertDialogTitle>
+            <AlertDialogDescription>{gsWarning}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Отмена</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                setGsWarning(null);
+                await applySalaryToggle(true);
+              }}
+            >
+              Всё равно выдать
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
