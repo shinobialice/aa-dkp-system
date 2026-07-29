@@ -1,6 +1,7 @@
 // components/LootRawTable.tsx
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { ArrowUpDown } from "lucide-react";
 import { LootItem } from "./LootTypes";
 import { LootIcon } from "../LootBuy/icons/LootIconComponent";
 import {
@@ -15,7 +16,10 @@ import { Button } from "@/shared/ui";
 import { ScrollArea } from "@/shared/ui";
 import { SellLootDialog } from "./SellLootDialog";
 import { getActiveUsers } from "@/actions/getActiveUsers";
-import { distributeLootItem } from "@/actions/distributeLootItems";
+import {
+  distributeLootItem,
+  updateLootSale,
+} from "@/actions/distributeLootItems";
 import { getLoot } from "@/actions/lootActions";
 
 function isSameMonth(date: Date, month: number, year: number) {
@@ -49,10 +53,75 @@ export function LootRawTable({
     { id: number; username: string }[]
   >([]);
   const [editMode, setEditMode] = useState(false);
+  const [sortKey, setSortKey] = useState<
+    "acquired_at" | "sold_at" | "status" | null
+  >(null);
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
   useEffect(() => {
     getActiveUsers().then(setActiveUsers);
   }, []);
+
+  const toggleSort = (key: "acquired_at" | "sold_at" | "status") => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
+
+  const sortHeader = (label: string, key: "acquired_at" | "sold_at" | "status") => (
+    <Button
+      variant="ghost"
+      className="cursor-pointer -ml-3 h-auto px-3 py-1"
+      onClick={() => toggleSort(key)}
+    >
+      {label}
+      <ArrowUpDown className="ml-2 h-4 w-4" />
+    </Button>
+  );
+
+  const visibleLoot = useMemo(() => {
+    const filtered = loot.filter((item) => {
+      if (item.status === "Распродано") return false;
+
+      const acquired = item.acquired_at ? new Date(item.acquired_at) : null;
+      const acquiredThisMonth = acquired
+        ? isSameMonth(acquired, selectedMonth, selectedYear)
+        : false;
+
+      if (item.status === "В наличии") {
+        // Ещё не продано — переносим из прошлых месяцев, пока не продастся
+        return acquired
+          ? isOnOrBeforeMonth(acquired, selectedMonth, selectedYear)
+          : false;
+      }
+
+      if (item.status === "В казну" || item.status === "Продано") {
+        const sold = item.sold_at ? new Date(item.sold_at) : null;
+        const soldThisMonth = sold
+          ? isSameMonth(sold, selectedMonth, selectedYear)
+          : false;
+        // Показываем, если получено в этом месяце или продано в этом месяце
+        return acquiredThisMonth || soldThisMonth;
+      }
+
+      return false;
+    });
+
+    if (!sortKey) return filtered;
+
+    return [...filtered].sort((a, b) => {
+      if (sortKey === "status") {
+        const cmp = (a.status ?? "").localeCompare(b.status ?? "");
+        return sortDir === "asc" ? cmp : -cmp;
+      }
+      const aTime = a[sortKey] ? new Date(a[sortKey] as Date).getTime() : 0;
+      const bTime = b[sortKey] ? new Date(b[sortKey] as Date).getTime() : 0;
+      return sortDir === "asc" ? aTime - bTime : bTime - aTime;
+    });
+  }, [loot, selectedMonth, selectedYear, sortKey, sortDir]);
 
   return (
     <div className="overflow-auto rounded-md border">
@@ -60,52 +129,23 @@ export function LootRawTable({
         <Table>
           <TableHeader className="sticky top-0 z-1 bg-background">
             <TableRow>
-              <TableHead>Получено</TableHead>
+              <TableHead>{sortHeader("Получено", "acquired_at")}</TableHead>
               <TableHead>Источник</TableHead>
               <TableHead>Предмет</TableHead>
               <TableHead>Кол-во</TableHead>
               <TableHead>Цена</TableHead>
-              <TableHead>Статус</TableHead>
-              <TableHead>Продано</TableHead>
+              <TableHead>{sortHeader("Статус", "status")}</TableHead>
+              <TableHead>{sortHeader("Продано", "sold_at")}</TableHead>
               <TableHead>Кому</TableHead>
               <TableHead>Комментарий</TableHead>
               {isAdmin && <TableHead>Действия</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loot
-              .filter((item) => {
-                if (item.status === "Распродано") return false;
-
-                const acquired = item.acquired_at
-                  ? new Date(item.acquired_at)
-                  : null;
-                const acquiredThisMonth = acquired
-                  ? isSameMonth(acquired, selectedMonth, selectedYear)
-                  : false;
-
-                if (item.status === "В наличии") {
-                  // Ещё не продано — переносим из прошлых месяцев, пока не продастся
-                  return acquired
-                    ? isOnOrBeforeMonth(acquired, selectedMonth, selectedYear)
-                    : false;
-                }
-
-                if (item.status === "В казну" || item.status === "Продано") {
-                  const sold = item.sold_at ? new Date(item.sold_at) : null;
-                  const soldThisMonth = sold
-                    ? isSameMonth(sold, selectedMonth, selectedYear)
-                    : false;
-                  // Показываем, если получено в этом месяце или продано в этом месяце
-                  return acquiredThisMonth || soldThisMonth;
-                }
-
-                return false;
-              })
-              .map((item) => (
+            {visibleLoot.map((item) => (
                 <TableRow key={item.id}>
                 <TableCell>
-                  {!item.sold_to && item.acquired_at
+                  {item.acquired_at
                     ? new Intl.DateTimeFormat("ru-RU").format(
                         new Date(item.acquired_at),
                       )
@@ -191,7 +231,8 @@ export function LootRawTable({
           }
           onConfirm={async (data) => {
             try {
-              await distributeLootItem({
+              const action = editMode ? updateLootSale : distributeLootItem;
+              await action({
                 lootId: selectedItem.id,
                 quantity: data.quantity,
                 soldTo: data.soldTo,
@@ -200,7 +241,6 @@ export function LootRawTable({
                 comment: data.comment,
                 price: data.price,
               });
-              const updated = await getLoot();
               setSelectedItem(null);
               setDialogOpen(false);
               location.reload();

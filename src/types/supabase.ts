@@ -576,6 +576,7 @@ export type Database = {
         Row: {
           created_at: string;
           id: number;
+          loot_id: number | null;
           name: string | null;
           quality: string | null;
           quantity: number | null;
@@ -585,6 +586,7 @@ export type Database = {
         Insert: {
           created_at: string;
           id?: number;
+          loot_id?: number | null;
           name?: string | null;
           quality?: string | null;
           quantity?: number | null;
@@ -594,6 +596,7 @@ export type Database = {
         Update: {
           created_at?: string;
           id?: number;
+          loot_id?: number | null;
           name?: string | null;
           quality?: string | null;
           quantity?: number | null;
@@ -601,6 +604,13 @@ export type Database = {
           user_id?: number;
         };
         Relationships: [
+          {
+            foreignKeyName: "user_inventory_loot_id_fkey";
+            columns: ["loot_id"];
+            isOneToOne: false;
+            referencedRelation: "loot";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "user_inventory_user_id_fkey";
             columns: ["user_id"];

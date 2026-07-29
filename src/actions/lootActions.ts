@@ -16,14 +16,19 @@ export const getItemTypes = async () => {
 
 // Get loot list with itemType
 export async function getLoot() {
-  const { data, error } = await supabase.from("loot").select(`
+  const { data, error } = await supabase
+    .from("loot")
+    .select(
+      `
       *,
       itemType: item_type (
         id,
         name,
         price
       )
-    `);
+    `,
+    )
+    .order("acquired_at", { ascending: true });
 
   if (error) {
     console.error("Ошибка при загрузке лута:", error);
