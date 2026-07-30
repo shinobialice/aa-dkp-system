@@ -30,6 +30,39 @@ export async function getUserTags(userId: number, asOf?: Date) {
   return data;
 }
 
+// 1b. Батч-версия getUserTags — один запрос на всех переданных пользователей
+// сразу, вместо одного запроса на каждого (используется при расчёте причин
+// отказа в ЗП для всей гильдии на странице /members).
+export async function getUserTagsBatch(userIds: number[], asOf?: Date) {
+  if (userIds.length === 0) return {} as Record<number, { tag: string }[]>;
+
+  let query = supabase.from("user_tags").select("*").in("user_id", userIds);
+
+  if (asOf) {
+    const asOfIso = asOf.toISOString();
+    query = query
+      .lte("created_at", asOfIso)
+      .or(`removed_at.is.null,removed_at.gt.${asOfIso}`);
+  } else {
+    query = query.is("removed_at", null);
+  }
+
+  const { data, error } = await query.order("created_at", {
+    ascending: false,
+  });
+
+  if (error) {
+    console.error("Ошибка при получении тэгов:", error);
+    throw new Error("Не удалось загрузить тэги");
+  }
+
+  const result: Record<number, NonNullable<typeof data>> = {};
+  for (const row of data ?? []) {
+    (result[row.user_id] ??= []).push(row);
+  }
+  return result;
+}
+
 // 2. Add a new tag
 export async function addUserTag(userId: number, tag: string) {
   await ensurePrivilieges(["Администратор"]);

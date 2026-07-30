@@ -5,9 +5,11 @@ import ensurePrivilieges from "./ensurePrivilieges";
 import { getUserMonthlyAttendance } from "./getUserMonthlyAttendance";
 import { getUserTags } from "./userTagsActions";
 import { getUserPenaltyPoints } from "./penaltyActions";
-import calculateSalaryWeight from "@/utils/calculateSalaryWeight";
-import calculateGuildTenureBonus from "@/utils/calculateGuildTenureBonus";
-import calculateRequiredGearScore from "@/utils/calculateRequiredGearScore";
+import {
+  buildSalaryWeightResult,
+  type SalaryWeightUser,
+} from "@/utils/buildSalaryWeightResult";
+import getSalaryAsOfDate from "@/utils/getSalaryAsOfDate";
 import { getAverageGuildGS } from "./getAverageGuildGS";
 import {
   getSalaryEligibilitySettings,
@@ -120,19 +122,28 @@ async function getCustomBonus(userId: number): Promise<number> {
   return totalBonus;
 }
 
-// Момент, на который считаются стаж и испытательный срок при генерации ЗП.
-// Для завершившегося месяца — это его последний момент (граница со следующим
-// месяцем), зафиксированный навсегда. Для текущего (ещё не закончившегося)
-// месяца — реальное "сейчас", как и раньше. Без этого перегенерация ЗП за
-// прошлый месяц спустя время задним числом увеличивала бы бонус за стаж
-// (он растёт без потолка) и могла бы задним числом "закрывать" испытательный
-// срок, меняя уже выплаченные исторические суммы.
-function getSalaryAsOfDate(month: number, year: number): Date {
-  const startOfNextMonth = new Date(
-    Date.UTC(month === 12 ? year + 1 : year, month % 12, 1),
-  );
-  const now = new Date();
-  return now < startOfNextMonth ? now : startOfNextMonth;
+// Батч-версия getCustomBonus — один запрос на всех переданных пользователей
+// сразу (используется при расчёте причин отказа в ЗП для всей гильдии на
+// странице /members, см. getSalaryReasons).
+export async function getCustomBonusBatch(
+  userIds: number[],
+): Promise<Record<number, number>> {
+  if (userIds.length === 0) return {};
+
+  const { data, error } = await supabase
+    .from("user_salary_bonus")
+    .select("user_id, amount")
+    .in("user_id", userIds);
+
+  if (error) {
+    return {};
+  }
+
+  const result: Record<number, number> = {};
+  for (const row of data ?? []) {
+    result[row.user_id] = (result[row.user_id] ?? 0) + (row.amount || 0);
+  }
+  return result;
 }
 
 // Критерии допуска + средний ГС по гильдии считаются один раз на весь
@@ -151,14 +162,7 @@ export async function getSalaryEligibilityContext(): Promise<SalaryEligibilityCo
 }
 
 export async function computeUserSalaryWeight(
-  user: {
-    id: number;
-    joined_at: string | null;
-    active: boolean;
-    is_eligible_for_salary: boolean;
-    class?: string | null;
-    class_gear_score?: number | null;
-  },
+  user: SalaryWeightUser,
   month: number,
   year: number,
   context: SalaryEligibilityContext,
@@ -177,45 +181,13 @@ export async function computeUserSalaryWeight(
     (sum, p) => sum + (p.amount || 0),
     0,
   );
-  const tenureBonusPercent = calculateGuildTenureBonus(user.joined_at, asOf);
-  const { settings } = context;
-  const isTwoHanded = tags.includes("Двурук");
-  const requiredGearScore = settings.gsEnabled
-    ? calculateRequiredGearScore(user.class, context.averageGuildGS, isTwoHanded)
-    : null;
 
-  const weightResult = calculateSalaryWeight({
-    active: user.active,
-    isEligibleForSalary: user.is_eligible_for_salary,
-    joinedAt: user.joined_at,
+  return buildSalaryWeightResult(user, asOf, context, {
+    attendance,
     tags,
-    primePercent: attendance.primePercent,
-    totalPercent: attendance.totalPercent,
-    basePoints: attendance.totalPercent,
-    tenureBonusPercent,
-    individualBonusPercent,
     penaltyPoints,
-    asOf,
-    primeEnabled: settings.primeEnabled,
-    primeThresholdPercent: settings.primeThresholdPercent,
-    pointsEnabled: settings.pointsEnabled,
-    pointsThresholdPercent: settings.pointsThresholdPercent,
-    dvBypassEnabled: settings.dvBypassEnabled,
-    gsEnabled: settings.gsEnabled,
-    classGearScore: user.class_gear_score ?? null,
-    requiredGearScore,
-  });
-
-  return {
-    userId: user.id,
-    basePoints: attendance.totalPercent,
-    tenureBonusPercent,
     individualBonusPercent,
-    aglPercent: attendance.aglPercent,
-    primePercent: attendance.primePercent,
-    totalPercent: attendance.totalPercent,
-    ...weightResult,
-  };
+  });
 }
 
 export const generateSalaries = async (month: number, year: number) => {

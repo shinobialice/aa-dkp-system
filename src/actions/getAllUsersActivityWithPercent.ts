@@ -5,28 +5,27 @@ import supabase from "@/shared/lib/supabaseAdmin";
 // Босс-события "Кошка"/"Морф" не учитываются в проценте учёта баллов.
 const EXCLUDED_FROM_POINTS_ACCOUNTING_BOSS_IDS = [14, 11];
 
-export async function getAllUsersActivityWithPercent() {
-  const now = new Date();
-  const currentMonth = now.getMonth() + 1;
-  const currentYear = now.getFullYear();
-  const monthStart = new Date(Date.UTC(currentYear, currentMonth - 1, 1));
+export type MonthlyAttendance = {
+  primePercent: number;
+  aglPercent: number;
+  totalPercent: number;
+  dkp: number;
+};
+
+// Считает посещаемость/учёт баллов за месяц сразу для всех переданных
+// пользователей одним запросом рейдов, вместо того чтобы дергать этот же
+// запрос отдельно на каждого игрока (см. getSalaryReasons/computeUserSalaryWeight,
+// где раньше был N+1 к per-user getUserMonthlyAttendance).
+export async function computeMonthlyAttendanceForUsers(
+  users: { id: number; joined_at: string | null }[],
+  month: number,
+  year: number,
+): Promise<Record<number, MonthlyAttendance>> {
+  const monthStart = new Date(Date.UTC(year, month - 1, 1));
   const startDate = monthStart.toISOString();
   const endDate = new Date(
-    Date.UTC(
-      currentMonth === 12 ? currentYear + 1 : currentYear,
-      currentMonth % 12,
-      1,
-    ),
+    Date.UTC(month === 12 ? year + 1 : year, month % 12, 1),
   ).toISOString();
-
-  const { data: users, error: usersError } = await supabase
-    .from("user")
-    .select("id, joined_at");
-
-  if (usersError || !users) {
-    console.error("Ошибка при получении пользователей:", usersError);
-    throw new Error("Не удалось получить пользователей");
-  }
 
   const { data: raids, error: raidsError } = await supabase
     .from("raid")

@@ -17,6 +17,31 @@ export const getUserPenaltyPoints = async (userId: number) => {
   return data;
 };
 
+// Батч-версия getUserPenaltyPoints — суммирует штрафы сразу для всех
+// переданных пользователей одним запросом (используется при расчёте причин
+// отказа в ЗП для всей гильдии на странице /members).
+export const getUserPenaltyPointsBatch = async (
+  userIds: number[],
+): Promise<Record<number, number>> => {
+  if (userIds.length === 0) return {};
+
+  const { data, error } = await supabase
+    .from("user_penalty_points")
+    .select("user_id, amount")
+    .in("user_id", userIds);
+
+  if (error) {
+    console.error("Ошибка при получении штрафов:", error);
+    throw new Error("Не удалось загрузить штрафы пользователей");
+  }
+
+  const result: Record<number, number> = {};
+  for (const row of data ?? []) {
+    result[row.user_id] = (result[row.user_id] ?? 0) + (row.amount ?? 0);
+  }
+  return result;
+};
+
 export async function addUserPenaltyPoints({
   userId,
   amount,
