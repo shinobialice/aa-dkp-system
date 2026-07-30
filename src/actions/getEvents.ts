@@ -71,10 +71,10 @@ export const getRaids = async () => {
       const end = `${endDatePart}T${endTime}`;
 
       let color = "gray";
-      if (raid.type === "Прайм") color = "rgb(90, 54, 165)";
-      if (raid.type === "АГЛ") color = "rgb(215, 100, 168)";
-      if (title.includes("Кошка")) color = "rgb(232, 157, 53)";
-      if (title.includes("Морф")) color = "rgb(59, 130, 246)";
+      if (raid.type === "Прайм") color = "rgb(157, 41, 41)";
+      if (raid.type === "АГЛ") color = "rgb(47, 158, 98)";
+      if (title.includes("Кошка")) color = "rgb(215, 100, 168)";
+      if (title.includes("Морф")) color = "rgb(40, 111, 180)";
 
       return {
         id: raid.id.toString(),

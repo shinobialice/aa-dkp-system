@@ -215,10 +215,10 @@ export default function CalendarView({ isAdmin, isModerator }: Props) {
 
         <div className="flex flex-wrap gap-4 ml-6">
           {[
-            { color: "rgb(90, 54, 165)", label: "Прайм" },
-            { color: "rgb(215, 100, 168)", label: "АГЛ" },
-            { color: "rgb(232, 157, 53)", label: "Кошка" },
-            { color: "rgb(59, 130, 246)", label: "Морф" },
+            { color: "rgb(157, 41, 41)", label: "Прайм" },
+            { color: "rgb(47, 158, 98)", label: "АГЛ" },
+            { color: "rgb(215, 100, 168)", label: "Кошка" },
+            { color: "rgb(40, 111, 180)", label: "Морф" },
           ].map((item, index) => (
             <div key={index} className="flex items-center gap-2">
               <div
