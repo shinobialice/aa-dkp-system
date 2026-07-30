@@ -1,4 +1,6 @@
-import { getRaidData, getAttendances } from "./attendance";
+"use server";
+
+import supabase from "@/shared/lib/supabaseAdmin";
 
 const MONTHS = [
   "Январь",
@@ -15,82 +17,31 @@ const MONTHS = [
   "Декабрь",
 ];
 
-export async function getGuildPrimeStatsByYear(year: number) {
-  const raids = (await getRaidData(year)).filter((r) => r.type === "Прайм");
-  const attendances = await getAttendances(raids.map((r) => r.id));
+async function getMonthlyAttendance(year: number, type: string) {
+  const { data, error } = await supabase.rpc("get_monthly_attendance", {
+    p_year: year,
+    p_type: type,
+  });
 
-  const primeByMonth = new Array(12)
-    .fill(0)
-    .map(() => ({ totalPercent: 0, count: 0 }));
-  const raidMap = new Map<number, { month: number; active: number }>();
+  if (error) throw new Error("Ошибка при загрузке посещаемости");
 
-  for (const raid of raids) {
-    const d = new Date(raid.start_date!);
-    const m = d.getMonth();
-    const active = raid.active_user_count ?? 0;
-    raidMap.set(raid.id, { month: m, active });
-  }
+  const percentByMonth = new Map<number, number>(
+    (data ?? []).map((row: { month: number; percent: number }) => [
+      row.month,
+      Number(row.percent),
+    ]),
+  );
 
-  const attendancePerRaid = new Map<number, Set<number>>();
-  for (const att of attendances) {
-    if (!attendancePerRaid.has(att.raid_id)) {
-      attendancePerRaid.set(att.raid_id, new Set());
-    }
-    attendancePerRaid.get(att.raid_id)!.add(att.user_id);
-  }
-
-  for (const [raidId, users] of attendancePerRaid) {
-    const raid = raidMap.get(raidId);
-    if (!raid) continue;
-    const { month, active } = raid;
-    if (active === 0) continue;
-    const percent = (users.size / active) * 100;
-    primeByMonth[month].totalPercent += percent;
-    primeByMonth[month].count += 1;
-  }
-
-  return primeByMonth.map((entry, i) => ({
-    month: MONTHS[i],
-    percent: entry.count ? entry.totalPercent / entry.count : 0,
+  return MONTHS.map((label, i) => ({
+    month: label,
+    percent: percentByMonth.get(i + 1) ?? 0,
   }));
 }
 
+export async function getGuildPrimeStatsByYear(year: number) {
+  return getMonthlyAttendance(year, "Прайм");
+}
+
 export async function getGuildAglStatsByYear(year: number) {
-  const raids = (await getRaidData(year)).filter((r) => r.type === "АГЛ");
-  const attendances = await getAttendances(raids.map((r) => r.id));
-
-  const aglByMonth = new Array(12)
-    .fill(0)
-    .map(() => ({ totalPercent: 0, count: 0 }));
-  const raidMap = new Map<number, { month: number; active: number }>();
-
-  for (const raid of raids) {
-    const d = new Date(raid.start_date!);
-    const m = d.getMonth();
-    const active = raid.active_user_count ?? 0;
-    raidMap.set(raid.id, { month: m, active });
-  }
-
-  const attendancePerRaid = new Map<number, Set<number>>();
-  for (const att of attendances) {
-    if (!attendancePerRaid.has(att.raid_id)) {
-      attendancePerRaid.set(att.raid_id, new Set());
-    }
-    attendancePerRaid.get(att.raid_id)!.add(att.user_id);
-  }
-
-  for (const [raidId, users] of attendancePerRaid) {
-    const raid = raidMap.get(raidId);
-    if (!raid) continue;
-    const { month, active } = raid;
-    if (active === 0) continue;
-    const percent = (users.size / active) * 100;
-    aglByMonth[month].totalPercent += percent;
-    aglByMonth[month].count += 1;
-  }
-
-  return aglByMonth.map((entry, i) => ({
-    month: MONTHS[i],
-    percent: entry.count ? entry.totalPercent / entry.count : 0,
-  }));
+  return getMonthlyAttendance(year, "АГЛ");
 }

@@ -2,105 +2,44 @@
 
 import supabase from "@/shared/lib/supabaseAdmin";
 
-// raid.start_date хранится как naive-строка без таймзоны (мск. время без
-// смещения, см. createRaidEvent.ts). Границы месяца/года строим той же
-// naive-арифметикой по числам, без Date.UTC()/toISOString() — те применили
-// бы к наивной строке смещение часового пояса и сдвинули бы границу.
-function monthRangeBounds(year: number, month?: number) {
-  const startMonthIndex = year * 12 + (month ?? 0);
-  const endMonthIndex = month === undefined ? (year + 1) * 12 : startMonthIndex + 1;
+async function getDailyAttendance(year: number, month: number, type: string) {
+  const { data, error } = await supabase.rpc("get_daily_attendance", {
+    p_year: year,
+    p_month: month,
+    p_type: type,
+  });
 
-  const toDateString = (monthIndex: number) => {
-    const y = Math.floor(monthIndex / 12);
-    const m = monthIndex % 12;
-    return `${y}-${String(m + 1).padStart(2, "0")}-01T00:00:00`;
-  };
+  if (error) throw new Error("Ошибка при загрузке посещаемости");
 
-  return { start: toDateString(startMonthIndex), end: toDateString(endMonthIndex) };
-}
-
-export async function getRaidData(year: number, month?: number) {
-  const { start, end } = monthRangeBounds(year, month);
-
-  const { data: raids, error } = await supabase
-    .from("raid")
-    .select("id, start_date, type, active_user_count")
-    .gte("start_date", start)
-    .lt("start_date", end);
-
-  if (error || !raids) throw new Error("Ошибка при загрузке рейдов");
-
-  return raids;
-}
-
-export async function getAttendances(raidIds?: number[]) {
-  if (raidIds && raidIds.length === 0) return [];
-
-  // PostgREST режет любой select() на 1000 строк по умолчанию — при
-  // активной гильдии посещаемость за месяц легко превышает этот лимит,
-  // забираем всё батчами через .range().
-  const pageSize = 1000;
-  const attendances: { user_id: number; raid_id: number }[] = [];
-
-  for (let from = 0; ; from += pageSize) {
-    let query = supabase
-      .from("raid_attendance")
-      .select("user_id, raid_id")
-      .range(from, from + pageSize - 1);
-    if (raidIds) query = query.in("raid_id", raidIds);
-
-    const { data, error } = await query;
-    if (error || !data) throw new Error("Ошибка при загрузке посещаемости");
-
-    attendances.push(...data);
-    if (data.length < pageSize) break;
-  }
-
-  return attendances;
-}
-
-export async function calculateDailyAverage(
-  raids: { id: number; start_date: string; active_user_count: number | null }[],
-  attendances: { user_id: number; raid_id: number }[],
-) {
-  const raidDate = new Map<number, string>();
-  const raidActive = new Map<number, number>();
-
-  for (const raid of raids) {
-    if (!raid.start_date) continue;
-    raidDate.set(raid.id, raid.start_date.split("T")[0]);
-    raidActive.set(raid.id, raid.active_user_count ?? 0);
-  }
-
-  const attendeesPerRaid = new Map<number, Set<number>>();
-  for (const att of attendances) {
-    if (!raidDate.has(att.raid_id)) continue;
-    if (!attendeesPerRaid.has(att.raid_id)) {
-      attendeesPerRaid.set(att.raid_id, new Set());
-    }
-    attendeesPerRaid.get(att.raid_id)!.add(att.user_id);
-  }
-
-  // Рейды одного типа в один день считаются отдельно (у каждого свой
-  // active_user_count), а на графике день агрегирует средним по своим рейдам.
-  const percentsPerDate = new Map<string, number[]>();
-  for (const [raidId, date] of raidDate) {
-    const active = raidActive.get(raidId) ?? 0;
-    const attendeeCount = attendeesPerRaid.get(raidId)?.size ?? 0;
-    const percent = active > 0 ? (attendeeCount / active) * 100 : 0;
-    if (!percentsPerDate.has(date)) percentsPerDate.set(date, []);
-    percentsPerDate.get(date)!.push(percent);
-  }
-
-  const daily = Array.from(percentsPerDate.entries()).map(
-    ([date, percents]) => ({
-      date,
-      value: percents.reduce((acc, p) => acc + p, 0) / percents.length,
+  const daily: { date: string; value: number }[] = (data ?? []).map(
+    (row: { date: string; percent: number }) => ({
+      date: row.date,
+      value: Number(row.percent),
     }),
   );
 
-  const avgPercent =
+  const percent =
     daily.reduce((acc, d) => acc + d.value, 0) / (daily.length || 1);
 
-  return { percent: avgPercent, daily };
+  return { percent, daily };
+}
+
+export async function getGuildAttendancePrime({
+  year,
+  month,
+}: {
+  year: number;
+  month: number;
+}) {
+  return getDailyAttendance(year, month, "Прайм");
+}
+
+export async function getGuildAttendanceAgl({
+  year,
+  month,
+}: {
+  year: number;
+  month: number;
+}) {
+  return getDailyAttendance(year, month, "АГЛ");
 }
