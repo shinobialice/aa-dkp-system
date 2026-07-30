@@ -7,6 +7,7 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import { ChevronLeft, ChevronRight, Table, Calendar1 } from "lucide-react";
 import { EventDialog } from "./EventDialog";
 import { RaidInfoDialog } from "./RaidInfoDialog";
+import MissingActivitiesBanner from "./MissingActivitiesBanner";
 import { Button } from "@/shared/ui";
 import {
   Select,
@@ -100,9 +101,10 @@ export default function CalendarView({ isAdmin, isModerator }: Props) {
   return (
     <div className="flex min-h-screen flex-col bg-background text-onBackground">
       <div className="flex-1">
-        <h1 className="text-3xl font-bold ml-6 text-primary">
+        <h1 className="text-3xl font-bold ml-6 mb-4 text-primary">
           Календарь активностей
         </h1>
+        {canEditEvents && <MissingActivitiesBanner />}
         <div className="flex justify-end mb-4 space-x-2 mr-6">
           <Button
             variant="outline"
