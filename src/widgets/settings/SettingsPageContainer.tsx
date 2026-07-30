@@ -17,6 +17,7 @@ import { CreateUserForm } from "./CreateUserForm";
 import { UserSelect } from "./UserSelect";
 import { SalaryEligibilitySettingsForm } from "./SalaryEligibilitySettingsForm";
 import { BossPointsSettingsForm } from "./BossPointsSettingsForm";
+import { AttendanceBonusSettingsForm } from "./AttendanceBonusSettingsForm";
 
 type UserOption = {
   id: number;
@@ -110,6 +111,10 @@ export function SettingsPageContainer() {
 
       <Card className="p-4 flex-1 w-full">
         <BossPointsSettingsForm />
+      </Card>
+
+      <Card className="p-4 flex-1 w-full">
+        <AttendanceBonusSettingsForm />
       </Card>
     </div>
   );

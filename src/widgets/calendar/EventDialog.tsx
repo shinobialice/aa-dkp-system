@@ -73,7 +73,10 @@ export function EventDialog({
       const bosses = selectedEvent.raid_boss?.map((rb: any) => rb.boss) || [];
       setSelectedBosses(bosses);
 
-      if (selectedEvent.type === "Прайм" && bosses.length > 0) {
+      if (
+        (selectedEvent.type === "Прайм" || selectedEvent.type === "АГЛ") &&
+        bosses.length > 0
+      ) {
         setSelectedBoss(bosses[0].boss_name);
       }
     }

@@ -7,6 +7,11 @@ import { Checkbox } from "@/shared/ui";
 import { Label } from "@/shared/ui";
 import { Input } from "@/shared/ui";
 import { getActiveUsers } from "@/actions/getActiveUsers";
+import { getAttendanceBonusSettings } from "@/actions/attendanceBonusSettings";
+import {
+  DEFAULT_ATTENDANCE_BONUS_SETTINGS,
+  type AttendanceBonusSettings,
+} from "@/utils/attendanceBonusDefaults";
 import eventDkpCalculator from "@/utils/eventDkpCalculator";
 
 export function RaidDetailsForm({
@@ -57,6 +62,10 @@ export function RaidDetailsForm({
   isDoubleProc: boolean;
   setIsDoubleProc: (val: boolean) => void;
 }) {
+  const [bonus, setBonus] = React.useState<AttendanceBonusSettings | null>(
+    null,
+  );
+
   React.useEffect(() => {
     async function fetchUsers() {
       const activeUsers = await getActiveUsers();
@@ -66,21 +75,44 @@ export function RaidDetailsForm({
   }, [setUsers]);
 
   React.useEffect(() => {
+    getAttendanceBonusSettings()
+      .then(setBonus)
+      .catch(() => setBonus(DEFAULT_ATTENDANCE_BONUS_SETTINGS));
+  }, []);
+
+  React.useEffect(() => {
+    if (!bonus) return;
     let dkp = 0;
     if (category === "АГЛ") {
       dkp = selectedBosses.reduce(
         (sum, boss) => sum + (boss.dkp_points || 0),
         0,
       );
-      if (isPvp) dkp += 1;
-      else if (isPvpLong) dkp += 3;
-      if (isProc) dkp += 1;
-      if (isDoubleProc) dkp += 1;
+      if (isPvp) dkp += bonus.pvpPoints;
+      else if (isPvpLong) dkp += bonus.pvpLongPoints;
+      if (isProc) dkp += bonus.procPoints;
+      if (isDoubleProc) dkp += bonus.doubleProcPoints;
     } else {
-      dkp = eventDkpCalculator(selectedBosses[0], isPvp, isPvpLong);
+      dkp = eventDkpCalculator(selectedBosses[0], isPvp, isPvpLong, bonus);
     }
     setDkpPoints(dkp);
-  }, [selectedBosses, isPvp, isPvpLong, isProc, isDoubleProc, category]);
+  }, [selectedBosses, isPvp, isPvpLong, isProc, isDoubleProc, category, bonus]);
+
+  // Прок/х2 Прок относятся только к обычному АГЛ — для Морфа, Марли Прока
+  // и Кошки этих чекбоксов нет. Сбрасываем их только когда босса меняет
+  // сам пользователь (см. handleSelectBoss) — НЕ через эффект на
+  // selectedBoss, иначе это срабатывало бы и при загрузке старого рейда в
+  // режиме редактирования, тихо обнуляя уже сохранённый исторический бонус
+  // ещё до того, как админ вообще коснулся формы.
+  const handleSelectBoss = (boss: any) => {
+    setSelectedBoss(boss.boss_name);
+    setSelectedBosses([boss]);
+    setErrors((prev: any) => ({ ...prev, selectedBoss: false }));
+    if (category === "АГЛ" && boss.boss_name !== "АГЛ") {
+      setIsProc(false);
+      setIsDoubleProc(false);
+    }
+  };
 
   return (
     <div className="flex flex-col h-full space-y-4">
@@ -91,6 +123,8 @@ export function RaidDetailsForm({
         setSelectedBosses={setSelectedBosses}
         setIsPvp={setIsPvp}
         setIsPvpLong={setIsPvpLong}
+        setIsProc={setIsProc}
+        setIsDoubleProc={setIsDoubleProc}
         setErrors={setErrors}
         errors={errors}
       />
@@ -98,10 +132,7 @@ export function RaidDetailsForm({
         category={category}
         bosses={bosses}
         selectedBoss={selectedBoss}
-        setSelectedBoss={setSelectedBoss}
-        selectedBosses={selectedBosses}
-        setSelectedBosses={setSelectedBosses}
-        setErrors={setErrors}
+        onSelectBoss={handleSelectBoss}
         errors={errors}
       />
 
@@ -141,28 +172,34 @@ export function RaidDetailsForm({
               ПВП дольше 30 минут
             </label>
           </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              className="cursor-pointer"
-              id="proc_agl"
-              checked={isProc}
-              onCheckedChange={(checked) => setIsProc(checked === true)}
-            />
-            <label htmlFor="proc_agl" className="text-sm">
-              Прок
-            </label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              className="cursor-pointer"
-              id="double_proc_agl"
-              checked={isDoubleProc}
-              onCheckedChange={(checked) => setIsDoubleProc(checked === true)}
-            />
-            <label htmlFor="double_proc_agl" className="text-sm">
-              х2 Прок
-            </label>
-          </div>
+          {selectedBoss === "АГЛ" && (
+            <>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  className="cursor-pointer"
+                  id="proc_agl"
+                  checked={isProc}
+                  onCheckedChange={(checked) => setIsProc(checked === true)}
+                />
+                <label htmlFor="proc_agl" className="text-sm">
+                  Прок
+                </label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  className="cursor-pointer"
+                  id="double_proc_agl"
+                  checked={isDoubleProc}
+                  onCheckedChange={(checked) =>
+                    setIsDoubleProc(checked === true)
+                  }
+                />
+                <label htmlFor="double_proc_agl" className="text-sm">
+                  х2 Прок
+                </label>
+              </div>
+            </>
+          )}
         </>
       )}
 

@@ -48,7 +48,8 @@ export const getRaids = async () => {
       const [hh, mm, ss] = timePart.split(":").map(Number);
 
       const endMoment = new Date(Date.UTC(year, month - 1, day, hh, mm, ss));
-      endMoment.setUTCHours(endMoment.getUTCHours() + 1);
+      const durationMinutes = raid.type === "АГЛ" ? 30 : 60;
+      endMoment.setUTCMinutes(endMoment.getUTCMinutes() + durationMinutes);
       const endDatePart = endMoment.toISOString().slice(0, 10);
       const endTime = endMoment.toISOString().slice(11, 19);
 

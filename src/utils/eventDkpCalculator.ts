@@ -1,3 +1,5 @@
+import type { AttendanceBonusSettings } from "@/utils/attendanceBonusDefaults";
+
 type Boss = {
   id: number;
   boss_name: string;
@@ -13,15 +15,16 @@ export default function eventDkpCalculator(
   selectedBoss: Boss | null,
   isPvp: boolean,
   isPvpLong: boolean,
+  bonus: AttendanceBonusSettings,
 ) {
   if (!selectedBoss) return 0;
 
   let dkp = selectedBoss.dkp_points;
 
   if (isPvp) {
-    dkp += 2;
+    dkp += bonus.pvpPoints;
   } else if (isPvpLong) {
-    dkp += 1;
+    dkp += bonus.pvpLongPoints;
   }
 
   return dkp;

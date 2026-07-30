@@ -15,6 +15,8 @@ export default function CategorySelector({
   setSelectedBosses,
   setIsPvp,
   setIsPvpLong,
+  setIsProc,
+  setIsDoubleProc,
   setErrors,
   errors,
 }: {
@@ -24,6 +26,8 @@ export default function CategorySelector({
   setSelectedBosses: React.Dispatch<React.SetStateAction<any[]>>;
   setIsPvp: (val: boolean) => void;
   setIsPvpLong: (val: boolean) => void;
+  setIsProc: (val: boolean) => void;
+  setIsDoubleProc: (val: boolean) => void;
   setErrors: React.Dispatch<React.SetStateAction<any>>;
   errors: { category: boolean };
 }) {
@@ -37,6 +41,8 @@ export default function CategorySelector({
           setSelectedBosses([]);
           setIsPvp(false);
           setIsPvpLong(false);
+          setIsProc(false);
+          setIsDoubleProc(false);
           setErrors((prev: any) => ({ ...prev, category: false }));
         }}
         value={category ?? undefined}
