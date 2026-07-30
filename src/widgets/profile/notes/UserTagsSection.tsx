@@ -151,14 +151,14 @@ export function UserTagsSection({
         >
           Активен
         </Badge>
-        {/* {isAdmin && ( */}
-        <Switch
-          className="cursor-pointer"
-          checked={user.active}
-          onCheckedChange={toggleActive}
-          disabled={updating}
-        />
-        {/* )} */}
+        {isAdmin && (
+          <Switch
+            className="cursor-pointer"
+            checked={user.active}
+            onCheckedChange={toggleActive}
+            disabled={updating}
+          />
+        )}
       </div>
       <div className="flex justify-between items-center py-4">
         <Badge
@@ -167,14 +167,14 @@ export function UserTagsSection({
         >
           Получает зарплату
         </Badge>
-        {/* {isAdmin && ( */}
-        <Switch
-          checked={user.is_eligible_for_salary}
-          onCheckedChange={toggleSalary}
-          disabled={updating}
-          className="cursor-pointer"
-        />
-        {/* )} */}
+        {isAdmin && (
+          <Switch
+            checked={user.is_eligible_for_salary}
+            onCheckedChange={toggleSalary}
+            disabled={updating}
+            className="cursor-pointer"
+          />
+        )}
       </div>
 
       {tags.map((tag) => (
