@@ -1,3 +1,9 @@
+export const MISC_LOOT_ITEM_NAMES = [
+  "Эссенции акхиума",
+  "Всякие мелочи",
+  "Всякие мелочи 2",
+];
+
 export type LootItem = {
   sold_to_user_id?: number | null;
   id: number;

@@ -292,6 +292,33 @@ export type Database = {
           },
         ];
       };
+      misc_loot_totals: {
+        Row: {
+          amount: number;
+          id: number;
+          item_name: string;
+          month: number;
+          updated_at: string;
+          year: number;
+        };
+        Insert: {
+          amount?: number;
+          id?: number;
+          item_name: string;
+          month: number;
+          updated_at?: string;
+          year: number;
+        };
+        Update: {
+          amount?: number;
+          id?: number;
+          item_name?: string;
+          month?: number;
+          updated_at?: string;
+          year?: number;
+        };
+        Relationships: [];
+      };
       News: {
         Row: {
           content: string;

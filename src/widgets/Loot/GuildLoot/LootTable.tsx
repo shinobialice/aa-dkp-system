@@ -19,6 +19,7 @@ import {
 import { getLoot, addLootItem, getItemTypes } from "@/actions/lootActions";
 import { deleteLootItem } from "@/actions/deleteLootItem";
 import { LootRawTable } from "./LootRawTable";
+import { MiscLootSummary } from "./MiscLootSummary";
 import { Button } from "@/shared/ui";
 import ExpensesTable from "./ExpenseTable";
 
@@ -111,6 +112,11 @@ export default function LootTable({ isAdmin }: Props) {
               </SelectContent>
             </Select>
           </div>
+          <MiscLootSummary
+            isAdmin={isAdmin}
+            selectedMonth={selectedMonth}
+            selectedYear={selectedYear}
+          />
           <LootRawTable
             isAdmin={isAdmin}
             loot={loot}

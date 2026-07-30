@@ -2,7 +2,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowUpDown } from "lucide-react";
-import { LootItem } from "./LootTypes";
+import { LootItem, MISC_LOOT_ITEM_NAMES } from "./LootTypes";
 import { LootIcon } from "../LootBuy/icons/LootIconComponent";
 import {
   Table,
@@ -22,7 +22,7 @@ import {
 } from "@/actions/distributeLootItems";
 import { getLoot } from "@/actions/lootActions";
 
-function isSameMonth(date: Date, month: number, year: number) {
+export function isSameMonth(date: Date, month: number, year: number) {
   return date.getMonth() + 1 === month && date.getFullYear() === year;
 }
 
@@ -84,6 +84,7 @@ export function LootRawTable({
 
   const visibleLoot = useMemo(() => {
     const filtered = loot.filter((item) => {
+      if (MISC_LOOT_ITEM_NAMES.includes(item.itemType.name)) return false;
       if (item.status === "Распродано") return false;
 
       const acquired = item.acquired_at ? new Date(item.acquired_at) : null;
