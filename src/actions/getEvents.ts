@@ -47,15 +47,6 @@ export const getRaids = async () => {
       const [year, month, day] = datePart.split("-").map(Number);
       const [hh, mm, ss] = timePart.split(":").map(Number);
 
-      const endMoment = new Date(Date.UTC(year, month - 1, day, hh, mm, ss));
-      const durationMinutes = raid.type === "АГЛ" ? 30 : 60;
-      endMoment.setUTCMinutes(endMoment.getUTCMinutes() + durationMinutes);
-      const endDatePart = endMoment.toISOString().slice(0, 10);
-      const endTime = endMoment.toISOString().slice(11, 19);
-
-      const start = raid.start_date;
-      const end = `${endDatePart}T${endTime}`;
-
       const title =
         raid.raid_boss
           ?.flatMap((rb) => rb.boss || [])
@@ -63,10 +54,27 @@ export const getRaids = async () => {
           .filter(Boolean)
           .join(", ") || "Unknown Boss";
 
+      // Морф/Марли Прок/Кошка — полноценные боссы, идут час, как Прайм.
+      // 30 минут только у "чистого" АГЛ (фарм, без привязки к конкретному
+      // боссу).
+      const isAglBossFight = ["Морф", "Марли Прок", "Кошка"].some((name) =>
+        title.includes(name),
+      );
+      const endMoment = new Date(Date.UTC(year, month - 1, day, hh, mm, ss));
+      const durationMinutes =
+        raid.type === "АГЛ" && !isAglBossFight ? 30 : 60;
+      endMoment.setUTCMinutes(endMoment.getUTCMinutes() + durationMinutes);
+      const endDatePart = endMoment.toISOString().slice(0, 10);
+      const endTime = endMoment.toISOString().slice(11, 19);
+
+      const start = raid.start_date;
+      const end = `${endDatePart}T${endTime}`;
+
       let color = "gray";
       if (raid.type === "Прайм") color = "rgb(90, 54, 165)";
       if (raid.type === "АГЛ") color = "rgb(215, 100, 168)";
       if (title.includes("Кошка")) color = "rgb(232, 157, 53)";
+      if (title.includes("Морф")) color = "rgb(59, 130, 246)";
 
       return {
         id: raid.id.toString(),

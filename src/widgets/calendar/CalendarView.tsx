@@ -218,6 +218,7 @@ export default function CalendarView({ isAdmin, isModerator }: Props) {
             { color: "rgb(90, 54, 165)", label: "Прайм" },
             { color: "rgb(215, 100, 168)", label: "АГЛ" },
             { color: "rgb(232, 157, 53)", label: "Кошка" },
+            { color: "rgb(59, 130, 246)", label: "Морф" },
           ].map((item, index) => (
             <div key={index} className="flex items-center gap-2">
               <div
