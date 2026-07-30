@@ -34,16 +34,27 @@ export async function getRaidData(year: number, month?: number) {
 }
 
 export async function getAttendances(raidIds?: number[]) {
-  let query = supabase.from("raid_attendance").select("user_id, raid_id");
-  if (raidIds) {
-    if (raidIds.length === 0) return [];
-    query = query.in("raid_id", raidIds);
+  if (raidIds && raidIds.length === 0) return [];
+
+  // PostgREST режет любой select() на 1000 строк по умолчанию — при
+  // активной гильдии посещаемость за месяц легко превышает этот лимит,
+  // забираем всё батчами через .range().
+  const pageSize = 1000;
+  const attendances: { user_id: number; raid_id: number }[] = [];
+
+  for (let from = 0; ; from += pageSize) {
+    let query = supabase
+      .from("raid_attendance")
+      .select("user_id, raid_id")
+      .range(from, from + pageSize - 1);
+    if (raidIds) query = query.in("raid_id", raidIds);
+
+    const { data, error } = await query;
+    if (error || !data) throw new Error("Ошибка при загрузке посещаемости");
+
+    attendances.push(...data);
+    if (data.length < pageSize) break;
   }
-
-  const { data: attendances, error } = await query;
-
-  if (error || !attendances)
-    throw new Error("Ошибка при загрузке посещаемости");
 
   return attendances;
 }

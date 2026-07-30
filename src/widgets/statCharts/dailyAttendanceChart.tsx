@@ -11,8 +11,8 @@ import {
 } from "@/shared/ui";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/shared/ui";
 import {
-  AreaChart,
-  Area,
+  BarChart,
+  Bar,
   CartesianGrid,
   XAxis,
   YAxis,
@@ -134,59 +134,31 @@ export default function DailyAttendanceChart({
       <CardContent>
         <ChartContainer className="w-full h-[250px]" config={chartConfig}>
           <ResponsiveContainer width="100%" height={250}>
-            <AreaChart data={chartData}>
-              <defs>
-                <linearGradient id="fillprime" x1="0" y1="0" x2="0" y2="1">
-                  <stop
-                    offset="5%"
-                    stopColor="var(--color-prime)"
-                    stopOpacity={0.8}
-                  />
-                  <stop
-                    offset="95%"
-                    stopColor="var(--color-prime)"
-                    stopOpacity={0.1}
-                  />
-                </linearGradient>
-                <linearGradient id="fillagl" x1="0" y1="0" x2="0" y2="1">
-                  <stop
-                    offset="5%"
-                    stopColor="var(--color-agl)"
-                    stopOpacity={0.8}
-                  />
-                  <stop
-                    offset="95%"
-                    stopColor="var(--color-agl)"
-                    stopOpacity={0.1}
-                  />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
+            <BarChart accessibilityLayer data={chartData}>
+              <CartesianGrid vertical={false} strokeDasharray="3 3" />
+              <XAxis
+                dataKey="date"
+                tickLine={false}
+                tickMargin={10}
+                axisLine={false}
+                tickFormatter={(v) => v.split("-")[2]}
+              />
               <YAxis
                 domain={[0, 100]}
                 tickFormatter={(v) => `${Math.round(v)}%`}
               />
-              <Area
-                type="monotone"
-                dataKey="prime"
-                stroke="var(--color-prime)"
-                fill="url(#fillprime)"
-              />
-              <Area
-                type="monotone"
-                dataKey="agl"
-                stroke="var(--color-agl)"
-                fill="url(#fillagl)"
-              />
               <ChartTooltip
+                cursor={false}
                 content={
                   <RoundedTooltipContent
+                    indicator="dashed"
                     labelFormatter={(val: any) => `Дата: ${val}`}
                   />
                 }
               />
-            </AreaChart>
+              <Bar dataKey="prime" fill="var(--color-prime)" radius={4} />
+              <Bar dataKey="agl" fill="var(--color-agl)" radius={4} />
+            </BarChart>
           </ResponsiveContainer>
         </ChartContainer>
       </CardContent>
