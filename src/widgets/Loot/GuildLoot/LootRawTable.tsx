@@ -13,6 +13,7 @@ import {
   TableRow,
 } from "@/shared/ui";
 import { Button } from "@/shared/ui";
+import { Input } from "@/shared/ui";
 import { ScrollArea } from "@/shared/ui";
 import { SellLootDialog } from "./SellLootDialog";
 import { getActiveUsers } from "@/actions/getActiveUsers";
@@ -57,6 +58,7 @@ export function LootRawTable({
     "acquired_at" | "sold_at" | "status" | null
   >(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     getActiveUsers().then(setActiveUsers);
@@ -83,9 +85,13 @@ export function LootRawTable({
   );
 
   const visibleLoot = useMemo(() => {
+    const query = search.trim().toLowerCase();
+
     const filtered = loot.filter((item) => {
       if (MISC_LOOT_ITEM_NAMES.includes(item.itemType.name)) return false;
       if (item.status === "Распродано") return false;
+      if (query && !item.itemType.name.toLowerCase().includes(query))
+        return false;
 
       const acquired = item.acquired_at ? new Date(item.acquired_at) : null;
       const acquiredThisMonth = acquired
@@ -122,10 +128,17 @@ export function LootRawTable({
       const bTime = b[sortKey] ? new Date(b[sortKey] as Date).getTime() : 0;
       return sortDir === "asc" ? aTime - bTime : bTime - aTime;
     });
-  }, [loot, selectedMonth, selectedYear, sortKey, sortDir]);
+  }, [loot, selectedMonth, selectedYear, sortKey, sortDir, search]);
 
   return (
-    <div className="overflow-auto rounded-md border">
+    <div className="space-y-2">
+      <Input
+        placeholder="Поиск по предмету..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="max-w-xs"
+      />
+      <div className="overflow-auto rounded-md border">
       <ScrollArea className="h-[1000px] w-full">
         <Table>
           <TableHeader className="sticky top-0 z-1 bg-background">
@@ -205,6 +218,7 @@ export function LootRawTable({
           </TableBody>
         </Table>
       </ScrollArea>
+      </div>
 
       {selectedItem && (
         <SellLootDialog
