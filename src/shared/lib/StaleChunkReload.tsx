@@ -30,15 +30,38 @@ function reloadOnce() {
   window.location.reload();
 }
 
+// Браузерная консоль недоступна в Vercel — шлём любую необработанную
+// ошибку на сервер, чтобы она попала в Runtime Logs и была видна, даже
+// если репродюсит кто-то без открытых devtools.
+function reportError(message: string, stack?: string) {
+  try {
+    fetch("/api/log-client-error", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      keepalive: true,
+      body: JSON.stringify({
+        message,
+        stack,
+        url: window.location.href,
+        userAgent: navigator.userAgent,
+      }),
+    }).catch(() => {});
+  } catch {
+    // logging must never itself throw
+  }
+}
+
 export function StaleChunkReload() {
   useEffect(() => {
     const onError = (event: ErrorEvent) => {
+      reportError(event.message, event.error?.stack);
       if (isStaleChunkError(event.message, event.error?.name)) {
         reloadOnce();
       }
     };
     const onRejection = (event: PromiseRejectionEvent) => {
       const reason = event.reason;
+      reportError(reason?.message ?? String(reason), reason?.stack);
       if (isStaleChunkError(reason?.message, reason?.name)) {
         reloadOnce();
       }

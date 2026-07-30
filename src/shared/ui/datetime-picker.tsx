@@ -337,6 +337,12 @@ export function DateTimePicker({
           <DayPicker
             timeZone={timezone}
             mode="single"
+            // Навигация уже полностью своя (кнопки выше + MonthYearPicker) —
+            // встроенный Nav только визуально скрыт через classNames, но всё
+            // равно монтируется и в проде у части пользователей падает с
+            // "useDayPicker() must be used within a custom component".
+            // hideNavigation убирает его из рендера совсем.
+            hideNavigation
             selected={date}
             onSelect={(d) => d && onDayChanged(d)}
             month={month}
