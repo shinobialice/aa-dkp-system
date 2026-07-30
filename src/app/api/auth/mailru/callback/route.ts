@@ -5,6 +5,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import supabase from "@/shared/lib/supabaseAdmin";
 
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL!;
+
 function generateSessionToken() {
   return crypto.randomBytes(32).toString("hex");
 }
@@ -42,7 +44,7 @@ export async function GET(req: NextRequest) {
     body: new URLSearchParams({
       grant_type: "authorization_code",
       code,
-      redirect_uri: "https://aa-dkp-system.vercel.app/api/auth/mailru/callback",
+      redirect_uri: `${baseUrl}/api/auth/mailru/callback`,
     }),
   });
 
