@@ -1,6 +1,7 @@
 "use server";
 import supabase from "@/shared/lib/supabaseAdmin";
 import ensurePrivilieges from "./ensurePrivilieges";
+import { triggerFinanceRecalcForCurrentMonth } from "./recalculateFinanceForMonth";
 
 // 1. Get user tags
 // Без asOf — только тэги, действующие прямо сейчас (для отображения в UI).
@@ -78,6 +79,9 @@ export async function addUserTag(userId: number, tag: string) {
     throw new Error("Не удалось добавить тэг");
   }
 
+  // АФК/ДВ напрямую влияют на допуск/вес зарплаты (см. calculateSalaryWeight).
+  await triggerFinanceRecalcForCurrentMonth();
+
   return data;
 }
 
@@ -94,4 +98,6 @@ export async function deleteUserTag(tagId: number) {
     console.error("Ошибка при удалении тэга:", error);
     throw new Error("Не удалось удалить тэг");
   }
+
+  await triggerFinanceRecalcForCurrentMonth();
 }

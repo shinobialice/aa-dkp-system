@@ -1,6 +1,7 @@
 "use server";
 
 import supabase from "@/shared/lib/supabaseAdmin";
+import { triggerFinanceRecalcForCurrentMonth } from "./recalculateFinanceForMonth";
 
 export const getUserPenaltyPoints = async (userId: number) => {
   const { data, error } = await supabase
@@ -71,6 +72,8 @@ export async function addUserPenaltyPoints({
     console.error("Error adding penalty points:", error);
     throw new Error("Ошибка при добавлении штрафа");
   }
+
+  await triggerFinanceRecalcForCurrentMonth();
 }
 
 export async function deleteUserPenaltyPoints(id: number) {
@@ -83,4 +86,6 @@ export async function deleteUserPenaltyPoints(id: number) {
     console.error("Error deleting penalty points:", error);
     throw new Error("Ошибка при удалении штрафа");
   }
+
+  await triggerFinanceRecalcForCurrentMonth();
 }

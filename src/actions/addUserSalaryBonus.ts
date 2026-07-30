@@ -1,6 +1,7 @@
 "use server";
 
 import supabase from "@/shared/lib/supabaseAdmin";
+import { triggerFinanceRecalcForCurrentMonth } from "./recalculateFinanceForMonth";
 
 export async function addUserSalaryBonus({
   userId,
@@ -31,6 +32,8 @@ export async function addUserSalaryBonus({
     console.error("Error adding salary bonus:", error);
     throw new Error("Ошибка при добавлении бонуса");
   }
+
+  await triggerFinanceRecalcForCurrentMonth();
 }
 
 export async function deleteUserSalaryBonus(id: number) {
@@ -43,4 +46,6 @@ export async function deleteUserSalaryBonus(id: number) {
     console.error("Error deleting salary bonus:", error);
     throw new Error("Ошибка при удалении бонуса");
   }
+
+  await triggerFinanceRecalcForCurrentMonth();
 }

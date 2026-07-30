@@ -2,13 +2,11 @@
 import supabase from "@/shared/lib/supabaseAdmin";
 import type { Database } from "@/types/supabase";
 import ensurePrivilieges from "./ensurePrivilieges";
-import { getUserMonthlyAttendance } from "./getUserMonthlyAttendance";
-import { getUserTags } from "./userTagsActions";
-import { getUserPenaltyPoints } from "./penaltyActions";
-import {
-  buildSalaryWeightResult,
-  type SalaryWeightUser,
-} from "@/utils/buildSalaryWeightResult";
+import { generateGuildFunds } from "./generateGuildFunds";
+import { computeMonthlyAttendanceForUsers } from "./getAllUsersActivityWithPercent";
+import { getUserTagsBatch } from "./userTagsActions";
+import { getUserPenaltyPointsBatch } from "./penaltyActions";
+import { buildSalaryWeightResult } from "@/utils/buildSalaryWeightResult";
 import getSalaryAsOfDate from "@/utils/getSalaryAsOfDate";
 import { getAverageGuildGS } from "./getAverageGuildGS";
 import {
@@ -97,30 +95,29 @@ export const updateSalaryAdvance = async (
 ) => {
   await ensurePrivilieges(["Администратор"]);
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("Salary")
     .update({ sentAmount, sent })
-    .eq("id", salaryId);
+    .eq("id", salaryId)
+    .select("month, year")
+    .maybeSingle();
 
-  if (error) {
+  if (error || !data) {
     throw new Error("Ошибка при обновлении аванса");
   }
-};
 
-async function getCustomBonus(userId: number): Promise<number> {
-  const { data, error } = await supabase
-    .from("user_salary_bonus")
-    .select("amount")
-    .eq("user_id", userId);
-
-  if (error) {
-    return 0;
+  // "Выслано авансом"/"В казне" в GuildFunds считаются от суммы
+  // Salary.sentAmount (см. getLiveAdvanceSent в generateGuildFunds.ts) —
+  // без этого пересчёта отметка "выслано" не отражалась бы на /loot/finance,
+  // пока кто-нибудь не продаст лут/добавит рейд или не нажмёт "Пересчитать".
+  // Веса зарплат аванс не меняет, поэтому пересчитываем только фонд, не всю
+  // generateSalaries.
+  try {
+    await generateGuildFunds(data.month, data.year);
+  } catch (err) {
+    console.error("Ошибка при пересчёте фонда после изменения аванса:", err);
   }
-
-  const totalBonus =
-    data?.reduce((sum, bonus) => sum + (bonus.amount || 0), 0) ?? 0;
-  return totalBonus;
-}
+};
 
 // Батч-версия getCustomBonus — один запрос на всех переданных пользователей
 // сразу (используется при расчёте причин отказа в ЗП для всей гильдии на
@@ -161,35 +158,6 @@ export async function getSalaryEligibilityContext(): Promise<SalaryEligibilityCo
   return { settings, averageGuildGS };
 }
 
-export async function computeUserSalaryWeight(
-  user: SalaryWeightUser,
-  month: number,
-  year: number,
-  context: SalaryEligibilityContext,
-) {
-  const asOf = getSalaryAsOfDate(month, year);
-  const [attendance, tagRows, penaltyRows, individualBonusPercent] =
-    await Promise.all([
-      getUserMonthlyAttendance(user.id, year, month),
-      getUserTags(user.id, asOf),
-      getUserPenaltyPoints(user.id),
-      getCustomBonus(user.id),
-    ]);
-
-  const tags = (tagRows ?? []).map((t) => t.tag);
-  const penaltyPoints = (penaltyRows ?? []).reduce(
-    (sum, p) => sum + (p.amount || 0),
-    0,
-  );
-
-  return buildSalaryWeightResult(user, asOf, context, {
-    attendance,
-    tags,
-    penaltyPoints,
-    individualBonusPercent,
-  });
-}
-
 export const generateSalaries = async (month: number, year: number) => {
   const { data: fund, error: fundError } = await supabase
     .from("GuildFunds")
@@ -213,17 +181,39 @@ export const generateSalaries = async (month: number, year: number) => {
   }
 
   const context = await getSalaryEligibilityContext();
+  const asOf = getSalaryAsOfDate(month, year);
+  const userIds = users.map((u) => u.id);
 
-  const userRows = await Promise.all(
-    users.map((user) =>
-      computeUserSalaryWeight(
-        { ...user, active: true, is_eligible_for_salary: true },
-        month,
-        year,
-        context,
-      ),
-    ),
-  );
+  // Раньше здесь на каждого пользователя дергался отдельный
+  // computeUserSalaryWeight (4 запроса на игрока, включая повторный запрос
+  // всех рейдов месяца) — при вызове на каждое открытие /loot/finance и
+  // каждые 60 сек автообновления это было особенно тяжело. Теперь — 4
+  // запроса на всю гильдию разом (см. getSalaryReasons, где тот же фикс).
+  const [attendanceMap, tagsMap, penaltyMap, bonusMap] = await Promise.all([
+    computeMonthlyAttendanceForUsers(users, month, year),
+    getUserTagsBatch(userIds, asOf),
+    getUserPenaltyPointsBatch(userIds),
+    getCustomBonusBatch(userIds),
+  ]);
+
+  const userRows = users.map((user) => {
+    const attendance = attendanceMap[user.id] ?? {
+      primePercent: 0,
+      aglPercent: 0,
+      totalPercent: 0,
+      dkp: 0,
+    };
+    const tags = (tagsMap[user.id] ?? []).map((t) => t.tag);
+    const penaltyPoints = penaltyMap[user.id] ?? 0;
+    const individualBonusPercent = bonusMap[user.id] ?? 0;
+
+    return buildSalaryWeightResult(
+      { ...user, active: true, is_eligible_for_salary: true },
+      asOf,
+      context,
+      { attendance, tags, penaltyPoints, individualBonusPercent },
+    );
+  });
 
   const eligibleRows = userRows.filter((r) => r.eligible);
   const totalWeight = eligibleRows.reduce((sum, r) => sum + r.finalWeight, 0);

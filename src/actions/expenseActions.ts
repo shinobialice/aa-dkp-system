@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import supabase from "@/shared/lib/supabaseAdmin";
+import { triggerFinanceRecalc } from "./recalculateFinanceForMonth";
 
 export const getExpenses = async () => {
   const { data, error } = await supabase
@@ -59,4 +60,7 @@ export const addExpense = async ({
   }
 
   revalidatePath("/loot");
+
+  const expenseDate = new Date(date);
+  await triggerFinanceRecalc(expenseDate.getMonth() + 1, expenseDate.getFullYear());
 };

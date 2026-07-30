@@ -1,6 +1,7 @@
 "use server";
 
 import supabase from "@/shared/lib/supabaseAdmin";
+import { triggerFinanceRecalc } from "./recalculateFinanceForMonth";
 
 /**
  * Обновляет существующее событие по ID
@@ -18,6 +19,14 @@ const updateEvent = async (
   is_double_proc: boolean = false,
   lateUserIds: number[] = [],
 ) => {
+  // Запоминаем старую дату — если рейд переносят в другой месяц, пересчитать
+  // нужно оба месяца (у старого пропадает посещаемость/dkp, у нового — появляется).
+  const { data: previousRaid } = await supabase
+    .from("raid")
+    .select("start_date")
+    .eq("id", id)
+    .maybeSingle();
+
   // 1. Update the raid event itself
   const { error: updateError } = await supabase
     .from("raid")
@@ -84,6 +93,21 @@ const updateEvent = async (
     if (bossInsertError) {
       throw new Error("Не удалось добавить боссов к рейду");
     }
+  }
+
+  // Посещаемость/dkp влияют на веса зарплат за месяц рейда — пересчитываем
+  // сразу, не дожидаясь таймера на /loot/finance.
+  const monthsToRecalc = new Set([
+    `${start_date.getFullYear()}-${start_date.getMonth() + 1}`,
+  ]);
+  if (previousRaid?.start_date) {
+    const prevDate = new Date(previousRaid.start_date);
+    monthsToRecalc.add(`${prevDate.getFullYear()}-${prevDate.getMonth() + 1}`);
+  }
+
+  for (const key of monthsToRecalc) {
+    const [year, month] = key.split("-").map(Number);
+    await triggerFinanceRecalc(month, year);
   }
 };
 

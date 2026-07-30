@@ -2,6 +2,7 @@
 
 import supabase from "@/shared/lib/supabaseAdmin";
 import { MISC_LOOT_ITEM_NAMES } from "@/widgets/Loot/GuildLoot/LootTypes";
+import { triggerFinanceRecalc } from "./recalculateFinanceForMonth";
 
 export async function getMiscLootTotals(month: number, year: number) {
   const { data, error } = await supabase
@@ -49,4 +50,6 @@ export async function setMiscLootTotal({
     console.error(error);
     throw new Error("Не удалось сохранить сумму");
   }
+
+  await triggerFinanceRecalc(month, year);
 }

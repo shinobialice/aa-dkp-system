@@ -19,16 +19,22 @@ import {
 } from "@/shared/ui";
 import { Input, Checkbox } from "@/shared/ui";
 import {
-  generateSalaries,
   getGuildFunds,
   getSalariesForMonth,
   updateSalaryAdvance,
 } from "@/actions/financeActions";
-import { generateGuildFunds } from "@/actions/generateGuildFunds";
+import { recalculateFinanceForMonthAsAdmin } from "@/actions/recalculateFinanceForMonth";
 import { classColors, classIcons } from "@/widgets/MembersTable/classStyles";
 import { getYearOptions } from "@/utils/getYearOptions";
 
-const AUTO_REFRESH_MS = 60 * 1000;
+// Раньше здесь пересчитывался весь фонд/зарплаты (с записью в БД) на каждое
+// открытие страницы и каждые 60 сек для каждого зрителя. Теперь пересчёт
+// точечно триггерится из мест, которые реально меняют цифры (продажа лута,
+// рейды/посещаемость — см. recalculateFinanceForMonth.ts), а страница просто
+// читает уже посчитанное. Лёгкий поллинг здесь нужен только на случай правок,
+// которые пока не триггерят пересчёт сами (штрафы, тэги, доп. бонусы,
+// расходы, критерии допуска) — можно держать короче, т.к. это просто чтение.
+const AUTO_REFRESH_MS = 20 * 1000;
 
 type Fund = {
   totalIncome: number;
@@ -119,21 +125,13 @@ export default function FinanceClient({
   // фоновое авто-обновление не перетирало недописанное значение.
   const editingSalaryId = useRef<number | null>(null);
 
+  // Только чтение — сам пересчёт (запись в БД) теперь триггерится точечно
+  // из продажи лута и создания/правки рейдов (см. recalculateFinanceForMonth.ts),
+  // а не гоняется здесь при каждом открытии страницы/тике таймера.
   const refresh = useCallback(
     async (m: number, y: number, opts?: { silent?: boolean }) => {
       if (opts?.silent) setRefreshing(true);
       try {
-        // Первый проход — считаем доход/фонд (нужен generateSalaries).
-        await generateGuildFunds(m, y);
-        try {
-          await generateSalaries(m, y);
-        } catch {
-          // Нет допущенных пользователей за месяц (например, ещё нет данных) —
-          // фонд всё равно должен отобразиться.
-        }
-        // Второй проход — пересчитываем "В казне" с учётом реального аванса
-        // по игрокам (Salary.sentAmount), который появился только что.
-        await generateGuildFunds(m, y);
         const [fundResult, salariesResult] = await Promise.all([
           getGuildFunds(m, y),
           getSalariesForMonth(m, y),
@@ -149,6 +147,20 @@ export default function FinanceClient({
       }
     },
     [],
+  );
+
+  // Полный пересчёт по кнопке — для правок, которые пока не триггерят его
+  // сами (штрафы, тэги, доп. бонусы, расходы, критерии допуска в Настройках).
+  const recalculate = useCallback(
+    async (m: number, y: number) => {
+      setRefreshing(true);
+      try {
+        await recalculateFinanceForMonthAsAdmin(m, y);
+      } finally {
+        await refresh(m, y);
+      }
+    },
+    [refresh],
   );
 
   useEffect(() => {
@@ -231,7 +243,7 @@ export default function FinanceClient({
             </SelectContent>
           </Select>
           <Button
-            onClick={() => refresh(month, year)}
+            onClick={() => recalculate(month, year)}
             variant="outline"
             className="cursor-pointer"
             disabled={refreshing}

@@ -1,6 +1,7 @@
 "use server";
 
 import supabase from "@/shared/lib/supabaseAdmin";
+import { triggerFinanceRecalc } from "./recalculateFinanceForMonth";
 
 export async function distributeLootItem({
   lootId,
@@ -50,17 +51,18 @@ export async function distributeLootItem({
     .eq("id", lootId);
 
   // 3. Insert new loot record for the distributed portion
+  const soldAt = new Date().toISOString();
   const { data: created, error: createError } = await supabase
     .from("loot")
     .insert([
       {
         item_type_id: loot.item_type_id,
         source: loot.source,
-        acquired_at: loot.acquired_at ?? new Date().toISOString(),
+        acquired_at: loot.acquired_at ?? soldAt,
         quantity,
         sold_to: soldTo,
         sold_to_user_id: soldToId,
-        sold_at: new Date().toISOString(),
+        sold_at: soldAt,
         comment,
         status: isFree ? "Выдано" : "Продано",
         price: isFree ? 0 : (price ?? loot.item_type?.price ?? 0),
@@ -73,6 +75,11 @@ export async function distributeLootItem({
   if (createError || !created) {
     console.error(createError);
     throw new Error("Ошибка при создании новой записи лута");
+  }
+
+  if (!isFree) {
+    const soldAtDate = new Date(soldAt);
+    await triggerFinanceRecalc(soldAtDate.getMonth() + 1, soldAtDate.getFullYear());
   }
 
   // 5. Add to user inventory if applicable
@@ -198,5 +205,13 @@ export async function updateLootSale({
       .from("user_inventory")
       .delete()
       .eq("id", existingInventory.id);
+  }
+
+  // Цена/статус (платно↔бесплатно) могли измениться в любую сторону —
+  // пересчитываем безусловно. sold_at не менялся, так что месяц дохода
+  // остаётся прежним.
+  if (loot.sold_at) {
+    const soldAtDate = new Date(loot.sold_at);
+    await triggerFinanceRecalc(soldAtDate.getMonth() + 1, soldAtDate.getFullYear());
   }
 }

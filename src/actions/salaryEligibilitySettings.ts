@@ -3,6 +3,7 @@
 import supabase from "@/shared/lib/supabaseAdmin";
 import ensurePrivilieges from "./ensurePrivilieges";
 import { revalidatePath } from "next/cache";
+import { triggerFinanceRecalcForCurrentMonth } from "./recalculateFinanceForMonth";
 
 export type SalaryEligibilitySettings = {
   primeEnabled: boolean;
@@ -70,4 +71,5 @@ export async function updateSalaryEligibilitySettings(
   }
 
   revalidatePath("/settings");
+  await triggerFinanceRecalcForCurrentMonth();
 }

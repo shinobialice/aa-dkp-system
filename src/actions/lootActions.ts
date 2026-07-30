@@ -1,6 +1,7 @@
 "use server";
 
 import supabase from "@/shared/lib/supabaseAdmin";
+import { triggerFinanceRecalc } from "./recalculateFinanceForMonth";
 
 // Get list of item types
 export const getItemTypes = async () => {
@@ -69,5 +70,12 @@ export const addLootItem = async ({
   if (error) {
     console.error("Ошибка при добавлении лута:", error);
     throw new Error("Не удалось добавить предмет");
+  }
+
+  // "В казну"/"Продано" сразу с income (см. AddLootDialog — quick-add в
+  // казну) — пересчитываем фонд месяца продажи, не дожидаясь таймера.
+  if (sold_at && (status === "В казну" || status === "Продано")) {
+    const soldAt = new Date(sold_at);
+    await triggerFinanceRecalc(soldAt.getMonth() + 1, soldAt.getFullYear());
   }
 };

@@ -1,6 +1,7 @@
 "use server";
 import supabase from "@/shared/lib/supabaseAdmin";
 import ensurePrivilieges from "./ensurePrivilieges";
+import { triggerFinanceRecalc } from "./recalculateFinanceForMonth";
 
 function getMoscowISOString(date: Date): string {
   const year = date.getFullYear();
@@ -95,6 +96,10 @@ const createRaidEvent = async (
     console.error("Failed to insert raid bosses:", bossError);
     throw new Error("Ошибка при добавлении боссов");
   }
+
+  // Посещаемость влияет на веса зарплат за месяц рейда (см. generateSalaries)
+  // — пересчитываем сразу, не дожидаясь таймера на /loot/finance.
+  await triggerFinanceRecalc(start_date.getMonth() + 1, start_date.getFullYear());
 
   return raid;
 };
