@@ -1,4 +1,3 @@
-// pages/login-vk.tsx
 import { generateCodeChallenge, generateCodeVerifier } from "@/utils/pkce";
 import Cookies from "js-cookie";
 import { VkIcon } from "./authIcons";

@@ -28,7 +28,6 @@ const createRaidEvent = async (
 ) => {
   await ensurePrivilieges(["Администратор", "Raid Manager"]);
 
-  // 1. Получить текущее количество активных пользователей
   const { data: activeUsers, error: activeError } = await supabase
     .from("user")
     .select("id")
@@ -41,7 +40,6 @@ const createRaidEvent = async (
 
   const active_user_count = activeUsers.length;
 
-  // 2. Создать рейд с этим числом
   const { data: raid, error: raidError } = await supabase
     .from("raid")
     .insert([
@@ -65,7 +63,6 @@ const createRaidEvent = async (
     throw new Error("Ошибка при создании рейда");
   }
 
-  // 3. Участники
   const attendanceData = userIds.map((user_id) => ({
     raid_id: raid.id,
     user_id,
@@ -82,7 +79,6 @@ const createRaidEvent = async (
     throw new Error("Ошибка при добавлении участников");
   }
 
-  // 4. Боссы
   const bossData = bossIds.map((boss_id) => ({
     raid_id: raid.id,
     boss_id,

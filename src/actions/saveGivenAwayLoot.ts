@@ -8,7 +8,6 @@ export const saveGivenAwayLoot = async (
 ) => {
   const dateObj = new Date(item.date).toISOString();
 
-  // 1. Check if givenawayloot entry already exists
   const { data: existing, error: findError } = await supabase
     .from("givenawayloot")
     .select("id")
@@ -22,7 +21,6 @@ export const saveGivenAwayLoot = async (
   }
 
   if (existing) {
-    // 2. Update existing entry
     const { error: updateError } = await supabase
       .from("givenawayloot")
       .update({
@@ -36,7 +34,6 @@ export const saveGivenAwayLoot = async (
       throw new Error("Ошибка при обновлении выданного лута");
     }
   } else {
-    // 3. Insert new entry
     const { error: insertError } = await supabase.from("givenawayloot").insert([
       {
         user_id: userId,
@@ -53,9 +50,7 @@ export const saveGivenAwayLoot = async (
     }
   }
 
-  // 4. Handle userInventory
   if (item.status === "Выдано") {
-    // Check if it already exists
     const { data: existingInventory, error: inventoryFindError } =
       await supabase
         .from("user_inventory")

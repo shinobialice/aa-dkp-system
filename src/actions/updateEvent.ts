@@ -27,7 +27,6 @@ const updateEvent = async (
     .eq("id", id)
     .maybeSingle();
 
-  // 1. Update the raid event itself
   const { error: updateError } = await supabase
     .from("raid")
     .update({
@@ -46,7 +45,6 @@ const updateEvent = async (
     throw new Error("Не удалось обновить событие");
   }
 
-  // 2. Delete old attendance and raid bosses
   const { error: attendanceDeleteError } = await supabase
     .from("raid_attendance")
     .delete()
@@ -61,7 +59,6 @@ const updateEvent = async (
     throw new Error("Не удалось очистить старые связи рейда");
   }
 
-  // 3. Insert new attendance entries
   if (userIds.length > 0) {
     const attendanceInsert = userIds.map((user_id) => ({
       raid_id: id,
@@ -79,7 +76,6 @@ const updateEvent = async (
     }
   }
 
-  // 4. Insert new raid bosses
   if (bossIds.length > 0) {
     const raidBossInsert = bossIds.map((boss_id) => ({
       raid_id: id,

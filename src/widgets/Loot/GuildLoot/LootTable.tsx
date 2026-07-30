@@ -1,4 +1,3 @@
-// components/LootTable.tsx
 "use client";
 import { useState, useEffect } from "react";
 import { AddLootDialog } from "./AddLootDialog";

@@ -51,11 +51,9 @@ export default function BossRespawnHistory() {
         .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
       let userMap: Record<number, string> = {};
       if (data && data.length > 0) {
-        // Get unique user_ids
         const userIds = Array.from(
           new Set(data.map((row: any) => row.user_id)),
         );
-        // Fetch usernames for those ids
         userMap = await getUsernamesByIds(userIds);
       }
       if (isMounted && data) {

@@ -3,7 +3,6 @@
 import supabase from "@/shared/lib/supabaseAdmin";
 
 export default async function deleteEvent(eventId: number) {
-  // 1. Delete raid attendance entries
   const { error: attendanceError } = await supabase
     .from("raid_attendance")
     .delete()
@@ -14,7 +13,6 @@ export default async function deleteEvent(eventId: number) {
     throw new Error("Ошибка при удалении посещаемости");
   }
 
-  // 2. Delete raid boss entries
   const { error: bossError } = await supabase
     .from("raid_boss")
     .delete()
@@ -25,7 +23,6 @@ export default async function deleteEvent(eventId: number) {
     throw new Error("Ошибка при удалении боссов");
   }
 
-  // 3. Delete the raid itself
   const { error: raidError } = await supabase
     .from("raid")
     .delete()

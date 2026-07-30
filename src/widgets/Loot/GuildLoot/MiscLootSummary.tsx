@@ -1,4 +1,3 @@
-// components/MiscLootSummary.tsx
 "use client";
 import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";

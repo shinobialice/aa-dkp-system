@@ -1,4 +1,3 @@
-// components/LootRawTable.tsx
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowUpDown } from "lucide-react";

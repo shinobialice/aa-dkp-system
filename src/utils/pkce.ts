@@ -1,4 +1,3 @@
-// utils/pkce.ts
 export function generateCodeVerifier(length = 64): string {
   const charset =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
