@@ -12,7 +12,7 @@ export async function GET() {
 
   const { data: user } = await supabase
     .from("user")
-    .select("id, username")
+    .select("id, username, avatar_url")
     .eq("session_token", token)
     .single();
 
@@ -24,7 +24,9 @@ export async function GET() {
     {
       id: user.id,
       name: user.username,
-      avatar: `https://api.dicebear.com/7.x/identicon/svg?seed=${user.id}`,
+      avatar:
+        user.avatar_url ??
+        `https://api.dicebear.com/7.x/identicon/svg?seed=${user.id}`,
     },
     { status: 200 },
   );

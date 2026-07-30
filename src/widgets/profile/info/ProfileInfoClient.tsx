@@ -10,6 +10,7 @@ export default function ProfileInfoClient({
   tags: initialTags,
   setUsernameHistory,
   isAdmin,
+  isOwnProfile,
 }: {
   user: any;
   tags: any[];
@@ -22,6 +23,7 @@ export default function ProfileInfoClient({
     }[],
   ) => void;
   isAdmin: boolean;
+  isOwnProfile: boolean;
 }) {
   const [tags, setTags] = useState(initialTags);
   const [editMode, setEditMode] = useState(false);
@@ -63,6 +65,7 @@ export default function ProfileInfoClient({
     <Card>
       <ProfileHeader
         isAdmin={isAdmin}
+        isOwnProfile={isOwnProfile}
         user={user}
         formData={formData}
         setFormData={setFormData}

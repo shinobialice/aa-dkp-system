@@ -16,7 +16,8 @@ const getUser = async (userId: number) => {
       vk_name,
       active,
       is_eligible_for_salary,
-      joined_at
+      joined_at,
+      avatar_url
     `,
     )
     .eq("id", userId)

@@ -14,6 +14,7 @@ export default function ProfilePageWrapper({
   averageGuildGS,
   activity,
   isAdmin,
+  isOwnProfile,
 }: {
   user: any;
   tags: { id: number; tag: string }[];
@@ -29,6 +30,7 @@ export default function ProfilePageWrapper({
     dkp: number;
   };
   isAdmin: boolean;
+  isOwnProfile: boolean;
 }) {
   const [user, setUser] = useState(initialUser);
   const [tags, setTags] = useState(initialTags);
@@ -47,6 +49,7 @@ export default function ProfilePageWrapper({
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 items-start">
         <ProfileInfoClient
           isAdmin={isAdmin}
+          isOwnProfile={isOwnProfile}
           user={user}
           tags={tags}
           setUsernameHistory={setUsernameHistory}

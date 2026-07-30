@@ -1,11 +1,14 @@
 "use client";
-import { Pencil, Check } from "lucide-react";
+import { useRef, useState } from "react";
+import { Pencil, Check, Camera } from "lucide-react";
+import { toast } from "sonner";
 import { Avatar, AvatarImage, AvatarFallback } from "@/shared/ui";
 import { Badge } from "@/shared/ui";
 import { Button } from "@/shared/ui";
 import { CardHeader, CardTitle } from "@/shared/ui";
 import { Input } from "@/shared/ui";
 import editUser from "@/actions/editUser";
+import { uploadAvatar } from "@/actions/uploadAvatar";
 import { getUsernameHistory } from "@/actions/usernameHistoryActions";
 
 const badgeColors: { [key: string]: string } = {
@@ -30,6 +33,7 @@ export default function ProfileHeader({
   tags,
   setUsernameHistory,
   isAdmin,
+  isOwnProfile,
 }: {
   user: any;
   formData: any;
@@ -46,7 +50,37 @@ export default function ProfileHeader({
     }[],
   ) => void;
   isAdmin: boolean;
+  isOwnProfile: boolean;
 }) {
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(
+    user.avatar_url ?? null,
+  );
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAvatarChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const payload = new FormData();
+      payload.append("file", file);
+      const newAvatarUrl = await uploadAvatar(payload);
+      setAvatarUrl(newAvatarUrl);
+      toast.success("Аватар обновлён");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Не удалось загрузить аватар",
+      );
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <CardHeader className="flex flex-col items-center">
       <div className="relative flex justify-center w-full">
@@ -89,13 +123,38 @@ export default function ProfileHeader({
           )}
         </div>
 
-        <Avatar className="h-20 w-20 mb-4">
-          <AvatarImage
-            src={`https://api.dicebear.com/6.x/initials/svg?seed=${user.username}`}
-            alt={user.username}
-          />
-          <AvatarFallback>{user.username.slice(0, 2)}</AvatarFallback>
-        </Avatar>
+        <div className="relative mb-4 h-20 w-20">
+          <Avatar className="h-20 w-20">
+            <AvatarImage
+              src={
+                avatarUrl ??
+                `https://api.dicebear.com/6.x/initials/svg?seed=${user.username}`
+              }
+              alt={user.username}
+            />
+            <AvatarFallback>{user.username.slice(0, 2)}</AvatarFallback>
+          </Avatar>
+
+          {isOwnProfile && (
+            <>
+              <button
+                type="button"
+                disabled={uploading}
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity hover:opacity-100 disabled:opacity-100 cursor-pointer"
+              >
+                <Camera className="size-6" />
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/gif"
+                className="hidden"
+                onChange={handleAvatarChange}
+              />
+            </>
+          )}
+        </div>
       </div>
 
       <CardTitle className="text-2xl">

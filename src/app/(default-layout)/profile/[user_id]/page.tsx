@@ -4,6 +4,7 @@ import getUser from "@/actions/getUser";
 import getUserInventory from "@/actions/getUserInventory";
 import { getUserMonthlyAttendance } from "@/actions/getUserMonthlyAttendance";
 import getUserNotes from "@/actions/getUserNotes";
+import { getSessionUserId } from "@/actions/getSessionUserId";
 import { hasTag } from "@/actions/hasTag";
 import { getUserTags } from "@/actions/userTagsActions";
 import { getUsernameHistory } from "@/actions/usernameHistoryActions";
@@ -34,10 +35,13 @@ export default async function Page(p: {
 
   const sessionToken = (await cookies()).get("session_token")?.value ?? "";
   const isAdmin = await hasTag(sessionToken, ["Администратор"]);
+  const sessionUserId = await getSessionUserId();
+  const isOwnProfile = sessionUserId === userId;
 
   return (
     <ProfilePageWrapper
       isAdmin={isAdmin}
+      isOwnProfile={isOwnProfile}
       user={user}
       tags={tags}
       inventory={inventory}
