@@ -73,9 +73,27 @@ export const generateGuildFunds = async (month: number, year: number) => {
     throw new Error("Не удалось загрузить проданный лут");
   }
 
-  const totalIncome = loot.reduce((sum, item) => {
+  const lootIncome = loot.reduce((sum, item) => {
     return sum + (item.price ?? 0); // ✅ price — это уже итоговая сумма продажи
   }, 0);
+
+  const { data: miscTotals, error: miscError } = await supabase
+    .from("misc_loot_totals")
+    .select("amount")
+    .eq("month", month)
+    .eq("year", year);
+
+  if (miscError) {
+    console.error("Ошибка при получении сумм по разному:", miscError);
+    throw new Error("Не удалось загрузить суммы по разному");
+  }
+
+  const miscIncome = (miscTotals ?? []).reduce(
+    (sum, item) => sum + (item.amount ?? 0),
+    0,
+  );
+
+  const totalIncome = lootIncome + miscIncome;
 
   const { data: treasuryIncome, error: treasuryError } = await supabase
     .from("loot")
