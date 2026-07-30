@@ -34,16 +34,27 @@ export async function getRaidData(year: number, month?: number) {
 }
 
 export async function getAttendances(raidIds?: number[]) {
-  let query = supabase.from("raid_attendance").select("user_id, raid_id");
-  if (raidIds) {
-    if (raidIds.length === 0) return [];
-    query = query.in("raid_id", raidIds);
+  if (raidIds && raidIds.length === 0) return [];
+
+  // PostgREST режет любой select() на 1000 строк по умолчанию — при
+  // активной гильдии посещаемость за месяц легко превышает этот лимит,
+  // забираем всё батчами через .range().
+  const pageSize = 1000;
+  const attendances: { user_id: number; raid_id: number }[] = [];
+
+  for (let from = 0; ; from += pageSize) {
+    let query = supabase
+      .from("raid_attendance")
+      .select("user_id, raid_id")
+      .range(from, from + pageSize - 1);
+    if (raidIds) query = query.in("raid_id", raidIds);
+
+    const { data, error } = await query;
+    if (error || !data) throw new Error("Ошибка при загрузке посещаемости");
+
+    attendances.push(...data);
+    if (data.length < pageSize) break;
   }
-
-  const { data: attendances, error } = await query;
-
-  if (error || !attendances)
-    throw new Error("Ошибка при загрузке посещаемости");
 
   return attendances;
 }
@@ -52,29 +63,41 @@ export async function calculateDailyAverage(
   raids: { id: number; start_date: string; active_user_count: number | null }[],
   attendances: { user_id: number; raid_id: number }[],
 ) {
-  const raidMap = new Map<number, string>();
-  const dailyMap = new Map<string, Set<number>>();
-  const activeUsersPerDate = new Map<string, number>();
+  const raidDate = new Map<number, string>();
+  const raidActive = new Map<number, number>();
 
   for (const raid of raids) {
     if (!raid.start_date) continue;
-    const date = raid.start_date.split("T")[0];
-    raidMap.set(raid.id, date);
-    activeUsersPerDate.set(date, raid.active_user_count ?? 0);
-    if (!dailyMap.has(date)) dailyMap.set(date, new Set());
+    raidDate.set(raid.id, raid.start_date.split("T")[0]);
+    raidActive.set(raid.id, raid.active_user_count ?? 0);
   }
 
+  const attendeesPerRaid = new Map<number, Set<number>>();
   for (const att of attendances) {
-    const date = raidMap.get(att.raid_id);
-    if (!date) continue;
-    dailyMap.get(date)?.add(att.user_id);
+    if (!raidDate.has(att.raid_id)) continue;
+    if (!attendeesPerRaid.has(att.raid_id)) {
+      attendeesPerRaid.set(att.raid_id, new Set());
+    }
+    attendeesPerRaid.get(att.raid_id)!.add(att.user_id);
   }
 
-  const daily = Array.from(dailyMap.entries()).map(([date, users]) => {
-    const activeUsers = activeUsersPerDate.get(date) ?? 0;
-    const percent = activeUsers > 0 ? (users.size / activeUsers) * 100 : 0;
-    return { date, value: percent };
-  });
+  // Рейды одного типа в один день считаются отдельно (у каждого свой
+  // active_user_count), а на графике день агрегирует средним по своим рейдам.
+  const percentsPerDate = new Map<string, number[]>();
+  for (const [raidId, date] of raidDate) {
+    const active = raidActive.get(raidId) ?? 0;
+    const attendeeCount = attendeesPerRaid.get(raidId)?.size ?? 0;
+    const percent = active > 0 ? (attendeeCount / active) * 100 : 0;
+    if (!percentsPerDate.has(date)) percentsPerDate.set(date, []);
+    percentsPerDate.get(date)!.push(percent);
+  }
+
+  const daily = Array.from(percentsPerDate.entries()).map(
+    ([date, percents]) => ({
+      date,
+      value: percents.reduce((acc, p) => acc + p, 0) / percents.length,
+    }),
+  );
 
   const avgPercent =
     daily.reduce((acc, d) => acc + d.value, 0) / (daily.length || 1);

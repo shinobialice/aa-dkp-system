@@ -11,8 +11,8 @@ import {
 } from "@/shared/ui";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/shared/ui";
 import {
-  AreaChart,
-  Area,
+  BarChart,
+  Bar,
   CartesianGrid,
   XAxis,
   YAxis,
@@ -82,59 +82,31 @@ export default function MonthlyAttendanceChart({
       <CardContent className="pt-4">
         <ChartContainer className="w-full h-[300px]" config={chartConfig}>
           <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={data}>
-              <defs>
-                <linearGradient id="fillprime" x1="0" y1="0" x2="0" y2="1">
-                  <stop
-                    offset="5%"
-                    stopColor="var(--color-prime)"
-                    stopOpacity={0.8}
-                  />
-                  <stop
-                    offset="95%"
-                    stopColor="var(--color-prime)"
-                    stopOpacity={0.1}
-                  />
-                </linearGradient>
-                <linearGradient id="fillagl" x1="0" y1="0" x2="0" y2="1">
-                  <stop
-                    offset="5%"
-                    stopColor="var(--color-agl)"
-                    stopOpacity={0.8}
-                  />
-                  <stop
-                    offset="95%"
-                    stopColor="var(--color-agl)"
-                    stopOpacity={0.1}
-                  />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
+            <BarChart accessibilityLayer data={data}>
+              <CartesianGrid vertical={false} strokeDasharray="3 3" />
+              <XAxis
+                dataKey="month"
+                tickLine={false}
+                tickMargin={10}
+                axisLine={false}
+                tickFormatter={(v) => v.slice(0, 3)}
+              />
               <YAxis
                 domain={[0, 100]}
                 tickFormatter={(v) => `${Math.round(v)}%`}
               />
-              <Area
-                type="natural"
-                dataKey="prime"
-                fill="url(#fillprime)"
-                stroke="var(--color-prime)"
-              />
-              <Area
-                type="natural"
-                dataKey="agl"
-                fill="url(#fillagl)"
-                stroke="var(--color-agl)"
-              />
               <ChartTooltip
+                cursor={false}
                 content={
                   <RoundedTooltipContent
+                    indicator="dashed"
                     labelFormatter={(val: any) => `Месяц: ${val}`}
                   />
                 }
               />
-            </AreaChart>
+              <Bar dataKey="prime" fill="var(--color-prime)" radius={4} />
+              <Bar dataKey="agl" fill="var(--color-agl)" radius={4} />
+            </BarChart>
           </ResponsiveContainer>
         </ChartContainer>
       </CardContent>
