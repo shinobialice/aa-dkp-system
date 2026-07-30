@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo, useState } from "react";
+import { ArrowUpDown } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -8,6 +10,7 @@ import {
   DialogTitle,
 } from "@/shared/ui";
 import { Separator } from "@/shared/ui";
+import { Badge, Button } from "@/shared/ui";
 import {
   Table,
   TableBody,
@@ -16,6 +19,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/shared/ui";
+import { classColors, classIcons } from "@/widgets/MembersTable/classStyles";
+
+type SortKey = "username" | "class";
+
+const EMPTY_ATTENDANCE: any[] = [];
 
 export function RaidInfoDialog({
   open,
@@ -26,6 +34,42 @@ export function RaidInfoDialog({
   setOpen: (v: boolean) => void;
   raid: any;
 }) {
+  const attendance = raid?.raid_attendance ?? EMPTY_ATTENDANCE;
+
+  const [sortKey, setSortKey] = useState<SortKey | null>(null);
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
+
+  const sortedAttendance = useMemo(() => {
+    if (!sortKey) return attendance;
+    return [...attendance].sort((a: any, b: any) => {
+      const cmp = String(a.user?.[sortKey] ?? "").localeCompare(
+        String(b.user?.[sortKey] ?? ""),
+        "ru",
+      );
+      return sortDir === "asc" ? cmp : -cmp;
+    });
+  }, [attendance, sortKey, sortDir]);
+
+  const sortHeader = (label: string, key: SortKey) => (
+    <Button
+      className="cursor-pointer"
+      variant="ghost"
+      onClick={() => toggleSort(key)}
+    >
+      {label}
+      <ArrowUpDown className="ml-2 h-4 w-4" />
+    </Button>
+  );
+
   if (!raid) {
     return null;
   }
@@ -33,7 +77,6 @@ export function RaidInfoDialog({
   const bosses =
     raid.raid_boss?.map((rb: any) => rb.boss?.boss_name).filter(Boolean) ??
     [];
-  const attendance = raid.raid_attendance ?? [];
   const date = raid.start_date ? new Date(raid.start_date) : null;
 
   return (
@@ -72,17 +115,32 @@ export function RaidInfoDialog({
           <Table>
             <TableHeader className="sticky top-0 z-1 bg-background">
               <TableRow>
-                <TableHead>Ник</TableHead>
-                <TableHead>Класс</TableHead>
+                <TableHead>{sortHeader("Ник", "username")}</TableHead>
+                <TableHead>{sortHeader("Класс", "class")}</TableHead>
                 <TableHead>Опоздал</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {attendance.length > 0 ? (
-                attendance.map((a: any) => (
+              {sortedAttendance.length > 0 ? (
+                sortedAttendance.map((a: any) => (
                   <TableRow key={a.user.id}>
                     <TableCell>{a.user.username}</TableCell>
-                    <TableCell>{a.user.class}</TableCell>
+                    <TableCell>
+                      {a.user.class ? (
+                        <Badge
+                          className="text-background gap-1"
+                          style={{
+                            backgroundColor:
+                              classColors[a.user.class] ?? "rgb(120,120,120)",
+                          }}
+                        >
+                          {classIcons[a.user.class]}
+                          {a.user.class}
+                        </Badge>
+                      ) : (
+                        "—"
+                      )}
+                    </TableCell>
                     <TableCell>{a.is_late ? "Да" : "Нет"}</TableCell>
                   </TableRow>
                 ))
