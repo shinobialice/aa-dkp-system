@@ -21,6 +21,7 @@ import {
   BadgeDollarSign,
   HandCoins,
   Swords,
+  UserX,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -70,10 +71,11 @@ const AppSidebar: FC<Props> = ({ isAdmin }) => {
     { title: "Статистика", url: "/stats", icon: LineChart },
     { title: "Киллкаунт", url: "/kill_counter", icon: Swords },
     { title: "Настройки", url: "/settings", icon: Settings },
+    { title: "АФК", url: "/afk", icon: UserX },
   ];
 
   const visibleMenuItems = menuItems.filter((item) => {
-    if (item.url === "/settings" && !isAdmin) {
+    if ((item.url === "/settings" || item.url === "/afk") && !isAdmin) {
       return false;
     }
     return true;

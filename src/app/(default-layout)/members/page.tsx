@@ -10,9 +10,9 @@ const MembersPage = async () => {
     .select(
       "id, username, class, class_gear_score, joined_at, active, is_eligible_for_salary",
     )
+    .eq("active", true)
     .order("joined_at", { ascending: true })
-    .order("is_eligible_for_salary", { ascending: false })
-    .order("active", { ascending: false });
+    .order("is_eligible_for_salary", { ascending: false });
 
   if (error || !users) {
     console.error("Error loading users:", error);

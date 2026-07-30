@@ -9,9 +9,14 @@ export async function updateUser(
 ) {
   await ensurePrivilieges(["Администратор"]);
 
+  const payload: typeof data & { inactive_since?: string | null } = { ...data };
+  if (data.active !== undefined) {
+    payload.inactive_since = data.active ? null : new Date().toISOString();
+  }
+
   const { data: updatedUser, error } = await supabase
     .from("user")
-    .update(data)
+    .update(payload)
     .eq("id", id)
     .select()
     .maybeSingle();
