@@ -65,13 +65,13 @@ export default function MonthlyAttendanceChart({
 
   return (
     <Card>
-      <CardHeader className="flex items-center justify-between">
-        <CardTitle>Посещаемость по месяцам</CardTitle>
+      <CardHeader className="flex flex-col items-start gap-2 xl:flex-row xl:items-center xl:justify-between">
+        <CardTitle className="text-base">Посещаемость по месяцам</CardTitle>
         <Select
           value={String(year)}
           onValueChange={(val) => setYear(Number(val))}
         >
-          <SelectTrigger className="w-[100px]">
+          <SelectTrigger className="w-[85px]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -84,8 +84,8 @@ export default function MonthlyAttendanceChart({
         </Select>
       </CardHeader>
       <CardContent className="pt-4">
-        <ChartContainer className="w-full h-[300px]" config={chartConfig}>
-          <ResponsiveContainer width="100%" height={300}>
+        <ChartContainer className="w-full h-[200px]" config={chartConfig}>
+          <ResponsiveContainer width="100%" height={200}>
             <BarChart accessibilityLayer data={data}>
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
               <XAxis

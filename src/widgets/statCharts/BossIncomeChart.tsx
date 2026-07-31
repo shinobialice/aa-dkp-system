@@ -35,12 +35,14 @@ export default function BossIncomeChart({
   setYear,
   setMonth,
   initialData,
+  className,
 }: {
   year: number;
   month: number;
   setYear: (val: number) => void;
   setMonth: (val: number) => void;
   initialData?: BossIncomeStat[];
+  className?: string;
 }) {
   const [data, setData] = useState<BossIncomeStat[]>(initialData ?? []);
   const skipNextFetch = useRef(!!initialData);
@@ -57,15 +59,15 @@ export default function BossIncomeChart({
   const total = data.reduce((sum, d) => sum + d.income, 0);
 
   return (
-    <Card>
-      <CardHeader className="flex items-center justify-between">
-        <CardTitle>Доход от боссов за месяц</CardTitle>
+    <Card className={className}>
+      <CardHeader className="flex flex-col items-start gap-2 xl:flex-row xl:items-center xl:justify-between">
+        <CardTitle className="text-base">Доход от боссов за месяц</CardTitle>
         <div className="flex gap-2">
           <Select
             value={String(month)}
             onValueChange={(val) => setMonth(Number(val))}
           >
-            <SelectTrigger className="w-[120px]">
+            <SelectTrigger className="w-[110px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -82,7 +84,7 @@ export default function BossIncomeChart({
             value={String(year)}
             onValueChange={(val) => setYear(Number(val))}
           >
-            <SelectTrigger className="w-[90px]">
+            <SelectTrigger className="w-[85px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -102,8 +104,8 @@ export default function BossIncomeChart({
           </p>
         ) : (
           <>
-            <ChartContainer className="w-full h-[300px]" config={chartConfig}>
-              <ResponsiveContainer width="100%" height={300}>
+            <ChartContainer className="w-full h-[200px]" config={chartConfig}>
+              <ResponsiveContainer width="100%" height={200}>
                 <BarChart accessibilityLayer data={data}>
                   <CartesianGrid vertical={false} strokeDasharray="3 3" />
                   <XAxis
