@@ -16,6 +16,7 @@ export const getLootQueueByItemName = async (itemName: string) => {
           required,
           delivered,
           created_at,
+          roll,
           user (
             username
           )
@@ -38,17 +39,21 @@ export const getLootQueueByItemName = async (itemName: string) => {
     required: number | null;
     delivered: number | null;
     created_at: string;
-    user: { username: string }[] | null;
+    roll: number | null;
+    user: { username: string } | null;
   };
 
-  return (item.loot_queue || []).map((entry: LootQueueEntry) => ({
+  const lootQueue = (item.loot_queue || []) as unknown as LootQueueEntry[];
+
+  return lootQueue.map((entry) => ({
     id: entry.id,
     userId: entry.user_id,
-    username: entry.user?.[0]?.username || "Unknown",
+    username: entry.user?.username || "Unknown",
     status: entry.status,
     synth_target: entry.synth_target,
     required: entry.required ?? 0,
     delivered: entry.delivered ?? 0,
     createdAt: entry.created_at,
+    roll: entry.roll,
   }));
 };

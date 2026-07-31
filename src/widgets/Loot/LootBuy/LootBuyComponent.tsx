@@ -2,14 +2,17 @@ import { Card, CardContent } from "@/shared/ui";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui";
 import { getLootGrouped } from "@/actions/getLootGrouped";
 import { getLootStock } from "@/actions/getLootStock";
+import { getActiveUsers } from "@/actions/getActiveUsers";
 import { PricesComponent } from "@/widgets/Loot/LootBuy/PricesComponent";
 
 export default async function LootBuyComponent() {
-  const [lootByBoss, stock] = await Promise.all([
+  const [lootByBoss, stock, activeUsers] = await Promise.all([
     getLootGrouped(),
     getLootStock(),
+    getActiveUsers(),
   ]);
 
+  const allUsers = activeUsers.map((u) => u.username);
   const bossTabs = Object.keys(lootByBoss).filter((s) => s !== "Разное");
   const miscLoot = lootByBoss["Разное"] || [];
 
@@ -32,7 +35,11 @@ export default async function LootBuyComponent() {
 
               {bossTabs.map((boss) => (
                 <TabsContent key={boss} value={boss} className="mt-4">
-                  <PricesComponent items={lootByBoss[boss]} stock={stock} />
+                  <PricesComponent
+                    items={lootByBoss[boss]}
+                    stock={stock}
+                    allUsers={allUsers}
+                  />
                 </TabsContent>
               ))}
             </Tabs>
@@ -42,7 +49,11 @@ export default async function LootBuyComponent() {
 
       <Card className="shadow-xl">
         <CardContent>
-          <PricesComponent items={miscLoot} stock={stock} />
+          <PricesComponent
+            items={miscLoot}
+            stock={stock}
+            allUsers={allUsers}
+          />
         </CardContent>
       </Card>
     </div>

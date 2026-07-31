@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AddToQueueForm } from "./AddToQueueForm";
 import { EditToggleButton } from "./EditToggleButton";
 import type { LootQueueEntry } from "./LootQueueTypes";
@@ -15,39 +15,54 @@ import {
 } from "@/shared/ui";
 import { Popover, PopoverTrigger, PopoverContent } from "@/shared/ui";
 import { addToLootQueue } from "@/actions/addToLootQueue";
-import { getActiveUsers } from "@/actions/getActiveUsers";
 import { getLootQueueByItemName } from "@/actions/getLootQueueByItemName";
 import { markQueueLootAsSold } from "@/actions/markQueueLootAsSold";
+import { removeFromLootQueue } from "@/actions/removeFromLootQueue";
 import { updateLootQueueEntry } from "@/actions/updateLootQueueEntry";
 
 const extendedItems = ["Эссенция ярости", "Трофейная эссенция стихий"];
+const rollItems = ["Аметистовая гравировка северной звезды"];
 
 type Props = {
   itemName: string;
   children: React.ReactNode;
   isAdmin: boolean;
+  allUsers: string[];
 };
 
 type EditableField = "required" | "delivered" | "status" | "synth_target";
 
-export function LootQueuePopover({ itemName, children, isAdmin }: Props) {
+export function LootQueuePopover({
+  itemName,
+  children,
+  isAdmin,
+  allUsers,
+}: Props) {
   const [searchUser, setSearchUser] = useState("");
   const [selectedUser, setSelectedUser] = useState("");
-  const [queue, setQueue] = useState<Record<string, LootQueueEntry[]>>({});
+  const [queue, setQueue] = useState<LootQueueEntry[]>([]);
   const [editMode, setEditMode] = useState(false);
-  const [allUsers, setAllUsers] = useState<string[]>([]);
+  const [open, setOpen] = useState(false);
   const isExtended = extendedItems.includes(itemName);
+  const showRoll = rollItems.includes(itemName);
+
+  const refreshQueue = async () => {
+    const updatedQueue = (await getLootQueueByItemName(
+      itemName,
+    )) as LootQueueEntry[];
+    setQueue(
+      showRoll
+        ? [...updatedQueue].sort((a, b) => (b.roll ?? -1) - (a.roll ?? -1))
+        : updatedQueue,
+    );
+  };
 
   const handleAddToQueue = async () => {
     if (!selectedUser) {
       return;
     }
     await addToLootQueue(selectedUser, itemName);
-    const updatedQueue = await getLootQueueByItemName(itemName);
-    setQueue((prev) => ({
-      ...prev,
-      [itemName]: updatedQueue as LootQueueEntry[],
-    }));
+    await refreshQueue();
     setSelectedUser("");
     setSearchUser("");
   };
@@ -59,11 +74,28 @@ export function LootQueuePopover({ itemName, children, isAdmin }: Props) {
       itemName,
       delivered: entry.delivered,
     });
-    const updatedQueue = await getLootQueueByItemName(itemName);
-    setQueue((prev) => ({
-      ...prev,
-      [itemName]: updatedQueue as LootQueueEntry[],
-    }));
+    await refreshQueue();
+  };
+
+  const handleRemove = async (entry: LootQueueEntry) => {
+    await removeFromLootQueue(entry.id);
+    await refreshQueue();
+  };
+
+  const handleRollChange = async (entry: LootQueueEntry, roll: number | null) => {
+    await updateLootQueueEntry({ id: entry.id, roll });
+    await refreshQueue();
+  };
+
+  const handleStatusToggle = async (
+    entry: LootQueueEntry,
+    status: "пропуск" | "позже",
+  ) => {
+    await updateLootQueueEntry({
+      id: entry.id,
+      status: entry.status === status ? "" : status,
+    });
+    await refreshQueue();
   };
 
   const handleChange = async (
@@ -71,7 +103,7 @@ export function LootQueuePopover({ itemName, children, isAdmin }: Props) {
     field: EditableField,
     value: string | number,
   ): Promise<void> => {
-    const entry = queue[itemName]?.[index];
+    const entry = queue[index];
     if (!entry) {
       return;
     }
@@ -95,34 +127,20 @@ export function LootQueuePopover({ itemName, children, isAdmin }: Props) {
     };
 
     await updateLootQueueEntry(updated);
-    const updatedQueue = await getLootQueueByItemName(itemName);
-    setQueue((prev) => ({
-      ...prev,
-      [itemName]: updatedQueue as LootQueueEntry[],
-    }));
+    await refreshQueue();
   };
 
-  useEffect(() => {
-    const loadData = async () => {
-      const [fetchedUsers, fetchedQueue] = await Promise.all([
-        getActiveUsers(),
-        getLootQueueByItemName(itemName),
-      ]);
-      setAllUsers(fetchedUsers.map((u: { username: string }) => u.username));
-      setQueue((prev) => ({
-        ...prev,
-        [itemName]: fetchedQueue as LootQueueEntry[],
-      }));
-    };
-
-    loadData();
-  }, [itemName]);
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (nextOpen) refreshQueue();
+  };
 
   const commonProps = {
-    queue: queue[itemName] || [],
+    queue,
     editMode,
     handleChange,
     handleSold,
+    handleRemove,
   };
 
   const formProps = {
@@ -136,7 +154,7 @@ export function LootQueuePopover({ itemName, children, isAdmin }: Props) {
 
   if (!isExtended) {
     return (
-      <Popover>
+      <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>{children}</PopoverTrigger>
         <PopoverContent className="w-[620px]">
           <div className="flex items-center justify-between mb-2">
@@ -147,7 +165,12 @@ export function LootQueuePopover({ itemName, children, isAdmin }: Props) {
               toggle={() => setEditMode((prev) => !prev)}
             />
           </div>
-          <QueueTableSimple {...commonProps} />
+          <QueueTableSimple
+            {...commonProps}
+            showRoll={showRoll}
+            handleRollChange={handleRollChange}
+            handleStatusToggle={handleStatusToggle}
+          />
           {editMode && <AddToQueueForm {...formProps} />}
         </PopoverContent>
       </Popover>
@@ -155,7 +178,7 @@ export function LootQueuePopover({ itemName, children, isAdmin }: Props) {
   }
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="w-[1200px] max-w-none">
         <DialogHeader>

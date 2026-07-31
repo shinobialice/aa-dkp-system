@@ -1,4 +1,5 @@
 import { LootQueueEntry } from "./LootQueueTypes";
+import { StatusBadge } from "./StatusBadge";
 import { Button } from "@/shared/ui";
 import { Input } from "@/shared/ui";
 import {
@@ -21,6 +22,7 @@ type Props = {
     value: string | number,
   ) => Promise<void>;
   handleSold: (entry: LootQueueEntry) => Promise<void>;
+  handleRemove: (entry: LootQueueEntry) => Promise<void>;
 };
 
 export function QueueTableExtended({
@@ -28,6 +30,7 @@ export function QueueTableExtended({
   editMode,
   handleChange,
   handleSold,
+  handleRemove,
 }: Props) {
   return (
     <div className="max-h-[420px] border rounded mt-4">
@@ -121,7 +124,13 @@ export function QueueTableExtended({
                         </select>
                       );
                     }
-                    return <span>{entry.status || "-"}</span>;
+                    return entry.status &&
+                      entry.status !== "продано" &&
+                      entry.status !== "ожидание" ? (
+                      <StatusBadge status={entry.status} />
+                    ) : (
+                      <span>{entry.status || "-"}</span>
+                    );
                   })()}
                 </TableCell>
                 <TableCell>
@@ -145,17 +154,31 @@ export function QueueTableExtended({
                 </TableCell>
                 {editMode && (
                   <TableCell>
-                    <Button
-                      className="cursor-pointer"
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => {
-                        handleSold(entry);
-                      }}
-                      disabled={(entry.required || 0) > (entry.delivered || 0)}
-                    >
-                      Продано
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        className="cursor-pointer"
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => {
+                          handleSold(entry);
+                        }}
+                        disabled={
+                          (entry.required || 0) > (entry.delivered || 0)
+                        }
+                      >
+                        Продано
+                      </Button>
+                      <Button
+                        className="cursor-pointer"
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => {
+                          handleRemove(entry);
+                        }}
+                      >
+                        Удалить
+                      </Button>
+                    </div>
                   </TableCell>
                 )}
               </TableRow>

@@ -7,12 +7,14 @@ export const updateLootQueueEntry = async ({
   synth_target,
   delivered,
   required,
+  roll,
 }: {
   id: number;
   status?: string;
   synth_target?: string;
   delivered?: number;
   required?: number;
+  roll?: number | null;
 }) => {
   const updateData: Record<string, unknown> = {};
 
@@ -20,6 +22,7 @@ export const updateLootQueueEntry = async ({
   if (synth_target !== undefined) updateData.synth_target = synth_target;
   if (delivered !== undefined) updateData.delivered = delivered;
   if (required !== undefined) updateData.required = required;
+  if (roll !== undefined) updateData.roll = roll;
 
   const { data, error } = await supabase
     .from("loot_queue")

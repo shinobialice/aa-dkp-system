@@ -21,9 +21,11 @@ export type LootItem = {
 export async function PricesComponent({
   items,
   stock,
+  allUsers,
 }: {
   items: LootItem[];
   stock?: Record<string, number>;
+  allUsers: string[];
 }) {
   const sessionToken = (await cookies()).get("session_token")?.value ?? "";
   const isAdmin = await hasTag(sessionToken, ["Администратор"]);
@@ -40,6 +42,7 @@ export async function PricesComponent({
         {items.map((item) => (
           <LootQueuePopover
             isAdmin={isAdmin}
+            allUsers={allUsers}
             key={item.name}
             itemName={item.name}
           >
