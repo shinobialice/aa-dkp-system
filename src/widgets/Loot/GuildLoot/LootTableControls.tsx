@@ -1,4 +1,4 @@
-import { Button } from "@/shared/ui";
+import { Button, Label } from "@/shared/ui";
 import {
   Select,
   SelectItem,
@@ -9,6 +9,7 @@ import {
 import { getYearOptions } from "@/utils/getYearOptions";
 
 export function LootTableControls({
+  isAdmin,
   month,
   year,
   onMonthChange,
@@ -16,6 +17,7 @@ export function LootTableControls({
   onAddClick,
   label = "Добавить",
 }: {
+  isAdmin: boolean;
   month: number;
   year: number;
   onMonthChange: (m: number) => void;
@@ -25,6 +27,13 @@ export function LootTableControls({
 }) {
   return (
     <div className="flex gap-4 items-center">
+      {isAdmin && (
+        <Button className="cursor-pointer" onClick={onAddClick}>
+          {label}
+        </Button>
+      )}
+
+      <Label>Месяц:</Label>
       <Select
         value={month.toString()}
         onValueChange={(value) => onMonthChange(+value)}
@@ -41,6 +50,7 @@ export function LootTableControls({
         </SelectContent>
       </Select>
 
+      <Label>Год:</Label>
       <Select
         value={year.toString()}
         onValueChange={(value) => onYearChange(+value)}
@@ -56,10 +66,6 @@ export function LootTableControls({
           ))}
         </SelectContent>
       </Select>
-
-      <Button className="cursor-pointer" onClick={onAddClick}>
-        {label}
-      </Button>
     </div>
   );
 }

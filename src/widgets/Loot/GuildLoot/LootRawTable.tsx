@@ -138,7 +138,7 @@ export function LootRawTable({
         className="max-w-xs"
       />
       <div className="overflow-auto rounded-md border">
-      <ScrollArea className="h-[1000px] w-full">
+      <ScrollArea className="h-[60vh] w-full">
         <Table>
           <TableHeader className="sticky top-0 z-1 bg-background">
             <TableRow>

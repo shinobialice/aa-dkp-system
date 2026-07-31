@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { AddExpenseDialog } from "./AddExpenseDialog";
 import { ExpenseItem } from "./ExpensesTypes";
 import { LootTableControls } from "./LootTableControls";
-import { ScrollArea } from "@/shared/ui";
+import { Button, ScrollArea } from "@/shared/ui";
 import {
   Table,
   TableHeader,
@@ -13,7 +13,12 @@ import {
   TableRow,
   TableCell,
 } from "@/shared/ui";
-import { getExpenses, addExpense } from "@/actions/expenseActions";
+import {
+  getExpenses,
+  addExpense,
+  updateExpense,
+  deleteExpense,
+} from "@/actions/expenseActions";
 
 type Props = { isAdmin: boolean };
 
@@ -22,6 +27,9 @@ export default function ExpensesTable({ isAdmin }: Props) {
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [expenses, setExpenses] = useState<ExpenseItem[]>([]);
   const [showDialog, setShowDialog] = useState(false);
+  const [editingExpense, setEditingExpense] = useState<ExpenseItem | null>(
+    null,
+  );
 
   useEffect(() => {
     const load = async () => {
@@ -32,16 +40,39 @@ export default function ExpensesTable({ isAdmin }: Props) {
   }, []);
 
   const handleAdd = async (exp: ExpenseItem) => {
-    await addExpense({
-      ...exp,
-      date:
-        typeof exp.date === "string"
-          ? exp.date
-          : exp.date.toISOString().split("T")[0],
-      comment: exp.comment ?? undefined,
-    });
+    const date =
+      typeof exp.date === "string"
+        ? exp.date
+        : exp.date.toISOString().split("T")[0];
+
+    if (exp.id) {
+      await updateExpense({
+        ...exp,
+        id: exp.id,
+        date,
+        comment: exp.comment ?? undefined,
+      });
+    } else {
+      await addExpense({
+        ...exp,
+        date,
+        comment: exp.comment ?? undefined,
+      });
+    }
     setExpenses(await getExpenses());
     setShowDialog(false);
+    setEditingExpense(null);
+  };
+
+  const handleDelete = async (exp: ExpenseItem) => {
+    if (!exp.id) return;
+    if (!confirm("Удалить этот расход?")) return;
+    const date =
+      typeof exp.date === "string"
+        ? exp.date
+        : exp.date.toISOString().split("T")[0];
+    await deleteExpense(exp.id, date);
+    setExpenses(await getExpenses());
   };
 
   const filteredExpenses = expenses.filter((e) => {
@@ -51,21 +82,25 @@ export default function ExpensesTable({ isAdmin }: Props) {
 
   return (
     <div className="col-span-2 space-y-4">
-      {isAdmin && (
-        <LootTableControls
-          month={month}
-          year={year}
-          onMonthChange={setMonth}
-          onYearChange={setYear}
-          onAddClick={() => setShowDialog(true)}
-          label="Добавить расход"
-        />
-      )}
+      <LootTableControls
+        isAdmin={isAdmin}
+        month={month}
+        year={year}
+        onMonthChange={setMonth}
+        onYearChange={setYear}
+        onAddClick={() => setShowDialog(true)}
+        label="Добавить расход"
+      />
 
       <AddExpenseDialog
         open={showDialog}
-        onClose={() => setShowDialog(false)}
+        onClose={() => {
+          setShowDialog(false);
+          setEditingExpense(null);
+        }}
         onAdd={handleAdd}
+        editMode={!!editingExpense}
+        initialValues={editingExpense ?? undefined}
       />
 
       <div className="overflow-auto rounded-md border">
@@ -78,12 +113,13 @@ export default function ExpensesTable({ isAdmin }: Props) {
                 <TableHead>Цель</TableHead>
                 <TableHead>Источник</TableHead>
                 <TableHead>Комментарий</TableHead>
+                {isAdmin && <TableHead>Действия</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredExpenses.length > 0 ? (
                 filteredExpenses.map((exp, i) => (
-                  <TableRow key={i}>
+                  <TableRow key={exp.id ?? i}>
                     <TableCell>
                       {new Intl.DateTimeFormat("ru-RU").format(
                         new Date(exp.date),
@@ -93,12 +129,34 @@ export default function ExpensesTable({ isAdmin }: Props) {
                     <TableCell>{exp.target}</TableCell>
                     <TableCell>{exp.source}</TableCell>
                     <TableCell>{exp.comment}</TableCell>
+                    {isAdmin && (
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button
+                            className="cursor-pointer"
+                            onClick={() => {
+                              setEditingExpense(exp);
+                              setShowDialog(true);
+                            }}
+                          >
+                            Изменить
+                          </Button>
+                          <Button
+                            className="cursor-pointer"
+                            variant="destructive"
+                            onClick={() => handleDelete(exp)}
+                          >
+                            Удалить
+                          </Button>
+                        </div>
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
                   <TableCell
-                    colSpan={5}
+                    colSpan={isAdmin ? 6 : 5}
                     className="text-center text-muted-foreground p-4"
                   >
                     Нет расходов за выбранный период

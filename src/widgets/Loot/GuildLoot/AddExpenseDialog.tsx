@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ExpenseItem } from "./ExpensesTypes";
 import { Button } from "@/shared/ui";
 import { DateTimePicker } from "@/shared/ui";
@@ -13,28 +13,47 @@ import {
 } from "@/shared/ui";
 import { Label } from "@/shared/ui";
 
+const emptyForm = {
+  date: new Date().toISOString().split("T")[0],
+  amount: "",
+  target: "",
+  source: "",
+  comment: "",
+};
+
 export function AddExpenseDialog({
   open,
   onClose,
   onAdd,
+  editMode,
+  initialValues,
 }: {
   open: boolean;
   onClose: () => void;
   onAdd: (expense: ExpenseItem) => Promise<void>;
+  editMode?: boolean;
+  initialValues?: ExpenseItem;
 }) {
-  const [form, setForm] = useState<{
-    date: string;
-    amount: string;
-    target: string;
-    source: string;
-    comment: string;
-  }>({
-    date: new Date().toISOString().split("T")[0],
-    amount: "",
-    target: "",
-    source: "",
-    comment: "",
-  });
+  const [form, setForm] = useState(emptyForm);
+
+  useEffect(() => {
+    if (!open) return;
+    if (editMode && initialValues) {
+      const date =
+        typeof initialValues.date === "string"
+          ? initialValues.date
+          : initialValues.date.toISOString();
+      setForm({
+        date: date.split("T")[0],
+        amount: initialValues.amount.toString(),
+        target: initialValues.target,
+        source: initialValues.source,
+        comment: initialValues.comment ?? "",
+      });
+    } else {
+      setForm(emptyForm);
+    }
+  }, [open, editMode, initialValues]);
 
   const handleSubmit = async () => {
     if (!form.amount || !form.target || !form.source) {
@@ -43,23 +62,20 @@ export function AddExpenseDialog({
     }
     await onAdd({
       ...form,
+      id: editMode ? initialValues?.id : undefined,
       amount: Number(form.amount),
     });
     onClose();
-    setForm({
-      date: new Date().toISOString().split("T")[0],
-      amount: "",
-      target: "",
-      source: "",
-      comment: "",
-    });
+    setForm(emptyForm);
   };
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Добавить расход</DialogTitle>
+          <DialogTitle>
+            {editMode ? "Изменить расход" : "Добавить расход"}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-2 py-4">
