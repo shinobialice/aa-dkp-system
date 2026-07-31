@@ -113,6 +113,34 @@ const RespawnTracker: FC = () => {
   }, []);
 
   useEffect(() => {
+    const channel = supabase
+      .channel("boss_respawn-changes")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "boss_respawn" },
+        (payload) => {
+          const row = payload.new as {
+            boss_name: BossName;
+            last_kill: string | null;
+            packs_needed: number | null;
+          };
+          if (!row?.boss_name) return;
+          setBossStates((prev) => ({
+            ...prev,
+            [row.boss_name]: {
+              lastKill: row.last_kill,
+              packsNeeded: row.packs_needed,
+            },
+          }));
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  useEffect(() => {
     const interval = setInterval(() => {
       setTick((t) => t + 1);
     }, 1000);

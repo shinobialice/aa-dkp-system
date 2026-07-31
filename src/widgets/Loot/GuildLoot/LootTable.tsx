@@ -29,6 +29,10 @@ export default function LootTable({ isAdmin }: Props) {
       setItemTypes(await getItemTypes());
     };
     loadData();
+    const interval = setInterval(async () => {
+      setLoot(await getLoot());
+    }, 8000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleAdd = async (item: NewLootItem) => {

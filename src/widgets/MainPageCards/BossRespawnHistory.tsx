@@ -72,6 +72,31 @@ export default function BossRespawnHistory() {
     };
   }, [page]);
 
+  useEffect(() => {
+    const channel = supabase
+      .channel("boss_respawn_history-changes")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "boss_respawn_history" },
+        async (payload) => {
+          const row = payload.new as Omit<HistoryRow, "username">;
+          setTotal((t) => t + 1);
+          if (page !== 1) return;
+          const userMap = await getUsernamesByIds([row.user_id]);
+          setRows((prev) =>
+            [
+              { ...row, username: userMap[row.user_id] || "?" },
+              ...prev,
+            ].slice(0, PAGE_SIZE),
+          );
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [page]);
+
   return (
     <div className="mt-8">
       <h2 className="text-xl font-bold mb-2">История убийств боссов</h2>

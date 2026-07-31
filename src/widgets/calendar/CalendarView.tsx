@@ -55,7 +55,20 @@ export default function CalendarView({ isAdmin, isModerator }: Props) {
 
   useEffect(() => {
     getRaids().then(setEvents);
+    const interval = setInterval(() => {
+      getRaids().then(setEvents);
+    }, 10000);
+    return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (!infoDialogOpen || !selectedEvent?.id) return;
+    const interval = setInterval(async () => {
+      const fresh = await getRaidById(selectedEvent.id);
+      setSelectedEvent(fresh);
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [infoDialogOpen, selectedEvent?.id]);
 
   const handleDateSet = (info: any) => {
     const start = new Intl.DateTimeFormat("ru-RU", {

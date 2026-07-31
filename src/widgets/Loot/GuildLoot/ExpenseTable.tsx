@@ -37,6 +37,8 @@ export default function ExpensesTable({ isAdmin }: Props) {
       setExpenses(all);
     };
     load();
+    const interval = setInterval(load, 8000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleAdd = async (exp: ExpenseItem) => {
