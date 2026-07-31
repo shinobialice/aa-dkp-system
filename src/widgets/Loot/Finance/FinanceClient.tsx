@@ -339,7 +339,7 @@ export default function FinanceClient({
                   <TableCell>{s.aglPercent.toFixed(2)}%</TableCell>
                   <TableCell>{s.primePercent.toFixed(2)}%</TableCell>
                   <TableCell>{s.totalPercent.toFixed(2)}%</TableCell>
-                  <TableCell>{s.tenurePercent.toFixed(2)}%</TableCell>
+                  <TableCell>{Math.round(s.tenurePercent)}%</TableCell>
                   <TableCell>{s.customBonusPercent.toFixed(2)}%</TableCell>
                   <TableCell>{s.penaltyPercent.toFixed(2)}%</TableCell>
                   <TableCell>{s.weightPercent.toFixed(2)}%</TableCell>

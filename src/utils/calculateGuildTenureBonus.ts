@@ -17,5 +17,5 @@ export default function calculateGuildTenureBonus(
   if (days > 30.5) bonusPercent += (days / 30.5) * 1 - 1;
   if (days > 182) bonusPercent += 5;
 
-  return bonusPercent;
+  return Math.round(bonusPercent);
 }

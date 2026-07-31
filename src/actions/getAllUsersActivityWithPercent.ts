@@ -76,7 +76,6 @@ export async function computeMonthlyAttendanceForUsers(
           ? dkp / 2
           : dkp
         : 0;
-
       if (raid.type === "Прайм") {
         totalPrimeRaids += 1;
         userPrimeRaids += attendanceWeight;

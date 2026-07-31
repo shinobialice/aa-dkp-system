@@ -4,11 +4,7 @@ import type { Database } from "@/types/supabase";
 
 type RaidRow = Database["public"]["Tables"]["raid"]["Row"];
 
-// Босс-события "Кошка"/"Морф" не учитываются в проценте учёта баллов.
-const EXCLUDED_FROM_POINTS_ACCOUNTING_BOSS_IDS = [14, 11];
-
 type RaidWithRelations = RaidRow & {
-  raid_boss: Array<{ boss_id: number }>;
   raid_attendance: Array<{
     user_id: number;
     is_late: boolean;
@@ -51,7 +47,6 @@ export async function getUserMonthlyAttendance(
       type,
       start_date,
       dkp_summary,
-      raid_boss(boss_id),
       raid_attendance(user_id, is_late)
     `,
     )
@@ -73,8 +68,8 @@ export async function getUserMonthlyAttendance(
   let totalAglRaids = 0;
   let userAglRaids = 0;
 
-  // Учёт баллов % — доля набранных DKP от общего числа доступных за месяц
-  // (без Кошки/Морфа). Опоздание даёт половину очков за рейд.
+  // Учёт баллов % — доля набранных DKP от общего числа доступных за месяц.
+  // Опоздание даёт половину очков за рейд.
   let totalPointsAvailable = 0;
   let userPointsEarned = 0;
 
@@ -84,9 +79,6 @@ export async function getUserMonthlyAttendance(
     const dkp = raid.dkp_summary ?? 0;
     const attendance = raid.raid_attendance.find((a) => a.user_id === userId);
     const earnedDkp = attendance ? (attendance.is_late ? dkp / 2 : dkp) : 0;
-    const bossId = raid.raid_boss[0]?.boss_id;
-    const excludedFromAccounting =
-      EXCLUDED_FROM_POINTS_ACCOUNTING_BOSS_IDS.includes(bossId as number);
 
     const attendanceWeight = attendance ? (attendance.is_late ? 0.5 : 1) : 0;
 
@@ -99,11 +91,8 @@ export async function getUserMonthlyAttendance(
     }
 
     userDkp += earnedDkp;
-
-    if (!excludedFromAccounting) {
-      totalPointsAvailable += dkp;
-      userPointsEarned += earnedDkp;
-    }
+    totalPointsAvailable += dkp;
+    userPointsEarned += earnedDkp;
   }
 
   return {
