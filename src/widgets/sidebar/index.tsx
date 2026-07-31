@@ -22,6 +22,7 @@ import {
   HandCoins,
   Swords,
   UserX,
+  LifeBuoy,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -72,6 +73,12 @@ const AppSidebar: FC<Props> = ({ isAdmin }) => {
     { title: "Киллкаунт", url: "/kill_counter", icon: Swords },
     { title: "Настройки", url: "/settings", icon: Settings },
     { title: "АФК", url: "/afk", icon: UserX },
+    {
+      title: "Тех. Поддержка",
+      url: "https://vk.me/join/eXPIU9w1p0dw7bN/3Q_38BbFHClg8BhrsxM=",
+      icon: LifeBuoy,
+      external: true,
+    },
   ];
 
   const visibleMenuItems = menuItems.filter((item) => {
@@ -138,10 +145,21 @@ const AppSidebar: FC<Props> = ({ isAdmin }) => {
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
-                      <Link href={item.url}>
-                        <item.icon className="h-5 w-5" />
-                        <span>{item.title}</span>
-                      </Link>
+                      {item.external ? (
+                        <a
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <item.icon className="h-5 w-5" />
+                          <span>{item.title}</span>
+                        </a>
+                      ) : (
+                        <Link href={item.url}>
+                          <item.icon className="h-5 w-5" />
+                          <span>{item.title}</span>
+                        </Link>
+                      )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );

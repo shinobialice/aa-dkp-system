@@ -1,6 +1,7 @@
 "use server";
 
 import supabase from "@/shared/lib/supabaseAdmin";
+import ensurePrivilieges from "./ensurePrivilieges";
 import { triggerFinanceRecalcForCurrentMonth } from "./recalculateFinanceForMonth";
 
 export async function addUserSalaryBonus({
@@ -12,6 +13,8 @@ export async function addUserSalaryBonus({
   amount: number;
   reason: string;
 }) {
+  await ensurePrivilieges(["Администратор"]);
+
   if (amount <= 0) {
     throw new Error("Бонус должен быть больше 0%");
   }
@@ -37,6 +40,8 @@ export async function addUserSalaryBonus({
 }
 
 export async function deleteUserSalaryBonus(id: number) {
+  await ensurePrivilieges(["Администратор"]);
+
   const { error } = await supabase
     .from("user_salary_bonus")
     .delete()

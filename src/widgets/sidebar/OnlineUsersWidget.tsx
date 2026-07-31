@@ -50,8 +50,11 @@ export function OnlineUsersWidget() {
             <DropdownMenuItem disabled>Никого нет</DropdownMenuItem>
           )}
           {users.map((u) => (
-            <DropdownMenuItem key={u.id} asChild>
-              <a href={`/profile/${u.id}`}>{u.username}</a>
+            <DropdownMenuItem key={u.id} className="cursor-pointer" asChild>
+              <a href={`/profile/${u.id}`}>
+                <span className="h-2 w-2 shrink-0 rounded-full bg-green-500" />
+                {u.username}
+              </a>
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>

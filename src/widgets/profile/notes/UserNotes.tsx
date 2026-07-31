@@ -19,9 +19,11 @@ import {
 function UserBonusesSection({
   bonuses,
   onRemove,
+  isAdmin,
 }: {
   bonuses: any[];
   onRemove: () => void;
+  isAdmin: boolean;
 }) {
   return (
     <div className="flex flex-col divide-y">
@@ -30,17 +32,19 @@ function UserBonusesSection({
           <div className="text-sm font-medium">{bonus.reason}</div>
           <div className="flex items-center gap-2">
             <div className="text-lg font-semibold">{bonus.amount}%</div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-muted-foreground"
-              onClick={async () => {
-                await deleteUserSalaryBonus(bonus.id);
-                onRemove();
-              }}
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
+            {isAdmin && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-muted-foreground"
+                onClick={async () => {
+                  await deleteUserSalaryBonus(bonus.id);
+                  onRemove();
+                }}
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            )}
           </div>
         </div>
       ))}
@@ -154,6 +158,7 @@ export default function UserNotes({
             <UserBonusesSection
               bonuses={bonuses}
               onRemove={() => setRefreshToggle(!refreshToggle)}
+              isAdmin={isAdmin}
             />
 
             <div className="flex justify-between items-center py-4">

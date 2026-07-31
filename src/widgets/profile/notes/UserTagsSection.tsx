@@ -134,8 +134,15 @@ export function UserTagsSection({
     if (exists) {
       return;
     }
-    const newTag = await addUserTag(user.id, tag);
-    setTags([...tags, newTag]);
+    const prevTags = tags;
+    setTags([...tags, { id: -Date.now(), tag }]);
+    try {
+      const newTag = await addUserTag(user.id, tag);
+      setTags([...prevTags, newTag]);
+    } catch {
+      setTags(prevTags);
+      toast.error("Не удалось добавить тэг");
+    }
   }
 
   const availableTags = allPossibleTags.filter(

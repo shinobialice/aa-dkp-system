@@ -115,24 +115,24 @@ export function UserMonthActivity({
             <Card className="flex flex-col items-center justify-center p-4">
               <div className="text-sm text-muted-foreground">АГЛ</div>
               <div className="text-2xl font-bold">
-                {data.aglPercent.toFixed(0)}%
+                {data.aglPercent.toFixed(2)}%
               </div>
             </Card>
             <Card className="flex flex-col items-center justify-center p-4">
               <div className="text-sm text-muted-foreground">Прайм</div>
               <div className="text-2xl font-bold">
-                {data.primePercent.toFixed(0)}%
+                {data.primePercent.toFixed(2)}%
               </div>
             </Card>
             <Card className="flex flex-col items-center justify-center p-4">
               <div className="text-sm text-muted-foreground">Итого</div>
               <div className="text-2xl font-bold">
-                {data.totalPercent.toFixed(0)}%
+                {data.totalPercent.toFixed(2)}%
               </div>
             </Card>
             <Card className="flex flex-col items-center justify-center p-4">
               <div className="text-sm text-muted-foreground">Учет баллов</div>
-              <div className="text-2xl font-bold">{data.dkp}</div>
+              <div className="text-2xl font-bold">{data.dkp.toFixed(2)}</div>
             </Card>
           </div>
         )}
