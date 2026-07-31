@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
 import { DeleteEventButton } from "./CreateEvent/components/DeleteEventButton";
 import { RaidDetailsForm } from "./CreateEvent/components/RaidDetailsForm";
 import { ScreenshotOcr } from "./CreateEvent/components/ScreenshotOcr";
@@ -47,6 +48,7 @@ export function EventDialog({
   const [users, setUsers] = useState<any[]>([]);
   const [bosses, setBosses] = useState<any[]>([]);
   const [, setSuccess] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({
     category: false,
     selectedBoss: false,
@@ -143,39 +145,44 @@ export function EventDialog({
     const bossIds = selectedBosses.map((b) => b.id);
     const lateIds = userIds.filter((id) => lateUserIds[id]);
 
-    if (mode === "create") {
-      await createEvent(
-        category!,
-        dkpPoints,
-        selectedDate!,
-        userIds,
-        bossIds,
-        isPvp,
-        isPvpLong,
-        isProc,
-        isDoubleProc,
-        lateIds,
-      );
-    } else if (mode === "edit" && selectedEvent) {
-      await updateEvent(
-        selectedEvent.id,
-        category!,
-        dkpPoints,
-        selectedDate!,
-        userIds,
-        bossIds,
-        isPvp,
-        isPvpLong,
-        isProc,
-        isDoubleProc,
-        lateIds,
-      );
-    }
+    setSubmitting(true);
+    try {
+      if (mode === "create") {
+        await createEvent(
+          category!,
+          dkpPoints,
+          selectedDate!,
+          userIds,
+          bossIds,
+          isPvp,
+          isPvpLong,
+          isProc,
+          isDoubleProc,
+          lateIds,
+        );
+      } else if (mode === "edit" && selectedEvent) {
+        await updateEvent(
+          selectedEvent.id,
+          category!,
+          dkpPoints,
+          selectedDate!,
+          userIds,
+          bossIds,
+          isPvp,
+          isPvpLong,
+          isProc,
+          isDoubleProc,
+          lateIds,
+        );
+      }
 
-    setSuccess(mode === "edit" ? "Обновлено!" : "Создано!");
-    setOpen(false);
-    if (onComplete) {
-      onComplete();
+      setSuccess(mode === "edit" ? "Обновлено!" : "Создано!");
+      setOpen(false);
+      if (onComplete) {
+        onComplete();
+      }
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -253,8 +260,10 @@ export function EventDialog({
 
           <Button
             onClick={handleSubmit}
+            disabled={submitting}
             className="w-full cursor-pointer md:w-auto"
           >
+            {submitting && <Loader2 className="mr-2 size-4 animate-spin" />}
             {mode === "edit" ? "Изменить" : "Создать"}
           </Button>
         </DialogFooter>

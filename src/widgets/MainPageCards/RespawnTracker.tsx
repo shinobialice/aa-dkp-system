@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, FC } from "react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui";
 import supabase from "@/shared/lib/supabase";
@@ -280,7 +281,10 @@ const RespawnTracker: FC = () => {
                       onClick={() => handleKilledNow(boss)}
                       disabled={saving === boss || loading}
                     >
-                      {saving === boss ? "Сохр..." : "Был убит сейчас"}
+                      {saving === boss && (
+                        <Loader2 className="mr-1 size-3 animate-spin" />
+                      )}
+                      Был убит сейчас
                     </Button>
                     <DateTimePopover
                       value={popoverDate[boss]}
@@ -295,7 +299,10 @@ const RespawnTracker: FC = () => {
                         disabled={saving === boss || loading}
                         onClick={() => {}}
                       >
-                        {saving === boss ? "Сохр..." : "Установить время"}
+                        {saving === boss && (
+                          <Loader2 className="mr-1 size-3 animate-spin" />
+                        )}
+                        Установить время
                       </Button>
                     </DateTimePopover>
                   </div>
