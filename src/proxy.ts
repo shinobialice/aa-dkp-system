@@ -31,10 +31,13 @@ export async function proxy(req: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  const isValidSession = await verifySessionToken(sessionToken);
-  if (!isValidSession) {
-    const loginUrl = new URL("/login", req.url);
-    return NextResponse.redirect(loginUrl);
+  const session = await verifySessionToken(sessionToken);
+  if (!session.valid) {
+    const redirectUrl =
+      session.reason === "inactive"
+        ? new URL("/login-error?reason=inactive", req.url)
+        : new URL("/login", req.url);
+    return NextResponse.redirect(redirectUrl);
   }
 
   return NextResponse.next();
