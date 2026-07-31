@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
 import {
   Select,
@@ -24,6 +24,7 @@ import {
 } from "@/actions/guildStats";
 import { RoundedTooltipContent } from "./RoundedTooltipContent";
 import { getYearOptions } from "@/utils/getYearOptions";
+import { mergeDailyAttendance } from "@/utils/mergeAttendanceSeries";
 
 const months = [
   "Январь",
@@ -45,41 +46,28 @@ export default function DailyAttendanceChart({
   month,
   setYear,
   setMonth,
+  initialData,
 }: {
   year: number;
   month: number;
   setYear: (val: number) => void;
   setMonth: (val: number) => void;
+  initialData?: ReturnType<typeof mergeDailyAttendance>;
 }) {
-  const [chartData, setChartData] = useState<any[]>([]);
+  const [chartData, setChartData] = useState<any[]>(initialData ?? []);
+  const skipNextFetch = useRef(!!initialData);
 
   useEffect(() => {
+    if (skipNextFetch.current) {
+      skipNextFetch.current = false;
+      return;
+    }
+
     Promise.all([
       getGuildAttendancePrime({ year, month }),
       getGuildAttendanceAgl({ year, month }),
     ]).then(([prime, agl]) => {
-      const raidsByDay: Record<string, { prime: number; agl: number }> = {};
-
-      for (const day of prime.daily ?? []) {
-        const key = day.date.split("T")[0];
-        raidsByDay[key] = { ...raidsByDay[key], prime: day.value };
-      }
-      for (const day of agl.daily ?? []) {
-        const key = day.date.split("T")[0];
-        raidsByDay[key] = { ...raidsByDay[key], agl: day.value };
-      }
-
-      const merged = Object.entries(raidsByDay)
-        .map(([date, values]) => ({
-          date,
-          prime: values.prime ?? 0,
-          agl: values.agl ?? 0,
-        }))
-        .sort(
-          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
-        );
-
-      setChartData(merged);
+      setChartData(mergeDailyAttendance(prime, agl));
     });
   }, [year, month]);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
 import {
   Select,
@@ -24,6 +24,7 @@ import {
 } from "@/actions/guildStats";
 import { RoundedTooltipContent } from "./RoundedTooltipContent";
 import { getYearOptions } from "@/utils/getYearOptions";
+import { mergeMonthlyAttendance } from "@/utils/mergeAttendanceSeries";
 
 const chartConfig = {
   prime: {
@@ -39,23 +40,26 @@ const chartConfig = {
 export default function MonthlyAttendanceChart({
   year,
   setYear,
+  initialData,
 }: {
   year: number;
   setYear: (val: number) => void;
+  initialData?: ReturnType<typeof mergeMonthlyAttendance>;
 }) {
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<any[]>(initialData ?? []);
+  const skipNextFetch = useRef(!!initialData);
 
   useEffect(() => {
+    if (skipNextFetch.current) {
+      skipNextFetch.current = false;
+      return;
+    }
+
     Promise.all([
       getGuildPrimeStatsByYear(year),
       getGuildAglStatsByYear(year),
     ]).then(([prime, agl]) => {
-      const merged = prime.map((p, i) => ({
-        month: p.month,
-        prime: p.percent ?? 0,
-        agl: agl[i]?.percent ?? 0,
-      }));
-      setData(merged);
+      setData(mergeMonthlyAttendance(prime, agl));
     });
   }, [year]);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
 import {
   Select,
@@ -34,15 +34,23 @@ export default function BossIncomeChart({
   month,
   setYear,
   setMonth,
+  initialData,
 }: {
   year: number;
   month: number;
   setYear: (val: number) => void;
   setMonth: (val: number) => void;
+  initialData?: BossIncomeStat[];
 }) {
-  const [data, setData] = useState<BossIncomeStat[]>([]);
+  const [data, setData] = useState<BossIncomeStat[]>(initialData ?? []);
+  const skipNextFetch = useRef(!!initialData);
 
   useEffect(() => {
+    if (skipNextFetch.current) {
+      skipNextFetch.current = false;
+      return;
+    }
+
     getBossIncomeByMonth(month, year).then(setData);
   }, [year, month]);
 
