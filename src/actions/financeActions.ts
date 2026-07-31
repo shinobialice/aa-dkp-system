@@ -170,18 +170,31 @@ export const generateSalaries = async (month: number, year: number) => {
     throw new Error("Сначала нужно сгенерировать фонд");
   }
 
-  const { data: users, error: usersError } = await supabase
+  const asOf = getSalaryAsOfDate(month, year);
+
+  const { data: allEligible, error: usersError } = await supabase
     .from("user")
-    .select("id, joined_at, class, class_gear_score")
-    .eq("active", true)
+    .select("id, joined_at, class, class_gear_score, active, inactive_since")
     .eq("is_eligible_for_salary", true);
 
-  if (usersError || !users || users.length === 0) {
+  if (usersError || !allEligible) {
+    throw new Error("Нет активных сотрудников для выплаты");
+  }
+
+  // Для прошлого месяца учитываем тех, кто был активен НА МОМЕНТ этого
+  // месяца (active сейчас, либо стал неактивным уже после asOf) — иначе
+  // человек, ушедший из гильдии позже, задним числом выпадал бы из уже
+  // выплаченной ЗП при любом пересчёте месяца (см. inactive_since в
+  // updateUser.ts).
+  const users = allEligible.filter(
+    (u) => u.active || (u.inactive_since && new Date(u.inactive_since) > asOf),
+  );
+
+  if (users.length === 0) {
     throw new Error("Нет активных сотрудников для выплаты");
   }
 
   const context = await getSalaryEligibilityContext();
-  const asOf = getSalaryAsOfDate(month, year);
   const userIds = users.map((u) => u.id);
 
   // Раньше здесь на каждого пользователя дергался отдельный

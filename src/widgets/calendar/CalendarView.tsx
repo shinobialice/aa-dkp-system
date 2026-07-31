@@ -104,7 +104,7 @@ export default function CalendarView({ isAdmin, isModerator }: Props) {
         <h1 className="text-3xl font-bold ml-6 mb-4 text-primary">
           Календарь активностей
         </h1>
-        {canEditEvents && <MissingActivitiesBanner />}
+        <MissingActivitiesBanner />
         <div className="flex justify-end mb-4 space-x-2 mr-6">
           <Button
             variant="outline"
