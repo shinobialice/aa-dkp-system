@@ -2,17 +2,7 @@
 import supabase from "@/shared/lib/supabaseAdmin";
 import ensurePrivilieges from "./ensurePrivilieges";
 import { triggerFinanceRecalc } from "./recalculateFinanceForMonth";
-
-function getMoscowISOString(date: Date): string {
-  const year = date.getFullYear();
-  const month = (date.getMonth() + 1).toString().padStart(2, "0");
-  const day = date.getDate().toString().padStart(2, "0");
-  const hour = date.getHours().toString().padStart(2, "0");
-  const minute = date.getMinutes().toString().padStart(2, "0");
-  const second = date.getSeconds().toString().padStart(2, "0");
-
-  return `${year}-${month}-${day}T${hour}:${minute}:${second}`;
-}
+import { getMoscowISOString } from "@/utils/getMoscowISOString";
 
 const createRaidEvent = async (
   type: string,

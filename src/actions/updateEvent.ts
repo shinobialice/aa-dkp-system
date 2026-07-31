@@ -2,6 +2,7 @@
 
 import supabase from "@/shared/lib/supabaseAdmin";
 import { triggerFinanceRecalc } from "./recalculateFinanceForMonth";
+import { getMoscowISOString } from "@/utils/getMoscowISOString";
 
 /**
  * Обновляет существующее событие по ID
@@ -32,7 +33,7 @@ const updateEvent = async (
     .update({
       type,
       dkp_summary,
-      start_date: start_date.toISOString(),
+      start_date: getMoscowISOString(start_date),
       is_pvp,
       is_pvp_long,
       is_proc,
