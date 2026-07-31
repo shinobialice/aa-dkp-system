@@ -2,9 +2,6 @@
 
 import supabase from "@/shared/lib/supabaseAdmin";
 
-// Босс-события "Кошка"/"Морф" не учитываются в проценте учёта баллов.
-const EXCLUDED_FROM_POINTS_ACCOUNTING_BOSS_IDS = [14, 11];
-
 export type MonthlyAttendance = {
   primePercent: number;
   aglPercent: number;
@@ -29,9 +26,7 @@ export async function computeMonthlyAttendanceForUsers(
 
   const { data: raids, error: raidsError } = await supabase
     .from("raid")
-    .select(
-      `id, type, start_date, dkp_summary, raid_boss(boss_id), raid_attendance(user_id, is_late)`,
-    )
+    .select(`id, type, start_date, dkp_summary, raid_attendance(user_id, is_late)`)
     .gte("start_date", startDate)
     .lt("start_date", endDate);
 
@@ -68,9 +63,6 @@ export async function computeMonthlyAttendanceForUsers(
       if (new Date(raid.start_date as string) < effectiveStart) continue;
 
       const dkp = raid.dkp_summary ?? 0;
-      const bossId = (raid.raid_boss as { boss_id: number }[])?.[0]?.boss_id;
-      const excludedFromAccounting =
-        EXCLUDED_FROM_POINTS_ACCOUNTING_BOSS_IDS.includes(bossId as number);
       const attendance = (
         raid.raid_attendance as { user_id: number; is_late: boolean }[]
       ).find((a) => a.user_id === user.id);
@@ -94,11 +86,8 @@ export async function computeMonthlyAttendanceForUsers(
       }
 
       userDkp += earnedDkp;
-
-      if (!excludedFromAccounting) {
-        totalPointsAvailable += dkp;
-        userPointsEarned += earnedDkp;
-      }
+      totalPointsAvailable += dkp;
+      userPointsEarned += earnedDkp;
     }
 
     result[user.id] = {
