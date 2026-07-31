@@ -49,6 +49,10 @@ const EXCLUDED_BOSSES = new Set([
   "Великий луг",
 ]);
 
+// Эти конкретные слоты (босс+время) есть в расписании и реально проводятся,
+// но их обычно не фиксируют в рейдах — поэтому не считаем их пропусками.
+const EXCLUDED_SLOTS = new Set(["АГЛ|19:20"]);
+
 // Насколько по времени фактический рейд может отклоняться от слота в
 // расписании и всё ещё засчитываться как его выполнение.
 const MATCH_TOLERANCE_MINUTES = 90;
@@ -238,6 +242,7 @@ export const getMissingActivitiesForMonth = async (
     for (const row of daySchedule) {
       if (EXCLUDED_BOSSES.has(row.boss_name)) continue;
       const time = row.time.slice(0, 5);
+      if (EXCLUDED_SLOTS.has(`${row.boss_name}|${time}`)) continue;
       if (
         weekday === "Четверг" &&
         time >= THURSDAY_MAINTENANCE_START &&
