@@ -20,7 +20,10 @@ export function DateTimePopover({
         <div className="flex justify-end mt-2">
           <button
             className="px-3 py-1 bg-primary text-white rounded hover:bg-primary/90"
-            onClick={() => setOpen(false)}
+            onPointerDown={(e) => {
+              e.preventDefault();
+              setOpen(false);
+            }}
           >
             OK
           </button>
