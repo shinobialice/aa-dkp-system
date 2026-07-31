@@ -106,7 +106,7 @@ export async function GET(req: NextRequest) {
       .eq("token", linkToken);
 
     const response = NextResponse.redirect(
-      new URL("/link-account/complete", req.url),
+      new URL("/link-account/complete", baseUrl),
     );
 
     response.cookies.set("link-token", "", { path: "/", maxAge: -1 });
@@ -132,7 +132,7 @@ export async function GET(req: NextRequest) {
   let userId: number;
 
   if (!existingUser) {
-    return NextResponse.redirect(new URL("/login-error", req.url));
+    return NextResponse.redirect(new URL("/login-error", baseUrl));
   } else {
     await supabase
       .from("user")
@@ -142,7 +142,7 @@ export async function GET(req: NextRequest) {
     userId = existingUser.id;
   }
 
-  const response = NextResponse.redirect(new URL("/", req.url));
+  const response = NextResponse.redirect(new URL("/", baseUrl));
 
   response.cookies.set("session_token", sessionToken, {
     path: "/",
