@@ -9,6 +9,20 @@ const receiver = new Receiver({
   nextSigningKey: process.env.QSTASH_NEXT_SIGNING_KEY!,
 });
 
+const quietHoursStart = 2;
+const quietHoursEnd = 7;
+
+function isQuietHours(): boolean {
+  const moscowHour = Number(
+    new Date().toLocaleString("en-US", {
+      timeZone: "Europe/Moscow",
+      hour: "2-digit",
+      hour12: false,
+    }),
+  );
+  return moscowHour >= quietHoursStart && moscowHour < quietHoursEnd;
+}
+
 export async function POST(req: NextRequest) {
   const body = await req.text();
   const signature = req.headers.get("upstash-signature") ?? "";
@@ -26,6 +40,10 @@ export async function POST(req: NextRequest) {
 
   if (!isValid) {
     return new NextResponse("Unauthorized", { status: 401 });
+  }
+
+  if (isQuietHours()) {
+    return NextResponse.json({ ok: true, skipped: "quiet_hours" });
   }
 
   const { boss } = JSON.parse(body) as { boss: string };
