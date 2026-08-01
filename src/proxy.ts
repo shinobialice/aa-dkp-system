@@ -16,6 +16,7 @@ export async function proxy(req: NextRequest) {
     "/_next/static",
     "/_next/image",
     "/api/auth/vk/callback",
+    "/api/notify-respawn",
   ];
 
   const isPublic = publicPaths.some((path) =>
