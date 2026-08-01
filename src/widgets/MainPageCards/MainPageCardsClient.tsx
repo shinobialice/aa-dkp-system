@@ -2,10 +2,11 @@
 
 import { useEffect, useState, FC, ReactNode } from "react";
 import useCurrentUser from "@/hooks/useCurrentUser";
-import { Loader } from "lucide-react";
+import { Loader, Swords, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
 import getStats from "@/actions/getStats";
 import Image from "next/image";
+import { classIcons } from "@/widgets/MembersTable/classStyles";
 import MainPageClock from "./MainPageClock";
 import UpcomingEvents from "./UpcomingEvents";
 import RespawnTracker from "./RespawnTracker";
@@ -13,10 +14,22 @@ import BossRespawnHistory from "./BossRespawnHistory";
 
 type Stats = Awaited<ReturnType<typeof getStats>>;
 
+const statIcons: Record<string, React.ReactNode> = {
+  "Общее": <Users className="size-4" />,
+  ДД: <Swords className="size-4" />,
+  Хилы: classIcons["Хил"],
+  Тактики: classIcons["Тактик"],
+  Барды: classIcons["Бард"],
+  Танцоры: classIcons["Танцор"],
+};
+
 const StatCard: FC<{ title: string; value: number }> = ({ title, value }) => (
   <Card>
     <CardHeader>
-      <CardTitle>{title}</CardTitle>
+      <CardTitle className="flex items-center gap-2">
+        {statIcons[title]}
+        {title}
+      </CardTitle>
     </CardHeader>
     <CardContent>
       <p>{value}</p>
@@ -61,7 +74,7 @@ const MainPageCardsClient: FC = () => {
   }
 
   const statItems = [
-    { title: "Активные игроки", value: stats.activePlayers },
+    { title: "Общее", value: stats.activePlayers },
     { title: "ДД", value: stats.dds },
     { title: "Хилы", value: stats.healers },
     { title: "Тактики", value: stats.tacticians },
@@ -93,13 +106,13 @@ const MainPageCardsClient: FC = () => {
   ];
 
   return (
-    <div className="space-y-8 p-4">
+    <div className="max-w-[1600px] mx-auto space-y-8 p-4">
       <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6 text-2xl">
         {statItems.map((item) => (
           <StatCard key={item.title} title={item.title} value={item.value} />
         ))}
       </div>
-      <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-[1080px_400px] items-start text-2xl">
+      <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-[1080px_auto] items-start text-2xl">
         <InfoCard title={infoItems[0].title} content={infoItems[0].content} />
         <InfoCard title={infoItems[1].title} content={infoItems[1].content} />
       </div>
