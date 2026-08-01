@@ -3,6 +3,14 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
+import supabase from "@/shared/lib/supabase";
+import {
+  BossName,
+  bosses as respawnBosses,
+  respawnHoursByBoss,
+  respawnWindow,
+  getRespawnStart,
+} from "@/shared/config/bossRespawn";
 
 const bossImages: Record<string, string> = {
   АГЛ: "/images/ashyara.png",
@@ -15,6 +23,9 @@ const bossImages: Record<string, string> = {
   "Оборона Ифнира": "/images/ifnir.png",
   "Осада замка": "/images/osada.png",
   Кошка: "/images/koshka.png",
+  Кириос: "/images/kirios.png",
+  Марли: "/images/marli.png",
+  Морф: "/images/morpheos.png",
 };
 
 const schedule: Record<string, [string, string][]> = {
@@ -146,8 +157,20 @@ function formatMinutes(mins: number): string {
   return `${h} ч ${m} мин`;
 }
 
+function formatMoscowHM(date: Date): string {
+  return date.toLocaleString("ru-RU", {
+    hour12: false,
+    timeZone: "Europe/Moscow",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 export default function UpcomingEvents() {
   const [now, setNow] = useState(getMoscowTime());
+  const [bossLastKill, setBossLastKill] = useState<
+    Record<BossName, string | null>
+  >({ Марли: null, Морф: null, Кириос: null });
   const [events, setEvents] = useState<
     {
       boss: string;
@@ -160,8 +183,50 @@ export default function UpcomingEvents() {
   >([]);
 
   useEffect(() => {
+    async function fetchBossRespawn() {
+      const { data } = await supabase
+        .from("boss_respawn")
+        .select("boss_name,last_kill")
+        .in("boss_name", respawnBosses);
+      if (data) {
+        setBossLastKill((prev) => {
+          const next = { ...prev };
+          data.forEach(
+            (row: { boss_name: BossName; last_kill: string | null }) => {
+              next[row.boss_name] = row.last_kill;
+            },
+          );
+          return next;
+        });
+      }
+    }
+    fetchBossRespawn();
+
+    const channel = supabase
+      .channel("upcoming-events-boss-respawn")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "boss_respawn" },
+        (payload) => {
+          const row = payload.new as {
+            boss_name: BossName;
+            last_kill: string | null;
+          };
+          if (!row?.boss_name) return;
+          setBossLastKill((prev) => ({ ...prev, [row.boss_name]: row.last_kill }));
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  useEffect(() => {
     const checkEvents = () => {
       const msk = getMoscowTime();
+      const realNow = new Date();
+      const shift = msk.getTime() - realNow.getTime();
       setNow(msk);
 
       const result: typeof events = [];
@@ -196,6 +261,31 @@ export default function UpcomingEvents() {
         }
       }
 
+      for (const boss of respawnBosses) {
+        const lastKill = bossLastKill[boss];
+        if (!lastKill) continue;
+        const start = getRespawnStart(lastKill, respawnHoursByBoss[boss]);
+        const end = new Date(start.getTime() + respawnWindow * 60 * 60 * 1000);
+        if (realNow >= end) continue;
+
+        const isNow = realNow >= start && realNow < end;
+        const startsInMin = Math.floor(
+          (start.getTime() - realNow.getTime()) / 60000,
+        );
+        const endsInMin = isNow
+          ? Math.ceil((end.getTime() - realNow.getTime()) / 60000)
+          : undefined;
+
+        result.push({
+          boss,
+          time: formatMoscowHM(start),
+          date: new Date(start.getTime() + shift),
+          isNow,
+          startsInMin,
+          endsInMin,
+        });
+      }
+
       result.sort((a, b) => a.date.getTime() - b.date.getTime());
       setEvents(result.slice(0, 5));
     };
@@ -203,7 +293,7 @@ export default function UpcomingEvents() {
     checkEvents();
     const interval = setInterval(checkEvents, 10_000);
     return () => clearInterval(interval);
-  }, []);
+  }, [bossLastKill]);
 
   return (
     <div className="flex flex-col gap-4">
