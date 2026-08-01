@@ -5,6 +5,8 @@ import {
   getGuildAglStatsByYear,
   getBossIncomeByMonth,
   getRaidsByDay,
+  getRosterComposition,
+  getInventoryStock,
 } from "@/actions/guildStats";
 import {
   mergeDailyAttendance,
@@ -31,15 +33,25 @@ export default async function StatsPage() {
   const month = now.getMonth();
   const today = getMoscowTodayISO();
 
-  const [dailyPrime, dailyAgl, monthlyPrime, monthlyAgl, bossIncome, raids] =
-    await Promise.all([
-      getGuildAttendancePrime({ year, month }),
-      getGuildAttendanceAgl({ year, month }),
-      getGuildPrimeStatsByYear(year),
-      getGuildAglStatsByYear(year),
-      getBossIncomeByMonth(month + 1, year),
-      getRaidsByDay(today),
-    ]);
+  const [
+    dailyPrime,
+    dailyAgl,
+    monthlyPrime,
+    monthlyAgl,
+    bossIncome,
+    raids,
+    rosterComposition,
+    inventoryStock,
+  ] = await Promise.all([
+    getGuildAttendancePrime({ year, month }),
+    getGuildAttendanceAgl({ year, month }),
+    getGuildPrimeStatsByYear(year),
+    getGuildAglStatsByYear(year),
+    getBossIncomeByMonth(month + 1, year),
+    getRaidsByDay(today),
+    getRosterComposition(),
+    getInventoryStock(),
+  ]);
 
   return (
     <StatsPageClient
@@ -50,6 +62,8 @@ export default async function StatsPage() {
       initialBossIncomeData={bossIncome}
       initialRaidsDate={today}
       initialRaidsData={raids}
+      initialRosterComposition={rosterComposition}
+      initialInventoryStock={inventoryStock}
     />
   );
 }

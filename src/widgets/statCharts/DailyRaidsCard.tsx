@@ -67,7 +67,7 @@ export default function DailyRaidsCard({
             Рейдов в этот день не было
           </p>
         ) : (
-          <div className="max-h-[200px] overflow-y-auto space-y-2">
+          <div className="h-[600px] overflow-y-auto space-y-2">
             {raids.map((raid) => (
               <div
                 key={raid.id}
@@ -91,7 +91,9 @@ export default function DailyRaidsCard({
                 </div>
                 <span className="shrink-0 font-medium">
                   {raid.attendeeCount}
-                  {raid.activeUserCount ? ` / ${raid.activeUserCount}` : ""}{" "}
+                  {raid.activeUserCount
+                    ? ` / ${raid.activeUserCount}`
+                    : ""}{" "}
                   чел.
                 </span>
               </div>
