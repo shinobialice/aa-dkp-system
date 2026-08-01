@@ -126,6 +126,7 @@ const AppSidebar: FC<Props> = ({ isAdmin }) => {
                             {item.items.map((subItem) => (
                               <SidebarMenuItem key={subItem.title}>
                                 <SidebarMenuButton
+                                  className="cursor-pointer"
                                   onClick={() => router.push(subItem.url)}
                                 >
                                   <subItem.icon className="h-4 w-4" />
@@ -141,7 +142,10 @@ const AppSidebar: FC<Props> = ({ isAdmin }) => {
                 }
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton onClick={() => router.push(item.url)}>
+                    <SidebarMenuButton
+                      className="cursor-pointer"
+                      onClick={() => router.push(item.url)}
+                    >
                       <item.icon className="h-5 w-5" />
                       <span>{item.title}</span>
                     </SidebarMenuButton>
