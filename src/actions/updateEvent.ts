@@ -1,6 +1,7 @@
 "use server";
 
 import supabase from "@/shared/lib/supabaseAdmin";
+import ensurePrivilieges from "./ensurePrivilieges";
 import { triggerFinanceRecalc } from "./recalculateFinanceForMonth";
 import { getMoscowISOString } from "@/utils/getMoscowISOString";
 
@@ -20,6 +21,8 @@ const updateEvent = async (
   is_double_proc: boolean = false,
   lateUserIds: number[] = [],
 ) => {
+  await ensurePrivilieges(["Администратор", "Raid Manager", "Модератор"]);
+
   // Запоминаем старую дату — если рейд переносят в другой месяц, пересчитать
   // нужно оба месяца (у старого пропадает посещаемость/dkp, у нового — появляется).
   const { data: previousRaid } = await supabase

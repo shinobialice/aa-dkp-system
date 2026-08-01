@@ -1,8 +1,11 @@
 "use server";
 
 import supabase from "@/shared/lib/supabaseAdmin";
+import ensurePrivilieges from "./ensurePrivilieges";
 
 export default async function deleteEvent(eventId: number) {
+  await ensurePrivilieges(["Администратор", "Raid Manager", "Модератор"]);
+
   const { error: attendanceError } = await supabase
     .from("raid_attendance")
     .delete()

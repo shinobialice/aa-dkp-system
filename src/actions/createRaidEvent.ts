@@ -16,7 +16,7 @@ const createRaidEvent = async (
   is_double_proc: boolean = false,
   lateUserIds: number[] = [],
 ) => {
-  await ensurePrivilieges(["Администратор", "Raid Manager"]);
+  await ensurePrivilieges(["Администратор", "Raid Manager", "Модератор"]);
 
   const { data: activeUsers, error: activeError } = await supabase
     .from("user")
