@@ -10,7 +10,9 @@ const POLL_MS = 15000;
 
 export default function MembersTable({ data }: { data: any[] }) {
   const [rows, setRows] = useState(data);
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: "class", desc: false },
+  ]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   useEffect(() => {
