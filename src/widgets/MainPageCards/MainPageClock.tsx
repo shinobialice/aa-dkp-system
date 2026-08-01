@@ -49,7 +49,7 @@ export default function MainPageClock() {
   return (
     <div className="flex flex-row justify-between items-center gap-4 text-sm ">
       <div>
-        🕓 МСК:{" "}
+        🕓{" "}
         {realTime.toLocaleTimeString("ru-RU", {
           hour: "2-digit",
           minute: "2-digit",

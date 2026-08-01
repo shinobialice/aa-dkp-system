@@ -223,7 +223,7 @@ export default function UpcomingEvents() {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm space-y-1">
-              <div>🕓 {e.time} МСК</div>
+              <div>🕓 {e.time}</div>
               {e.isNow ? (
                 <div className="text-xs text-muted-foreground">
                   До конца: {formatMinutes(e.endsInMin ?? 0)}

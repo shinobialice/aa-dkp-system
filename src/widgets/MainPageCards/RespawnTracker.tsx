@@ -2,6 +2,7 @@
 
 import { useEffect, useState, FC } from "react";
 import { Loader2 } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui";
 import supabase from "@/shared/lib/supabase";
@@ -9,6 +10,12 @@ import useCurrentUser from "@/hooks/useCurrentUser";
 import { DateTimePopover } from "./DateTimePopover";
 
 type BossName = "Марли" | "Морф" | "Кириос";
+
+const bossImages: Partial<Record<BossName, string>> = {
+  Кириос: "/images/kirios.png",
+  Марли: "/images/marli.png",
+  Морф: "/images/morpheos.png",
+};
 type BossState = {
   lastKill: string | null; // ISO string
   packsNeeded: number | null;
@@ -76,8 +83,8 @@ const RespawnTracker: FC = () => {
     } else {
       status = "Ожидание убийства";
     }
-    const nextRespawn = `${formatMoscowDateTime(respawnStart)} (МСК)`;
-    const lastKillDisplay = `${formatMoscowDateTime(killDate)} (МСК)`;
+    const nextRespawn = formatMoscowDateTime(respawnStart);
+    const lastKillDisplay = formatMoscowDateTime(killDate);
     return { status, nextRespawn, lastKillDisplay, waiting, timeLeft };
   }
   const [bossStates, setBossStates] =
@@ -244,7 +251,7 @@ const RespawnTracker: FC = () => {
       <table className="w-full table-fixed text-sm border">
         <thead>
           <tr className="bg-muted">
-            <th className="p-2 border w-[80px]">Название</th>
+            <th className="p-2 border w-[100px]">Название</th>
             <th className="p-2 border w-[125px]">Время респауна</th>
             <th className="p-2 border w-[125px]">Статус</th>
             <th className="p-2 border w-[125px]">Следующий респаун</th>
@@ -260,7 +267,20 @@ const RespawnTracker: FC = () => {
             const info = getRespawnInfo(state.lastKill, respawnHours);
             return (
               <tr key={boss}>
-                <td className="p-2 border font-bold">{boss}</td>
+                <td className="p-2 border font-bold">
+                  <div className="flex flex-col items-center justify-center gap-1">
+                    {bossImages[boss] && (
+                      <Image
+                        src={bossImages[boss]!}
+                        alt={boss}
+                        width={64}
+                        height={64}
+                        className="rounded-md object-cover"
+                      />
+                    )}
+                    {boss}
+                  </div>
+                </td>
                 <td className="p-2 border">
                   {respawnHours} ч. (+ {respawnWindow} ч. промежуток)
                 </td>

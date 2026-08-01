@@ -207,17 +207,15 @@ export default function BossRespawnHistory() {
 }
 
 function formatDT(dt: string) {
-  return (
-    new Date(dt).toLocaleString("ru-RU", {
-      hour12: false,
-      timeZone: "Europe/Moscow",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    }) + " (МСК)"
-  );
+  return new Date(dt).toLocaleString("ru-RU", {
+    hour12: false,
+    timeZone: "Europe/Moscow",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 type PageItem = { type: "page"; page: number } | { type: "ellipsis" };
