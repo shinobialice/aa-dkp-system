@@ -1,7 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
+
+const bossImages: Record<string, string> = {
+  АГЛ: "/images/ashyara.png",
+  Калидис: "/images/kalidis.png",
+  Кракен: "/images/kraken.png",
+  "Великий луг": "/images/velikii_lug.png",
+  Анталлон: "/images/antallon.png",
+  Ксанатос: "/images/ksanatos.png",
+  Левиафан: "/images/leviathan.png",
+  "Оборона Ифнира": "/images/ifnir.png",
+  "Осада замка": "/images/osada.png",
+  Кошка: "/images/koshka.png",
+};
 
 const schedule: Record<string, [string, string][]> = {
   Понедельник: [
@@ -183,7 +197,7 @@ export default function UpcomingEvents() {
       }
 
       result.sort((a, b) => a.date.getTime() - b.date.getTime());
-      setEvents(result.slice(0, 4));
+      setEvents(result.slice(0, 5));
     };
 
     checkEvents();
@@ -197,27 +211,39 @@ export default function UpcomingEvents() {
         <Card
           key={i}
           className={
-            e.isNow ? "border-primary bg-muted shadow-md" : "opacity-90"
+            "flex-row items-center justify-between gap-4" +
+            (e.isNow ? " border-primary bg-muted shadow-md" : " opacity-90")
           }
         >
-          <CardHeader>
-            <CardTitle className="text-base flex items-center justify-between">
-              <span>{e.boss}</span>
-              {e.isNow && <span className="text-primary text-sm">⏱</span>}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm space-y-1">
-            <div>🕓 {e.time} МСК</div>
-            {e.isNow ? (
-              <div className="text-xs text-muted-foreground">
-                До конца: {formatMinutes(e.endsInMin ?? 0)}
-              </div>
-            ) : (
-              <div className="text-xs text-muted-foreground">
-                Через: {formatMinutes(e.startsInMin ?? 0)}
-              </div>
-            )}
-          </CardContent>
+          <div className="min-w-0 flex-1">
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <span>{e.boss}</span>
+                {e.isNow && <span className="text-primary text-sm">⏱</span>}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm space-y-1">
+              <div>🕓 {e.time} МСК</div>
+              {e.isNow ? (
+                <div className="text-xs text-muted-foreground">
+                  До конца: {formatMinutes(e.endsInMin ?? 0)}
+                </div>
+              ) : (
+                <div className="text-xs text-muted-foreground">
+                  Через: {formatMinutes(e.startsInMin ?? 0)}
+                </div>
+              )}
+            </CardContent>
+          </div>
+          {bossImages[e.boss] && (
+            <Image
+              src={bossImages[e.boss]}
+              alt={e.boss}
+              width={80}
+              height={80}
+              className="mr-6 shrink-0 rounded-lg object-cover"
+            />
+          )}
         </Card>
       ))}
     </div>
