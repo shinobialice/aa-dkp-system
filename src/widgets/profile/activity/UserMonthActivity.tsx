@@ -2,6 +2,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
 
+const formatPoints = (n: number) => Number(n.toFixed(2)).toString();
+
 const months = [
   "Январь",
   "Февраль",
@@ -53,6 +55,7 @@ export function UserMonthActivity({
     primePercent: number;
     totalPercent: number;
     dkp: number;
+    totalPointsAvailable: number;
   } | null>(null);
   const yearOptions = [];
   for (let y = now.getFullYear() - 3; y <= now.getFullYear() + 1; y++) {
@@ -132,7 +135,9 @@ export function UserMonthActivity({
             </Card>
             <Card className="flex flex-col items-center justify-center p-4">
               <div className="text-sm text-muted-foreground">Учет баллов</div>
-              <div className="text-2xl font-bold">{data.dkp.toFixed(2)}</div>
+              <div className="text-2xl font-bold">
+                {formatPoints(data.dkp)} / {formatPoints(data.totalPointsAvailable)}
+              </div>
             </Card>
           </div>
         )}

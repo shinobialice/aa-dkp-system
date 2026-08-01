@@ -104,5 +104,6 @@ export async function getUserMonthlyAttendance(
       ? (userPointsEarned / totalPointsAvailable) * 100
       : 0,
     dkp: userDkp,
+    totalPointsAvailable,
   };
 }
