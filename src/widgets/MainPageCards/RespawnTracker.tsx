@@ -7,9 +7,15 @@ import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui";
 import supabase from "@/shared/lib/supabase";
 import useCurrentUser from "@/hooks/useCurrentUser";
+import { registerBossKill } from "@/actions/registerBossKill";
 import { DateTimePopover } from "./DateTimePopover";
-
-type BossName = "Марли" | "Морф" | "Кириос";
+import {
+  BossName,
+  bosses,
+  respawnHoursByBoss,
+  respawnWindow,
+  getRespawnStart,
+} from "@/shared/config/bossRespawn";
 
 const bossImages: Partial<Record<BossName, string>> = {
   Кириос: "/images/kirios.png",
@@ -22,13 +28,6 @@ type BossState = {
   updatedAt: string | null; // ISO string, момент последней регистрации
 };
 
-const respawnWindow = 1; // hours, общий "промежуток" для всех боссов
-const respawnHoursByBoss: Record<BossName, number> = {
-  Марли: 12,
-  Морф: 12,
-  Кириос: 2,
-};
-const bosses: BossName[] = ["Марли", "Морф", "Кириос"];
 const registerCooldownSeconds = 30;
 
 const emptyStates: Record<BossName, BossState> = {
@@ -60,9 +59,7 @@ const RespawnTracker: FC = () => {
         timeLeft: null,
       };
     const killDate = new Date(lastKill);
-    const respawnStart = new Date(
-      killDate.getTime() + respawnHours * 60 * 60 * 1000,
-    );
+    const respawnStart = getRespawnStart(lastKill, respawnHours);
     const respawnEnd = new Date(
       respawnStart.getTime() + respawnWindow * 60 * 60 * 1000,
     );
@@ -168,22 +165,14 @@ const RespawnTracker: FC = () => {
     }
     if (isOnCooldown(boss)) return;
     setSaving(boss);
-    const killDate = new Date(iso);
-    const nextRespawn = new Date(
-      killDate.getTime() + respawnHoursByBoss[boss] * 60 * 60 * 1000,
+    const { registered } = await registerBossKill(
+      boss,
+      iso,
+      action,
+      user.id,
+      registerCooldownSeconds,
     );
-    const { data: registered, error } = await supabase.rpc(
-      "register_boss_kill",
-      {
-        p_boss_name: boss,
-        p_kill_time: iso,
-        p_action: action,
-        p_user_id: user.id,
-        p_next_respawn: nextRespawn.toISOString(),
-        p_cooldown_seconds: registerCooldownSeconds,
-      },
-    );
-    if (!error && registered) {
+    if (registered) {
       setBossStates((prev) => ({
         ...prev,
         [boss]: { ...prev[boss], lastKill: iso, updatedAt: new Date().toISOString() },
