@@ -1,6 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
 import { Badge } from "@/shared/ui";
 import type { SalaryEligibilitySettings } from "@/actions/salaryEligibilitySettings";
+import type { getBosses } from "@/actions/getBosses";
+import type { GuildMode } from "@/actions/guildStatusSettings";
+
+const BOSS_CATEGORY_ORDER = ["Прайм", "АГЛ"];
+const GUILD_MODE_LABEL: Record<GuildMode, string> = {
+  freeshard: "Фришка",
+  pvp: "ПВП",
+};
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return <h2 className="text-xl font-bold text-primary mt-8 mb-3">{children}</h2>;
@@ -95,10 +103,63 @@ function EligibilityCriteriaTable({
   );
 }
 
+function BossPointsTable({
+  bosses,
+  mode,
+}: {
+  bosses: Awaited<ReturnType<typeof getBosses>>;
+  mode: GuildMode;
+}) {
+  return (
+    <Card className="lg:sticky lg:top-4 h-fit">
+      <CardHeader>
+        <CardTitle className="text-base">Баллы за боссов</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4 overflow-x-auto">
+        <p className="text-xs text-muted-foreground">
+          Текущий режим гильдии:{" "}
+          <span className="font-semibold">{GUILD_MODE_LABEL[mode]}</span>
+        </p>
+        {BOSS_CATEGORY_ORDER.map((category) => {
+          const rows = bosses.filter((b) => b.category === category);
+          if (rows.length === 0) return null;
+
+          return (
+            <table key={category} className="w-full text-sm border">
+              <thead>
+                <tr className="bg-muted">
+                  <th className="p-2 border text-left">{category}</th>
+                  <th className="p-2 border text-center whitespace-nowrap">
+                    Баллы
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((b) => (
+                  <tr key={b.id}>
+                    <td className="p-2 border">{b.boss_name}</td>
+                    <td className="p-2 border text-center">
+                      {b.dkp_points}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          );
+        })}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function GuildInfoContent({
   settings,
+  bosses,
+  guildMode,
 }: {
   settings: SalaryEligibilitySettings;
+  bosses: Awaited<ReturnType<typeof getBosses>>;
+  guildMode: GuildMode;
 }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -298,7 +359,10 @@ export default function GuildInfoContent({
         </List>
       </div>
 
-      <EligibilityCriteriaTable settings={settings} />
+      <div className="space-y-6">
+        <EligibilityCriteriaTable settings={settings} />
+        <BossPointsTable bosses={bosses} mode={guildMode} />
+      </div>
     </div>
   );
 }
