@@ -22,9 +22,14 @@ import { getRaidById } from "@/actions/getRaidById";
 type Props = {
   isAdmin: boolean;
   isModerator?: boolean;
+  isSecretutka?: boolean;
 };
 
-export default function CalendarView({ isAdmin, isModerator }: Props) {
+export default function CalendarView({
+  isAdmin,
+  isModerator,
+  isSecretutka,
+}: Props) {
   const calendarRef = useRef<FullCalendar | null>(null);
   const [currentRange, setCurrentRange] = useState("...");
   const [currentView, setCurrentView] = useState("timeGridWeek");
@@ -42,7 +47,7 @@ export default function CalendarView({ isAdmin, isModerator }: Props) {
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
 
-  const canEditEvents = isAdmin || isModerator;
+  const canEditEvents = isAdmin || isModerator || isSecretutka;
 
   const handleEventClick = async (info: any) => {
     const fullEvent = await getRaidById(info.event.id);
@@ -143,7 +148,7 @@ export default function CalendarView({ isAdmin, isModerator }: Props) {
           >
             <Calendar1 className="size-4" />
           </Button>
-          {isAdmin || isModerator ? (
+          {canEditEvents ? (
             <Button
               className="cursor-pointer"
               variant="default"

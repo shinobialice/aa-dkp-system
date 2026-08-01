@@ -21,7 +21,12 @@ const updateEvent = async (
   is_double_proc: boolean = false,
   lateUserIds: number[] = [],
 ) => {
-  await ensurePrivilieges(["Администратор", "Raid Manager", "Модератор"]);
+  await ensurePrivilieges([
+    "Администратор",
+    "Raid Manager",
+    "Модератор",
+    "Секретутка",
+  ]);
 
   // Запоминаем старую дату — если рейд переносят в другой месяц, пересчитать
   // нужно оба месяца (у старого пропадает посещаемость/dkp, у нового — появляется).

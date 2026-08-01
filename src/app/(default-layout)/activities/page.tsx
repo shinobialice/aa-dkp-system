@@ -6,10 +6,15 @@ const ActivitiesPage = async () => {
   const sessionToken = (await cookies()).get("session_token")?.value ?? ""; // Ensure safe access to value
   const isAdmin = await hasTag(sessionToken, ["Администратор"]);
   const isModerator = await hasTag(sessionToken, ["Модератор"]);
+  const isSecretutka = await hasTag(sessionToken, ["Секретутка"]);
 
   return (
     <>
-      <CalendarView isAdmin={isAdmin} isModerator={isModerator} />
+      <CalendarView
+        isAdmin={isAdmin}
+        isModerator={isModerator}
+        isSecretutka={isSecretutka}
+      />
     </>
   );
 };

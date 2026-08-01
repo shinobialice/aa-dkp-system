@@ -14,6 +14,7 @@ export default function ProfilePageWrapper({
   averageGuildGS,
   activity,
   isAdmin,
+  canEditProfile,
   isOwnProfile,
 }: {
   user: any;
@@ -21,7 +22,12 @@ export default function ProfilePageWrapper({
   inventory: any[];
   tasks: any[];
   notes: any[];
-  usernameHistory: { id: number; old_username: string; new_username: string; changed_at: string }[];
+  usernameHistory: {
+    id: number;
+    old_username: string;
+    new_username: string;
+    changed_at: string;
+  }[];
   averageGuildGS: number;
   activity: {
     aglPercent: number;
@@ -30,6 +36,7 @@ export default function ProfilePageWrapper({
     dkp: number;
   };
   isAdmin: boolean;
+  canEditProfile: boolean;
   isOwnProfile: boolean;
 }) {
   const [user, setUser] = useState(initialUser);
@@ -48,7 +55,7 @@ export default function ProfilePageWrapper({
       </div>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 items-start">
         <ProfileInfoClient
-          isAdmin={isAdmin}
+          canEditProfile={canEditProfile}
           isOwnProfile={isOwnProfile}
           user={user}
           tags={tags}

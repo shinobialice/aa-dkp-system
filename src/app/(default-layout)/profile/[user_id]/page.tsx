@@ -35,12 +35,17 @@ export default async function Page(p: {
 
   const sessionToken = (await cookies()).get("session_token")?.value ?? "";
   const isAdmin = await hasTag(sessionToken, ["Администратор"]);
+  const canEditProfile = await hasTag(sessionToken, [
+    "Администратор",
+    "Секретутка",
+  ]);
   const sessionUserId = await getSessionUserId();
   const isOwnProfile = sessionUserId === userId;
 
   return (
     <ProfilePageWrapper
       isAdmin={isAdmin}
+      canEditProfile={canEditProfile}
       isOwnProfile={isOwnProfile}
       user={user}
       tags={tags}

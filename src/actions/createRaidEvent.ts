@@ -16,7 +16,12 @@ const createRaidEvent = async (
   is_double_proc: boolean = false,
   lateUserIds: number[] = [],
 ) => {
-  await ensurePrivilieges(["Администратор", "Raid Manager", "Модератор"]);
+  await ensurePrivilieges([
+    "Администратор",
+    "Raid Manager",
+    "Модератор",
+    "Секретутка",
+  ]);
 
   const { data: activeUsers, error: activeError } = await supabase
     .from("user")
@@ -85,7 +90,10 @@ const createRaidEvent = async (
 
   // Посещаемость влияет на веса зарплат за месяц рейда (см. generateSalaries)
   // — пересчитываем сразу, не дожидаясь таймера на /loot/finance.
-  await triggerFinanceRecalc(start_date.getMonth() + 1, start_date.getFullYear());
+  await triggerFinanceRecalc(
+    start_date.getMonth() + 1,
+    start_date.getFullYear(),
+  );
 
   return raid;
 };

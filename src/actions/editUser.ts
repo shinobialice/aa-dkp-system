@@ -1,5 +1,6 @@
 "use server";
 import supabase from "@/shared/lib/supabaseAdmin";
+import ensurePrivilieges from "./ensurePrivilieges";
 
 const editUser = async (
   userId: number,
@@ -11,6 +12,8 @@ const editUser = async (
   vkName: string,
   joined_at: Date | string | null,
 ) => {
+  await ensurePrivilieges(["Администратор", "Секретутка"]);
+
   const { data: existing } = await supabase
     .from("user")
     .select("username")

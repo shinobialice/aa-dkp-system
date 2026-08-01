@@ -15,6 +15,7 @@ const badgeColors: { [key: string]: string } = {
   Активен: "rgb(47, 158, 98)",
   "Получает зарплату": "rgb(23, 133, 115)",
   Администратор: "rgb(215, 100, 168)",
+  Секретутка: "rgb(79, 70, 229)",
   Сноровка: "rgb(90, 54, 165)",
   Крит: "rgb(215, 100, 168)",
   ДВ: "rgb(232, 157, 53)",
@@ -32,7 +33,7 @@ export default function ProfileHeader({
   setEditMode,
   tags,
   setUsernameHistory,
-  isAdmin,
+  canEditProfile,
   isOwnProfile,
 }: {
   user: any;
@@ -49,7 +50,7 @@ export default function ProfileHeader({
       changed_at: string;
     }[],
   ) => void;
-  isAdmin: boolean;
+  canEditProfile: boolean;
   isOwnProfile: boolean;
 }) {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(
@@ -58,9 +59,7 @@ export default function ProfileHeader({
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleAvatarChange = async (
-    e: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
@@ -111,7 +110,7 @@ export default function ProfileHeader({
             </Button>
           )}
 
-          {isAdmin && (
+          {canEditProfile && (
             <Button
               variant="ghost"
               size="icon"
