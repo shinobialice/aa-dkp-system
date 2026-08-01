@@ -104,7 +104,11 @@ export function LootRawTable({
           : false;
       }
 
-      if (item.status === "В казну" || item.status === "Продано") {
+      if (
+        item.status === "В казну" ||
+        item.status === "Продано" ||
+        item.status === "Выдано"
+      ) {
         const sold = item.sold_at ? new Date(item.sold_at) : null;
         const soldThisMonth = sold
           ? isSameMonth(sold, selectedMonth, selectedYear)
