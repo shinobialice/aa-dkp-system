@@ -7,11 +7,11 @@ import { columns } from "@/widgets/MembersTable/columns";
 import { DataTable } from "@/widgets/MembersTable/data-table";
 import { Button } from "@/shared/ui";
 
-function formatDaysAfk(inactiveSince: string | null): string {
-  if (!inactiveSince) return "неизвестно";
+function formatDaysAfk(afkSince: string | null): string {
+  if (!afkSince) return "неизвестно";
 
   const days = Math.floor(
-    (Date.now() - new Date(inactiveSince).getTime()) / (1000 * 3600 * 24),
+    (Date.now() - new Date(afkSince).getTime()) / (1000 * 3600 * 24),
   );
 
   if (days <= 0) return "меньше дня";
@@ -27,8 +27,8 @@ function formatDaysAfk(inactiveSince: string | null): string {
   return `${days} ${unit}`;
 }
 
-const inactiveSinceColumn: ColumnDef<any> = {
-  accessorKey: "inactive_since",
+const afkSinceColumn: ColumnDef<any> = {
+  accessorKey: "afk_since",
   header: ({ column }) => (
     <Button
       className="cursor-pointer"
@@ -39,7 +39,7 @@ const inactiveSinceColumn: ColumnDef<any> = {
       <ArrowUpDown className="ml-2 h-4 w-4" />
     </Button>
   ),
-  cell: ({ row }) => formatDaysAfk(row.original.inactive_since),
+  cell: ({ row }) => formatDaysAfk(row.original.afk_since),
   sortingFn: "datetime",
 };
 
@@ -49,7 +49,7 @@ const afkColumns = [
   ...columns.filter(
     (col) => !attendanceColumnKeys.includes((col as { accessorKey?: string }).accessorKey ?? ""),
   ),
-  inactiveSinceColumn,
+  afkSinceColumn,
 ];
 
 export default function AfkMembersTable({ data }: { data: any[] }) {

@@ -7,18 +7,36 @@ import { getSalaryReasons } from "@/actions/getSalaryReasons";
 const AfkPage = async () => {
   await ensurePrivilieges(["Администратор"]);
 
-  const { data: users, error } = await supabase
-    .from("user")
+  const { data: afkTags, error } = await supabase
+    .from("user_tags")
     .select(
-      "id, username, class, class_gear_score, joined_at, active, is_eligible_for_salary, inactive_since",
+      "created_at, user(id, username, class, class_gear_score, joined_at, active, is_eligible_for_salary)",
     )
-    .eq("active", false)
-    .order("inactive_since", { ascending: true, nullsFirst: true });
+    .eq("tag", "АФК")
+    .is("removed_at", null)
+    .order("created_at", { ascending: true });
 
-  if (error || !users) {
+  if (error || !afkTags) {
     console.error("Error loading АФК users:", error);
     return <div>Ошибка загрузки списка АФК-игроков</div>;
   }
+
+  type AfkUser = {
+    id: number;
+    username: string;
+    class: string | null;
+    class_gear_score: number | null;
+    joined_at: string | null;
+    active: boolean;
+    is_eligible_for_salary: boolean;
+  };
+
+  const users = afkTags
+    .filter((row) => row.user)
+    .map((row) => ({
+      ...(row.user as unknown as AfkUser),
+      afk_since: row.created_at,
+    }));
 
   const now = new Date();
   const month = now.getMonth() + 1;
