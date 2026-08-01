@@ -12,6 +12,7 @@ type BossName = "Марли" | "Морф" | "Кириос";
 type BossState = {
   lastKill: string | null; // ISO string
   packsNeeded: number | null;
+  updatedAt: string | null; // ISO string, момент последней регистрации
 };
 
 const respawnWindow = 1; // hours, общий "промежуток" для всех боссов
@@ -21,11 +22,12 @@ const respawnHoursByBoss: Record<BossName, number> = {
   Кириос: 2,
 };
 const bosses: BossName[] = ["Марли", "Морф", "Кириос"];
+const registerCooldownSeconds = 30;
 
 const emptyStates: Record<BossName, BossState> = {
-  Марли: { lastKill: null, packsNeeded: null },
-  Морф: { lastKill: null, packsNeeded: null },
-  Кириос: { lastKill: null, packsNeeded: null },
+  Марли: { lastKill: null, packsNeeded: null, updatedAt: null },
+  Морф: { lastKill: null, packsNeeded: null, updatedAt: null },
+  Кириос: { lastKill: null, packsNeeded: null, updatedAt: null },
 };
 
 function formatMoscowDateTime(date: Date): string {
@@ -90,7 +92,7 @@ const RespawnTracker: FC = () => {
       setLoading(true);
       const { data } = await supabase
         .from("boss_respawn")
-        .select("boss_name,last_kill,packs_needed")
+        .select("boss_name,last_kill,packs_needed,updated_at")
         .in("boss_name", bosses);
       if (data) {
         const loaded: Record<BossName, BossState> = { ...emptyStates };
@@ -99,10 +101,12 @@ const RespawnTracker: FC = () => {
             boss_name: BossName;
             last_kill: string | null;
             packs_needed: number | null;
+            updated_at: string | null;
           }) => {
             loaded[row.boss_name] = {
               lastKill: row.last_kill,
               packsNeeded: row.packs_needed,
+              updatedAt: row.updated_at,
             };
           },
         );
@@ -124,6 +128,7 @@ const RespawnTracker: FC = () => {
             boss_name: BossName;
             last_kill: string | null;
             packs_needed: number | null;
+            updated_at: string | null;
           };
           if (!row?.boss_name) return;
           setBossStates((prev) => ({
@@ -131,6 +136,7 @@ const RespawnTracker: FC = () => {
             [row.boss_name]: {
               lastKill: row.last_kill,
               packsNeeded: row.packs_needed,
+              updatedAt: row.updated_at,
             },
           }));
         },
@@ -153,36 +159,44 @@ const RespawnTracker: FC = () => {
       alert("Вы должны быть авторизованы для изменения времени!");
       return;
     }
+    if (isOnCooldown(boss)) return;
     setSaving(boss);
-    await supabase.from("boss_respawn").upsert(
-      {
-        boss_name: boss,
-        last_kill: iso,
-        updated_by: user.id,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "boss_name" },
-    );
-    const prevKill = bossStates[boss].lastKill;
     const killDate = new Date(iso);
     const nextRespawn = new Date(
       killDate.getTime() + respawnHoursByBoss[boss] * 60 * 60 * 1000,
     );
-    await supabase.from("boss_respawn_history").insert({
-      boss_name: boss,
-      action,
-      kill_time: iso,
-      prev_kill_time: prevKill,
-      next_respawn: nextRespawn.toISOString(),
-      user_id: user.id,
-      created_at: new Date().toISOString(),
-      packs_needed: bossStates[boss].packsNeeded,
-    });
-    setBossStates((prev) => ({
-      ...prev,
-      [boss]: { ...prev[boss], lastKill: iso },
-    }));
+    const { data: registered, error } = await supabase.rpc(
+      "register_boss_kill",
+      {
+        p_boss_name: boss,
+        p_kill_time: iso,
+        p_action: action,
+        p_user_id: user.id,
+        p_next_respawn: nextRespawn.toISOString(),
+        p_cooldown_seconds: registerCooldownSeconds,
+      },
+    );
+    if (!error && registered) {
+      setBossStates((prev) => ({
+        ...prev,
+        [boss]: { ...prev[boss], lastKill: iso, updatedAt: new Date().toISOString() },
+      }));
+    }
     setSaving(null);
+  }
+
+  function isOnCooldown(boss: BossName): boolean {
+    const updatedAt = bossStates[boss].updatedAt;
+    if (!updatedAt) return false;
+    const elapsedMs = Date.now() - new Date(updatedAt).getTime();
+    return elapsedMs < registerCooldownSeconds * 1000;
+  }
+
+  function cooldownSecondsLeft(boss: BossName): number {
+    const updatedAt = bossStates[boss].updatedAt;
+    if (!updatedAt) return 0;
+    const elapsedMs = Date.now() - new Date(updatedAt).getTime();
+    return Math.max(0, Math.ceil((registerCooldownSeconds * 1000 - elapsedMs) / 1000));
   }
 
   async function handlePacksChange(boss: BossName, value: number | null) {
@@ -279,12 +293,16 @@ const RespawnTracker: FC = () => {
                     <Button
                       className="w-[120px] cursor-pointer text-xs px-1"
                       onClick={() => handleKilledNow(boss)}
-                      disabled={saving === boss || loading}
+                      disabled={saving === boss || loading || isOnCooldown(boss)}
                     >
                       {saving === boss && (
                         <Loader2 className="mr-1 size-3 animate-spin" />
                       )}
-                      {boss === "Кириос" ? "Реснулся" : "Был убит сейчас"}
+                      {isOnCooldown(boss)
+                        ? `КД ${cooldownSecondsLeft(boss)}с`
+                        : boss === "Кириос"
+                          ? "Реснулся"
+                          : "Был убит сейчас"}
                     </Button>
                     <DateTimePopover
                       value={popoverDate[boss]}
@@ -296,7 +314,7 @@ const RespawnTracker: FC = () => {
                       <Button
                         className="w-[120px] cursor-pointer text-xs px-1"
                         variant="outline"
-                        disabled={saving === boss || loading}
+                        disabled={saving === boss || loading || isOnCooldown(boss)}
                         onClick={() => {}}
                       >
                         {saving === boss && (
