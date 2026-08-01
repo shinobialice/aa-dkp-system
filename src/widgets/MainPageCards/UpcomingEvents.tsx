@@ -89,7 +89,7 @@ const schedule: Record<string, [string, string][]> = {
     ["18:00", "Великий луг"],
     ["19:20", "АГЛ"],
     ["19:30", "Кракен"],
-    ["21:00", "Калидис"],
+    ["20:30", "Калидис"],
     ["22:00", "Кошка"],
     ["23:20", "АГЛ"],
     ["03:20", "АГЛ"],
@@ -183,7 +183,7 @@ export default function UpcomingEvents() {
             ? Math.ceil((end.getTime() - msk.getTime()) / 60000)
             : undefined;
 
-          if (startsInMin >= -60) {
+          if (msk < end) {
             result.push({
               boss,
               time,
