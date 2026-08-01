@@ -96,6 +96,11 @@ const schedule: Record<string, [string, string][]> = {
   ],
 };
 
+const defaultDurationMinutes = 60;
+const eventDurationMinutes: Record<string, number> = {
+  АГЛ: 30,
+};
+
 const dayNames = [
   "Воскресенье",
   "Понедельник",
@@ -153,7 +158,8 @@ export default function UpcomingEvents() {
 
         for (const [time, boss] of dayEvents) {
           const start = getDateWithTime(msk, time, offset);
-          const end = new Date(start.getTime() + 60 * 60 * 1000);
+          const durationMin = eventDurationMinutes[boss] ?? defaultDurationMinutes;
+          const end = new Date(start.getTime() + durationMin * 60 * 1000);
 
           const isNow = msk >= start && msk < end;
           const startsInMin = Math.floor(
@@ -173,13 +179,10 @@ export default function UpcomingEvents() {
               endsInMin,
             });
           }
-
-          if (result.length >= 6) break;
         }
-
-        if (result.length >= 6) break;
       }
 
+      result.sort((a, b) => a.date.getTime() - b.date.getTime());
       setEvents(result.slice(0, 4));
     };
 
