@@ -24,7 +24,7 @@ import {
   UserX,
   Newspaper,
 } from "lucide-react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { useTheme } from "next-themes";
 import {
@@ -53,6 +53,7 @@ type Props = { isAdmin: boolean };
 
 const AppSidebar: FC<Props> = ({ isAdmin }) => {
   const { setTheme } = useTheme();
+  const router = useRouter();
 
   const menuItems = [
     { title: "Основная информация", url: "/news", icon: Info },
@@ -86,9 +87,10 @@ const AppSidebar: FC<Props> = ({ isAdmin }) => {
   return (
     <Sidebar>
       <SidebarContent>
-        <Link
-          href="/"
-          className="inline-flex items-center gap-3 mb-6 border-b border-border pb-4 pt-4 pl-8"
+        <button
+          type="button"
+          onClick={() => router.push("/")}
+          className="inline-flex items-center gap-3 mb-6 border-b border-border pb-4 pt-4 pl-8 cursor-pointer text-left"
         >
           <Image
             src="/images/logo.png"
@@ -98,7 +100,7 @@ const AppSidebar: FC<Props> = ({ isAdmin }) => {
             className="mb-0"
           />
           <h2 className="text-2xl font-bold text-primary">No Fear</h2>
-        </Link>
+        </button>
 
         <SidebarGroup>
           <SidebarGroupLabel>Меню</SidebarGroupLabel>
@@ -123,11 +125,11 @@ const AppSidebar: FC<Props> = ({ isAdmin }) => {
                           <SidebarMenu>
                             {item.items.map((subItem) => (
                               <SidebarMenuItem key={subItem.title}>
-                                <SidebarMenuButton asChild>
-                                  <Link href={subItem.url}>
-                                    <subItem.icon className="h-4 w-4" />
-                                    <span>{subItem.title}</span>
-                                  </Link>
+                                <SidebarMenuButton
+                                  onClick={() => router.push(subItem.url)}
+                                >
+                                  <subItem.icon className="h-4 w-4" />
+                                  <span>{subItem.title}</span>
                                 </SidebarMenuButton>
                               </SidebarMenuItem>
                             ))}
@@ -139,11 +141,9 @@ const AppSidebar: FC<Props> = ({ isAdmin }) => {
                 }
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <Link href={item.url}>
-                        <item.icon className="h-5 w-5" />
-                        <span>{item.title}</span>
-                      </Link>
+                    <SidebarMenuButton onClick={() => router.push(item.url)}>
+                      <item.icon className="h-5 w-5" />
+                      <span>{item.title}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Users, Crown, ShieldCheck, Sparkles } from "lucide-react";
 import {
   DropdownMenu,
@@ -31,6 +31,7 @@ const roleIcons: Record<string, React.ReactNode> = {
 };
 
 export function OnlineUsersWidget() {
+  const router = useRouter();
   const [users, setUsers] = useState<OnlineUser[]>([]);
 
   useEffect(() => {
@@ -63,12 +64,14 @@ export function OnlineUsersWidget() {
             <DropdownMenuItem disabled>Никого нет</DropdownMenuItem>
           )}
           {users.map((u) => (
-            <DropdownMenuItem key={u.id} className="cursor-pointer" asChild>
-              <Link href={`/profile/${u.id}`}>
-                <span className="h-2 w-2 shrink-0 rounded-full bg-green-500" />
-                <span className="truncate">{u.username}</span>
-                {u.role && <span className="ml-auto">{roleIcons[u.role]}</span>}
-              </Link>
+            <DropdownMenuItem
+              key={u.id}
+              className="cursor-pointer"
+              onSelect={() => router.push(`/profile/${u.id}`)}
+            >
+              <span className="h-2 w-2 shrink-0 rounded-full bg-green-500" />
+              <span className="truncate">{u.username}</span>
+              {u.role && <span className="ml-auto">{roleIcons[u.role]}</span>}
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>

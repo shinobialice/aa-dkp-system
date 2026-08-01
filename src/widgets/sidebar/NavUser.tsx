@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronsUpDown, BadgeCheck, LogOut } from "lucide-react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui";
 import {
   DropdownMenu,
@@ -23,6 +23,7 @@ import { logout } from "@/actions/logout";
 export function NavUser() {
   const { isMobile } = useSidebar();
   const user = useCurrentUser();
+  const router = useRouter();
 
   if (!user) return null;
 
@@ -54,11 +55,12 @@ export function NavUser() {
             sideOffset={4}
           >
             <DropdownMenuGroup>
-              <DropdownMenuItem className="cursor-pointer" asChild>
-                <Link href={`/profile/${user.id}`}>
-                  <BadgeCheck className="mr-2 h-4 w-4" />
-                  Мой профиль
-                </Link>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onSelect={() => router.push(`/profile/${user.id}`)}
+              >
+                <BadgeCheck className="mr-2 h-4 w-4" />
+                Мой профиль
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
