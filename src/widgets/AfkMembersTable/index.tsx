@@ -6,6 +6,7 @@ import { ArrowUpDown } from "lucide-react";
 import { columns } from "@/widgets/MembersTable/columns";
 import { DataTable } from "@/widgets/MembersTable/data-table";
 import { Button } from "@/shared/ui";
+import { Badge } from "@/shared/ui";
 
 function formatDaysAfk(afkSince: string | null): string {
   if (!afkSince) return "неизвестно";
@@ -43,12 +44,38 @@ const afkSinceColumn: ColumnDef<any> = {
   sortingFn: "datetime",
 };
 
+const reasonColumn: ColumnDef<any> = {
+  id: "reason",
+  header: "Причина",
+  cell: ({ row }) => (
+    <div className="flex flex-wrap justify-center gap-1">
+      {row.original.isInactive && (
+        <Badge
+          className="text-background"
+          style={{ backgroundColor: "rgb(180, 60, 60)" }}
+        >
+          Неактивен
+        </Badge>
+      )}
+      {row.original.isAfkTagged && (
+        <Badge
+          className="text-background"
+          style={{ backgroundColor: "rgb(120, 120, 120)" }}
+        >
+          АФК
+        </Badge>
+      )}
+    </div>
+  ),
+};
+
 const attendanceColumnKeys = ["primePercent", "aglPercent", "totalPercent"];
 
 const afkColumns = [
   ...columns.filter(
     (col) => !attendanceColumnKeys.includes((col as { accessorKey?: string }).accessorKey ?? ""),
   ),
+  reasonColumn,
   afkSinceColumn,
 ];
 
