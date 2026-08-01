@@ -27,6 +27,7 @@ type Props = {
 export default function CalendarView({ isAdmin, isModerator }: Props) {
   const calendarRef = useRef<FullCalendar | null>(null);
   const [currentRange, setCurrentRange] = useState("...");
+  const [currentView, setCurrentView] = useState("timeGridWeek");
   const [events, setEvents] = useState<
     {
       id: string;
@@ -71,6 +72,7 @@ export default function CalendarView({ isAdmin, isModerator }: Props) {
   }, [infoDialogOpen, selectedEvent?.id]);
 
   const handleDateSet = (info: any) => {
+    setCurrentView(info.view.type);
     if (info.view.type === "dayGridMonth") {
       const label = new Intl.DateTimeFormat("ru-RU", {
         month: "long",
@@ -162,25 +164,27 @@ export default function CalendarView({ isAdmin, isModerator }: Props) {
               {currentRange}
             </span>
             <div className="flex items-end gap-2 mr-6">
-              <Select
-                defaultValue="weekGrid"
-                onValueChange={(value) => {
-                  if (value === "weekGrid") {
-                    handleNav("week");
-                  }
-                  if (value === "monthGrid") {
-                    handleNav("monthGrid");
-                  }
-                }}
-              >
-                <SelectTrigger className="cursor-pointer">
-                  <SelectValue placeholder="Неделя" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="weekGrid">Неделя</SelectItem>
-                  <SelectItem value="monthGrid">Месяц</SelectItem>
-                </SelectContent>
-              </Select>
+              {currentView !== "listWeek" ? (
+                <Select
+                  defaultValue="weekGrid"
+                  onValueChange={(value) => {
+                    if (value === "weekGrid") {
+                      handleNav("week");
+                    }
+                    if (value === "monthGrid") {
+                      handleNav("monthGrid");
+                    }
+                  }}
+                >
+                  <SelectTrigger className="cursor-pointer">
+                    <SelectValue placeholder="Неделя" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="weekGrid">Неделя</SelectItem>
+                    <SelectItem value="monthGrid">Месяц</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : null}
               <Button
                 className="cursor-pointer"
                 onClick={() => handleNav("today")}
