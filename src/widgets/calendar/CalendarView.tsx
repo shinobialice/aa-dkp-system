@@ -71,6 +71,14 @@ export default function CalendarView({ isAdmin, isModerator }: Props) {
   }, [infoDialogOpen, selectedEvent?.id]);
 
   const handleDateSet = (info: any) => {
+    if (info.view.type === "dayGridMonth") {
+      const label = new Intl.DateTimeFormat("ru-RU", {
+        month: "long",
+        year: "numeric",
+      }).format(info.view.currentStart);
+      setCurrentRange(label.charAt(0).toUpperCase() + label.slice(1));
+      return;
+    }
     const start = new Intl.DateTimeFormat("ru-RU", {
       day: "2-digit",
       month: "long",
@@ -205,6 +213,7 @@ export default function CalendarView({ isAdmin, isModerator }: Props) {
             headerToolbar={false}
             height="100%"
             locale="ru-RU"
+            firstDay={1}
             eventDisplay="block"
             nowIndicator
             slotDuration="00:30:00"
@@ -219,6 +228,11 @@ export default function CalendarView({ isAdmin, isModerator }: Props) {
               day: "2-digit",
               month: "2-digit",
               omitCommas: true,
+            }}
+            views={{
+              dayGridMonth: {
+                dayHeaderFormat: { weekday: "short" },
+              },
             }}
             dayHeaderClassNames="bg-primaryVariant text-onPrimary"
             dayCellClassNames="bg-surface"
