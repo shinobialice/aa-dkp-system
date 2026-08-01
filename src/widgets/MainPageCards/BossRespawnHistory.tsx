@@ -26,7 +26,7 @@ interface HistoryRow {
   packs_needed: number | null;
 }
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 6;
 
 export default function BossRespawnHistory() {
   const [rows, setRows] = useState<HistoryRow[]>([]);
