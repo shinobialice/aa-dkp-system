@@ -84,14 +84,14 @@ export default function DailyAttendanceChart({
 
   return (
     <Card>
-      <CardHeader className="flex items-center justify-between">
-        <CardTitle>Общая посещаемость по дням</CardTitle>
+      <CardHeader className="flex flex-col items-start gap-2 xl:flex-row xl:items-center xl:justify-between">
+        <CardTitle className="text-base">Общая посещаемость по дням</CardTitle>
         <div className="flex gap-2">
           <Select
             value={String(year)}
             onValueChange={(val) => setYear(Number(val))}
           >
-            <SelectTrigger className="w-[90px]">
+            <SelectTrigger className="w-[85px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -106,7 +106,7 @@ export default function DailyAttendanceChart({
             value={String(month)}
             onValueChange={(val) => setMonth(Number(val))}
           >
-            <SelectTrigger className="w-[120px]">
+            <SelectTrigger className="w-[110px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -119,9 +119,9 @@ export default function DailyAttendanceChart({
           </Select>
         </div>
       </CardHeader>
-      <CardContent>
-        <ChartContainer className="w-full h-[250px]" config={chartConfig}>
-          <ResponsiveContainer width="100%" height={250}>
+      <CardContent className="pt-4">
+        <ChartContainer className="w-full h-[200px]" config={chartConfig}>
+          <ResponsiveContainer width="100%" height={200}>
             <BarChart accessibilityLayer data={chartData}>
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
               <XAxis
