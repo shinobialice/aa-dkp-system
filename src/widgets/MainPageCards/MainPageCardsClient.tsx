@@ -99,14 +99,9 @@ const MainPageCardsClient: FC = () => {
           <StatCard key={item.title} title={item.title} value={item.value} />
         ))}
       </div>
-      <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 items-start text-2xl">
-        {infoItems.map((item) => (
-          <InfoCard
-            key={item.title}
-            title={item.title}
-            content={item.content}
-          />
-        ))}
+      <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-[1080px_400px] items-start text-2xl">
+        <InfoCard title={infoItems[0].title} content={infoItems[0].content} />
+        <InfoCard title={infoItems[1].title} content={infoItems[1].content} />
       </div>
     </div>
   );
