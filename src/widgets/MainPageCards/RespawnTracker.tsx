@@ -284,7 +284,7 @@ const RespawnTracker: FC = () => {
                       {saving === boss && (
                         <Loader2 className="mr-1 size-3 animate-spin" />
                       )}
-                      Был убит сейчас
+                      {boss === "Кириос" ? "Реснулся" : "Был убит сейчас"}
                     </Button>
                     <DateTimePopover
                       value={popoverDate[boss]}
