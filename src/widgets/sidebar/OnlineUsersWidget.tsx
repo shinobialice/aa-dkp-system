@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Users } from "lucide-react";
+import { Users, Crown, ShieldCheck, Sparkles } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +16,19 @@ import { getOnlineUsers } from "@/actions/getOnlineUsers";
 
 const POLL_INTERVAL_MS = 30 * 1000;
 
-type OnlineUser = { id: number; username: string };
+type OnlineUser = { id: number; username: string; role: string | null };
+
+const roleIcons: Record<string, React.ReactNode> = {
+  Администратор: (
+    <Crown className="size-3.5 shrink-0" color="rgb(215, 100, 168)" />
+  ),
+  Модератор: (
+    <ShieldCheck className="size-3.5 shrink-0" color="rgb(58, 76, 92)" />
+  ),
+  Секретутка: (
+    <Sparkles className="size-3.5 shrink-0" color="rgb(79, 70, 229)" />
+  ),
+};
 
 export function OnlineUsersWidget() {
   const [users, setUsers] = useState<OnlineUser[]>([]);
@@ -54,7 +66,8 @@ export function OnlineUsersWidget() {
             <DropdownMenuItem key={u.id} className="cursor-pointer" asChild>
               <Link href={`/profile/${u.id}`}>
                 <span className="h-2 w-2 shrink-0 rounded-full bg-green-500" />
-                {u.username}
+                <span className="truncate">{u.username}</span>
+                {u.role && <span className="ml-auto">{roleIcons[u.role]}</span>}
               </Link>
             </DropdownMenuItem>
           ))}
