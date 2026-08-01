@@ -122,8 +122,8 @@ export default function ProfileHeader({
           )}
         </div>
 
-        <div className="relative mb-4 h-20 w-20">
-          <Avatar className="h-20 w-20">
+        <div className="relative mb-4 h-32 w-32">
+          <Avatar className="h-32 w-32">
             <AvatarImage
               src={
                 avatarUrl ??
@@ -131,7 +131,9 @@ export default function ProfileHeader({
               }
               alt={user.username}
             />
-            <AvatarFallback>{user.username.slice(0, 2)}</AvatarFallback>
+            <AvatarFallback className="text-2xl">
+              {user.username.slice(0, 2)}
+            </AvatarFallback>
           </Avatar>
 
           {isOwnProfile && (
