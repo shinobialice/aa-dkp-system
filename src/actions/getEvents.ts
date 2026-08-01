@@ -75,6 +75,7 @@ export const getRaids = async () => {
       if (raid.type === "АГЛ") color = "rgb(47, 158, 98)";
       if (title.includes("Кошка")) color = "rgb(215, 100, 168)";
       if (title.includes("Морф")) color = "rgb(40, 111, 180)";
+      if (title.includes("Марли Прок")) color = "rgb(180, 108, 51)";
 
       return {
         id: raid.id.toString(),
