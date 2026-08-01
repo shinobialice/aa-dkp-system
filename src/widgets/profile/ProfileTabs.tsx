@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import getUserInventory from "@/actions/getUserInventory";
 import InventoryTabsClient from "./inventory/InventoryTabsClient";
 import UserNotes from "./notes/UserNotes";
 import TasksTable from "./tasks/TasksTable";
@@ -43,6 +44,11 @@ export default function ProfileTabs({
     setTasks(initialTasks);
   }, [initialTasks]);
 
+  const handleInventoryChange = async () => {
+    const updated = await getUserInventory(user.id);
+    setInventory(updated);
+  };
+
   return (
     <Tabs defaultValue="inventory">
       <TabsList className="mb-4">
@@ -64,9 +70,7 @@ export default function ProfileTabs({
           isAdmin={isAdmin}
           inventory={inventory}
           userId={user.id}
-          onChange={() => {
-            // Handle inventory updates passed from parent
-          }}
+          onChange={handleInventoryChange}
         />
       </TabsContent>
 
