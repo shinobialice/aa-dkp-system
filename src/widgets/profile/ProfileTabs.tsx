@@ -5,6 +5,7 @@ import InventoryTabsClient from "./inventory/InventoryTabsClient";
 import UserNotes from "./notes/UserNotes";
 import TasksTable from "./tasks/TasksTable";
 import UsernameHistoryTab from "./usernameHistory/UsernameHistoryTab";
+import UserMonthlyRaidsTab from "./raids/UserMonthlyRaidsTab";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/ui";
 
 export default function ProfileTabs({
@@ -61,6 +62,9 @@ export default function ProfileTabs({
         <TabsTrigger className="cursor-pointer" value="notes">
           Заметки
         </TabsTrigger>
+        <TabsTrigger className="cursor-pointer" value="raids">
+          Рейды
+        </TabsTrigger>
         <TabsTrigger className="cursor-pointer" value="username-history">
           История ников
         </TabsTrigger>
@@ -94,6 +98,10 @@ export default function ProfileTabs({
           setUser={setUser}
           averageGuildGS={averageGuildGS}
         />
+      </TabsContent>
+
+      <TabsContent value="raids">
+        <UserMonthlyRaidsTab userId={user.id} />
       </TabsContent>
 
       <TabsContent value="username-history">
