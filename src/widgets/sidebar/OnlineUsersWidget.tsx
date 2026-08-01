@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Users } from "lucide-react";
 import {
   DropdownMenu,
@@ -51,10 +52,10 @@ export function OnlineUsersWidget() {
           )}
           {users.map((u) => (
             <DropdownMenuItem key={u.id} className="cursor-pointer" asChild>
-              <a href={`/profile/${u.id}`}>
+              <Link href={`/profile/${u.id}`}>
                 <span className="h-2 w-2 shrink-0 rounded-full bg-green-500" />
                 {u.username}
-              </a>
+              </Link>
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
