@@ -22,6 +22,7 @@ import {
   HandCoins,
   Swords,
   UserX,
+  Newspaper,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -55,6 +56,7 @@ const AppSidebar: FC<Props> = ({ isAdmin }) => {
 
   const menuItems = [
     { title: "Основная информация", url: "/news", icon: Info },
+    { title: "Новости", url: "/game-news", icon: Newspaper },
     { title: "Участники", url: "/members", icon: Users },
     { title: "Активности", url: "/activities", icon: CalendarDays },
     { title: "Расписание", url: "/schedule", icon: Calendar },
