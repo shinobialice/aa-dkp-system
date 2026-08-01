@@ -3,6 +3,7 @@ import supabase from "@/shared/lib/supabaseAdmin";
 import { hasTag } from "@/actions/hasTag";
 import LootGiveaway from "@/widgets/Loot/LootGiveaway";
 import { lootColumns } from "@/widgets/Loot/LootGiveaway/lootColumns";
+import { gliderTypes } from "@/widgets/Loot/LootGiveaway/gliderTypes";
 import { cookies } from "next/headers";
 
 export default async function Page() {
@@ -29,6 +30,14 @@ export default async function Page() {
         name,
         date: record?.date?.split("T")[0] || "",
         comment: record?.comment || "",
+        status: record?.status || "",
+      };
+    }),
+    gliders: gliderTypes.map((type) => {
+      const record = user.givenawayloot?.find((i) => i.name === type);
+      return {
+        type,
+        date: record?.date?.split("T")[0] || "",
         status: record?.status || "",
       };
     }),

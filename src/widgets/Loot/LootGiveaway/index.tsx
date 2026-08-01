@@ -11,10 +11,19 @@ import {
 } from "@tanstack/react-table";
 import type { Row } from "@tanstack/react-table";
 import { format } from "date-fns";
+import { X } from "lucide-react";
 import { lootColumns } from "./lootColumns";
+import { gliderTypes } from "./gliderTypes";
 import { Button } from "@/shared/ui";
 import { Input } from "@/shared/ui";
 import { Switch } from "@/shared/ui";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui";
 import {
   Table,
   TableHeader,
@@ -25,10 +34,18 @@ import {
 } from "@/shared/ui";
 import { saveGivenAwayLoot } from "@/actions/saveGivenAwayLoot";
 
+const NONE_STATUS = "__none__";
+
 type LootItem = {
   name: string;
   date: string;
   comment?: string;
+  status: string;
+};
+
+type GliderItem = {
+  type: string;
+  date: string;
   status: string;
 };
 
@@ -37,6 +54,7 @@ type Player = {
   username: string;
   active: boolean;
   loot: LootItem[];
+  gliders: GliderItem[];
 };
 
 type LootGiveawayProps = {
@@ -84,6 +102,134 @@ export default function LootGiveaway({
         });
       });
     }
+  };
+
+  const updateGlider = (
+    playerIndex: number,
+    type: string,
+    changes: Partial<GliderItem>,
+  ) => {
+    const updated = [...allPlayers];
+    const glider = updated[playerIndex].gliders.find((g) => g.type === type);
+    if (!glider) return;
+    Object.assign(glider, changes);
+    setAllPlayers(updated);
+
+    const { date, status } = glider;
+    const isValidDate = date && !isNaN(Date.parse(date));
+    if (status && (status === "Выдано" ? isValidDate : true)) {
+      startTransition(() => {
+        saveGivenAwayLoot(updated[playerIndex].id, {
+          name: type,
+          date: isValidDate ? date : new Date().toISOString().split("T")[0],
+          status,
+        });
+      });
+    }
+  };
+
+  const removeGlider = (playerIndex: number, type: string) => {
+    const updated = [...allPlayers];
+    const glider = updated[playerIndex].gliders.find((g) => g.type === type);
+    if (!glider) return;
+    glider.date = "";
+    glider.status = "";
+    setAllPlayers(updated);
+
+    startTransition(() => {
+      saveGivenAwayLoot(updated[playerIndex].id, {
+        name: type,
+        date: new Date().toISOString().split("T")[0],
+        status: "",
+      });
+    });
+  };
+
+  const renderGliderCell = (
+    gliders: GliderItem[],
+    isEditMode: boolean,
+    playerIndex: number,
+  ) => {
+    const given = gliders.filter((g) => g.status);
+
+    if (!isEditMode) {
+      if (given.length === 0) return "–";
+      return given
+        .map((g) => {
+          const dateValid = g.date && !isNaN(Date.parse(g.date));
+          if (g.status === "Выдано") {
+            return dateValid
+              ? `${g.type} (${format(new Date(g.date), "dd.MM.yyyy")})`
+              : g.type;
+          }
+          return `${g.type}: В наличии`;
+        })
+        .join(", ");
+    }
+
+    const available = gliders.filter((g) => !g.status);
+
+    return (
+      <div className="flex flex-col gap-1 min-w-48">
+        {given.map((g) => (
+          <div key={g.type} className="flex items-center gap-1">
+            <span className="text-xs flex-1">{g.type}</span>
+            <Select
+              value={g.status}
+              onValueChange={(value) =>
+                updateGlider(playerIndex, g.type, { status: value })
+              }
+            >
+              <SelectTrigger size="sm" className="h-7 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Выдано">Выдано</SelectItem>
+                <SelectItem value="В наличии">В наличии</SelectItem>
+              </SelectContent>
+            </Select>
+            {g.status === "Выдано" && (
+              <input
+                type="date"
+                className="text-xs border rounded px-1 py-0.5"
+                value={g.date}
+                onChange={(e) =>
+                  updateGlider(playerIndex, g.type, { date: e.target.value })
+                }
+              />
+            )}
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              className="size-6 cursor-pointer text-muted-foreground"
+              onClick={() => removeGlider(playerIndex, g.type)}
+            >
+              <X />
+            </Button>
+          </div>
+        ))}
+        {available.length > 0 && (
+          <Select
+            value=""
+            onValueChange={(value) =>
+              updateGlider(playerIndex, value, { status: "Выдано" })
+            }
+          >
+            <SelectTrigger size="sm" className="h-7 w-full text-xs">
+              <SelectValue placeholder="+ добавить глайдер" />
+            </SelectTrigger>
+            <SelectContent>
+              {available.map((g) => (
+                <SelectItem key={g.type} value={g.type}>
+                  {g.type}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+      </div>
+    );
   };
 
   const renderLootCell = (
@@ -147,17 +293,23 @@ export default function LootGiveaway({
 
     return (
       <div className="flex flex-col gap-1">
-        <select
-          className="text-xs border rounded px-2 py-1"
-          value={loot.status || ""}
-          onChange={(e) =>
-            updateLoot(playerIndex, lootIndex, { status: e.target.value })
+        <Select
+          value={loot.status || NONE_STATUS}
+          onValueChange={(value) =>
+            updateLoot(playerIndex, lootIndex, {
+              status: value === NONE_STATUS ? "" : value,
+            })
           }
         >
-          <option value="">–</option>
-          <option value="Выдано">Выдано</option>
-          <option value="В наличии">В наличии</option>
-        </select>
+          <SelectTrigger size="sm" className="h-7 text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={NONE_STATUS}>–</SelectItem>
+            <SelectItem value="Выдано">Выдано</SelectItem>
+            <SelectItem value="В наличии">В наличии</SelectItem>
+          </SelectContent>
+        </Select>
 
         {loot.status === "Выдано" && (
           <input
@@ -173,6 +325,32 @@ export default function LootGiveaway({
     );
   };
 
+  const lootTableColumns: ColumnDef<Player>[] = lootColumns.map(
+    (col, lootIndex) => ({
+      id: col,
+      header: col,
+      cell: ({ row }: { row: Row<Player> }) => {
+        const playerIndex = allPlayers.findIndex(
+          (p) => p.id === row.original.id,
+        );
+        const loot = row.original.loot[lootIndex];
+        return renderLootCell(loot, editMode, playerIndex, lootIndex);
+      },
+    }),
+  );
+
+  const gliderColumn: ColumnDef<Player> = {
+    id: "Глайдер",
+    header: "Глайдер",
+    cell: ({ row }) => {
+      const playerIndex = allPlayers.findIndex((p) => p.id === row.original.id);
+      return renderGliderCell(row.original.gliders, editMode, playerIndex);
+    },
+  };
+
+  const andhakarIndex = lootColumns.indexOf("Анд'хакар, Чернильная тьма");
+  lootTableColumns.splice(andhakarIndex + 1, 0, gliderColumn);
+
   const tableColumns: ColumnDef<Player>[] = [
     {
       accessorKey: "username",
@@ -184,17 +362,7 @@ export default function LootGiveaway({
       header: "Активен",
       cell: ({ row }) => <Switch checked={row.getValue("active")} disabled />,
     },
-    ...lootColumns.map((col, lootIndex) => ({
-      id: col,
-      header: col,
-      cell: ({ row }: { row: Row<Player> }) => {
-        const playerIndex = allPlayers.findIndex(
-          (p) => p.id === row.original.id,
-        );
-        const loot = row.original.loot[lootIndex];
-        return renderLootCell(loot, editMode, playerIndex, lootIndex);
-      },
-    })),
+    ...lootTableColumns,
   ];
 
   const table = useReactTable({
