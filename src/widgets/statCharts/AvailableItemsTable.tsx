@@ -22,9 +22,8 @@ const ITEM_ICONS: Record<string, string> = {
   "Баф фигура": inventoryIcons["Бафалка"],
   "Колл. глайдер": inventoryIcons["Коллеционный глайдер"],
   "Колл. глайдер т2": inventoryIcons["Коллеционный глайдер т2"],
-  "Колл. ездовой пет т2": inventoryIcons["Коллекционный фамильяр т2"],
   ККЛ: inventoryIcons["Крылья кровавого легиона"],
-  "Драк. глайдер": inventoryIcons["Дракон"],
+  "Драк. глайдер": inventoryIcons["Глайдер дракон"],
   "Глайдер Авиары": inventoryIcons["Авиара"],
   "Колл. пет": inventoryIcons["Коллекционный фамильяр"],
   Дракон: inventoryIcons["Дракон"],
@@ -36,7 +35,6 @@ const ITEM_ICONS: Record<string, string> = {
 const T2_FRAME_URL = "https://archeagecodex.com/images/icon_grade11.png";
 const T2_FRAME_LABELS = new Set([
   "Колл. глайдер т2",
-  "Колл. ездовой пет т2",
   "Коллекционный фамильяр",
 ]);
 
