@@ -9,7 +9,7 @@ const editUser = async (
   secondaryClassName: string | null,
   secondaryClassGearScore: number | null,
   vkName: string,
-  joined_at: Date | string,
+  joined_at: Date | string | null,
 ) => {
   const { data: existing } = await supabase
     .from("user")
@@ -26,7 +26,7 @@ const editUser = async (
       secondary_class: secondaryClassName,
       secondary_class_gear_score: secondaryClassGearScore,
       vk_name: vkName,
-      joined_at: new Date(joined_at).toISOString(),
+      joined_at: joined_at ? new Date(joined_at).toISOString() : null,
     })
     .eq("id", userId)
     .select()
