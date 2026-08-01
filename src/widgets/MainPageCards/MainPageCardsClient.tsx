@@ -6,7 +6,7 @@ import { Loader, Swords, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
 import getStats from "@/actions/getStats";
 import Image from "next/image";
-import { classIcons } from "@/widgets/MembersTable/classStyles";
+import { classColors, classIcons } from "@/widgets/MembersTable/classStyles";
 import MainPageClock from "./MainPageClock";
 import UpcomingEvents from "./UpcomingEvents";
 import RespawnTracker from "./RespawnTracker";
@@ -23,19 +23,36 @@ const statIcons: Record<string, React.ReactNode> = {
   Танцоры: classIcons["Танцор"],
 };
 
-const StatCard: FC<{ title: string; value: number }> = ({ title, value }) => (
-  <Card>
-    <CardHeader>
-      <CardTitle className="flex items-center gap-2">
-        {statIcons[title]}
-        {title}
-      </CardTitle>
-    </CardHeader>
-    <CardContent>
-      <p>{value}</p>
-    </CardContent>
-  </Card>
-);
+const statColors: Record<string, string> = {
+  "Общее": "#6366f1",
+  ДД: "#f97316",
+  Хилы: classColors["Хил"],
+  Тактики: classColors["Тактик"],
+  Барды: classColors["Бард"],
+  Танцоры: classColors["Танцор"],
+};
+
+const StatCard: FC<{ title: string; value: number }> = ({ title, value }) => {
+  const color = statColors[title];
+  return (
+    <Card
+      className="border-t-4"
+      style={{ borderTopColor: color, backgroundColor: `${color}0d` }}
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <span style={{ color }}>{statIcons[title]}</span>
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="font-bold" style={{ color }}>
+          {value}
+        </p>
+      </CardContent>
+    </Card>
+  );
+};
 
 const InfoCard: FC<{ title: string; content: ReactNode }> = ({
   title,
