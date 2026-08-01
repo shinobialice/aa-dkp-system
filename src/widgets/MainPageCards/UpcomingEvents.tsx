@@ -269,7 +269,7 @@ export default function UpcomingEvents() {
         if (realNow >= end) continue;
 
         const isNow = realNow >= start && realNow < end;
-        const startsInMin = Math.floor(
+        const startsInMin = Math.ceil(
           (start.getTime() - realNow.getTime()) / 60000,
         );
         const endsInMin = isNow
