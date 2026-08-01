@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
 import supabase from "@/shared/lib/supabase";
 import {
@@ -166,11 +167,36 @@ function formatMoscowHM(date: Date): string {
   });
 }
 
+function playAlertSound() {
+  const audio = new Audio("/images/notification/notification.wav");
+  audio.play().catch(() => {});
+}
+
+const notifyBeforeMin = 10;
+type ToastItem = { id: string; boss: string };
+
 export default function UpcomingEvents() {
   const [now, setNow] = useState(getMoscowTime());
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const notifiedKeysRef = useRef<Set<string>>(new Set());
   const [bossLastKill, setBossLastKill] = useState<
     Record<BossName, string | null>
   >({ Марли: null, Морф: null, Кириос: null });
+
+  const dismissToast = useCallback((id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+
+  const notify = useCallback(
+    (key: string, boss: string) => {
+      if (notifiedKeysRef.current.has(key)) return;
+      notifiedKeysRef.current.add(key);
+      setToasts((prev) => [...prev, { id: key, boss }]);
+      playAlertSound();
+      setTimeout(() => dismissToast(key), 15_000);
+    },
+    [dismissToast],
+  );
   const [events, setEvents] = useState<
     {
       boss: string;
@@ -257,6 +283,9 @@ export default function UpcomingEvents() {
               startsInMin,
               endsInMin,
             });
+            if (startsInMin > 0 && startsInMin <= notifyBeforeMin) {
+              notify(`${boss}__${start.getTime()}`, boss);
+            }
           }
         }
       }
@@ -284,6 +313,9 @@ export default function UpcomingEvents() {
           startsInMin,
           endsInMin,
         });
+        if (startsInMin > 0 && startsInMin <= notifyBeforeMin) {
+          notify(`${boss}__${start.getTime()}`, boss);
+        }
       }
 
       result.sort((a, b) => a.date.getTime() - b.date.getTime());
@@ -293,10 +325,39 @@ export default function UpcomingEvents() {
     checkEvents();
     const interval = setInterval(checkEvents, 10_000);
     return () => clearInterval(interval);
-  }, [bossLastKill]);
+  }, [bossLastKill, notify]);
 
   return (
     <div className="flex flex-col gap-4">
+      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+        {toasts.map((t) => (
+          <Card
+            key={t.id}
+            className="flex-row items-center gap-3 border-primary bg-muted shadow-lg py-3 px-4 animate-in slide-in-from-bottom-2"
+          >
+            {bossImages[t.boss] && (
+              <Image
+                src={bossImages[t.boss]}
+                alt={t.boss}
+                width={40}
+                height={40}
+                className="shrink-0 rounded-lg object-cover"
+              />
+            )}
+            <div className="text-sm">
+              <span className="font-semibold">{t.boss}</span> через{" "}
+              {notifyBeforeMin} мин!
+            </div>
+            <button
+              onClick={() => dismissToast(t.id)}
+              className="ml-2 shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
+              aria-label="Закрыть"
+            >
+              <X className="size-4" />
+            </button>
+          </Card>
+        ))}
+      </div>
       {events.map((e, i) => (
         <Card
           key={i}
