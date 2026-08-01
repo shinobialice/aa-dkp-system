@@ -20,6 +20,7 @@ import {
   TableRow,
 } from "@/shared/ui";
 import { classColors, classIcons } from "@/widgets/MembersTable/classStyles";
+import { parseMoscowISOString } from "@/utils/getMoscowISOString";
 
 type SortKey = "username" | "class";
 
@@ -77,7 +78,7 @@ export function RaidInfoDialog({
   const bosses =
     raid.raid_boss?.map((rb: any) => rb.boss?.boss_name).filter(Boolean) ??
     [];
-  const date = raid.start_date ? new Date(raid.start_date) : null;
+  const date = raid.start_date ? parseMoscowISOString(raid.start_date) : null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -101,6 +102,7 @@ export function RaidInfoDialog({
                     year: "numeric",
                     hour: "2-digit",
                     minute: "2-digit",
+                    timeZone: "Europe/Moscow",
                   })
                 : "—"}
             </strong>

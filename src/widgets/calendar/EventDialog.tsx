@@ -20,6 +20,7 @@ import { Separator } from "@/shared/ui";
 import createEvent from "@/actions/createRaidEvent";
 import { getBosses } from "@/actions/getBosses";
 import updateEvent from "@/actions/updateEvent";
+import { parseMoscowISOString } from "@/utils/getMoscowISOString";
 
 export function EventDialog({
   open,
@@ -65,7 +66,9 @@ export function EventDialog({
     if (mode === "edit" && selectedEvent) {
       setCategory(selectedEvent.type || null);
       setSelectedDate(
-        selectedEvent.start_date ? new Date(selectedEvent.start_date) : null,
+        selectedEvent.start_date
+          ? parseMoscowISOString(selectedEvent.start_date)
+          : null,
       );
       setIsPvp(selectedEvent.is_pvp);
       setIsPvpLong(selectedEvent.is_pvp_long);
