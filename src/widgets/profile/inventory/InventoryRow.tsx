@@ -83,7 +83,7 @@ export default function InventoryRow({
       }
     } else if (value === "Есть" && !userItem) {
       await addItemToUserInventory(userId, item.name, item.type, null);
-    } else if (value === "Нет" && userItem) {
+    } else if (value === "Нету" && userItem) {
       await deleteItemFromUserInventory(userItem.id);
     }
     onChange();

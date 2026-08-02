@@ -56,7 +56,7 @@ export default function ItemSelector({
             : "Нету";
     }
 
-    return userItem ? "Есть" : "Нет";
+    return userItem ? "Есть" : "Нету";
   };
 
   if (!canEdit) {
@@ -142,13 +142,13 @@ export default function ItemSelector({
   }
 
   return (
-    <Select value={userItem ? "Есть" : "Нет"} onValueChange={onChange}>
+    <Select value={userItem ? "Есть" : "Нету"} onValueChange={onChange}>
       <SelectTrigger className="w-[100px] cursor-pointer">
         <SelectValue placeholder="Выбрать" />
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="Есть">Есть</SelectItem>
-        <SelectItem value="Нет">Нет</SelectItem>
+        <SelectItem value="Нету">Нету</SelectItem>
       </SelectContent>
     </Select>
   );
