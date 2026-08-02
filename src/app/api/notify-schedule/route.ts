@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
     }
 
     await sendVkMessage(
-      `${tag} ⚠️ Скоро ${boss}! Начало в ${time} (через ~${leadMinutes} мин).`,
+      `${tag} ⚠️ Скоро ${boss}! Начало в ${time} (через ${leadMinutes} мин).`,
     );
     sent += 1;
   }

@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
   const minutes = resolveNotifyMinutes(settings, boss);
 
   await sendVkMessage(
-    `${tag} ⚠️ Скоро ${boss}! Респаун ожидается через ~${minutes} мин.`,
+    `${tag} ⚠️ Скоро ${boss}! Респаун ожидается через ${minutes} мин.`,
   );
 
   return NextResponse.json({ ok: true });
