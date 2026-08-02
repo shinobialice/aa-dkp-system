@@ -4,7 +4,7 @@ import { sendVkMessage } from "@/shared/lib/vkBot";
 import { getVkMentionTag } from "@/shared/lib/vkQuietHours";
 import { getVkNotificationSettings } from "@/actions/vkNotificationSettings";
 import { resolveNotifyMinutes } from "@/shared/config/vkNotificationDefaults";
-import type { BossName } from "@/shared/config/bossRespawn";
+import { bossEmoji, type BossName } from "@/shared/config/bossRespawn";
 
 export const runtime = "nodejs";
 
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
   const minutes = resolveNotifyMinutes(settings, boss);
 
   await sendVkMessage(
-    `${tag} ⚠️ Скоро ${boss}! Респаун ожидается через ${minutes} мин.`,
+    `${tag} ${bossEmoji[boss]}${boss}${bossEmoji[boss]} Респавн ожидается через ${minutes} мин.`,
   );
 
   return NextResponse.json({ ok: true });

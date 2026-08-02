@@ -10,6 +10,12 @@ export const respawnHoursByBoss: Record<BossName, number> = {
   Кириос: 2,
 };
 
+export const bossEmoji: Record<BossName, string> = {
+  Марли: "🏴‍☠️",
+  Морф: "⚓",
+  Кириос: "🧛",
+};
+
 export function getRespawnStart(lastKill: string, respawnHours: number): Date {
   return new Date(new Date(lastKill).getTime() + respawnHours * 60 * 60 * 1000);
 }
