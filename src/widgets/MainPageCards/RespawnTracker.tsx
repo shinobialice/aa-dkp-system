@@ -210,7 +210,7 @@ const RespawnTracker: FC = () => {
 
   function handleKilledNow(boss: BossName) {
     const now = new Date().toISOString();
-    saveRespawn(boss, now, "Убит сейчас");
+    saveRespawn(boss, now, boss === "Кириос" ? "Реснулся" : "Убит сейчас");
   }
 
   const [popoverDate, setPopoverDate] = useState<Record<BossName, Date | null>>(
