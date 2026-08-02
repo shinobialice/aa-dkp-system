@@ -8,7 +8,7 @@ const qstash = new Client({
 
 export async function scheduleRespawnNotification(
   boss: string,
-  notifyAt: Date,
+  notifyAt: Date | null,
   previousMessageId: string | null,
 ): Promise<string | null> {
   if (previousMessageId) {
@@ -19,7 +19,9 @@ export async function scheduleRespawnNotification(
     }
   }
 
-  if (notifyAt.getTime() <= Date.now()) return null;
+  // notifyAt === null — босс выключен в настройках уведомлений ВК, только
+  // отменяем предыдущее сообщение выше, новое не планируем.
+  if (!notifyAt || notifyAt.getTime() <= Date.now()) return null;
 
   const { messageId } = await qstash.publishJSON({
     url: `${process.env.NEXT_PUBLIC_BASE_URL}/api/notify-respawn`,
