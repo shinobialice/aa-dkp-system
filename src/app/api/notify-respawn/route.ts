@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Receiver } from "@upstash/qstash";
 import { sendVkMessage } from "@/shared/lib/vkBot";
+import { getVkMentionTag } from "@/shared/lib/vkQuietHours";
 import { getVkNotificationSettings } from "@/actions/vkNotificationSettings";
+import { resolveNotifyMinutes } from "@/shared/config/vkNotificationDefaults";
 import type { BossName } from "@/shared/config/bossRespawn";
 
 export const runtime = "nodejs";
@@ -10,22 +12,6 @@ const receiver = new Receiver({
   currentSigningKey: process.env.QSTASH_CURRENT_SIGNING_KEY!,
   nextSigningKey: process.env.QSTASH_NEXT_SIGNING_KEY!,
 });
-
-function isQuietHours(start: number, end: number): boolean {
-  if (start === end) return false;
-
-  const moscowHour = Number(
-    new Date().toLocaleString("en-US", {
-      timeZone: "Europe/Moscow",
-      hour: "2-digit",
-      hour12: false,
-    }),
-  );
-
-  return start < end
-    ? moscowHour >= start && moscowHour < end
-    : moscowHour >= start || moscowHour < end;
-}
 
 export async function POST(req: NextRequest) {
   const body = await req.text();
@@ -49,19 +35,19 @@ export async function POST(req: NextRequest) {
   const { boss } = JSON.parse(body) as { boss: BossName };
   const settings = await getVkNotificationSettings();
 
-  if (
-    settings.quietHoursEnabled &&
-    isQuietHours(settings.quietHoursStart, settings.quietHoursEnd)
-  ) {
-    return NextResponse.json({ ok: true, skipped: "quiet_hours" });
-  }
-
   if (!settings.enabledBosses.includes(boss)) {
     return NextResponse.json({ ok: true, skipped: "boss_disabled" });
   }
 
+  const tag = getVkMentionTag(
+    settings.quietHoursEnabled,
+    settings.quietHoursStart,
+    settings.quietHoursEnd,
+  );
+  const minutes = resolveNotifyMinutes(settings, boss);
+
   await sendVkMessage(
-    `@all ⚠️ Скоро ${boss}! Респаун ожидается через ~${settings.notifyBeforeMinutes} мин.`,
+    `${tag} ⚠️ Скоро ${boss}! Респаун ожидается через ~${minutes} мин.`,
   );
 
   return NextResponse.json({ ok: true });

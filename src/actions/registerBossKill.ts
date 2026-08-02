@@ -8,6 +8,7 @@ import {
   getRespawnStart,
 } from "@/shared/config/bossRespawn";
 import { getVkNotificationSettings } from "./vkNotificationSettings";
+import { resolveNotifyMinutes } from "@/shared/config/vkNotificationDefaults";
 
 export async function registerBossKill(
   boss: BossName,
@@ -43,7 +44,8 @@ export async function registerBossKill(
   const vkSettings = await getVkNotificationSettings();
   const notifyAt = vkSettings.enabledBosses.includes(boss)
     ? new Date(
-        nextRespawn.getTime() - vkSettings.notifyBeforeMinutes * 60 * 1000,
+        nextRespawn.getTime() -
+          resolveNotifyMinutes(vkSettings, boss) * 60 * 1000,
       )
     : null;
 

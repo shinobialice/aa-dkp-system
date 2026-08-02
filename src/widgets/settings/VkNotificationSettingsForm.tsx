@@ -6,9 +6,50 @@ import { Button, Checkbox, Input, Label, Switch } from "@/shared/ui";
 import {
   getVkNotificationSettings,
   updateVkNotificationSettings,
-  type VkNotificationSettings,
 } from "@/actions/vkNotificationSettings";
-import { bosses, type BossName } from "@/shared/config/bossRespawn";
+import {
+  resolveNotifyMinutes,
+  type VkNotificationSettings,
+} from "@/shared/config/vkNotificationDefaults";
+import { bosses } from "@/shared/config/bossRespawn";
+import { fixedScheduleEvents } from "@/shared/config/fixedSchedule";
+
+function EventRow({
+  name,
+  settings,
+  onToggle,
+  onMinutesChange,
+}: {
+  name: string;
+  settings: VkNotificationSettings;
+  onToggle: (checked: boolean) => void;
+  onMinutesChange: (minutes: number) => void;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <Checkbox
+        id={`vk-event-${name}`}
+        className="cursor-pointer"
+        checked={settings.enabledBosses.includes(name)}
+        onCheckedChange={(checked) => onToggle(checked === true)}
+      />
+      <Label
+        htmlFor={`vk-event-${name}`}
+        className="font-normal flex-1 cursor-pointer"
+      >
+        {name}
+      </Label>
+      <Input
+        type="number"
+        min={0}
+        className="w-16"
+        value={resolveNotifyMinutes(settings, name)}
+        onChange={(e) => onMinutesChange(Number(e.target.value))}
+      />
+      <span className="text-xs text-muted-foreground">мин</span>
+    </div>
+  );
+}
 
 export function VkNotificationSettingsForm() {
   const [settings, setSettings] = useState<VkNotificationSettings | null>(
@@ -37,13 +78,21 @@ export function VkNotificationSettingsForm() {
     }
   }
 
-  function toggleBoss(boss: BossName, checked: boolean) {
+  function toggleEvent(name: string, checked: boolean) {
     if (!settings) return;
     setSettings({
       ...settings,
       enabledBosses: checked
-        ? [...settings.enabledBosses, boss]
-        : settings.enabledBosses.filter((b) => b !== boss),
+        ? [...settings.enabledBosses, name]
+        : settings.enabledBosses.filter((b) => b !== name),
+    });
+  }
+
+  function setEventMinutes(name: string, minutes: number) {
+    if (!settings) return;
+    setSettings({
+      ...settings,
+      notifyMinutesByEvent: { ...settings.notifyMinutesByEvent, [name]: minutes },
     });
   }
 
@@ -52,49 +101,44 @@ export function VkNotificationSettingsForm() {
       <div>
         <h2 className="text-xl font-bold">Уведомления ВК</h2>
         <p className="text-sm text-muted-foreground">
-          Сообщения ВК-бота о скором респауне боссов — отдельно от звуковых
-          оповещений в браузере.
+          Сообщения ВК-бота о скором начале боссов и рейдов — отдельно от
+          звуковых оповещений в браузере.
         </p>
       </div>
 
       <div className="space-y-2">
-        <Label>На каких боссов присылать</Label>
+        <Label>Плавающие боссы (без фиксированного времени)</Label>
         <div className="space-y-2 border rounded-lg p-3">
           {bosses.map((boss) => (
-            <div key={boss} className="flex items-center gap-2">
-              <Checkbox
-                id={`vk-boss-${boss}`}
-                checked={settings.enabledBosses.includes(boss)}
-                onCheckedChange={(checked) => toggleBoss(boss, checked === true)}
-              />
-              <Label htmlFor={`vk-boss-${boss}`} className="font-normal">
-                {boss}
-              </Label>
-            </div>
+            <EventRow
+              key={boss}
+              name={boss}
+              settings={settings}
+              onToggle={(checked) => toggleEvent(boss, checked)}
+              onMinutesChange={(minutes) => setEventMinutes(boss, minutes)}
+            />
           ))}
         </div>
       </div>
 
-      <div className="flex items-center gap-2 border rounded-lg p-3">
-        <Label className="flex-1">За сколько минут до респауна слать</Label>
-        <Input
-          type="number"
-          min={0}
-          className="w-20"
-          value={settings.notifyBeforeMinutes}
-          onChange={(e) =>
-            setSettings({
-              ...settings,
-              notifyBeforeMinutes: Number(e.target.value),
-            })
-          }
-        />
-        <span className="text-sm text-muted-foreground">мин</span>
+      <div className="space-y-2">
+        <Label>Расписание</Label>
+        <div className="space-y-2 border rounded-lg p-3">
+          {fixedScheduleEvents.map((name) => (
+            <EventRow
+              key={name}
+              name={name}
+              settings={settings}
+              onToggle={(checked) => toggleEvent(name, checked)}
+              onMinutesChange={(minutes) => setEventMinutes(name, minutes)}
+            />
+          ))}
+        </div>
       </div>
 
       <div className="space-y-3 border rounded-lg p-3">
         <div className="flex items-center justify-between gap-4">
-          <Label>Тихие часы (уведомления не приходят)</Label>
+          <Label>Тихие часы (бот тегает @online вместо @all)</Label>
           <Switch
             checked={settings.quietHoursEnabled}
             onCheckedChange={(v) =>
