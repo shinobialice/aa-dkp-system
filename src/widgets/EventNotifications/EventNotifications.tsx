@@ -5,12 +5,13 @@ import Image from "next/image";
 import { X } from "lucide-react";
 import { Card } from "@/shared/ui";
 import { useUpcomingEvents, bossImages } from "@/hooks/useUpcomingEvents";
+import { useSoundNotificationsEnabled } from "@/hooks/useSoundNotificationsEnabled";
 
 const notifyBeforeMin = 10;
 
 function playAlertSound() {
-  const audio = new Audio("/images/notification/notification.wav");
-  audio.volume = 0.3;
+  const audio = new Audio("/images/notification/notification2.wav");
+  audio.volume = 0.2;
   audio.play().catch(() => {});
 }
 
@@ -18,6 +19,7 @@ type ToastItem = { id: string; boss: string };
 
 export function EventNotifications() {
   const events = useUpcomingEvents();
+  const { enabled: soundEnabled } = useSoundNotificationsEnabled();
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const notifiedKeysRef = useRef<Set<string>>(new Set());
 
@@ -34,10 +36,10 @@ export function EventNotifications() {
       notifiedKeysRef.current.add(e.key);
 
       setToasts((prev) => [...prev, { id: e.key, boss: e.boss }]);
-      playAlertSound();
+      if (soundEnabled) playAlertSound();
       setTimeout(() => dismissToast(e.key), 15_000);
     }
-  }, [events, dismissToast]);
+  }, [events, dismissToast, soundEnabled]);
 
   if (toasts.length === 0) return null;
 

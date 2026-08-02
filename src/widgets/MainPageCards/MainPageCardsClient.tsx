@@ -3,7 +3,13 @@
 import { useEffect, useState, FC, ReactNode } from "react";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import { Loader, Swords, Users } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/ui";
 import getStats from "@/actions/getStats";
 import Image from "next/image";
 import { classColors, classIcons } from "@/widgets/MembersTable/classStyles";
@@ -11,6 +17,7 @@ import MainPageClock from "./MainPageClock";
 import UpcomingEvents from "./UpcomingEvents";
 import RespawnTracker from "./RespawnTracker";
 import BossRespawnHistory from "./BossRespawnHistory";
+import SoundNotificationToggle from "./SoundNotificationToggle";
 
 type Stats = Awaited<ReturnType<typeof getStats>>;
 
@@ -54,13 +61,15 @@ const StatCard: FC<{ title: string; value: number }> = ({ title, value }) => {
   );
 };
 
-const InfoCard: FC<{ title: string; content: ReactNode }> = ({
+const InfoCard: FC<{ title: string; action?: ReactNode; content: ReactNode }> = ({
   title,
+  action,
   content,
 }) => (
   <Card className="min-w-0">
     <CardHeader>
       <CardTitle>{title}</CardTitle>
+      {action && <CardAction>{action}</CardAction>}
     </CardHeader>
     <CardContent className="min-w-0">
       <div className="min-w-0">{content}</div>
@@ -111,6 +120,7 @@ const MainPageCardsClient: FC = () => {
     },
     {
       title: "Предстоящие мероприятия",
+      action: <SoundNotificationToggle />,
       content: (
         <div>
           <MainPageClock />
@@ -131,7 +141,11 @@ const MainPageCardsClient: FC = () => {
       </div>
       <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-[1080px_auto] items-start text-2xl">
         <InfoCard title={infoItems[0].title} content={infoItems[0].content} />
-        <InfoCard title={infoItems[1].title} content={infoItems[1].content} />
+        <InfoCard
+          title={infoItems[1].title}
+          action={infoItems[1].action}
+          content={infoItems[1].content}
+        />
       </div>
     </div>
   );
