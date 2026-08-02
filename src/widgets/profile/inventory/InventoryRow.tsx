@@ -13,13 +13,13 @@ export default function InventoryRow({
   inventory,
   userId,
   onChange,
-  isAdmin,
+  canEdit,
 }: {
   item: any;
   inventory: any[];
   userId: number;
   onChange: () => void;
-  isAdmin: boolean;
+  canEdit: boolean;
 }) {
   const isDragon = item.name === "Дракон";
 
@@ -122,7 +122,7 @@ export default function InventoryRow({
           item={item}
           userItem={userItem}
           onChange={handleChange}
-          isAdmin={isAdmin}
+          canEdit={canEdit}
         />
       </TableCell>
     </TableRow>

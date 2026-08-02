@@ -10,14 +10,14 @@ type ItemSelectorProps = {
   item: any;
   userItem: any;
   onChange: (value: string) => void;
-  isAdmin: boolean;
+  canEdit: boolean;
 };
 
 export default function ItemSelector({
   item,
   userItem,
   onChange,
-  isAdmin,
+  canEdit,
 }: ItemSelectorProps) {
   const isBafalka = item.name === "Бафалка";
 
@@ -59,7 +59,7 @@ export default function ItemSelector({
     return userItem ? "Есть" : "Нет";
   };
 
-  if (!isAdmin) {
+  if (!canEdit) {
     return (
       <div className="w-[100px] text-sm py-2 px-3 border rounded bg-muted text-muted-foreground">
         {getDisplayValue()}

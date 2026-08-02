@@ -1,7 +1,10 @@
 "use server";
 import supabase from "@/shared/lib/supabaseAdmin";
+import ensurePrivilieges from "./ensurePrivilieges";
 
 const setItemQuality = async (itemId: number, quality: string) => {
+  await ensurePrivilieges(["Администратор", "Секретутка"]);
+
   const { data, error } = await supabase
     .from("user_inventory")
     .update({ quality })

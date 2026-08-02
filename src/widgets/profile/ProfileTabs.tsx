@@ -18,6 +18,7 @@ export default function ProfileTabs({
   usernameHistory,
   averageGuildGS,
   isAdmin,
+  canEditInventory,
 }: {
   user: any;
   inventory: any[];
@@ -33,6 +34,7 @@ export default function ProfileTabs({
   }[];
   averageGuildGS: number;
   isAdmin: boolean;
+  canEditInventory: boolean;
 }) {
   const [inventory, setInventory] = useState(initialInventory);
   const [tasks, setTasks] = useState(initialTasks);
@@ -71,7 +73,7 @@ export default function ProfileTabs({
       </TabsList>
       <TabsContent value="inventory">
         <InventoryTabsClient
-          isAdmin={isAdmin}
+          canEdit={canEditInventory}
           inventory={inventory}
           userId={user.id}
           onChange={handleInventoryChange}

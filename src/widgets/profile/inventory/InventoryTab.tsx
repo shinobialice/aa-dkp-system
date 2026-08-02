@@ -15,13 +15,13 @@ export default function InventoryTab({
   inventory,
   userId,
   onChange,
-  isAdmin,
+  canEdit,
 }: {
   type: string;
   inventory: any[];
   userId: number;
   onChange: () => void;
-  isAdmin: boolean;
+  canEdit: boolean;
 }) {
   if (type === "Куплено") {
     const lootItems = inventory.filter((inv) => inv.type === "Куплено");
@@ -128,7 +128,7 @@ export default function InventoryTab({
         <TableBody>
           {filteredItems.map((item) => (
             <InventoryRow
-              isAdmin={isAdmin}
+              canEdit={canEdit}
               key={item.name}
               item={item}
               inventory={inventory}

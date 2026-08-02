@@ -39,6 +39,7 @@ export default async function Page(p: {
     "Администратор",
     "Секретутка",
   ]);
+  const canEditInventory = canEditProfile;
   const sessionUserId = await getSessionUserId();
   const isOwnProfile = sessionUserId === userId;
 
@@ -46,6 +47,7 @@ export default async function Page(p: {
     <ProfilePageWrapper
       isAdmin={isAdmin}
       canEditProfile={canEditProfile}
+      canEditInventory={canEditInventory}
       isOwnProfile={isOwnProfile}
       user={user}
       tags={tags}

@@ -15,6 +15,7 @@ export default function ProfilePageWrapper({
   activity,
   isAdmin,
   canEditProfile,
+  canEditInventory,
   isOwnProfile,
 }: {
   user: any;
@@ -37,6 +38,7 @@ export default function ProfilePageWrapper({
   };
   isAdmin: boolean;
   canEditProfile: boolean;
+  canEditInventory: boolean;
   isOwnProfile: boolean;
 }) {
   const [user, setUser] = useState(initialUser);
@@ -71,6 +73,7 @@ export default function ProfilePageWrapper({
           usernameHistory={usernameHistory}
           averageGuildGS={averageGuildGS}
           isAdmin={isAdmin}
+          canEditInventory={canEditInventory}
         />
       </div>
     </div>
