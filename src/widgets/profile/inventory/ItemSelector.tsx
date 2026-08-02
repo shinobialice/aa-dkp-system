@@ -13,6 +13,9 @@ type ItemSelectorProps = {
   canEdit: boolean;
 };
 
+const triggerClass =
+  "h-6 w-auto min-w-0 gap-1 rounded-full border-none bg-secondary px-2.5 text-[11px] font-medium shadow-none hover:bg-secondary/80 cursor-pointer data-[size=sm]:h-6";
+
 export default function ItemSelector({
   item,
   userItem,
@@ -60,10 +63,17 @@ export default function ItemSelector({
   };
 
   if (!canEdit) {
+    const isPresent = getDisplayValue() !== "Нету";
     return (
-      <div className="w-[100px] text-sm py-2 px-3 border rounded bg-muted text-muted-foreground">
+      <span
+        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
+          isPresent
+            ? "bg-primary/15 text-primary"
+            : "text-muted-foreground"
+        }`}
+      >
         {getDisplayValue()}
-      </div>
+      </span>
     );
   }
 
@@ -83,7 +93,7 @@ export default function ItemSelector({
         }
         onValueChange={onChange}
       >
-        <SelectTrigger className="w-[100px] cursor-pointer">
+        <SelectTrigger size="sm" className={triggerClass}>
           <SelectValue placeholder="Выбрать" />
         </SelectTrigger>
         <SelectContent>
@@ -102,7 +112,7 @@ export default function ItemSelector({
         value={!userItem ? "Нету" : userItem.name}
         onValueChange={onChange}
       >
-        <SelectTrigger className="w-[100px] cursor-pointer">
+        <SelectTrigger size="sm" className={triggerClass}>
           <SelectValue placeholder="Выбрать" />
         </SelectTrigger>
         <SelectContent>
@@ -129,7 +139,7 @@ export default function ItemSelector({
         }
         onValueChange={onChange}
       >
-        <SelectTrigger className="w-[100px] cursor-pointer">
+        <SelectTrigger size="sm" className={triggerClass}>
           <SelectValue placeholder="Выбрать" />
         </SelectTrigger>
         <SelectContent>
@@ -143,7 +153,7 @@ export default function ItemSelector({
 
   return (
     <Select value={userItem ? "Есть" : "Нету"} onValueChange={onChange}>
-      <SelectTrigger className="w-[100px] cursor-pointer">
+      <SelectTrigger size="sm" className={triggerClass}>
         <SelectValue placeholder="Выбрать" />
       </SelectTrigger>
       <SelectContent>

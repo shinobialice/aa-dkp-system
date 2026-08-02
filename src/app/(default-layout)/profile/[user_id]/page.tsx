@@ -4,6 +4,7 @@ import getUser from "@/actions/getUser";
 import getUserInventory from "@/actions/getUserInventory";
 import { getUserMonthlyAttendance } from "@/actions/getUserMonthlyAttendance";
 import getUserNotes from "@/actions/getUserNotes";
+import { getUserCurrentMonthSalary } from "@/actions/getUserCurrentMonthSalary";
 import { getSessionUserId } from "@/actions/getSessionUserId";
 import { hasTag } from "@/actions/hasTag";
 import { getUserTags } from "@/actions/userTagsActions";
@@ -23,7 +24,7 @@ export default async function Page(p: {
     new Date().getMonth() + 1,
   );
 
-  const [user, tags, inventory, tasks, notes, usernameHistory] =
+  const [user, tags, inventory, tasks, notes, usernameHistory, salary] =
     await Promise.all([
       getUser(userId),
       getUserTags(userId),
@@ -31,6 +32,7 @@ export default async function Page(p: {
       getTasks(userId),
       getUserNotes(userId),
       getUsernameHistory(userId),
+      getUserCurrentMonthSalary(userId),
     ]);
 
   const sessionToken = (await cookies()).get("session_token")?.value ?? "";
@@ -57,6 +59,7 @@ export default async function Page(p: {
       usernameHistory={usernameHistory}
       averageGuildGS={averageGuildGS}
       activity={activity}
+      salary={salary}
     />
   );
 }

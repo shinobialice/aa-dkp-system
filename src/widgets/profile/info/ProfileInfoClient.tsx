@@ -1,9 +1,15 @@
 "use client";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import ProfileAdditionalInfo from "./ProfileAdditionalInfo";
 import ProfileClasses from "./ProfileClasses";
 import ProfileHeader from "./ProfileHeader";
 import { Card, CardContent } from "@/shared/ui";
+
+const formatPoints = (n: number) => Number(n.toFixed(2)).toString();
+const currentMonthLabel = new Date().toLocaleDateString("ru-RU", {
+  month: "long",
+});
 
 export default function ProfileInfoClient({
   user,
@@ -11,6 +17,8 @@ export default function ProfileInfoClient({
   setUsernameHistory,
   canEditProfile,
   isOwnProfile,
+  activity,
+  salary,
 }: {
   user: any;
   tags: any[];
@@ -24,6 +32,14 @@ export default function ProfileInfoClient({
   ) => void;
   canEditProfile: boolean;
   isOwnProfile: boolean;
+  activity: {
+    aglPercent: number;
+    primePercent: number;
+    totalPercent: number;
+    dkp: number;
+    totalPointsAvailable: number;
+  };
+  salary: number | null;
 }) {
   const [tags, setTags] = useState(initialTags);
   const [editMode, setEditMode] = useState(false);
@@ -62,7 +78,7 @@ export default function ProfileInfoClient({
   }, [formData.vkName]);
 
   return (
-    <Card>
+    <Card className="gap-0 overflow-hidden py-0">
       <ProfileHeader
         canEditProfile={canEditProfile}
         isOwnProfile={isOwnProfile}
@@ -74,7 +90,7 @@ export default function ProfileInfoClient({
         tags={tags}
         setUsernameHistory={setUsernameHistory}
       />
-      <CardContent className="space-y-4">
+      <CardContent className="flex flex-wrap gap-x-8 gap-y-4 border-t py-5">
         <ProfileClasses
           user={user}
           formData={formData}
@@ -87,6 +103,36 @@ export default function ProfileInfoClient({
           setFormData={setFormData}
           editMode={editMode}
         />
+        <div className="min-w-[140px] space-y-1.5">
+          <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Баллы · {currentMonthLabel}
+          </div>
+          <div className="text-sm font-semibold">
+            {formatPoints(activity.dkp)} / {formatPoints(activity.totalPointsAvailable)}
+          </div>
+        </div>
+        <div className="min-w-[140px] space-y-1.5">
+          <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Посещаемость
+          </div>
+          <div className="text-sm font-semibold">
+            {activity.totalPercent.toFixed(2)}%
+          </div>
+        </div>
+        <div className="min-w-[140px] space-y-1.5">
+          <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Зарплата · {currentMonthLabel}
+          </div>
+          <div className="flex items-center gap-1.5 text-sm font-semibold">
+            <Image
+              src="https://archeagecodex.com/items/gold.png"
+              alt=""
+              width={16}
+              height={16}
+            />
+            {salary != null ? salary.toLocaleString("ru-RU") : "—"}
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

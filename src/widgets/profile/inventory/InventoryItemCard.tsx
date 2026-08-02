@@ -1,14 +1,13 @@
-'use client";';
+"use client";
 import Image from "next/image";
 import inventoryIcons from "./InventoryIcons";
 import ItemIcon from "./ItemIcon";
 import ItemSelector from "./ItemSelector";
-import { TableRow, TableCell } from "@/shared/ui";
 import addItemToUserInventory from "@/actions/addItemToUserInventory";
 import deleteItemFromUserInventory from "@/actions/deleteItemFromUserInventory";
 import setItemQuality from "@/actions/setItemQuality";
 
-export default function InventoryRow({
+export default function InventoryItemCard({
   item,
   inventory,
   userId,
@@ -89,42 +88,50 @@ export default function InventoryRow({
     onChange();
   };
 
+  const isPresent = !!userItem;
+
   return (
-    <TableRow>
-      <TableCell>
-        <div className="flex items-center gap-2">
-          <div style={{ position: "relative" }}>
-            <ItemIcon
-              itemName={displayIconName}
-              itemIconUrl={itemIconUrl}
-              quality={userItem?.quality || null}
+    <div
+      className={`flex flex-col items-center gap-2 rounded-lg border p-3 text-center transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md ${
+        isPresent
+          ? "border-primary/30 bg-primary/5"
+          : "border-dashed opacity-70"
+      }`}
+    >
+      <div
+        className={`flex items-center justify-center rounded-md border bg-card p-1 ${
+          isPresent ? "border-primary/40" : "border-border"
+        }`}
+      >
+        <div className="relative">
+          <ItemIcon
+            itemName={displayIconName}
+            itemIconUrl={itemIconUrl}
+            quality={userItem?.quality || null}
+          />
+          {isDragon && userItem && (
+            <Image
+              width={40}
+              height={40}
+              src="https://archeagecodex.com/images/icon_grade6.png"
+              alt="legendary"
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                pointerEvents: "none",
+              }}
             />
-            {isDragon && userItem && (
-              <Image
-                width={40}
-                height={40}
-                src="https://archeagecodex.com/images/icon_grade6.png"
-                alt="legendary"
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  pointerEvents: "none",
-                }}
-              />
-            )}
-          </div>
-          <span>{item.name}</span>
+          )}
         </div>
-      </TableCell>
-      <TableCell>
-        <ItemSelector
-          item={item}
-          userItem={userItem}
-          onChange={handleChange}
-          canEdit={canEdit}
-        />
-      </TableCell>
-    </TableRow>
+      </div>
+      <span className="text-xs leading-tight">{item.name}</span>
+      <ItemSelector
+        item={item}
+        userItem={userItem}
+        onChange={handleChange}
+        canEdit={canEdit}
+      />
+    </div>
   );
 }

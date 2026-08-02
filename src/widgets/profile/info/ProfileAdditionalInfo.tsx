@@ -5,7 +5,6 @@ import {
 } from "date-fns";
 
 import { format } from "date-fns";
-import { CardDescription } from "@/shared/ui";
 import { DateTimePicker } from "@/shared/ui";
 import { Input } from "@/shared/ui";
 
@@ -52,18 +51,16 @@ export default function ProfileAdditionalInfo({
   }
 
   return (
-    <div className="pt-2 border-t">
-      <CardDescription className="text-sm mb-6">
-        Дополнительная информация:
-      </CardDescription>
-
-      <div className="flex items-center gap-2">
-        <span>VK: </span>
+    <>
+      <div className="min-w-[160px] space-y-1.5">
+        <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          VK
+        </div>
         {(() => {
           if (editMode) {
             return (
               <Input
-                className="w-[200px]"
+                className="w-[180px]"
                 value={formData.vkName ?? ""}
                 onChange={(e) => {
                   const input = e.target.value;
@@ -79,45 +76,55 @@ export default function ProfileAdditionalInfo({
                 href={`https://vk.ru/${formData.vkName}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-500 hover:underline"
+                className="text-sm font-semibold text-primary hover:underline"
               >
                 {formData.vkRealName ? formData.vkRealName : "—"}
               </a>
             );
           }
-          return "Нет данных";
+          return (
+            <div className="text-sm font-semibold text-muted-foreground">
+              Нет данных
+            </div>
+          );
         })()}
       </div>
 
-      <div className="mt-4">
-        <span>Дата вступления: </span>
-        {(() => {
-          if (editMode) {
-            return (
-              <DateTimePicker
-                classNames={{ trigger: "w-[245px]" }}
-                hideTime
-                value={
-                  formData.joined_at ? new Date(formData.joined_at) : undefined
-                }
-                onChange={(date) =>
-                  setFormData((prev: any) => ({
-                    ...prev,
-                    joined_at: date ? format(date, "yyyy-MM-dd") : "",
-                  }))
-                }
-              />
-            );
-          } else if (formData.joined_at) {
-            return new Date(formData.joined_at).toLocaleDateString("ru-RU");
-          }
-          return "Неизвестно";
-        })()}
+      <div className="min-w-[140px] space-y-1.5">
+        <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Дата вступления
+        </div>
+        {editMode ? (
+          <DateTimePicker
+            classNames={{ trigger: "w-[180px]" }}
+            hideTime
+            value={
+              formData.joined_at ? new Date(formData.joined_at) : undefined
+            }
+            onChange={(date) =>
+              setFormData((prev: any) => ({
+                ...prev,
+                joined_at: date ? format(date, "yyyy-MM-dd") : "",
+              }))
+            }
+          />
+        ) : (
+          <div className="text-sm font-semibold">
+            {formData.joined_at
+              ? new Date(formData.joined_at).toLocaleDateString("ru-RU")
+              : "Неизвестно"}
+          </div>
+        )}
       </div>
 
-      <div className="mt-4">
-        Время в гильдии: {parts.length > 0 ? parts.join(" ") : "Меньше дня"}
+      <div className="min-w-[140px] space-y-1.5">
+        <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Стаж в гильдии
+        </div>
+        <div className="text-sm font-semibold">
+          {parts.length > 0 ? parts.join(" ") : "Меньше дня"}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

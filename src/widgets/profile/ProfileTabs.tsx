@@ -1,7 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
 import getUserInventory from "@/actions/getUserInventory";
+import { UserActivityChart } from "@/widgets/profile/activity/UserActivityChart";
+import { UserMonthActivity } from "@/widgets/profile/activity/UserMonthActivity";
 import InventoryTabsClient from "./inventory/InventoryTabsClient";
+import PurchasesAndGiveaways from "./inventory/PurchasesAndGiveaways";
 import UserNotes from "./notes/UserNotes";
 import TasksTable from "./tasks/TasksTable";
 import UsernameHistoryTab from "./usernameHistory/UsernameHistoryTab";
@@ -58,17 +61,23 @@ export default function ProfileTabs({
         <TabsTrigger className="cursor-pointer" value="inventory">
           Инвентарь
         </TabsTrigger>
-        <TabsTrigger className="cursor-pointer" value="tasks">
-          Задания
-        </TabsTrigger>
-        <TabsTrigger className="cursor-pointer" value="notes">
-          Заметки
+        <TabsTrigger className="cursor-pointer" value="activity">
+          Активность
         </TabsTrigger>
         <TabsTrigger className="cursor-pointer" value="raids">
           Рейды
         </TabsTrigger>
+        <TabsTrigger className="cursor-pointer" value="notes">
+          Заметки
+        </TabsTrigger>
+        <TabsTrigger className="cursor-pointer" value="purchases">
+          Куплено/Выдано
+        </TabsTrigger>
         <TabsTrigger className="cursor-pointer" value="username-history">
           История ников
+        </TabsTrigger>
+        <TabsTrigger className="cursor-pointer" value="tasks">
+          Задания
         </TabsTrigger>
       </TabsList>
       <TabsContent value="inventory">
@@ -80,15 +89,13 @@ export default function ProfileTabs({
         />
       </TabsContent>
 
-      <TabsContent value="tasks">
-        <TasksTable
-          isAdmin={isAdmin}
-          tasks={tasks}
-          userId={user.id}
-          onChange={() => {
-            // Handle tasks updates passed from parent
-          }}
-        />
+      <TabsContent value="activity" className="space-y-6">
+        <UserMonthActivity userId={user.id} />
+        <UserActivityChart userId={user.id} />
+      </TabsContent>
+
+      <TabsContent value="raids">
+        <UserMonthlyRaidsTab userId={user.id} />
       </TabsContent>
 
       <TabsContent value="notes">
@@ -102,12 +109,23 @@ export default function ProfileTabs({
         />
       </TabsContent>
 
-      <TabsContent value="raids">
-        <UserMonthlyRaidsTab userId={user.id} />
+      <TabsContent value="purchases">
+        <PurchasesAndGiveaways inventory={inventory} />
       </TabsContent>
 
       <TabsContent value="username-history">
         <UsernameHistoryTab history={usernameHistory} />
+      </TabsContent>
+
+      <TabsContent value="tasks">
+        <TasksTable
+          isAdmin={isAdmin}
+          tasks={tasks}
+          userId={user.id}
+          onChange={() => {
+            // Handle tasks updates passed from parent
+          }}
+        />
       </TabsContent>
     </Tabs>
   );

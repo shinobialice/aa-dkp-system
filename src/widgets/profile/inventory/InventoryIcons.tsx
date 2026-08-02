@@ -5,6 +5,8 @@ const inventoryIcons: { [key: string]: string } = {
   Канонёрка: "https://archeagecodex.com/items/icon_item_5029.png",
   Бафалка: "https://archeagecodex.com/items/icon_item_2055.png",
   "Коллеционный глайдер": "https://archeagecodex.com/items/icon_item_4502.png",
+  "Глайдер «Рассекатель небес»":
+    "https://archeagecodex.com/items/icon_item_1369.png",
   "Крылья кровавого легиона":
     "https://archeagecodex.com/items/icon_item_3936.png",
   "Глайдер охотника на драконов":

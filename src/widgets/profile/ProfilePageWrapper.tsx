@@ -1,7 +1,5 @@
 "use client";
 import { useState } from "react";
-import { UserActivityChart } from "@/widgets/profile/activity/UserActivityChart";
-import { UserMonthActivity } from "@/widgets/profile/activity/UserMonthActivity";
 import ProfileInfoClient from "@/widgets/profile/info/ProfileInfoClient";
 import ProfileTabs from "@/widgets/profile/ProfileTabs";
 
@@ -13,6 +11,7 @@ export default function ProfilePageWrapper({
   usernameHistory: initialUsernameHistory,
   averageGuildGS,
   activity,
+  salary,
   isAdmin,
   canEditProfile,
   canEditInventory,
@@ -35,7 +34,9 @@ export default function ProfilePageWrapper({
     primePercent: number;
     totalPercent: number;
     dkp: number;
+    totalPointsAvailable: number;
   };
+  salary: number | null;
   isAdmin: boolean;
   canEditProfile: boolean;
   canEditInventory: boolean;
@@ -48,34 +49,28 @@ export default function ProfilePageWrapper({
   );
 
   return (
-    <div className="space-y-8 p-4">
-      <div className="grid grid-cols-3 gap-6 lg:grid-cols-2 items-start">
-        <UserMonthActivity userId={user.id} />
-        <div>
-          <UserActivityChart userId={user.id} />
-        </div>
-      </div>
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 items-start">
-        <ProfileInfoClient
-          canEditProfile={canEditProfile}
-          isOwnProfile={isOwnProfile}
-          user={user}
-          tags={tags}
-          setUsernameHistory={setUsernameHistory}
-        />
-        <ProfileTabs
-          user={user}
-          setUser={setUser}
-          inventory={inventory}
-          tasks={tasks}
-          tags={tags}
-          setTags={setTags}
-          usernameHistory={usernameHistory}
-          averageGuildGS={averageGuildGS}
-          isAdmin={isAdmin}
-          canEditInventory={canEditInventory}
-        />
-      </div>
+    <div className="space-y-6 p-4">
+      <ProfileInfoClient
+        canEditProfile={canEditProfile}
+        isOwnProfile={isOwnProfile}
+        user={user}
+        tags={tags}
+        setUsernameHistory={setUsernameHistory}
+        activity={activity}
+        salary={salary}
+      />
+      <ProfileTabs
+        user={user}
+        setUser={setUser}
+        inventory={inventory}
+        tasks={tasks}
+        tags={tags}
+        setTags={setTags}
+        usernameHistory={usernameHistory}
+        averageGuildGS={averageGuildGS}
+        isAdmin={isAdmin}
+        canEditInventory={canEditInventory}
+      />
     </div>
   );
 }
