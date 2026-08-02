@@ -169,7 +169,7 @@ export default function UserNotes({
             </div>
           </div>
 
-          <div className="flex-1 border-r px-6">
+          <div className={`flex-1 ${isAdmin ? "border-r px-6" : "pl-6"}`}>
             <div className="flex justify-between">
               <div className="text-xl font-bold mb-4">Штрафы</div>
               {isAdmin && (
@@ -190,21 +190,23 @@ export default function UserNotes({
             />
           </div>
 
-          <div className="flex-1 pl-6">
-            <div className="text-xl font-bold mb-4">Тэги</div>
-            <UserTagsSection
-              user={user}
-              onUpdate={() => {}}
-              tags={tags}
-              setTags={(newTags) => {
-                setTags(newTags);
-                updateTags(newTags);
-              }}
-              setUser={setUser}
-              averageGuildGS={averageGuildGS}
-              isAdmin={isAdmin}
-            />
-          </div>
+          {isAdmin && (
+            <div className="flex-1 pl-6">
+              <div className="text-xl font-bold mb-4">Тэги</div>
+              <UserTagsSection
+                user={user}
+                onUpdate={() => {}}
+                tags={tags}
+                setTags={(newTags) => {
+                  setTags(newTags);
+                  updateTags(newTags);
+                }}
+                setUser={setUser}
+                averageGuildGS={averageGuildGS}
+                isAdmin={isAdmin}
+              />
+            </div>
+          )}
         </div>
       </CardContent>
 
