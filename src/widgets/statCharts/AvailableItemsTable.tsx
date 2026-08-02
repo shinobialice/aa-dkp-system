@@ -19,7 +19,9 @@ const ITEM_ICONS: Record<string, string> = {
   Кабуксон: inventoryIcons["Кобуксон"],
   "Танк(любой)": inventoryIcons["Танк"],
   Канонерка: inventoryIcons["Канонёрка"],
-  "Баф фигура": inventoryIcons["Бафалка"],
+  "Баф фигура 3 эпоха": inventoryIcons["Бафалка"],
+  "Баф фигура 4 эпоха": inventoryIcons["Бафалка"],
+  "Баф фигура 5 эпоха": inventoryIcons["Бафалка"],
   "Колл. глайдер": inventoryIcons["Коллеционный глайдер"],
   "Колл. глайдер т2": inventoryIcons["Коллеционный глайдер т2"],
   ККЛ: inventoryIcons["Крылья кровавого легиона"],
@@ -34,11 +36,17 @@ const ITEM_ICONS: Record<string, string> = {
   "Коллекционный фамильяр": inventoryIcons["Коллекционный фамильяр т2"],
 };
 
-const T2_FRAME_URL = "https://archeagecodex.com/images/icon_grade11.png";
-const T2_FRAME_LABELS = new Set([
-  "Колл. глайдер т2",
-  "Коллекционный фамильяр",
-]);
+const GRADE_FRAME_LABELS: Record<string, string> = {
+  "Колл. глайдер т2": "https://archeagecodex.com/images/icon_grade11.png",
+  "Коллекционный фамильяр":
+    "https://archeagecodex.com/images/icon_grade11.png",
+  "Баф фигура 3 эпоха": "https://archeagecodex.com/images/icon_grade10.png",
+  "Баф фигура 4 эпоха": "https://archeagecodex.com/images/icon_grade11.png",
+  "Баф фигура 5 эпоха": "https://archeagecodex.com/images/icon_grade12.png",
+  "Красный Дракон": "https://archeagecodex.com/images/icon_grade6.png",
+  "Черный Дракон": "https://archeagecodex.com/images/icon_grade6.png",
+  "Зеленый Дракон": "https://archeagecodex.com/images/icon_grade6.png",
+};
 
 export default function AvailableItemsTable({
   data,
@@ -79,9 +87,9 @@ export default function AvailableItemsTable({
                             height={24}
                             className="rounded"
                           />
-                          {T2_FRAME_LABELS.has(item.label) && (
+                          {GRADE_FRAME_LABELS[item.label] && (
                             <Image
-                              src={T2_FRAME_URL}
+                              src={GRADE_FRAME_LABELS[item.label]}
                               alt=""
                               width={24}
                               height={24}
