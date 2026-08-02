@@ -10,6 +10,7 @@ import {
   dayNames,
   getMoscowTime,
   getDateWithTime,
+  eventEmoji,
 } from "@/shared/config/fixedSchedule";
 
 export const runtime = "nodejs";
@@ -73,8 +74,9 @@ export async function POST(req: NextRequest) {
       continue;
     }
 
+    const emoji = eventEmoji[boss] ?? "⚠️";
     await sendVkMessage(
-      `${tag} ⚠️ Скоро ${boss}! Начало в ${time} (через ${leadMinutes} мин).`,
+      `${tag} ${emoji}${boss}${emoji} Начало в ${time} (через ${leadMinutes} мин).`,
     );
     sent += 1;
   }

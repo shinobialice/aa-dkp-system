@@ -116,6 +116,18 @@ export const dayNames = [
   "Суббота",
 ];
 
+export const eventEmoji: Record<string, string> = {
+  АГЛ: "⚔️",
+  Кошка: "🐱",
+  "Пепельные равнины": "🌋",
+  Кракен: "🐙",
+  Калидис: "🌊",
+  Анталлон: "😈",
+  Ксанатос: "🐉",
+  Левиафан: "🐲",
+  "Осада замка": "🏰",
+};
+
 const vkNotificationExcludedEvents = new Set(["Великий луг", "Оборона Ифнира"]);
 
 export const fixedScheduleEvents = Array.from(
