@@ -37,7 +37,7 @@ export default function InventoryItemCard({
 
   const handleChange = async (value: string) => {
     if (item.name === "Бафалка") {
-      if (value === "Нету") {
+      if (value === "Нет") {
         if (userItem) {
           await deleteItemFromUserInventory(userItem.id);
         }
@@ -57,7 +57,7 @@ export default function InventoryItemCard({
         "Коллекционный фамильяр т2",
       ].includes(item.name)
     ) {
-      if (value === "Нету") {
+      if (value === "Нет") {
         if (userItem) {
           await deleteItemFromUserInventory(userItem.id);
         }
@@ -70,7 +70,7 @@ export default function InventoryItemCard({
         }
       }
     } else if (isDragon) {
-      if (value === "Нету") {
+      if (value === "Нет") {
         if (userItem) {
           await deleteItemFromUserInventory(userItem.id);
         }
@@ -82,7 +82,7 @@ export default function InventoryItemCard({
       }
     } else if (value === "Есть" && !userItem) {
       await addItemToUserInventory(userId, item.name, item.type, null);
-    } else if (value === "Нету" && userItem) {
+    } else if (value === "Нет" && userItem) {
       await deleteItemFromUserInventory(userItem.id);
     }
     onChange();

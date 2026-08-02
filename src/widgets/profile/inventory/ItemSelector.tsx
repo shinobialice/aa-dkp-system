@@ -35,35 +35,35 @@ export default function ItemSelector({
   const getDisplayValue = () => {
     if (isBafalka) {
       return !userItem
-        ? "Нету"
+        ? "Нет"
         : userItem.quality === "3"
           ? "3 эпоха"
           : userItem.quality === "4"
             ? "4 эпоха"
             : userItem.quality === "5"
               ? "5 эпоха"
-              : "Нету";
+              : "Нет";
     }
 
     if (isDragon) {
-      return userItem?.name || "Нету";
+      return userItem?.name || "Нет";
     }
 
     if (isSpecialItem) {
       return !userItem
-        ? "Нету"
+        ? "Нет"
         : userItem.quality === "3"
           ? "T1"
           : userItem.quality === "4"
             ? "T2"
-            : "Нету";
+            : "Нет";
     }
 
-    return userItem ? "Есть" : "Нету";
+    return userItem ? "Есть" : "Нет";
   };
 
   if (!canEdit) {
-    const isPresent = getDisplayValue() !== "Нету";
+    const isPresent = getDisplayValue() !== "Нет";
     return (
       <span
         className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
@@ -82,14 +82,14 @@ export default function ItemSelector({
       <Select
         value={
           !userItem
-            ? "Нету"
+            ? "Нет"
             : userItem.quality === "3"
               ? "3 эпоха"
               : userItem.quality === "4"
                 ? "4 эпоха"
                 : userItem.quality === "5"
                   ? "5 эпоха"
-                  : "Нету"
+                  : "Нет"
         }
         onValueChange={onChange}
       >
@@ -97,7 +97,7 @@ export default function ItemSelector({
           <SelectValue placeholder="Выбрать" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="Нету">Нету</SelectItem>
+          <SelectItem value="Нет">Нет</SelectItem>
           <SelectItem value="3 эпоха">3 эпоха</SelectItem>
           <SelectItem value="4 эпоха">4 эпоха</SelectItem>
           <SelectItem value="5 эпоха">5 эпоха</SelectItem>
@@ -109,14 +109,14 @@ export default function ItemSelector({
   if (isDragon) {
     return (
       <Select
-        value={!userItem ? "Нету" : userItem.name}
+        value={!userItem ? "Нет" : userItem.name}
         onValueChange={onChange}
       >
         <SelectTrigger size="sm" className={triggerClass}>
           <SelectValue placeholder="Выбрать" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="Нету">Нету</SelectItem>
+          <SelectItem value="Нет">Нет</SelectItem>
           <SelectItem value="Красный Дракон">Красный Дракон</SelectItem>
           <SelectItem value="Черный Дракон">Черный Дракон</SelectItem>
           <SelectItem value="Зеленый Дракон">Зеленый Дракон</SelectItem>
@@ -130,12 +130,12 @@ export default function ItemSelector({
       <Select
         value={
           !userItem
-            ? "Нету"
+            ? "Нет"
             : userItem.quality === "3"
               ? "T1"
               : userItem.quality === "4"
                 ? "T2"
-                : "Нету"
+                : "Нет"
         }
         onValueChange={onChange}
       >
@@ -143,7 +143,7 @@ export default function ItemSelector({
           <SelectValue placeholder="Выбрать" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="Нету">Нету</SelectItem>
+          <SelectItem value="Нет">Нет</SelectItem>
           <SelectItem value="T1">T1</SelectItem>
           <SelectItem value="T2">T2</SelectItem>
         </SelectContent>
@@ -152,13 +152,13 @@ export default function ItemSelector({
   }
 
   return (
-    <Select value={userItem ? "Есть" : "Нету"} onValueChange={onChange}>
+    <Select value={userItem ? "Есть" : "Нет"} onValueChange={onChange}>
       <SelectTrigger size="sm" className={triggerClass}>
         <SelectValue placeholder="Выбрать" />
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="Есть">Есть</SelectItem>
-        <SelectItem value="Нету">Нету</SelectItem>
+        <SelectItem value="Нет">Нет</SelectItem>
       </SelectContent>
     </Select>
   );
