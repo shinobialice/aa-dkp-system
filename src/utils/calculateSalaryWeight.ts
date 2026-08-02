@@ -14,6 +14,7 @@ type SalaryWeightInput = {
   active: boolean;
   isEligibleForSalary: boolean;
   joinedAt: string | Date | null;
+  probationBypass: boolean;
   tags: string[];
   primePercent: number;
   totalPercent: number;
@@ -51,6 +52,7 @@ export default function calculateSalaryWeight(
     active,
     isEligibleForSalary,
     joinedAt,
+    probationBypass,
     tags,
     primePercent,
     totalPercent,
@@ -82,7 +84,7 @@ export default function calculateSalaryWeight(
     };
   }
 
-  if (!isProbationOver(joinedAt, asOf)) {
+  if (!probationBypass && !isProbationOver(joinedAt, asOf)) {
     return { eligible: false, reason: "Испытательный срок не завершён", finalWeight: 0, penaltyPercent: 0 };
   }
 

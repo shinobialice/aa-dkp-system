@@ -15,19 +15,20 @@ const AfkPage = async () => {
     joined_at: string | null;
     active: boolean;
     is_eligible_for_salary: boolean;
+    probation_bypass: boolean;
   };
 
   const [inactiveRes, afkTagsRes] = await Promise.all([
     supabase
       .from("user")
       .select(
-        "id, username, class, class_gear_score, joined_at, active, is_eligible_for_salary, inactive_since",
+        "id, username, class, class_gear_score, joined_at, active, is_eligible_for_salary, probation_bypass, inactive_since",
       )
       .eq("active", false),
     supabase
       .from("user_tags")
       .select(
-        "created_at, user(id, username, class, class_gear_score, joined_at, active, is_eligible_for_salary)",
+        "created_at, user(id, username, class, class_gear_score, joined_at, active, is_eligible_for_salary, probation_bypass)",
       )
       .eq("tag", "АФК")
       .is("removed_at", null),

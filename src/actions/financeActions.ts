@@ -174,7 +174,9 @@ export const generateSalaries = async (month: number, year: number) => {
 
   const { data: allEligible, error: usersError } = await supabase
     .from("user")
-    .select("id, joined_at, class, class_gear_score, active, inactive_since")
+    .select(
+      "id, joined_at, class, class_gear_score, active, inactive_since, probation_bypass",
+    )
     .eq("is_eligible_for_salary", true);
 
   if (usersError || !allEligible) {

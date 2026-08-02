@@ -25,12 +25,14 @@ type UserType = {
   id: number;
   active: boolean;
   is_eligible_for_salary: boolean;
+  probation_bypass: boolean;
   joined_at: string | Date;
 };
 
 const badgeColors: Record<string, string> = {
   Активен: "rgb(47, 158, 98)",
   "Получает зарплату": "rgb(23, 133, 115)",
+  "Испыталка не учитывается": "rgb(161, 98, 7)",
   Администратор: "rgb(215, 100, 168)",
   Модератор: "rgb(58, 76, 92)",
   Секретутка: "rgb(79, 70, 229)",
@@ -93,6 +95,14 @@ export function UserTagsSection({
     setUpdating(true);
     await updateUser(user.id, { is_eligible_for_salary: newValue });
     setUser({ ...user, is_eligible_for_salary: newValue });
+    setUpdating(false);
+    onUpdate();
+  }
+
+  async function toggleProbationBypass(newValue: boolean) {
+    setUpdating(true);
+    await updateUser(user.id, { probation_bypass: newValue });
+    setUser({ ...user, probation_bypass: newValue });
     setUpdating(false);
     onUpdate();
   }
@@ -180,6 +190,22 @@ export function UserTagsSection({
           <Switch
             checked={user.is_eligible_for_salary}
             onCheckedChange={toggleSalary}
+            disabled={updating}
+            className="cursor-pointer"
+          />
+        )}
+      </div>
+      <div className="flex justify-between items-center py-4">
+        <Badge
+          className="text-background"
+          style={{ backgroundColor: badgeColors["Испыталка не учитывается"] }}
+        >
+          Испыталка не учитывается
+        </Badge>
+        {isAdmin && (
+          <Switch
+            checked={user.probation_bypass}
+            onCheckedChange={toggleProbationBypass}
             disabled={updating}
             className="cursor-pointer"
           />

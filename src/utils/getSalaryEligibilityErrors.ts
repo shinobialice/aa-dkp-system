@@ -4,6 +4,7 @@ import calculateRequiredGearScore from "./calculateRequiredGearScore";
 type UserForEligibility = {
   active: boolean;
   joined_at: string | Date | null;
+  probation_bypass?: boolean;
   class?: string | null;
   class_gear_score?: number | null;
 };
@@ -35,7 +36,7 @@ function getSalaryEligibilityErrors(
 
   if (!user.joined_at) {
     hardErrors.push("Дата вступления не указана");
-  } else if (!isProbationOver(user.joined_at)) {
+  } else if (!user.probation_bypass && !isProbationOver(user.joined_at)) {
     const day = new Date(user.joined_at).getDate();
     const needMonths = day <= 20 ? 1 : 2;
     hardErrors.push(

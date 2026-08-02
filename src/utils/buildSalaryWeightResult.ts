@@ -8,6 +8,7 @@ export type SalaryWeightUser = {
   joined_at: string | null;
   active: boolean;
   is_eligible_for_salary: boolean;
+  probation_bypass?: boolean;
   class?: string | null;
   class_gear_score?: number | null;
 };
@@ -44,6 +45,7 @@ export function buildSalaryWeightResult(
     active: user.active,
     isEligibleForSalary: user.is_eligible_for_salary,
     joinedAt: user.joined_at,
+    probationBypass: user.probation_bypass ?? false,
     tags,
     primePercent: attendance.primePercent,
     totalPercent: attendance.totalPercent,

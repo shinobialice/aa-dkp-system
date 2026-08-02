@@ -16,6 +16,7 @@ const getUser = async (userId: number) => {
       vk_name,
       active,
       is_eligible_for_salary,
+      probation_bypass,
       joined_at,
       avatar_url
     `,
