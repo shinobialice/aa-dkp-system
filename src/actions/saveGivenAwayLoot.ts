@@ -54,18 +54,19 @@ export const saveGivenAwayLoot = async (
     const { data: existingInventory, error: inventoryFindError } =
       await supabase
         .from("user_inventory")
-        .select("id")
+        .select("id, type")
         .eq("user_id", userId)
         .eq("name", item.name)
-        .eq("type", "Выдано")
-        .maybeSingle();
+        .limit(1);
 
     if (inventoryFindError) {
       console.error("Ошибка при поиске инвентаря:", inventoryFindError);
       throw new Error("Не удалось проверить инвентарь");
     }
 
-    if (!existingInventory) {
+    const inventoryRow = existingInventory?.[0] ?? null;
+
+    if (!inventoryRow) {
       const { error: insertInventoryError } = await supabase
         .from("user_inventory")
         .insert([
@@ -79,6 +80,15 @@ export const saveGivenAwayLoot = async (
 
       if (insertInventoryError) {
         throw new Error("Ошибка при добавлении предмета в инвентарь");
+      }
+    } else if (inventoryRow.type === "Выдано") {
+      const { error: updateInventoryError } = await supabase
+        .from("user_inventory")
+        .update({ created_at: dateObj })
+        .eq("id", inventoryRow.id);
+
+      if (updateInventoryError) {
+        throw new Error("Ошибка при обновлении инвентаря");
       }
     }
   } else {

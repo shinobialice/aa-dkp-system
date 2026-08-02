@@ -84,22 +84,43 @@ export async function distributeLootItem({
 
   // 5. Add to user inventory if applicable
   if (soldToId) {
-    const { error: inventoryError } = await supabase
-      .from("user_inventory")
-      .insert([
-        {
-          user_id: soldToId,
-          name: loot.item_type.name,
-          type: isFree ? "Выдано" : "Куплено",
-          created_at: new Date().toISOString(),
-          quantity,
-          loot_id: created.id,
-        },
-      ]);
+    let skipInsert = false;
 
-    if (inventoryError) {
-      console.error(inventoryError);
-      throw new Error("Ошибка при добавлении предмета в инвентарь");
+    if (isFree) {
+      const { data: existingInventory, error: inventoryFindError } =
+        await supabase
+          .from("user_inventory")
+          .select("id")
+          .eq("user_id", soldToId)
+          .eq("name", loot.item_type.name)
+          .limit(1);
+
+      if (inventoryFindError) {
+        console.error(inventoryFindError);
+        throw new Error("Не удалось проверить инвентарь");
+      }
+
+      skipInsert = (existingInventory?.length ?? 0) > 0;
+    }
+
+    if (!skipInsert) {
+      const { error: inventoryError } = await supabase
+        .from("user_inventory")
+        .insert([
+          {
+            user_id: soldToId,
+            name: loot.item_type.name,
+            type: isFree ? "Выдано" : "Куплено",
+            created_at: new Date().toISOString(),
+            quantity,
+            loot_id: created.id,
+          },
+        ]);
+
+      if (inventoryError) {
+        console.error(inventoryError);
+        throw new Error("Ошибка при добавлении предмета в инвентарь");
+      }
     }
   }
 }

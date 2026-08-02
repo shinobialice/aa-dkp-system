@@ -23,7 +23,7 @@ const ITEM_ICONS: Record<string, string> = {
   "Колл. глайдер": inventoryIcons["Коллеционный глайдер"],
   "Колл. глайдер т2": inventoryIcons["Коллеционный глайдер т2"],
   ККЛ: inventoryIcons["Крылья кровавого легиона"],
-  "Драк. глайдер": inventoryIcons["Глайдер дракон"],
+  "Драк. глайдер": inventoryIcons["Глайдер охотника на драконов"],
   "Глайдер Авиары": inventoryIcons["Авиара"],
   "Колл. пет": inventoryIcons["Коллекционный фамильяр"],
   Дракон: inventoryIcons["Дракон"],

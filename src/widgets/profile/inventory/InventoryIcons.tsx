@@ -7,7 +7,8 @@ const inventoryIcons: { [key: string]: string } = {
   "Коллеционный глайдер": "https://archeagecodex.com/items/icon_item_4502.png",
   "Крылья кровавого легиона":
     "https://archeagecodex.com/items/icon_item_3936.png",
-  "Глайдер дракон": "https://archeagecodex.com/items/icon_item_1369.png",
+  "Глайдер охотника на драконов":
+    "https://archeagecodex.com/items/icon_item_1205.png",
   Авиара: "https://archeagecodex.com/items/icon_item_4312.png",
   "Коллеционный глайдер т2":
     "https://archeagecodex.com/items/icon_item_5871.png",
