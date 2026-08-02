@@ -13,8 +13,6 @@ export type VkNotificationSettings = {
   quietHoursEnd: number;
 };
 
-// Совпадает с DEFAULT'ами в migration_vk_notification_settings.sql —
-// подстраховка на случай, если singleton-строка ещё не создана в БД.
 const DEFAULT_SETTINGS: VkNotificationSettings = {
   enabledBosses: ["Марли", "Морф", "Кириос"],
   notifyBeforeMinutes: 10,
@@ -23,9 +21,6 @@ const DEFAULT_SETTINGS: VkNotificationSettings = {
   quietHoursEnd: 7,
 };
 
-// Читается и из настроек (клиентская форма), и из registerBossKill.ts /
-// app/api/notify-respawn/route.ts — последний публичный (без сессии), не
-// требует прав, поэтому не под ensurePrivilieges.
 export async function getVkNotificationSettings(): Promise<VkNotificationSettings> {
   const { data, error } = await supabase
     .from("vk_notification_settings")

@@ -19,8 +19,6 @@ export async function scheduleRespawnNotification(
     }
   }
 
-  // notifyAt === null — босс выключен в настройках уведомлений ВК, только
-  // отменяем предыдущее сообщение выше, новое не планируем.
   if (!notifyAt || notifyAt.getTime() <= Date.now()) return null;
 
   const { messageId } = await qstash.publishJSON({

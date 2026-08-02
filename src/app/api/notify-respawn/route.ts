@@ -11,9 +11,6 @@ const receiver = new Receiver({
   nextSigningKey: process.env.QSTASH_NEXT_SIGNING_KEY!,
 });
 
-// start === end трактуем как «весь день не тихий», а не «весь день тихий» —
-// иначе одинаковые значения в форме молча вырубили бы все уведомления.
-// start > end — интервал через полночь (например 23-7).
 function isQuietHours(start: number, end: number): boolean {
   if (start === end) return false;
 
@@ -52,9 +49,6 @@ export async function POST(req: NextRequest) {
   const { boss } = JSON.parse(body) as { boss: BossName };
   const settings = await getVkNotificationSettings();
 
-  // Проверяем тихие часы и включённость босса на момент фактической
-  // доставки, а не постановки в очередь — так правки настроек между
-  // регистрацией килла и респауном тоже учитываются.
   if (
     settings.quietHoursEnabled &&
     isQuietHours(settings.quietHoursStart, settings.quietHoursEnd)
