@@ -10,6 +10,7 @@ const notifyBeforeMin = 10;
 
 function playAlertSound() {
   const audio = new Audio("/images/notification/notification.wav");
+  audio.volume = 0.3;
   audio.play().catch(() => {});
 }
 
