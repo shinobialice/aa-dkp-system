@@ -33,13 +33,22 @@ import {
   TableCell,
 } from "@/shared/ui";
 import { saveGivenAwayLoot } from "@/actions/saveGivenAwayLoot";
+import {
+  addMiscLootGrant,
+  deleteMiscLootGrant,
+  type MiscLootGrant,
+} from "@/actions/miscLootGrants";
+import {
+  addWishlistItem,
+  deleteWishlistItem,
+  type WishlistItem,
+} from "@/actions/lootWishlist";
 
 const NONE_STATUS = "__none__";
 
 type LootItem = {
   name: string;
   date: string;
-  comment?: string;
   status: string;
 };
 
@@ -55,12 +64,162 @@ type Player = {
   active: boolean;
   loot: LootItem[];
   gliders: GliderItem[];
+  miscGrants: MiscLootGrant[];
+  wishlist: WishlistItem[];
 };
 
 type LootGiveawayProps = {
   initialPlayers: Player[];
   isAdmin: boolean; // Add isAdmin prop
 };
+
+function AddMiscGrantForm({
+  onAdd,
+}: {
+  onAdd: (grant: { comment: string; amount: number | null; date: string }) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [comment, setComment] = useState("");
+  const [amount, setAmount] = useState("");
+  const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]);
+
+  if (!open) {
+    return (
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        className="h-6 px-2 text-xs cursor-pointer justify-start"
+        onClick={() => setOpen(true)}
+      >
+        + добавить
+      </Button>
+    );
+  }
+
+  const handleSubmit = () => {
+    if (!comment.trim()) return;
+    onAdd({ comment: comment.trim(), amount: amount ? Number(amount) : null, date });
+    setComment("");
+    setAmount("");
+    setOpen(false);
+  };
+
+  return (
+    <div className="flex flex-col gap-1 border rounded p-1">
+      <Input
+        placeholder="Комментарий"
+        value={comment}
+        onChange={(e) => setComment(e.target.value)}
+        className="text-xs h-7"
+      />
+      <div className="flex items-center gap-1">
+        <Input
+          type="number"
+          placeholder="Сумма"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          className="text-xs h-7 w-20"
+        />
+        <input
+          type="date"
+          className="text-xs border rounded px-1 py-0.5 h-7 flex-1"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+        />
+      </div>
+      <div className="flex items-center gap-1">
+        <Button
+          type="button"
+          size="sm"
+          className="h-6 px-2 text-xs cursor-pointer"
+          disabled={!comment.trim()}
+          onClick={handleSubmit}
+        >
+          Добавить
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="h-6 px-2 text-xs cursor-pointer"
+          onClick={() => setOpen(false)}
+        >
+          Отмена
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function AddWishlistForm({
+  onAdd,
+}: {
+  onAdd: (item: { itemName: string; comment: string }) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [itemName, setItemName] = useState("");
+  const [comment, setComment] = useState("");
+
+  if (!open) {
+    return (
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        className="h-6 px-2 text-xs cursor-pointer justify-start"
+        onClick={() => setOpen(true)}
+      >
+        + добавить
+      </Button>
+    );
+  }
+
+  const handleSubmit = () => {
+    if (!itemName.trim()) return;
+    onAdd({ itemName: itemName.trim(), comment: comment.trim() });
+    setItemName("");
+    setComment("");
+    setOpen(false);
+  };
+
+  return (
+    <div className="flex flex-col gap-1 border rounded p-1">
+      <Input
+        placeholder="Название предмета"
+        value={itemName}
+        onChange={(e) => setItemName(e.target.value)}
+        className="text-xs h-7"
+      />
+      <Input
+        placeholder="Комментарий (необязательно)"
+        value={comment}
+        onChange={(e) => setComment(e.target.value)}
+        className="text-xs h-7"
+      />
+      <div className="flex items-center gap-1">
+        <Button
+          type="button"
+          size="sm"
+          className="h-6 px-2 text-xs cursor-pointer"
+          disabled={!itemName.trim()}
+          onClick={handleSubmit}
+        >
+          Добавить
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="h-6 px-2 text-xs cursor-pointer"
+          onClick={() => setOpen(false)}
+        >
+          Отмена
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 export default function LootGiveaway({
   initialPlayers,
@@ -86,18 +245,13 @@ export default function LootGiveaway({
     Object.assign(loot, changes);
     setAllPlayers(updated);
 
-    const { name, date, comment, status } = loot;
+    const { name, date, status } = loot;
     const isValidDate = date && !isNaN(Date.parse(date));
-    if (
-      !name.startsWith("Прочее") &&
-      status &&
-      (status === "Выдано" ? isValidDate : true)
-    ) {
+    if (status && (status === "Выдано" ? isValidDate : true)) {
       startTransition(() => {
         saveGivenAwayLoot(updated[playerIndex].id, {
           name,
           date: isValidDate ? date : new Date().toISOString().split("T")[0],
-          comment,
           status,
         });
       });
@@ -142,6 +296,60 @@ export default function LootGiveaway({
         date: new Date().toISOString().split("T")[0],
         status: "",
       });
+    });
+  };
+
+  const handleAddMiscGrant = async (
+    playerIndex: number,
+    grant: { comment: string; amount: number | null; date: string },
+  ) => {
+    const created = await addMiscLootGrant(allPlayers[playerIndex].id, grant);
+    const updated = [...allPlayers];
+    updated[playerIndex] = {
+      ...updated[playerIndex],
+      miscGrants: [...updated[playerIndex].miscGrants, created].sort((a, b) =>
+        a.date.localeCompare(b.date),
+      ),
+    };
+    setAllPlayers(updated);
+  };
+
+  const handleRemoveMiscGrant = (playerIndex: number, id: number) => {
+    const updated = [...allPlayers];
+    updated[playerIndex] = {
+      ...updated[playerIndex],
+      miscGrants: updated[playerIndex].miscGrants.filter((g) => g.id !== id),
+    };
+    setAllPlayers(updated);
+
+    startTransition(() => {
+      deleteMiscLootGrant(id);
+    });
+  };
+
+  const handleAddWishlistItem = async (
+    playerIndex: number,
+    item: { itemName: string; comment: string },
+  ) => {
+    const created = await addWishlistItem(allPlayers[playerIndex].id, item);
+    const updated = [...allPlayers];
+    updated[playerIndex] = {
+      ...updated[playerIndex],
+      wishlist: [...updated[playerIndex].wishlist, created],
+    };
+    setAllPlayers(updated);
+  };
+
+  const handleRemoveWishlistItem = (playerIndex: number, id: number) => {
+    const updated = [...allPlayers];
+    updated[playerIndex] = {
+      ...updated[playerIndex],
+      wishlist: updated[playerIndex].wishlist.filter((w) => w.id !== id),
+    };
+    setAllPlayers(updated);
+
+    startTransition(() => {
+      deleteWishlistItem(id);
     });
   };
 
@@ -241,22 +449,6 @@ export default function LootGiveaway({
     const dateValid = loot.date && !isNaN(Date.parse(loot.date));
 
     if (!isEditMode) {
-      if (loot.name.startsWith("Прочее")) {
-        if (loot.comment && dateValid) {
-          return `${loot.comment} (${format(
-            new Date(loot.date),
-            "dd.MM.yyyy",
-          )})`;
-        }
-        if (loot.comment) {
-          return loot.comment;
-        }
-        if (dateValid) {
-          return format(new Date(loot.date), "dd.MM.yyyy");
-        }
-        return "–";
-      }
-
       if (loot.status === "В наличии") {
         return "В наличии";
       }
@@ -266,29 +458,6 @@ export default function LootGiveaway({
           : "Выдано";
       }
       return "–";
-    }
-
-    if (loot.name.startsWith("Прочее")) {
-      return (
-        <div className="flex flex-col gap-1">
-          <Input
-            placeholder="Название предмета"
-            value={loot.comment || ""}
-            onChange={(e) =>
-              updateLoot(playerIndex, lootIndex, { comment: e.target.value })
-            }
-            className="text-xs"
-          />
-          <input
-            type="date"
-            className="text-xs border rounded px-2 py-1"
-            value={loot.date || ""}
-            onChange={(e) =>
-              updateLoot(playerIndex, lootIndex, { date: e.target.value })
-            }
-          />
-        </div>
-      );
     }
 
     return (
@@ -325,6 +494,84 @@ export default function LootGiveaway({
     );
   };
 
+  const renderMiscCell = (
+    grants: MiscLootGrant[],
+    isEditMode: boolean,
+    playerIndex: number,
+  ) => {
+    const formatGrant = (g: MiscLootGrant) => {
+      const dateValid = g.date && !isNaN(Date.parse(g.date));
+      const amountPart = g.amount != null ? `${g.amount}: ` : "";
+      const datePart = dateValid
+        ? ` (${format(new Date(g.date), "dd.MM.yyyy")})`
+        : "";
+      return `${amountPart}${g.comment}${datePart}`;
+    };
+
+    if (!isEditMode) {
+      if (grants.length === 0) return "–";
+      return grants.map(formatGrant).join("; ");
+    }
+
+    return (
+      <div className="flex flex-col gap-1 min-w-48">
+        {grants.map((g) => (
+          <div key={g.id} className="flex items-center gap-1">
+            <span className="text-xs flex-1">{formatGrant(g)}</span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              className="size-6 cursor-pointer text-muted-foreground"
+              onClick={() => handleRemoveMiscGrant(playerIndex, g.id)}
+            >
+              <X />
+            </Button>
+          </div>
+        ))}
+        <AddMiscGrantForm
+          onAdd={(grant) => handleAddMiscGrant(playerIndex, grant)}
+        />
+      </div>
+    );
+  };
+
+  const renderWishlistCell = (
+    wishlist: WishlistItem[],
+    isEditMode: boolean,
+    playerIndex: number,
+  ) => {
+    const formatItem = (w: WishlistItem) =>
+      w.comment ? `${w.itemName} (${w.comment})` : w.itemName;
+
+    if (!isEditMode) {
+      if (wishlist.length === 0) return "–";
+      return wishlist.map(formatItem).join(", ");
+    }
+
+    return (
+      <div className="flex flex-col gap-1 min-w-48">
+        {wishlist.map((w) => (
+          <div key={w.id} className="flex items-center gap-1">
+            <span className="text-xs flex-1">{formatItem(w)}</span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              className="size-6 cursor-pointer text-muted-foreground"
+              onClick={() => handleRemoveWishlistItem(playerIndex, w.id)}
+            >
+              <X />
+            </Button>
+          </div>
+        ))}
+        <AddWishlistForm
+          onAdd={(item) => handleAddWishlistItem(playerIndex, item)}
+        />
+      </div>
+    );
+  };
+
   const lootTableColumns: ColumnDef<Player>[] = lootColumns.map(
     (col, lootIndex) => ({
       id: col,
@@ -351,6 +598,25 @@ export default function LootGiveaway({
   const andhakarIndex = lootColumns.indexOf("Анд'хакар, Чернильная тьма");
   lootTableColumns.splice(andhakarIndex + 1, 0, gliderColumn);
 
+  const miscColumn: ColumnDef<Player> = {
+    id: "Прочее",
+    header: "Прочее",
+    cell: ({ row }) => {
+      const playerIndex = allPlayers.findIndex((p) => p.id === row.original.id);
+      return renderMiscCell(row.original.miscGrants, editMode, playerIndex);
+    },
+  };
+  lootTableColumns.push(miscColumn);
+
+  const wishlistColumn: ColumnDef<Player> = {
+    id: "Хочет",
+    header: "Хочет",
+    cell: ({ row }) => {
+      const playerIndex = allPlayers.findIndex((p) => p.id === row.original.id);
+      return renderWishlistCell(row.original.wishlist, editMode, playerIndex);
+    },
+  };
+
   const tableColumns: ColumnDef<Player>[] = [
     {
       accessorKey: "username",
@@ -363,6 +629,7 @@ export default function LootGiveaway({
       cell: ({ row }) => <Switch checked={row.getValue("active")} disabled />,
     },
     ...lootTableColumns,
+    wishlistColumn,
   ];
 
   const table = useReactTable({

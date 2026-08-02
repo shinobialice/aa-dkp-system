@@ -12,7 +12,9 @@ export default async function Page() {
 
   const { data: users, error } = await supabase
     .from("user")
-    .select("id, username, active, givenawayloot(name, date, comment, status)")
+    .select(
+      "id, username, active, givenawayloot(name, date, status), misc_loot_grants(id, comment, amount, date), loot_wishlist(id, item_name, comment)",
+    )
     .order("id", { ascending: true });
 
   if (error || !users) {
@@ -29,7 +31,6 @@ export default async function Page() {
       return {
         name,
         date: record?.date?.split("T")[0] || "",
-        comment: record?.comment || "",
         status: record?.status || "",
       };
     }),
@@ -41,6 +42,19 @@ export default async function Page() {
         status: record?.status || "",
       };
     }),
+    miscGrants: (user.misc_loot_grants ?? [])
+      .map((g) => ({
+        id: g.id,
+        comment: g.comment,
+        amount: g.amount === null ? null : Number(g.amount),
+        date: g.date?.split("T")[0] || "",
+      }))
+      .sort((a, b) => a.date.localeCompare(b.date)),
+    wishlist: (user.loot_wishlist ?? []).map((w) => ({
+      id: w.id,
+      itemName: w.item_name,
+      comment: w.comment,
+    })),
   }));
 
   return <LootGiveaway isAdmin={isAdmin} initialPlayers={initialPlayers} />;
