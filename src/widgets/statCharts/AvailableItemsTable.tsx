@@ -22,23 +22,24 @@ const ITEM_ICONS: Record<string, string> = {
   "Баф фигура 3 эпоха": inventoryIcons["Бафалка"],
   "Баф фигура 4 эпоха": inventoryIcons["Бафалка"],
   "Баф фигура 5 эпоха": inventoryIcons["Бафалка"],
-  "Колл. глайдер": inventoryIcons["Коллеционный глайдер"],
-  "Колл. глайдер т2": inventoryIcons["Коллеционный глайдер т2"],
+  "Коллеционный глайдер": inventoryIcons["Коллеционный глайдер"],
+  "Коллеционный глайдер Т2": inventoryIcons["Коллеционный глайдер т2"],
   ККЛ: inventoryIcons["Крылья кровавого легиона"],
   "Драк. глайдер": inventoryIcons["Глайдер охотника на драконов"],
   "Глайдер Авиары": inventoryIcons["Авиара"],
-  "Колл. пет": inventoryIcons["Коллекционный фамильяр"],
+  "Коллекционный фамильяр": inventoryIcons["Коллекционный фамильяр"],
   "Красный Дракон": inventoryIcons["Красный Дракон"],
   "Черный Дракон": inventoryIcons["Черный Дракон"],
   "Зеленый Дракон": inventoryIcons["Зеленый Дракон"],
   Рокана: getLootIconUrl("Ро'кана, Безумие морей"),
   "Кряк. щит": getLootIconUrl("Анд'хакар, Чернильная тьма"),
-  "Коллекционный фамильяр": inventoryIcons["Коллекционный фамильяр т2"],
+  "Коллекционный фамильяр Т2": inventoryIcons["Коллекционный фамильяр т2"],
 };
 
 const GRADE_FRAME_LABELS: Record<string, string> = {
-  "Колл. глайдер т2": "https://archeagecodex.com/images/icon_grade11.png",
-  "Коллекционный фамильяр":
+  "Коллеционный глайдер Т2":
+    "https://archeagecodex.com/images/icon_grade11.png",
+  "Коллекционный фамильяр Т2":
     "https://archeagecodex.com/images/icon_grade11.png",
   "Баф фигура 3 эпоха": "https://archeagecodex.com/images/icon_grade10.png",
   "Баф фигура 4 эпоха": "https://archeagecodex.com/images/icon_grade11.png",

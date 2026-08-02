@@ -12,6 +12,7 @@ const ITEM_SOURCES: {
   name: string;
   type?: string;
   quality?: string;
+  excludeQuality?: string;
 }[] = [
   { label: "Фрегат", name: "Фрегат", type: "Техника" },
   { label: "Кабуксон", name: "Кобуксон", type: "Техника" },
@@ -35,9 +36,14 @@ const ITEM_SOURCES: {
     type: "Техника",
     quality: "5",
   },
-  { label: "Колл. глайдер", name: "Коллеционный глайдер", type: "Глайдеры" },
   {
-    label: "Колл. глайдер т2",
+    label: "Коллеционный глайдер",
+    name: "Коллеционный глайдер",
+    type: "Глайдеры",
+    excludeQuality: "4",
+  },
+  {
+    label: "Коллеционный глайдер Т2",
     name: "Коллеционный глайдер",
     type: "Глайдеры",
     quality: "4",
@@ -45,14 +51,19 @@ const ITEM_SOURCES: {
   { label: "ККЛ", name: "Крылья кровавого легиона", type: "Глайдеры" },
   { label: "Драк. глайдер", name: "Дракон", type: "Глайдеры" },
   { label: "Глайдер Авиары", name: "Авиара", type: "Глайдеры" },
-  { label: "Колл. пет", name: "Коллекционный фамильяр", type: "Петы" },
+  {
+    label: "Коллекционный фамильяр",
+    name: "Коллекционный фамильяр",
+    type: "Петы",
+    excludeQuality: "4",
+  },
   { label: "Красный Дракон", name: "Красный Дракон", type: "Петы" },
   { label: "Черный Дракон", name: "Черный Дракон", type: "Петы" },
   { label: "Зеленый Дракон", name: "Зеленый Дракон", type: "Петы" },
   { label: "Рокана", name: "Ро'кана, Безумие морей" },
   { label: "Кряк. щит", name: "Анд'хакар, Чернильная тьма" },
   {
-    label: "Коллекционный фамильяр",
+    label: "Коллекционный фамильяр Т2",
     name: "Коллекционный фамильяр",
     type: "Петы",
     quality: "4",
@@ -82,7 +93,7 @@ export async function getInventoryStock(): Promise<InventoryStockStat[]> {
     users.filter((u) => u.active).map((u) => u.id),
   );
 
-  return ITEM_SOURCES.map(({ label, name, type, quality }) => {
+  return ITEM_SOURCES.map(({ label, name, type, quality, excludeQuality }) => {
     const owners = new Set(
       inventory
         .filter(
@@ -90,6 +101,7 @@ export async function getInventoryStock(): Promise<InventoryStockStat[]> {
             row.name === name &&
             (!type || row.type === type) &&
             (!quality || row.quality === quality) &&
+            (!excludeQuality || row.quality !== excludeQuality) &&
             activeUserIds.has(row.user_id),
         )
         .map((row) => row.user_id),
