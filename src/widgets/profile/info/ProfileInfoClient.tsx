@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import type { PrimeStreak } from "@/actions/getUserPrimeStreak";
 import ProfileAdditionalInfo from "./ProfileAdditionalInfo";
 import ProfileClasses from "./ProfileClasses";
 import ProfileHeader from "./ProfileHeader";
@@ -22,6 +23,7 @@ export default function ProfileInfoClient({
   isOwnProfile,
   activity,
   salary,
+  primeStreak,
 }: {
   user: any;
   tags: any[];
@@ -46,6 +48,7 @@ export default function ProfileInfoClient({
     totalPointsAvailable: number;
   };
   salary: number | null;
+  primeStreak: PrimeStreak;
 }) {
   const [tags, setTags] = useState(initialTags);
   const [editMode, setEditMode] = useState(false);
@@ -96,6 +99,7 @@ export default function ProfileInfoClient({
         setEditMode={setEditMode}
         tags={tags}
         setUsernameHistory={setUsernameHistory}
+        primeStreak={primeStreak}
       />
       <CardContent className="flex flex-wrap gap-x-8 gap-y-4 border-t py-5">
         <ProfileClasses

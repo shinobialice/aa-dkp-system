@@ -3,6 +3,7 @@ import getTasks from "@/actions/getTasks";
 import getUser from "@/actions/getUser";
 import getUserInventory from "@/actions/getUserInventory";
 import { getUserMonthlyAttendance } from "@/actions/getUserMonthlyAttendance";
+import { getUserPrimeStreak } from "@/actions/getUserPrimeStreak";
 import getUserNotes from "@/actions/getUserNotes";
 import { getUserCurrentMonthSalary } from "@/actions/getUserCurrentMonthSalary";
 import { getSessionUserId } from "@/actions/getSessionUserId";
@@ -25,16 +26,25 @@ export default async function Page(p: {
     new Date().getMonth() + 1,
   );
 
-  const [user, tags, inventory, tasks, notes, usernameHistory, salary] =
-    await Promise.all([
-      getUser(userId),
-      getUserTags(userId),
-      getUserInventory(userId),
-      getTasks(userId),
-      getUserNotes(userId),
-      getUsernameHistory(userId),
-      getUserCurrentMonthSalary(userId),
-    ]);
+  const [
+    user,
+    tags,
+    inventory,
+    tasks,
+    notes,
+    usernameHistory,
+    salary,
+    primeStreak,
+  ] = await Promise.all([
+    getUser(userId),
+    getUserTags(userId),
+    getUserInventory(userId),
+    getTasks(userId),
+    getUserNotes(userId),
+    getUsernameHistory(userId),
+    getUserCurrentMonthSalary(userId),
+    getUserPrimeStreak(userId),
+  ]);
 
   const sessionToken = (await cookies()).get("session_token")?.value ?? "";
   const isAdmin = await hasTag(sessionToken, ["Администратор"]);
@@ -74,6 +84,7 @@ export default async function Page(p: {
       averageGuildGS={averageGuildGS}
       activity={activity}
       salary={salary}
+      primeStreak={primeStreak}
     />
   );
 }

@@ -9,9 +9,11 @@ import { Input } from "@/shared/ui";
 import editUser from "@/actions/editUser";
 import { uploadAvatar } from "@/actions/uploadAvatar";
 import { getUsernameHistory } from "@/actions/usernameHistoryActions";
+import type { PrimeStreak } from "@/actions/getUserPrimeStreak";
 import RankProgress from "./RankProgress";
 import AnniversaryCelebration from "./AnniversaryCelebration";
 import DragonFlyby from "./DragonFlyby";
+import PrimeStreakBadge from "./PrimeStreakBadge";
 
 const badgeColors: { [key: string]: string } = {
   Активен: "rgb(47, 158, 98)",
@@ -38,6 +40,7 @@ export default function ProfileHeader({
   canEditProfile,
   canEditNickname,
   isOwnProfile,
+  primeStreak,
 }: {
   user: any;
   formData: any;
@@ -56,6 +59,7 @@ export default function ProfileHeader({
   canEditProfile: boolean;
   canEditNickname: boolean;
   isOwnProfile: boolean;
+  primeStreak: PrimeStreak;
 }) {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(
     user.avatar_url ?? null,
@@ -182,9 +186,12 @@ export default function ProfileHeader({
                   }
                 />
               ) : (
-                <h1 className="text-xl font-bold md:text-2xl">
-                  {formData.username}
-                </h1>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h1 className="text-xl font-bold md:text-2xl">
+                    {formData.username}
+                  </h1>
+                  <PrimeStreakBadge {...primeStreak} />
+                </div>
               )}
 
               <div className="flex flex-wrap gap-2">

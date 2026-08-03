@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import type { PrimeStreak } from "@/actions/getUserPrimeStreak";
 import ProfileInfoClient from "@/widgets/profile/info/ProfileInfoClient";
 import ProfileTabs from "@/widgets/profile/ProfileTabs";
 
@@ -12,6 +13,7 @@ export default function ProfilePageWrapper({
   averageGuildGS,
   activity,
   salary,
+  primeStreak,
   isAdmin,
   canEditProfile,
   canEditNickname,
@@ -40,6 +42,7 @@ export default function ProfilePageWrapper({
     totalPointsAvailable: number;
   };
   salary: number | null;
+  primeStreak: PrimeStreak;
   isAdmin: boolean;
   canEditProfile: boolean;
   canEditNickname: boolean;
@@ -67,6 +70,7 @@ export default function ProfilePageWrapper({
         setUsernameHistory={setUsernameHistory}
         activity={activity}
         salary={salary}
+        primeStreak={primeStreak}
       />
       <ProfileTabs
         user={user}
