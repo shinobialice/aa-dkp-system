@@ -9,4 +9,5 @@ export type LootQueueEntry = {
   createdAt: string;
   quantity?: number;
   roll: number | null;
+  position: number | null;
 };

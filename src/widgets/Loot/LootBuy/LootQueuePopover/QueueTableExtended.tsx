@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { GripVertical } from "lucide-react";
 import { LootQueueEntry } from "./LootQueueTypes";
 import { StatusBadge } from "./StatusBadge";
 import { Button } from "@/shared/ui";
@@ -23,6 +25,7 @@ type Props = {
   ) => Promise<void>;
   handleSold: (entry: LootQueueEntry) => Promise<void>;
   handleRemove: (entry: LootQueueEntry) => Promise<void>;
+  handleReorder: (fromIndex: number, toIndex: number) => void;
 };
 
 export function QueueTableExtended({
@@ -31,12 +34,16 @@ export function QueueTableExtended({
   handleChange,
   handleSold,
   handleRemove,
+  handleReorder,
 }: Props) {
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+
   return (
     <div className="max-h-[420px] overflow-y-auto border rounded mt-4">
       <Table>
         <TableHeader className="sticky top-0 z-1 bg-background">
           <TableRow>
+            {editMode && <TableHead className="w-[24px]" />}
             <TableHead className="w-[30px]">#</TableHead>
             <TableHead className="w-[100px]">Игрок</TableHead>
             <TableHead className="w-[100px]">Запрошено</TableHead>
@@ -51,7 +58,26 @@ export function QueueTableExtended({
           {queue.map((entry, index) => {
             const remaining = (entry.required || 0) - (entry.delivered || 0);
             return (
-              <TableRow key={entry.id}>
+              <TableRow
+                key={entry.id}
+                draggable={editMode}
+                onDragStart={() => setDragIndex(index)}
+                onDragOver={(e) => {
+                  if (editMode) e.preventDefault();
+                }}
+                onDrop={(e) => {
+                  if (!editMode || dragIndex === null) return;
+                  e.preventDefault();
+                  if (dragIndex !== index) handleReorder(dragIndex, index);
+                  setDragIndex(null);
+                }}
+                onDragEnd={() => setDragIndex(null)}
+              >
+                {editMode && (
+                  <TableCell className="cursor-grab active:cursor-grabbing">
+                    <GripVertical className="h-4 w-4 text-muted-foreground" />
+                  </TableCell>
+                )}
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>{entry.username}</TableCell>
                 <TableCell>

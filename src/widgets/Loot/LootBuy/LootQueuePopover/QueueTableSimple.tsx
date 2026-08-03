@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { GripVertical } from "lucide-react";
 import { LootQueueEntry } from "./LootQueueTypes";
 import { StatusBadge } from "./StatusBadge";
 import { Button } from "@/shared/ui";
@@ -17,6 +19,7 @@ type Props = {
   showRoll: boolean;
   handleSold: (entry: LootQueueEntry) => void;
   handleRemove: (entry: LootQueueEntry) => void;
+  handleReorder: (fromIndex: number, toIndex: number) => void;
   handleRollChange: (entry: LootQueueEntry, roll: number | null) => void;
   handleStatusToggle: (
     entry: LootQueueEntry,
@@ -30,13 +33,18 @@ export function QueueTableSimple({
   showRoll,
   handleSold,
   handleRemove,
+  handleReorder,
   handleRollChange,
   handleStatusToggle,
 }: Props) {
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const canDrag = editMode && !showRoll;
+
   return (
     <Table>
       <TableHeader>
         <TableRow>
+          {canDrag && <TableHead className="w-[24px]" />}
           <TableHead>#</TableHead>
           <TableHead>Игрок</TableHead>
           {showRoll && <TableHead>Ролл</TableHead>}
@@ -46,7 +54,26 @@ export function QueueTableSimple({
       </TableHeader>
       <TableBody>
         {queue.map((entry, index) => (
-          <TableRow key={entry.id}>
+          <TableRow
+            key={entry.id}
+            draggable={canDrag}
+            onDragStart={() => setDragIndex(index)}
+            onDragOver={(e) => {
+              if (canDrag) e.preventDefault();
+            }}
+            onDrop={(e) => {
+              if (!canDrag || dragIndex === null) return;
+              e.preventDefault();
+              if (dragIndex !== index) handleReorder(dragIndex, index);
+              setDragIndex(null);
+            }}
+            onDragEnd={() => setDragIndex(null)}
+          >
+            {canDrag && (
+              <TableCell className="cursor-grab active:cursor-grabbing">
+                <GripVertical className="h-4 w-4 text-muted-foreground" />
+              </TableCell>
+            )}
             <TableCell>{index + 1}</TableCell>
             <TableCell>
               <div className="flex items-center gap-2">

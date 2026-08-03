@@ -18,6 +18,7 @@ import { addToLootQueue } from "@/actions/addToLootQueue";
 import { getLootQueueByItemName } from "@/actions/getLootQueueByItemName";
 import { markQueueLootAsSold } from "@/actions/markQueueLootAsSold";
 import { removeFromLootQueue } from "@/actions/removeFromLootQueue";
+import { reorderLootQueue } from "@/actions/reorderLootQueue";
 import { updateLootQueueEntry } from "@/actions/updateLootQueueEntry";
 
 const extendedItems = ["Эссенция ярости", "Трофейная эссенция стихий"];
@@ -75,6 +76,14 @@ export function LootQueuePopover({
   const handleRemove = async (entry: LootQueueEntry) => {
     await removeFromLootQueue(entry.id);
     await refreshQueue();
+  };
+
+  const handleReorder = async (fromIndex: number, toIndex: number) => {
+    const reordered = [...queue];
+    const [moved] = reordered.splice(fromIndex, 1);
+    reordered.splice(toIndex, 0, moved);
+    setQueue(reordered);
+    await reorderLootQueue(reordered.map((entry) => entry.id));
   };
 
   const handleRollChange = async (
@@ -139,6 +148,7 @@ export function LootQueuePopover({
     handleChange,
     handleSold,
     handleRemove,
+    handleReorder,
   };
 
   const formProps = {

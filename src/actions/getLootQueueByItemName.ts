@@ -17,6 +17,7 @@ export const getLootQueueByItemName = async (itemName: string) => {
           delivered,
           created_at,
           roll,
+          position,
           user (
             username
           )
@@ -40,20 +41,33 @@ export const getLootQueueByItemName = async (itemName: string) => {
     delivered: number | null;
     created_at: string;
     roll: number | null;
+    position: number | null;
     user: { username: string } | null;
   };
 
   const lootQueue = (item.loot_queue || []) as unknown as LootQueueEntry[];
 
-  return lootQueue.map((entry) => ({
-    id: entry.id,
-    userId: entry.user_id,
-    username: entry.user?.username || "Unknown",
-    status: entry.status,
-    synth_target: entry.synth_target,
-    required: entry.required ?? 0,
-    delivered: entry.delivered ?? 0,
-    createdAt: entry.created_at,
-    roll: entry.roll,
-  }));
+  return lootQueue
+    .map((entry) => ({
+      id: entry.id,
+      userId: entry.user_id,
+      username: entry.user?.username || "Unknown",
+      status: entry.status,
+      synth_target: entry.synth_target,
+      required: entry.required ?? 0,
+      delivered: entry.delivered ?? 0,
+      createdAt: entry.created_at,
+      roll: entry.roll,
+      position: entry.position,
+    }))
+    .sort((a, b) => {
+      if (a.position !== null && b.position !== null) {
+        return a.position - b.position;
+      }
+      if (a.position !== null) return -1;
+      if (b.position !== null) return 1;
+      return (
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
+    });
 };
