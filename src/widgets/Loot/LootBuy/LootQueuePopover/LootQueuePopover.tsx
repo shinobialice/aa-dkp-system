@@ -68,12 +68,7 @@ export function LootQueuePopover({
   };
 
   const handleSold = async (entry: LootQueueEntry) => {
-    await markQueueLootAsSold({
-      lootQueueId: entry.id,
-      userId: entry.userId,
-      itemName,
-      delivered: entry.delivered,
-    });
+    await markQueueLootAsSold(entry.id);
     await refreshQueue();
   };
 
