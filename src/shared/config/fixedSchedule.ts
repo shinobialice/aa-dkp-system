@@ -126,6 +126,7 @@ export const eventEmoji: Record<string, string> = {
   Ксанатос: "🐉",
   Левиафан: "🐲",
   "Осада замка": "🏰",
+  Прайм: "🔥",
 };
 
 const vkNotificationExcludedEvents = new Set(["Великий луг", "Оборона Ифнира"]);

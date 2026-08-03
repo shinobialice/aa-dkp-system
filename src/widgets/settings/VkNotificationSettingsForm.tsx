@@ -9,6 +9,7 @@ import {
 } from "@/actions/vkNotificationSettings";
 import {
   resolveNotifyMinutes,
+  PRIME_EVENT_NAME,
   type VkNotificationSettings,
 } from "@/shared/config/vkNotificationDefaults";
 import { bosses } from "@/shared/config/bossRespawn";
@@ -118,6 +119,37 @@ export function VkNotificationSettingsForm() {
               onMinutesChange={(minutes) => setEventMinutes(boss, minutes)}
             />
           ))}
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Прайм</Label>
+        <div className="space-y-2 border rounded-lg p-3">
+          <EventRow
+            name={PRIME_EVENT_NAME}
+            settings={settings}
+            onToggle={(checked) => toggleEvent(PRIME_EVENT_NAME, checked)}
+            onMinutesChange={(minutes) =>
+              setEventMinutes(PRIME_EVENT_NAME, minutes)
+            }
+          />
+          <div className="flex items-center gap-2">
+            <Label htmlFor="vk-prime-time" className="flex-1 font-normal">
+              Время каждый день (МСК)
+            </Label>
+            <Input
+              id="vk-prime-time"
+              type="time"
+              className="w-32"
+              value={settings.primeTime ?? ""}
+              onChange={(e) =>
+                setSettings({
+                  ...settings,
+                  primeTime: e.target.value || null,
+                })
+              }
+            />
+          </div>
         </div>
       </div>
 

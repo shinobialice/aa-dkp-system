@@ -32,6 +32,7 @@ export async function getVkNotificationSettings(): Promise<VkNotificationSetting
     quietHoursEnabled: data.quiet_hours_enabled,
     quietHoursStart: data.quiet_hours_start,
     quietHoursEnd: data.quiet_hours_end,
+    primeTime: data.prime_time ?? null,
   };
 }
 
@@ -48,6 +49,7 @@ export async function updateVkNotificationSettings(
     quiet_hours_enabled: settings.quietHoursEnabled,
     quiet_hours_start: settings.quietHoursStart,
     quiet_hours_end: settings.quietHoursEnd,
+    prime_time: settings.primeTime,
     updated_at: new Date().toISOString(),
   });
 

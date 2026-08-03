@@ -5,7 +5,10 @@ export type VkNotificationSettings = {
   quietHoursEnabled: boolean;
   quietHoursStart: number;
   quietHoursEnd: number;
+  primeTime: string | null;
 };
+
+export const PRIME_EVENT_NAME = "Прайм";
 
 export const DEFAULT_VK_NOTIFICATION_SETTINGS: VkNotificationSettings = {
   enabledBosses: ["Марли", "Морф", "Кириос"],
@@ -14,6 +17,7 @@ export const DEFAULT_VK_NOTIFICATION_SETTINGS: VkNotificationSettings = {
   quietHoursEnabled: true,
   quietHoursStart: 2,
   quietHoursEnd: 7,
+  primeTime: null,
 };
 
 export function resolveNotifyMinutes(

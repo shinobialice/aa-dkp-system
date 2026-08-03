@@ -4,7 +4,10 @@ import supabase from "@/shared/lib/supabaseAdmin";
 import { sendVkMessage } from "@/shared/lib/vkBot";
 import { getVkMentionTag } from "@/shared/lib/vkQuietHours";
 import { getVkNotificationSettings } from "@/actions/vkNotificationSettings";
-import { resolveNotifyMinutes } from "@/shared/config/vkNotificationDefaults";
+import {
+  resolveNotifyMinutes,
+  PRIME_EVENT_NAME,
+} from "@/shared/config/vkNotificationDefaults";
 import {
   schedule,
   dayNames,
@@ -43,7 +46,12 @@ export async function POST(req: NextRequest) {
 
   const settings = await getVkNotificationSettings();
   const msk = getMoscowTime();
-  const todayEvents = schedule[dayNames[msk.getDay()]] ?? [];
+  const todayEvents: [string, string][] = [
+    ...(schedule[dayNames[msk.getDay()]] ?? []),
+  ];
+  if (settings.primeTime) {
+    todayEvents.push([settings.primeTime, PRIME_EVENT_NAME]);
+  }
   const tag = getVkMentionTag(
     settings.quietHoursEnabled,
     settings.quietHoursStart,
