@@ -56,9 +56,7 @@ const RespawnTracker: FC = () => {
     if (isMaintenanceWindow(new Date(), maintenanceWindows))
       return {
         status: "Проф. работы",
-        nextRespawn: lastKill
-          ? formatMoscowDateTime(getRespawnStart(lastKill, respawnHours))
-          : "-",
+        nextRespawn: "-",
         lastKillDisplay: lastKill
           ? formatMoscowDateTime(new Date(lastKill))
           : "Нет данных",
@@ -78,7 +76,7 @@ const RespawnTracker: FC = () => {
     if (isMaintenanceWindow(respawnStart, maintenanceWindows))
       return {
         status: "Проф. работы",
-        nextRespawn: formatMoscowDateTime(respawnStart),
+        nextRespawn: "-",
         lastKillDisplay: formatMoscowDateTime(killDate),
         waiting: false,
         timeLeft: null,
