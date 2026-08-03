@@ -11,6 +11,7 @@ import { uploadAvatar } from "@/actions/uploadAvatar";
 import { getUsernameHistory } from "@/actions/usernameHistoryActions";
 import RankProgress from "./RankProgress";
 import AnniversaryCelebration from "./AnniversaryCelebration";
+import DragonFlyby from "./DragonFlyby";
 
 const badgeColors: { [key: string]: string } = {
   Активен: "rgb(47, 158, 98)",
@@ -86,6 +87,7 @@ export default function ProfileHeader({
   return (
     <div className="relative">
       <AnniversaryCelebration joinedAt={user.joined_at ?? null} />
+      <DragonFlyby username={user.username} />
       <div className="h-16 w-full bg-gradient-to-br from-primary/25 via-chart-1/15 to-transparent md:h-20" />
 
       <div className="px-6 pb-6">

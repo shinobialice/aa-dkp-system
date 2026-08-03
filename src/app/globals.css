@@ -201,3 +201,40 @@
 .anniversary-banner {
   animation: anniversary-banner-in 0.4s ease-out;
 }
+
+@keyframes dragon-flyby {
+  0% {
+    left: -15%;
+    top: 55%;
+    opacity: 0;
+  }
+  2% {
+    opacity: 1;
+  }
+  12% {
+    top: 30%;
+  }
+  24% {
+    top: 60%;
+  }
+  36% {
+    top: 35%;
+  }
+  38% {
+    left: 115%;
+    top: 45%;
+    opacity: 1;
+  }
+  40% {
+    opacity: 0;
+  }
+  100% {
+    left: 115%;
+    top: 45%;
+    opacity: 0;
+  }
+}
+
+.dragon-flyby {
+  animation: dragon-flyby 18s ease-in-out infinite;
+}
