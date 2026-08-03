@@ -23,7 +23,6 @@ import {
   Swords,
   UserX,
   Newspaper,
-  Bell,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -75,15 +74,10 @@ const AppSidebar: FC<Props> = ({ isAdmin }) => {
     { title: "Статистика", url: "/stats", icon: LineChart },
     { title: "Киллкаунт", url: "/kill_counter", icon: Swords },
     { title: "Настройки", url: "/settings", icon: Settings },
-    {
-      title: "Уведомления ВК",
-      url: "/settings/vk-notifications",
-      icon: Bell,
-    },
     { title: "АФК", url: "/afk", icon: UserX },
   ];
 
-  const adminOnlyUrls = ["/settings", "/settings/vk-notifications", "/afk"];
+  const adminOnlyUrls = ["/settings", "/afk"];
 
   const visibleMenuItems = menuItems.filter((item) => {
     if (item.url && adminOnlyUrls.includes(item.url) && !isAdmin) {

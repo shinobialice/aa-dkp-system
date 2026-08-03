@@ -56,5 +56,5 @@ export async function updateVkNotificationSettings(
     throw new Error("Не удалось сохранить настройки уведомлений ВК");
   }
 
-  revalidatePath("/settings/vk-notifications");
+  revalidatePath("/settings");
 }
