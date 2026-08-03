@@ -14,6 +14,8 @@ import {
 } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 import { ClassFilter } from "../../../MembersTable/ClassFilter";
+import { classColors, classIcons } from "../../../MembersTable/classStyles";
+import { Badge } from "@/shared/ui";
 import { Button } from "@/shared/ui";
 import { Checkbox } from "@/shared/ui";
 import { Input } from "@/shared/ui";
@@ -97,7 +99,19 @@ const columns: ColumnDef<User>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => <div>{row.getValue("class")}</div>,
+    cell: ({ row }) => {
+      const cls = row.getValue("class") as string;
+      if (!cls) return "—";
+      return (
+        <Badge
+          className="text-background gap-1"
+          style={{ backgroundColor: classColors[cls] ?? "rgb(120,120,120)" }}
+        >
+          {classIcons[cls]}
+          {cls}
+        </Badge>
+      );
+    },
   },
 ];
 
