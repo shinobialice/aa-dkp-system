@@ -3,8 +3,13 @@ import { Receiver } from "@upstash/qstash";
 import { sendVkMessage } from "@/shared/lib/vkBot";
 import { getVkMentionTag } from "@/shared/lib/vkQuietHours";
 import { getVkNotificationSettings } from "@/actions/vkNotificationSettings";
+import { getMaintenanceWindows } from "@/actions/maintenanceWindows";
 import { resolveNotifyMinutes } from "@/shared/config/vkNotificationDefaults";
-import { bossEmoji, type BossName } from "@/shared/config/bossRespawn";
+import {
+  bossEmoji,
+  isMaintenanceWindow,
+  type BossName,
+} from "@/shared/config/bossRespawn";
 
 export const runtime = "nodejs";
 
@@ -33,6 +38,12 @@ export async function POST(req: NextRequest) {
   }
 
   const { boss } = JSON.parse(body) as { boss: BossName };
+
+  const maintenanceWindows = await getMaintenanceWindows();
+  if (isMaintenanceWindow(new Date(), maintenanceWindows)) {
+    return NextResponse.json({ ok: true, skipped: "maintenance_window" });
+  }
+
   const settings = await getVkNotificationSettings();
 
   if (!settings.enabledBosses.includes(boss)) {

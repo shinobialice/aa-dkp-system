@@ -8,6 +8,7 @@ import {
   respawnHoursByBoss,
   respawnWindow,
   getRespawnStart,
+  isMaintenanceWindow,
 } from "@/shared/config/bossRespawn";
 import {
   schedule,
@@ -17,6 +18,7 @@ import {
   getMoscowTime,
   getDateWithTime,
 } from "@/shared/config/fixedSchedule";
+import { useMaintenanceWindows } from "./useMaintenanceWindows";
 
 export const bossImages: Record<string, string> = {
   АГЛ: "/images/ashyara.png",
@@ -59,6 +61,7 @@ export function useUpcomingEvents(): UpcomingEvent[] {
     Record<BossName, string | null>
   >({ Марли: null, Морф: null, Кириос: null });
   const [events, setEvents] = useState<UpcomingEvent[]>([]);
+  const maintenanceWindows = useMaintenanceWindows();
 
   useEffect(() => {
     async function fetchBossRespawn() {
@@ -145,6 +148,7 @@ export function useUpcomingEvents(): UpcomingEvent[] {
         const start = getRespawnStart(lastKill, respawnHoursByBoss[boss]);
         const end = new Date(start.getTime() + respawnWindow * 60 * 60 * 1000);
         if (realNow >= end) continue;
+        if (isMaintenanceWindow(start, maintenanceWindows)) continue;
 
         const isNow = realNow >= start && realNow < end;
         const startsInMin = Math.ceil(
@@ -172,7 +176,7 @@ export function useUpcomingEvents(): UpcomingEvent[] {
     checkEvents();
     const interval = setInterval(checkEvents, 10_000);
     return () => clearInterval(interval);
-  }, [bossLastKill]);
+  }, [bossLastKill, maintenanceWindows]);
 
   return events;
 }

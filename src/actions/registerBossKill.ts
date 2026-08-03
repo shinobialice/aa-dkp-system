@@ -6,9 +6,11 @@ import {
   BossName,
   respawnHoursByBoss,
   getRespawnStart,
+  isMaintenanceWindow,
 } from "@/shared/config/bossRespawn";
 import { getVkNotificationSettings } from "./vkNotificationSettings";
 import { resolveNotifyMinutes } from "@/shared/config/vkNotificationDefaults";
+import { getMaintenanceWindows } from "./maintenanceWindows";
 
 export async function registerBossKill(
   boss: BossName,
@@ -42,12 +44,15 @@ export async function registerBossKill(
     .maybeSingle();
 
   const vkSettings = await getVkNotificationSettings();
-  const notifyAt = vkSettings.enabledBosses.includes(boss)
-    ? new Date(
-        nextRespawn.getTime() -
-          resolveNotifyMinutes(vkSettings, boss) * 60 * 1000,
-      )
-    : null;
+  const maintenanceWindows = await getMaintenanceWindows();
+  const notifyAt =
+    vkSettings.enabledBosses.includes(boss) &&
+    !isMaintenanceWindow(nextRespawn, maintenanceWindows)
+      ? new Date(
+          nextRespawn.getTime() -
+            resolveNotifyMinutes(vkSettings, boss) * 60 * 1000,
+        )
+      : null;
 
   const messageId = await scheduleRespawnNotification(
     boss,

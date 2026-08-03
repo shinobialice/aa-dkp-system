@@ -7,6 +7,7 @@ import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui";
 import supabase from "@/shared/lib/supabase";
 import useCurrentUser from "@/hooks/useCurrentUser";
+import { useMaintenanceWindows } from "@/hooks/useMaintenanceWindows";
 import { registerBossKill } from "@/actions/registerBossKill";
 import { DateTimePopover } from "./DateTimePopover";
 import {
@@ -15,6 +16,7 @@ import {
   respawnHoursByBoss,
   respawnWindow,
   getRespawnStart,
+  isMaintenanceWindow,
 } from "@/shared/config/bossRespawn";
 
 const bossImages: Partial<Record<BossName, string>> = {
@@ -49,7 +51,20 @@ function formatMoscowDateTime(date: Date): string {
 }
 
 const RespawnTracker: FC = () => {
+  const maintenanceWindows = useMaintenanceWindows();
   function getRespawnInfo(lastKill: string | null, respawnHours: number) {
+    if (isMaintenanceWindow(new Date(), maintenanceWindows))
+      return {
+        status: "Проф. работы",
+        nextRespawn: lastKill
+          ? formatMoscowDateTime(getRespawnStart(lastKill, respawnHours))
+          : "-",
+        lastKillDisplay: lastKill
+          ? formatMoscowDateTime(new Date(lastKill))
+          : "Нет данных",
+        waiting: false,
+        timeLeft: null,
+      };
     if (!lastKill)
       return {
         status: "Нет данных",
@@ -60,6 +75,14 @@ const RespawnTracker: FC = () => {
       };
     const killDate = new Date(lastKill);
     const respawnStart = getRespawnStart(lastKill, respawnHours);
+    if (isMaintenanceWindow(respawnStart, maintenanceWindows))
+      return {
+        status: "Проф. работы",
+        nextRespawn: formatMoscowDateTime(respawnStart),
+        lastKillDisplay: formatMoscowDateTime(killDate),
+        waiting: false,
+        timeLeft: null,
+      };
     const respawnEnd = new Date(
       respawnStart.getTime() + respawnWindow * 60 * 60 * 1000,
     );
@@ -228,6 +251,7 @@ const RespawnTracker: FC = () => {
   }
 
   function getStatusColor(status: string) {
+    if (status === "Проф. работы") return "text-orange-500 font-semibold";
     if (status.startsWith("Ожидание (")) return "text-yellow-500 font-semibold";
     if (status === "Возможен респаун!") return "text-green-600 font-bold";
     if (status === "Ожидание убийства") return "text-blue-500 font-semibold";
