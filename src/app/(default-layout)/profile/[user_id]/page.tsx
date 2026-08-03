@@ -9,6 +9,7 @@ import { getSessionUserId } from "@/actions/getSessionUserId";
 import { hasTag } from "@/actions/hasTag";
 import { getUserTags } from "@/actions/userTagsActions";
 import { getUsernameHistory } from "@/actions/usernameHistoryActions";
+import { getUserSelfEditSettings } from "@/actions/userSelfEditSettings";
 import ProfilePageWrapper from "@/widgets/profile/ProfilePageWrapper";
 import { cookies } from "next/headers";
 
@@ -37,18 +38,31 @@ export default async function Page(p: {
 
   const sessionToken = (await cookies()).get("session_token")?.value ?? "";
   const isAdmin = await hasTag(sessionToken, ["Администратор"]);
-  const canEditProfile = await hasTag(sessionToken, [
+  const isPrivilegedEditor = await hasTag(sessionToken, [
     "Администратор",
     "Секретутка",
   ]);
-  const canEditInventory = canEditProfile;
   const sessionUserId = await getSessionUserId();
   const isOwnProfile = sessionUserId === userId;
+
+  const selfEditSettings = await getUserSelfEditSettings();
+  const canSelfEdit = isOwnProfile && !!user?.active;
+  const canEditNickname =
+    isPrivilegedEditor || (canSelfEdit && selfEditSettings.nicknameEditEnabled);
+  const canEditGs =
+    isPrivilegedEditor || (canSelfEdit && selfEditSettings.gsEditEnabled);
+  const canEditInventory =
+    isPrivilegedEditor ||
+    (canSelfEdit && selfEditSettings.inventoryEditEnabled);
+  const canEditProfile = canEditNickname || canEditGs;
 
   return (
     <ProfilePageWrapper
       isAdmin={isAdmin}
       canEditProfile={canEditProfile}
+      canEditNickname={canEditNickname}
+      canEditGs={canEditGs}
+      canEditAdminFields={isPrivilegedEditor}
       canEditInventory={canEditInventory}
       isOwnProfile={isOwnProfile}
       user={user}

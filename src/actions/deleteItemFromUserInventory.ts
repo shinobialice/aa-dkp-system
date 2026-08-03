@@ -1,9 +1,19 @@
 "use server";
 import supabase from "@/shared/lib/supabaseAdmin";
-import ensurePrivilieges from "./ensurePrivilieges";
+import ensureCanEditUserData from "./ensureCanEditUserData";
 
 const deleteItemFromUserInventory = async (id: number) => {
-  await ensurePrivilieges(["Администратор", "Секретутка"]);
+  const { data: item } = await supabase
+    .from("user_inventory")
+    .select("user_id")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (!item) {
+    throw new Error("Failed to delete item from user inventory");
+  }
+
+  await ensureCanEditUserData(item.user_id, "inventoryEditEnabled");
 
   const { data, error } = await supabase
     .from("user_inventory")

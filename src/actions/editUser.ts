@@ -1,6 +1,9 @@
 "use server";
+import { cookies } from "next/headers";
 import supabase from "@/shared/lib/supabaseAdmin";
-import ensurePrivilieges from "./ensurePrivilieges";
+import { hasTag } from "./hasTag";
+import { getSessionUserId } from "./getSessionUserId";
+import { getUserSelfEditSettings } from "./userSelfEditSettings";
 
 const editUser = async (
   userId: number,
@@ -12,13 +15,62 @@ const editUser = async (
   vkName: string,
   joined_at: Date | string | null,
 ) => {
-  await ensurePrivilieges(["Администратор", "Секретутка"]);
-
   const { data: existing } = await supabase
     .from("user")
-    .select("username")
+    .select(
+      "username, class, class_gear_score, secondary_class, secondary_class_gear_score, vk_name, joined_at, active",
+    )
     .eq("id", userId)
     .maybeSingle();
+
+  if (!existing) {
+    throw new Error("Игрок не найден");
+  }
+
+  const normalizedJoinedAt = joined_at
+    ? new Date(joined_at).toISOString()
+    : null;
+
+  const sessionToken = (await cookies()).get("session_token")?.value ?? "";
+  const isPrivilegedEditor = await hasTag(sessionToken, [
+    "Администратор",
+    "Секретутка",
+  ]);
+
+  if (!isPrivilegedEditor) {
+    const sessionUserId = await getSessionUserId();
+    if (sessionUserId !== userId || !existing.active) {
+      throw new Error("Access denied: insufficient privileges");
+    }
+
+    const existingJoinedAtTime = existing.joined_at
+      ? new Date(existing.joined_at).getTime()
+      : null;
+    const newJoinedAtTime = normalizedJoinedAt
+      ? new Date(normalizedJoinedAt).getTime()
+      : null;
+
+    const nicknameChanged = username !== existing.username;
+    const gsChanged =
+      className !== existing.class ||
+      classGearScore !== existing.class_gear_score ||
+      secondaryClassName !== existing.secondary_class ||
+      secondaryClassGearScore !== existing.secondary_class_gear_score;
+    const adminFieldsChanged =
+      vkName !== existing.vk_name || newJoinedAtTime !== existingJoinedAtTime;
+
+    if (adminFieldsChanged) {
+      throw new Error("Access denied: insufficient privileges");
+    }
+
+    const selfEditSettings = await getUserSelfEditSettings();
+    if (nicknameChanged && !selfEditSettings.nicknameEditEnabled) {
+      throw new Error("Access denied: insufficient privileges");
+    }
+    if (gsChanged && !selfEditSettings.gsEditEnabled) {
+      throw new Error("Access denied: insufficient privileges");
+    }
+  }
 
   const { data: user, error } = await supabase
     .from("user")
@@ -29,7 +81,7 @@ const editUser = async (
       secondary_class: secondaryClassName,
       secondary_class_gear_score: secondaryClassGearScore,
       vk_name: vkName,
-      joined_at: joined_at ? new Date(joined_at).toISOString() : null,
+      joined_at: normalizedJoinedAt,
     })
     .eq("id", userId)
     .select()

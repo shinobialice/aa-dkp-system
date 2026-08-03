@@ -16,6 +16,9 @@ export default function ProfileInfoClient({
   tags: initialTags,
   setUsernameHistory,
   canEditProfile,
+  canEditNickname,
+  canEditGs,
+  canEditAdminFields,
   isOwnProfile,
   activity,
   salary,
@@ -31,6 +34,9 @@ export default function ProfileInfoClient({
     }[],
   ) => void;
   canEditProfile: boolean;
+  canEditNickname: boolean;
+  canEditGs: boolean;
+  canEditAdminFields: boolean;
   isOwnProfile: boolean;
   activity: {
     aglPercent: number;
@@ -81,6 +87,7 @@ export default function ProfileInfoClient({
     <Card className="gap-0 overflow-hidden py-0">
       <ProfileHeader
         canEditProfile={canEditProfile}
+        canEditNickname={canEditNickname}
         isOwnProfile={isOwnProfile}
         user={user}
         formData={formData}
@@ -96,12 +103,14 @@ export default function ProfileInfoClient({
           formData={formData}
           setFormData={setFormData}
           editMode={editMode}
+          canEditGs={canEditGs}
         />
         <ProfileAdditionalInfo
           user={user}
           formData={formData}
           setFormData={setFormData}
           editMode={editMode}
+          canEditAdminFields={canEditAdminFields}
         />
         <div className="min-w-[140px] space-y-1.5">
           <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">

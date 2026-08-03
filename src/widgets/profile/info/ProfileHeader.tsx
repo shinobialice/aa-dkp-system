@@ -35,6 +35,7 @@ export default function ProfileHeader({
   tags,
   setUsernameHistory,
   canEditProfile,
+  canEditNickname,
   isOwnProfile,
 }: {
   user: any;
@@ -52,6 +53,7 @@ export default function ProfileHeader({
     }[],
   ) => void;
   canEditProfile: boolean;
+  canEditNickname: boolean;
   isOwnProfile: boolean;
 }) {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(
@@ -166,7 +168,7 @@ export default function ProfileHeader({
             </div>
 
             <div className="mt-3 space-y-2">
-              {editMode ? (
+              {editMode && canEditNickname ? (
                 <Input
                   className="text-xl font-bold md:text-2xl"
                   value={formData.username}

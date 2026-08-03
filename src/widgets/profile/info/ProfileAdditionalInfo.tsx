@@ -13,12 +13,15 @@ export default function ProfileAdditionalInfo({
   formData,
   setFormData,
   editMode,
+  canEditAdminFields,
 }: {
   user: any;
   formData: any;
   setFormData: (data: any) => void;
   editMode: boolean;
+  canEditAdminFields: boolean;
 }) {
+  const canEdit = editMode && canEditAdminFields;
   const joinedDate = user.joined_at ? new Date(user.joined_at) : null;
   const now = new Date();
 
@@ -57,7 +60,7 @@ export default function ProfileAdditionalInfo({
           VK
         </div>
         {(() => {
-          if (editMode) {
+          if (canEdit) {
             return (
               <Input
                 className="w-[180px]"
@@ -94,7 +97,7 @@ export default function ProfileAdditionalInfo({
         <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Дата вступления
         </div>
-        {editMode ? (
+        {canEdit ? (
           <DateTimePicker
             classNames={{ trigger: "w-[180px]" }}
             hideTime

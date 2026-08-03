@@ -1,9 +1,19 @@
 "use server";
 import supabase from "@/shared/lib/supabaseAdmin";
-import ensurePrivilieges from "./ensurePrivilieges";
+import ensureCanEditUserData from "./ensureCanEditUserData";
 
 const setItemQuality = async (itemId: number, quality: string) => {
-  await ensurePrivilieges(["Администратор", "Секретутка"]);
+  const { data: item } = await supabase
+    .from("user_inventory")
+    .select("user_id")
+    .eq("id", itemId)
+    .maybeSingle();
+
+  if (!item) {
+    throw new Error("Не удалось обновить качество предмета");
+  }
+
+  await ensureCanEditUserData(item.user_id, "inventoryEditEnabled");
 
   const { data, error } = await supabase
     .from("user_inventory")

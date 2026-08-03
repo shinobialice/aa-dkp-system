@@ -34,14 +34,17 @@ export default function ProfileClasses({
   formData,
   setFormData,
   editMode,
+  canEditGs,
 }: {
   user: any;
   formData: any;
   setFormData: (data: any) => void;
   editMode: boolean;
+  canEditGs: boolean;
 }) {
+  const canEdit = editMode && canEditGs;
   const hasSecondary =
-    editMode || user.secondary_class || user.secondary_class_gear_score;
+    canEdit || user.secondary_class || user.secondary_class_gear_score;
 
   return (
     <>
@@ -49,7 +52,7 @@ export default function ProfileClasses({
         <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Класс
         </div>
-        {editMode ? (
+        {canEdit ? (
           <div className="flex items-center gap-2">
             <Select
               value={formData.class ?? ""}
@@ -97,7 +100,7 @@ export default function ProfileClasses({
           <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Доп. класс
           </div>
-          {editMode ? (
+          {canEdit ? (
             <div className="flex items-center gap-2">
               <Select
                 value={formData.secondaryClass ?? "Нет"}

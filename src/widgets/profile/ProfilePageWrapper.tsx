@@ -14,6 +14,9 @@ export default function ProfilePageWrapper({
   salary,
   isAdmin,
   canEditProfile,
+  canEditNickname,
+  canEditGs,
+  canEditAdminFields,
   canEditInventory,
   isOwnProfile,
 }: {
@@ -39,6 +42,9 @@ export default function ProfilePageWrapper({
   salary: number | null;
   isAdmin: boolean;
   canEditProfile: boolean;
+  canEditNickname: boolean;
+  canEditGs: boolean;
+  canEditAdminFields: boolean;
   canEditInventory: boolean;
   isOwnProfile: boolean;
 }) {
@@ -52,6 +58,9 @@ export default function ProfilePageWrapper({
     <div className="space-y-6 p-4">
       <ProfileInfoClient
         canEditProfile={canEditProfile}
+        canEditNickname={canEditNickname}
+        canEditGs={canEditGs}
+        canEditAdminFields={canEditAdminFields}
         isOwnProfile={isOwnProfile}
         user={user}
         tags={tags}

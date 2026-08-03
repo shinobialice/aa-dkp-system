@@ -23,6 +23,7 @@ import { createLinkToken } from "@/actions/createLinkToken";
 import { getEligibleUsers } from "@/actions/getEligibleUsers";
 import { CreateUserForm } from "./CreateUserForm";
 import { UserSelect } from "./UserSelect";
+import { UserSelfEditSettingsForm } from "./UserSelfEditSettingsForm";
 import { SalaryEligibilitySettingsForm } from "./SalaryEligibilitySettingsForm";
 import { BossPointsSettingsForm } from "./BossPointsSettingsForm";
 import { AttendanceBonusSettingsForm } from "./AttendanceBonusSettingsForm";
@@ -152,6 +153,10 @@ export function SettingsPageContainer() {
                     }}
                   />
                 </div>
+              </Card>
+
+              <Card className="p-4 max-w-xl">
+                <UserSelfEditSettingsForm />
               </Card>
             </section>
           )}

@@ -1,6 +1,6 @@
 "use server";
 import supabase from "@/shared/lib/supabaseAdmin";
-import ensurePrivilieges from "./ensurePrivilieges";
+import ensureCanEditUserData from "./ensureCanEditUserData";
 
 const addItemToUserInventory = async (
   userId: number,
@@ -8,7 +8,7 @@ const addItemToUserInventory = async (
   type: string,
   quality: string | null,
 ) => {
-  await ensurePrivilieges(["Администратор", "Секретутка"]);
+  await ensureCanEditUserData(userId, "inventoryEditEnabled");
 
   const { data, error } = await supabase
     .from("user_inventory")
