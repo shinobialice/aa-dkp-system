@@ -82,7 +82,10 @@ export function LootQueuePopover({
     await refreshQueue();
   };
 
-  const handleRollChange = async (entry: LootQueueEntry, roll: number | null) => {
+  const handleRollChange = async (
+    entry: LootQueueEntry,
+    roll: number | null,
+  ) => {
     await updateLootQueueEntry({ id: entry.id, roll });
     await refreshQueue();
   };
@@ -156,8 +159,8 @@ export function LootQueuePopover({
     return (
       <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>{children}</PopoverTrigger>
-        <PopoverContent className="w-[620px]">
-          <div className="flex items-center justify-between mb-2">
+        <PopoverContent className="w-[620px] max-h-[min(1000px,var(--radix-popover-content-available-height))] flex flex-col overflow-hidden">
+          <div className="flex items-center justify-between mb-2 shrink-0">
             <div className="text-sm font-semibold">Очередь на: {itemName}</div>
             <EditToggleButton
               isAdmin={isAdmin}
@@ -165,13 +168,19 @@ export function LootQueuePopover({
               toggle={() => setEditMode((prev) => !prev)}
             />
           </div>
-          <QueueTableSimple
-            {...commonProps}
-            showRoll={showRoll}
-            handleRollChange={handleRollChange}
-            handleStatusToggle={handleStatusToggle}
-          />
-          {editMode && <AddToQueueForm {...formProps} />}
+          <div className="overflow-y-auto min-h-0">
+            <QueueTableSimple
+              {...commonProps}
+              showRoll={showRoll}
+              handleRollChange={handleRollChange}
+              handleStatusToggle={handleStatusToggle}
+            />
+          </div>
+          {editMode && (
+            <div className="shrink-0 pt-2">
+              <AddToQueueForm {...formProps} />
+            </div>
+          )}
         </PopoverContent>
       </Popover>
     );

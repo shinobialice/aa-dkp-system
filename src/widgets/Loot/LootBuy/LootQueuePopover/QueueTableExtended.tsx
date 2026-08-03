@@ -33,7 +33,7 @@ export function QueueTableExtended({
   handleRemove,
 }: Props) {
   return (
-    <div className="max-h-[420px] border rounded mt-4">
+    <div className="max-h-[420px] overflow-y-auto border rounded mt-4">
       <Table>
         <TableHeader className="sticky top-0 z-1 bg-background">
           <TableRow>
