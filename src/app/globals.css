@@ -236,5 +236,6 @@
 }
 
 .dragon-flyby {
-  animation: dragon-flyby 18s ease-in-out infinite;
+  animation: dragon-flyby 30s ease-in-out infinite;
+  transform: scaleX(-1);
 }

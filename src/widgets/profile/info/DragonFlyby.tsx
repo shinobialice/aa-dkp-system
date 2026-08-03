@@ -1,21 +1,36 @@
 "use client";
 
-import Image from "next/image";
+import { useEffect, useState } from "react";
+import Lottie from "lottie-react";
 
 const DRAGON_USERNAME = "wdx";
 
 export default function DragonFlyby({ username }: { username: string }) {
-  if (username.toLowerCase() !== DRAGON_USERNAME) return null;
+  const isDragonUser = username.toLowerCase() === DRAGON_USERNAME;
+  const [animationData, setAnimationData] = useState<object | null>(null);
+
+  useEffect(() => {
+    if (!isDragonUser) return;
+
+    let cancelled = false;
+    fetch("/lottie/dragon.json")
+      .then((res) => res.json())
+      .then((data) => {
+        if (!cancelled) setAnimationData(data);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isDragonUser]);
+
+  if (!isDragonUser || !animationData) return null;
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-16 overflow-hidden md:h-20">
-      <Image
-        src="https://archeagecodex.com/items/icon_item_4310.png"
-        alt=""
-        width={48}
-        height={48}
-        className="dragon-flyby absolute size-10 -scale-x-100 md:size-12"
-      />
+    <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden">
+      <div className="dragon-flyby absolute size-28 md:size-36">
+        <Lottie animationData={animationData} loop autoplay />
+      </div>
     </div>
   );
 }
