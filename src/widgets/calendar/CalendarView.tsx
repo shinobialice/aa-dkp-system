@@ -258,6 +258,7 @@ export default function CalendarView({
             { color: "rgb(215, 100, 168)", label: "Кошка" },
             { color: "rgb(40, 111, 180)", label: "Морф" },
             { color: "rgb(180, 108, 51)", label: "Марли Прок" },
+            { color: "rgb(126, 34, 206)", label: "Анталлон" },
           ].map((item, index) => (
             <div key={index} className="flex items-center gap-2">
               <div
