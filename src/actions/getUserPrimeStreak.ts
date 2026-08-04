@@ -9,7 +9,7 @@ type RaidWithAttendance = RaidRow & {
   raid_attendance: Array<{ user_id: number }>;
 };
 
-const MONTHLY_SKIP_ALLOWANCE = 10;
+const MONTHLY_SKIP_ALLOWANCE = 7;
 
 export type PrimeStreak = {
   streak: number;
