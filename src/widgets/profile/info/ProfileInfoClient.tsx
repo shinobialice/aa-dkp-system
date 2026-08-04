@@ -60,9 +60,7 @@ export default function ProfileInfoClient({
     secondaryClassGearScore: user.secondary_class_gear_score,
     vkName: user.vk_name,
     vkRealName: "",
-    joined_at: user.joined_at
-      ? new Date(user.joined_at).toISOString().split("T")[0]
-      : "",
+    joined_at: user.joined_at ? user.joined_at.slice(0, 10) : "",
   });
 
   useEffect(() => {

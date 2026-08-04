@@ -4,7 +4,7 @@ import {
   differenceInYears,
 } from "date-fns";
 
-import { format } from "date-fns";
+import { format, parse } from "date-fns";
 import { DateTimePicker } from "@/shared/ui";
 import { Input } from "@/shared/ui";
 
@@ -102,7 +102,9 @@ export default function ProfileAdditionalInfo({
             classNames={{ trigger: "w-[180px]" }}
             hideTime
             value={
-              formData.joined_at ? new Date(formData.joined_at) : undefined
+              formData.joined_at
+                ? parse(formData.joined_at, "yyyy-MM-dd", new Date())
+                : undefined
             }
             onChange={(date) =>
               setFormData((prev: any) => ({
@@ -114,7 +116,10 @@ export default function ProfileAdditionalInfo({
         ) : (
           <div className="text-sm font-semibold">
             {formData.joined_at
-              ? new Date(formData.joined_at).toLocaleDateString("ru-RU")
+              ? format(
+                  parse(formData.joined_at, "yyyy-MM-dd", new Date()),
+                  "dd.MM.yyyy",
+                )
               : "Неизвестно"}
           </div>
         )}
