@@ -98,8 +98,7 @@ export default function BossRespawnHistory() {
   }, [page]);
 
   return (
-    <div className="mt-8">
-      <h2 className="text-xl font-bold mb-2">История убийств боссов</h2>
+    <div className="mt-4">
       <div className="mb-2 text-sm text-muted-foreground">{total} записей</div>
       <div className="overflow-x-auto">
         <table className="min-w-full text-sm border">

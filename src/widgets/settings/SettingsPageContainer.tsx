@@ -8,6 +8,7 @@ import {
   Swords,
   HandCoins,
   Bell,
+  PartyPopper,
 } from "lucide-react";
 import { Button } from "@/shared/ui";
 import { Card } from "@/shared/ui";
@@ -29,6 +30,7 @@ import { BossPointsSettingsForm } from "./BossPointsSettingsForm";
 import { AttendanceBonusSettingsForm } from "./AttendanceBonusSettingsForm";
 import { MaintenanceWindowsForm } from "./MaintenanceWindowsForm";
 import { VkNotificationSettingsForm } from "./VkNotificationSettingsForm";
+import { EventSettingsForm } from "./EventSettingsForm";
 
 type UserOption = {
   id: number;
@@ -40,6 +42,7 @@ const sections = [
   { id: "bosses", label: "Боссы и респаун", icon: Swords },
   { id: "salary", label: "Зарплата", icon: HandCoins },
   { id: "vk", label: "Уведомления ВК", icon: Bell },
+  { id: "event", label: "Ивент", icon: PartyPopper },
 ] as const;
 
 type SectionId = (typeof sections)[number]["id"];
@@ -193,6 +196,14 @@ export function SettingsPageContainer() {
             <section className="space-y-6">
               <Card className="p-4">
                 <VkNotificationSettingsForm />
+              </Card>
+            </section>
+          )}
+
+          {active === "event" && (
+            <section className="space-y-6">
+              <Card className="p-4 max-w-xl">
+                <EventSettingsForm />
               </Card>
             </section>
           )}
