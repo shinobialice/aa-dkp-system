@@ -43,11 +43,11 @@ const editUser = async (
       throw new Error("Access denied: insufficient privileges");
     }
 
-    const existingJoinedAtTime = existing.joined_at
-      ? new Date(existing.joined_at).getTime()
+    const existingJoinedAtDate = existing.joined_at
+      ? new Date(existing.joined_at).toISOString().slice(0, 10)
       : null;
-    const newJoinedAtTime = normalizedJoinedAt
-      ? new Date(normalizedJoinedAt).getTime()
+    const newJoinedAtDate = normalizedJoinedAt
+      ? new Date(normalizedJoinedAt).toISOString().slice(0, 10)
       : null;
 
     const nicknameChanged = username !== existing.username;
@@ -57,7 +57,7 @@ const editUser = async (
       secondaryClassName !== existing.secondary_class ||
       secondaryClassGearScore !== existing.secondary_class_gear_score;
     const adminFieldsChanged =
-      vkName !== existing.vk_name || newJoinedAtTime !== existingJoinedAtTime;
+      vkName !== existing.vk_name || newJoinedAtDate !== existingJoinedAtDate;
 
     if (adminFieldsChanged) {
       throw new Error("Access denied: insufficient privileges");
