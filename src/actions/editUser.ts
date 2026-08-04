@@ -27,15 +27,21 @@ const editUser = async (
     throw new Error("Игрок не найден");
   }
 
-  const normalizedJoinedAt = joined_at
-    ? new Date(joined_at).toISOString()
-    : null;
-
   const sessionToken = (await cookies()).get("session_token")?.value ?? "";
   const isPrivilegedEditor = await hasTag(sessionToken, [
     "Администратор",
     "Секретутка",
   ]);
+
+  // Поля, которые самоправщик физически не видит в форме (vkName, joined_at).
+  // Раньше сервер сравнивал присланное значение с текущим в БД и отклонял
+  // правку при расхождении — но эти два снимка могут разъехаться по любой
+  // причине, не связанной с действием пользователя (админ поправил дату,
+  // вкладка провисела открытой и т.п.), и тогда обычная смена ника/ГС ложно
+  // блокировалась. Проще и надёжнее для не-админов не доверять клиенту эти
+  // поля вовсе, а всегда сохранять то, что уже есть в БД.
+  let finalVkName = vkName;
+  let finalJoinedAt = joined_at ? new Date(joined_at).toISOString() : null;
 
   if (!isPrivilegedEditor) {
     const sessionUserId = await getSessionUserId();
@@ -46,12 +52,8 @@ const editUser = async (
       throw new Error("Access denied: profile not active");
     }
 
-    const existingJoinedAtDate = existing.joined_at
-      ? new Date(existing.joined_at).toISOString().slice(0, 10)
-      : null;
-    const newJoinedAtDate = normalizedJoinedAt
-      ? new Date(normalizedJoinedAt).toISOString().slice(0, 10)
-      : null;
+    finalVkName = existing.vk_name;
+    finalJoinedAt = existing.joined_at;
 
     const nicknameChanged = username !== existing.username;
     const gsChanged =
@@ -59,16 +61,6 @@ const editUser = async (
       classGearScore !== existing.class_gear_score ||
       secondaryClassName !== existing.secondary_class ||
       secondaryClassGearScore !== existing.secondary_class_gear_score;
-    if (vkName !== existing.vk_name) {
-      throw new Error(
-        `Access denied: vkName changed (sent=${JSON.stringify(vkName)}, existing=${JSON.stringify(existing.vk_name)})`,
-      );
-    }
-    if (newJoinedAtDate !== existingJoinedAtDate) {
-      throw new Error(
-        `Access denied: joined_at changed (sent=${newJoinedAtDate}, existing=${existingJoinedAtDate})`,
-      );
-    }
 
     const selfEditSettings = await getUserSelfEditSettings();
     if (nicknameChanged && !selfEditSettings.nicknameEditEnabled) {
@@ -87,8 +79,8 @@ const editUser = async (
       class_gear_score: classGearScore,
       secondary_class: secondaryClassName,
       secondary_class_gear_score: secondaryClassGearScore,
-      vk_name: vkName,
-      joined_at: normalizedJoinedAt,
+      vk_name: finalVkName,
+      joined_at: finalJoinedAt,
     })
     .eq("id", userId)
     .select()
