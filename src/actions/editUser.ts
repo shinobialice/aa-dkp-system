@@ -39,8 +39,11 @@ const editUser = async (
 
   if (!isPrivilegedEditor) {
     const sessionUserId = await getSessionUserId();
-    if (sessionUserId !== userId || !existing.active) {
-      throw new Error("Access denied: insufficient privileges");
+    if (sessionUserId !== userId) {
+      throw new Error("Access denied: not own profile");
+    }
+    if (!existing.active) {
+      throw new Error("Access denied: profile not active");
     }
 
     const existingJoinedAtDate = existing.joined_at
@@ -56,19 +59,23 @@ const editUser = async (
       classGearScore !== existing.class_gear_score ||
       secondaryClassName !== existing.secondary_class ||
       secondaryClassGearScore !== existing.secondary_class_gear_score;
-    const adminFieldsChanged =
-      vkName !== existing.vk_name || newJoinedAtDate !== existingJoinedAtDate;
-
-    if (adminFieldsChanged) {
-      throw new Error("Access denied: insufficient privileges");
+    if (vkName !== existing.vk_name) {
+      throw new Error(
+        `Access denied: vkName changed (sent=${JSON.stringify(vkName)}, existing=${JSON.stringify(existing.vk_name)})`,
+      );
+    }
+    if (newJoinedAtDate !== existingJoinedAtDate) {
+      throw new Error(
+        `Access denied: joined_at changed (sent=${newJoinedAtDate}, existing=${existingJoinedAtDate})`,
+      );
     }
 
     const selfEditSettings = await getUserSelfEditSettings();
     if (nicknameChanged && !selfEditSettings.nicknameEditEnabled) {
-      throw new Error("Access denied: insufficient privileges");
+      throw new Error("Access denied: nickname edit disabled");
     }
     if (gsChanged && !selfEditSettings.gsEditEnabled) {
-      throw new Error("Access denied: insufficient privileges");
+      throw new Error("Access denied: gs edit disabled");
     }
   }
 
