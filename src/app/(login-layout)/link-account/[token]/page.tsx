@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Heart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import VkLoginButton from "@/widgets/login/vkbutton";
 import Cookies from "js-cookie";
 import MailLoginButton from "@/widgets/login/mailbutton";
@@ -12,6 +12,7 @@ import GoogleLoginButton from "@/widgets/login/googlebutton";
 
 export default function LinkAccountPage() {
   const params = useParams();
+  const router = useRouter();
   const token = params.token as string;
   const [loading, setLoading] = useState(true);
 
@@ -37,12 +38,12 @@ export default function LinkAccountPage() {
         setUserInfo(data);
       })
       .catch(() => {
-        setUserInfo(null);
+        router.replace("/");
       })
       .finally(() => setLoading(false));
-  }, [token]);
+  }, [token, router]);
 
-  if (loading) {
+  if (loading || !userInfo) {
     return <p className="p-4 text-center">Загрузка...</p>;
   }
 
@@ -83,6 +84,8 @@ export default function LinkAccountPage() {
           src="/images/login_banner.png"
           alt="Login Image"
           fill
+          priority
+          sizes="(min-width: 1024px) 50vw, 100vw"
           className="object-cover dark:brightness-[0.2] dark:grayscale"
         />
       </div>
