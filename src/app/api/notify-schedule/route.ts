@@ -4,6 +4,8 @@ import supabase from "@/shared/lib/supabaseAdmin";
 import { sendVkMessage } from "@/shared/lib/vkBot";
 import { getVkMentionTag } from "@/shared/lib/vkQuietHours";
 import { getVkNotificationSettings } from "@/actions/vkNotificationSettings";
+import { getMaintenanceWindows } from "@/actions/maintenanceWindows";
+import { isMaintenanceWindow } from "@/shared/config/bossRespawn";
 import {
   resolveNotifyMinutes,
   PRIME_EVENT_NAME,
@@ -42,6 +44,11 @@ export async function POST(req: NextRequest) {
 
   if (!isValid) {
     return new NextResponse("Unauthorized", { status: 401 });
+  }
+
+  const maintenanceWindows = await getMaintenanceWindows();
+  if (isMaintenanceWindow(new Date(), maintenanceWindows)) {
+    return NextResponse.json({ ok: true, skipped: "maintenance_window" });
   }
 
   const settings = await getVkNotificationSettings();
