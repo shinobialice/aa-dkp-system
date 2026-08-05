@@ -293,11 +293,21 @@ const RespawnTracker: FC = () => {
                   </div>
                 </td>
                 <td className="p-2 border">
-                  {respawnHours} ч. (+ {respawnWindow} ч. промежуток)
+                  {respawnHours} ч.
+                  <br />
+                  (+ {respawnWindow} ч. промежуток)
                 </td>
                 <td className={`p-2 border`}>
                   <span className={getStatusColor(info.status)}>
-                    {info.status}
+                    {info.waiting ? (
+                      <>
+                        Ожидание
+                        <br />
+                        {info.timeLeft}
+                      </>
+                    ) : (
+                      info.status
+                    )}
                   </span>
                 </td>
                 <td className="p-2 border">{info.nextRespawn}</td>
