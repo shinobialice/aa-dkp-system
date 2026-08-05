@@ -120,6 +120,9 @@ export function useUpcomingEvents(): UpcomingEvent[] {
           const durationMin = eventDurationMinutes[boss] ?? defaultDurationMinutes;
           const end = new Date(start.getTime() + durationMin * 60 * 1000);
 
+          const realStart = new Date(start.getTime() - shift);
+          if (isMaintenanceWindow(realStart, maintenanceWindows)) continue;
+
           const isNow = msk >= start && msk < end;
           const startsInMin = Math.floor(
             (start.getTime() - msk.getTime()) / 60000,
