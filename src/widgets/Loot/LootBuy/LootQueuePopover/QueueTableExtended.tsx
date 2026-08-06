@@ -171,11 +171,7 @@ export function QueueTableExtended({
                         />
                       );
                     }
-                    return (
-                      <span className="w-[80px] truncate inline-block">
-                        {entry.synth_target || "-"}
-                      </span>
-                    );
+                    return <span>{entry.synth_target || "-"}</span>;
                   })()}
                 </TableCell>
                 {editMode && (
