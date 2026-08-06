@@ -20,6 +20,7 @@ const LootGrade: { [key: string]: number } = {
   "Свиток пробудившихся мифов": 6,
   "Свиток пробуждения драконоборца": 5,
   "Кристалл властелина морей": 7,
+  "Свиток пробудившихся легенд": 7,
   "Застывшее пламя": 10,
   "Ро'кана, Безумие морей": 5,
   "Анд'хакар, Чернильная тьма": 5,
@@ -97,6 +98,7 @@ export const LootIcons: { [key: string]: string | number } = {
     "https://archeagecodex.com/items/quest/icon_item_quest028.png",
   "Эссенция ярости": 4687, //+рамка //archeagecodex.com/images/icon_grade5.png
   "Трофейная эссенция стихий": 3094, //+рамка //archeagecodex.com/images/icon_grade12.png
+  "Свиток пробудившихся легенд": 4893, //+рамка //archeagecodex.com/images/icon_grade7.png
   "Свиток пробудившихся мифов": 4893, //+рамка //archeagecodex.com/images/icon_grade6.png
   "Свиток пробуждения драконоборца": 4446, //+рамка //archeagecodex.com/images/icon_grade5.png
   "Акхиумная сфера": 4790,
