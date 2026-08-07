@@ -244,6 +244,7 @@ export function LootRawTable({
                   price:
                     selectedItem.price ?? selectedItem.itemType?.price ?? 0,
                   comment: selectedItem.comment ?? "",
+                  isFree: selectedItem.status === "Выдано",
                 }
               : undefined
           }

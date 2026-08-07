@@ -50,6 +50,7 @@ export function SellLootDialog({
     quantity?: number;
     price?: number;
     comment?: string;
+    isFree?: boolean;
   };
   itemName?: string;
 }) {
@@ -80,7 +81,7 @@ export function SellLootDialog({
         setPrice(initialValues.price ?? 0);
         setUnitPrice(initialValues.price ?? 0);
         setComment(initialValues.comment ?? "");
-        setIsFree(false);
+        setIsFree(initialValues.isFree ?? false);
         setManualPriceEdit(false);
       } else {
         const startPrice = initialPrice ?? 0;
