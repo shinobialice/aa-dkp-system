@@ -37,21 +37,20 @@ export default function InventoryLogTable({
 
   return (
     <div className="space-y-2">
-      <Table>
+      <Table className="table-fixed">
         <TableHeader>
           <TableRow>
-            <TableHead>Название</TableHead>
-            <TableHead>{dateLabel}</TableHead>
-            <TableHead>Количество</TableHead>
-            <TableHead>Источник</TableHead>
-            <TableHead>Комментарий</TableHead>
+            <TableHead className="w-[35%]">Название</TableHead>
+            <TableHead className="w-[20%]">{dateLabel}</TableHead>
+            <TableHead className="w-[15%]">Количество</TableHead>
+            <TableHead className="w-[30%]">Комментарий</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {pageItems.map((item) => {
             return (
               <TableRow key={item.id}>
-                <TableCell>
+                <TableCell className="whitespace-normal break-words">
                   <div className="flex items-center gap-2">
                     <LootIcon itemName={item.name} size={28} />
                     {item.name}
@@ -63,8 +62,9 @@ export default function InventoryLogTable({
                     : "—"}
                 </TableCell>
                 <TableCell>{item.quantity ?? 1}</TableCell>
-                <TableCell>{item.source}</TableCell>
-                <TableCell>{item.comment || "—"}</TableCell>
+                <TableCell className="whitespace-normal break-words">
+                  {item.comment || "—"}
+                </TableCell>
               </TableRow>
             );
           })}
