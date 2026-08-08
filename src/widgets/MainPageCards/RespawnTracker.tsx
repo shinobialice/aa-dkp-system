@@ -328,7 +328,9 @@ const RespawnTracker: FC = () => {
                 </td>
                 <td className="p-2 border">{info.nextRespawn}</td>
                 <td className="p-2 border">{info.lastKillDisplay}</td>
-                <td className="p-2 border">
+                <td
+                  className={`p-2 border${boss === "Кириос" ? " cursor-pointer" : ""}`}
+                >
                   {boss === "Кириос" ? state.packsNeeded ?? "-" : "-"}
                 </td>
                 <td className="p-2 border">
