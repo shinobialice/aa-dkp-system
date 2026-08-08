@@ -26,7 +26,7 @@ export function PacksPopover({
               type="button"
               size="sm"
               variant="outline"
-              className="w-9 px-0"
+              className="w-9 px-0 cursor-pointer"
               onClick={() => onSelect(n)}
             >
               {n}
