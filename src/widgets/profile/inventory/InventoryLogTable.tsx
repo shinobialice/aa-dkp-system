@@ -1,9 +1,8 @@
-import Image from "next/image";
-import inventoryIcons from "./InventoryIcons";
-import {
-  LootIcons,
-  getLootIconUrl,
-} from "@/widgets/Loot/LootBuy/icons/LootIcons";
+"use client";
+
+import { useEffect, useState } from "react";
+import { LootIcon } from "@/widgets/Loot/LootBuy/icons/LootIconComponent";
+import type { InventoryLogEntry } from "@/actions/getUserPurchaseLog";
 import {
   Table,
   TableBody,
@@ -11,65 +10,94 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  Button,
 } from "@/shared/ui";
 
-function resolveIconUrl(name: string): string | null {
-  if (inventoryIcons[name]) return inventoryIcons[name];
-  if (LootIcons[name] !== undefined) return getLootIconUrl(name);
-  return null;
-}
+const PAGE_SIZE = 10;
 
 export default function InventoryLogTable({
-  type,
   dateLabel,
-  inventory,
+  items,
 }: {
-  type: string;
   dateLabel: string;
-  inventory: any[];
+  items: InventoryLogEntry[];
 }) {
-  const items = inventory.filter((inv) => inv.type === type);
+  const [page, setPage] = useState(0);
+
+  useEffect(() => {
+    setPage(0);
+  }, [items]);
 
   if (items.length === 0) {
     return <p className="text-sm text-muted-foreground">Пусто</p>;
   }
 
+  const pageCount = Math.ceil(items.length / PAGE_SIZE);
+  const pageItems = items.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
+
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Название</TableHead>
-          <TableHead>{dateLabel}</TableHead>
-          <TableHead>Количество</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {items.map((item) => {
-          const iconUrl = resolveIconUrl(item.name);
-          return (
-            <TableRow key={item.id}>
-              <TableCell>
-                <div className="flex items-center gap-2">
-                  {iconUrl && (
-                    <Image
-                      src={iconUrl}
-                      alt=""
-                      width={28}
-                      height={28}
-                      className="rounded"
-                    />
-                  )}
-                  {item.name}
-                </div>
-              </TableCell>
-              <TableCell>
-                {new Date(item.created_at).toLocaleDateString("ru-RU")}
-              </TableCell>
-              <TableCell>{item.quantity ?? 1}</TableCell>
-            </TableRow>
-          );
-        })}
-      </TableBody>
-    </Table>
+    <div className="space-y-2">
+      <Table className="table-fixed">
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-[35%]">Название</TableHead>
+            <TableHead className="w-[20%]">{dateLabel}</TableHead>
+            <TableHead className="w-[15%]">Количество</TableHead>
+            <TableHead className="w-[30%]">Комментарий</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {pageItems.map((item) => {
+            return (
+              <TableRow key={item.id}>
+                <TableCell className="whitespace-normal break-words">
+                  <div className="flex items-center gap-2">
+                    <LootIcon itemName={item.name} size={28} />
+                    {item.name}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  {item.date
+                    ? new Date(item.date).toLocaleDateString("ru-RU")
+                    : "—"}
+                </TableCell>
+                <TableCell>{item.quantity ?? 1}</TableCell>
+                <TableCell className="whitespace-normal break-words">
+                  {item.comment || "—"}
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+
+      {pageCount > 1 && (
+        <div className="flex items-center justify-between pt-1">
+          <span className="text-xs text-muted-foreground">
+            Страница {page + 1} из {pageCount}
+          </span>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="cursor-pointer"
+              disabled={page === 0}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              Назад
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="cursor-pointer"
+              disabled={page >= pageCount - 1}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              Далее
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

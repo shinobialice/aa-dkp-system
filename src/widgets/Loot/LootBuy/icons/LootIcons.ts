@@ -118,6 +118,9 @@ export const LootIcons: { [key: string]: string | number } = {
   "Застывшее пламя": "https://archeagecodex.com/items/icon_item_6015.png", 
   "Глайдер «Властелин морей»": "https://archeagecodex.com/items/icon_item_1205.png",
   "Корона":"https://archeagecodex.com/items/costume_hm/nu_m_hm_leather076.png",
+  Фрегат: "https://archeagecodex.com/items/icon_item_2121.png",
+  "Крылья кровавого легиона": "https://archeagecodex.com/items/icon_item_3936.png",
+  Авиара: "https://archeagecodex.com/items/icon_item_4312.png",
 };
 
 export function getLootIconUrl(itemName: string): string {

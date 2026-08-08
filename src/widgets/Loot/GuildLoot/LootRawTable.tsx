@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { ArrowUpDown } from "lucide-react";
 import { LootItem, MISC_LOOT_ITEM_NAMES } from "./LootTypes";
 import { LootIcon } from "../LootBuy/icons/LootIconComponent";
@@ -185,7 +186,20 @@ export function LootRawTable({
                       )
                     : "—"}
                 </TableCell>
-                <TableCell>{item.sold_to ?? "—"}</TableCell>
+                <TableCell>
+                  {item.sold_to_user_id ? (
+                    <Link
+                      href={`/profile/${item.sold_to_user_id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline"
+                    >
+                      {item.sold_to}
+                    </Link>
+                  ) : (
+                    (item.sold_to ?? "—")
+                  )}
+                </TableCell>
                 <TableCell>{item.comment ?? "—"}</TableCell>
                 {isAdmin && (
                   <TableCell>
