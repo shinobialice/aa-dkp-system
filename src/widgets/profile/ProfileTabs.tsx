@@ -110,7 +110,7 @@ export default function ProfileTabs({
       </TabsContent>
 
       <TabsContent value="purchases">
-        <PurchasesAndGiveaways inventory={inventory} />
+        <PurchasesAndGiveaways userId={user.id} />
       </TabsContent>
 
       <TabsContent value="username-history">
