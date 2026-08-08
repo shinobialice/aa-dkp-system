@@ -18,6 +18,7 @@ export async function registerBossKill(
   action: string,
   userId: number,
   cooldownSeconds: number,
+  packsNeeded?: number,
 ): Promise<{ registered: boolean }> {
   const nextRespawn = getRespawnStart(killTimeIso, respawnHoursByBoss[boss]);
 
@@ -30,6 +31,7 @@ export async function registerBossKill(
       p_user_id: userId,
       p_next_respawn: nextRespawn.toISOString(),
       p_cooldown_seconds: cooldownSeconds,
+      p_packs_needed: packsNeeded ?? null,
     },
   );
 
@@ -37,33 +39,37 @@ export async function registerBossKill(
     return { registered: false };
   }
 
-  const { data: row } = await supabase
-    .from("boss_respawn")
-    .select("notify_message_id")
-    .eq("boss_name", boss)
-    .maybeSingle();
+  try {
+    const { data: row } = await supabase
+      .from("boss_respawn")
+      .select("notify_message_id")
+      .eq("boss_name", boss)
+      .maybeSingle();
 
-  const vkSettings = await getVkNotificationSettings();
-  const maintenanceWindows = await getMaintenanceWindows();
-  const notifyAt =
-    vkSettings.enabledBosses.includes(boss) &&
-    !isMaintenanceWindow(nextRespawn, maintenanceWindows)
-      ? new Date(
-          nextRespawn.getTime() -
-            resolveNotifyMinutes(vkSettings, boss) * 60 * 1000,
-        )
-      : null;
+    const vkSettings = await getVkNotificationSettings();
+    const maintenanceWindows = await getMaintenanceWindows();
+    const notifyAt =
+      vkSettings.enabledBosses.includes(boss) &&
+      !isMaintenanceWindow(nextRespawn, maintenanceWindows)
+        ? new Date(
+            nextRespawn.getTime() -
+              resolveNotifyMinutes(vkSettings, boss) * 60 * 1000,
+          )
+        : null;
 
-  const messageId = await scheduleRespawnNotification(
-    boss,
-    notifyAt,
-    row?.notify_message_id ?? null,
-  );
+    const messageId = await scheduleRespawnNotification(
+      boss,
+      notifyAt,
+      row?.notify_message_id ?? null,
+    );
 
-  await supabase
-    .from("boss_respawn")
-    .update({ notify_message_id: messageId })
-    .eq("boss_name", boss);
+    await supabase
+      .from("boss_respawn")
+      .update({ notify_message_id: messageId })
+      .eq("boss_name", boss);
+  } catch (notifyError) {
+    console.error("Не удалось запланировать VK-уведомление:", notifyError);
+  }
 
   return { registered: true };
 }

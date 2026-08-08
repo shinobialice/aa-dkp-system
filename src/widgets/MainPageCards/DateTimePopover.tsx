@@ -5,10 +5,12 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/shared/ui/popover";
 export function DateTimePopover({
   value,
   onChange,
+  onConfirm,
   children,
 }: {
   value: Date | null;
   onChange: (value: Date | null) => void;
+  onConfirm?: () => void;
   children: React.ReactNode;
 }) {
   const [open, setOpen] = React.useState(false);
@@ -23,6 +25,7 @@ export function DateTimePopover({
             onPointerDown={(e) => {
               e.preventDefault();
               setOpen(false);
+              onConfirm?.();
             }}
           >
             OK

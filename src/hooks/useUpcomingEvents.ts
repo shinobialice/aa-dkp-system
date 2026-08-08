@@ -54,11 +54,24 @@ export type UpcomingEvent = {
   isNow: boolean;
   startsInMin?: number;
   endsInMin?: number;
+  packsNeeded?: number | null;
 };
+
+export function packsLabel(n: number): string {
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return `${n} пак`;
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14))
+    return `${n} пака`;
+  return `${n} паков`;
+}
 
 export function useUpcomingEvents(): UpcomingEvent[] {
   const [bossLastKill, setBossLastKill] = useState<
     Record<BossName, string | null>
+  >({ Марли: null, Морф: null, Кириос: null });
+  const [bossPacks, setBossPacks] = useState<
+    Record<BossName, number | null>
   >({ Марли: null, Морф: null, Кириос: null });
   const [events, setEvents] = useState<UpcomingEvent[]>([]);
   const maintenanceWindows = useMaintenanceWindows();
@@ -67,7 +80,7 @@ export function useUpcomingEvents(): UpcomingEvent[] {
     async function fetchBossRespawn() {
       const { data } = await supabase
         .from("boss_respawn")
-        .select("boss_name,last_kill")
+        .select("boss_name,last_kill,packs_needed")
         .in("boss_name", respawnBosses);
       if (data) {
         setBossLastKill((prev) => {
@@ -75,6 +88,15 @@ export function useUpcomingEvents(): UpcomingEvent[] {
           data.forEach(
             (row: { boss_name: BossName; last_kill: string | null }) => {
               next[row.boss_name] = row.last_kill;
+            },
+          );
+          return next;
+        });
+        setBossPacks((prev) => {
+          const next = { ...prev };
+          data.forEach(
+            (row: { boss_name: BossName; packs_needed: number | null }) => {
+              next[row.boss_name] = row.packs_needed;
             },
           );
           return next;
@@ -92,9 +114,11 @@ export function useUpcomingEvents(): UpcomingEvent[] {
           const row = payload.new as {
             boss_name: BossName;
             last_kill: string | null;
+            packs_needed: number | null;
           };
           if (!row?.boss_name) return;
           setBossLastKill((prev) => ({ ...prev, [row.boss_name]: row.last_kill }));
+          setBossPacks((prev) => ({ ...prev, [row.boss_name]: row.packs_needed }));
         },
       )
       .subscribe();
@@ -169,6 +193,7 @@ export function useUpcomingEvents(): UpcomingEvent[] {
           isNow,
           startsInMin,
           endsInMin,
+          packsNeeded: bossPacks[boss],
         });
       }
 
@@ -179,7 +204,7 @@ export function useUpcomingEvents(): UpcomingEvent[] {
     checkEvents();
     const interval = setInterval(checkEvents, 10_000);
     return () => clearInterval(interval);
-  }, [bossLastKill, maintenanceWindows]);
+  }, [bossLastKill, bossPacks, maintenanceWindows]);
 
   return events;
 }

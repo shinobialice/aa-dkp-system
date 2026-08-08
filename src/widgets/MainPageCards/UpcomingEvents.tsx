@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle, ScrollArea } from "@/shared/ui";
-import { useUpcomingEvents, bossImages } from "@/hooks/useUpcomingEvents";
+import { useUpcomingEvents, bossImages, packsLabel } from "@/hooks/useUpcomingEvents";
 
 function formatMinutes(mins: number): string {
   const h = Math.floor(Math.abs(mins) / 60);
@@ -28,7 +28,12 @@ export default function UpcomingEvents() {
             <div className="min-w-0 flex-1">
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
-                  <span>{e.boss}</span>
+                  <span>
+                    {e.boss}
+                    {e.boss === "Кириос" &&
+                      typeof e.packsNeeded === "number" &&
+                      ` (${packsLabel(e.packsNeeded)})`}
+                  </span>
                   {e.isNow && <span className="text-primary text-sm">⏱</span>}
                 </CardTitle>
               </CardHeader>

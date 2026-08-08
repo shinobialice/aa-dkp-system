@@ -4,12 +4,12 @@ import { useEffect, useState, FC } from "react";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/shared/ui/button";
-import { Input } from "@/shared/ui";
 import supabase from "@/shared/lib/supabase";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import { useMaintenanceWindows } from "@/hooks/useMaintenanceWindows";
 import { registerBossKill } from "@/actions/registerBossKill";
 import { DateTimePopover } from "./DateTimePopover";
+import { PacksPopover } from "./PacksPopover";
 import {
   BossName,
   bosses,
@@ -179,7 +179,12 @@ const RespawnTracker: FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  async function saveRespawn(boss: BossName, iso: string, action: string) {
+  async function saveRespawn(
+    boss: BossName,
+    iso: string,
+    action: string,
+    packsNeeded?: number,
+  ) {
     if (!user) {
       alert("Вы должны быть авторизованы для изменения времени!");
       return;
@@ -192,11 +197,17 @@ const RespawnTracker: FC = () => {
       action,
       user.id,
       registerCooldownSeconds,
+      packsNeeded,
     );
     if (registered) {
       setBossStates((prev) => ({
         ...prev,
-        [boss]: { ...prev[boss], lastKill: iso, updatedAt: new Date().toISOString() },
+        [boss]: {
+          ...prev[boss],
+          lastKill: iso,
+          updatedAt: new Date().toISOString(),
+          packsNeeded: packsNeeded ?? prev[boss].packsNeeded,
+        },
       }));
     }
     setSaving(null);
@@ -216,22 +227,27 @@ const RespawnTracker: FC = () => {
     return Math.max(0, Math.ceil((registerCooldownSeconds * 1000 - elapsedMs) / 1000));
   }
 
-  async function handlePacksChange(boss: BossName, value: number | null) {
-    setBossStates((prev) => ({
-      ...prev,
-      [boss]: { ...prev[boss], packsNeeded: value },
-    }));
-    await supabase
-      .from("boss_respawn")
-      .upsert(
-        { boss_name: boss, packs_needed: value },
-        { onConflict: "boss_name" },
-      );
+  const [pendingKill, setPendingKill] = useState<
+    { boss: BossName; iso: string; action: string } | null
+  >(null);
+
+  function beginKill(boss: BossName, iso: string, action: string) {
+    if (boss === "Кириос") {
+      setPendingKill({ boss, iso, action });
+    } else {
+      saveRespawn(boss, iso, action);
+    }
+  }
+
+  function confirmPendingKillPacks(packs: number) {
+    if (!pendingKill) return;
+    saveRespawn(pendingKill.boss, pendingKill.iso, pendingKill.action, packs);
+    setPendingKill(null);
   }
 
   function handleKilledNow(boss: BossName) {
     const now = new Date().toISOString();
-    saveRespawn(boss, now, boss === "Кириос" ? "Реснулся" : "Убит сейчас");
+    beginKill(boss, now, boss === "Кириос" ? "Реснулся" : "Убит сейчас");
   }
 
   const [popoverDate, setPopoverDate] = useState<Record<BossName, Date | null>>(
@@ -241,11 +257,11 @@ const RespawnTracker: FC = () => {
       Кириос: null,
     },
   );
-  function handleSetTime(boss: BossName, date: Date | null) {
+  function handleConfirmSetTime(boss: BossName) {
+    const date = popoverDate[boss];
     if (!date) return;
-    const iso = date.toISOString();
-    saveRespawn(boss, iso, "Указано время");
     setPopoverDate((prev) => ({ ...prev, [boss]: null }));
+    beginKill(boss, date.toISOString(), "Указано время");
   }
 
   function getStatusColor(status: string) {
@@ -313,58 +329,62 @@ const RespawnTracker: FC = () => {
                 <td className="p-2 border">{info.nextRespawn}</td>
                 <td className="p-2 border">{info.lastKillDisplay}</td>
                 <td className="p-2 border">
-                  {boss === "Кириос" ? (
-                    <Input
-                      type="number"
-                      value={state.packsNeeded ?? ""}
-                      onChange={(e) =>
-                        handlePacksChange(
-                          boss,
-                          e.target.value === "" ? null : Number(e.target.value),
-                        )
-                      }
-                      className="w-12 px-1"
-                    />
-                  ) : (
-                    "-"
-                  )}
+                  {boss === "Кириос" ? state.packsNeeded ?? "-" : "-"}
                 </td>
                 <td className="p-2 border">
-                  <div className="flex flex-col items-center gap-2">
-                    <Button
-                      className="w-[120px] cursor-pointer text-xs px-1"
-                      onClick={() => handleKilledNow(boss)}
-                      disabled={saving === boss || loading || isOnCooldown(boss)}
-                    >
-                      {saving === boss && (
-                        <Loader2 className="mr-1 size-3 animate-spin" />
-                      )}
-                      {isOnCooldown(boss)
-                        ? `КД ${cooldownSecondsLeft(boss)}с`
-                        : boss === "Кириос"
-                          ? "Реснулся"
-                          : "Был убит сейчас"}
-                    </Button>
-                    <DateTimePopover
-                      value={popoverDate[boss]}
-                      onChange={(date) => {
-                        setPopoverDate((prev) => ({ ...prev, [boss]: date }));
-                        if (date) handleSetTime(boss, date);
-                      }}
-                    >
+                  <PacksPopover
+                    open={pendingKill?.boss === boss}
+                    onOpenChange={(open) => {
+                      if (!open) setPendingKill(null);
+                    }}
+                    onSelect={confirmPendingKillPacks}
+                  >
+                    <div className="flex flex-col items-center gap-2">
                       <Button
                         className="w-[120px] cursor-pointer text-xs px-1"
-                        variant="outline"
-                        disabled={saving === boss || loading || isOnCooldown(boss)}
-                        onClick={() => {}}
+                        onClick={() => handleKilledNow(boss)}
+                        disabled={
+                          saving === boss ||
+                          loading ||
+                          isOnCooldown(boss) ||
+                          pendingKill?.boss === boss
+                        }
                       >
                         {saving === boss && (
                           <Loader2 className="mr-1 size-3 animate-spin" />
                         )}
-                        Установить время
+                        {isOnCooldown(boss)
+                          ? `КД ${cooldownSecondsLeft(boss)}с`
+                          : boss === "Кириос"
+                            ? "Реснулся"
+                            : "Был убит сейчас"}
                       </Button>
-                    </DateTimePopover>
-                  </div>
+                      <DateTimePopover
+                        value={popoverDate[boss]}
+                        onChange={(date) =>
+                          setPopoverDate((prev) => ({ ...prev, [boss]: date }))
+                        }
+                        onConfirm={() => handleConfirmSetTime(boss)}
+                      >
+                        <Button
+                          className="w-[120px] cursor-pointer text-xs px-1"
+                          variant="outline"
+                          disabled={
+                            saving === boss ||
+                            loading ||
+                            isOnCooldown(boss) ||
+                            pendingKill?.boss === boss
+                          }
+                          onClick={() => {}}
+                        >
+                          {saving === boss && (
+                            <Loader2 className="mr-1 size-3 animate-spin" />
+                          )}
+                          Установить время
+                        </Button>
+                      </DateTimePopover>
+                    </div>
+                  </PacksPopover>
                 </td>
               </tr>
             );
