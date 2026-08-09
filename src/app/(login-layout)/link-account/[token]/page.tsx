@@ -24,20 +24,20 @@ export default function LinkAccountPage() {
   useEffect(() => {
     if (!token) return;
 
-    Cookies.set("link-token", token, {
-      expires: 0.1,
-      path: "/",
-    });
-
     fetch(`/api/link-token/${token}`)
       .then((res) => {
         if (!res.ok) throw new Error("Token not valid");
         return res.json();
       })
       .then((data) => {
+        Cookies.set("link-token", token, {
+          expires: 0.1,
+          path: "/",
+        });
         setUserInfo(data);
       })
       .catch(() => {
+        Cookies.remove("link-token", { path: "/" });
         router.replace("/");
       })
       .finally(() => setLoading(false));

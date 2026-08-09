@@ -18,8 +18,8 @@ export default function VkLoginButton() {
       state,
     });
 
-    Cookies.set("vk_code_verifier", codeVerifier);
-    Cookies.set("vk_state", state);
+    Cookies.set("vk_code_verifier", codeVerifier, { path: "/" });
+    Cookies.set("vk_state", state, { path: "/" });
     window.location.href = `https://id.vk.ru/authorize?${params}`;
   };
 

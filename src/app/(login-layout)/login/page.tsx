@@ -1,13 +1,19 @@
 "use client";
 
+import { useEffect } from "react";
 import { Heart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import Cookies from "js-cookie";
 import VkLoginButton from "@/widgets/login/vkbutton";
 import MailLoginButton from "@/widgets/login/mailbutton";
 import GoogleLoginButton from "@/widgets/login/googlebutton";
 
 export default function LoginPage() {
+  useEffect(() => {
+    Cookies.remove("link-token", { path: "/" });
+  }, []);
+
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
       <div className="flex flex-col gap-4 p-6 md:p-10">
