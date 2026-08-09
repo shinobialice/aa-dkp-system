@@ -13,6 +13,9 @@ import {
   type AttendanceBonusSettings,
 } from "@/utils/attendanceBonusDefaults";
 import eventDkpCalculator from "@/utils/eventDkpCalculator";
+import { LootIcon } from "@/widgets/Loot/LootBuy/icons/LootIconComponent";
+import { getUnlinkedLootCandidates } from "@/actions/getUnlinkedLootCandidates";
+import { isPrimeLinkableSource } from "@/widgets/Loot/GuildLoot/LootTypes";
 
 export function RaidDetailsForm({
   setUsers,
@@ -37,6 +40,9 @@ export function RaidDetailsForm({
   setIsProc,
   isDoubleProc,
   setIsDoubleProc,
+  loot,
+  lootLinkIds,
+  setLootLinkIds,
 }: {
   users: any[];
   setUsers: (users: any[]) => void;
@@ -61,6 +67,9 @@ export function RaidDetailsForm({
   setIsProc: (val: boolean) => void;
   isDoubleProc: boolean;
   setIsDoubleProc: (val: boolean) => void;
+  loot?: any[];
+  lootLinkIds: Record<number, boolean>;
+  setLootLinkIds: React.Dispatch<React.SetStateAction<Record<number, boolean>>>;
 }) {
   const [bonus, setBonus] = React.useState<AttendanceBonusSettings | null>(
     null,
@@ -112,6 +121,30 @@ export function RaidDetailsForm({
       setIsProc(false);
       setIsDoubleProc(false);
     }
+  };
+
+  const visibleLoot = (loot ?? []).filter(
+    (item: any) => item.status !== "Распродано",
+  );
+
+  const [unlinkedCandidates, setUnlinkedCandidates] = React.useState<any[]>(
+    [],
+  );
+  const canLinkLoot =
+    !!selectedBoss && !!selectedDate && isPrimeLinkableSource(selectedBoss);
+
+  React.useEffect(() => {
+    const fetchCandidates = canLinkLoot
+      ? getUnlinkedLootCandidates({
+          bossName: selectedBoss!,
+          date: selectedDate!.toISOString(),
+        })
+      : Promise.resolve([]);
+    fetchCandidates.then(setUnlinkedCandidates);
+  }, [canLinkLoot, selectedBoss, selectedDate]);
+
+  const toggleLootLink = (id: number) => {
+    setLootLinkIds((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   return (
@@ -231,6 +264,66 @@ export function RaidDetailsForm({
           <p className="text-sm text-red-500">Обязательное поле</p>
         )}
       </div>
+
+      {loot && category !== "АГЛ" && (
+        <div className="space-y-2">
+          <Label>
+            Лут
+            {visibleLoot.length > 0 ? ` (${visibleLoot.length})` : ""}
+          </Label>
+          <div className="rounded-md border max-h-48 overflow-y-auto divide-y">
+            {visibleLoot.length > 0 ? (
+              visibleLoot.map((item: any) => (
+                <div
+                  key={item.id}
+                  className="flex items-center gap-2 px-2 py-1.5 text-sm"
+                >
+                  <LootIcon itemName={item.itemType?.name} size={22} />
+                  <span className="flex-1 truncate">
+                    {item.itemType?.name ?? "—"}
+                  </span>
+                  <span className="text-muted-foreground shrink-0">
+                    x{item.quantity}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <div className="px-2 py-3 text-sm text-muted-foreground text-center">
+                Лут не привязан к этому рейду
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {canLinkLoot && unlinkedCandidates.length > 0 && (
+        <div className="space-y-2">
+          <Label>Непривязанный лут рядом с этой датой</Label>
+          <div className="rounded-md border max-h-48 overflow-y-auto divide-y">
+            {unlinkedCandidates.map((item: any) => (
+              <label
+                key={item.id}
+                htmlFor={`link-loot-${item.id}`}
+                className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer hover:bg-accent"
+              >
+                <Checkbox
+                  className="cursor-pointer"
+                  id={`link-loot-${item.id}`}
+                  checked={!!lootLinkIds[item.id]}
+                  onCheckedChange={() => toggleLootLink(item.id)}
+                />
+                <LootIcon itemName={item.itemType?.name} size={22} />
+                <span className="flex-1 truncate">
+                  {item.itemType?.name ?? "—"}
+                </span>
+                <span className="text-muted-foreground shrink-0">
+                  x{item.quantity}
+                </span>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="mt-auto space-y-2">
         <Label>Ценность посещения</Label>

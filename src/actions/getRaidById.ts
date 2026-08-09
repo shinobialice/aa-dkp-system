@@ -14,6 +14,17 @@ export const getRaidById = async (id: string) => {
       raid_attendance(
         is_late,
         user(id, username, active, class)
+      ),
+      loot(
+        id,
+        status,
+        source,
+        quantity,
+        price,
+        sold_to,
+        acquired_at,
+        sold_at,
+        itemType: item_type ( id, name, price )
       )
     `,
     )

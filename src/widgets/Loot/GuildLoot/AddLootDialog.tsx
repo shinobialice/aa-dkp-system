@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { LootItemSelector } from "./LootItemSelector";
-import { ItemType, NewLootItem } from "./LootTypes";
+import { SourceSelector } from "./SourceSelector";
+import { RaidLinkPicker } from "./RaidLinkPicker";
+import { ItemType, NewLootItem, isPrimeLinkableSource } from "./LootTypes";
 import { LootIcon } from "../LootBuy/icons/LootIconComponent";
 import { Button } from "@/shared/ui";
 import { DateTimePicker } from "@/shared/ui";
@@ -32,12 +34,14 @@ export function AddLootDialog({
     acquired_at: new Date().toISOString().split("T")[0],
     quantity: 1,
     itemName: "",
+    raidId: null,
   });
 
   const getItemTypeIdByName = (name: string): number | undefined =>
     itemTypes.find((item) => item.name === name)?.id;
 
   const isOtherType = form.itemName === "В казну";
+  const isLinkable = isPrimeLinkableSource(form.source);
 
   const handleSelect = (name: string) => {
     const id = getItemTypeIdByName(name);
@@ -68,6 +72,7 @@ export function AddLootDialog({
       acquired_at: new Date().toISOString().split("T")[0],
       quantity: 1,
       itemName: "",
+      raidId: null,
     });
   };
 
@@ -91,11 +96,9 @@ export function AddLootDialog({
           />
 
           <Label>Источник</Label>
-          <input
-            type="text"
+          <SourceSelector
             value={form.source}
-            onChange={(e) => setForm({ ...form, source: e.target.value })}
-            className="border rounded px-2 py-1"
+            onChange={(source) => setForm({ ...form, source, raidId: null })}
           />
 
           <Label>Дата получения</Label>
@@ -106,9 +109,22 @@ export function AddLootDialog({
               setForm({
                 ...form,
                 acquired_at: date ? date.toISOString().split("T")[0] : "",
+                raidId: null,
               })
             }
           />
+
+          {isLinkable && (
+            <>
+              <Label>Рейд</Label>
+              <RaidLinkPicker
+                source={form.source}
+                acquiredAt={form.acquired_at || null}
+                value={form.raidId ?? null}
+                onChange={(raidId) => setForm({ ...form, raidId })}
+              />
+            </>
+          )}
 
           <Label>{isOtherType ? "Сумма дохода" : "Количество"}</Label>
           <input

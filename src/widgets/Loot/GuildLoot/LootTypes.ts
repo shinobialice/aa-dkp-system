@@ -4,6 +4,20 @@ export const MISC_LOOT_ITEM_NAMES = [
   "Всякие мелочи 2",
 ];
 
+// Привязка к рейду имеет смысл только для праймовых боссов — у АГЛ нет
+// смысла сопоставлять казну с конкретным заходом.
+export const PRIME_LINKABLE_BOSSES = [
+  "Кракен",
+  "Калидис",
+  "Анталлон",
+  "Ксанатос",
+  "Левиафан",
+];
+
+export function isPrimeLinkableSource(source: string | null | undefined) {
+  return PRIME_LINKABLE_BOSSES.includes((source ?? "").trim());
+}
+
 export type LootItem = {
   sold_to_user_id?: number | null;
   id: number;
@@ -17,6 +31,7 @@ export type LootItem = {
   acquired_at: Date | null;
   quantity?: number;
   price: number | null;
+  raid_id?: number | null;
   itemType: {
     id: number;
     name: string;
@@ -50,4 +65,5 @@ export type NewLootItem = {
   status?: string;
   sold_at?: string;
   price?: number;
+  raidId?: number | null;
 };
