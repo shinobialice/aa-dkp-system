@@ -239,18 +239,3 @@
   animation: dragon-flyby 30s ease-in-out infinite;
   transform: scaleX(-1);
 }
-
-@keyframes dimonish-wobble {
-  0%,
-  100% {
-    transform: rotate(-3deg);
-  }
-  50% {
-    transform: rotate(3deg);
-  }
-}
-
-.dimonish-wobble {
-  animation: dimonish-wobble 1.4s ease-in-out infinite;
-  transform-origin: top center;
-}

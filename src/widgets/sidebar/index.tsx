@@ -47,6 +47,7 @@ import {
 import Image from "next/image";
 import { NavUser } from "./NavUser";
 import { OnlineUsersWidget } from "./OnlineUsersWidget";
+import DimonishMenuItem from "./DimonishMenuItem";
 import { FC } from "react";
 
 type Props = { isAdmin: boolean };
@@ -154,6 +155,7 @@ const AppSidebar: FC<Props> = ({ isAdmin }) => {
                   </SidebarMenuItem>
                 );
               })}
+              <DimonishMenuItem />
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
