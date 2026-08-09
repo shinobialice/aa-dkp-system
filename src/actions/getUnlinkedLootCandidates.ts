@@ -1,8 +1,7 @@
 "use server";
 
 import supabase from "@/shared/lib/supabaseAdmin";
-
-const CANDIDATE_WINDOW_DAYS = 3;
+import { getMoscowISOString } from "@/utils/getMoscowISOString";
 
 export const getUnlinkedLootCandidates = async ({
   bossName,
@@ -13,11 +12,11 @@ export const getUnlinkedLootCandidates = async ({
 }) => {
   if (!bossName || !date) return [];
 
-  const centerDate = new Date(date);
-  const from = new Date(centerDate);
-  from.setUTCDate(from.getUTCDate() - CANDIDATE_WINDOW_DAYS);
-  const to = new Date(centerDate);
-  to.setUTCDate(to.getUTCDate() + CANDIDATE_WINDOW_DAYS + 1);
+  // Дата в казне (loot.acquired_at) всегда вводится день-в-день — берём
+  // ровно тот календарный день рейда по МСК, без окна в несколько дней.
+  const mskDay = getMoscowISOString(new Date(date)).slice(0, 10);
+  const [y, m, d] = mskDay.split("-").map(Number);
+  const nextDay = new Date(Date.UTC(y, m - 1, d + 1)).toISOString().slice(0, 10);
 
   const { data, error } = await supabase
     .from("loot")
@@ -33,8 +32,8 @@ export const getUnlinkedLootCandidates = async ({
     )
     .is("raid_id", null)
     .eq("source", bossName)
-    .gte("acquired_at", from.toISOString())
-    .lt("acquired_at", to.toISOString())
+    .gte("acquired_at", `${mskDay}T00:00:00`)
+    .lt("acquired_at", `${nextDay}T00:00:00`)
     .order("acquired_at", { ascending: false });
 
   if (error || !data) {

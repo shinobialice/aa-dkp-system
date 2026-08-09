@@ -298,7 +298,7 @@ export function RaidDetailsForm({
 
       {canLinkLoot && unlinkedCandidates.length > 0 && (
         <div className="space-y-2">
-          <Label>Непривязанный лут рядом с этой датой</Label>
+          <Label>Непривязанный лут за этот день</Label>
           <div className="rounded-md border max-h-48 overflow-y-auto divide-y">
             {unlinkedCandidates.map((item: any) => (
               <label

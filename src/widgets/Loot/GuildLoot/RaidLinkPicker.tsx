@@ -88,7 +88,7 @@ export function RaidLinkPicker({
         </button>
         {candidates.length === 0 && (
           <div className="px-2 py-1.5 text-sm text-muted-foreground">
-            Рейды рядом с этой датой не найдены
+            Рейды в этот день не найдены
           </div>
         )}
         {candidates.map((c) => (

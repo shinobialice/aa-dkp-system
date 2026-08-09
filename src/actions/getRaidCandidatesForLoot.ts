@@ -1,12 +1,7 @@
 "use server";
 
 import supabase from "@/shared/lib/supabaseAdmin";
-import {
-  getMoscowISOString,
-  parseMoscowISOString,
-} from "@/utils/getMoscowISOString";
-
-const CANDIDATE_WINDOW_DAYS = 3;
+import { parseMoscowISOString } from "@/utils/getMoscowISOString";
 
 export const getRaidCandidatesForLoot = async ({
   source,
@@ -15,22 +10,21 @@ export const getRaidCandidatesForLoot = async ({
   source?: string | null;
   acquiredAt?: string | null;
 }) => {
-  // acquiredAt (loot.acquired_at) — настоящий UTC instant. raid.start_date
-  // хранится как naive МСК-строка (см. getMoscowISOString.ts), поэтому
-  // границы окна тоже переводим в МСК-строку — иначе сравнение поплывёт
-  // на таймзону сервера.
+  // Дата в казне (loot.acquired_at) всегда вводится день-в-день — ищем
+  // рейды ровно в этот календарный день, без окна в несколько дней.
+  // acquiredAt хранится как полночь UTC нужного дня, а raid.start_date —
+  // как naive МСК-строка того же дня, так что сравниваем их календарные
+  // дни напрямую по срезу строки, без конвертации таймзон.
   const centerDate = acquiredAt ? new Date(acquiredAt) : new Date();
-
-  const from = new Date(centerDate);
-  from.setUTCDate(from.getUTCDate() - CANDIDATE_WINDOW_DAYS);
-  const to = new Date(centerDate);
-  to.setUTCDate(to.getUTCDate() + CANDIDATE_WINDOW_DAYS + 1);
+  const day = centerDate.toISOString().slice(0, 10);
+  const [y, m, d] = day.split("-").map(Number);
+  const nextDay = new Date(Date.UTC(y, m - 1, d + 1)).toISOString().slice(0, 10);
 
   const { data, error } = await supabase
     .from("raid")
     .select("id, type, start_date, raid_boss(boss(boss_name))")
-    .gte("start_date", getMoscowISOString(from))
-    .lt("start_date", getMoscowISOString(to))
+    .gte("start_date", `${day}T00:00:00`)
+    .lt("start_date", `${nextDay}T00:00:00`)
     .order("start_date", { ascending: false });
 
   if (error || !data) {
