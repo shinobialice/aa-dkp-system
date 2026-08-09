@@ -21,10 +21,12 @@ import {
 } from "@/shared/ui";
 import { classColors, classIcons } from "@/widgets/MembersTable/classStyles";
 import { parseMoscowISOString } from "@/utils/getMoscowISOString";
+import { LootIcon } from "@/widgets/Loot/LootBuy/icons/LootIconComponent";
 
 type SortKey = "username" | "class";
 
 const EMPTY_ATTENDANCE: any[] = [];
+const EMPTY_LOOT: any[] = [];
 
 export function RaidInfoDialog({
   open,
@@ -36,6 +38,9 @@ export function RaidInfoDialog({
   raid: any;
 }) {
   const attendance = raid?.raid_attendance ?? EMPTY_ATTENDANCE;
+  const loot = (raid?.loot ?? EMPTY_LOOT).filter(
+    (item: any) => item.status !== "Распродано",
+  );
 
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
@@ -79,6 +84,57 @@ export function RaidInfoDialog({
     raid.raid_boss?.map((rb: any) => rb.boss?.boss_name).filter(Boolean) ??
     [];
   const date = raid.start_date ? parseMoscowISOString(raid.start_date) : null;
+  const showLoot = raid.type !== "АГЛ";
+
+  const attendanceTable = (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead className="sticky top-0 z-10 bg-background">
+            {sortHeader("Ник", "username")}
+          </TableHead>
+          <TableHead className="sticky top-0 z-10 bg-background">
+            {sortHeader("Класс", "class")}
+          </TableHead>
+          <TableHead className="sticky top-0 z-10 bg-background">
+            Опоздал
+          </TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {sortedAttendance.length > 0 ? (
+          sortedAttendance.map((a: any) => (
+            <TableRow key={a.user.id}>
+              <TableCell>{a.user.username}</TableCell>
+              <TableCell>
+                {a.user.class ? (
+                  <Badge
+                    className="text-background gap-1"
+                    style={{
+                      backgroundColor:
+                        classColors[a.user.class] ?? "rgb(120,120,120)",
+                    }}
+                  >
+                    {classIcons[a.user.class]}
+                    {a.user.class}
+                  </Badge>
+                ) : (
+                  "—"
+                )}
+              </TableCell>
+              <TableCell>{a.is_late ? "Да" : "Нет"}</TableCell>
+            </TableRow>
+          ))
+        ) : (
+          <TableRow>
+            <TableCell colSpan={3} className="h-24 text-center">
+              Нет участников
+            </TableCell>
+          </TableRow>
+        )}
+      </TableBody>
+    </Table>
+  );
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -113,48 +169,60 @@ export function RaidInfoDialog({
           </div>
         </div>
 
-        <div className="rounded-md border flex-1 min-h-0 overflow-y-auto">
-          <Table>
-            <TableHeader className="sticky top-0 z-1 bg-background">
-              <TableRow>
-                <TableHead>{sortHeader("Ник", "username")}</TableHead>
-                <TableHead>{sortHeader("Класс", "class")}</TableHead>
-                <TableHead>Опоздал</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sortedAttendance.length > 0 ? (
-                sortedAttendance.map((a: any) => (
-                  <TableRow key={a.user.id}>
-                    <TableCell>{a.user.username}</TableCell>
-                    <TableCell>
-                      {a.user.class ? (
-                        <Badge
-                          className="text-background gap-1"
-                          style={{
-                            backgroundColor:
-                              classColors[a.user.class] ?? "rgb(120,120,120)",
-                          }}
-                        >
-                          {classIcons[a.user.class]}
-                          {a.user.class}
-                        </Badge>
-                      ) : (
-                        "—"
-                      )}
-                    </TableCell>
-                    <TableCell>{a.is_late ? "Да" : "Нет"}</TableCell>
+        {showLoot && (
+          <div className="shrink-0">
+            <h3 className="text-sm font-semibold mb-2">
+              Лут{loot.length > 0 ? ` (${loot.length})` : ""}
+            </h3>
+            <div className="rounded-md border max-h-40 overflow-y-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="sticky top-0 z-10 bg-background">
+                      Предмет
+                    </TableHead>
+                    <TableHead className="sticky top-0 z-10 bg-background">
+                      Кол-во
+                    </TableHead>
+                    <TableHead className="sticky top-0 z-10 bg-background">
+                      Статус
+                    </TableHead>
+                    <TableHead className="sticky top-0 z-10 bg-background">
+                      Кому
+                    </TableHead>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={3} className="h-24 text-center">
-                    Нет участников
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                </TableHeader>
+                <TableBody>
+                  {loot.length > 0 ? (
+                    loot.map((item: any) => (
+                      <TableRow key={item.id}>
+                        <TableCell className="flex items-center gap-2">
+                          <LootIcon itemName={item.itemType?.name} size={28} />
+                          <span>{item.itemType?.name ?? "—"}</span>
+                        </TableCell>
+                        <TableCell>{item.quantity}</TableCell>
+                        <TableCell>{item.status ?? "—"}</TableCell>
+                        <TableCell>{item.sold_to ?? "—"}</TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={4} className="h-24 text-center">
+                        Лут не привязан к этому рейду
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        )}
+
+        <div className="shrink-0">
+          <h3 className="text-sm font-semibold mb-2">Участники</h3>
+        </div>
+        <div className="rounded-md border flex-1 min-h-0 overflow-y-auto">
+          {attendanceTable}
         </div>
       </DialogContent>
     </Dialog>

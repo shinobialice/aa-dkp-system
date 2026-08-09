@@ -47,6 +47,7 @@ export const addLootItem = async ({
   quantity,
   status,
   sold_at,
+  raidId,
 }: {
   itemTypeId: number;
   source?: string;
@@ -54,6 +55,7 @@ export const addLootItem = async ({
   quantity?: number;
   status?: string;
   sold_at?: string;
+  raidId?: number | null;
 }) => {
   const { error } = await supabase.from("loot").insert([
     {
@@ -64,6 +66,7 @@ export const addLootItem = async ({
       acquired_at: new Date(acquired_at).toISOString(),
       quantity: quantity ?? 1,
       created_at: new Date().toISOString(),
+      raid_id: raidId ?? null,
     },
   ]);
 
