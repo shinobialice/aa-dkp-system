@@ -8,6 +8,8 @@ export async function getEligibleUsers() {
     .select("id, username")
     .eq("active", true)
     .is("google_id", null)
+    .is("vk_id", null)
+    .is("mail_id", null)
     .order("username", { ascending: true });
 
   if (error || !users) {
