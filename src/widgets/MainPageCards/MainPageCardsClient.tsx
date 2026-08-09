@@ -19,6 +19,7 @@ import UpcomingEvents from "./UpcomingEvents";
 import RespawnTracker from "./RespawnTracker";
 import BossRespawnHistory from "./BossRespawnHistory";
 import SoundNotificationToggle from "./SoundNotificationToggle";
+import DimonishButton from "./DimonishButton";
 
 type Stats = Awaited<ReturnType<typeof getStats>>;
 
@@ -193,6 +194,7 @@ const MainPageCardsClient: FC = () => {
           content={infoItems[1].content}
         />
       </div>
+      <DimonishButton />
     </div>
   );
 };
