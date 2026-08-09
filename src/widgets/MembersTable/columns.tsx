@@ -6,6 +6,7 @@ import { classColors, classIcons } from "./classStyles";
 import { Badge } from "@/shared/ui";
 import { Button } from "@/shared/ui";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/ui";
+import { Avatar, AvatarImage, AvatarFallback } from "@/shared/ui";
 
 export const columns: ColumnDef<any>[] = [
   {
@@ -21,7 +22,22 @@ export const columns: ColumnDef<any>[] = [
       </Button>
     ),
     cell: ({ row }) => (
-      <Link href={`/profile/${row.original.id}`} className=" underline">
+      <Link
+        href={`/profile/${row.original.id}`}
+        className="flex items-center gap-2 underline"
+      >
+        <Avatar className="h-6 w-6 shrink-0">
+          <AvatarImage
+            src={
+              row.original.avatar_url ??
+              `https://api.dicebear.com/6.x/initials/svg?seed=${row.original.username}`
+            }
+            alt={row.original.username}
+          />
+          <AvatarFallback className="text-[10px]">
+            {row.original.username.slice(0, 2)}
+          </AvatarFallback>
+        </Avatar>
         {row.original.username}
       </Link>
     ),

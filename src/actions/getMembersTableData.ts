@@ -9,7 +9,7 @@ export async function getMembersTableData() {
   const { data: users, error } = await supabase
     .from("user")
     .select(
-      "id, username, class, class_gear_score, joined_at, active, is_eligible_for_salary, probation_bypass",
+      "id, username, avatar_url, class, class_gear_score, joined_at, active, is_eligible_for_salary, probation_bypass",
     )
     .eq("active", true)
     .order("joined_at", { ascending: true })
