@@ -12,7 +12,7 @@ export async function getOnlineUsers() {
 
   const { data, error } = await supabase
     .from("user")
-    .select("id, username")
+    .select("id, username, avatar_url")
     .gte("last_seen_at", cutoff)
     .order("username", { ascending: true });
 
