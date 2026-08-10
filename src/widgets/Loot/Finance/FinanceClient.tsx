@@ -100,10 +100,11 @@ export default function FinanceClient({
     <Button
       className="cursor-pointer"
       variant="ghost"
+      size="sm"
       onClick={() => toggleSort(field)}
     >
       {label}
-      <ArrowUpDown className="ml-2 h-4 w-4" />
+      <ArrowUpDown className="ml-1 h-4 w-4" />
     </Button>
   );
 
@@ -204,7 +205,7 @@ export default function FinanceClient({
   const freeGold = effectiveInTreasury - remainingSalaries;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex items-center gap-3">
         <h1 className="text-2xl font-bold">
           Финансы гильдии — {month}/{year}
@@ -272,7 +273,7 @@ export default function FinanceClient({
       )}
 
       {fund && (
-        <div className="grid grid-cols-2 gap-4 border rounded-md p-4 bg-muted/30">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-2 border rounded-md p-3 bg-muted/30 text-sm">
           <div>
             💰 Доходы (Продано): <strong>{fund.totalIncome}</strong>
           </div>
@@ -308,7 +309,7 @@ export default function FinanceClient({
       )}
 
       {salaries.length > 0 && (
-        <div className="border rounded-md overflow-auto">
+        <div className="border rounded-md overflow-auto max-h-[70vh] [&_th]:sticky [&_th]:top-0 [&_th]:z-10 [&_th]:h-8 [&_th]:bg-background [&_td]:py-1.5">
           <Table>
             <TableHeader>
               <TableRow>
@@ -378,7 +379,7 @@ export default function FinanceClient({
                       onChange={(e) =>
                         handleAdvanceChange(s.id, +e.target.value, s.sent)
                       }
-                      className="w-28"
+                      className="h-8 w-28"
                     />
                   </TableCell>
                   <TableCell>{s.total - s.sentAmount}</TableCell>
