@@ -2,6 +2,7 @@
 
 import { randomUUID } from "crypto";
 import supabase from "@/shared/lib/supabaseAdmin";
+import { getBaseUrl } from "@/shared/lib";
 
 export async function createLinkToken(userId: number) {
   const token = randomUUID();
@@ -24,5 +25,5 @@ export async function createLinkToken(userId: number) {
     throw new Error("Не удалось создать токен привязки");
   }
 
-  return `${process.env.NEXT_PUBLIC_BASE_URL}/link-account/${token}`;
+  return `${getBaseUrl()}/link-account/${token}`;
 }

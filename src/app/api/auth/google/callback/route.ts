@@ -2,8 +2,9 @@ import crypto from "crypto";
 import supabase from "@/shared/lib/supabaseAdmin";
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { getBaseUrl } from "@/shared/lib";
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL!;
+const baseUrl = getBaseUrl();
 function generateSessionToken() {
   return crypto.randomBytes(32).toString("hex");
 }

@@ -3,6 +3,7 @@
 import Cookies from "js-cookie";
 import { MailIcon } from "./authIcons"; // если есть
 import { Button } from "@/shared/ui";
+import { getBaseUrl } from "@/shared/lib";
 
 export default function MailLoginButton() {
   const handleLogin = () => {
@@ -17,7 +18,7 @@ export default function MailLoginButton() {
     const params = new URLSearchParams({
       response_type: "code",
       client_id: process.env.NEXT_PUBLIC_MAILRU_CLIENT_ID!,
-      redirect_uri: `${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/mailru/callback`,
+      redirect_uri: `${getBaseUrl()}/api/auth/mailru/callback`,
       state,
       scope: "userinfo",
     });

@@ -2,6 +2,7 @@ import { generateCodeChallenge, generateCodeVerifier } from "@/utils/pkce";
 import Cookies from "js-cookie";
 import { VkIcon } from "./authIcons";
 import { Button } from "@/shared/ui";
+import { getBaseUrl } from "@/shared/lib";
 
 export default function VkLoginButton() {
   const handleLogin = async () => {
@@ -12,7 +13,7 @@ export default function VkLoginButton() {
     const params = new URLSearchParams({
       response_type: "code",
       client_id: process.env.NEXT_PUBLIC_VK_CLIENT_ID!,
-      redirect_uri: `${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/vk/callback`,
+      redirect_uri: `${getBaseUrl()}/api/auth/vk/callback`,
       code_challenge: codeChallenge,
       code_challenge_method: "S256",
       state,

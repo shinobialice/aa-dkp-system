@@ -3,6 +3,7 @@
 import Cookies from "js-cookie";
 import { GoogleIcon } from "./authIcons";
 import { Button } from "@/shared/ui";
+import { getBaseUrl } from "@/shared/lib";
 
 export default function GoogleLoginButton() {
   const handleLogin = () => {
@@ -12,7 +13,7 @@ export default function GoogleLoginButton() {
       path: "/",
       expires: 0.1,
     });
-    const origin = process.env.NEXT_PUBLIC_BASE_URL!;
+    const origin = getBaseUrl();
 
     const params = new URLSearchParams({
       client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,

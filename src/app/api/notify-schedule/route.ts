@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Receiver } from "@upstash/qstash";
 import supabase from "@/shared/lib/supabaseAdmin";
+import { getBaseUrl } from "@/shared/lib";
 import { sendVkMessage } from "@/shared/lib/vkBot";
 import { getVkMentionTag } from "@/shared/lib/vkQuietHours";
 import { getVkNotificationSettings } from "@/actions/vkNotificationSettings";
@@ -36,7 +37,7 @@ export async function POST(req: NextRequest) {
     isValid = await receiver.verify({
       body,
       signature,
-      url: `${process.env.NEXT_PUBLIC_BASE_URL}/api/notify-schedule`,
+      url: `${getBaseUrl()}/api/notify-schedule`,
     });
   } catch {
     isValid = false;

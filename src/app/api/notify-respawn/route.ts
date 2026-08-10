@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Receiver } from "@upstash/qstash";
 import { sendVkMessage } from "@/shared/lib/vkBot";
+import { getBaseUrl } from "@/shared/lib";
 import { getVkMentionTag } from "@/shared/lib/vkQuietHours";
 import { getVkNotificationSettings } from "@/actions/vkNotificationSettings";
 import { getMaintenanceWindows } from "@/actions/maintenanceWindows";
@@ -27,7 +28,7 @@ export async function POST(req: NextRequest) {
     isValid = await receiver.verify({
       body,
       signature,
-      url: `${process.env.NEXT_PUBLIC_BASE_URL}/api/notify-respawn`,
+      url: `${getBaseUrl()}/api/notify-respawn`,
     });
   } catch {
     isValid = false;

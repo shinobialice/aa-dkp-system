@@ -1,5 +1,6 @@
 import "server-only";
 import { Client } from "@upstash/qstash";
+import { getBaseUrl } from "./getBaseUrl";
 
 const qstash = new Client({
   baseUrl: process.env.QSTASH_URL!,
@@ -22,7 +23,7 @@ export async function scheduleRespawnNotification(
   if (!notifyAt || notifyAt.getTime() <= Date.now()) return null;
 
   const { messageId } = await qstash.publishJSON({
-    url: `${process.env.NEXT_PUBLIC_BASE_URL}/api/notify-respawn`,
+    url: `${getBaseUrl()}/api/notify-respawn`,
     body: { boss },
     notBefore: Math.floor(notifyAt.getTime() / 1000),
   });
