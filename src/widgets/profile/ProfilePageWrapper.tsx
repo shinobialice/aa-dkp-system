@@ -58,7 +58,7 @@ export default function ProfilePageWrapper({
   );
 
   return (
-    <div className="space-y-6 p-4">
+    <div className="-mt-4 space-y-6 px-4 pb-4">
       <ProfileInfoClient
         canEditProfile={canEditProfile}
         canEditNickname={canEditNickname}

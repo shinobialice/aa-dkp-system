@@ -15,15 +15,15 @@ export default function InventoryTabsClient({
   canEdit: boolean;
 }) {
   return (
-    <Card>
+    <Card className="gap-3 py-4">
       <CardHeader>
         <CardTitle>Инвентарь игрока</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4">
         {categories.map((type) => (
           <div
             key={type}
-            className="space-y-3 border-t pt-6 first:border-t-0 first:pt-0"
+            className="space-y-2 border-t pt-4 first:border-t-0 first:pt-0"
           >
             <h3 className="text-sm font-semibold text-muted-foreground">
               {type}
