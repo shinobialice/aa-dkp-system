@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, TriangleAlert, X } from "lucide-react";
-import { Alert, AlertTitle, AlertDescription, Button } from "@/shared/ui";
+import { ChevronLeft, ChevronRight, TriangleAlert } from "lucide-react";
+import { Button } from "@/shared/ui";
+import { cn } from "@/shared/lib";
 import {
   getMissingActivitiesForMonth,
   type MissingActivities,
@@ -32,6 +33,9 @@ function getMoscowNow() {
   return { year: msk.getFullYear(), month: msk.getMonth() + 1 };
 }
 
+// Постоянная карточка статуса в боковой панели — раньше это был
+// раскрывающийся на всю ширину алерт, который при открытии сдвигал
+// календарь вниз. Теперь она всегда видна и не двигает соседей.
 export default function MissingActivitiesBanner() {
   const { year: currentYear, month: currentMonth } = getMoscowNow();
   const [selected, setSelected] = useState({
@@ -39,7 +43,6 @@ export default function MissingActivitiesBanner() {
     month: currentMonth,
   });
   const [data, setData] = useState<MissingActivities | null>(null);
-  const [open, setOpen] = useState(false);
 
   const isAtCurrentMonth =
     selected.year === currentYear && selected.month === currentMonth;
@@ -69,90 +72,78 @@ export default function MissingActivitiesBanner() {
     );
   };
 
-  if (!open) {
-    const currentMonthDeficit = isAtCurrentMonth ? data?.hasDeficit : undefined;
-    return (
-      <div className="mx-6 mb-4">
-        <Button
-          variant="outline"
-          className="cursor-pointer gap-2"
-          onClick={() => setOpen(true)}
-        >
-          {currentMonthDeficit && (
-            <TriangleAlert className="size-4 text-destructive" />
-          )}
-          Активности по расписанию
-          {currentMonthDeficit && (
-            <span className="rounded-full bg-destructive px-1.5 text-xs text-white">
-              {data?.missingSlots.length}
-            </span>
-          )}
-        </Button>
-      </div>
-    );
-  }
-
   const byDate = new Map<string, { time: string; bossName: string }[]>();
   for (const slot of data?.missingSlots ?? []) {
     if (!byDate.has(slot.date)) byDate.set(slot.date, []);
     byDate.get(slot.date)!.push(slot);
   }
 
+  const hasDeficit = !!data?.hasDeficit;
+
   return (
-    <Alert
-      variant={data?.hasDeficit ? "destructive" : "default"}
-      className="mx-6 mb-4 w-auto"
-    >
-      <TriangleAlert />
-      <AlertTitle className="flex w-full items-center justify-between gap-2">
-        <span>Обязательные активности по расписанию</span>
-        <span className="flex items-center gap-1">
-          <Button
-            variant="outline"
-            size="icon-sm"
-            className="cursor-pointer"
-            onClick={goPrev}
-          >
-            <ChevronLeft className="size-4" />
-          </Button>
-          <span className="text-nowrap text-sm font-normal">
-            {MONTH_NAMES[selected.month - 1]} {selected.year}
+    <div className="rounded-lg border bg-card p-3">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5">
+          <TriangleAlert
+            className={cn(
+              "size-3.5",
+              hasDeficit ? "text-destructive" : "text-muted-foreground",
+            )}
+          />
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Обязательные активности
+          </p>
+        </div>
+        {hasDeficit && (
+          <span className="rounded-full bg-destructive px-1.5 text-xs font-semibold text-white">
+            {data?.missingSlots.length}
           </span>
-          <Button
-            variant="outline"
-            size="icon-sm"
-            className="cursor-pointer"
-            onClick={goNext}
-            disabled={isAtCurrentMonth}
-          >
-            <ChevronRight className="size-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon-sm"
-            className="cursor-pointer ml-2"
-            onClick={() => setOpen(false)}
-          >
-            <X className="size-4" />
-          </Button>
+        )}
+      </div>
+
+      <div className="mt-2 flex items-center justify-center gap-1">
+        <Button
+          variant="outline"
+          size="icon-sm"
+          className="cursor-pointer"
+          onClick={goPrev}
+        >
+          <ChevronLeft className="size-3.5" />
+        </Button>
+        <span className="flex-1 text-center text-sm font-medium tabular-nums">
+          {MONTH_NAMES[selected.month - 1]} {selected.year}
         </span>
-      </AlertTitle>
-      <AlertDescription>
+        <Button
+          variant="outline"
+          size="icon-sm"
+          className="cursor-pointer"
+          onClick={goNext}
+          disabled={isAtCurrentMonth}
+        >
+          <ChevronRight className="size-3.5" />
+        </Button>
+      </div>
+
+      <div className="mt-2 text-sm">
         {!data ? (
-          <p>Загрузка…</p>
-        ) : !data.hasDeficit ? (
-          <p>Все обязательные активности за месяц проведены.</p>
+          <p className="text-muted-foreground">Загрузка…</p>
+        ) : !hasDeficit ? (
+          <p className="text-muted-foreground">
+            Все обязательные активности за месяц проведены.
+          </p>
         ) : (
-          <div className="max-h-64 w-full overflow-y-auto">
+          <div className="max-h-40 space-y-1 overflow-y-auto pr-1">
             {Array.from(byDate.entries()).map(([date, slots]) => (
-              <p key={date}>
+              <p key={date} className="leading-snug">
                 <span className="font-medium">{date}:</span>{" "}
-                {slots.map((s) => `${s.time} ${s.bossName}`).join(", ")}
+                <span className="text-muted-foreground">
+                  {slots.map((s) => `${s.time} ${s.bossName}`).join(", ")}
+                </span>
               </p>
             ))}
           </div>
         )}
-      </AlertDescription>
-    </Alert>
+      </div>
+    </div>
   );
 }

@@ -4,18 +4,12 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import listPlugin from "@fullcalendar/list";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import { ChevronLeft, ChevronRight, Table, Calendar1 } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { EventDialog } from "./EventDialog";
 import { RaidInfoDialog } from "./RaidInfoDialog";
 import MissingActivitiesBanner from "./MissingActivitiesBanner";
 import { Button } from "@/shared/ui";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/ui";
+import { cn } from "@/shared/lib";
 import { getRaids } from "@/actions/getEvents";
 import { getRaidById } from "@/actions/getRaidById";
 
@@ -23,6 +17,30 @@ type Props = {
   isAdmin: boolean;
   isModerator?: boolean;
   isSecretutka?: boolean;
+};
+
+// Цвета назначаются в getEvents.ts по типу рейда/боссу — держим список типов
+// здесь в том же порядке и с теми же значениями, чтобы легенда совпадала с
+// фактической закраской событий и её можно было использовать как фильтр.
+const RAID_TYPES = [
+  { key: "prime", label: "Прайм", color: "rgb(157, 41, 41)" },
+  { key: "agl", label: "АГЛ", color: "rgb(47, 158, 98)" },
+  { key: "koshka", label: "Кошка", color: "rgb(215, 100, 168)" },
+  { key: "morph", label: "Морф", color: "rgb(40, 111, 180)" },
+  { key: "marli", label: "Марли Прок", color: "rgb(180, 108, 51)" },
+  { key: "antallon", label: "Анталлон", color: "rgb(126, 34, 206)" },
+] as const;
+
+const colorToRaidKey = new Map<string, string>(
+  RAID_TYPES.map((rt) => [rt.color, rt.key]),
+);
+
+type CalendarEvent = {
+  id: string;
+  title: string;
+  start: string;
+  end: string;
+  color: string;
 };
 
 export default function CalendarView({
@@ -33,21 +51,31 @@ export default function CalendarView({
   const calendarRef = useRef<FullCalendar | null>(null);
   const [currentRange, setCurrentRange] = useState("...");
   const [currentView, setCurrentView] = useState("timeGridWeek");
-  const [events, setEvents] = useState<
-    {
-      id: string;
-      title: string;
-      start: string;
-      end: string;
-      color: string;
-    }[]
-  >([]);
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [hiddenTypes, setHiddenTypes] = useState<Set<string>>(new Set());
 
   const [openDialog, setOpenDialog] = useState(false);
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
 
   const canEditEvents = isAdmin || isModerator || isSecretutka;
+
+  const visibleEvents = events.filter((event) => {
+    const key = colorToRaidKey.get(event.color);
+    return !key || !hiddenTypes.has(key);
+  });
+
+  const toggleRaidType = (key: string) => {
+    setHiddenTypes((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  };
 
   const handleEventClick = async (info: any) => {
     const fullEvent = await getRaidById(info.event.id);
@@ -127,97 +155,129 @@ export default function CalendarView({
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-background text-onBackground">
-      <div className="flex-1">
-        <h1 className="text-3xl font-bold ml-6 mb-4 text-primary">
-          Календарь активностей
-        </h1>
-        <MissingActivitiesBanner />
-        <div className="flex justify-end mb-4 space-x-2 mr-6">
+    <div className="flex flex-col gap-4 bg-background text-foreground">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-primary">Активности</h1>
+          <p className="text-sm text-muted-foreground">
+            Календарь рейдов и обязательных активностей гильдии
+          </p>
+        </div>
+        {canEditEvents ? (
           <Button
-            variant="outline"
-            className="hidden md:flex cursor-pointer"
-            onClick={() => handleNav("list")}
+            className="cursor-pointer"
+            variant="default"
+            onClick={() => {
+              setSelectedEvent(null);
+              setOpenDialog(true);
+            }}
           >
-            <Table className="size-4" />
+            Добавить активность
           </Button>
+        ) : null}
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-muted/40 p-2">
+        <div className="inline-flex items-center gap-1 rounded-md border bg-background p-1">
           <Button
-            variant="outline"
-            className="hidden md:flex cursor-pointer"
+            size="sm"
+            variant={currentView === "timeGridWeek" ? "default" : "ghost"}
+            className="cursor-pointer"
             onClick={() => handleNav("week")}
           >
-            <Calendar1 className="size-4" />
+            Неделя
           </Button>
-          {canEditEvents ? (
-            <Button
-              className="cursor-pointer"
-              variant="default"
-              onClick={() => {
-                setSelectedEvent(null);
-                setOpenDialog(true);
-              }}
-            >
-              Добавить активность
-            </Button>
-          ) : null}
+          <Button
+            size="sm"
+            variant={currentView === "dayGridMonth" ? "default" : "ghost"}
+            className="cursor-pointer"
+            onClick={() => handleNav("monthGrid")}
+          >
+            Месяц
+          </Button>
+          <Button
+            size="sm"
+            variant={currentView === "listWeek" ? "default" : "ghost"}
+            className="cursor-pointer"
+            onClick={() => handleNav("list")}
+          >
+            Список
+          </Button>
         </div>
 
-        <div className="space-y-2 mb-4">
-          <div className="flex w-full flex-wrap items-center justify-between max-md:pb-2">
-            <div className="w-full max-w-40" />
-            <span className="text-nowrap font-semibold md:text-xl">
-              {currentRange}
-            </span>
-            <div className="flex items-end gap-2 mr-6">
-              {currentView !== "listWeek" ? (
-                <Select
-                  defaultValue="weekGrid"
-                  onValueChange={(value) => {
-                    if (value === "weekGrid") {
-                      handleNav("week");
-                    }
-                    if (value === "monthGrid") {
-                      handleNav("monthGrid");
-                    }
-                  }}
-                >
-                  <SelectTrigger className="cursor-pointer">
-                    <SelectValue placeholder="Неделя" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="weekGrid">Неделя</SelectItem>
-                    <SelectItem value="monthGrid">Месяц</SelectItem>
-                  </SelectContent>
-                </Select>
-              ) : null}
-              <Button
-                className="cursor-pointer"
-                onClick={() => handleNav("today")}
-              >
-                Сегодня
-              </Button>
-              <Button
-                className="cursor-pointer"
-                onClick={() => handleNav("prev")}
-              >
-                <ChevronLeft />
-              </Button>
-              <Button
-                className="cursor-pointer"
-                onClick={() => handleNav("next")}
-              >
-                <ChevronRight />
-              </Button>
+        <div className="flex items-center gap-2">
+          <span className="text-nowrap text-sm font-semibold tabular-nums md:text-base">
+            {currentRange}
+          </span>
+          <Button
+            size="sm"
+            className="cursor-pointer"
+            onClick={() => handleNav("today")}
+          >
+            Сегодня
+          </Button>
+          <Button
+            size="icon-sm"
+            variant="outline"
+            className="cursor-pointer"
+            onClick={() => handleNav("prev")}
+          >
+            <ChevronLeft className="size-4" />
+          </Button>
+          <Button
+            size="icon-sm"
+            variant="outline"
+            className="cursor-pointer"
+            onClick={() => handleNav("next")}
+          >
+            <ChevronRight className="size-4" />
+          </Button>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+        <aside className="flex flex-col gap-3 lg:w-64 lg:flex-none">
+          <MissingActivitiesBanner />
+
+          <div className="rounded-lg border bg-card p-3">
+            <p className="mb-1 px-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Типы активностей
+            </p>
+            <div className="flex flex-col gap-0.5">
+              {RAID_TYPES.map((raidType) => {
+                const active = !hiddenTypes.has(raidType.key);
+                return (
+                  <button
+                    key={raidType.key}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => toggleRaidType(raidType.key)}
+                    className={cn(
+                      "flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
+                      !active && "text-muted-foreground opacity-50",
+                    )}
+                  >
+                    <span
+                      className="size-2.5 shrink-0 rounded-full"
+                      style={{ backgroundColor: raidType.color }}
+                    />
+                    <span className="flex-1">{raidType.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
-        </div>
+        </aside>
 
-        <div className="bg-surface p-6 shadow-md" style={{ height: "80dvh" }}>
+        <div
+          className="min-w-0 flex-1 rounded-lg border bg-card p-3 shadow-sm"
+          style={{ height: "80dvh" }}
+        >
           <FullCalendar
             ref={calendarRef}
             plugins={[dayGridPlugin, timeGridPlugin, listPlugin]}
             initialView="timeGridWeek"
-            events={events}
+            events={visibleEvents}
             eventClick={handleEventClick}
             headerToolbar={false}
             height="100%"
@@ -225,6 +285,7 @@ export default function CalendarView({
             firstDay={1}
             eventDisplay="block"
             nowIndicator
+            scrollTime="24:00:00"
             slotDuration="00:30:00"
             slotLabelFormat={[
               {
@@ -243,53 +304,34 @@ export default function CalendarView({
                 dayHeaderFormat: { weekday: "short" },
               },
             }}
-            dayHeaderClassNames="bg-primaryVariant text-onPrimary"
-            dayCellClassNames="bg-surface"
-            slotLabelClassNames="text-onSurface"
+            dayHeaderClassNames="bg-card text-card-foreground"
+            dayCellClassNames="bg-card"
+            slotLabelClassNames="text-muted-foreground"
             allDaySlot={false}
             datesSet={handleDateSet}
           />
         </div>
-
-        <div className="flex flex-wrap gap-4 ml-6">
-          {[
-            { color: "rgb(157, 41, 41)", label: "Прайм" },
-            { color: "rgb(47, 158, 98)", label: "АГЛ" },
-            { color: "rgb(215, 100, 168)", label: "Кошка" },
-            { color: "rgb(40, 111, 180)", label: "Морф" },
-            { color: "rgb(180, 108, 51)", label: "Марли Прок" },
-            { color: "rgb(126, 34, 206)", label: "Анталлон" },
-          ].map((item, index) => (
-            <div key={index} className="flex items-center gap-2">
-              <div
-                className="h-3 w-3 rounded-full"
-                style={{ backgroundColor: item.color }}
-              />
-              <span className="text-sm text-onSurface">{item.label}</span>
-            </div>
-          ))}
-        </div>
-
-        {(selectedEvent || selectedEvent === null) && (
-          <EventDialog
-            mode={selectedEvent ? "edit" : "create"}
-            open={openDialog}
-            setOpen={setOpenDialog}
-            selectedEvent={selectedEvent}
-            onComplete={() => {
-              setOpenDialog(false);
-              setSelectedEvent(null);
-              getRaids().then(setEvents);
-            }}
-          />
-        )}
-
-        <RaidInfoDialog
-          open={infoDialogOpen}
-          setOpen={setInfoDialogOpen}
-          raid={selectedEvent}
-        />
       </div>
+
+      {(selectedEvent || selectedEvent === null) && (
+        <EventDialog
+          mode={selectedEvent ? "edit" : "create"}
+          open={openDialog}
+          setOpen={setOpenDialog}
+          selectedEvent={selectedEvent}
+          onComplete={() => {
+            setOpenDialog(false);
+            setSelectedEvent(null);
+            getRaids().then(setEvents);
+          }}
+        />
+      )}
+
+      <RaidInfoDialog
+        open={infoDialogOpen}
+        setOpen={setInfoDialogOpen}
+        raid={selectedEvent}
+      />
     </div>
   );
 }
