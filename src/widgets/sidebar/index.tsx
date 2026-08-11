@@ -60,7 +60,7 @@ const AppSidebar: FC<Props> = ({ isAdmin }) => {
     { title: "Основная информация", url: "/news", icon: Info },
     { title: "Новости", url: "/game-news", icon: Newspaper },
     { title: "Участники", url: "/members", icon: Users },
-    { title: "Активности", url: "/activities", icon: CalendarDays },
+    { title: "Посещаемость", url: "/activities", icon: CalendarDays },
     { title: "Расписание", url: "/schedule", icon: Calendar },
     {
       title: "Добыча",

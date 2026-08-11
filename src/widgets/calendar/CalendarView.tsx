@@ -158,9 +158,9 @@ export default function CalendarView({
     <div className="flex flex-col gap-4 bg-background text-foreground">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-primary">Активности</h1>
+          <h1 className="text-2xl font-bold text-primary">Посещаемость</h1>
           <p className="text-sm text-muted-foreground">
-            Календарь рейдов и обязательных активностей гильдии
+            Календарь рейдов 
           </p>
         </div>
         {canEditEvents ? (
