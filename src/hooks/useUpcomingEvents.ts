@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 import supabase from "@/shared/lib/supabase";
 import {
   BossName,
@@ -66,46 +67,64 @@ export function packsLabel(n: number): string {
   return `${n} паков`;
 }
 
-export function useUpcomingEvents(): UpcomingEvent[] {
-  const [bossLastKill, setBossLastKill] = useState<
-    Record<BossName, string | null>
-  >({ Марли: null, Морф: null, Кириос: null });
-  const [bossPacks, setBossPacks] = useState<
-    Record<BossName, number | null>
-  >({ Марли: null, Морф: null, Кириос: null });
-  const [events, setEvents] = useState<UpcomingEvent[]>([]);
-  const maintenanceWindows = useMaintenanceWindows();
+type BossRespawnState = {
+  lastKill: Record<BossName, string | null>;
+  packs: Record<BossName, number | null>;
+};
 
-  useEffect(() => {
-    async function fetchBossRespawn() {
-      const { data } = await supabase
-        .from("boss_respawn")
-        .select("boss_name,last_kill,packs_needed")
-        .in("boss_name", respawnBosses);
-      if (data) {
-        setBossLastKill((prev) => {
-          const next = { ...prev };
-          data.forEach(
-            (row: { boss_name: BossName; last_kill: string | null }) => {
-              next[row.boss_name] = row.last_kill;
-            },
-          );
-          return next;
-        });
-        setBossPacks((prev) => {
-          const next = { ...prev };
-          data.forEach(
-            (row: { boss_name: BossName; packs_needed: number | null }) => {
-              next[row.boss_name] = row.packs_needed;
-            },
-          );
-          return next;
-        });
-      }
-    }
+// Module-level store shared by every consumer of this hook. UpcomingEvents
+// and EventNotifications both render at the same time and each used to open
+// its own realtime channel under the same hardcoded name. Supabase's
+// `.channel(topic)` returns the *existing* channel when the topic already
+// exists, so the second caller's `.on()` landed on a channel the first
+// caller had already `.subscribe()`d, which Supabase rejects with "cannot
+// add postgres_changes callbacks after subscribe()" (same issue fixed in
+// useMaintenanceWindows.ts). Sharing one fetch + one channel across all
+// consumers avoids the collision entirely.
+let bossRespawnState: BossRespawnState = {
+  lastKill: { Марли: null, Морф: null, Кириос: null } as Record<
+    BossName,
+    string | null
+  >,
+  packs: { Марли: null, Морф: null, Кириос: null } as Record<
+    BossName,
+    number | null
+  >,
+};
+const bossRespawnListeners = new Set<(state: BossRespawnState) => void>();
+let bossRespawnChannel: RealtimeChannel | null = null;
+
+async function fetchBossRespawn() {
+  const { data } = await supabase
+    .from("boss_respawn")
+    .select("boss_name,last_kill,packs_needed")
+    .in("boss_name", respawnBosses);
+  if (data) {
+    const lastKill = { ...bossRespawnState.lastKill };
+    const packs = { ...bossRespawnState.packs };
+    data.forEach(
+      (row: {
+        boss_name: BossName;
+        last_kill: string | null;
+        packs_needed: number | null;
+      }) => {
+        lastKill[row.boss_name] = row.last_kill;
+        packs[row.boss_name] = row.packs_needed;
+      },
+    );
+    bossRespawnState = { lastKill, packs };
+    bossRespawnListeners.forEach((listener) => listener(bossRespawnState));
+  }
+}
+
+function subscribeBossRespawn(
+  listener: (state: BossRespawnState) => void,
+): () => void {
+  bossRespawnListeners.add(listener);
+
+  if (!bossRespawnChannel) {
     fetchBossRespawn();
-
-    const channel = supabase
+    bossRespawnChannel = supabase
       .channel("upcoming-events-boss-respawn")
       .on(
         "postgres_changes",
@@ -117,15 +136,42 @@ export function useUpcomingEvents(): UpcomingEvent[] {
             packs_needed: number | null;
           };
           if (!row?.boss_name) return;
-          setBossLastKill((prev) => ({ ...prev, [row.boss_name]: row.last_kill }));
-          setBossPacks((prev) => ({ ...prev, [row.boss_name]: row.packs_needed }));
+          bossRespawnState = {
+            lastKill: {
+              ...bossRespawnState.lastKill,
+              [row.boss_name]: row.last_kill,
+            },
+            packs: {
+              ...bossRespawnState.packs,
+              [row.boss_name]: row.packs_needed,
+            },
+          };
+          bossRespawnListeners.forEach((l) => l(bossRespawnState));
         },
       )
       .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
+  } else {
+    // A subscription already exists: hand the new listener the latest
+    // known snapshot instead of waiting for the next change event.
+    listener(bossRespawnState);
+  }
+
+  return () => {
+    bossRespawnListeners.delete(listener);
+    if (bossRespawnListeners.size === 0 && bossRespawnChannel) {
+      supabase.removeChannel(bossRespawnChannel);
+      bossRespawnChannel = null;
+    }
+  };
+}
+
+export function useUpcomingEvents(): UpcomingEvent[] {
+  const [{ lastKill: bossLastKill, packs: bossPacks }, setRespawnState] =
+    useState<BossRespawnState>(bossRespawnState);
+  const [events, setEvents] = useState<UpcomingEvent[]>([]);
+  const maintenanceWindows = useMaintenanceWindows();
+
+  useEffect(() => subscribeBossRespawn(setRespawnState), []);
 
   useEffect(() => {
     const checkEvents = () => {
