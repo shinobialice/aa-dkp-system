@@ -22,55 +22,42 @@ export function getRespawnStart(lastKill: string, respawnHours: number): Date {
 
 export type MaintenanceWindow = { startAt: string; endAt: string };
 
-function isWithinAdHocWindow(now: Date, windows: MaintenanceWindow[]): boolean {
-  return windows.some((w) => {
-    const start = new Date(w.startAt).getTime();
-    const end = new Date(w.endAt).getTime();
-    const t = now.getTime();
-    return t >= start && t < end;
-  });
-}
-
-// Каждый четверг 05:00-11:00 (МСК) на серверах проводятся профилактические работы,
-// плюс единоразовые внеплановые окна, добавленные админом на странице настроек
-export function isMaintenanceWindow(
-  now: Date = new Date(),
-  adHocWindows: MaintenanceWindow[] = [],
-): boolean {
-  if (isWithinAdHocWindow(now, adHocWindows)) return true;
-
-  const weekday = now.toLocaleString("en-US", {
-    timeZone: "Europe/Moscow",
-    weekday: "short",
-  });
-  const hour = Number(
-    now.toLocaleString("en-US", {
-      timeZone: "Europe/Moscow",
-      hour: "2-digit",
-      hour12: false,
-    }),
+function findAdHocWindow(
+  now: Date,
+  windows: MaintenanceWindow[],
+): MaintenanceWindow | null {
+  return (
+    windows.find((w) => {
+      const start = new Date(w.startAt).getTime();
+      const end = new Date(w.endAt).getTime();
+      const t = now.getTime();
+      return t >= start && t < end;
+    }) ?? null
   );
-  return weekday === "Thu" && hour >= 5 && hour < 11;
 }
 
-// Границы сегодняшнего регулярного окна (если сегодня четверг по МСК) —
-// используется в настройках, чтобы предложить админу "продлить" плановые
-// работы, добавив внеплановое окно сразу после штатного конца в 11:00
-export function getTodayRecurringMaintenanceWindow(
-  now: Date = new Date(),
-): { start: Date; end: Date } | null {
-  const weekday = now.toLocaleString("en-US", {
-    timeZone: "Europe/Moscow",
-    weekday: "short",
-  });
-  if (weekday !== "Thu") return null;
+function isThursdayMsk(date: Date): boolean {
+  return (
+    date.toLocaleString("en-US", {
+      timeZone: "Europe/Moscow",
+      weekday: "short",
+    }) === "Thu"
+  );
+}
 
+// Границы окна 05:00-11:00 МСК для календарного дня (по МСК), на который
+// приходится `date` — не проверяет день недели и не проверяет попадание
+// внутрь этих часов, этим занимаются вызывающие функции.
+function getRecurringWindowBoundsForDay(date: Date): {
+  start: Date;
+  end: Date;
+} {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Europe/Moscow",
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-  }).formatToParts(now);
+  }).formatToParts(date);
   const get = (type: string) => parts.find((p) => p.type === type)!.value;
   const dateStr = `${get("year")}-${get("month")}-${get("day")}`;
 
@@ -79,4 +66,68 @@ export function getTodayRecurringMaintenanceWindow(
     start: new Date(`${dateStr}T05:00:00+03:00`),
     end: new Date(`${dateStr}T11:00:00+03:00`),
   };
+}
+
+// Регулярное окно, которое реально накрывает `date` (день — четверг по МСК,
+// и время внутри 05:00-11:00) — в отличие от
+// getTodayRecurringMaintenanceWindow, которая сообщает границы окна для
+// сегодняшнего дня, если сегодня четверг, независимо от текущего часа.
+function getRecurringMaintenanceWindow(
+  date: Date,
+): { start: Date; end: Date } | null {
+  if (!isThursdayMsk(date)) return null;
+  const { start, end } = getRecurringWindowBoundsForDay(date);
+  if (date < start || date >= end) return null;
+  return { start, end };
+}
+
+// Каждый четверг 05:00-11:00 (МСК) на серверах проводятся профилактические работы,
+// плюс единоразовые внеплановые окна, добавленные админом на странице настроек
+export function isMaintenanceWindow(
+  now: Date = new Date(),
+  adHocWindows: MaintenanceWindow[] = [],
+): boolean {
+  if (findAdHocWindow(now, adHocWindows)) return true;
+  return getRecurringMaintenanceWindow(now) !== null;
+}
+
+// Границы сегодняшнего регулярного окна (если сегодня четверг по МСК) —
+// используется в настройках, чтобы предложить админу "продлить" плановые
+// работы, добавив внеплановое окно сразу после штатного конца в 11:00
+export function getTodayRecurringMaintenanceWindow(
+  now: Date = new Date(),
+): { start: Date; end: Date } | null {
+  if (!isThursdayMsk(now)) return null;
+  return getRecurringWindowBoundsForDay(now);
+}
+
+// Правда игры: если сервер уходит на проф. работы, пока таймер респавна
+// ещё тикает (в любой момент между киллом и концом окна возможного
+// респауна), игра сама сбрасывает респавн — даже если momент "killTime +
+// respawnHours" не попадает в само окно профилактики. После такого сброса
+// точное время респауна недостоверно, пока кто-то не подтвердит новый
+// килл/появление. Проверяет, началось ли хотя бы одно окно (плановое
+// четверговое или внеплановое) строго после killTime и не позже boundary
+// (обычно — конец окна возможного респауна).
+export function maintenanceStartedDuring(
+  killTime: Date,
+  boundary: Date,
+  adHocWindows: MaintenanceWindow[] = [],
+): boolean {
+  const adHocHit = adHocWindows.some((w) => {
+    const start = new Date(w.startAt);
+    return start > killTime && start <= boundary;
+  });
+  if (adHocHit) return true;
+
+  // respawnHours ограничен ~12ч, так что между killTime и boundary может
+  // попасть старт регулярного окна максимум на одном из двух ближайших
+  // календарных дней (по МСК).
+  for (const offsetDays of [0, 1]) {
+    const day = new Date(killTime.getTime() + offsetDays * 24 * 60 * 60 * 1000);
+    if (!isThursdayMsk(day)) continue;
+    const { start } = getRecurringWindowBoundsForDay(day);
+    if (start > killTime && start <= boundary) return true;
+  }
+  return false;
 }

@@ -17,6 +17,7 @@ import {
   respawnWindow,
   getRespawnStart,
   isMaintenanceWindow,
+  maintenanceStartedDuring,
 } from "@/shared/config/bossRespawn";
 
 const bossImages: Partial<Record<BossName, string>> = {
@@ -53,7 +54,8 @@ function formatMoscowDateTime(date: Date): string {
 const RespawnTracker: FC = () => {
   const maintenanceWindows = useMaintenanceWindows();
   function getRespawnInfo(lastKill: string | null, respawnHours: number) {
-    if (isMaintenanceWindow(new Date(), maintenanceWindows))
+    const now = new Date();
+    if (isMaintenanceWindow(now, maintenanceWindows))
       return {
         status: "Проф. работы",
         nextRespawn: "-",
@@ -73,18 +75,22 @@ const RespawnTracker: FC = () => {
       };
     const killDate = new Date(lastKill);
     const respawnStart = getRespawnStart(lastKill, respawnHours);
-    if (isMaintenanceWindow(respawnStart, maintenanceWindows))
+    const respawnEnd = new Date(
+      respawnStart.getTime() + respawnWindow * 60 * 60 * 1000,
+    );
+    // Если между киллом и концом окна возможного респауна сервер уходил на
+    // проф. работы (плановые или внеплановые) — игра сама сбрасывает
+    // респавн, и расчётное время недостоверно, даже если сам respawnStart
+    // не попадает в окно (пример: убили в 15:00, профы 16:00-17:00,
+    // расчётный респавн в 03:00 — но по факту он сброшен и неизвестен).
+    if (maintenanceStartedDuring(killDate, respawnEnd, maintenanceWindows))
       return {
-        status: "Проф. работы",
+        status: "Неизвестно",
         nextRespawn: "-",
         lastKillDisplay: formatMoscowDateTime(killDate),
         waiting: false,
         timeLeft: null,
       };
-    const respawnEnd = new Date(
-      respawnStart.getTime() + respawnWindow * 60 * 60 * 1000,
-    );
-    const now = new Date();
     let status = "Ожидание";
     let waiting = false;
     let timeLeft: string | null = null;
@@ -270,6 +276,7 @@ const RespawnTracker: FC = () => {
     if (status === "Возможен респаун!") return "text-green-600 font-bold";
     if (status === "Ожидание убийства") return "text-blue-500 font-semibold";
     if (status === "Нет данных") return "text-gray-400";
+    if (status === "Неизвестно") return "text-orange-400 font-semibold";
     return "text-gray-700";
   }
 

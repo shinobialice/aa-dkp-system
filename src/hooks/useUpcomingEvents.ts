@@ -10,6 +10,7 @@ import {
   respawnWindow,
   getRespawnStart,
   isMaintenanceWindow,
+  maintenanceStartedDuring,
 } from "@/shared/config/bossRespawn";
 import {
   schedule,
@@ -221,7 +222,11 @@ export function useUpcomingEvents(): UpcomingEvent[] {
         const start = getRespawnStart(lastKill, respawnHoursByBoss[boss]);
         const end = new Date(start.getTime() + respawnWindow * 60 * 60 * 1000);
         if (realNow >= end) continue;
-        if (isMaintenanceWindow(start, maintenanceWindows)) continue;
+        // Проф. работы между киллом и концом окна возможного респауна
+        // сбрасывают респавн в игре, даже если сам start не попадает в
+        // окно — расчётное время недостоверно, событие не показываем.
+        if (maintenanceStartedDuring(new Date(lastKill), end, maintenanceWindows))
+          continue;
 
         const isNow = realNow >= start && realNow < end;
         const startsInMin = Math.ceil(
