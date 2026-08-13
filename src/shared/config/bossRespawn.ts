@@ -101,6 +101,21 @@ export function getTodayRecurringMaintenanceWindow(
   return getRecurringWindowBoundsForDay(now);
 }
 
+// То же самое, но для дня, наступающего через daysFromNow календарных дней
+// (0 = сегодня) — используется, чтобы собрать регулярные окна на неделю
+// вперёд для "Предстоящих мероприятий". Границы строятся напрямую из
+// фиксированного смещения +03:00, без "фейкового локального времени", —
+// поэтому совпадают день-в-день с тем, что уже записано в БД при продлении
+// окна через getTodayRecurringMaintenanceWindow (важно для склейки смежных
+// окон без миллисекундных расхождений).
+export function getRecurringMaintenanceWindowInDays(
+  daysFromNow: number,
+): { start: Date; end: Date } | null {
+  const date = new Date(Date.now() + daysFromNow * 24 * 60 * 60 * 1000);
+  if (!isThursdayMsk(date)) return null;
+  return getRecurringWindowBoundsForDay(date);
+}
+
 // Правда игры: если сервер уходит на проф. работы, пока таймер респавна
 // ещё тикает (в любой момент между киллом и концом окна возможного
 // респауна), игра сама сбрасывает респавн — даже если momент "killTime +

@@ -11,6 +11,7 @@ import {
   getRespawnStart,
   isMaintenanceWindow,
   maintenanceStartedDuring,
+  getRecurringMaintenanceWindowInDays,
 } from "@/shared/config/bossRespawn";
 import {
   schedule,
@@ -37,7 +38,10 @@ export const bossImages: Record<string, string> = {
   Марли: "/images/marli.png",
   Морф: "/images/morpheos.png",
   "Пепельные равнины": "/images/pepelki.png",
+  "Проф. работы": "/images/prof.png",
 };
+
+const maintenanceEventName = "Проф. работы";
 
 export function formatMoscowHM(date: Date): string {
   return date.toLocaleString("ru-RU", {
@@ -214,6 +218,56 @@ export function useUpcomingEvents(): UpcomingEvent[] {
             });
           }
         }
+      }
+
+      // Окна проф. работ — регулярные четверговые на неделю вперёд и все
+      // внеплановые (включая продления штатного окна). Продление обычно
+      // начинается ровно в момент конца штатного окна ("Продлить" в
+      // настройках), так что окна нужно склеивать в одну карточку, а не
+      // показывать два "Проф. работы" подряд.
+      const maintenanceRanges: { start: Date; end: Date }[] = [];
+      for (let offset = 0; offset < 7; offset++) {
+        const recurring = getRecurringMaintenanceWindowInDays(offset);
+        if (recurring) maintenanceRanges.push(recurring);
+      }
+      for (const w of maintenanceWindows) {
+        maintenanceRanges.push({
+          start: new Date(w.startAt),
+          end: new Date(w.endAt),
+        });
+      }
+      maintenanceRanges.sort((a, b) => a.start.getTime() - b.start.getTime());
+
+      const mergedMaintenance: { start: Date; end: Date }[] = [];
+      for (const range of maintenanceRanges) {
+        const last = mergedMaintenance[mergedMaintenance.length - 1];
+        if (last && range.start.getTime() <= last.end.getTime()) {
+          if (range.end.getTime() > last.end.getTime()) last.end = range.end;
+        } else {
+          mergedMaintenance.push({ start: range.start, end: range.end });
+        }
+      }
+
+      for (const { start, end } of mergedMaintenance) {
+        if (realNow >= end) continue;
+
+        const isNow = realNow >= start && realNow < end;
+        const startsInMin = Math.ceil(
+          (start.getTime() - realNow.getTime()) / 60000,
+        );
+        const endsInMin = isNow
+          ? Math.ceil((end.getTime() - realNow.getTime()) / 60000)
+          : undefined;
+
+        result.push({
+          boss: maintenanceEventName,
+          time: `${formatMoscowHM(start)}-${formatMoscowHM(end)}`,
+          date: new Date(start.getTime() + shift),
+          key: `${maintenanceEventName}__${start.getTime()}`,
+          isNow,
+          startsInMin,
+          endsInMin,
+        });
       }
 
       for (const boss of respawnBosses) {
