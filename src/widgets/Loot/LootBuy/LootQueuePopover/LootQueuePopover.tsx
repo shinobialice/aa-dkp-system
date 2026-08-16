@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Dices } from "lucide-react";
 import { AddToQueueForm } from "./AddToQueueForm";
 import { EditToggleButton } from "./EditToggleButton";
 import type { LootQueueEntry } from "./LootQueueTypes";
@@ -14,6 +15,7 @@ import {
   DialogTitle,
 } from "@/shared/ui";
 import { Popover, PopoverTrigger, PopoverContent } from "@/shared/ui";
+import { Button } from "@/shared/ui";
 import { addToLootQueue } from "@/actions/addToLootQueue";
 import { getLootQueueByItemName } from "@/actions/getLootQueueByItemName";
 import { markQueueLootAsSold } from "@/actions/markQueueLootAsSold";
@@ -94,6 +96,18 @@ export function LootQueuePopover({
     await refreshQueue();
   };
 
+  const handleRollAll = async () => {
+    await Promise.all(
+      queue.map((entry) =>
+        updateLootQueueEntry({
+          id: entry.id,
+          roll: Math.floor(Math.random() * 101),
+        }),
+      ),
+    );
+    await refreshQueue();
+  };
+
   const handleStatusToggle = async (
     entry: LootQueueEntry,
     status: "пропуск" | "позже",
@@ -167,11 +181,23 @@ export function LootQueuePopover({
         <PopoverContent className="w-[620px] max-h-[min(1000px,var(--radix-popover-content-available-height))] flex flex-col overflow-hidden">
           <div className="flex items-center justify-between mb-2 shrink-0">
             <div className="text-sm font-semibold">Очередь на: {itemName}</div>
-            <EditToggleButton
-              isAdmin={isAdmin}
-              editMode={editMode}
-              toggle={() => setEditMode((prev) => !prev)}
-            />
+            <div className="flex items-center gap-2">
+              {showRoll && isAdmin && editMode && queue.length > 0 && (
+                <Button
+                  className="cursor-pointer"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRollAll}
+                >
+                  <Dices className="h-3 w-3 mr-1" /> Ролл
+                </Button>
+              )}
+              <EditToggleButton
+                isAdmin={isAdmin}
+                editMode={editMode}
+                toggle={() => setEditMode((prev) => !prev)}
+              />
+            </div>
           </div>
           <div className="overflow-y-auto min-h-0">
             <QueueTableSimple
