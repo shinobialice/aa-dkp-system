@@ -2,12 +2,6 @@
 
 import { useEffect } from "react";
 
-// После деплоя у вкладки, открытой ещё со старой версии сайта, может
-// остаться смесь старых и новых JS-чанков. React Context тогда ломается
-// между модулями (например, react-day-picker падает с "useDayPicker()
-// must be used within a custom component"), как и обычные динамические
-// импорты ("Loading chunk N failed"). Лечится обычным reload — делаем это
-// автоматически один раз, вместо того чтобы человек упирался в белый экран.
 const STALE_CHUNK_PATTERNS = [
   /Loading chunk [\d]+ failed/i,
   /Failed to fetch dynamically imported module/i,
@@ -30,6 +24,20 @@ function reloadOnce() {
   window.location.reload();
 }
 
+const VERSION_CHECK_INTERVAL_MS = 3 * 60 * 1000;
+
+async function checkVersionAndMaybeReload() {
+  if (!document.hidden) return;
+  try {
+    const res = await fetch("/api/version", { cache: "no-store" });
+    const data = await res.json();
+    if (data.sha && data.sha !== process.env.NEXT_PUBLIC_BUILD_SHA) {
+      reloadOnce();
+    }
+  } catch {
+  }
+}
+
 // Ошибки из чужих расширений браузера (антивирусы, блокировщики рекламы и
 // т.п.) — не наш баг и никогда им не станет, чинить нечего. Расширение,
 // которое ловит и репортит эти ошибки, может залипнуть в цикл и засыпать
@@ -41,15 +49,9 @@ function isFromBrowserExtension(...sources: (string | undefined)[]): boolean {
   return sources.some((s) => s && EXTENSION_ORIGIN_PATTERN.test(s));
 }
 
-// Одна и та же ошибка (например, реальный, но зацикленный баг) не должна
-// репортиться чаще раза в REPORT_DEDUPE_MS — иначе один цикл рендера может
-// сгенерировать сотни одинаковых запросов вместо одного полезного репорта.
 const REPORT_DEDUPE_MS = 30_000;
 const recentlyReported = new Map<string, number>();
 
-// Браузерная консоль недоступна в Vercel — шлём любую необработанную
-// ошибку на сервер, чтобы она попала в Runtime Logs и была видна, даже
-// если репродюсит кто-то без открытых devtools.
 function reportError(message: string, stack?: string) {
   if (isFromBrowserExtension(stack, message)) return;
 
@@ -72,7 +74,6 @@ function reportError(message: string, stack?: string) {
       }),
     }).catch(() => {});
   } catch {
-    // logging must never itself throw
   }
 }
 
@@ -98,6 +99,21 @@ export function StaleChunkReload() {
     return () => {
       window.removeEventListener("error", onError);
       window.removeEventListener("unhandledrejection", onRejection);
+    };
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(
+      checkVersionAndMaybeReload,
+      VERSION_CHECK_INTERVAL_MS,
+    );
+    const onVisibilityChange = () => {
+      if (document.hidden) checkVersionAndMaybeReload();
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, []);
 
