@@ -19,6 +19,7 @@ import {
   updateExpense,
   deleteExpense,
 } from "@/actions/expenseActions";
+import { useBroadcastPing } from "@/hooks/useBroadcastPing";
 
 type Props = { isAdmin: boolean };
 
@@ -37,9 +38,11 @@ export default function ExpensesTable({ isAdmin }: Props) {
       setExpenses(all);
     };
     load();
-    const interval = setInterval(load, 8000);
-    return () => clearInterval(interval);
   }, []);
+
+  useBroadcastPing("loot-changes", async () => {
+    setExpenses(await getExpenses());
+  });
 
   const handleAdd = async (exp: ExpenseItem) => {
     const date =

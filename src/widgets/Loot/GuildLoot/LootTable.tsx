@@ -10,6 +10,7 @@ import { LootRawTable } from "./LootRawTable";
 import { MiscLootSummary } from "./MiscLootSummary";
 import { LootTableControls } from "./LootTableControls";
 import ExpensesTable from "./ExpenseTable";
+import { useBroadcastPing } from "@/hooks/useBroadcastPing";
 
 type Props = {
   isAdmin: boolean; // Add isAdmin prop
@@ -29,11 +30,11 @@ export default function LootTable({ isAdmin }: Props) {
       setItemTypes(await getItemTypes());
     };
     loadData();
-    const interval = setInterval(async () => {
-      setLoot(await getLoot());
-    }, 8000);
-    return () => clearInterval(interval);
   }, []);
+
+  useBroadcastPing("loot-changes", async () => {
+    setLoot(await getLoot());
+  });
 
   const handleAdd = async (item: NewLootItem) => {
     await addLootItem(item);
