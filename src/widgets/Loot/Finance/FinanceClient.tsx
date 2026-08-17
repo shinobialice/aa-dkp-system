@@ -24,7 +24,6 @@ import {
   updateSalaryAdvance,
 } from "@/actions/financeActions";
 import { recalculateFinanceForMonthAsAdmin } from "@/actions/recalculateFinanceForMonth";
-import { useBroadcastPing } from "@/hooks/useBroadcastPing";
 import { classColors, classIcons } from "@/widgets/MembersTable/classStyles";
 import { getYearOptions } from "@/utils/getYearOptions";
 
@@ -35,6 +34,8 @@ import { getYearOptions } from "@/utils/getYearOptions";
 // читает уже посчитанное. Лёгкий поллинг здесь нужен только на случай правок,
 // которые пока не триггерят пересчёт сами (штрафы, тэги, доп. бонусы,
 // расходы, критерии допуска) — можно держать короче, т.к. это просто чтение.
+const AUTO_REFRESH_MS = 30 * 1000;
+
 type Fund = {
   totalIncome: number;
   totalExpenses: number;
@@ -166,6 +167,12 @@ export default function FinanceClient({
   useEffect(() => {
     setInitialLoading(true);
     refresh(month, year);
+    const interval = setInterval(() => {
+      // Вкладка в фоне — всё равно никто не смотрит; onVisible ниже досчитает
+      // актуальные данные, как только пользователь вернётся.
+      if (document.hidden) return;
+      refresh(month, year, { silent: true });
+    }, AUTO_REFRESH_MS);
     const onVisible = () => {
       if (document.visibilityState === "visible") {
         refresh(month, year, { silent: true });
@@ -174,14 +181,11 @@ export default function FinanceClient({
     document.addEventListener("visibilitychange", onVisible);
     window.addEventListener("focus", onVisible);
     return () => {
+      clearInterval(interval);
       document.removeEventListener("visibilitychange", onVisible);
       window.removeEventListener("focus", onVisible);
     };
   }, [month, year, refresh]);
-
-  useBroadcastPing("finance-changes", () => {
-    refresh(month, year, { silent: true });
-  });
 
   const handleAdvanceChange = async (
     salaryId: number,

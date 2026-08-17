@@ -19,7 +19,9 @@ import {
   updateExpense,
   deleteExpense,
 } from "@/actions/expenseActions";
-import { useBroadcastPing } from "@/hooks/useBroadcastPing";
+import { useVisiblePolling } from "@/hooks/useVisiblePolling";
+
+const POLL_MS = 30_000;
 
 type Props = { isAdmin: boolean };
 
@@ -40,9 +42,9 @@ export default function ExpensesTable({ isAdmin }: Props) {
     load();
   }, []);
 
-  useBroadcastPing("loot-changes", async () => {
+  useVisiblePolling(async () => {
     setExpenses(await getExpenses());
-  });
+  }, POLL_MS);
 
   const handleAdd = async (exp: ExpenseItem) => {
     const date =

@@ -12,7 +12,7 @@ import { Button } from "@/shared/ui";
 import { cn } from "@/shared/lib";
 import { getRaids } from "@/actions/getEvents";
 import { getRaidById } from "@/actions/getRaidById";
-import { useBroadcastPing } from "@/hooks/useBroadcastPing";
+import { useVisiblePolling } from "@/hooks/useVisiblePolling";
 
 type Props = {
   isAdmin: boolean;
@@ -92,9 +92,9 @@ export default function CalendarView({
     getRaids().then(setEvents);
   }, []);
 
-  useBroadcastPing("raid-changes", () => {
+  useVisiblePolling(() => {
     getRaids().then(setEvents);
-  });
+  }, 30_000);
 
   useEffect(() => {
     if (!infoDialogOpen || !selectedEvent?.id) return;

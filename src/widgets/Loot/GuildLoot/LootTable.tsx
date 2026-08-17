@@ -10,7 +10,9 @@ import { LootRawTable } from "./LootRawTable";
 import { MiscLootSummary } from "./MiscLootSummary";
 import { LootTableControls } from "./LootTableControls";
 import ExpensesTable from "./ExpenseTable";
-import { useBroadcastPing } from "@/hooks/useBroadcastPing";
+import { useVisiblePolling } from "@/hooks/useVisiblePolling";
+
+const POLL_MS = 30_000;
 
 type Props = {
   isAdmin: boolean; // Add isAdmin prop
@@ -32,9 +34,9 @@ export default function LootTable({ isAdmin }: Props) {
     loadData();
   }, []);
 
-  useBroadcastPing("loot-changes", async () => {
+  useVisiblePolling(async () => {
     setLoot(await getLoot());
-  });
+  }, POLL_MS);
 
   const handleAdd = async (item: NewLootItem) => {
     await addLootItem(item);
