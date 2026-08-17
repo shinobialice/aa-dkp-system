@@ -10,9 +10,6 @@ import { LootRawTable } from "./LootRawTable";
 import { MiscLootSummary } from "./MiscLootSummary";
 import { LootTableControls } from "./LootTableControls";
 import ExpensesTable from "./ExpenseTable";
-import { useVisiblePolling } from "@/hooks/useVisiblePolling";
-
-const POLL_MS = 30_000;
 
 type Props = {
   isAdmin: boolean; // Add isAdmin prop
@@ -32,11 +29,11 @@ export default function LootTable({ isAdmin }: Props) {
       setItemTypes(await getItemTypes());
     };
     loadData();
+    const interval = setInterval(async () => {
+      setLoot(await getLoot());
+    }, 8000);
+    return () => clearInterval(interval);
   }, []);
-
-  useVisiblePolling(async () => {
-    setLoot(await getLoot());
-  }, POLL_MS);
 
   const handleAdd = async (item: NewLootItem) => {
     await addLootItem(item);

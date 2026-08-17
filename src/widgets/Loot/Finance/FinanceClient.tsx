@@ -34,7 +34,7 @@ import { getYearOptions } from "@/utils/getYearOptions";
 // читает уже посчитанное. Лёгкий поллинг здесь нужен только на случай правок,
 // которые пока не триггерят пересчёт сами (штрафы, тэги, доп. бонусы,
 // расходы, критерии допуска) — можно держать короче, т.к. это просто чтение.
-const AUTO_REFRESH_MS = 30 * 1000;
+const AUTO_REFRESH_MS = 8 * 1000;
 
 type Fund = {
   totalIncome: number;
@@ -167,12 +167,10 @@ export default function FinanceClient({
   useEffect(() => {
     setInitialLoading(true);
     refresh(month, year);
-    const interval = setInterval(() => {
-      // Вкладка в фоне — всё равно никто не смотрит; onVisible ниже досчитает
-      // актуальные данные, как только пользователь вернётся.
-      if (document.hidden) return;
-      refresh(month, year, { silent: true });
-    }, AUTO_REFRESH_MS);
+    const interval = setInterval(
+      () => refresh(month, year, { silent: true }),
+      AUTO_REFRESH_MS,
+    );
     const onVisible = () => {
       if (document.visibilityState === "visible") {
         refresh(month, year, { silent: true });

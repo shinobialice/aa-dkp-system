@@ -14,7 +14,6 @@ import {
 import { SidebarMenuButton, SidebarMenuItem } from "@/shared/ui";
 import { Avatar, AvatarImage, AvatarFallback } from "@/shared/ui";
 import { getOnlineUsers } from "@/actions/getOnlineUsers";
-import { useVisiblePolling } from "@/hooks/useVisiblePolling";
 
 const POLL_INTERVAL_MS = 30 * 1000;
 
@@ -42,12 +41,13 @@ export function OnlineUsersWidget() {
   const [users, setUsers] = useState<OnlineUser[]>([]);
 
   useEffect(() => {
-    getOnlineUsers().then(setUsers);
+    const load = () => {
+      getOnlineUsers().then(setUsers);
+    };
+    load();
+    const interval = setInterval(load, POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
   }, []);
-
-  useVisiblePolling(() => {
-    getOnlineUsers().then(setUsers);
-  }, POLL_INTERVAL_MS);
 
   return (
     <SidebarMenuItem>

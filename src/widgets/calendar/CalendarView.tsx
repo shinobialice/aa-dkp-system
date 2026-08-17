@@ -12,7 +12,6 @@ import { Button } from "@/shared/ui";
 import { cn } from "@/shared/lib";
 import { getRaids } from "@/actions/getEvents";
 import { getRaidById } from "@/actions/getRaidById";
-import { useVisiblePolling } from "@/hooks/useVisiblePolling";
 
 type Props = {
   isAdmin: boolean;
@@ -90,18 +89,18 @@ export default function CalendarView({
 
   useEffect(() => {
     getRaids().then(setEvents);
+    const interval = setInterval(() => {
+      getRaids().then(setEvents);
+    }, 10000);
+    return () => clearInterval(interval);
   }, []);
-
-  useVisiblePolling(() => {
-    getRaids().then(setEvents);
-  }, 30_000);
 
   useEffect(() => {
     if (!infoDialogOpen || !selectedEvent?.id) return;
-    const interval = setInterval(() => {
-      if (document.hidden) return;
-      getRaidById(selectedEvent.id).then(setSelectedEvent);
-    }, 30_000);
+    const interval = setInterval(async () => {
+      const fresh = await getRaidById(selectedEvent.id);
+      setSelectedEvent(fresh);
+    }, 10000);
     return () => clearInterval(interval);
   }, [infoDialogOpen, selectedEvent?.id]);
 
