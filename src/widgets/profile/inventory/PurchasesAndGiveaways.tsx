@@ -2,22 +2,39 @@
 
 import { useEffect, useState } from "react";
 import InventoryLogTable from "./InventoryLogTable";
+import UserExpensesTable from "./UserExpensesTable";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/ui";
 import {
   getUserPurchaseLog,
   type InventoryLogEntry,
 } from "@/actions/getUserPurchaseLog";
+import { getExpensesBySource } from "@/actions/expenseActions";
+import type { ExpenseItem } from "@/widgets/Loot/GuildLoot/ExpensesTypes";
 
-export default function PurchasesAndGiveaways({ userId }: { userId: number }) {
+export default function PurchasesAndGiveaways({
+  userId,
+  username,
+}: {
+  userId: number;
+  username?: string | null;
+}) {
   const [items, setItems] = useState<InventoryLogEntry[]>([]);
+  const [expenses, setExpenses] = useState<ExpenseItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setLoading(true);
-    getUserPurchaseLog(userId)
-      .then(setItems)
+    Promise.all([
+      getUserPurchaseLog(userId),
+      username ? getExpensesBySource(username) : Promise.resolve([]),
+    ])
+      .then(([log, exp]) => {
+        setItems(log);
+        setExpenses(exp);
+      })
       .finally(() => setLoading(false));
-  }, [userId]);
+  }, [userId, username]);
 
   const purchased = items.filter((item) => item.type === "Куплено");
   const given = items.filter((item) => item.type === "Выдано");
@@ -27,27 +44,37 @@ export default function PurchasesAndGiveaways({ userId }: { userId: number }) {
       <CardHeader>
         <CardTitle>Куплено / Выдано</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent>
         {loading ? (
           <div className="flex items-center justify-center h-24 text-muted-foreground">
             Загрузка...
           </div>
         ) : (
-          <>
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-muted-foreground">
+          <Tabs defaultValue="purchased">
+            <TabsList className="mb-4">
+              <TabsTrigger className="cursor-pointer" value="purchased">
                 Куплено
-              </h3>
-              <InventoryLogTable dateLabel="Дата покупки" items={purchased} />
-            </div>
-
-            <div className="space-y-3 border-t pt-6">
-              <h3 className="text-sm font-semibold text-muted-foreground">
+              </TabsTrigger>
+              <TabsTrigger className="cursor-pointer" value="given">
                 Выдано
-              </h3>
+              </TabsTrigger>
+              <TabsTrigger className="cursor-pointer" value="expenses">
+                Расходы
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="purchased">
+              <InventoryLogTable dateLabel="Дата покупки" items={purchased} />
+            </TabsContent>
+
+            <TabsContent value="given">
               <InventoryLogTable dateLabel="Дата выдачи" items={given} />
-            </div>
-          </>
+            </TabsContent>
+
+            <TabsContent value="expenses">
+              <UserExpensesTable expenses={expenses} />
+            </TabsContent>
+          </Tabs>
         )}
       </CardContent>
     </Card>

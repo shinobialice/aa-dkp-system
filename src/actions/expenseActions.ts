@@ -18,6 +18,21 @@ export const getExpenses = async () => {
   return data;
 };
 
+export const getExpensesBySource = async (source: string) => {
+  const { data, error } = await supabase
+    .from("Expense")
+    .select("*")
+    .eq("source", source)
+    .order("date", { ascending: false });
+
+  if (error) {
+    console.error("Ошибка при получении расходов пользователя:", error);
+    throw new Error("Не удалось получить расходы пользователя");
+  }
+
+  return data;
+};
+
 export const addExpense = async ({
   date,
   amount,

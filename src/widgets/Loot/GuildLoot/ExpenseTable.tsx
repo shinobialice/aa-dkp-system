@@ -19,6 +19,7 @@ import {
   updateExpense,
   deleteExpense,
 } from "@/actions/expenseActions";
+import { getActiveUsers } from "@/actions/getActiveUsers";
 import { useVisiblePolling } from "@/hooks/useVisiblePolling";
 
 const POLL_MS = 30_000;
@@ -29,6 +30,7 @@ export default function ExpensesTable({ isAdmin }: Props) {
   const [month, setMonth] = useState<number>(new Date().getMonth() + 1);
   const [year, setYear] = useState<number>(new Date().getFullYear());
   const [expenses, setExpenses] = useState<ExpenseItem[]>([]);
+  const [users, setUsers] = useState<{ id: number; username: string }[]>([]);
   const [showDialog, setShowDialog] = useState(false);
   const [editingExpense, setEditingExpense] = useState<ExpenseItem | null>(
     null,
@@ -40,6 +42,10 @@ export default function ExpensesTable({ isAdmin }: Props) {
       setExpenses(all);
     };
     load();
+  }, []);
+
+  useEffect(() => {
+    getActiveUsers().then(setUsers);
   }, []);
 
   useVisiblePolling(async () => {
@@ -108,6 +114,7 @@ export default function ExpensesTable({ isAdmin }: Props) {
         onAdd={handleAdd}
         editMode={!!editingExpense}
         initialValues={editingExpense ?? undefined}
+        users={users}
       />
 
       <div className="overflow-auto rounded-md border">
