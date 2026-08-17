@@ -101,6 +101,15 @@ export const columns: ColumnDef<any>[] = [
       </Button>
     ),
     cell: ({ row }) => row.original.joinedAtFormatted,
+    sortingFn: (rowA, rowB) => {
+      const a = rowA.original.joined_at
+        ? new Date(rowA.original.joined_at).getTime()
+        : 0;
+      const b = rowB.original.joined_at
+        ? new Date(rowB.original.joined_at).getTime()
+        : 0;
+      return a - b;
+    },
   },
   {
     accessorKey: "daysInGuild",
