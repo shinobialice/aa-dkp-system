@@ -35,9 +35,14 @@ export async function getRealtimeAuthToken(): Promise<string | null> {
     return null;
   }
 
+  // aud: "authenticated" — как у настоящих токенов Supabase Auth. Одного
+  // role оказалось недостаточно: Realtime (в отличие от обычных запросов
+  // через PostgREST/service-role) проверял ещё и aud и отклонял канал с
+  // "Unauthorized", даже когда role был выставлен верно.
   return new SignJWT({ role: "authenticated" })
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(String(user.id))
+    .setAudience("authenticated")
     .setIssuedAt()
     .setExpirationTime(`${TOKEN_TTL_SECONDS}s`)
     .sign(new TextEncoder().encode(secret));
