@@ -19,6 +19,9 @@ import {
   updateExpense,
   deleteExpense,
 } from "@/actions/expenseActions";
+import { useVisiblePolling } from "@/hooks/useVisiblePolling";
+
+const POLL_MS = 30_000;
 
 type Props = { isAdmin: boolean };
 
@@ -37,9 +40,11 @@ export default function ExpensesTable({ isAdmin }: Props) {
       setExpenses(all);
     };
     load();
-    const interval = setInterval(load, 8000);
-    return () => clearInterval(interval);
   }, []);
+
+  useVisiblePolling(async () => {
+    setExpenses(await getExpenses());
+  }, POLL_MS);
 
   const handleAdd = async (exp: ExpenseItem) => {
     const date =
