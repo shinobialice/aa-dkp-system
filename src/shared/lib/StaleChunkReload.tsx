@@ -30,10 +30,35 @@ function reloadOnce() {
   window.location.reload();
 }
 
+// Ошибки из чужих расширений браузера (антивирусы, блокировщики рекламы и
+// т.п.) — не наш баг и никогда им не станет, чинить нечего. Расширение,
+// которое ловит и репортит эти ошибки, может залипнуть в цикл и засыпать
+// сервер десятками одинаковых репортов в секунду — отсекаем их до отправки.
+const EXTENSION_ORIGIN_PATTERN =
+  /\b(chrome|moz|safari-web|edge)-extension:\/\//i;
+
+function isFromBrowserExtension(...sources: (string | undefined)[]): boolean {
+  return sources.some((s) => s && EXTENSION_ORIGIN_PATTERN.test(s));
+}
+
+// Одна и та же ошибка (например, реальный, но зацикленный баг) не должна
+// репортиться чаще раза в REPORT_DEDUPE_MS — иначе один цикл рендера может
+// сгенерировать сотни одинаковых запросов вместо одного полезного репорта.
+const REPORT_DEDUPE_MS = 30_000;
+const recentlyReported = new Map<string, number>();
+
 // Браузерная консоль недоступна в Vercel — шлём любую необработанную
 // ошибку на сервер, чтобы она попала в Runtime Logs и была видна, даже
 // если репродюсит кто-то без открытых devtools.
 function reportError(message: string, stack?: string) {
+  if (isFromBrowserExtension(stack, message)) return;
+
+  const key = `${message}\n${stack ?? ""}`;
+  const now = Date.now();
+  const lastReportedAt = recentlyReported.get(key);
+  if (lastReportedAt && now - lastReportedAt < REPORT_DEDUPE_MS) return;
+  recentlyReported.set(key, now);
+
   try {
     fetch("/api/log-client-error", {
       method: "POST",
@@ -54,6 +79,7 @@ function reportError(message: string, stack?: string) {
 export function StaleChunkReload() {
   useEffect(() => {
     const onError = (event: ErrorEvent) => {
+      if (isFromBrowserExtension(event.filename, event.error?.stack)) return;
       reportError(event.message, event.error?.stack);
       if (isStaleChunkError(event.message, event.error?.name)) {
         reloadOnce();
