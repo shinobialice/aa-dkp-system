@@ -1,18 +1,18 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 
 export const getUsernameHistory = async (userId: number) => {
-  const { data, error } = await supabase
-    .from("user_username_history")
-    .select("id, old_username, new_username, changed_at")
-    .eq("user_id", userId)
-    .order("changed_at", { ascending: false });
-
-  if (error) {
+  try {
+    const data = await sql<any[]>`
+      SELECT id, old_username, new_username, changed_at
+      FROM user_username_history
+      WHERE user_id = ${userId}
+      ORDER BY changed_at DESC
+    `;
+    return data ?? [];
+  } catch (error) {
     console.error("Ошибка при получении истории ников:", error);
     throw new Error("Не удалось загрузить историю ников");
   }
-
-  return data ?? [];
 };

@@ -1,6 +1,7 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
+import { saveUploadedFile } from "@/shared/lib/localStorage";
 import ensurePrivilieges from "./ensurePrivilieges";
 import { revalidatePath } from "next/cache";
 
@@ -15,13 +16,12 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
 
 export async function getEventSettings(): Promise<EventSettings> {
-  const { data, error } = await supabase
-    .from("event_settings")
-    .select("title,image_url,starts_at,ends_at")
-    .eq("id", 1)
-    .maybeSingle();
-
-  if (error) {
+  let data;
+  try {
+    [data] = await sql<any[]>`
+      SELECT title, image_url, starts_at, ends_at FROM event_settings WHERE id = 1
+    `;
+  } catch (error) {
     console.error("Ошибка при получении настроек ивента:", error);
     throw new Error("Не удалось загрузить настройки ивента");
   }
@@ -45,15 +45,17 @@ export async function updateEventSettings(input: {
     throw new Error("Время окончания должно быть позже времени начала");
   }
 
-  const { error } = await supabase.from("event_settings").upsert({
-    id: 1,
-    title: input.title,
-    starts_at: input.startsAt,
-    ends_at: input.endsAt,
-    updated_at: new Date().toISOString(),
-  });
-
-  if (error) {
+  try {
+    await sql<any[]>`
+      INSERT INTO event_settings (id, title, starts_at, ends_at, updated_at)
+      VALUES (1, ${input.title}, ${input.startsAt}, ${input.endsAt}, now())
+      ON CONFLICT (id) DO UPDATE SET
+        title = EXCLUDED.title,
+        starts_at = EXCLUDED.starts_at,
+        ends_at = EXCLUDED.ends_at,
+        updated_at = EXCLUDED.updated_at
+    `;
+  } catch (error) {
     console.error("Ошибка при сохранении настроек ивента:", error);
     throw new Error("Не удалось сохранить настройки ивента");
   }
@@ -78,30 +80,25 @@ export async function uploadEventBanner(formData: FormData): Promise<string> {
     throw new Error("Файл слишком большой (максимум 5 МБ)");
   }
 
-  const path = "event-banner/banner";
-
-  const { error: uploadError } = await supabase.storage
-    .from("avatars")
-    .upload(path, file, { upsert: true, contentType: file.type });
-
-  if (uploadError) {
+  let publicUrl: string;
+  try {
+    publicUrl = await saveUploadedFile("avatars", "event-banner/banner", file);
+  } catch (uploadError) {
     console.error("Failed to upload event banner:", uploadError);
     throw new Error("Не удалось загрузить картинку");
   }
 
-  const {
-    data: { publicUrl },
-  } = supabase.storage.from("avatars").getPublicUrl(path);
-
   const imageUrl = `${publicUrl}?t=${Date.now()}`;
 
-  const { error: updateError } = await supabase.from("event_settings").upsert({
-    id: 1,
-    image_url: imageUrl,
-    updated_at: new Date().toISOString(),
-  });
-
-  if (updateError) {
+  try {
+    await sql<any[]>`
+      INSERT INTO event_settings (id, image_url, updated_at)
+      VALUES (1, ${imageUrl}, now())
+      ON CONFLICT (id) DO UPDATE SET
+        image_url = EXCLUDED.image_url,
+        updated_at = EXCLUDED.updated_at
+    `;
+  } catch (updateError) {
     console.error("Failed to save event banner url:", updateError);
     throw new Error("Не удалось сохранить картинку");
   }
@@ -115,12 +112,11 @@ export async function uploadEventBanner(formData: FormData): Promise<string> {
 export async function endEventNow() {
   await ensurePrivilieges(["Администратор"]);
 
-  const { error } = await supabase
-    .from("event_settings")
-    .update({ ends_at: new Date().toISOString() })
-    .eq("id", 1);
-
-  if (error) {
+  try {
+    await sql<any[]>`
+      UPDATE event_settings SET ends_at = now() WHERE id = 1
+    `;
+  } catch (error) {
     console.error("Ошибка при завершении ивента:", error);
     throw new Error("Не удалось завершить ивент");
   }

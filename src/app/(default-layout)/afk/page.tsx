@@ -1,4 +1,4 @@
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 import ensurePrivilieges from "@/actions/ensurePrivilieges";
 import AfkMembersTable from "@/widgets/AfkMembersTable";
 import { getCurrentMonthSalaries } from "@/actions/getCurrentMonthSalaries";
@@ -18,27 +18,24 @@ const AfkPage = async () => {
     probation_bypass: boolean;
   };
 
-  const [inactiveRes, afkTagsRes] = await Promise.all([
-    supabase
-      .from("user")
-      .select(
-        "id, username, class, class_gear_score, joined_at, active, is_eligible_for_salary, probation_bypass, inactive_since",
-      )
-      .eq("active", false),
-    supabase
-      .from("user_tags")
-      .select(
-        "created_at, user(id, username, class, class_gear_score, joined_at, active, is_eligible_for_salary, probation_bypass)",
-      )
-      .eq("tag", "АФК")
-      .is("removed_at", null),
-  ]);
-
-  if (inactiveRes.error || !inactiveRes.data || afkTagsRes.error || !afkTagsRes.data) {
-    console.error(
-      "Error loading АФК users:",
-      inactiveRes.error || afkTagsRes.error,
-    );
+  let inactiveRows, afkTagRows;
+  try {
+    [inactiveRows, afkTagRows] = await Promise.all([
+      sql<any[]>`
+        SELECT id, username, class, class_gear_score, joined_at, active,
+               is_eligible_for_salary, probation_bypass, inactive_since
+        FROM "user" WHERE active = false
+      `,
+      sql<any[]>`
+        SELECT ut.created_at, u.id, u.username, u.class, u.class_gear_score,
+               u.joined_at, u.active, u.is_eligible_for_salary, u.probation_bypass
+        FROM user_tags ut
+        JOIN "user" u ON u.id = ut.user_id
+        WHERE ut.tag = 'АФК' AND ut.removed_at IS NULL
+      `,
+    ]);
+  } catch (error) {
+    console.error("Error loading АФК users:", error);
     return <div>Ошибка загрузки списка АФК-игроков</div>;
   }
 
@@ -55,7 +52,7 @@ const AfkPage = async () => {
 
   const merged = new Map<number, MergedAfkUser>();
 
-  for (const row of inactiveRes.data) {
+  for (const row of inactiveRows) {
     const { inactive_since, ...user } = row;
     merged.set(user.id, {
       ...user,
@@ -65,22 +62,21 @@ const AfkPage = async () => {
     });
   }
 
-  for (const row of afkTagsRes.data) {
-    if (!row.user) continue;
-    const user = row.user as unknown as AfkUser;
+  for (const row of afkTagRows) {
+    const { created_at, ...user } = row;
     const existing = merged.get(user.id);
     if (existing) {
       const existingTime = existing.afk_since
         ? new Date(existing.afk_since).getTime()
         : Infinity;
-      const tagTime = new Date(row.created_at).getTime();
+      const tagTime = new Date(created_at).getTime();
       existing.afk_since =
-        tagTime < existingTime ? row.created_at : existing.afk_since;
+        tagTime < existingTime ? created_at : existing.afk_since;
       existing.isAfkTagged = true;
     } else {
       merged.set(user.id, {
         ...user,
-        afk_since: row.created_at,
+        afk_since: created_at,
         isInactive: false,
         isAfkTagged: true,
       });

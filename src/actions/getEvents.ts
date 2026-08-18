@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 
 type Boss = {
   id: number;
@@ -12,29 +12,36 @@ type Raid = {
   start_date: string;
   type: string;
   raid_boss: {
-    boss: Boss[];
+    boss: Boss;
   }[];
 };
 
 export const getRaids = async () => {
-  const { data, error } = await supabase.from("raid").select(`
-    id,
-    start_date,
-    type,
-    raid_boss(
-      boss:boss_id(
-        id,
-        boss_name
-      )
-    )
-  `);
-
-  if (error || !data) {
+  let rows;
+  try {
+    rows = await sql<any[]>`
+      SELECT r.id, r.start_date, r.type, b.id AS boss_id, b.boss_name AS boss_name
+      FROM raid r
+      LEFT JOIN raid_boss rb ON rb.raid_id = r.id
+      LEFT JOIN boss b ON b.id = rb.boss_id
+    `;
+  } catch (error) {
     console.error("Ошибка при получении рейдов:", error);
     throw new Error("Не удалось загрузить рейды");
   }
 
-  const raids = data as unknown as Raid[];
+  const raidMap = new Map<number, Raid>();
+  for (const row of rows) {
+    let raid = raidMap.get(row.id);
+    if (!raid) {
+      raid = { id: row.id, start_date: row.start_date, type: row.type, raid_boss: [] };
+      raidMap.set(row.id, raid);
+    }
+    if (row.boss_id) {
+      raid.raid_boss.push({ boss: { id: row.boss_id, boss_name: row.boss_name } });
+    }
+  }
+  const raids = Array.from(raidMap.values());
 
   return raids
     .filter((r) => r.start_date)

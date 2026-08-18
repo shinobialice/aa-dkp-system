@@ -1,14 +1,18 @@
 "use server";
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 
 export async function getAverageGuildGS() {
-  const { data: users, error } = await supabase
-    .from("user")
-    .select("class_gear_score")
-    .eq("active", true)
-    .not("class_gear_score", "is", null);
+  let users;
+  try {
+    users = await sql<any[]>`
+      SELECT class_gear_score FROM "user"
+      WHERE active = true AND class_gear_score IS NOT NULL
+    `;
+  } catch {
+    return 0;
+  }
 
-  if (error || !users || users.length === 0) {
+  if (!users || users.length === 0) {
     return 0;
   }
 

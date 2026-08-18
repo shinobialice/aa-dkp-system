@@ -1,19 +1,17 @@
 "use server";
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 
 const getStats = async () => {
-  // 1. Get all active users
-  const { data: users, error: usersError } = await supabase
-    .from("user")
-    .select("id, username, class, joined_at")
-    .eq("active", true);
-
-  if (usersError || !users) {
+  let users;
+  try {
+    users = await sql<any[]>`
+      SELECT id, username, class, joined_at FROM "user" WHERE active = true
+    `;
+  } catch (usersError) {
     console.error("Ошибка при загрузке пользователей:", usersError);
     throw new Error("Не удалось получить список пользователей");
   }
 
-  // 2. Filter stats
   const stats = {
     activePlayers: users.length,
     dds: users.filter(

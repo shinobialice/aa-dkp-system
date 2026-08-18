@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 
 export type BossIncomeStat = {
   boss: string;
@@ -17,14 +17,15 @@ export async function getBossIncomeByMonth(
     Date.UTC(month === 12 ? year + 1 : year, month % 12, 1),
   );
 
-  const { data, error } = await supabase
-    .from("loot")
-    .select("source, price, quantity")
-    .eq("status", "Продано")
-    .gte("sold_at", startDate.toISOString())
-    .lt("sold_at", endDate.toISOString());
-
-  if (error) {
+  let data;
+  try {
+    data = await sql<any[]>`
+      SELECT source, price, quantity FROM loot
+      WHERE status = 'Продано'
+        AND sold_at >= ${startDate.toISOString()}
+        AND sold_at < ${endDate.toISOString()}
+    `;
+  } catch (error) {
     console.error("Ошибка при получении дохода по боссам:", error);
     throw new Error("Не удалось загрузить доход по боссам");
   }

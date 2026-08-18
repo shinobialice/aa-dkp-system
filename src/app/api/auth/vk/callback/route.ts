@@ -1,9 +1,7 @@
-import type { NextApiRequest, NextApiResponse } from "next";
-import { parse, serialize } from "cookie";
 import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 import { getBaseUrl } from "@/shared/lib";
 
 const baseUrl = getBaseUrl();
@@ -71,13 +69,10 @@ export async function GET(req: NextRequest) {
   const { user } = await userInfoRes.json();
 
   if (linkToken) {
-    const { data: linkRow } = await supabase
-      .from("link_token")
-      .select("userId")
-      .eq("token", linkToken)
-      .eq("used", false)
-      .gt("expiresAt", new Date().toISOString())
-      .single();
+    const [linkRow] = await sql<any[]>`
+      SELECT "userId" FROM link_token
+      WHERE token = ${linkToken} AND used = false AND "expiresAt" > now()
+    `;
 
     if (!linkRow) {
       return NextResponse.json("Link token expired or invalid", {
@@ -88,23 +83,19 @@ export async function GET(req: NextRequest) {
     const sessionToken = generateSessionToken();
 
     // 🔗 Привязываем VK к существующему пользователю и сохраняем session_token
-    const { error: userUpdateError } = await supabase
-      .from("user")
-      .update({
-        vk_id: user.user_id,
-        session_token: sessionToken,
-      })
-      .eq("id", linkRow.userId);
-
-    if (userUpdateError) {
+    try {
+      await sql<any[]>`
+        UPDATE "user" SET vk_id = ${user.user_id}, session_token = ${sessionToken}
+        WHERE id = ${linkRow.userId}
+      `;
+    } catch (userUpdateError) {
       console.error("Ошибка при обновлении пользователя:", userUpdateError);
       return NextResponse.json("Failed to link VK account", { status: 500 });
     }
 
-    await supabase
-      .from("link_token")
-      .update({ used: true })
-      .eq("token", linkToken);
+    await sql<any[]>`
+      UPDATE link_token SET used = true WHERE token = ${linkToken}
+    `;
 
     const response = NextResponse.redirect(
       new URL("/link-account/complete", baseUrl),
@@ -124,21 +115,18 @@ export async function GET(req: NextRequest) {
 
   const sessionToken = generateSessionToken();
 
-  const { data: existingUser } = await supabase
-    .from("user")
-    .select("*")
-    .eq("vk_id", user.user_id)
-    .single();
+  const [existingUser] = await sql<any[]>`
+    SELECT * FROM "user" WHERE vk_id = ${user.user_id}
+  `;
 
   let userId: number;
 
   if (!existingUser) {
     return NextResponse.redirect(new URL("/login-error", baseUrl));
   } else {
-    await supabase
-      .from("user")
-      .update({ session_token: sessionToken })
-      .eq("id", existingUser.id);
+    await sql<any[]>`
+      UPDATE "user" SET session_token = ${sessionToken} WHERE id = ${existingUser.id}
+    `;
 
     userId = existingUser.id;
   }

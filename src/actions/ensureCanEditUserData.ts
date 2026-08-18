@@ -1,7 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 import { hasTag } from "./hasTag";
 import { getUserSelfEditSettings } from "./userSelfEditSettings";
 
@@ -17,11 +17,9 @@ const ensureCanEditUserData = async (
 
   if (await hasTag(sessionToken, ["Администратор", "Секретутка"])) return;
 
-  const { data: sessionUser } = await supabase
-    .from("user")
-    .select("id, active")
-    .eq("session_token", sessionToken)
-    .maybeSingle();
+  const [sessionUser] = await sql<any[]>`
+    SELECT id, active FROM "user" WHERE session_token = ${sessionToken}
+  `;
 
   if (!sessionUser || sessionUser.id !== userId || !sessionUser.active) {
     throw new Error("Access denied: insufficient privileges");

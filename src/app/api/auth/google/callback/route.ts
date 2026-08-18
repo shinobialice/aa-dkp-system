@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { getBaseUrl } from "@/shared/lib";
@@ -65,13 +65,10 @@ export async function GET(req: NextRequest) {
   }
 
   if (linkToken) {
-    const { data: linkRow } = await supabase
-      .from("link_token")
-      .select("userId")
-      .eq("token", linkToken)
-      .eq("used", false)
-      .gt("expiresAt", new Date().toISOString())
-      .single();
+    const [linkRow] = await sql<any[]>`
+      SELECT "userId" FROM link_token
+      WHERE token = ${linkToken} AND used = false AND "expiresAt" > now()
+    `;
 
     if (!linkRow) {
       return NextResponse.json("Link token expired or invalid", {
@@ -81,18 +78,14 @@ export async function GET(req: NextRequest) {
 
     const sessionToken = generateSessionToken();
 
-    await supabase
-      .from("user")
-      .update({
-        google_id: profile.id,
-        session_token: sessionToken,
-      })
-      .eq("id", linkRow.userId);
+    await sql<any[]>`
+      UPDATE "user" SET google_id = ${profile.id}, session_token = ${sessionToken}
+      WHERE id = ${linkRow.userId}
+    `;
 
-    await supabase
-      .from("link_token")
-      .update({ used: true })
-      .eq("token", linkToken);
+    await sql<any[]>`
+      UPDATE link_token SET used = true WHERE token = ${linkToken}
+    `;
 
     const response = NextResponse.redirect(
       new URL("/link-account/complete", baseUrl),
@@ -112,20 +105,17 @@ export async function GET(req: NextRequest) {
 
   const sessionToken = generateSessionToken();
 
-  const { data: existingUser } = await supabase
-    .from("user")
-    .select("*")
-    .eq("google_id", profile.id)
-    .single();
+  const [existingUser] = await sql<any[]>`
+    SELECT * FROM "user" WHERE google_id = ${profile.id}
+  `;
 
   if (!existingUser) {
     return NextResponse.redirect(new URL("/login-error", baseUrl));
   }
 
-  await supabase
-    .from("user")
-    .update({ session_token: sessionToken })
-    .eq("id", existingUser.id);
+  await sql<any[]>`
+    UPDATE "user" SET session_token = ${sessionToken} WHERE id = ${existingUser.id}
+  `;
 
   const response = NextResponse.redirect(new URL("/", baseUrl));
 

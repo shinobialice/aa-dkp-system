@@ -1,6 +1,6 @@
 import { getLootIconUrl } from "../widgets/Loot/LootBuy/icons/LootIcons";
 import { sourceMap } from "../widgets/Loot/priceSourceMap";
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 
 const HIDDEN_FROM_BUY = new Set([
   "Всякие мелочи",
@@ -24,11 +24,12 @@ const MISC_ORDER = [
 ];
 
 export async function getLootGrouped() {
-  const { data: items, error } = await supabase
-    .from("item_type")
-    .select("name, price");
-
-  if (error || !items) {
+  let items;
+  try {
+    items = await sql<any[]>`
+      SELECT name, price FROM item_type
+    `;
+  } catch (error) {
     console.error("Ошибка при загрузке предметов:", error);
     throw new Error("Не удалось получить список предметов");
   }

@@ -1,6 +1,5 @@
 "use server";
-import supabase from "@/shared/lib/supabaseAdmin";
-import type { Database } from "@/types/supabase";
+import sql from "@/shared/lib/db";
 import ensurePrivilieges from "./ensurePrivilieges";
 import { generateGuildFunds } from "./generateGuildFunds";
 import { computeMonthlyAttendanceForUsers } from "./getAllUsersActivityWithPercent";
@@ -14,64 +13,37 @@ import {
   type SalaryEligibilitySettings,
 } from "./salaryEligibilitySettings";
 
-type SalaryInsert = Database["public"]["Tables"]["Salary"]["Insert"];
-
 export const getGuildFunds = async (month: number, year: number) => {
-  const { data, error } = await supabase
-    .from("GuildFunds")
-    .select("*")
-    .eq("month", month)
-    .eq("year", year)
-    .maybeSingle();
-
-  if (error) {
+  try {
+    const [data] = await sql<any[]>`
+      SELECT * FROM "GuildFunds" WHERE month = ${month} AND year = ${year}
+    `;
+    return data ?? null;
+  } catch {
     throw new Error("Ошибка при получении фонда");
   }
-
-  return data;
 };
 
 export const getSalariesForMonth = async (month: number, year: number) => {
-  const { data, error } = await supabase
-    .from("Salary")
-    .select(
-      `
-    id,
-    userId,
-    amount,
-    bonus,
-    total,
-    sentAmount,
-    sent,
-    tenurePercent,
-    customBonusPercent,
-    penaltyPercent,
-    weightPercent,
-    aglPercent,
-    primePercent,
-    totalPercent,
-    month,
-    year,
-    user (
-      username,
-      class
-    )
-  `,
-    )
-    .eq("month", month)
-    .eq("year", year);
-
-  if (error || !data) {
+  let data;
+  try {
+    data = await sql<any[]>`
+      SELECT s.*, u.username AS user_username, u.class AS user_class
+      FROM "Salary" s
+      LEFT JOIN "user" u ON u.id = s."userId"
+      WHERE s.month = ${month} AND s.year = ${year}
+    `;
+  } catch {
     throw new Error("Ошибка при получении зарплат");
   }
 
-  return (data as any[]).map((s) => {
-    const username = s.user?.username ?? "Неизвестно";
+  return data.map((s) => {
+    const username = s.user_username ?? "Неизвестно";
     return {
       id: s.id,
       userId: s.userId,
       username: username ?? "Неизвестно",
-      class: s.user?.class ?? null,
+      class: s.user_class ?? null,
       amount: s.amount,
       bonus: s.bonus,
       total: s.total,
@@ -95,14 +67,18 @@ export const updateSalaryAdvance = async (
 ) => {
   await ensurePrivilieges(["Администратор"]);
 
-  const { data, error } = await supabase
-    .from("Salary")
-    .update({ sentAmount, sent })
-    .eq("id", salaryId)
-    .select("month, year")
-    .maybeSingle();
+  let data;
+  try {
+    [data] = await sql<any[]>`
+      UPDATE "Salary" SET "sentAmount" = ${sentAmount}, sent = ${sent}
+      WHERE id = ${salaryId}
+      RETURNING month, year
+    `;
+  } catch {
+    throw new Error("Ошибка при обновлении аванса");
+  }
 
-  if (error || !data) {
+  if (!data) {
     throw new Error("Ошибка при обновлении аванса");
   }
 
@@ -127,12 +103,12 @@ export async function getCustomBonusBatch(
 ): Promise<Record<number, number>> {
   if (userIds.length === 0) return {};
 
-  const { data, error } = await supabase
-    .from("user_salary_bonus")
-    .select("user_id, amount")
-    .in("user_id", userIds);
-
-  if (error) {
+  let data;
+  try {
+    data = await sql<any[]>`
+      SELECT user_id, amount FROM user_salary_bonus WHERE user_id = ANY(${userIds})
+    `;
+  } catch {
     return {};
   }
 
@@ -159,27 +135,28 @@ export async function getSalaryEligibilityContext(): Promise<SalaryEligibilityCo
 }
 
 export const generateSalaries = async (month: number, year: number) => {
-  const { data: fund, error: fundError } = await supabase
-    .from("GuildFunds")
-    .select("*")
-    .eq("month", month)
-    .eq("year", year)
-    .maybeSingle();
+  const [fund] = await sql<any[]>`
+    SELECT * FROM "GuildFunds" WHERE month = ${month} AND year = ${year}
+  `;
 
-  if (fundError || !fund) {
+  if (!fund) {
     throw new Error("Сначала нужно сгенерировать фонд");
   }
 
   const asOf = getSalaryAsOfDate(month, year);
 
-  const { data: allEligible, error: usersError } = await supabase
-    .from("user")
-    .select(
-      "id, joined_at, class, class_gear_score, active, inactive_since, probation_bypass",
-    )
-    .eq("is_eligible_for_salary", true);
+  let allEligible;
+  try {
+    allEligible = await sql<any[]>`
+      SELECT id, joined_at, class, class_gear_score, active, inactive_since, probation_bypass
+      FROM "user"
+      WHERE is_eligible_for_salary = true
+    `;
+  } catch {
+    throw new Error("Нет активных сотрудников для выплаты");
+  }
 
-  if (usersError || !allEligible) {
+  if (!allEligible || allEligible.length === 0) {
     throw new Error("Нет активных сотрудников для выплаты");
   }
 
@@ -243,11 +220,9 @@ export const generateSalaries = async (month: number, year: number) => {
     );
   }
 
-  const { data: existingSalaries } = await supabase
-    .from("Salary")
-    .select("userId, sentAmount, sent")
-    .eq("month", month)
-    .eq("year", year);
+  const existingSalaries = await sql<any[]>`
+    SELECT "userId", "sentAmount", sent FROM "Salary" WHERE month = ${month} AND year = ${year}
+  `;
 
   const advanceByUserId = new Map(
     (existingSalaries ?? []).map((s) => [
@@ -256,13 +231,9 @@ export const generateSalaries = async (month: number, year: number) => {
     ]),
   );
 
-  const { error: deleteError } = await supabase
-    .from("Salary")
-    .delete()
-    .eq("month", month)
-    .eq("year", year);
-
-  if (deleteError) {
+  try {
+    await sql<any[]>`DELETE FROM "Salary" WHERE month = ${month} AND year = ${year}`;
+  } catch {
     throw new Error("Ошибка при удалении предыдущих зарплат");
   }
 
@@ -316,11 +287,9 @@ export const generateSalaries = async (month: number, year: number) => {
     };
   });
 
-  const { error: insertError } = await supabase
-    .from("Salary")
-    .insert(salaryRows);
-
-  if (insertError) {
+  try {
+    await sql<any[]>`INSERT INTO "Salary" ${sql(salaryRows)}`;
+  } catch {
     throw new Error("Ошибка при генерации зарплат");
   }
 };

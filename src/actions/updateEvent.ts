@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 import ensurePrivilieges from "./ensurePrivilieges";
 import { triggerFinanceRecalc } from "./recalculateFinanceForMonth";
 import { getMoscowISOString } from "@/utils/getMoscowISOString";
@@ -30,41 +30,31 @@ const updateEvent = async (
 
   // Запоминаем старую дату — если рейд переносят в другой месяц, пересчитать
   // нужно оба месяца (у старого пропадает посещаемость/dkp, у нового — появляется).
-  const { data: previousRaid } = await supabase
-    .from("raid")
-    .select("start_date")
-    .eq("id", id)
-    .maybeSingle();
+  const [previousRaid] = await sql<any[]>`
+    SELECT start_date FROM raid WHERE id = ${id}
+  `;
 
-  const { error: updateError } = await supabase
-    .from("raid")
-    .update({
-      type,
-      dkp_summary,
-      start_date: getMoscowISOString(start_date),
-      is_pvp,
-      is_pvp_long,
-      is_proc,
-      is_double_proc,
-    })
-    .eq("id", id);
-
-  if (updateError) {
+  try {
+    await sql<any[]>`
+      UPDATE raid SET
+        type = ${type},
+        dkp_summary = ${dkp_summary},
+        start_date = ${getMoscowISOString(start_date)},
+        is_pvp = ${is_pvp},
+        is_pvp_long = ${is_pvp_long},
+        is_proc = ${is_proc},
+        is_double_proc = ${is_double_proc}
+      WHERE id = ${id}
+    `;
+  } catch (updateError) {
     console.error("Ошибка при обновлении события:", updateError);
     throw new Error("Не удалось обновить событие");
   }
 
-  const { error: attendanceDeleteError } = await supabase
-    .from("raid_attendance")
-    .delete()
-    .eq("raid_id", id);
-
-  const { error: raidBossDeleteError } = await supabase
-    .from("raid_boss")
-    .delete()
-    .eq("raid_id", id);
-
-  if (attendanceDeleteError || raidBossDeleteError) {
+  try {
+    await sql<any[]>`DELETE FROM raid_attendance WHERE raid_id = ${id}`;
+    await sql<any[]>`DELETE FROM raid_boss WHERE raid_id = ${id}`;
+  } catch {
     throw new Error("Не удалось очистить старые связи рейда");
   }
 
@@ -76,11 +66,9 @@ const updateEvent = async (
       is_late: lateUserIds.includes(user_id),
     }));
 
-    const { error: attendanceInsertError } = await supabase
-      .from("raid_attendance")
-      .insert(attendanceInsert);
-
-    if (attendanceInsertError) {
+    try {
+      await sql<any[]>`INSERT INTO raid_attendance ${sql(attendanceInsert)}`;
+    } catch {
       throw new Error("Не удалось добавить участников рейда");
     }
   }
@@ -91,11 +79,9 @@ const updateEvent = async (
       boss_id,
     }));
 
-    const { error: bossInsertError } = await supabase
-      .from("raid_boss")
-      .insert(raidBossInsert);
-
-    if (bossInsertError) {
+    try {
+      await sql<any[]>`INSERT INTO raid_boss ${sql(raidBossInsert)}`;
+    } catch {
       throw new Error("Не удалось добавить боссов к рейду");
     }
   }

@@ -1,18 +1,17 @@
 "use server";
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 
 export async function getCurrentMonthSalaries() {
   const now = new Date();
   const month = now.getMonth() + 1;
   const year = now.getFullYear();
 
-  const { data, error } = await supabase
-    .from("Salary")
-    .select("userId, total")
-    .eq("month", month)
-    .eq("year", year);
-
-  if (error || !data) {
+  let data;
+  try {
+    data = await sql<any[]>`
+      SELECT "userId", total FROM "Salary" WHERE month = ${month} AND year = ${year}
+    `;
+  } catch (error) {
     console.error("Ошибка при получении зарплат:", error);
     return {};
   }

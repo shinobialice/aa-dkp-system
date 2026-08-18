@@ -1,18 +1,18 @@
 "use server";
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 
 const getTasks = async (userId: number) => {
-  const { data: tasks, error } = await supabase
-    .from("tasks")
-    .select("id, user_id, name, created_at, completed_at")
-    .eq("user_id", userId);
-
-  if (error) {
+  try {
+    const tasks = await sql<any[]>`
+      SELECT id, user_id, name, created_at, completed_at
+      FROM tasks
+      WHERE user_id = ${userId}
+    `;
+    return tasks;
+  } catch (error) {
     console.error("Ошибка при получении задач:", error);
     throw new Error("Не удалось загрузить задачи");
   }
-
-  return tasks;
 };
 
 export default getTasks;

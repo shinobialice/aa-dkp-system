@@ -1,5 +1,5 @@
 "use server";
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 
 const createUserTask = async (
   userId: number,
@@ -7,21 +7,25 @@ const createUserTask = async (
   createdAt: Date,
   completedAt: Date | null,
 ) => {
-  const { data: task, error } = await supabase
-    .from("tasks")
-    .insert([
-      {
-        user_id: userId,
-        name,
-        created_at: createdAt.toISOString(),
-        completed_at: completedAt ? completedAt.toISOString() : null,
-      },
-    ])
-    .select()
-    .maybeSingle();
-
-  if (error || !task) {
+  let task;
+  try {
+    [task] = await sql<any[]>`
+      INSERT INTO tasks (user_id, name, created_at, completed_at)
+      VALUES (
+        ${userId},
+        ${name},
+        ${createdAt.toISOString()},
+        ${completedAt ? completedAt.toISOString() : null}
+      )
+      RETURNING *
+    `;
+  } catch (error) {
     console.error("Error creating task:", error);
+    throw new Error("Ошибка при создании задачи");
+  }
+
+  if (!task) {
+    console.error("Error creating task: not returned");
     throw new Error("Ошибка при создании задачи");
   }
 

@@ -1,15 +1,17 @@
 "use server";
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 
 const deleteUserTask = async (id: number) => {
-  const { data, error } = await supabase
-    .from("tasks")
-    .delete()
-    .eq("id", id)
-    .select()
-    .maybeSingle();
+  let data;
+  try {
+    [data] = await sql<any[]>`
+      DELETE FROM tasks WHERE id = ${id} RETURNING *
+    `;
+  } catch {
+    throw new Error("Failed to delete task");
+  }
 
-  if (error || !data) {
+  if (!data) {
     throw new Error("Failed to delete task");
   }
 

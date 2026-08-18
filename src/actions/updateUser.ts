@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 import ensurePrivilieges from "./ensurePrivilieges";
 
 export async function updateUser(
@@ -18,15 +18,18 @@ export async function updateUser(
     payload.inactive_since = data.active ? null : new Date().toISOString();
   }
 
-  const { data: updatedUser, error } = await supabase
-    .from("user")
-    .update(payload)
-    .eq("id", id)
-    .select()
-    .maybeSingle();
-
-  if (error || !updatedUser) {
+  let updatedUser;
+  try {
+    [updatedUser] = await sql<any[]>`
+      UPDATE "user" SET ${sql(payload)} WHERE id = ${id} RETURNING *
+    `;
+  } catch (error) {
     console.error("Ошибка при обновлении пользователя:", error);
+    throw new Error("Не удалось обновить пользователя");
+  }
+
+  if (!updatedUser) {
+    console.error("Ошибка при обновлении пользователя: not found");
     throw new Error("Не удалось обновить пользователя");
   }
 

@@ -1,10 +1,9 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 
 export async function updateLastSeen(userId: number) {
-  await supabase
-    .from("user")
-    .update({ last_seen_at: new Date().toISOString() })
-    .eq("id", userId);
+  await sql<any[]>`
+    UPDATE "user" SET last_seen_at = now() WHERE id = ${userId}
+  `;
 }

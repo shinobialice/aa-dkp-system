@@ -1,5 +1,5 @@
 "use server";
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 
 const editUserTask = async (
   userId: number,
@@ -8,20 +8,23 @@ const editUserTask = async (
   createdAt: Date,
   completedAt: Date | null,
 ) => {
-  const { data: updatedTask, error } = await supabase
-    .from("tasks")
-    .update({
-      name,
-      created_at: createdAt.toISOString(),
-      completed_at: completedAt ? completedAt.toISOString() : null,
-    })
-    .eq("id", taskId)
-    .eq("user_id", userId)
-    .select()
-    .maybeSingle();
-
-  if (error || !updatedTask) {
+  let updatedTask;
+  try {
+    [updatedTask] = await sql<any[]>`
+      UPDATE tasks SET
+        name = ${name},
+        created_at = ${createdAt.toISOString()},
+        completed_at = ${completedAt ? completedAt.toISOString() : null}
+      WHERE id = ${taskId} AND user_id = ${userId}
+      RETURNING *
+    `;
+  } catch (error) {
     console.error("Failed to update task:", error);
+    throw new Error("Ошибка при обновлении задачи");
+  }
+
+  if (!updatedTask) {
+    console.error("Failed to update task: not found");
     throw new Error("Ошибка при обновлении задачи");
   }
 

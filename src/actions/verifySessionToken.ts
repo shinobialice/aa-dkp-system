@@ -1,21 +1,21 @@
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 
 export async function verifySessionToken(
   token: string,
 ): Promise<{ valid: boolean; reason?: "inactive" }> {
   if (!token) return { valid: false };
 
-  const { data: user, error } = await supabase
-    .from("user")
-    .select("id, active")
-    .eq("session_token", token)
-    .maybeSingle();
-
-  if (error || !user) {
-    if (error) console.error("Error verifying session token:", error);
+  let user;
+  try {
+    [user] = await sql<any[]>`
+      SELECT id, active FROM "user" WHERE session_token = ${token}
+    `;
+  } catch (error) {
+    console.error("Error verifying session token:", error);
     return { valid: false };
   }
 
+  if (!user) return { valid: false };
   if (!user.active) return { valid: false, reason: "inactive" };
 
   return { valid: true };

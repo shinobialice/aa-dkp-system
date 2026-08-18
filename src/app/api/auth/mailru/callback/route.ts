@@ -1,9 +1,7 @@
-import type { NextApiRequest, NextApiResponse } from "next";
-import { parse, serialize } from "cookie";
 import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 import { getBaseUrl } from "@/shared/lib";
 
 const baseUrl = getBaseUrl();
@@ -70,13 +68,10 @@ export async function GET(req: NextRequest) {
 
   // Привязка к пользователю по link-token
   if (linkToken) {
-    const { data: linkRow } = await supabase
-      .from("link_token")
-      .select("userId")
-      .eq("token", linkToken)
-      .eq("used", false)
-      .gt("expiresAt", new Date().toISOString())
-      .single();
+    const [linkRow] = await sql<any[]>`
+      SELECT "userId" FROM link_token
+      WHERE token = ${linkToken} AND used = false AND "expiresAt" > now()
+    `;
 
     if (!linkRow) {
       return NextResponse.json("Invalid link token", { status: 400 });
@@ -84,24 +79,22 @@ export async function GET(req: NextRequest) {
 
     const sessionToken = generateSessionToken();
 
-    await supabase
-      .from("user")
-      .update({
-        mail_id: profile.id,
-        session_token: sessionToken,
-      })
-      .eq("id", linkRow.userId);
+    await sql<any[]>`
+      UPDATE "user" SET mail_id = ${profile.id}, session_token = ${sessionToken}
+      WHERE id = ${linkRow.userId}
+    `;
 
-    await supabase
-      .from("link_token")
-      .update({ used: true })
-      .eq("token", linkToken);
+    await sql<any[]>`
+      UPDATE link_token SET used = true WHERE token = ${linkToken}
+    `;
 
     const response = NextResponse.redirect(
       new URL("/link-account/complete", baseUrl),
     );
 
     response.cookies.set("link-token", "", { path: "/", maxAge: -1 });
+    // Примечание: в оригинале здесь было имя куки "session_token-token" (опечатка) —
+    // сохраняю поведение как есть, не в рамках этой миграции.
     response.cookies.set("session_token-token", sessionToken, {
       path: "/",
       httpOnly: true,
@@ -116,20 +109,17 @@ export async function GET(req: NextRequest) {
   // Обычный вход: только если mail_id уже привязан
   const sessionToken = generateSessionToken();
 
-  const { data: existingUser } = await supabase
-    .from("user")
-    .select("*")
-    .eq("mail_id", profile.id)
-    .single();
+  const [existingUser] = await sql<any[]>`
+    SELECT * FROM "user" WHERE mail_id = ${profile.id}
+  `;
 
   if (!existingUser) {
     return NextResponse.redirect(new URL("/login-error", baseUrl));
   }
 
-  await supabase
-    .from("user")
-    .update({ session_token: sessionToken })
-    .eq("id", existingUser.id);
+  await sql<any[]>`
+    UPDATE "user" SET session_token = ${sessionToken} WHERE id = ${existingUser.id}
+  `;
 
   const response = NextResponse.redirect(new URL("/", baseUrl));
 

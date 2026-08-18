@@ -1,5 +1,5 @@
 "use server";
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 
 export const updateLootQueueEntry = async ({
   id,
@@ -24,15 +24,18 @@ export const updateLootQueueEntry = async ({
   if (required !== undefined) updateData.required = required;
   if (roll !== undefined) updateData.roll = roll;
 
-  const { data, error } = await supabase
-    .from("loot_queue")
-    .update(updateData)
-    .eq("id", id)
-    .select()
-    .maybeSingle();
-
-  if (error || !data) {
+  let data;
+  try {
+    [data] = await sql<any[]>`
+      UPDATE loot_queue SET ${sql(updateData)} WHERE id = ${id} RETURNING *
+    `;
+  } catch (error) {
     console.error("Ошибка при обновлении очереди на лут:", error);
+    throw new Error("Не удалось обновить запись очереди");
+  }
+
+  if (!data) {
+    console.error("Ошибка при обновлении очереди на лут: not found");
     throw new Error("Не удалось обновить запись очереди");
   }
 

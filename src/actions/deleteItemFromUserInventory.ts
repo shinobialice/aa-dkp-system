@@ -1,13 +1,11 @@
 "use server";
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 import ensureCanEditUserData from "./ensureCanEditUserData";
 
 const deleteItemFromUserInventory = async (id: number) => {
-  const { data: item } = await supabase
-    .from("user_inventory")
-    .select("user_id")
-    .eq("id", id)
-    .maybeSingle();
+  const [item] = await sql<any[]>`
+    SELECT user_id FROM user_inventory WHERE id = ${id}
+  `;
 
   if (!item) {
     throw new Error("Failed to delete item from user inventory");
@@ -15,14 +13,16 @@ const deleteItemFromUserInventory = async (id: number) => {
 
   await ensureCanEditUserData(item.user_id, "inventoryEditEnabled");
 
-  const { data, error } = await supabase
-    .from("user_inventory")
-    .delete()
-    .eq("id", id)
-    .select()
-    .maybeSingle();
+  let data;
+  try {
+    [data] = await sql<any[]>`
+      DELETE FROM user_inventory WHERE id = ${id} RETURNING *
+    `;
+  } catch {
+    throw new Error("Failed to delete item from user inventory");
+  }
 
-  if (error || !data) {
+  if (!data) {
     throw new Error("Failed to delete item from user inventory");
   }
 

@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 import { triggerFinanceRecalc } from "./recalculateFinanceForMonth";
 
 export async function distributeLootItem({
@@ -21,13 +21,14 @@ export async function distributeLootItem({
   price?: number;
 }) {
   // 1. Load loot with item type
-  const { data: loot, error: lootError } = await supabase
-    .from("loot")
-    .select("*, item_type(*)")
-    .eq("id", lootId)
-    .maybeSingle();
+  const [loot] = await sql<any[]>`
+    SELECT l.*, it.name AS item_type_name, it.price AS item_type_price
+    FROM loot l
+    JOIN item_type it ON it.id = l.item_type_id
+    WHERE l.id = ${lootId}
+  `;
 
-  if (lootError || !loot || !loot.quantity || loot.quantity < quantity) {
+  if (!loot || !loot.quantity || loot.quantity < quantity) {
     throw new Error("Недостаточно предметов для выдачи");
   }
 
@@ -42,38 +43,30 @@ export async function distributeLootItem({
     }
   }
 
-  await supabase
-    .from("loot")
-    .update({
-      quantity: remainingQuantity,
-      status: newStatus,
-    })
-    .eq("id", lootId);
+  await sql<any[]>`
+    UPDATE loot SET quantity = ${remainingQuantity}, status = ${newStatus} WHERE id = ${lootId}
+  `;
 
   // 3. Insert new loot record for the distributed portion
   const soldAt = new Date().toISOString();
-  const { data: created, error: createError } = await supabase
-    .from("loot")
-    .insert([
-      {
-        item_type_id: loot.item_type_id,
-        source: loot.source,
-        acquired_at: loot.acquired_at ?? soldAt,
-        quantity,
-        sold_to: soldTo,
-        sold_to_user_id: soldToId,
-        sold_at: soldAt,
-        comment,
-        status: isFree ? "Выдано" : "Продано",
-        price: isFree ? 0 : (price ?? loot.item_type?.price ?? 0),
-        created_at: new Date().toISOString(),
-      },
-    ])
-    .select()
-    .maybeSingle();
-
-  if (createError || !created) {
+  let created;
+  try {
+    [created] = await sql<any[]>`
+      INSERT INTO loot
+        (item_type_id, source, acquired_at, quantity, sold_to, sold_to_user_id, sold_at, comment, status, price, created_at)
+      VALUES (
+        ${loot.item_type_id}, ${loot.source}, ${loot.acquired_at ?? soldAt}, ${quantity},
+        ${soldTo}, ${soldToId ?? null}, ${soldAt}, ${comment ?? null},
+        ${isFree ? "Выдано" : "Продано"}, ${isFree ? 0 : (price ?? loot.item_type_price ?? 0)}, now()
+      )
+      RETURNING *
+    `;
+  } catch (createError) {
     console.error(createError);
+    throw new Error("Ошибка при создании новой записи лута");
+  }
+
+  if (!created) {
     throw new Error("Ошибка при создании новой записи лута");
   }
 
@@ -87,15 +80,14 @@ export async function distributeLootItem({
     let skipInsert = false;
 
     if (isFree) {
-      const { data: existingInventory, error: inventoryFindError } =
-        await supabase
-          .from("user_inventory")
-          .select("id")
-          .eq("user_id", soldToId)
-          .eq("name", loot.item_type.name)
-          .limit(1);
-
-      if (inventoryFindError) {
+      let existingInventory;
+      try {
+        existingInventory = await sql<any[]>`
+          SELECT id FROM user_inventory
+          WHERE user_id = ${soldToId} AND name = ${loot.item_type_name}
+          LIMIT 1
+        `;
+      } catch (inventoryFindError) {
         console.error(inventoryFindError);
         throw new Error("Не удалось проверить инвентарь");
       }
@@ -104,20 +96,12 @@ export async function distributeLootItem({
     }
 
     if (!skipInsert) {
-      const { error: inventoryError } = await supabase
-        .from("user_inventory")
-        .insert([
-          {
-            user_id: soldToId,
-            name: loot.item_type.name,
-            type: isFree ? "Выдано" : "Куплено",
-            created_at: new Date().toISOString(),
-            quantity,
-            loot_id: created.id,
-          },
-        ]);
-
-      if (inventoryError) {
+      try {
+        await sql<any[]>`
+          INSERT INTO user_inventory (user_id, name, type, created_at, quantity, loot_id)
+          VALUES (${soldToId}, ${loot.item_type_name}, ${isFree ? "Выдано" : "Куплено"}, now(), ${quantity}, ${created.id})
+        `;
+      } catch (inventoryError) {
         console.error(inventoryError);
         throw new Error("Ошибка при добавлении предмета в инвентарь");
       }
@@ -148,73 +132,62 @@ export async function updateLootSale({
   comment?: string;
   price?: number;
 }) {
-  const { data: loot, error: lootError } = await supabase
-    .from("loot")
-    .select("*, item_type(*)")
-    .eq("id", lootId)
-    .maybeSingle();
+  const [loot] = await sql<any[]>`
+    SELECT l.*, it.name AS item_type_name, it.price AS item_type_price
+    FROM loot l
+    JOIN item_type it ON it.id = l.item_type_id
+    WHERE l.id = ${lootId}
+  `;
 
-  if (lootError || !loot) {
+  if (!loot) {
     throw new Error("Запись о продаже не найдена");
   }
 
   const newStatus = isFree ? "Выдано" : "Продано";
-  const newPrice = isFree ? 0 : (price ?? loot.item_type?.price ?? 0);
+  const newPrice = isFree ? 0 : (price ?? loot.item_type_price ?? 0);
 
-  const { error: updateError } = await supabase
-    .from("loot")
-    .update({
-      quantity,
-      sold_to: soldTo,
-      sold_to_user_id: soldToId ?? null,
-      comment,
-      status: newStatus,
-      price: newPrice,
-    })
-    .eq("id", lootId);
-
-  if (updateError) {
+  try {
+    await sql<any[]>`
+      UPDATE loot SET
+        quantity = ${quantity},
+        sold_to = ${soldTo},
+        sold_to_user_id = ${soldToId ?? null},
+        comment = ${comment ?? null},
+        status = ${newStatus},
+        price = ${newPrice}
+      WHERE id = ${lootId}
+    `;
+  } catch (updateError) {
     console.error(updateError);
     throw new Error("Ошибка при обновлении записи о продаже");
   }
 
-  const { data: existingInventory } = await supabase
-    .from("user_inventory")
-    .select("id")
-    .eq("loot_id", lootId)
-    .maybeSingle();
+  const [existingInventory] = await sql<any[]>`
+    SELECT id FROM user_inventory WHERE loot_id = ${lootId}
+  `;
 
   if (soldToId) {
     if (existingInventory) {
-      const { error: inventoryUpdateError } = await supabase
-        .from("user_inventory")
-        .update({
-          user_id: soldToId,
-          name: loot.item_type.name,
-          type: isFree ? "Выдано" : "Куплено",
-          quantity,
-        })
-        .eq("id", existingInventory.id);
-
-      if (inventoryUpdateError) {
+      try {
+        await sql<any[]>`
+          UPDATE user_inventory SET
+            user_id = ${soldToId},
+            name = ${loot.item_type_name},
+            type = ${isFree ? "Выдано" : "Куплено"},
+            quantity = ${quantity}
+          WHERE id = ${existingInventory.id}
+        `;
+      } catch (inventoryUpdateError) {
         console.error(inventoryUpdateError);
         throw new Error("Ошибка при обновлении инвентаря");
       }
     } else {
-      const { error: inventoryInsertError } = await supabase
-        .from("user_inventory")
-        .insert([
-          {
-            user_id: soldToId,
-            name: loot.item_type.name,
-            type: isFree ? "Выдано" : "Куплено",
-            created_at: new Date().toISOString(),
-            quantity,
-            loot_id: lootId,
-          },
-        ]);
-
-      if (inventoryInsertError) {
+      try {
+        await sql<any[]>`
+          INSERT INTO user_inventory (user_id, name, type, created_at, quantity, loot_id)
+          VALUES (${soldToId}, ${loot.item_type_name}, ${isFree ? "Выдано" : "Куплено"}, now(), ${quantity}, ${lootId})
+        `;
+      } catch (inventoryInsertError) {
         console.error(inventoryInsertError);
         throw new Error("Ошибка при добавлении предмета в инвентарь");
       }
@@ -222,10 +195,7 @@ export async function updateLootSale({
   } else if (existingInventory) {
     // Покупателя сменили на произвольный текст без привязки к аккаунту —
     // запись в инвентаре аккаунта больше не актуальна
-    await supabase
-      .from("user_inventory")
-      .delete()
-      .eq("id", existingInventory.id);
+    await sql<any[]>`DELETE FROM user_inventory WHERE id = ${existingInventory.id}`;
   }
 
   // Цена/статус (платно↔бесплатно) могли измениться в любую сторону —

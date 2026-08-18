@@ -1,21 +1,16 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 
 export async function getEligibleUsers() {
-  const { data: users, error } = await supabase
-    .from("user")
-    .select("id, username")
-    .eq("active", true)
-    .is("google_id", null)
-    .is("vk_id", null)
-    .is("mail_id", null)
-    .order("username", { ascending: true });
-
-  if (error || !users) {
+  try {
+    return await sql<any[]>`
+      SELECT id, username FROM "user"
+      WHERE active = true AND google_id IS NULL AND vk_id IS NULL AND mail_id IS NULL
+      ORDER BY username ASC
+    `;
+  } catch (error) {
     console.error("Ошибка при получении eligible пользователей:", error);
     throw new Error("Не удалось загрузить пользователей");
   }
-
-  return users;
 }

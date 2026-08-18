@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 import { computeMonthlyAttendanceForUsers } from "@/actions/getAllUsersActivityWithPercent";
 
 export type RosterClassStat = {
@@ -48,34 +48,32 @@ type RosterUser = {
 };
 
 export async function getRosterComposition(): Promise<RosterClassStat[]> {
-  const { data: users, error: usersError } = await supabase
-    .from("user")
-    .select("id, class, class_gear_score, joined_at")
-    .eq("active", true);
-
-  if (usersError || !users) {
+  let users;
+  try {
+    users = await sql<any[]>`
+      SELECT id, class, class_gear_score, joined_at FROM "user" WHERE active = true
+    `;
+  } catch (usersError) {
     console.error("Ошибка при получении состава гильдии:", usersError);
     throw new Error("Не удалось загрузить состав гильдии");
   }
 
   const { month, year } = getPreviousMonth();
 
-  const [attendance, salaryRows] = await Promise.all([
-    computeMonthlyAttendanceForUsers(users, month, year),
-    supabase
-      .from("Salary")
-      .select("userId, total")
-      .eq("month", month)
-      .eq("year", year),
-  ]);
-
-  if (salaryRows.error) {
-    console.error("Ошибка при получении зарплат:", salaryRows.error);
+  let attendance: Awaited<ReturnType<typeof computeMonthlyAttendanceForUsers>>;
+  let salaryRows;
+  try {
+    [attendance, salaryRows] = await Promise.all([
+      computeMonthlyAttendanceForUsers(users, month, year),
+      sql<any[]>`SELECT "userId", total FROM "Salary" WHERE month = ${month} AND year = ${year}`,
+    ]);
+  } catch (error) {
+    console.error("Ошибка при получении зарплат:", error);
     throw new Error("Не удалось загрузить зарплаты");
   }
 
   const paidUserIds = new Set(
-    (salaryRows.data ?? [])
+    (salaryRows ?? [])
       .filter((s) => (s.total ?? 0) > 0)
       .map((s) => s.userId),
   );

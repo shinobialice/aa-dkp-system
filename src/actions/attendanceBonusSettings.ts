@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 import ensurePrivilieges from "./ensurePrivilieges";
 import { revalidatePath } from "next/cache";
 import { getGuildStatus } from "./guildStatusSettings";
@@ -14,16 +14,13 @@ import {
 // Используется при создании/редактировании рейда — резолвит сразу под
 // текущий режим гильдии (фришка/пвп), как getBosses() делает для dkp_points.
 export async function getAttendanceBonusSettings(): Promise<AttendanceBonusSettings> {
-  const [{ data, error }, status] = await Promise.all([
-    supabase
-      .from("attendance_bonus_settings")
-      .select("*")
-      .eq("id", 1)
-      .maybeSingle(),
-    getGuildStatus(),
-  ]);
-
-  if (error) {
+  let data, status;
+  try {
+    [[data], status] = await Promise.all([
+      sql<any[]>`SELECT * FROM attendance_bonus_settings WHERE id = 1`,
+      getGuildStatus(),
+    ]);
+  } catch (error) {
     console.error("Ошибка при получении бонусов за посещение:", error);
     throw new Error("Не удалось загрузить бонусы за посещение");
   }
@@ -47,13 +44,12 @@ export async function getAttendanceBonusSettings(): Promise<AttendanceBonusSetti
 // Используется в Настройках — отдаёт оба варианта (фришка и пвп) сразу,
 // чтобы админ мог редактировать их одной формой.
 export async function getAttendanceBonusSettingsForSettings(): Promise<AttendanceBonusSettingsRow> {
-  const { data, error } = await supabase
-    .from("attendance_bonus_settings")
-    .select("*")
-    .eq("id", 1)
-    .maybeSingle();
-
-  if (error) {
+  let data;
+  try {
+    [data] = await sql<any[]>`
+      SELECT * FROM attendance_bonus_settings WHERE id = 1
+    `;
+  } catch (error) {
     console.error("Ошибка при получении бонусов за посещение:", error);
     throw new Error("Не удалось загрузить бонусы за посещение");
   }
@@ -77,20 +73,29 @@ export async function updateAttendanceBonusSettings(
 ) {
   await ensurePrivilieges(["Администратор"]);
 
-  const { error } = await supabase.from("attendance_bonus_settings").upsert({
-    id: 1,
-    pvp_points_freeshard: settings.pvpPointsFreeshard,
-    pvp_points_pvp: settings.pvpPointsPvp,
-    pvp_long_points_freeshard: settings.pvpLongPointsFreeshard,
-    pvp_long_points_pvp: settings.pvpLongPointsPvp,
-    proc_points_freeshard: settings.procPointsFreeshard,
-    proc_points_pvp: settings.procPointsPvp,
-    double_proc_points_freeshard: settings.doubleProcPointsFreeshard,
-    double_proc_points_pvp: settings.doubleProcPointsPvp,
-    updated_at: new Date().toISOString(),
-  });
-
-  if (error) {
+  try {
+    await sql<any[]>`
+      INSERT INTO attendance_bonus_settings
+        (id, pvp_points_freeshard, pvp_points_pvp, pvp_long_points_freeshard, pvp_long_points_pvp,
+         proc_points_freeshard, proc_points_pvp, double_proc_points_freeshard, double_proc_points_pvp, updated_at)
+      VALUES (
+        1, ${settings.pvpPointsFreeshard}, ${settings.pvpPointsPvp},
+        ${settings.pvpLongPointsFreeshard}, ${settings.pvpLongPointsPvp},
+        ${settings.procPointsFreeshard}, ${settings.procPointsPvp},
+        ${settings.doubleProcPointsFreeshard}, ${settings.doubleProcPointsPvp}, now()
+      )
+      ON CONFLICT (id) DO UPDATE SET
+        pvp_points_freeshard = EXCLUDED.pvp_points_freeshard,
+        pvp_points_pvp = EXCLUDED.pvp_points_pvp,
+        pvp_long_points_freeshard = EXCLUDED.pvp_long_points_freeshard,
+        pvp_long_points_pvp = EXCLUDED.pvp_long_points_pvp,
+        proc_points_freeshard = EXCLUDED.proc_points_freeshard,
+        proc_points_pvp = EXCLUDED.proc_points_pvp,
+        double_proc_points_freeshard = EXCLUDED.double_proc_points_freeshard,
+        double_proc_points_pvp = EXCLUDED.double_proc_points_pvp,
+        updated_at = EXCLUDED.updated_at
+    `;
+  } catch (error) {
     console.error("Ошибка при сохранении бонусов за посещение:", error);
     throw new Error("Не удалось сохранить бонусы за посещение");
   }

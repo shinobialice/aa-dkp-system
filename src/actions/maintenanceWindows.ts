@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 import ensurePrivilieges from "./ensurePrivilieges";
 import { revalidatePath } from "next/cache";
 
@@ -11,13 +11,14 @@ export type MaintenanceWindowRow = {
 };
 
 export async function getMaintenanceWindows(): Promise<MaintenanceWindowRow[]> {
-  const { data, error } = await supabase
-    .from("boss_maintenance_windows")
-    .select("id,start_at,end_at")
-    .gt("end_at", new Date().toISOString())
-    .order("start_at", { ascending: true });
-
-  if (error) {
+  let data;
+  try {
+    data = await sql<any[]>`
+      SELECT id, start_at, end_at FROM boss_maintenance_windows
+      WHERE end_at > now()
+      ORDER BY start_at ASC
+    `;
+  } catch (error) {
     console.error("Ошибка при получении окон профилактики:", error);
     throw new Error("Не удалось загрузить окна профилактики");
   }
@@ -40,13 +41,12 @@ export async function addMaintenanceWindow(
     throw new Error("Время окончания должно быть позже времени начала");
   }
 
-  const { error } = await supabase.from("boss_maintenance_windows").insert({
-    start_at: startAt,
-    end_at: endAt,
-    created_by: userId,
-  });
-
-  if (error) {
+  try {
+    await sql<any[]>`
+      INSERT INTO boss_maintenance_windows (start_at, end_at, created_by)
+      VALUES (${startAt}, ${endAt}, ${userId})
+    `;
+  } catch (error) {
     console.error("Ошибка при создании окна профилактики:", error);
     throw new Error("Не удалось создать окно профилактики");
   }
@@ -57,13 +57,11 @@ export async function addMaintenanceWindow(
 export async function extendMaintenanceWindow(id: number, endAt: string) {
   await ensurePrivilieges(["Администратор"]);
 
-  const { data: existing, error: fetchError } = await supabase
-    .from("boss_maintenance_windows")
-    .select("start_at")
-    .eq("id", id)
-    .maybeSingle();
+  const [existing] = await sql<any[]>`
+    SELECT start_at FROM boss_maintenance_windows WHERE id = ${id}
+  `;
 
-  if (fetchError || !existing) {
+  if (!existing) {
     throw new Error("Окно профилактики не найдено");
   }
 
@@ -71,12 +69,11 @@ export async function extendMaintenanceWindow(id: number, endAt: string) {
     throw new Error("Время окончания должно быть позже времени начала");
   }
 
-  const { error } = await supabase
-    .from("boss_maintenance_windows")
-    .update({ end_at: endAt })
-    .eq("id", id);
-
-  if (error) {
+  try {
+    await sql<any[]>`
+      UPDATE boss_maintenance_windows SET end_at = ${endAt} WHERE id = ${id}
+    `;
+  } catch (error) {
     console.error("Ошибка при продлении окна профилактики:", error);
     throw new Error("Не удалось продлить окно профилактики");
   }
@@ -87,12 +84,11 @@ export async function extendMaintenanceWindow(id: number, endAt: string) {
 export async function deleteMaintenanceWindow(id: number) {
   await ensurePrivilieges(["Администратор"]);
 
-  const { error } = await supabase
-    .from("boss_maintenance_windows")
-    .delete()
-    .eq("id", id);
-
-  if (error) {
+  try {
+    await sql<any[]>`
+      DELETE FROM boss_maintenance_windows WHERE id = ${id}
+    `;
+  } catch (error) {
     console.error("Ошибка при удалении окна профилактики:", error);
     throw new Error("Не удалось удалить окно профилактики");
   }

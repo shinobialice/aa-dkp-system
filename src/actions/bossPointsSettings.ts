@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 import ensurePrivilieges from "./ensurePrivilieges";
 import { revalidatePath } from "next/cache";
 
@@ -13,17 +13,17 @@ export type BossPointsRow = {
 };
 
 export async function getBossPointsForSettings(): Promise<BossPointsRow[]> {
-  const { data, error } = await supabase
-    .from("boss")
-    .select("id, boss_name, category, dkp_points_freeshard, dkp_points_pvp")
-    .order("id", { ascending: true });
-
-  if (error || !data) {
+  try {
+    const data = await sql<any[]>`
+      SELECT id, boss_name, category, dkp_points_freeshard, dkp_points_pvp
+      FROM boss
+      ORDER BY id ASC
+    `;
+    return data;
+  } catch (error) {
     console.error("Ошибка при получении очков боссов:", error);
     throw new Error("Не удалось загрузить очки боссов");
   }
-
-  return data;
 }
 
 export async function updateBossPoints(
@@ -44,21 +44,17 @@ export async function updateBossPoints(
     }
   }
 
-  const results = await Promise.all(
-    updates.map((u) =>
-      supabase
-        .from("boss")
-        .update({
-          dkp_points_freeshard: u.freeshard,
-          dkp_points_pvp: u.pvp,
-        })
-        .eq("id", u.id),
-    ),
-  );
-
-  const failed = results.find((r) => r.error);
-  if (failed) {
-    console.error("Ошибка при сохранении очков боссов:", failed.error);
+  try {
+    await Promise.all(
+      updates.map(
+        (u) => sql<any[]>`
+          UPDATE boss SET dkp_points_freeshard = ${u.freeshard}, dkp_points_pvp = ${u.pvp}
+          WHERE id = ${u.id}
+        `,
+      ),
+    );
+  } catch (error) {
+    console.error("Ошибка при сохранении очков боссов:", error);
     throw new Error("Не удалось сохранить очки боссов");
   }
 

@@ -1,13 +1,5 @@
 "use server";
-import supabase from "@/shared/lib/supabaseAdmin";
-import type { Database } from "@/types/supabase";
-
-type RaidRow = Database["public"]["Tables"]["raid"]["Row"];
-
-type RaidWithRelations = RaidRow & {
-  raid_boss: Array<{ boss: { boss_name: string } | null }>;
-  raid_attendance: Array<{ user_id: number; is_late: boolean }>;
-};
+import sql from "@/shared/lib/db";
 
 export type UserMonthlyRaid = {
   id: number;
@@ -28,41 +20,57 @@ export async function getUserMonthlyRaids(
     Date.UTC(month === 12 ? year + 1 : year, month % 12, 1),
   ).toISOString();
 
-  const { data, error } = await supabase
-    .from("raid")
-    .select(
-      `
-      id,
-      type,
-      start_date,
-      dkp_summary,
-      raid_boss(boss(boss_name)),
-      raid_attendance(user_id, is_late)
-    `,
-    )
-    .gte("start_date", startDate)
-    .lt("start_date", endDate)
-    .order("start_date", { ascending: false });
-
-  if (error || !data) {
+  let raids;
+  try {
+    raids = await sql<any[]>`
+      SELECT id, type, start_date, dkp_summary
+      FROM raid
+      WHERE start_date >= ${startDate} AND start_date < ${endDate}
+      ORDER BY start_date DESC
+    `;
+  } catch (error) {
     console.error("Ошибка при получении рейдов пользователя:", error);
     throw new Error("Не удалось загрузить рейды пользователя");
   }
 
-  const raids = data as unknown as RaidWithRelations[];
+  const raidIds = raids.map((r) => r.id);
+  let attendanceRows: any[] = [];
+  let bossRows: any[] = [];
+  if (raidIds.length > 0) {
+    [attendanceRows, bossRows] = await Promise.all([
+      sql<any[]>`SELECT raid_id, user_id, is_late FROM raid_attendance WHERE raid_id = ANY(${raidIds})`,
+      sql<any[]>`
+        SELECT rb.raid_id, b.boss_name
+        FROM raid_boss rb
+        JOIN boss b ON b.id = rb.boss_id
+        WHERE rb.raid_id = ANY(${raidIds})
+      `,
+    ]);
+  }
+
+  const attendanceByRaid = new Map<number, { user_id: number; is_late: boolean }[]>();
+  for (const a of attendanceRows) {
+    if (!attendanceByRaid.has(a.raid_id)) attendanceByRaid.set(a.raid_id, []);
+    attendanceByRaid.get(a.raid_id)!.push(a);
+  }
+  const bossesByRaid = new Map<number, string[]>();
+  for (const b of bossRows) {
+    if (!bossesByRaid.has(b.raid_id)) bossesByRaid.set(b.raid_id, []);
+    bossesByRaid.get(b.raid_id)!.push(b.boss_name);
+  }
 
   return raids
-    .filter((raid) => raid.raid_attendance.some((a) => a.user_id === userId))
+    .filter((raid) =>
+      (attendanceByRaid.get(raid.id) ?? []).some((a) => a.user_id === userId),
+    )
     .map((raid) => ({
       id: raid.id,
       type: raid.type,
       startDate: raid.start_date,
       dkpSummary: raid.dkp_summary ?? 0,
       isLate:
-        raid.raid_attendance.find((a) => a.user_id === userId)?.is_late ??
-        false,
-      bosses: (raid.raid_boss ?? [])
-        .map((rb) => rb.boss?.boss_name)
-        .filter((n): n is string => Boolean(n)),
+        (attendanceByRaid.get(raid.id) ?? []).find((a) => a.user_id === userId)
+          ?.is_late ?? false,
+      bosses: bossesByRaid.get(raid.id) ?? [],
     }));
 }

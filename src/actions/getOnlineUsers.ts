@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 
 const ONLINE_THRESHOLD_MS = 2 * 60 * 1000; // 2 минуты без heartbeat = не в сети
 
@@ -10,30 +10,30 @@ const rolePriority = ["Администратор", "Модератор", "Се�
 export async function getOnlineUsers() {
   const cutoff = new Date(Date.now() - ONLINE_THRESHOLD_MS).toISOString();
 
-  const { data, error } = await supabase
-    .from("user")
-    .select("id, username, avatar_url")
-    .gte("last_seen_at", cutoff)
-    .order("username", { ascending: true });
-
-  if (error) {
+  let data: { id: number; username: string; avatar_url: string | null }[];
+  try {
+    data = await sql<any[]>`
+      SELECT id, username, avatar_url FROM "user"
+      WHERE last_seen_at >= ${cutoff}
+      ORDER BY username ASC
+    `;
+  } catch (error) {
     console.error("Ошибка при получении онлайн-пользователей:", error);
     return [];
   }
 
   if (data.length === 0) return [];
 
-  const { data: tagRows, error: tagError } = await supabase
-    .from("user_tags")
-    .select("user_id, tag")
-    .in(
-      "user_id",
-      data.map((u) => u.id),
-    )
-    .in("tag", rolePriority)
-    .is("removed_at", null);
-
-  if (tagError) {
+  const userIds = data.map((u) => u.id);
+  let tagRows: { user_id: number; tag: string }[] = [];
+  try {
+    tagRows = await sql<any[]>`
+      SELECT user_id, tag FROM user_tags
+      WHERE user_id = ANY(${userIds})
+        AND tag = ANY(${rolePriority})
+        AND removed_at IS NULL
+    `;
+  } catch (tagError) {
     console.error("Ошибка при получении тэгов онлайн-пользователей:", tagError);
   }
 

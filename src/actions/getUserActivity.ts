@@ -1,23 +1,24 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 
 export async function getUserActivity(userId: number) {
-  const { data: attendances, error } = await supabase
-    .from("raid_attendance")
-    .select("raid(start_date, type)")
-    .eq("user_id", userId);
-
-  if (error || !attendances) {
+  let rows;
+  try {
+    rows = await sql<any[]>`
+      SELECT r.start_date, r.type
+      FROM raid_attendance ra
+      JOIN raid r ON r.id = ra.raid_id
+      WHERE ra.user_id = ${userId}
+    `;
+  } catch (error) {
     console.error("Ошибка при получении активности пользователя:", error);
     throw new Error("Не удалось получить активность пользователя");
   }
 
   const grouped: Record<string, { праймы: number; агл: number }> = {};
 
-  attendances.forEach(({ raid }) => {
-    // raid is an array, so grab the first element
-    const r = Array.isArray(raid) ? raid[0] : raid;
+  rows.forEach((r) => {
     if (!r?.start_date) return;
 
     const date = r.start_date.split("T")[0];

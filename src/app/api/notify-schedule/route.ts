@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Receiver } from "@upstash/qstash";
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 import { getBaseUrl } from "@/shared/lib";
 import { sendVkMessage } from "@/shared/lib/vkBot";
 import { getVkMentionTag } from "@/shared/lib/vkQuietHours";
@@ -80,12 +80,12 @@ export async function POST(req: NextRequest) {
     if (!isDue) continue;
 
     const eventKey = `${boss}__${start.getTime()}`;
-    const { error: logError } = await supabase
-      .from("vk_schedule_notify_log")
-      .insert({ event_key: eventKey });
-
-    if (logError) {
-      if (logError.code === "23505") continue;
+    try {
+      await sql<any[]>`
+        INSERT INTO vk_schedule_notify_log (event_key) VALUES (${eventKey})
+      `;
+    } catch (logError: any) {
+      if (logError?.code === "23505") continue; // уже отправляли (упёрлись в PK)
       console.error("Ошибка при записи лога уведомлений расписания:", logError);
       continue;
     }
@@ -100,10 +100,9 @@ export async function POST(req: NextRequest) {
   const cleanupThreshold = new Date(
     Date.now() - DEDUP_RETENTION_DAYS * 24 * 60 * 60 * 1000,
   ).toISOString();
-  await supabase
-    .from("vk_schedule_notify_log")
-    .delete()
-    .lt("notified_at", cleanupThreshold);
+  await sql<any[]>`
+    DELETE FROM vk_schedule_notify_log WHERE notified_at < ${cleanupThreshold}
+  `;
 
   return NextResponse.json({ ok: true, sent });
 }

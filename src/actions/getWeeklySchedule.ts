@@ -1,13 +1,14 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 
 export async function getWeeklySchedule() {
-  const { data, error } = await supabase
-    .from("week_schedule_event")
-    .select("weekday, time, boss_name");
-
-  if (error) {
+  let data;
+  try {
+    data = await sql<any[]>`
+      SELECT weekday, time, boss_name FROM week_schedule_event
+    `;
+  } catch (error) {
     console.error("Ошибка получения расписания", error);
     return {};
   }

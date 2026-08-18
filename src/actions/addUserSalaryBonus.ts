@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 import ensurePrivilieges from "./ensurePrivilieges";
 import { triggerFinanceRecalcForCurrentMonth } from "./recalculateFinanceForMonth";
 
@@ -22,16 +22,12 @@ export async function addUserSalaryBonus({
     throw new Error("Нужен комментарий за что бонус");
   }
 
-  const { error } = await supabase.from("user_salary_bonus").insert([
-    {
-      user_id: userId,
-      amount,
-      reason,
-      created_at: new Date().toISOString(),
-    },
-  ]);
-
-  if (error) {
+  try {
+    await sql<any[]>`
+      INSERT INTO user_salary_bonus (user_id, amount, reason, created_at)
+      VALUES (${userId}, ${amount}, ${reason}, now())
+    `;
+  } catch (error) {
     console.error("Error adding salary bonus:", error);
     throw new Error("Ошибка при добавлении бонуса");
   }
@@ -42,12 +38,9 @@ export async function addUserSalaryBonus({
 export async function deleteUserSalaryBonus(id: number) {
   await ensurePrivilieges(["Администратор"]);
 
-  const { error } = await supabase
-    .from("user_salary_bonus")
-    .delete()
-    .eq("id", id);
-
-  if (error) {
+  try {
+    await sql<any[]>`DELETE FROM user_salary_bonus WHERE id = ${id}`;
+  } catch (error) {
     console.error("Error deleting salary bonus:", error);
     throw new Error("Ошибка при удалении бонуса");
   }

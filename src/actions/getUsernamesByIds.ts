@@ -1,24 +1,23 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 
 export const getUsernamesByIds = async (
   userIds: number[],
 ): Promise<Record<number, string>> => {
   if (userIds.length === 0) return {};
 
-  const { data, error } = await supabase
-    .from("user")
-    .select("id, username")
-    .in("id", userIds);
+  try {
+    const data = await sql<any[]>`
+      SELECT id, username FROM "user" WHERE id = ANY(${userIds})
+    `;
 
-  if (error || !data) {
+    const result: Record<number, string> = {};
+    data.forEach((u) => {
+      result[u.id] = u.username;
+    });
+    return result;
+  } catch {
     return {};
   }
-
-  const result: Record<number, string> = {};
-  data.forEach((u: any) => {
-    result[u.id] = u.username;
-  });
-  return result;
 };
