@@ -7,6 +7,7 @@ import {
 import { hasTag } from "@/actions/hasTag";
 import AppSidebar from "@/widgets/sidebar";
 import { HeartbeatTracker } from "@/widgets/sidebar/HeartbeatTracker";
+import { SessionGuard } from "@/widgets/sidebar/SessionGuard";
 import { EventNotifications } from "@/widgets/EventNotifications/EventNotifications";
 import { cookies } from "next/headers";
 
@@ -20,6 +21,7 @@ export default async function DefaultLayout({
   return (
     <SidebarProvider defaultOpen>
       <HeartbeatTracker />
+      <SessionGuard />
       <EventNotifications />
       <div className="flex bg-background text-foreground w-full">
         <AppSidebar isAdmin={isAdmin} />

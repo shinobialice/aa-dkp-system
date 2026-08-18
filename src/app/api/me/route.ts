@@ -11,10 +11,10 @@ export async function GET() {
   }
 
   const [user] = await sql<any[]>`
-    SELECT id, username, avatar_url FROM "user" WHERE session_token = ${token}
+    SELECT id, username, avatar_url, active FROM "user" WHERE session_token = ${token}
   `;
 
-  if (!user) {
+  if (!user || !user.active) {
     return NextResponse.json({ error: "Invalid token" }, { status: 401 });
   }
 
