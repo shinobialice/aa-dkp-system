@@ -13,7 +13,7 @@ export default async function Page() {
   const { data: users, error } = await supabase
     .from("user")
     .select(
-      "id, username, active, givenawayloot(name, date, status), misc_loot_grants(id, comment, amount, date), loot_wishlist(id, item_name, comment)",
+      "id, username, active, avatar_url, givenawayloot(name, date, status), misc_loot_grants(id, comment, amount, date), loot_wishlist(id, item_name, comment)",
     )
     .order("id", { ascending: true });
 
@@ -26,6 +26,7 @@ export default async function Page() {
     id: user.id,
     username: user.username,
     active: user.active,
+    avatarUrl: user.avatar_url,
     loot: lootColumns.map((name) => {
       const record = user.givenawayloot?.find((i) => i.name === name);
       return {
