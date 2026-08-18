@@ -1,6 +1,5 @@
 import "./globals.css";
 import Providers from "@/app/providers";
-import { Analytics } from "@vercel/analytics/next";
 
 export const metadata = {
   metadataBase: new URL("https://nofearhub.com"),
@@ -40,7 +39,6 @@ export default function RootLayout({
     <html lang="ru" suppressHydrationWarning>
       <body>
         <Providers>{children}</Providers>
-        <Analytics />
       </body>
     </html>
   );
