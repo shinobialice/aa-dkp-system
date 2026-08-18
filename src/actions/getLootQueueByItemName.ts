@@ -1,57 +1,37 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 
 export const getLootQueueByItemName = async (itemName: string) => {
-  const { data: item, error: itemError } = await supabase
-    .from("item_type")
-    .select(
-      `
-        id,
-        loot_queue (
-          id,
-          user_id,
-          status,
-          synth_target,
-          required,
-          delivered,
-          created_at,
-          roll,
-          position,
-          user (
-            username
-          )
-        )
-      `,
-    )
-    .eq("name", itemName)
-    .single();
-
-  if (itemError || !item) {
-    console.error(itemError);
+  let rows;
+  try {
+    rows = await sql<any[]>`
+      SELECT
+        lq.id,
+        lq.user_id,
+        lq.status,
+        lq.synth_target,
+        lq.required,
+        lq.delivered,
+        lq.created_at,
+        lq.roll,
+        lq.position,
+        u.username
+      FROM loot_queue lq
+      JOIN item_type it ON it.id = lq.item_type_id
+      LEFT JOIN "user" u ON u.id = lq.user_id
+      WHERE it.name = ${itemName}
+    `;
+  } catch (error) {
+    console.error(error);
     return [];
   }
 
-  type LootQueueEntry = {
-    id: number;
-    user_id: number;
-    status: string;
-    synth_target: string | null;
-    required: number | null;
-    delivered: number | null;
-    created_at: string;
-    roll: number | null;
-    position: number | null;
-    user: { username: string } | null;
-  };
-
-  const lootQueue = (item.loot_queue || []) as unknown as LootQueueEntry[];
-
-  return lootQueue
+  return rows
     .map((entry) => ({
       id: entry.id,
       userId: entry.user_id,
-      username: entry.user?.username || "Unknown",
+      username: entry.username || "Unknown",
       status: entry.status,
       synth_target: entry.synth_target,
       required: entry.required ?? 0,

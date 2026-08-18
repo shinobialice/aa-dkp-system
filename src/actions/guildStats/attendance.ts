@@ -1,15 +1,16 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 
 async function getDailyAttendance(year: number, month: number, type: string) {
-  const { data, error } = await supabase.rpc("get_daily_attendance", {
-    p_year: year,
-    p_month: month,
-    p_type: type,
-  });
-
-  if (error) throw new Error("Ошибка при загрузке посещаемости");
+  let data;
+  try {
+    data = await sql<any[]>`
+      SELECT * FROM get_daily_attendance(${year}, ${month}, ${type})
+    `;
+  } catch {
+    throw new Error("Ошибка при загрузке посещаемости");
+  }
 
   const daily: { date: string; value: number }[] = (data ?? []).map(
     (row: { date: string; percent: number }) => ({

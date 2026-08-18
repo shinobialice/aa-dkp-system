@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { RealtimeChannel } from "@supabase/supabase-js";
-import supabase from "@/shared/lib/supabase";
+import { getBossRespawnStatus } from "@/actions/getBossRespawnStatus";
 import {
   BossName,
   bosses as respawnBosses,
@@ -78,14 +77,10 @@ type BossRespawnState = {
 };
 
 // Module-level store shared by every consumer of this hook. UpcomingEvents
-// and EventNotifications both render at the same time and each used to open
-// its own realtime channel under the same hardcoded name. Supabase's
-// `.channel(topic)` returns the *existing* channel when the topic already
-// exists, so the second caller's `.on()` landed on a channel the first
-// caller had already `.subscribe()`d, which Supabase rejects with "cannot
-// add postgres_changes callbacks after subscribe()" (same issue fixed in
-// useMaintenanceWindows.ts). Sharing one fetch + one channel across all
-// consumers avoids the collision entirely.
+// and EventNotifications both render at the same time — вместо
+// realtime-подписки (была у Supabase, self-hosted Postgres такого не даёт)
+// держим один общий поллинг на всех потребителей, чтобы не плодить лишние
+// запросы (тот же приём, что в useMaintenanceWindows.ts).
 let bossRespawnState: BossRespawnState = {
   lastKill: { Марли: null, Морф: null, Кириос: null } as Record<
     BossName,
@@ -97,13 +92,10 @@ let bossRespawnState: BossRespawnState = {
   >,
 };
 const bossRespawnListeners = new Set<(state: BossRespawnState) => void>();
-let bossRespawnChannel: RealtimeChannel | null = null;
+let bossRespawnPollTimer: ReturnType<typeof setInterval> | null = null;
 
 async function fetchBossRespawn() {
-  const { data } = await supabase
-    .from("boss_respawn")
-    .select("boss_name,last_kill,packs_needed")
-    .in("boss_name", respawnBosses);
+  const data = await getBossRespawnStatus(respawnBosses as unknown as string[]);
   if (data) {
     const lastKill = { ...bossRespawnState.lastKill };
     const packs = { ...bossRespawnState.packs };
@@ -127,45 +119,20 @@ function subscribeBossRespawn(
 ): () => void {
   bossRespawnListeners.add(listener);
 
-  if (!bossRespawnChannel) {
+  if (!bossRespawnPollTimer) {
     fetchBossRespawn();
-    bossRespawnChannel = supabase
-      .channel("upcoming-events-boss-respawn")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "boss_respawn" },
-        (payload) => {
-          const row = payload.new as {
-            boss_name: BossName;
-            last_kill: string | null;
-            packs_needed: number | null;
-          };
-          if (!row?.boss_name) return;
-          bossRespawnState = {
-            lastKill: {
-              ...bossRespawnState.lastKill,
-              [row.boss_name]: row.last_kill,
-            },
-            packs: {
-              ...bossRespawnState.packs,
-              [row.boss_name]: row.packs_needed,
-            },
-          };
-          bossRespawnListeners.forEach((l) => l(bossRespawnState));
-        },
-      )
-      .subscribe();
+    bossRespawnPollTimer = setInterval(fetchBossRespawn, 15_000);
   } else {
-    // A subscription already exists: hand the new listener the latest
-    // known snapshot instead of waiting for the next change event.
+    // Поллинг уже идёт: отдаём новому подписчику последний известный снимок,
+    // не дожидаясь следующего тика.
     listener(bossRespawnState);
   }
 
   return () => {
     bossRespawnListeners.delete(listener);
-    if (bossRespawnListeners.size === 0 && bossRespawnChannel) {
-      supabase.removeChannel(bossRespawnChannel);
-      bossRespawnChannel = null;
+    if (bossRespawnListeners.size === 0 && bossRespawnPollTimer) {
+      clearInterval(bossRespawnPollTimer);
+      bossRespawnPollTimer = null;
     }
   };
 }

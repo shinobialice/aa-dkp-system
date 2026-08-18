@@ -1,4 +1,4 @@
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
@@ -10,11 +10,9 @@ export async function GET() {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const { data: user } = await supabase
-    .from("user")
-    .select("id, username, avatar_url")
-    .eq("session_token", token)
-    .single();
+  const [user] = await sql<any[]>`
+    SELECT id, username, avatar_url FROM "user" WHERE session_token = ${token}
+  `;
 
   if (!user) {
     return NextResponse.json({ error: "Invalid token" }, { status: 401 });

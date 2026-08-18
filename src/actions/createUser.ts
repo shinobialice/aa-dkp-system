@@ -1,23 +1,20 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 import { revalidatePath } from "next/cache";
 import ensurePrivilieges from "./ensurePrivilieges";
 
 export async function createUser(username: string) {
   await ensurePrivilieges(["Администратор"]);
-  const { data, error } = await supabase
-    .from("user")
-    .insert({
-      username,
-      active: true,
-      created_at: new Date().toISOString(),
-      is_eligible_for_salary: false,
-    })
-    .select()
-    .single();
 
-  if (error) {
+  let data;
+  try {
+    [data] = await sql<any[]>`
+      INSERT INTO "user" (username, active, created_at, is_eligible_for_salary)
+      VALUES (${username}, true, now(), false)
+      RETURNING *
+    `;
+  } catch (error) {
     console.error("Ошибка создания пользователя:", error);
     throw new Error("Не удалось создать пользователя");
   }

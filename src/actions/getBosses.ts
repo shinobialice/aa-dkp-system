@@ -1,17 +1,19 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 import { getGuildStatus } from "./guildStatusSettings";
 
 export const getBosses = async () => {
-  const [{ data: bosses, error }, status] = await Promise.all([
-    supabase
-      .from("boss")
-      .select("id, boss_name, category, dkp_points_freeshard, dkp_points_pvp"),
-    getGuildStatus(),
-  ]);
-
-  if (error || !bosses) {
+  let bosses, status;
+  try {
+    [bosses, status] = await Promise.all([
+      sql<any[]>`
+        SELECT id, boss_name, category, dkp_points_freeshard, dkp_points_pvp
+        FROM boss
+      `,
+      getGuildStatus(),
+    ]);
+  } catch (error) {
     console.error("Ошибка при получении списка боссов:", error);
     throw new Error("Не удалось загрузить боссов");
   }

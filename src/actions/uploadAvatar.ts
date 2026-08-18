@@ -1,6 +1,7 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
+import { saveUploadedFile } from "@/shared/lib/localStorage";
 import { getSessionUserId } from "./getSessionUserId";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -25,29 +26,21 @@ export async function uploadAvatar(formData: FormData): Promise<string> {
     throw new Error("Файл слишком большой (максимум 5 МБ)");
   }
 
-  const path = `${sessionUserId}/avatar`;
-
-  const { error: uploadError } = await supabase.storage
-    .from("avatars")
-    .upload(path, file, { upsert: true, contentType: file.type });
-
-  if (uploadError) {
+  let publicUrl: string;
+  try {
+    publicUrl = await saveUploadedFile("avatars", `${sessionUserId}/avatar`, file);
+  } catch (uploadError) {
     console.error("Failed to upload avatar:", uploadError);
     throw new Error("Не удалось загрузить аватар");
   }
 
-  const {
-    data: { publicUrl },
-  } = supabase.storage.from("avatars").getPublicUrl(path);
-
   const avatarUrl = `${publicUrl}?t=${Date.now()}`;
 
-  const { error: updateError } = await supabase
-    .from("user")
-    .update({ avatar_url: avatarUrl })
-    .eq("id", sessionUserId);
-
-  if (updateError) {
+  try {
+    await sql<any[]>`
+      UPDATE "user" SET avatar_url = ${avatarUrl} WHERE id = ${sessionUserId}
+    `;
+  } catch (updateError) {
     console.error("Failed to save avatar url:", updateError);
     throw new Error("Не удалось сохранить аватар");
   }

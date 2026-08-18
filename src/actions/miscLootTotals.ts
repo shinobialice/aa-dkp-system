@@ -1,17 +1,17 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 import { MISC_LOOT_ITEM_NAMES } from "@/widgets/Loot/GuildLoot/LootTypes";
 import { triggerFinanceRecalc } from "./recalculateFinanceForMonth";
 
 export async function getMiscLootTotals(month: number, year: number) {
-  const { data, error } = await supabase
-    .from("misc_loot_totals")
-    .select("item_name, amount")
-    .eq("month", month)
-    .eq("year", year);
-
-  if (error) {
+  let data;
+  try {
+    data = await sql<any[]>`
+      SELECT item_name, amount FROM misc_loot_totals
+      WHERE month = ${month} AND year = ${year}
+    `;
+  } catch (error) {
     console.error(error);
     throw new Error("Не удалось получить суммы по разному");
   }
@@ -35,18 +35,15 @@ export async function setMiscLootTotal({
   year: number;
   amount: number;
 }) {
-  const { error } = await supabase.from("misc_loot_totals").upsert(
-    {
-      item_name: name,
-      month,
-      year,
-      amount,
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: "item_name,month,year" },
-  );
-
-  if (error) {
+  try {
+    await sql<any[]>`
+      INSERT INTO misc_loot_totals (item_name, month, year, amount, updated_at)
+      VALUES (${name}, ${month}, ${year}, ${amount}, now())
+      ON CONFLICT (item_name, month, year) DO UPDATE SET
+        amount = EXCLUDED.amount,
+        updated_at = EXCLUDED.updated_at
+    `;
+  } catch (error) {
     console.error(error);
     throw new Error("Не удалось сохранить сумму");
   }

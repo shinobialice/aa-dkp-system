@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 
 export type MonthlyAttendance = {
   primePercent: number;
@@ -24,26 +24,39 @@ export async function computeMonthlyAttendanceForUsers(
     Date.UTC(month === 12 ? year + 1 : year, month % 12, 1),
   ).toISOString();
 
-  const { data: raids, error: raidsError } = await supabase
-    .from("raid")
-    .select(`id, type, start_date, dkp_summary, raid_attendance(user_id, is_late)`)
-    .gte("start_date", startDate)
-    .lt("start_date", endDate);
-
-  if (raidsError || !raids) {
+  let rows;
+  try {
+    rows = await sql<any[]>`
+      SELECT r.id, r.type, r.start_date, r.dkp_summary, ra.user_id, ra.is_late
+      FROM raid r
+      LEFT JOIN raid_attendance ra ON ra.raid_id = r.id
+      WHERE r.start_date >= ${startDate} AND r.start_date < ${endDate}
+    `;
+  } catch (raidsError) {
     console.error("Ошибка при получении рейдов:", raidsError);
     throw new Error("Не удалось получить рейды");
   }
 
-  const result: Record<
+  const raidMap = new Map<
     number,
     {
-      primePercent: number;
-      aglPercent: number;
-      totalPercent: number;
-      dkp: number;
+      type: string;
+      start_date: string;
+      dkp_summary: number;
+      attendance: { user_id: number; is_late: boolean }[];
     }
-  > = {};
+  >();
+  for (const row of rows) {
+    let raid = raidMap.get(row.id);
+    if (!raid) {
+      raid = { type: row.type, start_date: row.start_date, dkp_summary: row.dkp_summary, attendance: [] };
+      raidMap.set(row.id, raid);
+    }
+    if (row.user_id !== null) raid.attendance.push({ user_id: row.user_id, is_late: row.is_late });
+  }
+  const raids = Array.from(raidMap.values());
+
+  const result: Record<number, MonthlyAttendance> = {};
 
   for (const user of users) {
     // Если вступил в течение месяца — считаем только с даты вступления.
@@ -63,9 +76,7 @@ export async function computeMonthlyAttendanceForUsers(
       if (new Date(raid.start_date as string) < effectiveStart) continue;
 
       const dkp = raid.dkp_summary ?? 0;
-      const attendance = (
-        raid.raid_attendance as { user_id: number; is_late: boolean }[]
-      ).find((a) => a.user_id === user.id);
+      const attendance = raid.attendance.find((a) => a.user_id === user.id);
       const attendanceWeight = attendance
         ? attendance.is_late
           ? 0.5

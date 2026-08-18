@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 
 type Boss = {
   id: number;
@@ -12,7 +12,7 @@ type Raid = {
   start_date: string;
   type: string;
   raid_boss: {
-    boss: Boss[];
+    boss: Boss;
   }[];
 };
 
@@ -145,37 +145,36 @@ export const getMissingActivitiesForMonth = async (
     return { hasDeficit: false, missingSlots: [] };
   }
 
-  const [
-    { data: raidData, error: raidError },
-    { data: scheduleData, error: scheduleError },
-  ] = await Promise.all([
-    supabase.from("raid").select(`
-      id,
-      start_date,
-      type,
-      raid_boss(
-        boss:boss_id(
-          id,
-          boss_name
-        )
-      )
-    `),
-    supabase.from("week_schedule_event").select("weekday, time, boss_name"),
-  ]);
-
-  if (raidError || !raidData) {
-    console.error(
-      "Ошибка при получении рейдов для проверки расписания:",
-      raidError,
-    );
+  let raidRows, scheduleData;
+  try {
+    [raidRows, scheduleData] = await Promise.all([
+      sql<any[]>`
+        SELECT r.id, r.start_date, r.type, b.id AS boss_id, b.boss_name AS boss_name
+        FROM raid r
+        LEFT JOIN raid_boss rb ON rb.raid_id = r.id
+        LEFT JOIN boss b ON b.id = rb.boss_id
+      `,
+      sql<any[]>`SELECT weekday, time, boss_name FROM week_schedule_event`,
+    ]);
+  } catch (error) {
+    console.error("Ошибка при получении данных для проверки расписания:", error);
     throw new Error("Не удалось загрузить рейды");
   }
-  if (scheduleError || !scheduleData) {
-    console.error("Ошибка при получении расписания:", scheduleError);
-    throw new Error("Не удалось загрузить расписание");
+
+  // Группируем плоский результат join'а обратно по рейдам.
+  const raidMap = new Map<number, Raid>();
+  for (const row of raidRows) {
+    let raid = raidMap.get(row.id);
+    if (!raid) {
+      raid = { id: row.id, start_date: row.start_date, type: row.type, raid_boss: [] };
+      raidMap.set(row.id, raid);
+    }
+    if (row.boss_id) {
+      raid.raid_boss.push({ boss: { id: row.boss_id, boss_name: row.boss_name } });
+    }
   }
 
-  const raids = raidData as unknown as Raid[];
+  const raids = Array.from(raidMap.values());
   const schedule = scheduleData as ScheduleRow[];
 
   const scheduleByWeekday = new Map<string, ScheduleRow[]>();

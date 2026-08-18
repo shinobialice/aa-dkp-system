@@ -1,36 +1,27 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 import { triggerFinanceRecalc } from "./recalculateFinanceForMonth";
 
 export const getExpenses = async () => {
-  const { data, error } = await supabase
-    .from("Expense")
-    .select("*")
-    .order("date", { ascending: false });
-
-  if (error) {
+  try {
+    return await sql<any[]>`SELECT * FROM "Expense" ORDER BY date DESC`;
+  } catch (error) {
     console.error("Ошибка при получении расходов:", error);
     throw new Error("Не удалось получить расходы");
   }
-
-  return data;
 };
 
 export const getExpensesBySource = async (source: string) => {
-  const { data, error } = await supabase
-    .from("Expense")
-    .select("*")
-    .eq("source", source)
-    .order("date", { ascending: false });
-
-  if (error) {
+  try {
+    return await sql<any[]>`
+      SELECT * FROM "Expense" WHERE source = ${source} ORDER BY date DESC
+    `;
+  } catch (error) {
     console.error("Ошибка при получении расходов пользователя:", error);
     throw new Error("Не удалось получить расходы пользователя");
   }
-
-  return data;
 };
 
 export const addExpense = async ({
@@ -59,17 +50,12 @@ export const addExpense = async ({
     throw new Error("Источник обязателен");
   }
 
-  const { error } = await supabase.from("Expense").insert([
-    {
-      date: new Date(date).toISOString(),
-      amount,
-      target,
-      source,
-      comment,
-    },
-  ]);
-
-  if (error) {
+  try {
+    await sql<any[]>`
+      INSERT INTO "Expense" (date, amount, target, source, comment)
+      VALUES (${new Date(date).toISOString()}, ${amount}, ${target}, ${source}, ${comment ?? null})
+    `;
+  } catch (error) {
     console.error("Ошибка при добавлении расхода:", error);
     throw new Error("Не удалось добавить расход");
   }
@@ -108,18 +94,17 @@ export const updateExpense = async ({
     throw new Error("Источник обязателен");
   }
 
-  const { error } = await supabase
-    .from("Expense")
-    .update({
-      date: new Date(date).toISOString(),
-      amount,
-      target,
-      source,
-      comment,
-    })
-    .eq("id", id);
-
-  if (error) {
+  try {
+    await sql<any[]>`
+      UPDATE "Expense" SET
+        date = ${new Date(date).toISOString()},
+        amount = ${amount},
+        target = ${target},
+        source = ${source},
+        comment = ${comment ?? null}
+      WHERE id = ${id}
+    `;
+  } catch (error) {
     console.error("Ошибка при обновлении расхода:", error);
     throw new Error("Не удалось обновить расход");
   }
@@ -131,9 +116,9 @@ export const updateExpense = async ({
 };
 
 export const deleteExpense = async (id: number, date: string) => {
-  const { error } = await supabase.from("Expense").delete().eq("id", id);
-
-  if (error) {
+  try {
+    await sql<any[]>`DELETE FROM "Expense" WHERE id = ${id}`;
+  } catch (error) {
     console.error("Ошибка при удалении расхода:", error);
     throw new Error("Не удалось удалить расход");
   }

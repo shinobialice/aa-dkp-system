@@ -1,21 +1,20 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 import { triggerFinanceRecalcForCurrentMonth } from "./recalculateFinanceForMonth";
 
 export const getUserPenaltyPoints = async (userId: number) => {
-  const { data, error } = await supabase
-    .from("user_penalty_points")
-    .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
-
-  if (error) {
+  try {
+    const data = await sql<any[]>`
+      SELECT * FROM user_penalty_points
+      WHERE user_id = ${userId}
+      ORDER BY created_at DESC
+    `;
+    return data;
+  } catch (error) {
     console.error("Ошибка при получении штрафов:", error);
     throw new Error("Не удалось загрузить штрафы пользователя");
   }
-
-  return data;
 };
 
 // Батч-версия getUserPenaltyPoints — суммирует штрафы сразу для всех
@@ -26,12 +25,13 @@ export const getUserPenaltyPointsBatch = async (
 ): Promise<Record<number, number>> => {
   if (userIds.length === 0) return {};
 
-  const { data, error } = await supabase
-    .from("user_penalty_points")
-    .select("user_id, amount")
-    .in("user_id", userIds);
-
-  if (error) {
+  let data;
+  try {
+    data = await sql<any[]>`
+      SELECT user_id, amount FROM user_penalty_points
+      WHERE user_id = ANY(${userIds})
+    `;
+  } catch (error) {
     console.error("Ошибка при получении штрафов:", error);
     throw new Error("Не удалось загрузить штрафы пользователей");
   }
@@ -59,16 +59,12 @@ export async function addUserPenaltyPoints({
     throw new Error("Нужен комментарий за что штраф");
   }
 
-  const { error } = await supabase.from("user_penalty_points").insert([
-    {
-      user_id: userId,
-      amount,
-      reason,
-      created_at: new Date().toISOString(),
-    },
-  ]);
-
-  if (error) {
+  try {
+    await sql<any[]>`
+      INSERT INTO user_penalty_points (user_id, amount, reason, created_at)
+      VALUES (${userId}, ${amount}, ${reason}, now())
+    `;
+  } catch (error) {
     console.error("Error adding penalty points:", error);
     throw new Error("Ошибка при добавлении штрафа");
   }
@@ -77,12 +73,11 @@ export async function addUserPenaltyPoints({
 }
 
 export async function deleteUserPenaltyPoints(id: number) {
-  const { error } = await supabase
-    .from("user_penalty_points")
-    .delete()
-    .eq("id", id);
-
-  if (error) {
+  try {
+    await sql<any[]>`
+      DELETE FROM user_penalty_points WHERE id = ${id}
+    `;
+  } catch (error) {
     console.error("Error deleting penalty points:", error);
     throw new Error("Ошибка при удалении штрафа");
   }

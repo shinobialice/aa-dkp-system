@@ -1,15 +1,5 @@
 "use server";
-import supabase from "@/shared/lib/supabaseAdmin";
-import type { Database } from "@/types/supabase";
-
-type RaidRow = Database["public"]["Tables"]["raid"]["Row"];
-
-type RaidWithRelations = RaidRow & {
-  raid_attendance: Array<{
-    user_id: number;
-    is_late: boolean;
-  }>;
-};
+import sql from "@/shared/lib/db";
 
 export async function getUserMonthlyAttendance(
   userId: number,
@@ -21,13 +11,12 @@ export async function getUserMonthlyAttendance(
     Date.UTC(month === 12 ? year + 1 : year, month % 12, 1),
   ).toISOString();
 
-  const { data: userRow, error: userError } = await supabase
-    .from("user")
-    .select("joined_at")
-    .eq("id", userId)
-    .maybeSingle();
-
-  if (userError) {
+  let userRow;
+  try {
+    [userRow] = await sql<any[]>`
+      SELECT joined_at FROM "user" WHERE id = ${userId}
+    `;
+  } catch (userError) {
     console.error("Ошибка при получении пользователя:", userError);
     throw new Error("Не удалось загрузить пользователя");
   }
@@ -39,26 +28,32 @@ export async function getUserMonthlyAttendance(
     joinedAt && joinedAt > monthStart ? joinedAt : monthStart;
   const startDate = effectiveStart.toISOString();
 
-  const { data, error } = await supabase
-    .from("raid")
-    .select(
-      `
-      id,
-      type,
-      start_date,
-      dkp_summary,
-      raid_attendance(user_id, is_late)
-    `,
-    )
-    .gte("start_date", startDate)
-    .lt("start_date", endDate);
-
-  if (error || !data) {
+  let rows;
+  try {
+    rows = await sql<any[]>`
+      SELECT r.id, r.type, r.dkp_summary, ra.user_id, ra.is_late
+      FROM raid r
+      LEFT JOIN raid_attendance ra ON ra.raid_id = r.id
+      WHERE r.start_date >= ${startDate} AND r.start_date < ${endDate}
+    `;
+  } catch (error) {
     console.error("Ошибка при получении рейдов:", error);
     throw new Error("Не удалось загрузить рейды");
   }
 
-  const raids = data as unknown as RaidWithRelations[];
+  // Группируем плоский результат join'а обратно по рейду.
+  const raidMap = new Map<
+    number,
+    { type: string; dkp_summary: number; attendance: { user_id: number; is_late: boolean }[] }
+  >();
+  for (const row of rows) {
+    let raid = raidMap.get(row.id);
+    if (!raid) {
+      raid = { type: row.type, dkp_summary: row.dkp_summary, attendance: [] };
+      raidMap.set(row.id, raid);
+    }
+    if (row.user_id !== null) raid.attendance.push({ user_id: row.user_id, is_late: row.is_late });
+  }
 
   // Праймы/АГЛ % — доля посещённых рейдов от общего числа рейдов этого типа
   // (с даты вступления, если она позже начала месяца).
@@ -75,9 +70,9 @@ export async function getUserMonthlyAttendance(
 
   let userDkp = 0;
 
-  for (const raid of raids) {
+  for (const raid of raidMap.values()) {
     const dkp = raid.dkp_summary ?? 0;
-    const attendance = raid.raid_attendance.find((a) => a.user_id === userId);
+    const attendance = raid.attendance.find((a) => a.user_id === userId);
     const earnedDkp = attendance ? (attendance.is_late ? dkp / 2 : dkp) : 0;
 
     const attendanceWeight = attendance ? (attendance.is_late ? 0.5 : 1) : 0;

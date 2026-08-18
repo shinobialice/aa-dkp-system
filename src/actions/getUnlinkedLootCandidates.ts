@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 import { getMoscowISOString } from "@/utils/getMoscowISOString";
 
 export const getUnlinkedLootCandidates = async ({
@@ -18,28 +18,29 @@ export const getUnlinkedLootCandidates = async ({
   const [y, m, d] = mskDay.split("-").map(Number);
   const nextDay = new Date(Date.UTC(y, m - 1, d + 1)).toISOString().slice(0, 10);
 
-  const { data, error } = await supabase
-    .from("loot")
-    .select(
-      `
-      id,
-      source,
-      acquired_at,
-      quantity,
-      status,
-      itemType: item_type ( id, name, price )
-    `,
-    )
-    .is("raid_id", null)
-    .eq("source", bossName)
-    .gte("acquired_at", `${mskDay}T00:00:00`)
-    .lt("acquired_at", `${nextDay}T00:00:00`)
-    .order("acquired_at", { ascending: false });
+  try {
+    const rows = await sql<any[]>`
+      SELECT
+        l.id, l.source, l.acquired_at, l.quantity, l.status,
+        it.id AS item_type_pk, it.name AS item_type_name, it.price AS item_type_price
+      FROM loot l
+      JOIN item_type it ON it.id = l.item_type_id
+      WHERE l.raid_id IS NULL
+        AND l.source = ${bossName}
+        AND l.acquired_at >= ${mskDay + "T00:00:00"}
+        AND l.acquired_at < ${nextDay + "T00:00:00"}
+      ORDER BY l.acquired_at DESC
+    `;
 
-  if (error || !data) {
+    return rows.map((row) => {
+      const { item_type_pk, item_type_name, item_type_price, ...loot } = row;
+      return {
+        ...loot,
+        itemType: { id: item_type_pk, name: item_type_name, price: item_type_price },
+      };
+    });
+  } catch (error) {
     console.error("Ошибка при поиске непривязанного лута:", error);
     return [];
   }
-
-  return data;
 };

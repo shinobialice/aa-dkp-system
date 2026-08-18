@@ -1,21 +1,20 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 import { computeMonthlyAttendanceForUsers } from "@/actions/getAllUsersActivityWithPercent";
 import { getCurrentMonthSalaries } from "@/actions/getCurrentMonthSalaries";
 import { getSalaryReasons } from "@/actions/getSalaryReasons";
 
 export async function getMembersTableData() {
-  const { data: users, error } = await supabase
-    .from("user")
-    .select(
-      "id, username, avatar_url, class, class_gear_score, joined_at, active, is_eligible_for_salary, probation_bypass",
-    )
-    .eq("active", true)
-    .order("joined_at", { ascending: true })
-    .order("is_eligible_for_salary", { ascending: false });
-
-  if (error || !users) {
+  let users;
+  try {
+    users = await sql<any[]>`
+      SELECT id, username, avatar_url, class, class_gear_score, joined_at, active, is_eligible_for_salary, probation_bypass
+      FROM "user"
+      WHERE active = true
+      ORDER BY joined_at ASC, is_eligible_for_salary DESC
+    `;
+  } catch (error) {
     console.error("Error loading users:", error);
     return null;
   }

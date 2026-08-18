@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 
 const MONTHS = [
   "Январь",
@@ -18,12 +18,14 @@ const MONTHS = [
 ];
 
 async function getMonthlyAttendance(year: number, type: string) {
-  const { data, error } = await supabase.rpc("get_monthly_attendance", {
-    p_year: year,
-    p_type: type,
-  });
-
-  if (error) throw new Error("Ошибка при загрузке посещаемости");
+  let data;
+  try {
+    data = await sql<any[]>`
+      SELECT * FROM get_monthly_attendance(${year}, ${type})
+    `;
+  } catch {
+    throw new Error("Ошибка при загрузке посещаемости");
+  }
 
   const percentByMonth = new Map<number, number>(
     (data ?? []).map((row: { month: number; percent: number }) => [

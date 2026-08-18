@@ -4,10 +4,10 @@ import { useEffect, useState, FC } from "react";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/shared/ui/button";
-import supabase from "@/shared/lib/supabase";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import { useMaintenanceWindows } from "@/hooks/useMaintenanceWindows";
 import { registerBossKill } from "@/actions/registerBossKill";
+import { getBossRespawnStatus } from "@/actions/getBossRespawnStatus";
 import { DateTimePopover } from "./DateTimePopover";
 import { PacksPopover } from "./PacksPopover";
 import {
@@ -119,13 +119,11 @@ const RespawnTracker: FC = () => {
   const user = useCurrentUser();
 
   useEffect(() => {
-    async function fetchRespawn() {
-      setLoading(true);
-      const { data } = await supabase
-        .from("boss_respawn")
-        .select("boss_name,last_kill,packs_needed,updated_at")
-        .in("boss_name", bosses);
-      if (data) {
+    let isMounted = true;
+    async function fetchRespawn(isInitial: boolean) {
+      if (isInitial) setLoading(true);
+      const data = await getBossRespawnStatus(bosses as unknown as string[]);
+      if (data && isMounted) {
         const loaded: Record<BossName, BossState> = { ...emptyStates };
         data.forEach(
           (row: {
@@ -143,38 +141,15 @@ const RespawnTracker: FC = () => {
         );
         setBossStates(loaded);
       }
-      setLoading(false);
+      if (isInitial) setLoading(false);
     }
-    fetchRespawn();
-  }, []);
-
-  useEffect(() => {
-    const channel = supabase
-      .channel("boss_respawn-changes")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "boss_respawn" },
-        (payload) => {
-          const row = payload.new as {
-            boss_name: BossName;
-            last_kill: string | null;
-            packs_needed: number | null;
-            updated_at: string | null;
-          };
-          if (!row?.boss_name) return;
-          setBossStates((prev) => ({
-            ...prev,
-            [row.boss_name]: {
-              lastKill: row.last_kill,
-              packsNeeded: row.packs_needed,
-              updatedAt: row.updated_at,
-            },
-          }));
-        },
-      )
-      .subscribe();
+    fetchRespawn(true);
+    // Поллинг вместо realtime-подписки (self-hosted Postgres без Supabase
+    // Realtime) — тихо обновляем состояние боссов раз в 15 секунд.
+    const interval = setInterval(() => fetchRespawn(false), 15_000);
     return () => {
-      supabase.removeChannel(channel);
+      isMounted = false;
+      clearInterval(interval);
     };
   }, []);
 

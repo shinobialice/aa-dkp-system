@@ -1,6 +1,6 @@
 "use server";
 import { cookies } from "next/headers";
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 import { hasTag } from "./hasTag";
 import { getSessionUserId } from "./getSessionUserId";
 import { getUserSelfEditSettings } from "./userSelfEditSettings";
@@ -15,13 +15,12 @@ const editUser = async (
   vkName: string,
   joined_at: Date | string | null,
 ) => {
-  const { data: existing } = await supabase
-    .from("user")
-    .select(
-      "username, class, class_gear_score, secondary_class, secondary_class_gear_score, vk_name, joined_at, active",
-    )
-    .eq("id", userId)
-    .maybeSingle();
+  const [existing] = await sql<any[]>`
+    SELECT username, class, class_gear_score, secondary_class,
+           secondary_class_gear_score, vk_name, joined_at, active
+    FROM "user"
+    WHERE id = ${userId}
+  `;
 
   if (!existing) {
     throw new Error("Игрок не найден");
@@ -71,36 +70,37 @@ const editUser = async (
     }
   }
 
-  const { data: user, error } = await supabase
-    .from("user")
-    .update({
-      username,
-      class: className,
-      class_gear_score: classGearScore,
-      secondary_class: secondaryClassName,
-      secondary_class_gear_score: secondaryClassGearScore,
-      vk_name: finalVkName,
-      joined_at: finalJoinedAt,
-    })
-    .eq("id", userId)
-    .select()
-    .maybeSingle();
-
-  if (error || !user) {
+  let user;
+  try {
+    [user] = await sql<any[]>`
+      UPDATE "user" SET
+        username = ${username},
+        class = ${className},
+        class_gear_score = ${classGearScore},
+        secondary_class = ${secondaryClassName},
+        secondary_class_gear_score = ${secondaryClassGearScore},
+        vk_name = ${finalVkName},
+        joined_at = ${finalJoinedAt}
+      WHERE id = ${userId}
+      RETURNING *
+    `;
+  } catch (error) {
     console.error("Failed to update user:", error);
     throw new Error("Ошибка при обновлении игрока");
   }
 
-  if (existing?.username && existing.username !== username) {
-    const { error: historyError } = await supabase
-      .from("user_username_history")
-      .insert({
-        user_id: userId,
-        old_username: existing.username,
-        new_username: username,
-      });
+  if (!user) {
+    console.error("Failed to update user: not found");
+    throw new Error("Ошибка при обновлении игрока");
+  }
 
-    if (historyError) {
+  if (existing?.username && existing.username !== username) {
+    try {
+      await sql<any[]>`
+        INSERT INTO user_username_history (user_id, old_username, new_username)
+        VALUES (${userId}, ${existing.username}, ${username})
+      `;
+    } catch (historyError) {
       console.error("Failed to log username change:", historyError);
     }
   }

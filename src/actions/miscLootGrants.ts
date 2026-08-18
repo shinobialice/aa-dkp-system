@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 import { revalidatePath } from "next/cache";
 
 export type MiscLootGrant = {
@@ -14,19 +14,20 @@ export async function addMiscLootGrant(
   userId: number,
   grant: { comment: string; amount: number | null; date: string },
 ): Promise<MiscLootGrant> {
-  const { data, error } = await supabase
-    .from("misc_loot_grants")
-    .insert({
-      user_id: userId,
-      comment: grant.comment,
-      amount: grant.amount,
-      date: new Date(grant.date).toISOString(),
-    })
-    .select("id, comment, amount, date")
-    .single();
-
-  if (error || !data) {
+  let data;
+  try {
+    [data] = await sql<any[]>`
+      INSERT INTO misc_loot_grants (user_id, comment, amount, date)
+      VALUES (${userId}, ${grant.comment}, ${grant.amount}, ${new Date(grant.date).toISOString()})
+      RETURNING id, comment, amount, date
+    `;
+  } catch (error) {
     console.error("Ошибка при добавлении записи в прочее:", error);
+    throw new Error("Не удалось добавить запись");
+  }
+
+  if (!data) {
+    console.error("Ошибка при добавлении записи в прочее: not returned");
     throw new Error("Не удалось добавить запись");
   }
 
@@ -41,12 +42,9 @@ export async function addMiscLootGrant(
 }
 
 export async function deleteMiscLootGrant(id: number) {
-  const { error } = await supabase
-    .from("misc_loot_grants")
-    .delete()
-    .eq("id", id);
-
-  if (error) {
+  try {
+    await sql<any[]>`DELETE FROM misc_loot_grants WHERE id = ${id}`;
+  } catch (error) {
     console.error("Ошибка при удалении записи из прочее:", error);
     throw new Error("Не удалось удалить запись");
   }

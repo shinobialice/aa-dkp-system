@@ -1,13 +1,6 @@
 "use server";
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 import { getMoscowTime } from "@/shared/config/fixedSchedule";
-import type { Database } from "@/types/supabase";
-
-type RaidRow = Database["public"]["Tables"]["raid"]["Row"];
-
-type RaidWithAttendance = RaidRow & {
-  raid_attendance: Array<{ user_id: number }>;
-};
 
 const MONTHLY_SKIP_ALLOWANCE = 7;
 
@@ -36,15 +29,15 @@ export async function getUserPrimeStreak(
   const nowNaive = toNaiveMoscowString(moscowNow);
   const currentMonthKey = nowNaive.slice(0, 7);
 
-  const { data, error } = await supabase
-    .from("raid")
-    .select("*, raid_attendance(user_id)")
-    .eq("type", "Прайм")
-    .lte("start_date", nowNaive)
-    .order("start_date", { ascending: false })
-    .limit(400);
-
-  if (error || !data) {
+  let raidRows;
+  try {
+    raidRows = await sql<any[]>`
+      SELECT id, start_date FROM raid
+      WHERE type = 'Прайм' AND start_date <= ${nowNaive}
+      ORDER BY start_date DESC
+      LIMIT 400
+    `;
+  } catch (error) {
     console.error("Ошибка при получении серии посещений Прайма:", error);
     return {
       streak: 0,
@@ -54,16 +47,25 @@ export async function getUserPrimeStreak(
     };
   }
 
-  const raids = data as unknown as RaidWithAttendance[];
+  const raidIds = raidRows.map((r) => r.id);
+  let attendanceRows: { raid_id: number; user_id: number }[] = [];
+  if (raidIds.length > 0) {
+    attendanceRows = await sql<any[]>`
+      SELECT raid_id, user_id FROM raid_attendance WHERE raid_id = ANY(${raidIds})
+    `;
+  }
+  const attendedRaidIds = new Set(
+    attendanceRows.filter((a) => a.user_id === userId).map((a) => a.raid_id),
+  );
 
   // Несколько Праймов в один день — не редкость (пересозданные рейды и
   // т.п.), но серия считается по дням, а не по количеству рейдов: день
   // засчитан, если пользователь был хотя бы на одном Прайме в этот день.
   const dayMap = new Map<string, boolean>();
-  for (const raid of raids) {
+  for (const raid of raidRows) {
     const day = (raid.start_date ?? "").slice(0, 10);
     if (!day) continue;
-    const attended = raid.raid_attendance.some((a) => a.user_id === userId);
+    const attended = attendedRaidIds.has(raid.id);
     dayMap.set(day, (dayMap.get(day) ?? false) || attended);
   }
 

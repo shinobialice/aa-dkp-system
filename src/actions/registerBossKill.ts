@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 import { scheduleRespawnNotification } from "@/shared/lib/qstash";
 import {
   BossName,
@@ -22,29 +22,27 @@ export async function registerBossKill(
 ): Promise<{ registered: boolean }> {
   const nextRespawn = getRespawnStart(killTimeIso, respawnHoursByBoss[boss]);
 
-  const { data: registered, error } = await supabase.rpc(
-    "register_boss_kill",
-    {
-      p_boss_name: boss,
-      p_kill_time: killTimeIso,
-      p_action: action,
-      p_user_id: userId,
-      p_next_respawn: nextRespawn.toISOString(),
-      p_cooldown_seconds: cooldownSeconds,
-      p_packs_needed: packsNeeded ?? null,
-    },
-  );
+  let registered = false;
+  try {
+    const [row] = await sql<any[]>`
+      SELECT register_boss_kill(
+        ${boss}, ${killTimeIso}, ${action}, ${userId}, ${nextRespawn.toISOString()},
+        ${cooldownSeconds}, ${packsNeeded ?? null}
+      ) AS registered
+    `;
+    registered = !!row?.registered;
+  } catch {
+    return { registered: false };
+  }
 
-  if (error || !registered) {
+  if (!registered) {
     return { registered: false };
   }
 
   try {
-    const { data: row } = await supabase
-      .from("boss_respawn")
-      .select("notify_message_id")
-      .eq("boss_name", boss)
-      .maybeSingle();
+    const [respawnRow] = await sql<any[]>`
+      SELECT notify_message_id FROM boss_respawn WHERE boss_name = ${boss}
+    `;
 
     const vkSettings = await getVkNotificationSettings();
     const maintenanceWindows = await getMaintenanceWindows();
@@ -60,13 +58,12 @@ export async function registerBossKill(
     const messageId = await scheduleRespawnNotification(
       boss,
       notifyAt,
-      row?.notify_message_id ?? null,
+      respawnRow?.notify_message_id ?? null,
     );
 
-    await supabase
-      .from("boss_respawn")
-      .update({ notify_message_id: messageId })
-      .eq("boss_name", boss);
+    await sql<any[]>`
+      UPDATE boss_respawn SET notify_message_id = ${messageId} WHERE boss_name = ${boss}
+    `;
   } catch (notifyError) {
     console.error("Не удалось запланировать VK-уведомление:", notifyError);
   }

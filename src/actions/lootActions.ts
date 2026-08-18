@@ -1,42 +1,42 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 import { triggerFinanceRecalc } from "./recalculateFinanceForMonth";
 
 // Get list of item types
 export const getItemTypes = async () => {
-  const { data, error } = await supabase.from("item_type").select("id, name");
-
-  if (error || !data) {
+  try {
+    return await sql<any[]>`SELECT id, name FROM item_type`;
+  } catch (error) {
     console.error("Ошибка при получении типов предметов:", error);
     throw new Error("Не удалось загрузить типы предметов");
   }
-
-  return data;
 };
 
 // Get loot list with itemType
 export async function getLoot() {
-  const { data, error } = await supabase
-    .from("loot")
-    .select(
-      `
-      *,
-      itemType: item_type (
-        id,
-        name,
-        price
-      )
-    `,
-    )
-    .order("acquired_at", { ascending: true });
-
-  if (error) {
+  let rows;
+  try {
+    rows = await sql<any[]>`
+      SELECT
+        l.*,
+        it.id AS item_type_pk, it.name AS item_type_name, it.price AS item_type_price
+      FROM loot l
+      JOIN item_type it ON it.id = l.item_type_id
+      ORDER BY l.acquired_at ASC
+    `;
+  } catch (error) {
     console.error("Ошибка при загрузке лута:", error);
     return [];
   }
 
-  return data;
+  return rows.map((row) => {
+    const { item_type_pk, item_type_name, item_type_price, ...loot } = row;
+    return {
+      ...loot,
+      itemType: { id: item_type_pk, name: item_type_name, price: item_type_price },
+    };
+  });
 }
 
 // Add loot item
@@ -57,20 +57,15 @@ export const addLootItem = async ({
   sold_at?: string;
   raidId?: number | null;
 }) => {
-  const { error } = await supabase.from("loot").insert([
-    {
-      item_type_id: itemTypeId,
-      status: status ?? "В наличии",
-      sold_at: sold_at ?? null,
-      source,
-      acquired_at: new Date(acquired_at).toISOString(),
-      quantity: quantity ?? 1,
-      created_at: new Date().toISOString(),
-      raid_id: raidId ?? null,
-    },
-  ]);
-
-  if (error) {
+  try {
+    await sql<any[]>`
+      INSERT INTO loot (item_type_id, status, sold_at, source, acquired_at, quantity, created_at, raid_id)
+      VALUES (
+        ${itemTypeId}, ${status ?? "В наличии"}, ${sold_at ?? null}, ${source ?? null},
+        ${new Date(acquired_at).toISOString()}, ${quantity ?? 1}, now(), ${raidId ?? null}
+      )
+    `;
+  } catch (error) {
     console.error("Ошибка при добавлении лута:", error);
     throw new Error("Не удалось добавить предмет");
   }

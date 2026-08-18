@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import supabase from "@/shared/lib/supabase";
+import { getBossRespawnHistoryPage } from "@/actions/getBossRespawnHistoryPage";
 import { getUsernamesByIds } from "@/actions/getUsernamesByIds";
 import {
   Pagination,
@@ -38,17 +38,11 @@ export default function BossRespawnHistory() {
     let isMounted = true;
     async function fetchHistory() {
       setLoading(true);
-      const { count } = await supabase
-        .from("boss_respawn_history")
-        .select("id", { count: "exact", head: true });
-      if (isMounted && typeof count === "number") setTotal(count);
-      const { data } = await supabase
-        .from("boss_respawn_history")
-        .select(
-          "id,boss_name,action,kill_time,prev_kill_time,next_respawn,user_id,created_at,packs_needed",
-        )
-        .order("id", { ascending: false })
-        .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
+      const { rows: data, total: count } = await getBossRespawnHistoryPage(
+        page,
+        PAGE_SIZE,
+      );
+      if (isMounted) setTotal(count);
       let userMap: Record<number, string> = {};
       if (data && data.length > 0) {
         const userIds = Array.from(
@@ -67,33 +61,12 @@ export default function BossRespawnHistory() {
       setLoading(false);
     }
     fetchHistory();
+    // Поллинг вместо realtime-подписки (self-hosted Postgres без Supabase
+    // Realtime) — обновляем список раз в 20 секунд.
+    const interval = setInterval(fetchHistory, 20_000);
     return () => {
       isMounted = false;
-    };
-  }, [page]);
-
-  useEffect(() => {
-    const channel = supabase
-      .channel("boss_respawn_history-changes")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "boss_respawn_history" },
-        async (payload) => {
-          const row = payload.new as Omit<HistoryRow, "username">;
-          setTotal((t) => t + 1);
-          if (page !== 1) return;
-          const userMap = await getUsernamesByIds([row.user_id]);
-          setRows((prev) =>
-            [
-              { ...row, username: userMap[row.user_id] || "?" },
-              ...prev,
-            ].slice(0, PAGE_SIZE),
-          );
-        },
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
+      clearInterval(interval);
     };
   }, [page]);
 

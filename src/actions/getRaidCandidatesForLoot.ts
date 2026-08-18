@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 import { parseMoscowISOString } from "@/utils/getMoscowISOString";
 
 export const getRaidCandidatesForLoot = async ({
@@ -20,38 +20,45 @@ export const getRaidCandidatesForLoot = async ({
   const [y, m, d] = day.split("-").map(Number);
   const nextDay = new Date(Date.UTC(y, m - 1, d + 1)).toISOString().slice(0, 10);
 
-  const { data, error } = await supabase
-    .from("raid")
-    .select("id, type, start_date, raid_boss(boss(boss_name))")
-    .gte("start_date", `${day}T00:00:00`)
-    .lt("start_date", `${nextDay}T00:00:00`)
-    .order("start_date", { ascending: false });
-
-  if (error || !data) {
+  let rows;
+  try {
+    rows = await sql<any[]>`
+      SELECT r.id, r.type, r.start_date, b.boss_name
+      FROM raid r
+      LEFT JOIN raid_boss rb ON rb.raid_id = r.id
+      LEFT JOIN boss b ON b.id = rb.boss_id
+      WHERE r.start_date >= ${day + "T00:00:00"} AND r.start_date < ${nextDay + "T00:00:00"}
+      ORDER BY r.start_date DESC
+    `;
+  } catch (error) {
     console.error("Ошибка при поиске рейдов для привязки лута:", error);
     return [];
+  }
+
+  const raidMap = new Map<
+    number,
+    { id: number; type: string; start_date: string; bossNames: string[] }
+  >();
+  for (const row of rows) {
+    let raid = raidMap.get(row.id);
+    if (!raid) {
+      raid = { id: row.id, type: row.type, start_date: row.start_date, bossNames: [] };
+      raidMap.set(row.id, raid);
+    }
+    if (row.boss_name) raid.bossNames.push(row.boss_name);
   }
 
   const normalizedSource = (source ?? "").trim().toLowerCase();
   const centerTime = centerDate.getTime();
 
-  return data
-    .map((raid: any) => {
-      const bossNames = (raid.raid_boss ?? [])
-        .map((rb: any) => rb.boss?.boss_name)
-        .filter(Boolean);
+  return Array.from(raidMap.values())
+    .map((raid) => {
       const matchesBoss =
         normalizedSource.length > 0 &&
-        bossNames.some(
-          (name: string) => name.trim().toLowerCase() === normalizedSource,
+        raid.bossNames.some(
+          (name) => name.trim().toLowerCase() === normalizedSource,
         );
-      return {
-        id: raid.id,
-        type: raid.type,
-        start_date: raid.start_date,
-        bossNames,
-        matchesBoss,
-      };
+      return { ...raid, matchesBoss };
     })
     .sort((a, b) => {
       if (a.matchesBoss !== b.matchesBoss) return a.matchesBoss ? -1 : 1;

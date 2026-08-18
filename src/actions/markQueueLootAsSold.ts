@@ -1,14 +1,11 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 
 export const markQueueLootAsSold = async (lootQueueId: number) => {
-  const { error } = await supabase
-    .from("loot_queue")
-    .delete()
-    .eq("id", lootQueueId);
-
-  if (error) {
+  try {
+    await sql<any[]>`DELETE FROM loot_queue WHERE id = ${lootQueueId}`;
+  } catch (error) {
     console.error("Ошибка при удалении из очереди:", error);
     throw new Error("Не удалось удалить запись из очереди");
   }

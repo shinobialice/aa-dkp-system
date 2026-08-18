@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 import ensurePrivilieges from "./ensurePrivilieges";
 import { revalidatePath } from "next/cache";
 import { triggerFinanceRecalcForCurrentMonth } from "./recalculateFinanceForMonth";
@@ -26,13 +26,12 @@ const DEFAULT_SETTINGS: SalaryEligibilitySettings = {
 };
 
 export async function getSalaryEligibilitySettings(): Promise<SalaryEligibilitySettings> {
-  const { data, error } = await supabase
-    .from("salary_eligibility_settings")
-    .select("*")
-    .eq("id", 1)
-    .maybeSingle();
-
-  if (error) {
+  let data;
+  try {
+    [data] = await sql<any[]>`
+      SELECT * FROM salary_eligibility_settings WHERE id = 1
+    `;
+  } catch (error) {
     console.error("Ошибка при получении критериев допуска к ЗП:", error);
     throw new Error("Не удалось загрузить критерии допуска к зарплате");
   }
@@ -54,18 +53,25 @@ export async function updateSalaryEligibilitySettings(
 ) {
   await ensurePrivilieges(["Администратор"]);
 
-  const { error } = await supabase.from("salary_eligibility_settings").upsert({
-    id: 1,
-    prime_enabled: settings.primeEnabled,
-    prime_threshold_percent: settings.primeThresholdPercent,
-    points_enabled: settings.pointsEnabled,
-    points_threshold_percent: settings.pointsThresholdPercent,
-    dv_bypass_enabled: settings.dvBypassEnabled,
-    gs_enabled: settings.gsEnabled,
-    updated_at: new Date().toISOString(),
-  });
-
-  if (error) {
+  try {
+    await sql<any[]>`
+      INSERT INTO salary_eligibility_settings
+        (id, prime_enabled, prime_threshold_percent, points_enabled,
+         points_threshold_percent, dv_bypass_enabled, gs_enabled, updated_at)
+      VALUES (
+        1, ${settings.primeEnabled}, ${settings.primeThresholdPercent}, ${settings.pointsEnabled},
+        ${settings.pointsThresholdPercent}, ${settings.dvBypassEnabled}, ${settings.gsEnabled}, now()
+      )
+      ON CONFLICT (id) DO UPDATE SET
+        prime_enabled = EXCLUDED.prime_enabled,
+        prime_threshold_percent = EXCLUDED.prime_threshold_percent,
+        points_enabled = EXCLUDED.points_enabled,
+        points_threshold_percent = EXCLUDED.points_threshold_percent,
+        dv_bypass_enabled = EXCLUDED.dv_bypass_enabled,
+        gs_enabled = EXCLUDED.gs_enabled,
+        updated_at = EXCLUDED.updated_at
+    `;
+  } catch (error) {
     console.error("Ошибка при сохранении критериев допуска к ЗП:", error);
     throw new Error("Не удалось сохранить критерии допуска к зарплате");
   }

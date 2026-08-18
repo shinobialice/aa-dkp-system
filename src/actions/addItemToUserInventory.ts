@@ -1,5 +1,5 @@
 "use server";
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 import ensureCanEditUserData from "./ensureCanEditUserData";
 
 const addItemToUserInventory = async (
@@ -10,26 +10,17 @@ const addItemToUserInventory = async (
 ) => {
   await ensureCanEditUserData(userId, "inventoryEditEnabled");
 
-  const { data, error } = await supabase
-    .from("user_inventory")
-    .insert([
-      {
-        user_id: userId,
-        name,
-        type,
-        quality,
-        created_at: new Date().toISOString(),
-      },
-    ])
-    .select()
-    .maybeSingle();
-
-  if (error) {
+  try {
+    const [data] = await sql<any[]>`
+      INSERT INTO user_inventory (user_id, name, type, quality, created_at)
+      VALUES (${userId}, ${name}, ${type}, ${quality}, now())
+      RETURNING *
+    `;
+    return data;
+  } catch (error) {
     console.error("Failed to insert inventory item:", error);
     throw new Error("Error inserting inventory item");
   }
-
-  return data;
 };
 
 export default addItemToUserInventory;

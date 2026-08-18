@@ -1,6 +1,6 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 
 export type InventoryStockStat = {
   label: string;
@@ -71,23 +71,19 @@ const ITEM_SOURCES: {
 ];
 
 export async function getInventoryStock(): Promise<InventoryStockStat[]> {
-  const { data: inventory, error: inventoryError } = await supabase
-    .from("user_inventory")
-    .select("name, type, quality, user_id");
-
-  if (inventoryError || !inventory) {
-    console.error("Ошибка при получении инвентаря гильдии:", inventoryError);
+  const inventory = await sql<any[]>`
+    SELECT name, type, quality, user_id FROM user_inventory
+  `.catch((error) => {
+    console.error("Ошибка при получении инвентаря гильдии:", error);
     throw new Error("Не удалось загрузить инвентарь гильдии");
-  }
+  });
 
-  const { data: users, error: usersError } = await supabase
-    .from("user")
-    .select("id, active");
-
-  if (usersError || !users) {
-    console.error("Ошибка при получении пользователей:", usersError);
+  const users = await sql<any[]>`
+    SELECT id, active FROM "user"
+  `.catch((error) => {
+    console.error("Ошибка при получении пользователей:", error);
     throw new Error("Не удалось загрузить пользователей");
-  }
+  });
 
   const activeUserIds = new Set(
     users.filter((u) => u.active).map((u) => u.id),

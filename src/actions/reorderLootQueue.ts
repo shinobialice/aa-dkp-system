@@ -1,11 +1,11 @@
 "use server";
 
-import supabase from "@/shared/lib/supabaseAdmin";
+import sql from "@/shared/lib/db";
 
 export const reorderLootQueue = async (orderedIds: number[]) => {
   await Promise.all(
     orderedIds.map((id, index) =>
-      supabase.from("loot_queue").update({ position: index }).eq("id", id),
+      sql<any[]>`UPDATE loot_queue SET position = ${index} WHERE id = ${id}`,
     ),
   );
 };
