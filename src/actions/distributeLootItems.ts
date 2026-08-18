@@ -43,69 +43,67 @@ export async function distributeLootItem({
     }
   }
 
-  await sql<any[]>`
-    UPDATE loot SET quantity = ${remainingQuantity}, status = ${newStatus} WHERE id = ${lootId}
-  `;
-
-  // 3. Insert new loot record for the distributed portion
+  // Шаги 2-3-5 оборачиваем в одну транзакцию: раньше это были отдельные
+  // запросы, и если INSERT записи о продаже падал (например, из-за
+  // рассинхрона serial-последовательности после миграции с Supabase — см.
+  // "duplicate key value violates unique constraint loot_pkey"), UPDATE
+  // остатка уже успевал закоммититься — предмет тихо исчезал из наличия
+  // без единой записи о том, что он вообще продан. Теперь при ошибке на
+  // любом шаге откатывается всё целиком.
   const soldAt = new Date().toISOString();
-  let created;
+  let created: any;
   try {
-    [created] = await sql<any[]>`
-      INSERT INTO loot
-        (item_type_id, source, acquired_at, quantity, sold_to, sold_to_user_id, sold_at, comment, status, price, created_at)
-      VALUES (
-        ${loot.item_type_id}, ${loot.source}, ${loot.acquired_at ?? soldAt}, ${quantity},
-        ${soldTo}, ${soldToId ?? null}, ${soldAt}, ${comment ?? null},
-        ${isFree ? "Выдано" : "Продано"}, ${isFree ? 0 : (price ?? loot.item_type_price ?? 0)}, now()
-      )
-      RETURNING *
-    `;
-  } catch (createError) {
-    console.error(createError);
-    throw new Error("Ошибка при создании новой записи лута");
-  }
+    await sql.begin(async (sql) => {
+      await sql<any[]>`
+        UPDATE loot SET quantity = ${remainingQuantity}, status = ${newStatus} WHERE id = ${lootId}
+      `;
 
-  if (!created) {
+      // 3. Insert new loot record for the distributed portion
+      [created] = await sql<any[]>`
+        INSERT INTO loot
+          (item_type_id, source, acquired_at, quantity, sold_to, sold_to_user_id, sold_at, comment, status, price, created_at)
+        VALUES (
+          ${loot.item_type_id}, ${loot.source}, ${loot.acquired_at ?? soldAt}, ${quantity},
+          ${soldTo}, ${soldToId ?? null}, ${soldAt}, ${comment ?? null},
+          ${isFree ? "Выдано" : "Продано"}, ${isFree ? 0 : (price ?? loot.item_type_price ?? 0)}, now()
+        )
+        RETURNING *
+      `;
+
+      if (!created) {
+        throw new Error("Ошибка при создании новой записи лута");
+      }
+
+      // 5. Add to user inventory if applicable
+      if (soldToId) {
+        let skipInsert = false;
+
+        if (isFree) {
+          const existingInventory = await sql<any[]>`
+            SELECT id FROM user_inventory
+            WHERE user_id = ${soldToId} AND name = ${loot.item_type_name}
+            LIMIT 1
+          `;
+
+          skipInsert = (existingInventory?.length ?? 0) > 0;
+        }
+
+        if (!skipInsert) {
+          await sql<any[]>`
+            INSERT INTO user_inventory (user_id, name, type, created_at, quantity, loot_id)
+            VALUES (${soldToId}, ${loot.item_type_name}, ${isFree ? "Выдано" : "Куплено"}, now(), ${quantity}, ${created.id})
+          `;
+        }
+      }
+    });
+  } catch (txError) {
+    console.error(txError);
     throw new Error("Ошибка при создании новой записи лута");
   }
 
   if (!isFree) {
     const soldAtDate = new Date(soldAt);
     await triggerFinanceRecalc(soldAtDate.getMonth() + 1, soldAtDate.getFullYear());
-  }
-
-  // 5. Add to user inventory if applicable
-  if (soldToId) {
-    let skipInsert = false;
-
-    if (isFree) {
-      let existingInventory;
-      try {
-        existingInventory = await sql<any[]>`
-          SELECT id FROM user_inventory
-          WHERE user_id = ${soldToId} AND name = ${loot.item_type_name}
-          LIMIT 1
-        `;
-      } catch (inventoryFindError) {
-        console.error(inventoryFindError);
-        throw new Error("Не удалось проверить инвентарь");
-      }
-
-      skipInsert = (existingInventory?.length ?? 0) > 0;
-    }
-
-    if (!skipInsert) {
-      try {
-        await sql<any[]>`
-          INSERT INTO user_inventory (user_id, name, type, created_at, quantity, loot_id)
-          VALUES (${soldToId}, ${loot.item_type_name}, ${isFree ? "Выдано" : "Куплено"}, now(), ${quantity}, ${created.id})
-        `;
-      } catch (inventoryError) {
-        console.error(inventoryError);
-        throw new Error("Ошибка при добавлении предмета в инвентарь");
-      }
-    }
   }
 }
 
