@@ -39,12 +39,26 @@ const KEEP_AS_STRING = {
   parse: (x: string) => toIsoLike(x),
 };
 
+// postgres.js по умолчанию парсит числами только int2/int4/oid/float4/float8 —
+// NUMERIC/DECIMAL (oid 1700, напр. проценты в Salary: aglPercent, weightPercent
+// и т.п.) остаётся "сырой" строкой, чтобы не терять точность у произвольно
+// больших чисел. supabase-js/PostgREST раньше отдавал их как JSON-числа, и весь
+// UI (.toFixed() и арифметика) ожидает именно number — приводим numeric к
+// JS number, как было раньше.
+const NUMERIC_AS_NUMBER = {
+  to: 1700,
+  from: [1700],
+  serialize: (x: unknown) => String(x),
+  parse: (x: string) => Number(x),
+};
+
 const sql =
   global.__sql ??
   postgres(process.env.DATABASE_URL!, {
     max: 10,
     types: {
       date: KEEP_AS_STRING,
+      numeric: NUMERIC_AS_NUMBER,
     },
   });
 
