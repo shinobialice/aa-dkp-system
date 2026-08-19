@@ -117,6 +117,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(new URL("/login-error", baseUrl));
   }
 
+  if (!existingUser.active) {
+    return NextResponse.redirect(
+      new URL("/login-error?reason=inactive", baseUrl),
+    );
+  }
+
   await sql<any[]>`
     UPDATE "user" SET session_token = ${sessionToken} WHERE id = ${existingUser.id}
   `;

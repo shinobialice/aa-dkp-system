@@ -25,6 +25,35 @@ function LoginErrorMessage() {
   );
 }
 
+function LoginErrorMedia() {
+  const reason = useSearchParams().get("reason");
+
+  if (reason === "inactive") {
+    return (
+      <Image
+        src="/images/EYOapvrWoAAC2a0.jpg"
+        alt="Access Denied"
+        width={863}
+        height={391}
+        className="rounded-lg w-full h-auto"
+      />
+    );
+  }
+
+  return (
+    <iframe
+      width="100%"
+      height="315"
+      src="https://www.youtube.com/embed/48AieXPNnZc?autoplay=1&mute=1"
+      title="Access Denied"
+      frameBorder="0"
+      allow="autoplay; encrypted-media"
+      allowFullScreen
+      className="rounded-lg"
+    />
+  );
+}
+
 export default function LoginErrorPage() {
   return (
     <div className="max-w-md mx-auto mt-20 p-6 text-center">
@@ -33,13 +62,9 @@ export default function LoginErrorPage() {
       </Suspense>
 
       <div className="mb-6 mt-6">
-        <Image
-          src="/images/EYOapvrWoAAC2a0.jpg"
-          alt="Access Denied"
-          width={863}
-          height={391}
-          className="rounded-lg w-full h-auto"
-        />
+        <Suspense fallback={null}>
+          <LoginErrorMedia />
+        </Suspense>
       </div>
     </div>
   );
