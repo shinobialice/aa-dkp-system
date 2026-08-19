@@ -144,56 +144,52 @@ export async function updateLootSale({
   const newStatus = isFree ? "Выдано" : "Продано";
   const newPrice = isFree ? 0 : (price ?? loot.item_type_price ?? 0);
 
+  // Как и в distributeLootItem — правка записи и синхронизация инвентаря
+  // раньше были отдельными запросами; при падении любого из них загруженная
+  // цена/покупатель на loot могли разойтись с user_inventory. Оборачиваем в
+  // транзакцию, чтобы падение любого шага откатывало всё целиком.
   try {
-    await sql<any[]>`
-      UPDATE loot SET
-        quantity = ${quantity},
-        sold_to = ${soldTo},
-        sold_to_user_id = ${soldToId ?? null},
-        comment = ${comment ?? null},
-        status = ${newStatus},
-        price = ${newPrice}
-      WHERE id = ${lootId}
-    `;
-  } catch (updateError) {
-    console.error(updateError);
+    await sql.begin(async (sql) => {
+      await sql<any[]>`
+        UPDATE loot SET
+          quantity = ${quantity},
+          sold_to = ${soldTo},
+          sold_to_user_id = ${soldToId ?? null},
+          comment = ${comment ?? null},
+          status = ${newStatus},
+          price = ${newPrice}
+        WHERE id = ${lootId}
+      `;
+
+      const [existingInventory] = await sql<any[]>`
+        SELECT id FROM user_inventory WHERE loot_id = ${lootId}
+      `;
+
+      if (soldToId) {
+        if (existingInventory) {
+          await sql<any[]>`
+            UPDATE user_inventory SET
+              user_id = ${soldToId},
+              name = ${loot.item_type_name},
+              type = ${isFree ? "Выдано" : "Куплено"},
+              quantity = ${quantity}
+            WHERE id = ${existingInventory.id}
+          `;
+        } else {
+          await sql<any[]>`
+            INSERT INTO user_inventory (user_id, name, type, created_at, quantity, loot_id)
+            VALUES (${soldToId}, ${loot.item_type_name}, ${isFree ? "Выдано" : "Куплено"}, now(), ${quantity}, ${lootId})
+          `;
+        }
+      } else if (existingInventory) {
+        // Покупателя сменили на произвольный текст без привязки к аккаунту —
+        // запись в инвентаре аккаунта больше не актуальна
+        await sql<any[]>`DELETE FROM user_inventory WHERE id = ${existingInventory.id}`;
+      }
+    });
+  } catch (txError) {
+    console.error(txError);
     throw new Error("Ошибка при обновлении записи о продаже");
-  }
-
-  const [existingInventory] = await sql<any[]>`
-    SELECT id FROM user_inventory WHERE loot_id = ${lootId}
-  `;
-
-  if (soldToId) {
-    if (existingInventory) {
-      try {
-        await sql<any[]>`
-          UPDATE user_inventory SET
-            user_id = ${soldToId},
-            name = ${loot.item_type_name},
-            type = ${isFree ? "Выдано" : "Куплено"},
-            quantity = ${quantity}
-          WHERE id = ${existingInventory.id}
-        `;
-      } catch (inventoryUpdateError) {
-        console.error(inventoryUpdateError);
-        throw new Error("Ошибка при обновлении инвентаря");
-      }
-    } else {
-      try {
-        await sql<any[]>`
-          INSERT INTO user_inventory (user_id, name, type, created_at, quantity, loot_id)
-          VALUES (${soldToId}, ${loot.item_type_name}, ${isFree ? "Выдано" : "Куплено"}, now(), ${quantity}, ${lootId})
-        `;
-      } catch (inventoryInsertError) {
-        console.error(inventoryInsertError);
-        throw new Error("Ошибка при добавлении предмета в инвентарь");
-      }
-    }
-  } else if (existingInventory) {
-    // Покупателя сменили на произвольный текст без привязки к аккаунту —
-    // запись в инвентаре аккаунта больше не актуальна
-    await sql<any[]>`DELETE FROM user_inventory WHERE id = ${existingInventory.id}`;
   }
 
   // Цена/статус (платно↔бесплатно) могли измениться в любую сторону —
