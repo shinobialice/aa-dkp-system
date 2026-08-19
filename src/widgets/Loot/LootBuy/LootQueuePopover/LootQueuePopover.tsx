@@ -22,9 +22,10 @@ import { markQueueLootAsSold } from "@/actions/markQueueLootAsSold";
 import { removeFromLootQueue } from "@/actions/removeFromLootQueue";
 import { reorderLootQueue } from "@/actions/reorderLootQueue";
 import { updateLootQueueEntry } from "@/actions/updateLootQueueEntry";
+import { ROLL_BASED_QUEUE_ITEMS } from "@/utils/rollBasedQueueItems";
 
 const extendedItems = ["Эссенция ярости", "Трофейная эссенция стихий"];
-const rollItems = ["Аметистовая гравировка северной звезды"];
+const rollItems = ROLL_BASED_QUEUE_ITEMS;
 
 type Props = {
   itemName: string;
@@ -97,11 +98,17 @@ export function LootQueuePopover({
   };
 
   const handleRollAll = async () => {
+    const pool = Array.from({ length: 101 }, (_, i) => i);
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+
     await Promise.all(
-      queue.map((entry) =>
+      queue.map((entry, i) =>
         updateLootQueueEntry({
           id: entry.id,
-          roll: Math.floor(Math.random() * 101),
+          roll: pool[i],
         }),
       ),
     );

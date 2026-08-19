@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 import { Button } from "@/shared/ui";
 import {
   Card,
@@ -190,33 +190,7 @@ export function UserActivityChart({ userId }: { userId: number }) {
           config={chartConfig}
           className="aspect-auto h-[250px] w-full"
         >
-          <AreaChart data={filteredData}>
-            <defs>
-              <linearGradient id="fillпраймы" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-праймы)"
-                  stopOpacity={0.8}
-                />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-праймы)"
-                  stopOpacity={0.1}
-                />
-              </linearGradient>
-              <linearGradient id="fillагл" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-агл)"
-                  stopOpacity={0.8}
-                />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-агл)"
-                  stopOpacity={0.1}
-                />
-              </linearGradient>
-            </defs>
+          <BarChart data={filteredData}>
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey={selectedMonth === null ? "month" : "date"}
@@ -254,25 +228,13 @@ export function UserActivityChart({ userId }: { userId: number }) {
             />
 
             {types.includes("агл") && (
-              <Area
-                dataKey="агл"
-                type="natural"
-                fill="url(#fillагл)"
-                stroke="var(--color-агл)"
-                stackId="a"
-              />
+              <Bar dataKey="агл" fill="var(--color-агл)" radius={4} />
             )}
             {types.includes("праймы") && (
-              <Area
-                dataKey="праймы"
-                type="natural"
-                fill="url(#fillпраймы)"
-                stroke="var(--color-праймы)"
-                stackId="a"
-              />
+              <Bar dataKey="праймы" fill="var(--color-праймы)" radius={4} />
             )}
             <ChartLegend content={<ChartLegendContent />} />
-          </AreaChart>
+          </BarChart>
         </ChartContainer>
       </CardContent>
     </Card>

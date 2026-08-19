@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import InventoryLogTable from "./InventoryLogTable";
 import UserExpensesTable from "./UserExpensesTable";
+import LootQueueTable from "./LootQueueTable";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/ui";
 import {
@@ -11,6 +12,10 @@ import {
 } from "@/actions/getUserPurchaseLog";
 import { getExpensesBySource } from "@/actions/expenseActions";
 import type { ExpenseItem } from "@/widgets/Loot/GuildLoot/ExpensesTypes";
+import {
+  getUserLootQueue,
+  type UserLootQueueEntry,
+} from "@/actions/getUserLootQueue";
 
 export default function PurchasesAndGiveaways({
   userId,
@@ -21,6 +26,7 @@ export default function PurchasesAndGiveaways({
 }) {
   const [items, setItems] = useState<InventoryLogEntry[]>([]);
   const [expenses, setExpenses] = useState<ExpenseItem[]>([]);
+  const [queue, setQueue] = useState<UserLootQueueEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,10 +34,12 @@ export default function PurchasesAndGiveaways({
     Promise.all([
       getUserPurchaseLog(userId),
       username ? getExpensesBySource(username) : Promise.resolve([]),
+      getUserLootQueue(userId),
     ])
-      .then(([log, exp]) => {
+      .then(([log, exp, lootQueue]) => {
         setItems(log);
         setExpenses(exp);
+        setQueue(lootQueue);
       })
       .finally(() => setLoading(false));
   }, [userId, username]);
@@ -61,6 +69,9 @@ export default function PurchasesAndGiveaways({
               <TabsTrigger className="cursor-pointer" value="expenses">
                 Расходы
               </TabsTrigger>
+              <TabsTrigger className="cursor-pointer" value="queue">
+                Очередь
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="purchased">
@@ -73,6 +84,10 @@ export default function PurchasesAndGiveaways({
 
             <TabsContent value="expenses">
               <UserExpensesTable expenses={expenses} />
+            </TabsContent>
+
+            <TabsContent value="queue">
+              <LootQueueTable items={queue} />
             </TabsContent>
           </Tabs>
         )}
