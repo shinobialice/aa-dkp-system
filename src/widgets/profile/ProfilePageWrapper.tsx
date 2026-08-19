@@ -21,6 +21,7 @@ export default function ProfilePageWrapper({
   canEditGs,
   canEditAdminFields,
   canEditInventory,
+  canEditSeals,
   isOwnProfile,
 }: {
   user: any;
@@ -51,6 +52,7 @@ export default function ProfilePageWrapper({
   canEditGs: boolean;
   canEditAdminFields: boolean;
   canEditInventory: boolean;
+  canEditSeals: boolean;
   isOwnProfile: boolean;
 }) {
   const [user, setUser] = useState(initialUser);
@@ -89,6 +91,7 @@ export default function ProfilePageWrapper({
         averageGuildGS={averageGuildGS}
         isAdmin={isAdmin}
         canEditInventory={canEditInventory}
+        canEditSeals={canEditSeals}
       />
     </div>
   );

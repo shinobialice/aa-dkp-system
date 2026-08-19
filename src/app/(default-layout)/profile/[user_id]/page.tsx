@@ -67,6 +67,8 @@ export default async function Page(p: {
   const canEditInventory =
     isPrivilegedEditor ||
     (canSelfEdit && selfEditSettings.inventoryEditEnabled);
+  const canEditSeals =
+    isPrivilegedEditor || (canSelfEdit && selfEditSettings.sealsEditEnabled);
   const canEditProfile = canEditNickname || canEditGs;
 
   return (
@@ -77,6 +79,7 @@ export default async function Page(p: {
       canEditGs={canEditGs}
       canEditAdminFields={isPrivilegedEditor}
       canEditInventory={canEditInventory}
+      canEditSeals={canEditSeals}
       isOwnProfile={isOwnProfile}
       user={user}
       tags={tags}

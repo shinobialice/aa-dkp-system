@@ -74,6 +74,16 @@ export function UserSelfEditSettingsForm() {
         />
       </div>
 
+      <div className="flex items-center justify-between gap-4 border rounded-lg p-3">
+        <Label>Печати</Label>
+        <Switch
+          checked={settings.sealsEditEnabled}
+          onCheckedChange={(v) =>
+            setSettings({ ...settings, sealsEditEnabled: v })
+          }
+        />
+      </div>
+
       <Button
         onClick={handleSave}
         disabled={saving}

@@ -5,7 +5,10 @@ import { toast } from "sonner";
 import { Button, Label } from "@/shared/ui";
 import { X, Clock } from "lucide-react";
 import useCurrentUser from "@/hooks/useCurrentUser";
-import { getTodayRecurringMaintenanceWindow } from "@/shared/config/bossRespawn";
+import {
+  getTodayRecurringMaintenanceWindow,
+  getNextRecurringMaintenanceWindow,
+} from "@/shared/config/bossRespawn";
 import {
   getMaintenanceWindows,
   addMaintenanceWindow,
@@ -36,6 +39,15 @@ function formatMoscowTime(date: Date): string {
   });
 }
 
+function formatMoscowWeekdayDate(date: Date): string {
+  return date.toLocaleString("ru-RU", {
+    timeZone: "Europe/Moscow",
+    weekday: "long",
+    day: "2-digit",
+    month: "2-digit",
+  });
+}
+
 function ExtendButton({
   onPick,
 }: {
@@ -62,6 +74,7 @@ export function MaintenanceWindowsForm() {
   const [saving, setSaving] = useState(false);
 
   const regularWindow = getTodayRecurringMaintenanceWindow();
+  const nextRegularWindow = getNextRecurringMaintenanceWindow();
 
   function reload() {
     getMaintenanceWindows().then(setWindows);
@@ -111,10 +124,10 @@ export function MaintenanceWindowsForm() {
   }
 
   async function handleExtendRegular(newEnd: Date) {
-    if (!user || !regularWindow) return;
+    if (!user || !nextRegularWindow) return;
     try {
       await addMaintenanceWindow(
-        regularWindow.end.toISOString(),
+        nextRegularWindow.end.toISOString(),
         newEnd.toISOString(),
         user.id,
       );
@@ -136,11 +149,23 @@ export function MaintenanceWindowsForm() {
         </p>
       </div>
 
-      {regularWindow && (
+      {nextRegularWindow && (
         <div className="flex items-center justify-between gap-2 border rounded-lg p-3 text-sm">
           <span>
-            Плановые работы сегодня: {formatMoscowTime(regularWindow.start)}–
-            {formatMoscowTime(regularWindow.end)} (МСК)
+            {regularWindow ? (
+              <>
+                Плановые работы сегодня:{" "}
+                {formatMoscowTime(nextRegularWindow.start)}–
+                {formatMoscowTime(nextRegularWindow.end)} (МСК)
+              </>
+            ) : (
+              <>
+                Ближайшие плановые работы:{" "}
+                {formatMoscowWeekdayDate(nextRegularWindow.start)},{" "}
+                {formatMoscowTime(nextRegularWindow.start)}–
+                {formatMoscowTime(nextRegularWindow.end)} (МСК)
+              </>
+            )}
           </span>
           <ExtendButton onPick={handleExtendRegular} />
         </div>

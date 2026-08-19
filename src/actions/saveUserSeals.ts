@@ -1,6 +1,6 @@
 "use server";
 import sql from "@/shared/lib/db";
-import ensurePrivilieges from "./ensurePrivilieges";
+import ensureCanEditUserData from "./ensureCanEditUserData";
 import getUserSeals, { UserSeal } from "./getUserSeals";
 import {
   MAX_USER_SEALS,
@@ -11,12 +11,13 @@ import {
 export type SealInput = { sealName: string; grade: number };
 
 // Полностью заменяет набор печатей игрока (не более MAX_USER_SEALS штук).
-// Доступно только администраторам — проверяется на сервере, а не только в UI.
+// Администраторам/Секретуткам — всегда, самому игроку — только если включен
+// тумблер "Печати" в Настройках (проверяется на сервере, а не только в UI).
 const saveUserSeals = async (
   userId: number,
   seals: SealInput[],
 ): Promise<UserSeal[]> => {
-  await ensurePrivilieges(["Администратор"]);
+  await ensureCanEditUserData(userId, "sealsEditEnabled");
 
   if (seals.length > MAX_USER_SEALS) {
     throw new Error(`Нельзя выбрать больше ${MAX_USER_SEALS} печатей`);

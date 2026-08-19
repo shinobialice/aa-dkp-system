@@ -8,12 +8,14 @@ export type UserSelfEditSettings = {
   nicknameEditEnabled: boolean;
   gsEditEnabled: boolean;
   inventoryEditEnabled: boolean;
+  sealsEditEnabled: boolean;
 };
 
 const DEFAULT_SETTINGS: UserSelfEditSettings = {
   nicknameEditEnabled: false,
   gsEditEnabled: false,
   inventoryEditEnabled: false,
+  sealsEditEnabled: false,
 };
 
 export async function getUserSelfEditSettings(): Promise<UserSelfEditSettings> {
@@ -28,6 +30,7 @@ export async function getUserSelfEditSettings(): Promise<UserSelfEditSettings> {
       nicknameEditEnabled: data.nickname_edit_enabled,
       gsEditEnabled: data.gs_edit_enabled,
       inventoryEditEnabled: data.inventory_edit_enabled,
+      sealsEditEnabled: data.seals_edit_enabled,
     };
   } catch (error) {
     console.error(
@@ -46,13 +49,14 @@ export async function updateUserSelfEditSettings(
   try {
     await sql<any[]>`
       INSERT INTO user_self_edit_settings
-        (id, nickname_edit_enabled, gs_edit_enabled, inventory_edit_enabled, updated_at)
+        (id, nickname_edit_enabled, gs_edit_enabled, inventory_edit_enabled, seals_edit_enabled, updated_at)
       VALUES
-        (1, ${settings.nicknameEditEnabled}, ${settings.gsEditEnabled}, ${settings.inventoryEditEnabled}, now())
+        (1, ${settings.nicknameEditEnabled}, ${settings.gsEditEnabled}, ${settings.inventoryEditEnabled}, ${settings.sealsEditEnabled}, now())
       ON CONFLICT (id) DO UPDATE SET
         nickname_edit_enabled = EXCLUDED.nickname_edit_enabled,
         gs_edit_enabled = EXCLUDED.gs_edit_enabled,
         inventory_edit_enabled = EXCLUDED.inventory_edit_enabled,
+        seals_edit_enabled = EXCLUDED.seals_edit_enabled,
         updated_at = EXCLUDED.updated_at
     `;
   } catch (error) {

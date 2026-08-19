@@ -5,7 +5,11 @@ import sql from "@/shared/lib/db";
 import { hasTag } from "./hasTag";
 import { getUserSelfEditSettings } from "./userSelfEditSettings";
 
-type SelfEditToggle = "nicknameEditEnabled" | "gsEditEnabled" | "inventoryEditEnabled";
+type SelfEditToggle =
+  | "nicknameEditEnabled"
+  | "gsEditEnabled"
+  | "inventoryEditEnabled"
+  | "sealsEditEnabled";
 
 // Разрешает Администратору/Секретутке всегда, а самому активному
 // пользователю — только если соответствующий тумблер включен в Настройках.

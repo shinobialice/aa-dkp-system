@@ -25,6 +25,7 @@ export default function ProfileTabs({
   averageGuildGS,
   isAdmin,
   canEditInventory,
+  canEditSeals,
 }: {
   user: any;
   inventory: any[];
@@ -43,6 +44,7 @@ export default function ProfileTabs({
   averageGuildGS: number;
   isAdmin: boolean;
   canEditInventory: boolean;
+  canEditSeals: boolean;
 }) {
   const [inventory, setInventory] = useState(initialInventory);
   const [tasks, setTasks] = useState(initialTasks);
@@ -141,7 +143,7 @@ export default function ProfileTabs({
           userId={user.id}
           seals={seals}
           onChange={setSeals}
-          isAdmin={isAdmin}
+          canEdit={canEditSeals}
         />
       </TabsContent>
     </Tabs>

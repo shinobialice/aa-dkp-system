@@ -27,10 +27,10 @@ type Props = {
   userId: number;
   seals: UserSeal[];
   onChange: (seals: UserSeal[]) => void;
-  isAdmin: boolean;
+  canEdit: boolean;
 };
 
-export default function SealsTab({ userId, seals, onChange, isAdmin }: Props) {
+export default function SealsTab({ userId, seals, onChange, canEdit }: Props) {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   // Черновик выбора на время редактирования: имя печати -> редкость.
@@ -97,7 +97,7 @@ export default function SealsTab({ userId, seals, onChange, isAdmin }: Props) {
       <CardHeader className="border-b">
         <CardTitle className="flex items-center justify-between">
           Печати героя
-          {isAdmin && !editing && (
+          {canEdit && !editing && (
             <Button
               variant="outline"
               className="cursor-pointer"
@@ -106,7 +106,7 @@ export default function SealsTab({ userId, seals, onChange, isAdmin }: Props) {
               Изменить
             </Button>
           )}
-          {isAdmin && editing && (
+          {canEdit && editing && (
             <div className="flex gap-2">
               <Button
                 variant="ghost"

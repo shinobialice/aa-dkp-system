@@ -116,6 +116,21 @@ export function getRecurringMaintenanceWindowInDays(
   return getRecurringWindowBoundsForDay(date);
 }
 
+// Ближайшее регулярное окно (сегодняшнее, если оно ещё не закончилось, иначе
+// следующего четверга) — используется в Настройках, чтобы показывать плановые
+// работы заранее, а не только в сам день их проведения.
+export function getNextRecurringMaintenanceWindow(): {
+  start: Date;
+  end: Date;
+} | null {
+  const now = new Date();
+  for (let offsetDays = 0; offsetDays <= 7; offsetDays += 1) {
+    const window = getRecurringMaintenanceWindowInDays(offsetDays);
+    if (window && window.end > now) return window;
+  }
+  return null;
+}
+
 // Правда игры: если сервер уходит на проф. работы, пока таймер респавна
 // ещё тикает и не досчитал до respawnStart, игра сама сбрасывает респавн —
 // даже если момент "killTime + respawnHours" сам по себе не попадает в окно
