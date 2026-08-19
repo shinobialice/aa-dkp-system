@@ -219,6 +219,7 @@ export function EventDialog({
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="md:border-r md:pr-4">
             <RaidDetailsForm
+              mode={mode}
               users={users}
               setUsers={setUsers}
               category={category}

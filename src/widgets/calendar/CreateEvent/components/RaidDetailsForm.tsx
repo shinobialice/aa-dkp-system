@@ -3,6 +3,7 @@ import React from "react";
 import CategorySelector from "./CategorySelector";
 import BossSelector from "./BossSelector";
 import DatetimePicker from "./DateTimePicker";
+import { ScheduledDateTimePicker } from "./ScheduledDateTimePicker";
 import { Checkbox } from "@/shared/ui";
 import { Label } from "@/shared/ui";
 import { Input } from "@/shared/ui";
@@ -43,6 +44,7 @@ export function RaidDetailsForm({
   loot,
   lootLinkIds,
   setLootLinkIds,
+  mode = "create",
 }: {
   users: any[];
   setUsers: (users: any[]) => void;
@@ -70,6 +72,7 @@ export function RaidDetailsForm({
   loot?: any[];
   lootLinkIds: Record<number, boolean>;
   setLootLinkIds: React.Dispatch<React.SetStateAction<Record<number, boolean>>>;
+  mode?: "create" | "edit";
 }) {
   const [bonus, setBonus] = React.useState<AttendanceBonusSettings | null>(
     null,
@@ -253,13 +256,26 @@ export function RaidDetailsForm({
       )}
       <div className="space-y-2">
         <Label>Дата и время (МСК)</Label>
-        <DatetimePicker
-          value={selectedDate}
-          onChange={(date) => {
-            setSelectedDate(date);
-            setErrors((prev: any) => ({ ...prev, selectedDate: false }));
-          }}
-        />
+        {mode === "edit" ? (
+          <DatetimePicker
+            value={selectedDate}
+            onChange={(date) => {
+              setSelectedDate(date);
+              setErrors((prev: any) => ({ ...prev, selectedDate: false }));
+            }}
+          />
+        ) : (
+          <ScheduledDateTimePicker
+            key={`${category ?? ""}-${selectedBoss ?? ""}`}
+            category={category}
+            selectedBoss={selectedBoss}
+            value={selectedDate}
+            onChange={(date) => {
+              setSelectedDate(date);
+              setErrors((prev: any) => ({ ...prev, selectedDate: !date }));
+            }}
+          />
+        )}
         {errors.selectedDate && (
           <p className="text-sm text-red-500">Обязательное поле</p>
         )}
