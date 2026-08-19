@@ -2,10 +2,13 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import type { PrimeStreak } from "@/actions/getUserPrimeStreak";
+import SealIcon from "@/widgets/profile/seals/SealIcon";
+import { getSealGradeLabel } from "@/widgets/profile/seals/sealsData";
 import ProfileAdditionalInfo from "./ProfileAdditionalInfo";
 import ProfileClasses from "./ProfileClasses";
 import ProfileHeader from "./ProfileHeader";
 import { Card, CardContent } from "@/shared/ui";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/shared/ui";
 
 const formatPoints = (n: number) => Number(n.toFixed(2)).toString();
 const currentMonthLabel = new Date().toLocaleDateString("ru-RU", {
@@ -15,6 +18,7 @@ const currentMonthLabel = new Date().toLocaleDateString("ru-RU", {
 export default function ProfileInfoClient({
   user,
   tags: initialTags,
+  seals,
   setUsernameHistory,
   canEditProfile,
   canEditNickname,
@@ -27,6 +31,7 @@ export default function ProfileInfoClient({
 }: {
   user: any;
   tags: any[];
+  seals: any[];
   setUsernameHistory: (
     history: {
       id: number;
@@ -107,6 +112,31 @@ export default function ProfileInfoClient({
           editMode={editMode}
           canEditGs={canEditGs}
         />
+        <div className="min-w-[140px] space-y-1.5">
+          <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Печати
+          </div>
+          {seals?.length > 0 ? (
+            <div className="flex items-center gap-1.5">
+              {seals.map((seal) => (
+                <Tooltip key={seal.id}>
+                  <TooltipTrigger asChild>
+                    <div>
+                      <SealIcon grade={seal.grade} size={28} />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {seal.seal_name} · {getSealGradeLabel(seal.grade)}
+                  </TooltipContent>
+                </Tooltip>
+              ))}
+            </div>
+          ) : (
+            <div className="text-sm font-semibold text-muted-foreground">
+              Не выбраны
+            </div>
+          )}
+        </div>
         <ProfileAdditionalInfo
           user={user}
           formData={formData}

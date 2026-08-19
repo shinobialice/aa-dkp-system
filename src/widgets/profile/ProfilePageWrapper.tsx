@@ -9,6 +9,7 @@ export default function ProfilePageWrapper({
   tags: initialTags,
   inventory,
   tasks,
+  seals: initialSeals,
   usernameHistory: initialUsernameHistory,
   averageGuildGS,
   activity,
@@ -26,6 +27,7 @@ export default function ProfilePageWrapper({
   tags: { id: number; tag: string }[];
   inventory: any[];
   tasks: any[];
+  seals: any[];
   notes: any[];
   usernameHistory: {
     id: number;
@@ -53,6 +55,7 @@ export default function ProfilePageWrapper({
 }) {
   const [user, setUser] = useState(initialUser);
   const [tags, setTags] = useState(initialTags);
+  const [seals, setSeals] = useState(initialSeals);
   const [usernameHistory, setUsernameHistory] = useState(
     initialUsernameHistory,
   );
@@ -67,6 +70,7 @@ export default function ProfilePageWrapper({
         isOwnProfile={isOwnProfile}
         user={user}
         tags={tags}
+        seals={seals}
         setUsernameHistory={setUsernameHistory}
         activity={activity}
         salary={salary}
@@ -77,6 +81,8 @@ export default function ProfilePageWrapper({
         setUser={setUser}
         inventory={inventory}
         tasks={tasks}
+        seals={seals}
+        setSeals={setSeals}
         tags={tags}
         setTags={setTags}
         usernameHistory={usernameHistory}

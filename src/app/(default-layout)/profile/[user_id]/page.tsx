@@ -2,6 +2,7 @@ import { getAverageGuildGS } from "@/actions/getAverageGuildGS";
 import getTasks from "@/actions/getTasks";
 import getUser from "@/actions/getUser";
 import getUserInventory from "@/actions/getUserInventory";
+import getUserSeals from "@/actions/getUserSeals";
 import { getUserMonthlyAttendance } from "@/actions/getUserMonthlyAttendance";
 import { getUserPrimeStreak } from "@/actions/getUserPrimeStreak";
 import getUserNotes from "@/actions/getUserNotes";
@@ -35,6 +36,7 @@ export default async function Page(p: {
     usernameHistory,
     salary,
     primeStreak,
+    seals,
   ] = await Promise.all([
     getUser(userId),
     getUserTags(userId),
@@ -44,6 +46,7 @@ export default async function Page(p: {
     getUsernameHistory(userId),
     getUserCurrentMonthSalary(userId),
     getUserPrimeStreak(userId),
+    getUserSeals(userId),
   ]);
 
   const sessionToken = (await cookies()).get("session_token")?.value ?? "";
@@ -79,6 +82,7 @@ export default async function Page(p: {
       tags={tags}
       inventory={inventory}
       tasks={tasks}
+      seals={seals}
       notes={notes}
       usernameHistory={usernameHistory}
       averageGuildGS={averageGuildGS}

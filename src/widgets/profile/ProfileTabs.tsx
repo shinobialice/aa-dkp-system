@@ -6,6 +6,7 @@ import { UserMonthActivity } from "@/widgets/profile/activity/UserMonthActivity"
 import InventoryTabsClient from "./inventory/InventoryTabsClient";
 import PurchasesAndGiveaways from "./inventory/PurchasesAndGiveaways";
 import UserNotes from "./notes/UserNotes";
+import SealsTab from "./seals/SealsTab";
 import TasksTable from "./tasks/TasksTable";
 import UsernameHistoryTab from "./usernameHistory/UsernameHistoryTab";
 import UserMonthlyRaidsTab from "./raids/UserMonthlyRaidsTab";
@@ -15,6 +16,8 @@ export default function ProfileTabs({
   user,
   inventory: initialInventory,
   tasks: initialTasks,
+  seals,
+  setSeals,
   tags,
   setTags,
   setUser,
@@ -26,6 +29,8 @@ export default function ProfileTabs({
   user: any;
   inventory: any[];
   tasks: any[];
+  seals: any[];
+  setSeals: (seals: any[]) => void;
   tags: any[];
   setTags: (tags: any[]) => void;
   setUser: (user: any) => void;
@@ -79,6 +84,9 @@ export default function ProfileTabs({
         <TabsTrigger className="cursor-pointer" value="tasks">
           Задания
         </TabsTrigger>
+        <TabsTrigger className="cursor-pointer" value="seals">
+          Печати
+        </TabsTrigger>
       </TabsList>
       <TabsContent value="inventory">
         <InventoryTabsClient
@@ -125,6 +133,15 @@ export default function ProfileTabs({
           onChange={() => {
             // Handle tasks updates passed from parent
           }}
+        />
+      </TabsContent>
+
+      <TabsContent value="seals">
+        <SealsTab
+          userId={user.id}
+          seals={seals}
+          onChange={setSeals}
+          isAdmin={isAdmin}
         />
       </TabsContent>
     </Tabs>
