@@ -1,5 +1,4 @@
 import { getAverageGuildGS } from "@/actions/getAverageGuildGS";
-import getTasks from "@/actions/getTasks";
 import getUser from "@/actions/getUser";
 import getUserInventory from "@/actions/getUserInventory";
 import getUserSeals from "@/actions/getUserSeals";
@@ -31,7 +30,6 @@ export default async function Page(p: {
     user,
     tags,
     inventory,
-    tasks,
     notes,
     usernameHistory,
     salary,
@@ -41,7 +39,6 @@ export default async function Page(p: {
     getUser(userId),
     getUserTags(userId),
     getUserInventory(userId),
-    getTasks(userId),
     getUserNotes(userId),
     getUsernameHistory(userId),
     getUserCurrentMonthSalary(userId),
@@ -84,7 +81,6 @@ export default async function Page(p: {
       user={user}
       tags={tags}
       inventory={inventory}
-      tasks={tasks}
       seals={seals}
       notes={notes}
       usernameHistory={usernameHistory}

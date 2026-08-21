@@ -62,7 +62,13 @@ export function LootRawTable({
   >([]);
   const [editMode, setEditMode] = useState(false);
   const [sortKey, setSortKey] = useState<
-    "acquired_at" | "sold_at" | "status" | null
+    | "acquired_at"
+    | "sold_at"
+    | "status"
+    | "source"
+    | "itemName"
+    | "price"
+    | null
   >("acquired_at");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [search, setSearch] = useState("");
@@ -72,7 +78,9 @@ export function LootRawTable({
     getActiveUsers().then(setActiveUsers);
   }, []);
 
-  const toggleSort = (key: "acquired_at" | "sold_at" | "status") => {
+  const toggleSort = (
+    key: "acquired_at" | "sold_at" | "status" | "source" | "itemName" | "price",
+  ) => {
     if (sortKey === key) {
       setSortDir((d) => (d === "asc" ? "desc" : "asc"));
     } else {
@@ -81,7 +89,10 @@ export function LootRawTable({
     }
   };
 
-  const sortHeader = (label: string, key: "acquired_at" | "sold_at" | "status") => (
+  const sortHeader = (
+    label: string,
+    key: "acquired_at" | "sold_at" | "status" | "source" | "itemName" | "price",
+  ) => (
     <Button
       variant="ghost"
       className="cursor-pointer -ml-3 h-auto px-3 py-1"
@@ -138,6 +149,19 @@ export function LootRawTable({
         const cmp = (a.status ?? "").localeCompare(b.status ?? "");
         return sortDir === "asc" ? cmp : -cmp;
       }
+      if (sortKey === "source") {
+        const cmp = (a.source ?? "").localeCompare(b.source ?? "");
+        return sortDir === "asc" ? cmp : -cmp;
+      }
+      if (sortKey === "itemName") {
+        const cmp = a.itemType.name.localeCompare(b.itemType.name);
+        return sortDir === "asc" ? cmp : -cmp;
+      }
+      if (sortKey === "price") {
+        const aPrice = a.price ?? a.itemType?.price ?? 0;
+        const bPrice = b.price ?? b.itemType?.price ?? 0;
+        return sortDir === "asc" ? aPrice - bPrice : bPrice - aPrice;
+      }
       const aTime = a[sortKey] ? new Date(a[sortKey] as Date).getTime() : 0;
       const bTime = b[sortKey] ? new Date(b[sortKey] as Date).getTime() : 0;
       return sortDir === "asc" ? aTime - bTime : bTime - aTime;
@@ -179,10 +203,16 @@ export function LootRawTable({
               <TableHead className="w-[120px]">
                 {sortHeader("Получено", "acquired_at")}
               </TableHead>
-              <TableHead className="w-[140px]">Источник</TableHead>
-              <TableHead className="w-[240px]">Предмет</TableHead>
+              <TableHead className="w-[140px]">
+                {sortHeader("Источник", "source")}
+              </TableHead>
+              <TableHead className="w-[240px]">
+                {sortHeader("Предмет", "itemName")}
+              </TableHead>
               <TableHead className="w-[70px]">Кол-во</TableHead>
-              <TableHead className="w-[90px]">Цена</TableHead>
+              <TableHead className="w-[100px]">
+                {sortHeader("Цена", "price")}
+              </TableHead>
               <TableHead className="w-[130px]">
                 {sortHeader("Статус", "status")}
               </TableHead>

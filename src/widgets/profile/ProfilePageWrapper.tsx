@@ -8,7 +8,6 @@ export default function ProfilePageWrapper({
   user: initialUser,
   tags: initialTags,
   inventory,
-  tasks,
   seals: initialSeals,
   usernameHistory: initialUsernameHistory,
   averageGuildGS,
@@ -27,7 +26,6 @@ export default function ProfilePageWrapper({
   user: any;
   tags: { id: number; tag: string }[];
   inventory: any[];
-  tasks: any[];
   seals: any[];
   notes: any[];
   usernameHistory: {
@@ -82,7 +80,6 @@ export default function ProfilePageWrapper({
         user={user}
         setUser={setUser}
         inventory={inventory}
-        tasks={tasks}
         seals={seals}
         setSeals={setSeals}
         tags={tags}

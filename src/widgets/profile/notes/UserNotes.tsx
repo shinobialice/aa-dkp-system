@@ -6,8 +6,16 @@ import calculateGuildTenureBonus from "@/utils/calculateGuildTenureBonus";
 import AddSalaryBonusDialog from "./AddSalaryBonusDialog";
 import AddPenaltyPointsDialog from "./AddPenaltyPointsDialog";
 import { UserTagsSection } from "./UserTagsSection";
+import SocialAccountsAdminPanel from "../info/SocialAccountsAdminPanel";
+import type { SocialProvider } from "@/shared/lib/socialProviders";
 import { Button } from "@/shared/ui";
-import { Card, CardHeader, CardContent, CardTitle } from "@/shared/ui";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardTitle,
+  CardAction,
+} from "@/shared/ui";
 import { deleteUserSalaryBonus } from "@/actions/addUserSalaryBonus";
 import { getUserSalaryBonus } from "@/actions/getUserSalaryBonus";
 import { getUserTags } from "@/actions/userTagsActions";
@@ -137,6 +145,22 @@ export default function UserNotes({
     <Card>
       <CardHeader>
         <CardTitle className="flex">Заметки</CardTitle>
+        {isAdmin && (
+          <CardAction>
+            <SocialAccountsAdminPanel
+              user={user}
+              onUnlinked={(provider: SocialProvider) => {
+                const patch =
+                  provider === "vk"
+                    ? { vk_id: null, vk_name: null }
+                    : provider === "google"
+                      ? { google_id: null }
+                      : { mail_id: null };
+                setUser((prev: any) => ({ ...prev, ...patch }));
+              }}
+            />
+          </CardAction>
+        )}
       </CardHeader>
       <CardContent className="border-t">
         <div className="flex gap-8 mt-6">

@@ -7,7 +7,6 @@ import InventoryTabsClient from "./inventory/InventoryTabsClient";
 import PurchasesAndGiveaways from "./inventory/PurchasesAndGiveaways";
 import UserNotes from "./notes/UserNotes";
 import SealsTab from "./seals/SealsTab";
-import TasksTable from "./tasks/TasksTable";
 import UsernameHistoryTab from "./usernameHistory/UsernameHistoryTab";
 import UserMonthlyRaidsTab from "./raids/UserMonthlyRaidsTab";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/ui";
@@ -15,7 +14,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/ui";
 export default function ProfileTabs({
   user,
   inventory: initialInventory,
-  tasks: initialTasks,
   seals,
   setSeals,
   tags,
@@ -29,7 +27,6 @@ export default function ProfileTabs({
 }: {
   user: any;
   inventory: any[];
-  tasks: any[];
   seals: any[];
   setSeals: (seals: any[]) => void;
   tags: any[];
@@ -47,15 +44,10 @@ export default function ProfileTabs({
   canEditSeals: boolean;
 }) {
   const [inventory, setInventory] = useState(initialInventory);
-  const [tasks, setTasks] = useState(initialTasks);
 
   useEffect(() => {
     setInventory(initialInventory);
   }, [initialInventory]);
-
-  useEffect(() => {
-    setTasks(initialTasks);
-  }, [initialTasks]);
 
   const handleInventoryChange = async () => {
     const updated = await getUserInventory(user.id);
@@ -82,9 +74,6 @@ export default function ProfileTabs({
         </TabsTrigger>
         <TabsTrigger className="cursor-pointer" value="username-history">
           История ников
-        </TabsTrigger>
-        <TabsTrigger className="cursor-pointer" value="tasks">
-          Задания
         </TabsTrigger>
         <TabsTrigger className="cursor-pointer" value="seals">
           Печати
@@ -125,17 +114,6 @@ export default function ProfileTabs({
 
       <TabsContent value="username-history">
         <UsernameHistoryTab history={usernameHistory} />
-      </TabsContent>
-
-      <TabsContent value="tasks">
-        <TasksTable
-          isAdmin={isAdmin}
-          tasks={tasks}
-          userId={user.id}
-          onChange={() => {
-            // Handle tasks updates passed from parent
-          }}
-        />
       </TabsContent>
 
       <TabsContent value="seals">
