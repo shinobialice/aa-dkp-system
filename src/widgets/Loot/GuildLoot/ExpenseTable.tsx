@@ -117,7 +117,7 @@ export default function ExpensesTable({ isAdmin }: Props) {
         users={users}
       />
 
-      <div className="overflow-auto rounded-md border">
+      <div className="overflow-auto rounded-md border [&_th]:h-8 [&_td]:py-1.5">
         <ScrollArea className="h-[1000px] w-full">
           <Table>
             <TableHeader className="sticky top-0 z-10 bg-background">
@@ -147,6 +147,7 @@ export default function ExpensesTable({ isAdmin }: Props) {
                       <TableCell>
                         <div className="flex gap-2">
                           <Button
+                            size="sm"
                             className="cursor-pointer"
                             onClick={() => {
                               setEditingExpense(exp);
@@ -156,6 +157,7 @@ export default function ExpensesTable({ isAdmin }: Props) {
                             Изменить
                           </Button>
                           <Button
+                            size="sm"
                             className="cursor-pointer"
                             variant="destructive"
                             onClick={() => handleDelete(exp)}

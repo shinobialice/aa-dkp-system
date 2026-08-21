@@ -23,6 +23,13 @@ import {
 } from "@/actions/distributeLootItems";
 import { getLoot } from "@/actions/lootActions";
 
+const STATUS_FILTERS: { value: string; label: string }[] = [
+  { value: "all", label: "Все" },
+  { value: "В наличии", label: "В наличии" },
+  { value: "Продано", label: "Продано" },
+  { value: "Выдано", label: "Выдано" },
+];
+
 export function isSameMonth(date: Date, month: number, year: number) {
   return date.getMonth() + 1 === month && date.getFullYear() === year;
 }
@@ -56,9 +63,10 @@ export function LootRawTable({
   const [editMode, setEditMode] = useState(false);
   const [sortKey, setSortKey] = useState<
     "acquired_at" | "sold_at" | "status" | null
-  >(null);
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  >("acquired_at");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   useEffect(() => {
     getActiveUsers().then(setActiveUsers);
@@ -90,6 +98,8 @@ export function LootRawTable({
     const filtered = loot.filter((item) => {
       if (MISC_LOOT_ITEM_NAMES.includes(item.itemType.name)) return false;
       if (item.status === "Распродано") return false;
+      if (statusFilter !== "all" && item.status !== statusFilter)
+        return false;
       if (query && !item.itemType.name.toLowerCase().includes(query))
         return false;
 
@@ -132,31 +142,56 @@ export function LootRawTable({
       const bTime = b[sortKey] ? new Date(b[sortKey] as Date).getTime() : 0;
       return sortDir === "asc" ? aTime - bTime : bTime - aTime;
     });
-  }, [loot, selectedMonth, selectedYear, sortKey, sortDir, search]);
+  }, [loot, selectedMonth, selectedYear, sortKey, sortDir, search, statusFilter]);
 
   return (
     <div className="space-y-2">
-      <Input
-        placeholder="Поиск по предмету..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="max-w-xs"
-      />
-      <div className="overflow-auto rounded-md border">
+      <div className="flex flex-wrap items-center gap-2">
+        <Input
+          placeholder="Поиск по предмету..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="max-w-xs"
+        />
+        <div className="flex flex-wrap gap-1">
+          {STATUS_FILTERS.map((f) => (
+            <Button
+              key={f.value}
+              size="sm"
+              variant="outline"
+              className={`cursor-pointer ${
+                statusFilter === f.value
+                  ? "bg-primary text-primary-foreground border-primary hover:bg-primary/90 hover:text-primary-foreground"
+                  : ""
+              }`}
+              onClick={() => setStatusFilter(f.value)}
+            >
+              {f.label}
+            </Button>
+          ))}
+        </div>
+      </div>
+      <div className="overflow-auto rounded-md border [&_th]:h-8 [&_td]:py-1.5">
       <ScrollArea className="h-[60vh] w-full">
-        <Table>
+        <Table className="table-fixed">
           <TableHeader className="sticky top-0 z-1 bg-background">
             <TableRow>
-              <TableHead>{sortHeader("Получено", "acquired_at")}</TableHead>
-              <TableHead>Источник</TableHead>
-              <TableHead>Предмет</TableHead>
-              <TableHead>Кол-во</TableHead>
-              <TableHead>Цена</TableHead>
-              <TableHead>{sortHeader("Статус", "status")}</TableHead>
-              <TableHead>{sortHeader("Продано", "sold_at")}</TableHead>
-              <TableHead>Кому</TableHead>
+              <TableHead className="w-[120px]">
+                {sortHeader("Получено", "acquired_at")}
+              </TableHead>
+              <TableHead className="w-[140px]">Источник</TableHead>
+              <TableHead className="w-[240px]">Предмет</TableHead>
+              <TableHead className="w-[70px]">Кол-во</TableHead>
+              <TableHead className="w-[90px]">Цена</TableHead>
+              <TableHead className="w-[130px]">
+                {sortHeader("Статус", "status")}
+              </TableHead>
+              <TableHead className="w-[120px]">
+                {sortHeader("Продано", "sold_at")}
+              </TableHead>
+              <TableHead className="w-[150px]">Кому</TableHead>
               <TableHead>Комментарий</TableHead>
-              {isAdmin && <TableHead>Действия</TableHead>}
+              {isAdmin && <TableHead className="w-[190px]">Действия</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -169,10 +204,14 @@ export function LootRawTable({
                       )
                     : "—"}
                 </TableCell>
-                <TableCell>{item.source ?? "—"}</TableCell>
+                <TableCell className="truncate" title={item.source ?? undefined}>
+                  {item.source ?? "—"}
+                </TableCell>
                 <TableCell className="flex items-center gap-2">
                   <LootIcon itemName={item.itemType.name} size={30} />
-                  <span>{item.itemType.name}</span>
+                  <span className="min-w-0 flex-1 truncate">
+                    {item.itemType.name}
+                  </span>
                 </TableCell>
                 <TableCell>{item.quantity}</TableCell>
                 <TableCell>
@@ -186,7 +225,7 @@ export function LootRawTable({
                       )
                     : "—"}
                 </TableCell>
-                <TableCell>
+                <TableCell className="truncate" title={item.sold_to ?? undefined}>
                   {item.sold_to_user_id ? (
                     <Link
                       href={`/profile/${item.sold_to_user_id}`}
@@ -200,12 +239,15 @@ export function LootRawTable({
                     (item.sold_to ?? "—")
                   )}
                 </TableCell>
-                <TableCell>{item.comment ?? "—"}</TableCell>
+                <TableCell className="truncate" title={item.comment ?? undefined}>
+                  {item.comment ?? "—"}
+                </TableCell>
                 {isAdmin && (
                   <TableCell>
                     <div className="flex gap-2">
                         {item.status !== "В казну" && (
                           <Button
+                            size="sm"
                             className={`cursor-pointer ${
                               item.sold_to
                                 ? ""
@@ -221,6 +263,7 @@ export function LootRawTable({
                           </Button>
                         )}
                       <Button
+                        size="sm"
                         className="cursor-pointer"
                         onClick={() => onDelete(item)}
                         variant="destructive"
