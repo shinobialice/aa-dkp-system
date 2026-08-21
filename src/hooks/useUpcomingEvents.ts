@@ -33,7 +33,6 @@ export const bossImages: Record<string, string> = {
   "Оборона Ифнира": "/images/ifnir.png",
   "Осада замка": "/images/osada.png",
   Кошка: "/images/koshka.png",
-  Кириос: "/images/kirios.png",
   Марли: "/images/marli.png",
   Морф: "/images/morpheos.png",
   "Пепельные равнины": "/images/pepelki.png",
@@ -59,21 +58,10 @@ export type UpcomingEvent = {
   isNow: boolean;
   startsInMin?: number;
   endsInMin?: number;
-  packsNeeded?: number | null;
 };
-
-export function packsLabel(n: number): string {
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-  if (mod10 === 1 && mod100 !== 11) return `${n} пак`;
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14))
-    return `${n} пака`;
-  return `${n} паков`;
-}
 
 type BossRespawnState = {
   lastKill: Record<BossName, string | null>;
-  packs: Record<BossName, number | null>;
 };
 
 // Module-level store shared by every consumer of this hook. UpcomingEvents
@@ -82,14 +70,7 @@ type BossRespawnState = {
 // держим один общий поллинг на всех потребителей, чтобы не плодить лишние
 // запросы (тот же приём, что в useMaintenanceWindows.ts).
 let bossRespawnState: BossRespawnState = {
-  lastKill: { Марли: null, Морф: null, Кириос: null } as Record<
-    BossName,
-    string | null
-  >,
-  packs: { Марли: null, Морф: null, Кириос: null } as Record<
-    BossName,
-    number | null
-  >,
+  lastKill: { Марли: null, Морф: null } as Record<BossName, string | null>,
 };
 const bossRespawnListeners = new Set<(state: BossRespawnState) => void>();
 let bossRespawnPollTimer: ReturnType<typeof setInterval> | null = null;
@@ -98,18 +79,12 @@ async function fetchBossRespawn() {
   const data = await getBossRespawnStatus(respawnBosses as unknown as string[]);
   if (data) {
     const lastKill = { ...bossRespawnState.lastKill };
-    const packs = { ...bossRespawnState.packs };
     data.forEach(
-      (row: {
-        boss_name: BossName;
-        last_kill: string | null;
-        packs_needed: number | null;
-      }) => {
+      (row: { boss_name: BossName; last_kill: string | null }) => {
         lastKill[row.boss_name] = row.last_kill;
-        packs[row.boss_name] = row.packs_needed;
       },
     );
-    bossRespawnState = { lastKill, packs };
+    bossRespawnState = { lastKill };
     bossRespawnListeners.forEach((listener) => listener(bossRespawnState));
   }
 }
@@ -138,7 +113,7 @@ function subscribeBossRespawn(
 }
 
 export function useUpcomingEvents(): UpcomingEvent[] {
-  const [{ lastKill: bossLastKill, packs: bossPacks }, setRespawnState] =
+  const [{ lastKill: bossLastKill }, setRespawnState] =
     useState<BossRespawnState>(bossRespawnState);
   const [events, setEvents] = useState<UpcomingEvent[]>([]);
   const maintenanceWindows = useMaintenanceWindows();
@@ -265,7 +240,6 @@ export function useUpcomingEvents(): UpcomingEvent[] {
           isNow,
           startsInMin,
           endsInMin,
-          packsNeeded: bossPacks[boss],
         });
       }
 
@@ -276,7 +250,7 @@ export function useUpcomingEvents(): UpcomingEvent[] {
     checkEvents();
     const interval = setInterval(checkEvents, 10_000);
     return () => clearInterval(interval);
-  }, [bossLastKill, bossPacks, maintenanceWindows]);
+  }, [bossLastKill, maintenanceWindows]);
 
   return events;
 }

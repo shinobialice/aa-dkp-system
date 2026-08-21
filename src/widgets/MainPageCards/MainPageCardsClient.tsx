@@ -66,8 +66,9 @@ const InfoCard: FC<{
   action?: ReactNode;
   content: ReactNode;
   compactHeader?: boolean;
-}> = ({ title, action, content, compactHeader }) => (
-  <Card className={cn("h-[780px] min-w-0", compactHeader && "gap-3 py-3")}>
+  heightClassName?: string;
+}> = ({ title, action, content, compactHeader, heightClassName = "h-[780px]" }) => (
+  <Card className={cn(heightClassName, "min-w-0", compactHeader && "gap-3 py-3")}>
     <CardHeader>
       <CardTitle className="text-base">{title}</CardTitle>
       {action && <CardAction>{action}</CardAction>}
@@ -130,6 +131,10 @@ const MainPageCardsClient: FC = () => {
     {
       title: "Трекер респауна боссов",
       compactHeader: true,
+      // Раньше высота была фиксированной вместе со вторым блоком, но после
+      // сокращения истории убийств до 4 записей контент стал заметно короче
+      // 780px — под фиксированную высоту оставалось много пустого места.
+      heightClassName: "h-auto",
       content: (
         <>
           <RespawnTracker />
@@ -181,11 +186,12 @@ const MainPageCardsClient: FC = () => {
           <StatCard key={item.title} title={item.title} value={item.value} />
         ))}
       </div>
-      <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-[1080px_auto]">
+      <div className="grid w-full items-start grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-[1080px_auto]">
         <InfoCard
           title={infoItems[0].title}
           content={infoItems[0].content}
           compactHeader={infoItems[0].compactHeader}
+          heightClassName={infoItems[0].heightClassName}
         />
         <InfoCard
           title={infoItems[1].title}

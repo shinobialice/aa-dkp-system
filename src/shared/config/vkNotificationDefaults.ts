@@ -11,7 +11,7 @@ export type VkNotificationSettings = {
 export const PRIME_EVENT_NAME = "Прайм";
 
 export const DEFAULT_VK_NOTIFICATION_SETTINGS: VkNotificationSettings = {
-  enabledBosses: ["Марли", "Морф", "Кириос"],
+  enabledBosses: ["Марли", "Морф"],
   defaultNotifyBeforeMinutes: 10,
   notifyMinutesByEvent: {},
   quietHoursEnabled: true,

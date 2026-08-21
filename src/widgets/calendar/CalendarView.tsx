@@ -8,6 +8,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { EventDialog } from "./EventDialog";
 import { RaidInfoDialog } from "./RaidInfoDialog";
 import MissingActivitiesBanner from "./MissingActivitiesBanner";
+import ScreenshotsLinkButton from "./ScreenshotsLinkButton";
 import { Button } from "@/shared/ui";
 import { cn } from "@/shared/lib";
 import { getRaids } from "@/actions/getEvents";
@@ -238,6 +239,8 @@ export default function CalendarView({
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
         <aside className="flex flex-col gap-3 lg:w-64 lg:flex-none">
+          <ScreenshotsLinkButton canEdit={isAdmin || !!isSecretutka} />
+
           <MissingActivitiesBanner />
 
           <div className="rounded-lg border bg-card p-3">

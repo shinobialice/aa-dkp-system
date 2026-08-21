@@ -1,19 +1,17 @@
-export type BossName = "Марли" | "Морф" | "Кириос";
+export type BossName = "Марли" | "Морф";
 
-export const bosses: BossName[] = ["Марли", "Морф", "Кириос"];
+export const bosses: BossName[] = ["Марли", "Морф"];
 
 export const respawnWindow = 1; // hours, общий "промежуток" для всех боссов
 
 export const respawnHoursByBoss: Record<BossName, number> = {
   Марли: 12,
   Морф: 12,
-  Кириос: 2,
 };
 
 export const bossEmoji: Record<BossName, string> = {
   Марли: "🏴‍☠️",
   Морф: "⚓",
-  Кириос: "🧛",
 };
 
 export function getRespawnStart(lastKill: string, respawnHours: number): Date {

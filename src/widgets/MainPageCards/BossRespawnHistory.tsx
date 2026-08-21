@@ -23,10 +23,9 @@ interface HistoryRow {
   user_id: number;
   created_at: string;
   username: string;
-  packs_needed: number | null;
 }
 
-const PAGE_SIZE = 6;
+const PAGE_SIZE = 4;
 
 export default function BossRespawnHistory() {
   const [rows, setRows] = useState<HistoryRow[]>([]);
@@ -36,8 +35,8 @@ export default function BossRespawnHistory() {
 
   useEffect(() => {
     let isMounted = true;
-    async function fetchHistory() {
-      setLoading(true);
+    async function fetchHistory(isInitial: boolean) {
+      if (isInitial) setLoading(true);
       const { rows: data, total: count } = await getBossRespawnHistoryPage(
         page,
         PAGE_SIZE,
@@ -58,12 +57,14 @@ export default function BossRespawnHistory() {
           })),
         );
       }
-      setLoading(false);
+      if (isInitial) setLoading(false);
     }
-    fetchHistory();
+    fetchHistory(true);
     // Поллинг вместо realtime-подписки (self-hosted Postgres без Supabase
-    // Realtime) — обновляем список раз в 20 секунд.
-    const interval = setInterval(fetchHistory, 20_000);
+    // Realtime) — обновляем список раз в 20 секунд. Фоновые обновления не
+    // дёргают loading — иначе таблица каждые 20с на миг подменялась на
+    // "Загрузка..." и это выглядело как бесконечная перезагрузка.
+    const interval = setInterval(() => fetchHistory(false), 20_000);
     return () => {
       isMounted = false;
       clearInterval(interval);
@@ -71,7 +72,7 @@ export default function BossRespawnHistory() {
   }, [page]);
 
   return (
-    <div className="mt-4">
+    <div className="mt-4 pb-3">
       <div className="mb-2 flex items-baseline gap-2">
         <h2 className="text-base leading-none font-semibold">
           История убийств боссов
@@ -87,7 +88,6 @@ export default function BossRespawnHistory() {
               <th className="p-2 border">Время убийства</th>
               <th className="p-2 border">Предыдущее время</th>
               <th className="p-2 border">Следующий респаун</th>
-              <th className="p-2 border">Паков</th>
               <th className="p-2 border">Кто установил</th>
               <th className="p-2 border">Когда установлено</th>
             </tr>
@@ -95,13 +95,13 @@ export default function BossRespawnHistory() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={8} className="text-center p-4">
+                <td colSpan={7} className="text-center p-4">
                   Загрузка...
                 </td>
               </tr>
             ) : rows.length === 0 ? (
               <tr>
-                <td colSpan={8} className="text-center p-4">
+                <td colSpan={7} className="text-center p-4">
                   Нет записей
                 </td>
               </tr>
@@ -117,7 +117,6 @@ export default function BossRespawnHistory() {
                   <td className="p-2 border">
                     {row.next_respawn ? formatDT(row.next_respawn) : "-"}
                   </td>
-                  <td className="p-2 border">{row.packs_needed ?? "-"}</td>
                   <td className="p-2 border">{row.username}</td>
                   <td className="p-2 border">{formatDT(row.created_at)}</td>
                 </tr>

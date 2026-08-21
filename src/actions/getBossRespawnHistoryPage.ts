@@ -8,7 +8,7 @@ export async function getBossRespawnHistoryPage(page: number, pageSize: number) 
       SELECT count(*)::int AS count FROM boss_respawn_history
     `;
     const rows = await sql<any[]>`
-      SELECT id, boss_name, action, kill_time, prev_kill_time, next_respawn, user_id, created_at, packs_needed
+      SELECT id, boss_name, action, kill_time, prev_kill_time, next_respawn, user_id, created_at
       FROM boss_respawn_history
       ORDER BY id DESC
       LIMIT ${pageSize} OFFSET ${(page - 1) * pageSize}

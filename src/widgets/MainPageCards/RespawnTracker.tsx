@@ -9,7 +9,6 @@ import { useMaintenanceWindows } from "@/hooks/useMaintenanceWindows";
 import { registerBossKill } from "@/actions/registerBossKill";
 import { getBossRespawnStatus } from "@/actions/getBossRespawnStatus";
 import { DateTimePopover } from "./DateTimePopover";
-import { PacksPopover } from "./PacksPopover";
 import {
   BossName,
   bosses,
@@ -21,22 +20,19 @@ import {
 } from "@/shared/config/bossRespawn";
 
 const bossImages: Partial<Record<BossName, string>> = {
-  Кириос: "/images/kirios.png",
   Марли: "/images/marli.png",
   Морф: "/images/morpheos.png",
 };
 type BossState = {
   lastKill: string | null; // ISO string
-  packsNeeded: number | null;
   updatedAt: string | null; // ISO string, момент последней регистрации
 };
 
 const registerCooldownSeconds = 30;
 
 const emptyStates: Record<BossName, BossState> = {
-  Марли: { lastKill: null, packsNeeded: null, updatedAt: null },
-  Морф: { lastKill: null, packsNeeded: null, updatedAt: null },
-  Кириос: { lastKill: null, packsNeeded: null, updatedAt: null },
+  Марли: { lastKill: null, updatedAt: null },
+  Морф: { lastKill: null, updatedAt: null },
 };
 
 function formatMoscowDateTime(date: Date): string {
@@ -132,12 +128,10 @@ const RespawnTracker: FC = () => {
           (row: {
             boss_name: BossName;
             last_kill: string | null;
-            packs_needed: number | null;
             updated_at: string | null;
           }) => {
             loaded[row.boss_name] = {
               lastKill: row.last_kill,
-              packsNeeded: row.packs_needed,
               updatedAt: row.updated_at,
             };
           },
@@ -163,12 +157,7 @@ const RespawnTracker: FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  async function saveRespawn(
-    boss: BossName,
-    iso: string,
-    action: string,
-    packsNeeded?: number,
-  ) {
+  async function saveRespawn(boss: BossName, iso: string, action: string) {
     if (!user) {
       alert("Вы должны быть авторизованы для изменения времени!");
       return;
@@ -181,7 +170,6 @@ const RespawnTracker: FC = () => {
       action,
       user.id,
       registerCooldownSeconds,
-      packsNeeded,
     );
     if (registered) {
       setBossStates((prev) => ({
@@ -190,7 +178,6 @@ const RespawnTracker: FC = () => {
           ...prev[boss],
           lastKill: iso,
           updatedAt: new Date().toISOString(),
-          packsNeeded: packsNeeded ?? prev[boss].packsNeeded,
         },
       }));
     }
@@ -211,41 +198,22 @@ const RespawnTracker: FC = () => {
     return Math.max(0, Math.ceil((registerCooldownSeconds * 1000 - elapsedMs) / 1000));
   }
 
-  const [pendingKill, setPendingKill] = useState<
-    { boss: BossName; iso: string; action: string } | null
-  >(null);
-
-  function beginKill(boss: BossName, iso: string, action: string) {
-    if (boss === "Кириос") {
-      setPendingKill({ boss, iso, action });
-    } else {
-      saveRespawn(boss, iso, action);
-    }
-  }
-
-  function confirmPendingKillPacks(packs: number) {
-    if (!pendingKill) return;
-    saveRespawn(pendingKill.boss, pendingKill.iso, pendingKill.action, packs);
-    setPendingKill(null);
-  }
-
   function handleKilledNow(boss: BossName) {
     const now = new Date().toISOString();
-    beginKill(boss, now, boss === "Кириос" ? "Реснулся" : "Убит сейчас");
+    saveRespawn(boss, now, "Убит сейчас");
   }
 
   const [popoverDate, setPopoverDate] = useState<Record<BossName, Date | null>>(
     {
       Марли: null,
       Морф: null,
-      Кириос: null,
     },
   );
   function handleConfirmSetTime(boss: BossName) {
     const date = popoverDate[boss];
     if (!date) return;
     setPopoverDate((prev) => ({ ...prev, [boss]: null }));
-    beginKill(boss, date.toISOString(), "Указано время");
+    saveRespawn(boss, date.toISOString(), "Указано время");
   }
 
   function getStatusColor(status: string) {
@@ -268,7 +236,6 @@ const RespawnTracker: FC = () => {
             <th className="p-2 border w-[125px]">Статус</th>
             <th className="p-2 border w-[125px]">Следующий респаун</th>
             <th className="p-2 border w-[125px]">Последнее убийство</th>
-            <th className="p-2 border w-[60px]">Паков</th>
             <th className="p-2 border w-[136px]">Действия</th>
           </tr>
         </thead>
@@ -311,65 +278,42 @@ const RespawnTracker: FC = () => {
                     )}
                   </span>
                 </td>
-                <td className="p-2 border">{info.nextRespawn}</td>
+                <td className="p-2 border font-bold">{info.nextRespawn}</td>
                 <td className="p-2 border">{info.lastKillDisplay}</td>
                 <td className="p-2 border">
-                  {boss === "Кириос" ? state.packsNeeded ?? "-" : "-"}
-                </td>
-                <td className="p-2 border">
-                  <PacksPopover
-                    open={pendingKill?.boss === boss}
-                    onOpenChange={(open) => {
-                      if (!open) setPendingKill(null);
-                    }}
-                    onSelect={confirmPendingKillPacks}
-                  >
-                    <div className="flex flex-col items-center gap-2">
+                  <div className="flex flex-col items-center gap-2">
+                    <Button
+                      className="w-[120px] cursor-pointer text-xs px-1"
+                      onClick={() => handleKilledNow(boss)}
+                      disabled={saving === boss || loading || isOnCooldown(boss)}
+                    >
+                      {saving === boss && (
+                        <Loader2 className="mr-1 size-3 animate-spin" />
+                      )}
+                      {isOnCooldown(boss)
+                        ? `КД ${cooldownSecondsLeft(boss)}с`
+                        : "Был убит сейчас"}
+                    </Button>
+                    <DateTimePopover
+                      value={popoverDate[boss]}
+                      onChange={(date) =>
+                        setPopoverDate((prev) => ({ ...prev, [boss]: date }))
+                      }
+                      onConfirm={() => handleConfirmSetTime(boss)}
+                    >
                       <Button
                         className="w-[120px] cursor-pointer text-xs px-1"
-                        onClick={() => handleKilledNow(boss)}
-                        disabled={
-                          saving === boss ||
-                          loading ||
-                          isOnCooldown(boss) ||
-                          pendingKill?.boss === boss
-                        }
+                        variant="outline"
+                        disabled={saving === boss || loading || isOnCooldown(boss)}
+                        onClick={() => {}}
                       >
                         {saving === boss && (
                           <Loader2 className="mr-1 size-3 animate-spin" />
                         )}
-                        {isOnCooldown(boss)
-                          ? `КД ${cooldownSecondsLeft(boss)}с`
-                          : boss === "Кириос"
-                            ? "Реснулся"
-                            : "Был убит сейчас"}
+                        Установить время
                       </Button>
-                      <DateTimePopover
-                        value={popoverDate[boss]}
-                        onChange={(date) =>
-                          setPopoverDate((prev) => ({ ...prev, [boss]: date }))
-                        }
-                        onConfirm={() => handleConfirmSetTime(boss)}
-                      >
-                        <Button
-                          className="w-[120px] cursor-pointer text-xs px-1"
-                          variant="outline"
-                          disabled={
-                            saving === boss ||
-                            loading ||
-                            isOnCooldown(boss) ||
-                            pendingKill?.boss === boss
-                          }
-                          onClick={() => {}}
-                        >
-                          {saving === boss && (
-                            <Loader2 className="mr-1 size-3 animate-spin" />
-                          )}
-                          Установить время
-                        </Button>
-                      </DateTimePopover>
-                    </div>
-                  </PacksPopover>
+                    </DateTimePopover>
+                  </div>
                 </td>
               </tr>
             );

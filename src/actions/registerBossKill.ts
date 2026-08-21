@@ -18,16 +18,18 @@ export async function registerBossKill(
   action: string,
   userId: number,
   cooldownSeconds: number,
-  packsNeeded?: number,
 ): Promise<{ registered: boolean }> {
   const nextRespawn = getRespawnStart(killTimeIso, respawnHoursByBoss[boss]);
 
   let registered = false;
   try {
+    // Последний параметр — сколько паков нужно на босса, эта механика была
+    // только у Кириоса и с его удалением всегда null (сигнатуру
+    // register_boss_kill в БД не трогаем, чтобы не городить миграцию).
     const [row] = await sql<any[]>`
       SELECT register_boss_kill(
         ${boss}, ${killTimeIso}, ${action}, ${userId}, ${nextRespawn.toISOString()},
-        ${cooldownSeconds}, ${packsNeeded ?? null}
+        ${cooldownSeconds}, ${null}
       ) AS registered
     `;
     registered = !!row?.registered;
