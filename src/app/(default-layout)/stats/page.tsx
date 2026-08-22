@@ -7,6 +7,7 @@ import {
   getRaidsByDay,
   getRosterComposition,
   getInventoryStock,
+  getSealGradeStats,
 } from "@/actions/guildStats";
 import {
   mergeDailyAttendance,
@@ -42,6 +43,7 @@ export default async function StatsPage() {
     raids,
     rosterComposition,
     inventoryStock,
+    sealGradeStats,
   ] = await Promise.all([
     getGuildAttendancePrime({ year, month }),
     getGuildAttendanceAgl({ year, month }),
@@ -51,6 +53,7 @@ export default async function StatsPage() {
     getRaidsByDay(today),
     getRosterComposition(),
     getInventoryStock(),
+    getSealGradeStats(),
   ]);
 
   return (
@@ -64,6 +67,7 @@ export default async function StatsPage() {
       initialRaidsData={raids}
       initialRosterComposition={rosterComposition}
       initialInventoryStock={inventoryStock}
+      initialSealGradeStats={sealGradeStats}
     />
   );
 }

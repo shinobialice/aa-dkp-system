@@ -6,12 +6,14 @@ import BossIncomeChart from "@/widgets/statCharts/BossIncomeChart";
 import DailyRaidsCard from "@/widgets/statCharts/DailyRaidsCard";
 import RosterCompositionTable from "@/widgets/statCharts/RosterCompositionTable";
 import AvailableItemsTable from "@/widgets/statCharts/AvailableItemsTable";
+import SealGradeStatsTable from "@/widgets/statCharts/SealGradeStatsTable";
 import { useState } from "react";
 import type {
   BossIncomeStat,
   DailyRaidStat,
   RosterClassStat,
   InventoryStockStat,
+  SealGradeStat,
 } from "@/actions/guildStats";
 import type {
   mergeDailyAttendance,
@@ -28,6 +30,7 @@ export default function StatsPageClient({
   initialRaidsData,
   initialRosterComposition,
   initialInventoryStock,
+  initialSealGradeStats,
 }: {
   initialYear: number;
   initialMonth: number;
@@ -38,6 +41,7 @@ export default function StatsPageClient({
   initialRaidsData: DailyRaidStat[];
   initialRosterComposition: RosterClassStat[];
   initialInventoryStock: InventoryStockStat[];
+  initialSealGradeStats: SealGradeStat[];
 }) {
   const [year2, setYear2] = useState(initialYear);
   const [month2, setMonth2] = useState(initialMonth);
@@ -69,6 +73,10 @@ export default function StatsPageClient({
       <RosterCompositionTable data={initialRosterComposition} />
       <AvailableItemsTable
         data={initialInventoryStock}
+        className="self-start"
+      />
+      <SealGradeStatsTable
+        data={initialSealGradeStats}
         className="self-start"
       />
       <DailyRaidsCard
