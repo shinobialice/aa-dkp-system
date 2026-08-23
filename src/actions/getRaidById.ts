@@ -31,7 +31,8 @@ export const getRaidById = async (id: string) => {
         SELECT
           l.id, l.status, l.source, l.quantity, l.price, l.sold_to,
           l.acquired_at, l.sold_at,
-          it.id AS item_type_id, it.name AS item_type_name, it.price AS item_type_price
+          it.id AS item_type_id, it.name AS item_type_name, it.price AS item_type_price,
+          it.icon_url AS item_type_icon_url, it.grade AS item_type_grade
         FROM loot l
         JOIN item_type it ON it.id = l.item_type_id
         WHERE l.raid_id = ${raidId}
@@ -61,7 +62,13 @@ export const getRaidById = async (id: string) => {
         sold_to: l.sold_to,
         acquired_at: l.acquired_at,
         sold_at: l.sold_at,
-        itemType: { id: l.item_type_id, name: l.item_type_name, price: l.item_type_price },
+        itemType: {
+          id: l.item_type_id,
+          name: l.item_type_name,
+          price: l.item_type_price,
+          icon_url: l.item_type_icon_url,
+          grade: l.item_type_grade,
+        },
       })),
     };
   } catch (error) {

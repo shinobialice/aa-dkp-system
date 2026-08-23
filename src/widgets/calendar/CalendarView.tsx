@@ -31,6 +31,7 @@ const RAID_TYPES = [
   { key: "morph", label: "Морф", color: "rgb(40, 111, 180)" },
   { key: "marli", label: "Марли Прок", color: "rgb(180, 108, 51)" },
   { key: "antallon", label: "Анталлон", color: "rgb(126, 34, 206)" },
+  { key: "korvus", label: "Корвус", color: "rgb(178, 102, 236)" },
 ] as const;
 
 const colorToRaidKey = new Map<string, string>(

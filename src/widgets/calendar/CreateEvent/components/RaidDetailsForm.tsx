@@ -294,7 +294,12 @@ export function RaidDetailsForm({
                   key={item.id}
                   className="flex items-center gap-2 px-2 py-1.5 text-sm"
                 >
-                  <LootIcon itemName={item.itemType?.name} size={22} />
+                  <LootIcon
+                    itemName={item.itemType?.name}
+                    iconUrl={item.itemType?.icon_url}
+                    grade={item.itemType?.grade}
+                    size={22}
+                  />
                   <span className="flex-1 truncate">
                     {item.itemType?.name ?? "—"}
                   </span>
@@ -328,7 +333,12 @@ export function RaidDetailsForm({
                   checked={!!lootLinkIds[item.id]}
                   onCheckedChange={() => toggleLootLink(item.id)}
                 />
-                <LootIcon itemName={item.itemType?.name} size={22} />
+                <LootIcon
+                  itemName={item.itemType?.name}
+                  iconUrl={item.itemType?.icon_url}
+                  grade={item.itemType?.grade}
+                  size={22}
+                />
                 <span className="flex-1 truncate">
                   {item.itemType?.name ?? "—"}
                 </span>

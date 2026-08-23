@@ -197,7 +197,12 @@ export function RaidInfoDialog({
                     loot.map((item: any) => (
                       <TableRow key={item.id}>
                         <TableCell className="flex items-center gap-2">
-                          <LootIcon itemName={item.itemType?.name} size={28} />
+                          <LootIcon
+                            itemName={item.itemType?.name}
+                            iconUrl={item.itemType?.icon_url}
+                            grade={item.itemType?.grade}
+                            size={28}
+                          />
                           <span>{item.itemType?.name ?? "—"}</span>
                         </TableCell>
                         <TableCell>{item.quantity}</TableCell>
