@@ -43,12 +43,16 @@ type LootItem = {
   name: string;
   date: string;
   status: string;
+  iconUrl: string | null;
+  grade: number | null;
 };
 
 type GliderItem = {
   type: string;
   date: string;
   status: string;
+  iconUrl: string | null;
+  grade: number | null;
 };
 
 type Player = {
@@ -93,10 +97,14 @@ function LootStatusIcon({
   name,
   status,
   date,
+  iconUrl,
+  grade,
 }: {
   name: string;
   status: string;
   date: string;
+  iconUrl: string | null;
+  grade: number | null;
 }) {
   const dateValid = date && !isNaN(Date.parse(date));
   const given = status === "Выдано";
@@ -109,6 +117,8 @@ function LootStatusIcon({
         <div className="relative shrink-0">
           <LootIcon
             itemName={name}
+            iconUrl={iconUrl}
+            grade={grade}
             size={26}
             className={given || available || wanted ? "" : "opacity-30 grayscale"}
           />
@@ -186,6 +196,8 @@ function PlayerCard({
               name={l.name}
               status={l.status}
               date={l.date}
+              iconUrl={l.iconUrl}
+              grade={l.grade}
             />
           ))}
           {shownGliders.map((g) => (
@@ -194,6 +206,8 @@ function PlayerCard({
               name={g.type}
               status={g.status}
               date={g.date}
+              iconUrl={g.iconUrl}
+              grade={g.grade}
             />
           ))}
           {shownLoot.length === 0 && shownGliders.length === 0 && (
@@ -603,7 +617,7 @@ export default function LootGiveaway({
             if (g.status === "Выдано") {
               return (
                 <Badge key={g.type} className="gap-1 bg-green-600">
-                  <LootIcon itemName={g.type} size={14} />
+                  <LootIcon itemName={g.type} iconUrl={g.iconUrl} grade={g.grade} size={14} />
                   {g.type}
                   {dateValid
                     ? ` · ${format(new Date(g.date), "dd.MM.yyyy")}`
@@ -614,14 +628,14 @@ export default function LootGiveaway({
             if (g.status === "Хочет") {
               return (
                 <Badge key={g.type} className="gap-1 bg-pink-500">
-                  <LootIcon itemName={g.type} size={14} />
+                  <LootIcon itemName={g.type} iconUrl={g.iconUrl} grade={g.grade} size={14} />
                   {g.type}
                 </Badge>
               );
             }
             return (
               <Badge key={g.type} variant="secondary" className="gap-1">
-                <LootIcon itemName={g.type} size={14} />
+                <LootIcon itemName={g.type} iconUrl={g.iconUrl} grade={g.grade} size={14} />
                 {g.type}
               </Badge>
             );
@@ -639,7 +653,7 @@ export default function LootGiveaway({
             key={g.type}
             className="flex flex-wrap items-center gap-1.5 rounded-md border p-2"
           >
-            <LootIcon itemName={g.type} size={22} />
+            <LootIcon itemName={g.type} iconUrl={g.iconUrl} grade={g.grade} size={22} />
             <span className="flex-1 text-xs">{g.type}</span>
             <Select
               value={g.status}
@@ -896,7 +910,12 @@ export default function LootGiveaway({
                         key={loot.name}
                         className="flex flex-wrap items-center gap-2 rounded-md border p-2"
                       >
-                        <LootIcon itemName={loot.name} size={28} />
+                        <LootIcon
+                          itemName={loot.name}
+                          iconUrl={loot.iconUrl}
+                          grade={loot.grade}
+                          size={28}
+                        />
                         <span className="flex-1 text-sm">{loot.name}</span>
                         {renderLootStatus(
                           loot,

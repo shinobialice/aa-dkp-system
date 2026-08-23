@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { Pencil } from "lucide-react";
 import InventoryCategoryGrid from "./InventoryCategoryGrid";
 import {
   getProfileItemTypes,
@@ -10,7 +11,7 @@ import {
   getOtherInventoryCatalog,
   OtherInventoryCatalogItem,
 } from "@/actions/getOtherInventoryCatalog";
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
+import { Button, Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
 
 const categories = ["Техника", "Глайдеры", "Петы", "Другое"];
 
@@ -27,6 +28,14 @@ export default function InventoryTabsClient({
   canEdit: boolean;
   isAdmin?: boolean;
 }) {
+  // По умолчанию — чистый вью-режим (как у обычного зрителя), даже если
+  // canEdit=true: карандаш открывает режим редактирования (есть/нет по
+  // каждому предмету, добавление в "Другое"), чтобы не захламлять профиль
+  // выпадающими списками каждый раз, когда его открывает админ/сам игрок.
+  const [editMode, setEditMode] = useState(false);
+  const effectiveCanEdit = canEdit && editMode;
+  const effectiveIsAdmin = isAdmin && editMode;
+
   // Техника/Глайдеры/Петы — фиксированный список из InventoryItems.tsx,
   // дополняемый тут только тем, что специально завели под соответствующую
   // категорию напрямую в БД (profile_item_type) — своей админки для этого
@@ -53,7 +62,20 @@ export default function InventoryTabsClient({
   return (
     <Card className="gap-3 py-4">
       <CardHeader>
-        <CardTitle>Инвентарь игрока</CardTitle>
+        <div className="flex items-center justify-between gap-2">
+          <CardTitle>Инвентарь игрока</CardTitle>
+          {canEdit && (
+            <Button
+              variant={editMode ? "secondary" : "ghost"}
+              size="icon"
+              className="size-8 cursor-pointer"
+              onClick={() => setEditMode((v) => !v)}
+              title={editMode ? "Закончить редактирование" : "Редактировать"}
+            >
+              <Pencil className="size-4" />
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {categories.map((type) => (
@@ -65,8 +87,8 @@ export default function InventoryTabsClient({
               {type}
             </h3>
             <InventoryCategoryGrid
-              canEdit={canEdit}
-              isAdmin={isAdmin}
+              canEdit={effectiveCanEdit}
+              isAdmin={effectiveIsAdmin}
               type={type}
               inventory={inventory}
               userId={userId}

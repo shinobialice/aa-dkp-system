@@ -10,18 +10,28 @@ export default async function Page() {
   const sessionToken = (await cookies()).get("session_token")?.value ?? "";
   const isAdmin = await hasTag(sessionToken, ["Администратор"]);
 
-  let users, giveawayRows, miscGrantRows, wishlistRows;
+  let users, giveawayRows, miscGrantRows, wishlistRows, itemTypeRows;
   try {
-    [users, giveawayRows, miscGrantRows, wishlistRows] = await Promise.all([
-      sql<any[]>`SELECT id, username, active, avatar_url FROM "user" ORDER BY id ASC`,
-      sql<any[]>`SELECT user_id, name, date, status FROM givenawayloot`,
-      sql<any[]>`SELECT user_id, id, comment, amount, date FROM misc_loot_grants`,
-      sql<any[]>`SELECT user_id, id, item_name, comment FROM loot_wishlist`,
-    ]);
+    [users, giveawayRows, miscGrantRows, wishlistRows, itemTypeRows] =
+      await Promise.all([
+        sql<any[]>`SELECT id, username, active, avatar_url FROM "user" ORDER BY id ASC`,
+        sql<any[]>`SELECT user_id, name, date, status FROM givenawayloot`,
+        sql<any[]>`SELECT user_id, id, comment, amount, date FROM misc_loot_grants`,
+        sql<any[]>`SELECT user_id, id, item_name, comment FROM loot_wishlist`,
+        sql<any[]>`SELECT name, icon_url, grade FROM item_type`,
+      ]);
   } catch (error) {
     console.error("Failed to load users:", error);
     return <div>Error loading loot data.</div>;
   }
+
+  // lootColumns/gliderTypes — фиксированные названия, без своей ссылки на
+  // item_type — подтягиваем иконку/грейд по совпадению имени с казной, если
+  // такой предмет там есть (у части названий тут его нет, тогда просто без
+  // иконки, как и раньше).
+  const itemTypeByName = new Map(
+    itemTypeRows.map((it) => [it.name, { iconUrl: it.icon_url, grade: it.grade }]),
+  );
 
   const giveawayByUser = new Map<number, any[]>();
   for (const g of giveawayRows) {
@@ -48,18 +58,24 @@ export default async function Page() {
       avatarUrl: user.avatar_url,
       loot: lootColumns.map((name) => {
         const record = givenawayloot.find((i) => i.name === name);
+        const itemType = itemTypeByName.get(name);
         return {
           name,
           date: record?.date?.split("T")[0] || "",
           status: record?.status || "",
+          iconUrl: itemType?.iconUrl ?? null,
+          grade: itemType?.grade ?? null,
         };
       }),
       gliders: gliderTypes.map((type) => {
         const record = givenawayloot.find((i) => i.name === type);
+        const itemType = itemTypeByName.get(type);
         return {
           type,
           date: record?.date?.split("T")[0] || "",
           status: record?.status || "",
+          iconUrl: itemType?.iconUrl ?? null,
+          grade: itemType?.grade ?? null,
         };
       }),
       miscGrants: (miscGrantsByUser.get(user.id) ?? [])
