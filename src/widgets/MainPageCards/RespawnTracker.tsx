@@ -82,9 +82,13 @@ const RespawnTracker: FC = () => {
     // моменту уже реально появился в мире, и профилактика не отменяет
     // состоявшийся респавн (окно на килл было — от respawnStart и до старта
     // профилактики), так что статус считаем как обычно.
+    // Статус остаётся "Проф. работы" до, во время и после самого окна — а не
+    // только пока оно идёт — потому что расчётное время всё это время
+    // недостоверно и станет известным только после того, как кто-то занесёт
+    // новый килл/время.
     if (maintenanceStartedDuring(killDate, respawnStart, maintenanceWindows))
       return {
-        status: "Неизвестно",
+        status: "Проф. работы",
         nextRespawn: "-",
         lastKillDisplay: formatMoscowDateTime(killDate),
         waiting: false,
@@ -222,7 +226,6 @@ const RespawnTracker: FC = () => {
     if (status === "Возможен респаун!") return "text-green-600 font-bold";
     if (status === "Ожидание убийства") return "text-blue-500 font-semibold";
     if (status === "Нет данных") return "text-gray-400";
-    if (status === "Неизвестно") return "text-orange-400 font-semibold";
     return "text-gray-700";
   }
 

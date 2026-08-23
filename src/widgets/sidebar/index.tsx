@@ -75,19 +75,13 @@ const AppSidebar: FC<Props> = ({ isAdmin }) => {
     },
     { title: "Статистика", url: "/stats", icon: LineChart },
     { title: "Киллкаунт", url: "/kill_counter", icon: Swords },
+  ];
+
+  const managementItems = [
     { title: "Настройки", url: "/settings", icon: Settings },
     { title: "Предметы", url: "/items", icon: Package },
     { title: "АФК", url: "/afk", icon: UserX },
   ];
-
-  const adminOnlyUrls = ["/settings", "/items", "/afk"];
-
-  const visibleMenuItems = menuItems.filter((item) => {
-    if (item.url && adminOnlyUrls.includes(item.url) && !isAdmin) {
-      return false;
-    }
-    return true;
-  });
 
   return (
     <Sidebar>
@@ -111,7 +105,7 @@ const AppSidebar: FC<Props> = ({ isAdmin }) => {
           <SidebarGroupLabel>Меню</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {visibleMenuItems.map((item) => {
+              {menuItems.map((item) => {
                 if (item.items) {
                   return (
                     <SidebarMenuItem key={item.title}>
@@ -158,6 +152,35 @@ const AppSidebar: FC<Props> = ({ isAdmin }) => {
                 );
               })}
               <DimonishMenuItem />
+
+              {isAdmin && (
+                <SidebarMenuItem>
+                  <Collapsible defaultOpen className="group/collapsible w-full">
+                    <SidebarMenuButton asChild>
+                      <CollapsibleTrigger className="flex items-center w-full gap-2 rounded-md p-2 text-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition cursor-pointer">
+                        <Settings className="h-5 w-5" />
+                        <span className="truncate">Управление сайтом</span>
+                        <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                      </CollapsibleTrigger>
+                    </SidebarMenuButton>
+                    <CollapsibleContent className="pl-7 ">
+                      <SidebarMenu>
+                        {managementItems.map((subItem) => (
+                          <SidebarMenuItem key={subItem.title}>
+                            <SidebarMenuButton
+                              className="cursor-pointer"
+                              onClick={() => router.push(subItem.url)}
+                            >
+                              <subItem.icon className="h-4 w-4" />
+                              <span>{subItem.title}</span>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        ))}
+                      </SidebarMenu>
+                    </CollapsibleContent>
+                  </Collapsible>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

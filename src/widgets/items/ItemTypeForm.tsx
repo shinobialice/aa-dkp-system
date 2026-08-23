@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { IconField } from "./IconField";
 import { SourceSelector } from "@/widgets/Loot/GuildLoot/SourceSelector";
+import { getSealGradeLabel, getSealGradeColor } from "@/widgets/profile/seals/sealsData";
 import {
   createItemType,
   updateItemType,
@@ -131,11 +132,16 @@ export function ItemTypeForm({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {GRADE_OPTIONS.map((g) => (
-                  <SelectItem key={g} value={String(g)}>
-                    {g}
-                  </SelectItem>
-                ))}
+                {GRADE_OPTIONS.map((g) => {
+                  const color = getSealGradeColor(g);
+                  return (
+                    <SelectItem key={g} value={String(g)}>
+                      <span style={color ? { color } : undefined}>
+                        {g} — {getSealGradeLabel(g)}
+                      </span>
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>
