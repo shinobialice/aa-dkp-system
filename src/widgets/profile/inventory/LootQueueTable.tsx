@@ -49,7 +49,12 @@ export default function LootQueueTable({
             <TableRow key={item.id}>
               <TableCell className="whitespace-normal break-words">
                 <div className="flex items-center gap-2">
-                  <LootIcon itemName={item.itemName} size={28} />
+                  <LootIcon
+                    itemName={item.itemName}
+                    iconUrl={item.iconUrl}
+                    grade={item.grade}
+                    size={28}
+                  />
                   {item.itemName}
                 </div>
               </TableCell>

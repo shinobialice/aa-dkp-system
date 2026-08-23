@@ -52,7 +52,12 @@ export default function InventoryLogTable({
               <TableRow key={item.id}>
                 <TableCell className="whitespace-normal break-words">
                   <div className="flex items-center gap-2">
-                    <LootIcon itemName={item.name} size={28} />
+                    <LootIcon
+                      itemName={item.name}
+                      iconUrl={item.iconUrl}
+                      grade={item.grade}
+                      size={28}
+                    />
                     {item.name}
                   </div>
                 </TableCell>

@@ -10,6 +10,8 @@ export type InventoryLogEntry = {
   date: string | null;
   quantity: number;
   comment: string | null;
+  iconUrl: string | null;
+  grade: number | null;
 };
 
 export const getUserPurchaseLog = async (
@@ -17,7 +19,9 @@ export const getUserPurchaseLog = async (
 ): Promise<InventoryLogEntry[]> => {
   const [lootRows, giveawayRows] = await Promise.all([
     sql<any[]>`
-      SELECT l.id, l.quantity, l.comment, l.status, l.sold_at, it.name AS item_type_name
+      SELECT
+        l.id, l.quantity, l.comment, l.status, l.sold_at,
+        it.name AS item_type_name, it.icon_url AS item_type_icon_url, it.grade AS item_type_grade
       FROM loot l
       JOIN item_type it ON it.id = l.item_type_id
       WHERE l.sold_to_user_id = ${userId} AND l.status = ANY(${["Продано", "Выдано"]})
@@ -25,9 +29,17 @@ export const getUserPurchaseLog = async (
       console.error("Ошибка при получении покупок/выдач из казны:", error);
       throw new Error("Не удалось получить покупки/выдачи из казны");
     }),
+    // У раздачи лута нет своей ссылки на item_type (только текстовое имя) —
+    // подтягиваем иконку/грейд по совпадению имени с каталогом казны, если
+    // такой предмет там есть; для остальных иконка просто не покажется, как
+    // и раньше.
     sql<any[]>`
-      SELECT id, name, date, comment, status FROM givenawayloot
-      WHERE user_id = ${userId} AND status = 'Выдано'
+      SELECT
+        g.id, g.name, g.date, g.comment, g.status,
+        it.icon_url AS item_type_icon_url, it.grade AS item_type_grade
+      FROM givenawayloot g
+      LEFT JOIN item_type it ON it.name = g.name
+      WHERE g.user_id = ${userId} AND g.status = 'Выдано'
     `.catch((error) => {
       console.error("Ошибка при получении раздач лута:", error);
       throw new Error("Не удалось получить раздачи лута");
@@ -42,6 +54,8 @@ export const getUserPurchaseLog = async (
     date: row.sold_at,
     quantity: row.quantity ?? 1,
     comment: row.comment,
+    iconUrl: row.item_type_icon_url ?? null,
+    grade: row.item_type_grade ?? null,
   }));
 
   const fromGiveaway: InventoryLogEntry[] = giveawayRows.map((row) => ({
@@ -52,6 +66,8 @@ export const getUserPurchaseLog = async (
     date: row.date,
     quantity: 1,
     comment: row.comment,
+    iconUrl: row.item_type_icon_url ?? null,
+    grade: row.item_type_grade ?? null,
   }));
 
   return [...fromTreasury, ...fromGiveaway].sort((a, b) => {

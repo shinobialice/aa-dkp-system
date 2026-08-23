@@ -10,6 +10,8 @@ export type UserLootQueueEntry = {
   place: number;
   totalInQueue: number;
   createdAt: string;
+  iconUrl: string | null;
+  grade: number | null;
 };
 
 export async function getUserLootQueue(
@@ -26,6 +28,8 @@ export async function getUserLootQueue(
           lq.status,
           lq.created_at,
           it.name AS item_name,
+          it.icon_url AS item_icon_url,
+          it.grade AS item_grade,
           ROW_NUMBER() OVER (
             PARTITION BY lq.item_type_id
             ORDER BY
@@ -54,5 +58,7 @@ export async function getUserLootQueue(
     place: Number(r.place),
     totalInQueue: Number(r.total_in_queue),
     createdAt: r.created_at,
+    iconUrl: r.item_icon_url ?? null,
+    grade: r.item_grade ?? null,
   }));
 }
