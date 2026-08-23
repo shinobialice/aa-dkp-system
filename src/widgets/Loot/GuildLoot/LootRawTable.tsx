@@ -238,7 +238,12 @@ export function LootRawTable({
                   {item.source ?? "—"}
                 </TableCell>
                 <TableCell className="flex items-center gap-2">
-                  <LootIcon itemName={item.itemType.name} size={30} />
+                  <LootIcon
+                    itemName={item.itemType.name}
+                    iconUrl={item.itemType.icon_url}
+                    grade={item.itemType.grade}
+                    size={30}
+                  />
                   <span className="min-w-0 flex-1 truncate">
                     {item.itemType.name}
                   </span>

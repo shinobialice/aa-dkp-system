@@ -1,12 +1,4 @@
-import { getLootIconUrl } from "../widgets/Loot/LootBuy/icons/LootIcons";
-import { sourceMap } from "../widgets/Loot/priceSourceMap";
 import sql from "@/shared/lib/db";
-
-const HIDDEN_FROM_BUY = new Set([
-  "Всякие мелочи",
-  "Всякие мелочи 2",
-  "В казну",
-]);
 
 const MISC_ORDER = [
   "Средоточие морей",
@@ -27,7 +19,7 @@ export async function getLootGrouped() {
   let items;
   try {
     items = await sql<any[]>`
-      SELECT name, price FROM item_type
+      SELECT name, price, icon_url, grade, source, show_in_buy FROM item_type
     `;
   } catch (error) {
     console.error("Ошибка при загрузке предметов:", error);
@@ -36,13 +28,17 @@ export async function getLootGrouped() {
 
   const grouped: Record<
     string,
-    { name: string; price: number | null; icon: string }[]
+    {
+      name: string;
+      price: number | null;
+      icon: string | null;
+      grade: number | null;
+    }[]
   > = {};
 
   for (const item of items) {
-    if (HIDDEN_FROM_BUY.has(item.name)) continue;
-    const source = sourceMap[item.name] || "Разное";
-    const icon = getLootIconUrl(item.name);
+    if (!item.show_in_buy) continue;
+    const source = item.source || "Разное";
 
     if (!grouped[source]) {
       grouped[source] = [];
@@ -51,7 +47,8 @@ export async function getLootGrouped() {
     grouped[source].push({
       name: item.name,
       price: item.price,
-      icon,
+      icon: item.icon_url,
+      grade: item.grade,
     });
   }
 

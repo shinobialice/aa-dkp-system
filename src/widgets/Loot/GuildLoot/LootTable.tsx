@@ -73,6 +73,7 @@ export default function LootTable({ isAdmin }: Props) {
             isAdmin={isAdmin}
             selectedMonth={selectedMonth}
             selectedYear={selectedYear}
+            itemTypes={itemTypes}
           />
           <LootRawTable
             isAdmin={isAdmin}

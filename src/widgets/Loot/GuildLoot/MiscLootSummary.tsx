@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
-import { MISC_LOOT_ITEM_NAMES } from "./LootTypes";
+import { MISC_LOOT_ITEM_NAMES, ItemType } from "./LootTypes";
 import { LootIcon } from "../LootBuy/icons/LootIconComponent";
 import { getMiscLootTotals, setMiscLootTotal } from "@/actions/miscLootTotals";
 import {
@@ -20,10 +20,12 @@ export function MiscLootSummary({
   selectedMonth,
   selectedYear,
   isAdmin,
+  itemTypes,
 }: {
   selectedMonth: number;
   selectedYear: number;
   isAdmin: boolean;
+  itemTypes: ItemType[];
 }) {
   const [totals, setTotals] = useState<{ name: string; amount: number }[]>(
     MISC_LOOT_ITEM_NAMES.map((name) => ({ name, amount: 0 })),
@@ -74,9 +76,16 @@ export function MiscLootSummary({
         </CardTitle>
       </CardHeader>
       <CardContent className="px-4 flex flex-wrap gap-6">
-        {totals.map((stat) => (
+        {totals.map((stat) => {
+          const itemType = itemTypes.find((it) => it.name === stat.name);
+          return (
           <div key={stat.name} className="flex items-center gap-2">
-            <LootIcon itemName={stat.name} size={28} />
+            <LootIcon
+              itemName={stat.name}
+              iconUrl={itemType?.icon_url}
+              grade={itemType?.grade}
+              size={28}
+            />
             <div className="text-sm">
               <div>{stat.name}</div>
               {isAdmin ? (
@@ -142,7 +151,8 @@ export function MiscLootSummary({
               )}
             </div>
           </div>
-        ))}
+          );
+        })}
       </CardContent>
     </Card>
   );

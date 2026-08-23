@@ -12,7 +12,6 @@ import {
 } from "@/shared/ui";
 import type { InventoryStockStat } from "@/actions/guildStats";
 import inventoryIcons from "@/widgets/profile/inventory/InventoryIcons";
-import { getLootIconUrl } from "@/widgets/Loot/LootBuy/icons/LootIcons";
 
 const ITEM_ICONS: Record<string, string> = {
   Фрегат: inventoryIcons["Фрегат"],
@@ -31,8 +30,8 @@ const ITEM_ICONS: Record<string, string> = {
   "Красный Дракон": inventoryIcons["Красный Дракон"],
   "Черный Дракон": inventoryIcons["Черный Дракон"],
   "Зеленый Дракон": inventoryIcons["Зеленый Дракон"],
-  Рокана: getLootIconUrl("Ро'кана, Безумие морей"),
-  "Кряк. щит": getLootIconUrl("Анд'хакар, Чернильная тьма"),
+  Рокана: "https://archeagecodex.com/items/icon_item_staff_1h_0058.png",
+  "Кряк. щит": "https://archeagecodex.com/items/icon_item_shield_0055.png",
   "Коллекционный фамильяр Т2": inventoryIcons["Коллекционный фамильяр т2"],
 };
 

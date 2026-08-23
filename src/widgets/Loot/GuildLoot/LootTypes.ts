@@ -36,6 +36,8 @@ export type LootItem = {
     id: number;
     name: string;
     price: number | null;
+    icon_url: string | null;
+    grade: number | null;
   };
 };
 
@@ -54,7 +56,12 @@ export type GroupedLootItem = {
   status: string;
 };
 
-export type ItemType = { id: number; name: string };
+export type ItemType = {
+  id: number;
+  name: string;
+  icon_url?: string | null;
+  grade?: number | null;
+};
 
 export type NewLootItem = {
   itemTypeId: number;

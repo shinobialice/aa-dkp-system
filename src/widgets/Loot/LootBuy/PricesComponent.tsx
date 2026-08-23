@@ -15,7 +15,8 @@ import { hasTag } from "@/actions/hasTag";
 export type LootItem = {
   name: string;
   price: number | null;
-  icon: string;
+  icon: string | null;
+  grade: number | null;
 };
 
 export async function PricesComponent({
@@ -49,7 +50,11 @@ export async function PricesComponent({
             <TableRow className="hover:bg-muted cursor-pointer">
               <TableCell>
                 <div className="flex items-center gap-2">
-                  <LootIcon itemName={item.name} />
+                  <LootIcon
+                    itemName={item.name}
+                    iconUrl={item.icon}
+                    grade={item.grade}
+                  />
                   <span>{item.name}</span>
                 </div>
               </TableCell>

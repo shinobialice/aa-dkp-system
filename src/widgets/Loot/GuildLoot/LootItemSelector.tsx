@@ -1,19 +1,20 @@
 "use client";
 import { useRef, useState } from "react";
 import { LootIcon } from "../LootBuy/icons/LootIconComponent";
-import { LootIcons } from "../LootBuy/icons/LootIcons";
+import { ItemType } from "./LootTypes";
 import { Command, CommandInput, CommandItem, CommandList } from "@/shared/ui";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui";
 
 export function LootItemSelector({
   value,
   onSelect,
+  itemTypes,
 }: {
   value: string;
   onSelect: (name: string) => void;
+  itemTypes: ItemType[];
 }) {
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const allItemNames = Object.keys(LootIcons);
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -33,19 +34,24 @@ export function LootItemSelector({
         <Command>
           <CommandInput placeholder="Поиск..." />
           <CommandList className="cursor-pointer">
-            {allItemNames.map((name) => (
+            {itemTypes.map((item) => (
               <CommandItem
-                key={name}
-                value={name}
+                key={item.id}
+                value={item.name}
                 onSelect={() => {
-                  onSelect(name);
+                  onSelect(item.name);
                   setIsOpen(false);
                   inputRef.current?.blur();
                 }}
                 className="flex items-center gap-2 cursor-pointer"
               >
-                <LootIcon itemName={name} size={24} />
-                <span>{name}</span>
+                <LootIcon
+                  itemName={item.name}
+                  iconUrl={item.icon_url}
+                  grade={item.grade}
+                  size={24}
+                />
+                <span>{item.name}</span>
               </CommandItem>
             ))}
           </CommandList>

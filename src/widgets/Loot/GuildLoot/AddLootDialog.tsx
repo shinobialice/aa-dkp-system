@@ -40,6 +40,10 @@ export function AddLootDialog({
   const getItemTypeIdByName = (name: string): number | undefined =>
     itemTypes.find((item) => item.name === name)?.id;
 
+  const selectedItemType = itemTypes.find(
+    (item) => item.name === form.itemName,
+  );
+
   const isOtherType = form.itemName === "В казну";
   const isLinkable = isPrimeLinkableSource(form.source);
 
@@ -86,13 +90,19 @@ export function AddLootDialog({
           <Label>Предмет</Label>
           {form.itemName && (
             <div className="flex items-center gap-2 mb-2">
-              <LootIcon itemName={form.itemName} size={32} />
+              <LootIcon
+                itemName={form.itemName}
+                iconUrl={selectedItemType?.icon_url}
+                grade={selectedItemType?.grade}
+                size={32}
+              />
               <span className="font-medium">{form.itemName}</span>
             </div>
           )}
           <LootItemSelector
             value={form.itemName || ""}
             onSelect={handleSelect}
+            itemTypes={itemTypes}
           />
 
           <Label>Источник</Label>

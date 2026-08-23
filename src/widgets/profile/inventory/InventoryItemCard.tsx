@@ -33,7 +33,10 @@ export default function InventoryItemCard({
     : inventory.find((inv) => inv.name === item.name && inv.type === item.type);
 
   const displayIconName = isDragon && userItem ? userItem.name : item.name;
-  const itemIconUrl = inventoryIcons[displayIconName] || null;
+  // item.iconUrl — предметы, заведённые админом на /items (см.
+  // InventoryCategoryGrid). У фиксированных 16 вещей его нет — для них, как
+  // и раньше, берём иконку из статического InventoryIcons.tsx.
+  const itemIconUrl = item.iconUrl ?? inventoryIcons[displayIconName] ?? null;
 
   const handleChange = async (value: string) => {
     if (item.name === "Бафалка") {

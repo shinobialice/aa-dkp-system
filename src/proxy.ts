@@ -32,6 +32,13 @@ export async function proxy(req: NextRequest) {
     "/images",
     "/_next/static",
     "/_next/image",
+    // Раздача загруженных файлов (аватарки, баннер ивента, иконки предметов).
+    // Публично не потому, что не нужна авторизация вообще, а потому что
+    // серверный оптимизатор next/image (см. /_next/image выше) сам делает
+    // внутренний fetch за оригиналом без куки браузера — с гейтом тут этот
+    // fetch редиректило бы на /login, и next/image ловил бы "not a valid
+    // image" вместо картинки.
+    "/api/uploads",
     "/api/auth/vk/callback",
     "/api/notify-respawn",
     "/api/notify-schedule",

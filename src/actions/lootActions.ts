@@ -6,7 +6,7 @@ import { triggerFinanceRecalc } from "./recalculateFinanceForMonth";
 // Get list of item types
 export const getItemTypes = async () => {
   try {
-    return await sql<any[]>`SELECT id, name FROM item_type`;
+    return await sql<any[]>`SELECT id, name, icon_url, grade FROM item_type`;
   } catch (error) {
     console.error("Ошибка при получении типов предметов:", error);
     throw new Error("Не удалось загрузить типы предметов");
@@ -20,7 +20,8 @@ export async function getLoot() {
     rows = await sql<any[]>`
       SELECT
         l.*,
-        it.id AS item_type_pk, it.name AS item_type_name, it.price AS item_type_price
+        it.id AS item_type_pk, it.name AS item_type_name, it.price AS item_type_price,
+        it.icon_url AS item_type_icon_url, it.grade AS item_type_grade
       FROM loot l
       JOIN item_type it ON it.id = l.item_type_id
       ORDER BY l.acquired_at ASC
@@ -31,10 +32,23 @@ export async function getLoot() {
   }
 
   return rows.map((row) => {
-    const { item_type_pk, item_type_name, item_type_price, ...loot } = row;
+    const {
+      item_type_pk,
+      item_type_name,
+      item_type_price,
+      item_type_icon_url,
+      item_type_grade,
+      ...loot
+    } = row;
     return {
       ...loot,
-      itemType: { id: item_type_pk, name: item_type_name, price: item_type_price },
+      itemType: {
+        id: item_type_pk,
+        name: item_type_name,
+        price: item_type_price,
+        icon_url: item_type_icon_url,
+        grade: item_type_grade,
+      },
     };
   });
 }

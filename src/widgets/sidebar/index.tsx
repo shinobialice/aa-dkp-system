@@ -23,6 +23,7 @@ import {
   Swords,
   UserX,
   Newspaper,
+  Package,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -75,10 +76,11 @@ const AppSidebar: FC<Props> = ({ isAdmin }) => {
     { title: "Статистика", url: "/stats", icon: LineChart },
     { title: "Киллкаунт", url: "/kill_counter", icon: Swords },
     { title: "Настройки", url: "/settings", icon: Settings },
+    { title: "Предметы", url: "/items", icon: Package },
     { title: "АФК", url: "/afk", icon: UserX },
   ];
 
-  const adminOnlyUrls = ["/settings", "/afk"];
+  const adminOnlyUrls = ["/settings", "/items", "/afk"];
 
   const visibleMenuItems = menuItems.filter((item) => {
     if (item.url && adminOnlyUrls.includes(item.url) && !isAdmin) {

@@ -1,34 +1,40 @@
 "use client";
 
 import Image from "next/image";
-import { getLootGradeUrl, getLootIconUrl } from "./LootIcons";
+
+const GRADE_URL = "https://archeagecodex.com/images/icon_grade";
 
 type LootIconProps = {
   itemName: string;
+  iconUrl?: string | null;
+  grade?: number | null;
   size?: number;
   className?: string;
 };
 
 export function LootIcon({
   itemName,
+  iconUrl,
+  grade,
   size = 40,
   className = "",
 }: LootIconProps) {
-  const iconUrl = getLootIconUrl(itemName);
-  const gradeUrl = getLootGradeUrl(itemName);
+  const gradeUrl = `${GRADE_URL}${grade ?? 1}.png`;
 
   return (
     <div
-      className={`relative inline-block`}
+      className={`relative inline-block rounded bg-muted`}
       style={{ width: size, height: size }}
     >
-      <Image
-        src={iconUrl}
-        alt={itemName}
-        width={size}
-        height={size}
-        className={className}
-      />
+      {iconUrl && (
+        <Image
+          src={iconUrl}
+          alt={itemName}
+          width={size}
+          height={size}
+          className={className}
+        />
+      )}
       <Image
         src={gradeUrl}
         alt="grade"

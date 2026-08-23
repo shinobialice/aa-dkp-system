@@ -82,6 +82,7 @@ export default function ProfileTabs({
       <TabsContent value="inventory">
         <InventoryTabsClient
           canEdit={canEditInventory}
+          isAdmin={isAdmin}
           inventory={inventory}
           userId={user.id}
           onChange={handleInventoryChange}
