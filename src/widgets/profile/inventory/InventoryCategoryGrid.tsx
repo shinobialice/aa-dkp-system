@@ -93,7 +93,7 @@ export default function InventoryCategoryGrid({
           onChange={onChange}
         />
       ))}
-      {isOther && isAdmin && (
+      {isOther && canEdit && (
         <AddCustomInventoryItemDialog
           userId={userId}
           catalog={otherCatalog.filter(
