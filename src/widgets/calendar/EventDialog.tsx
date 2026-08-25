@@ -207,12 +207,12 @@ export function EventDialog({
       <DialogContent className="max-w-7xl">
         <DialogHeader>
           <DialogTitle>
-            {mode === "edit" ? "Редактировать активность" : "Новая активность"}
+            {mode === "edit" ? "Редактировать посещение" : "Новое посещение"}
           </DialogTitle>
           <DialogDescription>
             {mode === "edit"
               ? "Измените детали события"
-              : "Создайте новую активность гильдии"}
+              : "Создайте новое посещение гильдии"}
           </DialogDescription>
         </DialogHeader>
         <Separator />

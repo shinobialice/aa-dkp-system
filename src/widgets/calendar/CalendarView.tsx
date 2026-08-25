@@ -83,11 +83,16 @@ export default function CalendarView({
   const handleEventClick = async (info: any) => {
     const fullEvent = await getRaidById(info.event.id);
     setSelectedEvent(fullEvent);
-    if (canEditEvents) {
-      setOpenDialog(true);
-    } else {
-      setInfoDialogOpen(true);
-    }
+    // Клик по событию всегда открывает обычный просмотр, как у рядовых
+    // пользователей — редактирование теперь отдельным шагом по кнопке
+    // внутри RaidInfoDialog (см. canEdit/onEdit), чтобы не открывать форму
+    // редактирования сразу и не путать её с формой создания.
+    setInfoDialogOpen(true);
+  };
+
+  const handleEditFromInfo = () => {
+    setInfoDialogOpen(false);
+    setOpenDialog(true);
   };
 
   useEffect(() => {
@@ -175,7 +180,7 @@ export default function CalendarView({
               setOpenDialog(true);
             }}
           >
-            Добавить активность
+            Добавить посещение
           </Button>
         ) : null}
       </div>
@@ -246,7 +251,7 @@ export default function CalendarView({
 
           <div className="rounded-lg border bg-card p-3">
             <p className="mb-1 px-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Типы активностей
+              Типы посещений
             </p>
             <div className="flex flex-col gap-0.5">
               {RAID_TYPES.map((raidType) => {
@@ -336,6 +341,8 @@ export default function CalendarView({
         open={infoDialogOpen}
         setOpen={setInfoDialogOpen}
         raid={selectedEvent}
+        canEdit={canEditEvents}
+        onEdit={handleEditFromInfo}
       />
     </div>
   );

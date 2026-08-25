@@ -91,7 +91,7 @@ export default function MissingActivitiesBanner() {
             )}
           />
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Обязательные активности
+            Обязательные посещения
           </p>
         </div>
         {hasDeficit && (
@@ -129,7 +129,7 @@ export default function MissingActivitiesBanner() {
           <p className="text-muted-foreground">Загрузка…</p>
         ) : !hasDeficit ? (
           <p className="text-muted-foreground">
-            Все обязательные активности за месяц проведены.
+            Все обязательные посещения за месяц проведены.
           </p>
         ) : (
           <div className="max-h-40 space-y-1 overflow-y-auto pr-1">

@@ -61,7 +61,7 @@ export default function ProfileTabs({
           Инвентарь
         </TabsTrigger>
         <TabsTrigger className="cursor-pointer" value="activity">
-          Активность
+          Посещения
         </TabsTrigger>
         <TabsTrigger className="cursor-pointer" value="raids">
           Рейды

@@ -6,6 +6,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/shared/ui";
@@ -32,10 +33,14 @@ export function RaidInfoDialog({
   open,
   setOpen,
   raid,
+  canEdit,
+  onEdit,
 }: {
   open: boolean;
   setOpen: (v: boolean) => void;
   raid: any;
+  canEdit?: boolean;
+  onEdit?: () => void;
 }) {
   const attendance = raid?.raid_attendance ?? EMPTY_ATTENDANCE;
   const loot = (raid?.loot ?? EMPTY_LOOT).filter(
@@ -144,7 +149,7 @@ export function RaidInfoDialog({
             {raid.type}
             {bosses.length > 0 ? ` — ${bosses.join(", ")}` : ""}
           </DialogTitle>
-          <DialogDescription>Информация об активности</DialogDescription>
+          <DialogDescription>Информация о посещении</DialogDescription>
         </DialogHeader>
         <Separator className="shrink-0" />
         <div className="grid grid-cols-2 gap-4 text-sm shrink-0">
@@ -229,6 +234,14 @@ export function RaidInfoDialog({
         <div className="rounded-md border flex-1 min-h-0 overflow-y-auto">
           {attendanceTable}
         </div>
+
+        {canEdit && (
+          <DialogFooter className="shrink-0">
+            <Button className="cursor-pointer" onClick={onEdit}>
+              Редактировать
+            </Button>
+          </DialogFooter>
+        )}
       </DialogContent>
     </Dialog>
   );

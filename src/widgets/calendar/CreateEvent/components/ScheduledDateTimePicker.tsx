@@ -65,8 +65,22 @@ export function ScheduledDateTimePicker({
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [takenTimes, setTakenTimes] = useState<string[]>([]);
+  const [loadError, setLoadError] = useState(false);
 
   const weekday = dateOnly ? getMoscowWeekday(dateOnly) : null;
+
+  // Ключ текущего выбора (босс/дата/день недели). Пока эффект ниже не
+  // подтвердил его через confirmedKey, считаем результат ещё не готовым —
+  // без этого на один кадр между сменой даты/босса и запуском эффекта
+  // рендерились старые times от предыдущего выбора, и если они оказывались
+  // пустыми, успевал мелькнуть красный текст "не рейдится в этот день"
+  // прежде, чем эффект перезапрашивал расписание и показывал лоадер.
+  const [confirmedKey, setConfirmedKey] = useState<string | null>(null);
+  const currentKey =
+    mode !== "free" && dateOnly && selectedBoss && weekday
+      ? `${mode}::${dateOnly.getTime()}::${selectedBoss}::${weekday}`
+      : null;
+  const isPendingKey = currentKey !== null && confirmedKey !== currentKey;
 
   useEffect(() => {
     if (mode === "free" || !dateOnly || !selectedBoss || !weekday) return;
@@ -74,8 +88,10 @@ export function ScheduledDateTimePicker({
     let cancelled = false;
 
     (async () => {
+      setConfirmedKey(currentKey);
       setLoading(true);
       setSelectedTime(null);
+      setLoadError(false);
       try {
         const fixed = await getFixedTimesForBoss(selectedBoss, weekday);
         if (cancelled) return;
@@ -93,6 +109,17 @@ export function ScheduledDateTimePicker({
           setSelectedTime(fixed[0]);
           onChange(combineDateAndTime(dateOnly, fixed[0]));
         } else {
+          onChange(null);
+        }
+      } catch (error) {
+        // Не даём сетевому/БД-сбою выглядеть как "босс не рейдится в этот
+        // день" — times остался бы пустым и отрисовался бы тот же текст,
+        // хотя на самом деле расписание просто не удалось загрузить.
+        console.error("Не удалось загрузить расписание босса:", error);
+        if (!cancelled) {
+          setTimes([]);
+          setTakenTimes([]);
+          setLoadError(true);
           onChange(null);
         }
       } finally {
@@ -134,11 +161,17 @@ export function ScheduledDateTimePicker({
         classNames={{ trigger: "w-[270px]" }}
       />
 
-      {loading && (
+      {(loading || isPendingKey) && dateOnly && (
         <p className="text-sm text-muted-foreground">Загрузка расписания...</p>
       )}
 
-      {!loading && mode === "locked-single" && dateOnly && (
+      {!loading && !isPendingKey && loadError && dateOnly && (
+        <p className="text-sm text-red-500">
+          Не удалось загрузить расписание — попробуйте выбрать дату ещё раз
+        </p>
+      )}
+
+      {!loading && !isPendingKey && !loadError && mode === "locked-single" && dateOnly && (
         times.length > 0 ? (
           <p className="text-sm text-muted-foreground">
             Время зафиксировано: <strong>{times[0]}</strong> (по расписанию)
@@ -150,7 +183,7 @@ export function ScheduledDateTimePicker({
         )
       )}
 
-      {!loading && mode === "agl-slots" && dateOnly && (
+      {!loading && !isPendingKey && !loadError && mode === "agl-slots" && dateOnly && (
         availableTimes.length > 0 ? (
           <Select value={selectedTime ?? undefined} onValueChange={handleTimeSelect}>
             <SelectTrigger className="w-[270px]">
@@ -171,7 +204,7 @@ export function ScheduledDateTimePicker({
         )
       )}
 
-      {!loading && mode === "cat-toggle" && dateOnly && (
+      {!loading && !isPendingKey && !loadError && mode === "cat-toggle" && dateOnly && (
         times.length > 0 ? (
           <div className="flex gap-2">
             {times.map((t, idx) => (
