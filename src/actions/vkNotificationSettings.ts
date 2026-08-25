@@ -31,9 +31,6 @@ export async function getVkNotificationSettings(): Promise<VkNotificationSetting
     quietHoursEnabled: data.quiet_hours_enabled,
     quietHoursStart: data.quiet_hours_start,
     quietHoursEnd: data.quiet_hours_end,
-    // Примечание: колонки prime_time в базе нет (не мигрировал специально —
-    // её не было и в исходной Supabase-базе, это уже существовавшая
-    // особенность/баг). Сохраняю поведение как было: чтение всегда даёт null.
     primeTime: data.prime_time ?? null,
   };
 }
@@ -47,12 +44,12 @@ export async function updateVkNotificationSettings(
     await sql<any[]>`
       INSERT INTO vk_notification_settings
         (id, enabled_bosses, notify_before_minutes, notify_minutes_by_event,
-         quiet_hours_enabled, quiet_hours_start, quiet_hours_end, updated_at)
+         quiet_hours_enabled, quiet_hours_start, quiet_hours_end, prime_time, updated_at)
       VALUES (
         1, ${settings.enabledBosses}, ${settings.defaultNotifyBeforeMinutes},
         ${sql.json(settings.notifyMinutesByEvent)},
         ${settings.quietHoursEnabled}, ${settings.quietHoursStart}, ${settings.quietHoursEnd},
-        now()
+        ${settings.primeTime}, now()
       )
       ON CONFLICT (id) DO UPDATE SET
         enabled_bosses = EXCLUDED.enabled_bosses,
@@ -61,6 +58,7 @@ export async function updateVkNotificationSettings(
         quiet_hours_enabled = EXCLUDED.quiet_hours_enabled,
         quiet_hours_start = EXCLUDED.quiet_hours_start,
         quiet_hours_end = EXCLUDED.quiet_hours_end,
+        prime_time = EXCLUDED.prime_time,
         updated_at = EXCLUDED.updated_at
     `;
   } catch (error) {

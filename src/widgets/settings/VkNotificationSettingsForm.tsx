@@ -15,6 +15,22 @@ import {
 import { bosses } from "@/shared/config/bossRespawn";
 import { fixedScheduleEvents } from "@/shared/config/fixedSchedule";
 
+// Разбираем "HH:MM" на часы/минуты для двух отдельных числовых полей —
+// это (в отличие от <input type="time">) даёт гарантированно 24-часовой
+// формат независимо от локали браузера/ОС пользователя.
+function splitPrimeTime(value: string | null): [string, string] {
+  if (!value) return ["", ""];
+  const [h, m] = value.split(":");
+  return [h ?? "", m ?? ""];
+}
+
+function joinPrimeTime(hour: string, minute: string): string | null {
+  if (hour === "" && minute === "") return null;
+  const h = String(Math.min(23, Math.max(0, Number(hour) || 0))).padStart(2, "0");
+  const m = String(Math.min(59, Math.max(0, Number(minute) || 0))).padStart(2, "0");
+  return `${h}:${m}`;
+}
+
 function EventRow({
   name,
   settings,
@@ -134,18 +150,42 @@ export function VkNotificationSettingsForm() {
             }
           />
           <div className="flex items-center gap-2">
-            <Label htmlFor="vk-prime-time" className="flex-1 font-normal">
-              Время каждый день (МСК)
+            <Label htmlFor="vk-prime-hour" className="flex-1 font-normal">
+              Время каждый день (МСК, 24ч)
             </Label>
             <Input
-              id="vk-prime-time"
-              type="time"
-              className="w-32"
-              value={settings.primeTime ?? ""}
+              id="vk-prime-hour"
+              type="number"
+              min={0}
+              max={23}
+              placeholder="ЧЧ"
+              className="w-16"
+              value={splitPrimeTime(settings.primeTime)[0]}
               onChange={(e) =>
                 setSettings({
                   ...settings,
-                  primeTime: e.target.value || null,
+                  primeTime: joinPrimeTime(
+                    e.target.value,
+                    splitPrimeTime(settings.primeTime)[1],
+                  ),
+                })
+              }
+            />
+            <span className="text-muted-foreground">:</span>
+            <Input
+              type="number"
+              min={0}
+              max={59}
+              placeholder="ММ"
+              className="w-16"
+              value={splitPrimeTime(settings.primeTime)[1]}
+              onChange={(e) =>
+                setSettings({
+                  ...settings,
+                  primeTime: joinPrimeTime(
+                    splitPrimeTime(settings.primeTime)[0],
+                    e.target.value,
+                  ),
                 })
               }
             />
