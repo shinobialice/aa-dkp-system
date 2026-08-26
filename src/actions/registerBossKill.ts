@@ -11,11 +11,12 @@ import {
   respawnWindow,
   getRespawnStart,
   isMaintenanceWindow,
-  maintenanceStartedDuring,
+  maintenanceOverlapsRange,
 } from "@/shared/config/bossRespawn";
 import { getVkNotificationSettings } from "./vkNotificationSettings";
 import { resolveNotifyMinutes } from "@/shared/config/vkNotificationDefaults";
 import { getMaintenanceWindows } from "./maintenanceWindows";
+import { upsertRaidSuggestion } from "./raidSuggestions";
 
 export async function registerBossKill(
   boss: BossName,
@@ -44,6 +45,15 @@ export async function registerBossKill(
   }
 
   try {
+    await upsertRaidSuggestion(boss, killTimeIso);
+  } catch (suggestionError) {
+    console.error(
+      "Не удалось обновить подсказку по созданию рейда:",
+      suggestionError,
+    );
+  }
+
+  try {
     const [respawnRow] = await sql<any[]>`
       SELECT notify_message_id, missed_message_id FROM boss_respawn WHERE boss_name = ${boss}
     `;
@@ -59,18 +69,24 @@ export async function registerBossKill(
           )
         : null;
 
+    const respawnEnd = new Date(
+      nextRespawn.getTime() + respawnWindow * 60 * 60 * 1000,
+    );
     const cascadedNextStart = new Date(
       nextRespawn.getTime() +
         (respawnHoursByBoss[boss] + respawnWindow) * 60 * 60 * 1000,
     );
+    const cascadedNextEnd = new Date(
+      cascadedNextStart.getTime() + respawnWindow * 60 * 60 * 1000,
+    );
     const missedNotifyAt =
       bossEnabled &&
-      !isMaintenanceWindow(cascadedNextStart, maintenanceWindows) &&
-      !maintenanceStartedDuring(
+      !maintenanceOverlapsRange(
         new Date(killTimeIso),
-        nextRespawn,
+        respawnEnd,
         maintenanceWindows,
-      )
+      ) &&
+      !maintenanceOverlapsRange(respawnEnd, cascadedNextEnd, maintenanceWindows)
         ? new Date(
             cascadedNextStart.getTime() -
               resolveNotifyMinutes(vkSettings, boss) * 60 * 1000,

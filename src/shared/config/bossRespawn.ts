@@ -124,22 +124,25 @@ export function getNextRecurringMaintenanceWindow(): {
   return null;
 }
 
-export function maintenanceStartedDuring(
-  killTime: Date,
-  boundary: Date,
+export function maintenanceOverlapsRange(
+  rangeStart: Date,
+  rangeEnd: Date,
   adHocWindows: MaintenanceWindow[] = [],
 ): boolean {
   const adHocHit = adHocWindows.some((w) => {
     const start = new Date(w.startAt);
-    return start > killTime && start <= boundary;
+    const end = new Date(w.endAt);
+    return start < rangeEnd && end > rangeStart;
   });
   if (adHocHit) return true;
 
-  for (const offsetDays of [0, 1]) {
-    const day = new Date(killTime.getTime() + offsetDays * 24 * 60 * 60 * 1000);
+  const dayMs = 24 * 60 * 60 * 1000;
+  const days = Math.ceil((rangeEnd.getTime() - rangeStart.getTime()) / dayMs) + 1;
+  for (let offsetDays = 0; offsetDays <= days; offsetDays += 1) {
+    const day = new Date(rangeStart.getTime() + offsetDays * dayMs);
     if (!isThursdayMsk(day)) continue;
-    const { start } = getRecurringWindowBoundsForDay(day);
-    if (start > killTime && start <= boundary) return true;
+    const { start, end } = getRecurringWindowBoundsForDay(day);
+    if (start < rangeEnd && end > rangeStart) return true;
   }
   return false;
 }

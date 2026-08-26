@@ -9,6 +9,7 @@ import { EventDialog } from "./EventDialog";
 import { RaidInfoDialog } from "./RaidInfoDialog";
 import MissingActivitiesBanner from "./MissingActivitiesBanner";
 import ScreenshotsLinkButton from "./ScreenshotsLinkButton";
+import RaidSuggestionsCard from "./RaidSuggestionsCard";
 import { Button } from "@/shared/ui";
 import { cn } from "@/shared/lib";
 import { getRaids } from "@/actions/getEvents";
@@ -277,6 +278,10 @@ export default function CalendarView({
               })}
             </div>
           </div>
+
+          {(isAdmin || isSecretutka) && (
+            <RaidSuggestionsCard onRaidCreated={() => getRaids().then(setEvents)} />
+          )}
         </aside>
 
         <div

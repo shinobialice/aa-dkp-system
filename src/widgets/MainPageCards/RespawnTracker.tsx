@@ -17,7 +17,7 @@ import {
   getRespawnStart,
   getNextMissedCycleStart,
   isMaintenanceWindow,
-  maintenanceStartedDuring,
+  maintenanceOverlapsRange,
 } from "@/shared/config/bossRespawn";
 
 const bossImages: Partial<Record<BossName, string>> = {
@@ -75,7 +75,7 @@ const RespawnTracker: FC = () => {
     const respawnEnd = new Date(
       respawnStart.getTime() + respawnWindow * 60 * 60 * 1000,
     );
-    if (maintenanceStartedDuring(killDate, respawnStart, maintenanceWindows))
+    if (maintenanceOverlapsRange(killDate, respawnEnd, maintenanceWindows))
       return {
         status: "Проф. работы",
         nextRespawn: "-",
@@ -98,8 +98,20 @@ const RespawnTracker: FC = () => {
     } else if (now >= respawnStart && now <= respawnEnd) {
       status = "Возможен респаун!";
     } else {
-      status = "Проёбано";
       nextRespawnDate = getNextMissedCycleStart(respawnStart, now, respawnHours);
+      const cascadeWindowEnd = new Date(
+        nextRespawnDate.getTime() + respawnWindow * 60 * 60 * 1000,
+      );
+      if (maintenanceOverlapsRange(respawnEnd, cascadeWindowEnd, maintenanceWindows)) {
+        return {
+          status: "Проф. работы",
+          nextRespawn: "-",
+          lastKillDisplay: formatMoscowDateTime(killDate),
+          waiting: false,
+          timeLeft: null,
+        };
+      }
+      status = "Проёбано";
     }
     const nextRespawn = formatMoscowDateTime(nextRespawnDate);
     const lastKillDisplay = formatMoscowDateTime(killDate);
