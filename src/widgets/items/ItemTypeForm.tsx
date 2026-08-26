@@ -153,7 +153,6 @@ export function ItemTypeForm({
             <Label>Источник (босс)</Label>
             <p className="text-xs text-muted-foreground">
               На какой вкладке боссов показывать предмет в «Покупке лута».
-              Пусто — попадёт на вкладку «Разное».
             </p>
             <SourceSelector value={source} onChange={setSource} />
           </div>
@@ -161,9 +160,8 @@ export function ItemTypeForm({
           <div className="space-y-2">
             <Label>Категория</Label>
             <p className="text-xs text-muted-foreground">
-              Необязательно. На какой вкладке инвентаря профиля предлагать
-              этот предмет при добавлении («Добавить предмет»). Пусто —
-              попадёт на вкладку «Другое».
+              На какой вкладке инвентаря профиля предлагать
+              этот предмет при добавлении («Добавить предмет»).
             </p>
             <Select
               value={category === "" ? "none" : category}
@@ -173,7 +171,8 @@ export function ItemTypeForm({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">Другое</SelectItem>
+                <SelectItem value="none">-</SelectItem>
+                <SelectItem value="Другое">Другое</SelectItem>
                 <SelectItem value="Глайдеры">Глайдер</SelectItem>
                 <SelectItem value="Петы">Пет</SelectItem>
               </SelectContent>

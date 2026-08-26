@@ -21,7 +21,17 @@ import {
   TableRow,
 } from "@/shared/ui";
 
-type SortKey = "name" | "price" | "source" | "show_in_buy";
+type SortKey = "name" | "price" | "source" | "show_in_buy" | "category";
+
+const CATEGORY_LABELS: Record<string, string> = {
+  Глайдеры: "Глайдер",
+  Петы: "Пет",
+  Другое: "Другое",
+};
+
+function getCategoryLabel(category: string | null): string {
+  return category ? (CATEGORY_LABELS[category] ?? category) : "-";
+}
 
 function compareValues(a: string | number | null, b: string | number | null) {
   if (a == null && b == null) return 0;
@@ -124,7 +134,8 @@ export function ItemTypeTable() {
       ? items.filter(
           (item) =>
             item.name.toLowerCase().includes(query) ||
-            (item.source ?? "").toLowerCase().includes(query),
+            (item.source ?? "").toLowerCase().includes(query) ||
+            getCategoryLabel(item.category).toLowerCase().includes(query),
         )
       : items;
 
@@ -137,6 +148,7 @@ export function ItemTypeTable() {
         price: (i) => i.price,
         source: (i) => i.source,
         show_in_buy: (i) => (i.show_in_buy ? 1 : 0),
+        category: (i) => getCategoryLabel(i.category),
       };
       const value = valueGetters[sortKey];
       const result = compareValues(value(a), value(b));
@@ -188,6 +200,9 @@ export function ItemTypeTable() {
             <SortableHead column="source" sortKey={sortKey} sortDir={sortDir} onSort={handleSort}>
               Источник
             </SortableHead>
+            <SortableHead column="category" sortKey={sortKey} sortDir={sortDir} onSort={handleSort}>
+              Категория
+            </SortableHead>
             <SortableHead column="show_in_buy" sortKey={sortKey} sortDir={sortDir} onSort={handleSort}>
               В покупке
             </SortableHead>
@@ -208,6 +223,7 @@ export function ItemTypeTable() {
               <TableCell>{item.name}</TableCell>
               <TableCell>{item.price ?? "—"}</TableCell>
               <TableCell>{item.source ?? "Разное"}</TableCell>
+              <TableCell>{getCategoryLabel(item.category)}</TableCell>
               <TableCell>{item.show_in_buy ? "Да" : "Нет"}</TableCell>
               <TableCell>
                 <div className="flex gap-2">
@@ -236,7 +252,7 @@ export function ItemTypeTable() {
           ))}
           {!loading && visibleItems.length === 0 && (
             <TableRow>
-              <TableCell colSpan={6} className="text-center text-muted-foreground">
+              <TableCell colSpan={7} className="text-center text-muted-foreground">
                 {items.length === 0
                   ? "Пока нет ни одного предмета"
                   : "Ничего не найдено"}
