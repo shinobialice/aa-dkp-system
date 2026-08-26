@@ -31,6 +31,16 @@ function joinPrimeTime(hour: string, minute: string): string | null {
   return `${h}:${m}`;
 }
 
+const weekDays: { label: string; value: number }[] = [
+  { label: "Пн", value: 1 },
+  { label: "Вт", value: 2 },
+  { label: "Ср", value: 3 },
+  { label: "Чт", value: 4 },
+  { label: "Пт", value: 5 },
+  { label: "Сб", value: 6 },
+  { label: "Вс", value: 0 },
+];
+
 function EventRow({
   name,
   settings,
@@ -113,6 +123,16 @@ export function VkNotificationSettingsForm() {
     });
   }
 
+  function togglePrimeDay(day: number, checked: boolean) {
+    if (!settings) return;
+    setSettings({
+      ...settings,
+      primeDays: checked
+        ? [...settings.primeDays, day].sort((a, b) => a - b)
+        : settings.primeDays.filter((d) => d !== day),
+    });
+  }
+
   return (
     <div className="space-y-6 max-w-xl">
       <div>
@@ -151,7 +171,7 @@ export function VkNotificationSettingsForm() {
           />
           <div className="flex items-center gap-2">
             <Label htmlFor="vk-prime-hour" className="flex-1 font-normal">
-              Время каждый день (МСК, 24ч)
+              Время (МСК, 24ч)
             </Label>
             <Input
               id="vk-prime-hour"
@@ -189,6 +209,29 @@ export function VkNotificationSettingsForm() {
                 })
               }
             />
+          </div>
+          <div className="flex items-center gap-2">
+            <Label className="font-normal">Дни недели</Label>
+            <div className="flex flex-1 justify-between">
+              {weekDays.map(({ label, value }) => (
+                <div key={value} className="flex flex-col items-center gap-1">
+                  <Checkbox
+                    id={`vk-prime-day-${value}`}
+                    className="cursor-pointer"
+                    checked={settings.primeDays.includes(value)}
+                    onCheckedChange={(checked) =>
+                      togglePrimeDay(value, checked === true)
+                    }
+                  />
+                  <Label
+                    htmlFor={`vk-prime-day-${value}`}
+                    className="font-normal text-xs cursor-pointer"
+                  >
+                    {label}
+                  </Label>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

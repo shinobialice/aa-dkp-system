@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
   const todayEvents: [string, string][] = [
     ...(schedule[dayNames[msk.getDay()]] ?? []),
   ];
-  if (settings.primeTime) {
+  if (settings.primeTime && settings.primeDays.includes(msk.getDay())) {
     todayEvents.push([settings.primeTime, PRIME_EVENT_NAME]);
   }
   const tag = getVkMentionTag(

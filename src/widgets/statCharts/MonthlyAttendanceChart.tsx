@@ -41,10 +41,12 @@ export default function MonthlyAttendanceChart({
   year,
   setYear,
   initialData,
+  bare,
 }: {
   year: number;
   setYear: (val: number) => void;
   initialData?: ReturnType<typeof mergeMonthlyAttendance>;
+  bare?: boolean;
 }) {
   const [data, setData] = useState<any[]>(initialData ?? []);
   const skipNextFetch = useRef(!!initialData);
@@ -63,57 +65,66 @@ export default function MonthlyAttendanceChart({
     });
   }, [year]);
 
+  const controls = (
+    <Select value={String(year)} onValueChange={(val) => setYear(Number(val))}>
+      <SelectTrigger className="w-[85px]">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {getYearOptions().map((y) => (
+          <SelectItem key={y} value={String(y)}>
+            {y}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+
+  const chart = (
+    <ChartContainer className="w-full h-[200px]" config={chartConfig}>
+      <ResponsiveContainer width="100%" height={200}>
+        <BarChart accessibilityLayer data={data}>
+          <CartesianGrid vertical={false} strokeDasharray="3 3" />
+          <XAxis
+            dataKey="month"
+            tickLine={false}
+            tickMargin={10}
+            axisLine={false}
+            tickFormatter={(v) => v.slice(0, 3)}
+          />
+          <YAxis domain={[0, 100]} tickFormatter={(v) => `${Math.round(v)}%`} />
+          <ChartTooltip
+            cursor={false}
+            content={
+              <RoundedTooltipContent
+                indicator="dashed"
+                labelFormatter={(val: any) => `Месяц: ${val}`}
+              />
+            }
+          />
+          <Bar dataKey="prime" fill="var(--color-prime)" radius={4} />
+          <Bar dataKey="agl" fill="var(--color-agl)" radius={4} />
+        </BarChart>
+      </ResponsiveContainer>
+    </ChartContainer>
+  );
+
+  if (bare) {
+    return (
+      <div>
+        <div className="flex justify-end px-6 pb-2">{controls}</div>
+        <CardContent>{chart}</CardContent>
+      </div>
+    );
+  }
+
   return (
     <Card>
       <CardHeader className="flex flex-col items-start gap-2 xl:flex-row xl:items-center xl:justify-between">
         <CardTitle className="text-base">Посещаемость по месяцам</CardTitle>
-        <Select
-          value={String(year)}
-          onValueChange={(val) => setYear(Number(val))}
-        >
-          <SelectTrigger className="w-[85px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {getYearOptions().map((y) => (
-              <SelectItem key={y} value={String(y)}>
-                {y}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {controls}
       </CardHeader>
-      <CardContent className="pt-4">
-        <ChartContainer className="w-full h-[200px]" config={chartConfig}>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart accessibilityLayer data={data}>
-              <CartesianGrid vertical={false} strokeDasharray="3 3" />
-              <XAxis
-                dataKey="month"
-                tickLine={false}
-                tickMargin={10}
-                axisLine={false}
-                tickFormatter={(v) => v.slice(0, 3)}
-              />
-              <YAxis
-                domain={[0, 100]}
-                tickFormatter={(v) => `${Math.round(v)}%`}
-              />
-              <ChartTooltip
-                cursor={false}
-                content={
-                  <RoundedTooltipContent
-                    indicator="dashed"
-                    labelFormatter={(val: any) => `Месяц: ${val}`}
-                  />
-                }
-              />
-              <Bar dataKey="prime" fill="var(--color-prime)" radius={4} />
-              <Bar dataKey="agl" fill="var(--color-agl)" radius={4} />
-            </BarChart>
-          </ResponsiveContainer>
-        </ChartContainer>
-      </CardContent>
+      <CardContent className="pt-4">{chart}</CardContent>
     </Card>
   );
 }

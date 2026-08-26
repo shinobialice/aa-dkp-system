@@ -9,6 +9,7 @@ import {
   HandCoins,
   Bell,
   PartyPopper,
+  Package,
 } from "lucide-react";
 import { Button } from "@/shared/ui";
 import { Card } from "@/shared/ui";
@@ -31,6 +32,7 @@ import { AttendanceBonusSettingsForm } from "./AttendanceBonusSettingsForm";
 import { MaintenanceWindowsForm } from "./MaintenanceWindowsForm";
 import { VkNotificationSettingsForm } from "./VkNotificationSettingsForm";
 import { EventSettingsForm } from "./EventSettingsForm";
+import { InventoryStockSettingsForm } from "./InventoryStockSettingsForm";
 
 type UserOption = {
   id: number;
@@ -43,6 +45,7 @@ const sections = [
   { id: "salary", label: "Зарплата", icon: HandCoins },
   { id: "vk", label: "Уведомления ВК", icon: Bell },
   { id: "event", label: "Ивент", icon: PartyPopper },
+  { id: "inventory", label: "Инвентарь", icon: Package },
 ] as const;
 
 type SectionId = (typeof sections)[number]["id"];
@@ -204,6 +207,14 @@ export function SettingsPageContainer() {
             <section className="space-y-6">
               <Card className="p-4 max-w-xl">
                 <EventSettingsForm />
+              </Card>
+            </section>
+          )}
+
+          {active === "inventory" && (
+            <section className="space-y-6">
+              <Card className="p-4 max-w-xl">
+                <InventoryStockSettingsForm />
               </Card>
             </section>
           )}

@@ -18,6 +18,9 @@ const inventoryIcons: { [key: string]: string } = {
     "https://archeagecodex.com/items/icon_item_4547.png",
   "Коллекционный фамильяр т2":
     "https://archeagecodex.com/items/icon_item_5854.png",
+  "Коллекционный пет": "https://archeagecodex.com/items/icon_item_4450.png",
+  "Коллекционный пет т2":
+    "https://archeagecodex.com/items/icon_item_4450.png",
   Дракон: "https://archeagecodex.com/items/icon_item_4260.png",
   "Красный Дракон": "https://archeagecodex.com/items/icon_item_4308.png",
   "Черный Дракон": "https://archeagecodex.com/items/icon_item_4309.png",

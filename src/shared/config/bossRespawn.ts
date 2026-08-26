@@ -2,7 +2,7 @@ export type BossName = "Марли" | "Морф";
 
 export const bosses: BossName[] = ["Марли", "Морф"];
 
-export const respawnWindow = 1; // hours, общий "промежуток" для всех боссов
+export const respawnWindow = 1;
 
 export const respawnHoursByBoss: Record<BossName, number> = {
   Марли: 12,
@@ -14,8 +14,26 @@ export const bossEmoji: Record<BossName, string> = {
   Морф: "⚓",
 };
 
+export const missedAdjectiveByBoss: Record<BossName, string> = {
+  Марли: "проёбана",
+  Морф: "проёбан",
+};
+
 export function getRespawnStart(lastKill: string, respawnHours: number): Date {
   return new Date(new Date(lastKill).getTime() + respawnHours * 60 * 60 * 1000);
+}
+
+export function getNextMissedCycleStart(
+  respawnStart: Date,
+  now: Date,
+  respawnHours: number,
+): Date {
+  const cycleMs = (respawnHours + respawnWindow) * 60 * 60 * 1000;
+  let cursor = respawnStart;
+  while (now.getTime() > cursor.getTime() + respawnWindow * 60 * 60 * 1000) {
+    cursor = new Date(cursor.getTime() + cycleMs);
+  }
+  return cursor;
 }
 
 export type MaintenanceWindow = { startAt: string; endAt: string };
@@ -43,9 +61,6 @@ function isThursdayMsk(date: Date): boolean {
   );
 }
 
-// Границы окна 05:00-11:00 МСК для календарного дня (по МСК), на который
-// приходится `date` — не проверяет день недели и не проверяет попадание
-// внутрь этих часов, этим занимаются вызывающие функции.
 function getRecurringWindowBoundsForDay(date: Date): {
   start: Date;
   end: Date;
@@ -59,17 +74,12 @@ function getRecurringWindowBoundsForDay(date: Date): {
   const get = (type: string) => parts.find((p) => p.type === type)!.value;
   const dateStr = `${get("year")}-${get("month")}-${get("day")}`;
 
-  // Europe/Moscow — фиксированный UTC+3 без перехода на летнее время с 2014 года
   return {
     start: new Date(`${dateStr}T05:00:00+03:00`),
     end: new Date(`${dateStr}T11:00:00+03:00`),
   };
 }
 
-// Регулярное окно, которое реально накрывает `date` (день — четверг по МСК,
-// и время внутри 05:00-11:00) — в отличие от
-// getTodayRecurringMaintenanceWindow, которая сообщает границы окна для
-// сегодняшнего дня, если сегодня четверг, независимо от текущего часа.
 function getRecurringMaintenanceWindow(
   date: Date,
 ): { start: Date; end: Date } | null {
@@ -79,8 +89,6 @@ function getRecurringMaintenanceWindow(
   return { start, end };
 }
 
-// Каждый четверг 05:00-11:00 (МСК) на серверах проводятся профилактические работы,
-// плюс единоразовые внеплановые окна, добавленные админом на странице настроек
 export function isMaintenanceWindow(
   now: Date = new Date(),
   adHocWindows: MaintenanceWindow[] = [],
@@ -89,9 +97,6 @@ export function isMaintenanceWindow(
   return getRecurringMaintenanceWindow(now) !== null;
 }
 
-// Границы сегодняшнего регулярного окна (если сегодня четверг по МСК) —
-// используется в настройках, чтобы предложить админу "продлить" плановые
-// работы, добавив внеплановое окно сразу после штатного конца в 11:00
 export function getTodayRecurringMaintenanceWindow(
   now: Date = new Date(),
 ): { start: Date; end: Date } | null {
@@ -99,13 +104,6 @@ export function getTodayRecurringMaintenanceWindow(
   return getRecurringWindowBoundsForDay(now);
 }
 
-// То же самое, но для дня, наступающего через daysFromNow календарных дней
-// (0 = сегодня) — используется, чтобы собрать регулярные окна на неделю
-// вперёд для "Предстоящих мероприятий". Границы строятся напрямую из
-// фиксированного смещения +03:00, без "фейкового локального времени", —
-// поэтому совпадают день-в-день с тем, что уже записано в БД при продлении
-// окна через getTodayRecurringMaintenanceWindow (важно для склейки смежных
-// окон без миллисекундных расхождений).
 export function getRecurringMaintenanceWindowInDays(
   daysFromNow: number,
 ): { start: Date; end: Date } | null {
@@ -114,9 +112,6 @@ export function getRecurringMaintenanceWindowInDays(
   return getRecurringWindowBoundsForDay(date);
 }
 
-// Ближайшее регулярное окно (сегодняшнее, если оно ещё не закончилось, иначе
-// следующего четверга) — используется в Настройках, чтобы показывать плановые
-// работы заранее, а не только в сам день их проведения.
 export function getNextRecurringMaintenanceWindow(): {
   start: Date;
   end: Date;
@@ -129,16 +124,6 @@ export function getNextRecurringMaintenanceWindow(): {
   return null;
 }
 
-// Правда игры: если сервер уходит на проф. работы, пока таймер респавна
-// ещё тикает и не досчитал до respawnStart, игра сама сбрасывает респавн —
-// даже если момент "killTime + respawnHours" сам по себе не попадает в окно
-// профилактики. После такого сброса точное время респауна недостоверно,
-// пока кто-то не подтвердит новый килл/появление. А вот если профилактика
-// стартует уже ПОСЛЕ respawnStart — босс к этому моменту уже реально
-// появился в мире (окно в 1ч — это сколько он там стоит), и профилактика
-// такой респавн не отменяет. Проверяет, началось ли хотя бы одно окно
-// (плановое четверговое или внеплановое) строго после killTime и не позже
-// boundary (respawnStart — момент, когда босс мог появиться).
 export function maintenanceStartedDuring(
   killTime: Date,
   boundary: Date,
@@ -150,9 +135,6 @@ export function maintenanceStartedDuring(
   });
   if (adHocHit) return true;
 
-  // respawnHours ограничен ~12ч, так что между killTime и boundary может
-  // попасть старт регулярного окна максимум на одном из двух ближайших
-  // календарных дней (по МСК).
   for (const offsetDays of [0, 1]) {
     const day = new Date(killTime.getTime() + offsetDays * 24 * 60 * 60 * 1000);
     if (!isThursdayMsk(day)) continue;

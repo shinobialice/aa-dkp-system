@@ -6,6 +6,16 @@ type ItemIconProps = {
   quality?: string | null;
 };
 
+// Рамка по качеству (T1/T2/эпоха) для большинства предметов — общая, по
+// quality. "Коллекционный пет" — исключение: T1 использует другую рамку,
+// чем остальные T1-предметы (icon_grade4, не общий icon_grade10).
+const gradeUrlOverrides: Record<string, Record<string, string>> = {
+  "Коллекционный пет": {
+    "3": "https://archeagecodex.com/images/icon_grade4.png",
+    "4": "https://archeagecodex.com/images/icon_grade11.png",
+  },
+};
+
 export default function ItemIcon({
   itemName,
   itemIconUrl,
@@ -22,6 +32,9 @@ export default function ItemIcon({
   } else if (parsedQuality === 5) {
     gradeUrl = "https://archeagecodex.com/images/icon_grade12.png";
   }
+
+  const override = quality ? gradeUrlOverrides[itemName]?.[quality] : undefined;
+  if (override) gradeUrl = override;
 
   return (
     <div

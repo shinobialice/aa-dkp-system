@@ -1,12 +1,9 @@
 "use client";
 
-import DailyAttendanceChart from "@/widgets/statCharts/dailyAttendanceChart";
-import MonthlyAttendanceChart from "@/widgets/statCharts/MonthlyAttendanceChart";
+import AttendanceTabsCard from "@/widgets/statCharts/AttendanceTabsCard";
 import BossIncomeChart from "@/widgets/statCharts/BossIncomeChart";
 import DailyRaidsCard from "@/widgets/statCharts/DailyRaidsCard";
-import RosterCompositionTable from "@/widgets/statCharts/RosterCompositionTable";
-import AvailableItemsTable from "@/widgets/statCharts/AvailableItemsTable";
-import SealGradeStatsTable from "@/widgets/statCharts/SealGradeStatsTable";
+import GuildInfoTabsCard from "@/widgets/statCharts/GuildInfoTabsCard";
 import { useState } from "react";
 import type {
   BossIncomeStat,
@@ -51,17 +48,15 @@ export default function StatsPageClient({
 
   return (
     <div className="p-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
-      <DailyAttendanceChart
-        year={year2}
-        month={month2}
-        setYear={setYear2}
-        setMonth={setMonth2}
-        initialData={initialDailyData}
-      />
-      <MonthlyAttendanceChart
-        year={year3}
-        setYear={setYear3}
-        initialData={initialMonthlyData}
+      <AttendanceTabsCard
+        dailyYear={year2}
+        dailyMonth={month2}
+        setDailyYear={setYear2}
+        setDailyMonth={setMonth2}
+        initialDailyData={initialDailyData}
+        monthlyYear={year3}
+        setMonthlyYear={setYear3}
+        initialMonthlyData={initialMonthlyData}
       />
       <BossIncomeChart
         year={year4}
@@ -70,13 +65,10 @@ export default function StatsPageClient({
         setMonth={setMonth4}
         initialData={initialBossIncomeData}
       />
-      <RosterCompositionTable data={initialRosterComposition} />
-      <AvailableItemsTable
-        data={initialInventoryStock}
-        className="self-start"
-      />
-      <SealGradeStatsTable
-        data={initialSealGradeStats}
+      <GuildInfoTabsCard
+        rosterComposition={initialRosterComposition}
+        sealGradeStats={initialSealGradeStats}
+        inventoryStock={initialInventoryStock}
         className="self-start"
       />
       <DailyRaidsCard

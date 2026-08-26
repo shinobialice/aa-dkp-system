@@ -1,10 +1,16 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import { getInventoryStockSettings } from "@/actions/inventoryStockSettings";
 
 export type InventoryStockStat = {
   label: string;
   count: number;
+};
+
+export type InventoryStockItem = {
+  label: string;
+  group: string;
 };
 
 const ITEM_SOURCES: {
@@ -63,6 +69,18 @@ const ITEM_SOURCES: {
     type: "Петы",
     quality: "4",
   },
+  {
+    label: "Коллекционный пет",
+    name: "Коллекционный пет",
+    type: "Петы",
+    excludeQuality: "4",
+  },
+  {
+    label: "Коллекционный пет Т2",
+    name: "Коллекционный пет",
+    type: "Петы",
+    quality: "4",
+  },
   { label: "Красный Дракон", name: "Красный Дракон", type: "Петы" },
   { label: "Черный Дракон", name: "Черный Дракон", type: "Петы" },
   { label: "Зеленый Дракон", name: "Зеленый Дракон", type: "Петы" },
@@ -70,7 +88,21 @@ const ITEM_SOURCES: {
   { label: "Кряк. щит", name: "Анд'хакар, Чернильная тьма" },
 ];
 
+// Список предметов с группой для настроек (см. InventoryStockSettingsForm) —
+// какие из них показывать на странице статистики.
+export async function getInventoryStockItems(): Promise<InventoryStockItem[]> {
+  return ITEM_SOURCES.map(({ label, type }) => ({
+    label,
+    group: type ?? "Прочее",
+  }));
+}
+
 export async function getInventoryStock(): Promise<InventoryStockStat[]> {
+  const { hiddenLabels } = await getInventoryStockSettings();
+  const sources = ITEM_SOURCES.filter(
+    (source) => !hiddenLabels.includes(source.label),
+  );
+
   const inventory = await sql<any[]>`
     SELECT name, type, quality, user_id FROM user_inventory
   `.catch((error) => {
@@ -89,7 +121,7 @@ export async function getInventoryStock(): Promise<InventoryStockStat[]> {
     users.filter((u) => u.active).map((u) => u.id),
   );
 
-  return ITEM_SOURCES.map(({ label, name, type, quality, excludeQuality }) => {
+  return sources.map(({ label, name, type, quality, excludeQuality }) => {
     const owners = new Set(
       inventory
         .filter(

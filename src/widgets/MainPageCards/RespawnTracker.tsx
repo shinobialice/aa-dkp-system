@@ -15,6 +15,7 @@ import {
   respawnHoursByBoss,
   respawnWindow,
   getRespawnStart,
+  getNextMissedCycleStart,
   isMaintenanceWindow,
   maintenanceStartedDuring,
 } from "@/shared/config/bossRespawn";
@@ -24,8 +25,8 @@ const bossImages: Partial<Record<BossName, string>> = {
   Морф: "/images/morpheos.png",
 };
 type BossState = {
-  lastKill: string | null; // ISO string
-  updatedAt: string | null; // ISO string, момент последней регистрации
+  lastKill: string | null;
+  updatedAt: string | null;
 };
 
 const registerCooldownSeconds = 30;
@@ -74,18 +75,6 @@ const RespawnTracker: FC = () => {
     const respawnEnd = new Date(
       respawnStart.getTime() + respawnWindow * 60 * 60 * 1000,
     );
-    // Если сервер уходил на проф. работы (плановые или внеплановые) ДО того,
-    // как таймер респауна досчитал до respawnStart — таймер сбрасывается, и
-    // расчётное время недостоверно (пример: убили в 15:00, профы 16:00-17:00,
-    // расчётный респавн в 03:00 — но по факту он сброшен и неизвестен).
-    // Если же профилактика началась уже ПОСЛЕ respawnStart — босс к этому
-    // моменту уже реально появился в мире, и профилактика не отменяет
-    // состоявшийся респавн (окно на килл было — от respawnStart и до старта
-    // профилактики), так что статус считаем как обычно.
-    // Статус остаётся "Проф. работы" до, во время и после самого окна — а не
-    // только пока оно идёт — потому что расчётное время всё это время
-    // недостоверно и станет известным только после того, как кто-то занесёт
-    // новый килл/время.
     if (maintenanceStartedDuring(killDate, respawnStart, maintenanceWindows))
       return {
         status: "Проф. работы",
@@ -97,6 +86,7 @@ const RespawnTracker: FC = () => {
     let status = "Ожидание";
     let waiting = false;
     let timeLeft: string | null = null;
+    let nextRespawnDate = respawnStart;
     if (now < respawnStart) {
       waiting = true;
       const ms = respawnStart.getTime() - now.getTime();
@@ -108,14 +98,10 @@ const RespawnTracker: FC = () => {
     } else if (now >= respawnStart && now <= respawnEnd) {
       status = "Возможен респаун!";
     } else {
-      // Промежуток (respawnWindow) прошёл, а новый килл/время так и не
-      // занесли — расчётное время устарело и доверять ему нельзя, поэтому
-      // явно помечаем как "проёбанный" респавн. Висит так, пока кто-то не
-      // зарегистрирует новый килл/время (это пересчитает respawnStart и
-      // выведет статус из этой ветки).
       status = "Проёбано";
+      nextRespawnDate = getNextMissedCycleStart(respawnStart, now, respawnHours);
     }
-    const nextRespawn = formatMoscowDateTime(respawnStart);
+    const nextRespawn = formatMoscowDateTime(nextRespawnDate);
     const lastKillDisplay = formatMoscowDateTime(killDate);
     return { status, nextRespawn, lastKillDisplay, waiting, timeLeft };
   }
@@ -150,8 +136,6 @@ const RespawnTracker: FC = () => {
       if (isInitial) setLoading(false);
     }
     fetchRespawn(true);
-    // Поллинг вместо realtime-подписки (self-hosted Postgres без Supabase
-    // Realtime) — тихо обновляем состояние боссов раз в 15 секунд.
     const interval = setInterval(() => fetchRespawn(false), 15_000);
     return () => {
       isMounted = false;

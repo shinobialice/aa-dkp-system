@@ -33,6 +33,8 @@ const ITEM_ICONS: Record<string, string> = {
   Рокана: "https://archeagecodex.com/items/icon_item_staff_1h_0058.png",
   "Кряк. щит": "https://archeagecodex.com/items/icon_item_shield_0055.png",
   "Коллекционный фамильяр Т2": inventoryIcons["Коллекционный фамильяр т2"],
+  "Коллекционный пет": inventoryIcons["Коллекционный пет"],
+  "Коллекционный пет Т2": inventoryIcons["Коллекционный пет т2"],
 };
 
 const GRADE_FRAME_LABELS: Record<string, string> = {
@@ -51,18 +53,79 @@ const GRADE_FRAME_LABELS: Record<string, string> = {
   "Зеленый Дракон": "https://archeagecodex.com/images/icon_grade6.png",
   Рокана: "https://archeagecodex.com/images/icon_grade5.png",
   "Кряк. щит": "https://archeagecodex.com/images/icon_grade5.png",
+  "Коллекционный пет": "https://archeagecodex.com/images/icon_grade4.png",
+  "Коллекционный пет Т2": "https://archeagecodex.com/images/icon_grade11.png",
 };
+
+function AvailableItemsColumns({ data }: { data: InventoryStockStat[] }) {
+  const half = Math.ceil(data.length / 2);
+  const left = data.slice(0, half);
+  const right = data.slice(half);
+
+  return (
+    <>
+      {[left, right].map((column, columnIndex) => (
+        <Table key={columnIndex}>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Наименование</TableHead>
+              <TableHead className="text-right">Кол-во</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {column.map((item) => (
+              <TableRow key={item.label}>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    {ITEM_ICONS[item.label] && (
+                      <div className="relative size-6 shrink-0">
+                        <Image
+                          src={ITEM_ICONS[item.label]}
+                          alt=""
+                          width={24}
+                          height={24}
+                          className="rounded"
+                        />
+                        {GRADE_FRAME_LABELS[item.label] && (
+                          <Image
+                            src={GRADE_FRAME_LABELS[item.label]}
+                            alt=""
+                            width={24}
+                            height={24}
+                            className="pointer-events-none absolute inset-0"
+                          />
+                        )}
+                      </div>
+                    )}
+                    {item.label}
+                  </div>
+                </TableCell>
+                <TableCell className="text-right">{item.count}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      ))}
+    </>
+  );
+}
 
 export default function AvailableItemsTable({
   data,
   className,
+  bare,
 }: {
   data: InventoryStockStat[];
   className?: string;
+  bare?: boolean;
 }) {
-  const half = Math.ceil(data.length / 2);
-  const left = data.slice(0, half);
-  const right = data.slice(half);
+  if (bare) {
+    return (
+      <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <AvailableItemsColumns data={data} />
+      </CardContent>
+    );
+  }
 
   return (
     <Card className={className}>
@@ -70,48 +133,7 @@ export default function AvailableItemsTable({
         <CardTitle className="text-base">Имеющиеся предметы</CardTitle>
       </CardHeader>
       <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {[left, right].map((column, columnIndex) => (
-          <Table key={columnIndex}>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Наименование</TableHead>
-                <TableHead className="text-right">Кол-во</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {column.map((item) => (
-                <TableRow key={item.label}>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {ITEM_ICONS[item.label] && (
-                        <div className="relative size-6 shrink-0">
-                          <Image
-                            src={ITEM_ICONS[item.label]}
-                            alt=""
-                            width={24}
-                            height={24}
-                            className="rounded"
-                          />
-                          {GRADE_FRAME_LABELS[item.label] && (
-                            <Image
-                              src={GRADE_FRAME_LABELS[item.label]}
-                              alt=""
-                              width={24}
-                              height={24}
-                              className="pointer-events-none absolute inset-0"
-                            />
-                          )}
-                        </div>
-                      )}
-                      {item.label}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">{item.count}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        ))}
+        <AvailableItemsColumns data={data} />
       </CardContent>
     </Card>
   );

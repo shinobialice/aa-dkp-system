@@ -47,12 +47,14 @@ export default function DailyAttendanceChart({
   setYear,
   setMonth,
   initialData,
+  bare,
 }: {
   year: number;
   month: number;
   setYear: (val: number) => void;
   setMonth: (val: number) => void;
   initialData?: ReturnType<typeof mergeDailyAttendance>;
+  bare?: boolean;
 }) {
   const [chartData, setChartData] = useState<any[]>(initialData ?? []);
   const skipNextFetch = useRef(!!initialData);
@@ -82,74 +84,86 @@ export default function DailyAttendanceChart({
     },
   };
 
+  const controls = (
+    <div className="flex gap-2">
+      <Select
+        value={String(year)}
+        onValueChange={(val) => setYear(Number(val))}
+      >
+        <SelectTrigger className="w-[85px]">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {getYearOptions().map((y) => (
+            <SelectItem key={y} value={String(y)}>
+              {y}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Select
+        value={String(month)}
+        onValueChange={(val) => setMonth(Number(val))}
+      >
+        <SelectTrigger className="w-[110px]">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {months.map((label, index) => (
+            <SelectItem key={index} value={String(index)}>
+              {label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+
+  const chart = (
+    <ChartContainer className="w-full h-[200px]" config={chartConfig}>
+      <ResponsiveContainer width="100%" height={200}>
+        <BarChart accessibilityLayer data={chartData}>
+          <CartesianGrid vertical={false} strokeDasharray="3 3" />
+          <XAxis
+            dataKey="date"
+            tickLine={false}
+            tickMargin={10}
+            axisLine={false}
+            tickFormatter={(v) => v.split("-")[2]}
+          />
+          <YAxis domain={[0, 100]} tickFormatter={(v) => `${Math.round(v)}%`} />
+          <ChartTooltip
+            cursor={false}
+            content={
+              <RoundedTooltipContent
+                indicator="dashed"
+                labelFormatter={(val: any) => `Дата: ${val}`}
+              />
+            }
+          />
+          <Bar dataKey="prime" fill="var(--color-prime)" radius={4} />
+          <Bar dataKey="agl" fill="var(--color-agl)" radius={4} />
+        </BarChart>
+      </ResponsiveContainer>
+    </ChartContainer>
+  );
+
+  if (bare) {
+    return (
+      <div>
+        <div className="flex justify-end px-6 pb-2">{controls}</div>
+        <CardContent>{chart}</CardContent>
+      </div>
+    );
+  }
+
   return (
     <Card>
       <CardHeader className="flex flex-col items-start gap-2 xl:flex-row xl:items-center xl:justify-between">
         <CardTitle className="text-base">Общая посещаемость по дням</CardTitle>
-        <div className="flex gap-2">
-          <Select
-            value={String(year)}
-            onValueChange={(val) => setYear(Number(val))}
-          >
-            <SelectTrigger className="w-[85px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {getYearOptions().map((y) => (
-                <SelectItem key={y} value={String(y)}>
-                  {y}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select
-            value={String(month)}
-            onValueChange={(val) => setMonth(Number(val))}
-          >
-            <SelectTrigger className="w-[110px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {months.map((label, index) => (
-                <SelectItem key={index} value={String(index)}>
-                  {label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        {controls}
       </CardHeader>
-      <CardContent className="pt-4">
-        <ChartContainer className="w-full h-[200px]" config={chartConfig}>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart accessibilityLayer data={chartData}>
-              <CartesianGrid vertical={false} strokeDasharray="3 3" />
-              <XAxis
-                dataKey="date"
-                tickLine={false}
-                tickMargin={10}
-                axisLine={false}
-                tickFormatter={(v) => v.split("-")[2]}
-              />
-              <YAxis
-                domain={[0, 100]}
-                tickFormatter={(v) => `${Math.round(v)}%`}
-              />
-              <ChartTooltip
-                cursor={false}
-                content={
-                  <RoundedTooltipContent
-                    indicator="dashed"
-                    labelFormatter={(val: any) => `Дата: ${val}`}
-                  />
-                }
-              />
-              <Bar dataKey="prime" fill="var(--color-prime)" radius={4} />
-              <Bar dataKey="agl" fill="var(--color-agl)" radius={4} />
-            </BarChart>
-          </ResponsiveContainer>
-        </ChartContainer>
-      </CardContent>
+      <CardContent className="pt-4">{chart}</CardContent>
     </Card>
   );
 }

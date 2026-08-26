@@ -1,12 +1,17 @@
 "use server";
 
 import sql from "@/shared/lib/db";
-import { scheduleRespawnNotification } from "@/shared/lib/qstash";
+import {
+  scheduleRespawnNotification,
+  scheduleMissedRespawnNotification,
+} from "@/shared/lib/qstash";
 import {
   BossName,
   respawnHoursByBoss,
+  respawnWindow,
   getRespawnStart,
   isMaintenanceWindow,
+  maintenanceStartedDuring,
 } from "@/shared/config/bossRespawn";
 import { getVkNotificationSettings } from "./vkNotificationSettings";
 import { resolveNotifyMinutes } from "@/shared/config/vkNotificationDefaults";
@@ -23,9 +28,6 @@ export async function registerBossKill(
 
   let registered = false;
   try {
-    // Последний параметр — сколько паков нужно на босса, эта механика была
-    // только у Кириоса и с его удалением всегда null (сигнатуру
-    // register_boss_kill в БД не трогаем, чтобы не городить миграцию).
     const [row] = await sql<any[]>`
       SELECT register_boss_kill(
         ${boss}, ${killTimeIso}, ${action}, ${userId}, ${nextRespawn.toISOString()},
@@ -43,16 +45,34 @@ export async function registerBossKill(
 
   try {
     const [respawnRow] = await sql<any[]>`
-      SELECT notify_message_id FROM boss_respawn WHERE boss_name = ${boss}
+      SELECT notify_message_id, missed_message_id FROM boss_respawn WHERE boss_name = ${boss}
     `;
 
     const vkSettings = await getVkNotificationSettings();
     const maintenanceWindows = await getMaintenanceWindows();
+    const bossEnabled = vkSettings.enabledBosses.includes(boss);
     const notifyAt =
-      vkSettings.enabledBosses.includes(boss) &&
-      !isMaintenanceWindow(nextRespawn, maintenanceWindows)
+      bossEnabled && !isMaintenanceWindow(nextRespawn, maintenanceWindows)
         ? new Date(
             nextRespawn.getTime() -
+              resolveNotifyMinutes(vkSettings, boss) * 60 * 1000,
+          )
+        : null;
+
+    const cascadedNextStart = new Date(
+      nextRespawn.getTime() +
+        (respawnHoursByBoss[boss] + respawnWindow) * 60 * 60 * 1000,
+    );
+    const missedNotifyAt =
+      bossEnabled &&
+      !isMaintenanceWindow(cascadedNextStart, maintenanceWindows) &&
+      !maintenanceStartedDuring(
+        new Date(killTimeIso),
+        nextRespawn,
+        maintenanceWindows,
+      )
+        ? new Date(
+            cascadedNextStart.getTime() -
               resolveNotifyMinutes(vkSettings, boss) * 60 * 1000,
           )
         : null;
@@ -62,9 +82,17 @@ export async function registerBossKill(
       notifyAt,
       respawnRow?.notify_message_id ?? null,
     );
+    const missedMessageId = await scheduleMissedRespawnNotification(
+      boss,
+      killTimeIso,
+      missedNotifyAt,
+      respawnRow?.missed_message_id ?? null,
+    );
 
     await sql<any[]>`
-      UPDATE boss_respawn SET notify_message_id = ${messageId} WHERE boss_name = ${boss}
+      UPDATE boss_respawn
+      SET notify_message_id = ${messageId}, missed_message_id = ${missedMessageId}
+      WHERE boss_name = ${boss}
     `;
   } catch (notifyError) {
     console.error("Не удалось запланировать VK-уведомление:", notifyError);

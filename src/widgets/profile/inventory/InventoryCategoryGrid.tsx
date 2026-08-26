@@ -3,7 +3,12 @@ import inventoryItems from "./InventoryItems";
 import InventoryItemCard from "./InventoryItemCard";
 import { AddCustomInventoryItemDialog } from "./AddCustomInventoryItemDialog";
 import { ProfileItemTypeRow } from "@/actions/profileItemTypeAdmin";
-import { OtherInventoryCatalogItem } from "@/actions/getOtherInventoryCatalog";
+import { OtherInventoryCatalogItem } from "@/actions/getInventoryCatalog";
+
+// Категории, где добавление предмета идёт через поиск по каталогу (казна +
+// profile_item_type под эту категорию, см. getInventoryCatalog в
+// InventoryTabsClient) — совпадает с catalogCategories там.
+const catalogCategories = ["Глайдеры", "Петы", "Другое"];
 
 export default function InventoryCategoryGrid({
   type,
@@ -11,9 +16,8 @@ export default function InventoryCategoryGrid({
   userId,
   onChange,
   canEdit,
-  isAdmin,
   extraItemTypes = [],
-  otherCatalog = [],
+  catalog = [],
   onExtraItemTypesChange,
 }: {
   type: string;
@@ -23,21 +27,25 @@ export default function InventoryCategoryGrid({
   canEdit: boolean;
   isAdmin?: boolean;
   extraItemTypes?: ProfileItemTypeRow[];
-  otherCatalog?: OtherInventoryCatalogItem[];
+  catalog?: OtherInventoryCatalogItem[];
   onExtraItemTypesChange?: () => void;
 }) {
-  const isOther = type === "Другое";
+  const hasCatalog = catalogCategories.includes(type);
 
-  // "Другое" — общий каталог (казна item_type + profile_item_type, см.
-  // getOtherInventoryCatalog), который со временем растёт, поэтому
-  // карточками тут показываем только то, что уже отмечено у игрока (иначе
-  // вкладка превратилась бы в простыню из предметов всей гильдии).
-  // Добавление — через AddCustomInventoryItemDialog (поиск и выбор из
-  // каталога). Остальные категории — фиксированный список из
-  // InventoryItems.tsx плюс то, что завели под них в profile_item_type,
+  // Категории с каталогом: карточками показываем только то, что уже
+  // отмечено у игрока (иначе вкладка превратилась бы в простыню из
+  // предметов всей гильдии), добавление — через
+  // AddCustomInventoryItemDialog (поиск и выбор из каталога). Имена, уже
+  // покрытые фиксированным списком (inventoryItems), из каталога убираем,
+  // чтобы не задваивать карточку. "Техника" — фиксированный список из
+  // InventoryItems.tsx плюс то, что завели под неё в profile_item_type,
   // показываем всё как обычно, есть/нет.
-  const dynamicItems = isOther
-    ? otherCatalog
+  const fixedNames = new Set(
+    inventoryItems.filter((item) => item.type === type).map((item) => item.name),
+  );
+  const dynamicItems = hasCatalog
+    ? catalog
+        .filter((t) => !fixedNames.has(t.name))
         .filter((t) => inventory.find((inv) => inv.name === t.name && inv.type === type))
         .map((t) => ({ type, name: t.name, iconUrl: t.icon_url }))
     : extraItemTypes
@@ -72,6 +80,18 @@ export default function InventoryCategoryGrid({
         return false;
       }
       if (
+        item.name === "Коллекционный пет" &&
+        inventory.find((inv) => inv.name === "Коллекционный пет т2")
+      ) {
+        return false;
+      }
+      if (
+        item.name === "Коллекционный пет т2" &&
+        !inventory.find((inv) => inv.name === "Коллекционный пет т2")
+      ) {
+        return false;
+      }
+      if (
         ["Красный Дракон", "Черный Дракон", "Зеленый Дракон"].includes(
           item.name,
         )
@@ -93,11 +113,14 @@ export default function InventoryCategoryGrid({
           onChange={onChange}
         />
       ))}
-      {isOther && canEdit && (
+      {hasCatalog && canEdit && (
         <AddCustomInventoryItemDialog
           userId={userId}
-          catalog={otherCatalog.filter(
-            (t) => !inventory.find((inv) => inv.name === t.name && inv.type === type),
+          type={type}
+          catalog={catalog.filter(
+            (t) =>
+              !fixedNames.has(t.name) &&
+              !inventory.find((inv) => inv.name === t.name && inv.type === type),
           )}
           onAdded={() => {
             onChange();

@@ -8,12 +8,22 @@ import {
   ProfileItemTypeRow,
 } from "@/actions/profileItemTypeAdmin";
 import {
-  getOtherInventoryCatalog,
+  getInventoryCatalog,
   OtherInventoryCatalogItem,
-} from "@/actions/getOtherInventoryCatalog";
+} from "@/actions/getInventoryCatalog";
 import { Button, Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
 
 const categories = ["Техника", "Глайдеры", "Петы", "Другое"];
+
+// Категории, у которых добавление предмета идёт через поиск по общему
+// каталогу (казна item_type + profile_item_type под эту категорию, см.
+// getInventoryCatalog) — карточками показываем только то, что уже отмечено
+// у игрока, иначе вкладка превратилась бы в простыню из предметов всей
+// гильдии. "Техника" — единственная категория без каталога: там по-прежнему
+// фиксированный список из InventoryItems.tsx, дополняемый только тем, что
+// завели напрямую в БД (profile_item_type) — своей админки для этого
+// сейчас нет.
+const catalogCategories = ["Глайдеры", "Петы", "Другое"];
 
 export default function InventoryTabsClient({
   inventory,
@@ -30,29 +40,31 @@ export default function InventoryTabsClient({
 }) {
   // По умолчанию — чистый вью-режим (как у обычного зрителя), даже если
   // canEdit=true: карандаш открывает режим редактирования (есть/нет по
-  // каждому предмету, добавление в "Другое"), чтобы не захламлять профиль
-  // выпадающими списками каждый раз, когда его открывает админ/сам игрок.
+  // каждому предмету, добавление в категории с каталогом), чтобы не
+  // захламлять профиль выпадающими списками каждый раз, когда его
+  // открывает админ/сам игрок.
   const [editMode, setEditMode] = useState(false);
   const effectiveCanEdit = canEdit && editMode;
   const effectiveIsAdmin = isAdmin && editMode;
 
-  // Техника/Глайдеры/Петы — фиксированный список из InventoryItems.tsx,
-  // дополняемый тут только тем, что специально завели под соответствующую
-  // категорию напрямую в БД (profile_item_type) — своей админки для этого
-  // сейчас нет.
   const [extraItemTypes, setExtraItemTypes] = useState<ProfileItemTypeRow[]>(
     [],
   );
-  // "Другое" — своя вкладка: список для поиска/выбора там объединяет казну
-  // (item_type) и profile_item_type, чтобы не заводить те же предметы
-  // дважды (см. getOtherInventoryCatalog).
-  const [otherCatalog, setOtherCatalog] = useState<OtherInventoryCatalogItem[]>(
-    [],
-  );
+  const [catalogsByCategory, setCatalogsByCategory] = useState<
+    Record<string, OtherInventoryCatalogItem[]>
+  >({});
 
   const reloadExtraItemTypes = useCallback(() => {
     getProfileItemTypes().then(setExtraItemTypes);
-    getOtherInventoryCatalog().then(setOtherCatalog);
+    Promise.all(
+      catalogCategories.map((category) => getInventoryCatalog(category)),
+    ).then((catalogs) => {
+      setCatalogsByCategory(
+        Object.fromEntries(
+          catalogCategories.map((category, i) => [category, catalogs[i]]),
+        ),
+      );
+    });
   }, []);
 
   useEffect(() => {
@@ -94,7 +106,7 @@ export default function InventoryTabsClient({
               userId={userId}
               onChange={onChange}
               extraItemTypes={extraItemTypes}
-              otherCatalog={otherCatalog}
+              catalog={catalogsByCategory[type] ?? []}
               onExtraItemTypesChange={reloadExtraItemTypes}
             />
           </div>

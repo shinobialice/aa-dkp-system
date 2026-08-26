@@ -29,6 +29,8 @@ export default function ItemSelector({
     "Коллеционный глайдер т2",
     "Коллекционный фамильяр",
     "Коллекционный фамильяр т2",
+    "Коллекционный пет",
+    "Коллекционный пет т2",
   ].includes(item.name);
 
   const isDragon = item.name === "Дракон";

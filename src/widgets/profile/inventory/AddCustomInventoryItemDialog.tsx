@@ -5,7 +5,7 @@ import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { LootIcon } from "@/widgets/Loot/LootBuy/icons/LootIconComponent";
 import addItemToUserInventory from "@/actions/addItemToUserInventory";
-import { OtherInventoryCatalogItem } from "@/actions/getOtherInventoryCatalog";
+import { OtherInventoryCatalogItem } from "@/actions/getInventoryCatalog";
 import {
   Command,
   CommandEmpty,
@@ -17,16 +17,19 @@ import {
   PopoverTrigger,
 } from "@/shared/ui";
 
-// Поиск + выбор уже существующего в каталоге предмета вкладки "Другое" —
-// заводить новые сюда нельзя, каталог (см. getOtherInventoryCatalog)
-// пополняется только через /items (казна) или напрямую в БД
-// (profile_item_type — для того, чего в казне нет и не будет).
+// Поиск + выбор уже существующего в каталоге предмета для категорий с
+// каталогом (см. catalogCategories в InventoryCategoryGrid) — заводить новые
+// сюда нельзя, каталог (см. getInventoryCatalog) пополняется только через
+// /items (казна) или напрямую в БД (profile_item_type — для того, чего в
+// казне нет и не будет).
 export function AddCustomInventoryItemDialog({
   userId,
+  type,
   catalog,
   onAdded,
 }: {
   userId: number;
+  type: string;
   catalog: OtherInventoryCatalogItem[];
   onAdded: () => void;
 }) {
@@ -35,7 +38,7 @@ export function AddCustomInventoryItemDialog({
   const handleSelect = async (item: OtherInventoryCatalogItem) => {
     setIsOpen(false);
     try {
-      await addItemToUserInventory(userId, item.name, "Другое", null);
+      await addItemToUserInventory(userId, item.name, type, null);
       toast.success("Предмет добавлен");
       onAdded();
     } catch (error) {
