@@ -47,6 +47,7 @@ export function ItemTypeForm({
   const [grade, setGrade] = useState("1");
   const [source, setSource] = useState("");
   const [showInBuy, setShowInBuy] = useState(true);
+  const [category, setCategory] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -57,6 +58,7 @@ export function ItemTypeForm({
     setGrade(String(item?.grade ?? 1));
     setSource(item?.source ?? "");
     setShowInBuy(item?.show_in_buy ?? true);
+    setCategory(item?.category ?? "");
   }, [open, item]);
 
   const handleSave = async () => {
@@ -73,6 +75,7 @@ export function ItemTypeForm({
         grade: Number(grade),
         source: source.trim() === "" ? null : source.trim(),
         showInBuy,
+        category: category === "" ? null : category,
       };
       if (item) {
         await updateItemType(item.id, payload);
@@ -153,6 +156,28 @@ export function ItemTypeForm({
               Пусто — попадёт на вкладку «Разное».
             </p>
             <SourceSelector value={source} onChange={setSource} />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Категория</Label>
+            <p className="text-xs text-muted-foreground">
+              Необязательно. На какой вкладке инвентаря профиля предлагать
+              этот предмет при добавлении («Добавить предмет»). Пусто —
+              попадёт на вкладку «Другое».
+            </p>
+            <Select
+              value={category === "" ? "none" : category}
+              onValueChange={(v) => setCategory(v === "none" ? "" : v)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Другое</SelectItem>
+                <SelectItem value="Глайдеры">Глайдер</SelectItem>
+                <SelectItem value="Петы">Пет</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="flex items-center justify-between rounded-lg border p-3">

@@ -6,6 +6,7 @@ import { getInventoryStockSettings } from "@/actions/inventoryStockSettings";
 export type InventoryStockStat = {
   label: string;
   count: number;
+  iconUrl?: string | null;
 };
 
 export type InventoryStockItem = {
@@ -58,6 +59,11 @@ const ITEM_SOURCES: {
   { label: "Драк. глайдер", name: "Дракон", type: "Глайдеры" },
   { label: "Глайдер Авиары", name: "Авиара", type: "Глайдеры" },
   {
+    label: "Паучья колония",
+    name: "Глайдер-крылья «Паучья колония»",
+    type: "Глайдеры",
+  },
+  {
     label: "Коллекционный фамильяр",
     name: "Коллекционный фамильяр",
     type: "Петы",
@@ -87,6 +93,12 @@ const ITEM_SOURCES: {
   { label: "Рокана", name: "Ро'кана, Безумие морей" },
   { label: "Кряк. щит", name: "Анд'хакар, Чернильная тьма" },
 ];
+
+// Категории, где предметы добавляются через поиск по каталогу (см.
+// getInventoryCatalog) — сюда со временем попадёт что угодно, поэтому
+// вдобавок к вручную настроенным выше ITEM_SOURCES ниже считаем и то, что
+// реально отмечено у игроков, но в список ещё не занесено.
+const CATALOG_TYPES = ["Глайдеры", "Петы", "Другое"];
 
 // Список предметов с группой для настроек (см. InventoryStockSettingsForm) —
 // какие из них показывать на странице статистики.
@@ -121,19 +133,66 @@ export async function getInventoryStock(): Promise<InventoryStockStat[]> {
     users.filter((u) => u.active).map((u) => u.id),
   );
 
-  return sources.map(({ label, name, type, quality, excludeQuality }) => {
-    const owners = new Set(
-      inventory
-        .filter(
-          (row) =>
-            row.name === name &&
-            (!type || row.type === type) &&
-            (!quality || row.quality === quality) &&
-            (!excludeQuality || row.quality !== excludeQuality) &&
-            activeUserIds.has(row.user_id),
-        )
-        .map((row) => row.user_id),
-    );
-    return { label, count: owners.size };
-  });
+  const curatedStats = sources.map(
+    ({ label, name, type, quality, excludeQuality }) => {
+      const owners = new Set(
+        inventory
+          .filter(
+            (row) =>
+              row.name === name &&
+              (!type || row.type === type) &&
+              (!quality || row.quality === quality) &&
+              (!excludeQuality || row.quality !== excludeQuality) &&
+              activeUserIds.has(row.user_id),
+          )
+          .map((row) => row.user_id),
+      );
+      return { label, count: owners.size };
+    },
+  );
+
+  // Всё остальное, что реально отмечено у игроков в категориях с каталогом,
+  // но не входит в ITEM_SOURCES выше (например, только что заведённый в
+  // казне/каталоге предмет, который кто-то уже отметил себе) — считаем по
+  // имени напрямую из инвентаря, без ручной настройки.
+  const curatedNames = new Set(ITEM_SOURCES.map((source) => source.name));
+  const dynamicOwnersByName = new Map<string, Set<number>>();
+  for (const row of inventory) {
+    if (
+      !CATALOG_TYPES.includes(row.type) ||
+      curatedNames.has(row.name) ||
+      hiddenLabels.includes(row.name) ||
+      !activeUserIds.has(row.user_id)
+    ) {
+      continue;
+    }
+    if (!dynamicOwnersByName.has(row.name)) {
+      dynamicOwnersByName.set(row.name, new Set());
+    }
+    dynamicOwnersByName.get(row.name)!.add(row.user_id);
+  }
+
+  const dynamicNames = Array.from(dynamicOwnersByName.keys());
+  const catalogIcons = dynamicNames.length
+    ? await sql<{ name: string; icon_url: string | null }[]>`
+        SELECT DISTINCT ON (name) name, icon_url
+        FROM (
+          SELECT name, icon_url, 1 AS priority FROM item_type WHERE name = ANY(${dynamicNames})
+          UNION ALL
+          SELECT name, icon_url, 2 AS priority FROM profile_item_type WHERE name = ANY(${dynamicNames})
+        ) combined
+        ORDER BY name, priority
+      `.catch(() => [])
+    : [];
+  const iconByName = new Map(catalogIcons.map((c) => [c.name, c.icon_url]));
+
+  const dynamicStats = Array.from(dynamicOwnersByName.entries())
+    .map(([label, owners]) => ({
+      label,
+      count: owners.size,
+      iconUrl: iconByName.get(label) ?? null,
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label, "ru"));
+
+  return [...curatedStats, ...dynamicStats];
 }

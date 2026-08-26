@@ -35,6 +35,7 @@ const ITEM_ICONS: Record<string, string> = {
   "Коллекционный фамильяр Т2": inventoryIcons["Коллекционный фамильяр т2"],
   "Коллекционный пет": inventoryIcons["Коллекционный пет"],
   "Коллекционный пет Т2": inventoryIcons["Коллекционный пет т2"],
+  "Паучья колония": "/api/uploads/item-icons/28e3c898-b347-447a-9824-cb5cfa5eed99.png",
 };
 
 const GRADE_FRAME_LABELS: Record<string, string> = {
@@ -73,36 +74,39 @@ function AvailableItemsColumns({ data }: { data: InventoryStockStat[] }) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {column.map((item) => (
-              <TableRow key={item.label}>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    {ITEM_ICONS[item.label] && (
-                      <div className="relative size-6 shrink-0">
-                        <Image
-                          src={ITEM_ICONS[item.label]}
-                          alt=""
-                          width={24}
-                          height={24}
-                          className="rounded"
-                        />
-                        {GRADE_FRAME_LABELS[item.label] && (
+            {column.map((item) => {
+              const iconUrl = ITEM_ICONS[item.label] ?? item.iconUrl;
+              return (
+                <TableRow key={item.label}>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      {iconUrl && (
+                        <div className="relative size-6 shrink-0">
                           <Image
-                            src={GRADE_FRAME_LABELS[item.label]}
+                            src={iconUrl}
                             alt=""
                             width={24}
                             height={24}
-                            className="pointer-events-none absolute inset-0"
+                            className="rounded"
                           />
-                        )}
-                      </div>
-                    )}
-                    {item.label}
-                  </div>
-                </TableCell>
-                <TableCell className="text-right">{item.count}</TableCell>
-              </TableRow>
-            ))}
+                          {GRADE_FRAME_LABELS[item.label] && (
+                            <Image
+                              src={GRADE_FRAME_LABELS[item.label]}
+                              alt=""
+                              width={24}
+                              height={24}
+                              className="pointer-events-none absolute inset-0"
+                            />
+                          )}
+                        </div>
+                      )}
+                      {item.label}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">{item.count}</TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       ))}

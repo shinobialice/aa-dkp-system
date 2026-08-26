@@ -15,6 +15,7 @@ export type ItemTypeRow = {
   grade: number;
   source: string | null;
   show_in_buy: boolean;
+  category: string | null;
 };
 
 type ItemTypeInput = {
@@ -24,6 +25,7 @@ type ItemTypeInput = {
   grade: number;
   source: string | null;
   showInBuy: boolean;
+  category: string | null;
 };
 
 // Служебные строки item_type — не обычные предметы лута, а завязанные по
@@ -52,7 +54,7 @@ async function assertNotUtilityItem(id: number) {
 export async function getItemTypesForAdmin(): Promise<ItemTypeRow[]> {
   await ensurePrivilieges(["Администратор"]);
   return await sql<ItemTypeRow[]>`
-    SELECT id, name, price, icon_url, grade, source, show_in_buy
+    SELECT id, name, price, icon_url, grade, source, show_in_buy, category
     FROM item_type
     WHERE name != ALL(${UTILITY_ITEM_NAMES})
     ORDER BY name
@@ -66,6 +68,7 @@ export async function createItemType({
   grade,
   source,
   showInBuy,
+  category,
 }: ItemTypeInput) {
   await ensurePrivilieges(["Администратор"]);
   const trimmed = name.trim();
@@ -74,8 +77,8 @@ export async function createItemType({
   }
   try {
     await sql<any[]>`
-      INSERT INTO item_type (name, price, icon_url, grade, source, show_in_buy)
-      VALUES (${trimmed}, ${price}, ${iconUrl}, ${grade}, ${source}, ${showInBuy})
+      INSERT INTO item_type (name, price, icon_url, grade, source, show_in_buy, category)
+      VALUES (${trimmed}, ${price}, ${iconUrl}, ${grade}, ${source}, ${showInBuy}, ${category})
     `;
   } catch (error: any) {
     console.error("Ошибка при создании предмета:", error);
@@ -88,7 +91,7 @@ export async function createItemType({
 
 export async function updateItemType(id: number, input: ItemTypeInput) {
   await ensurePrivilieges(["Администратор"]);
-  const { name, price, iconUrl, grade, source, showInBuy } = input;
+  const { name, price, iconUrl, grade, source, showInBuy, category } = input;
   const trimmed = name.trim();
   if (!trimmed) {
     throw new Error("Название предмета не может быть пустым");
@@ -98,7 +101,8 @@ export async function updateItemType(id: number, input: ItemTypeInput) {
     await sql<any[]>`
       UPDATE item_type
       SET name = ${trimmed}, price = ${price}, icon_url = ${iconUrl},
-          grade = ${grade}, source = ${source}, show_in_buy = ${showInBuy}
+          grade = ${grade}, source = ${source}, show_in_buy = ${showInBuy},
+          category = ${category}
       WHERE id = ${id}
     `;
   } catch (error: any) {
