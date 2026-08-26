@@ -108,7 +108,12 @@ const RespawnTracker: FC = () => {
     } else if (now >= respawnStart && now <= respawnEnd) {
       status = "Возможен респаун!";
     } else {
-      status = "Ожидание убийства";
+      // Промежуток (respawnWindow) прошёл, а новый килл/время так и не
+      // занесли — расчётное время устарело и доверять ему нельзя, поэтому
+      // явно помечаем как "проёбанный" респавн. Висит так, пока кто-то не
+      // зарегистрирует новый килл/время (это пересчитает respawnStart и
+      // выведет статус из этой ветки).
+      status = "Проёбано";
     }
     const nextRespawn = formatMoscowDateTime(respawnStart);
     const lastKillDisplay = formatMoscowDateTime(killDate);
@@ -224,7 +229,7 @@ const RespawnTracker: FC = () => {
     if (status === "Проф. работы") return "text-orange-500 font-semibold";
     if (status.startsWith("Ожидание (")) return "text-yellow-500 font-semibold";
     if (status === "Возможен респаун!") return "text-green-600 font-bold";
-    if (status === "Ожидание убийства") return "text-blue-500 font-semibold";
+    if (status === "Проёбано") return "text-red-600 font-bold";
     if (status === "Нет данных") return "text-gray-400";
     return "text-gray-700";
   }
