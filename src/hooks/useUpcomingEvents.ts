@@ -9,7 +9,7 @@ import {
   respawnWindow,
   getRespawnStart,
   isMaintenanceWindow,
-  maintenanceOverlapsRange,
+  maintenanceStartedDuring,
   getRecurringMaintenanceWindowInDays,
 } from "@/shared/config/bossRespawn";
 import {
@@ -221,7 +221,7 @@ export function useUpcomingEvents(): UpcomingEvent[] {
         // Проф. работы между киллом и концом окна возможного респауна
         // сбрасывают респавн в игре, даже если сам start не попадает в
         // окно — расчётное время недостоверно, событие не показываем.
-        if (maintenanceOverlapsRange(new Date(lastKill), end, maintenanceWindows))
+        if (maintenanceStartedDuring(new Date(lastKill), end, maintenanceWindows))
           continue;
 
         const isNow = realNow >= start && realNow < end;

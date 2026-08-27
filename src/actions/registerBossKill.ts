@@ -11,7 +11,7 @@ import {
   respawnWindow,
   getRespawnStart,
   isMaintenanceWindow,
-  maintenanceOverlapsRange,
+  maintenanceStartedDuring,
 } from "@/shared/config/bossRespawn";
 import { getVkNotificationSettings } from "./vkNotificationSettings";
 import { resolveNotifyMinutes } from "@/shared/config/vkNotificationDefaults";
@@ -81,12 +81,12 @@ export async function registerBossKill(
     );
     const missedNotifyAt =
       bossEnabled &&
-      !maintenanceOverlapsRange(
+      !maintenanceStartedDuring(
         new Date(killTimeIso),
         respawnEnd,
         maintenanceWindows,
       ) &&
-      !maintenanceOverlapsRange(respawnEnd, cascadedNextEnd, maintenanceWindows)
+      !maintenanceStartedDuring(respawnEnd, cascadedNextEnd, maintenanceWindows)
         ? new Date(
             cascadedNextStart.getTime() -
               resolveNotifyMinutes(vkSettings, boss) * 60 * 1000,

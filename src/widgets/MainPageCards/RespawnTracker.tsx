@@ -17,7 +17,7 @@ import {
   getRespawnStart,
   getNextMissedCycleStart,
   isMaintenanceWindow,
-  maintenanceOverlapsRange,
+  maintenanceStartedDuring,
 } from "@/shared/config/bossRespawn";
 
 const bossImages: Partial<Record<BossName, string>> = {
@@ -75,7 +75,7 @@ const RespawnTracker: FC = () => {
     const respawnEnd = new Date(
       respawnStart.getTime() + respawnWindow * 60 * 60 * 1000,
     );
-    if (maintenanceOverlapsRange(killDate, respawnEnd, maintenanceWindows))
+    if (maintenanceStartedDuring(killDate, respawnEnd, maintenanceWindows))
       return {
         status: "Проф. работы",
         nextRespawn: "-",
@@ -102,7 +102,7 @@ const RespawnTracker: FC = () => {
       const cascadeWindowEnd = new Date(
         nextRespawnDate.getTime() + respawnWindow * 60 * 60 * 1000,
       );
-      if (maintenanceOverlapsRange(respawnEnd, cascadeWindowEnd, maintenanceWindows)) {
+      if (maintenanceStartedDuring(respawnEnd, cascadeWindowEnd, maintenanceWindows)) {
         return {
           status: "Проф. работы",
           nextRespawn: "-",
