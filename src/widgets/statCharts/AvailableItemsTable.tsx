@@ -15,47 +15,53 @@ import inventoryIcons from "@/widgets/profile/inventory/InventoryIcons";
 
 const ITEM_ICONS: Record<string, string> = {
   Фрегат: inventoryIcons["Фрегат"],
-  Кабуксон: inventoryIcons["Кобуксон"],
-  "Танк(любой)": inventoryIcons["Танк"],
+  Кобуксон: inventoryIcons["Кобуксон"],
+  Танк: inventoryIcons["Танк"],
   Канонерка: inventoryIcons["Канонёрка"],
-  "Баф фигура 3 эпоха": inventoryIcons["Бафалка"],
-  "Баф фигура 4 эпоха": inventoryIcons["Бафалка"],
-  "Баф фигура 5 эпоха": inventoryIcons["Бафалка"],
+  "Глайдер «Рассекатель небес»": inventoryIcons["Глайдер «Рассекатель небес»"],
+  "Бафалка (3 эпоха)": inventoryIcons["Бафалка"],
+  "Бафалка (4 эпоха)": inventoryIcons["Бафалка"],
+  "Бафалка (5 эпоха)": inventoryIcons["Бафалка"],
   "Коллеционный глайдер": inventoryIcons["Коллеционный глайдер"],
-  "Коллеционный глайдер Т2": inventoryIcons["Коллеционный глайдер т2"],
-  ККЛ: inventoryIcons["Крылья кровавого легиона"],
-  "Драк. глайдер": inventoryIcons["Глайдер охотника на драконов"],
-  "Глайдер Авиары": inventoryIcons["Авиара"],
+  "Коллеционный глайдер (Т2)": inventoryIcons["Коллеционный глайдер т2"],
+  "Крылья кровавого легиона": inventoryIcons["Крылья кровавого легиона"],
+  Авиара: inventoryIcons["Авиара"],
   "Коллекционный фамильяр": inventoryIcons["Коллекционный фамильяр"],
   "Красный Дракон": inventoryIcons["Красный Дракон"],
   "Черный Дракон": inventoryIcons["Черный Дракон"],
   "Зеленый Дракон": inventoryIcons["Зеленый Дракон"],
-  Рокана: "https://archeagecodex.com/items/icon_item_staff_1h_0058.png",
-  "Кряк. щит": "https://archeagecodex.com/items/icon_item_shield_0055.png",
-  "Коллекционный фамильяр Т2": inventoryIcons["Коллекционный фамильяр т2"],
+  "Ро'кана, Безумие морей":
+    "https://archeagecodex.com/items/icon_item_staff_1h_0058.png",
+  "Анд'хакар, Чернильная тьма":
+    "https://archeagecodex.com/items/icon_item_shield_0055.png",
+  "Коллекционный фамильяр (Т2)": inventoryIcons["Коллекционный фамильяр т2"],
   "Коллекционный пет": inventoryIcons["Коллекционный пет"],
-  "Коллекционный пет Т2": inventoryIcons["Коллекционный пет т2"],
-  "Паучья колония": "/api/uploads/item-icons/28e3c898-b347-447a-9824-cb5cfa5eed99.png",
+  "Коллекционный пет (Т2)": inventoryIcons["Коллекционный пет т2"],
+  "Глайдер-крылья «Паучья колония»":
+    "/api/uploads/item-icons/28e3c898-b347-447a-9824-cb5cfa5eed99.png",
 };
 
 const GRADE_FRAME_LABELS: Record<string, string> = {
   "Коллеционный глайдер": "https://archeagecodex.com/images/icon_grade10.png",
-  "Коллеционный глайдер Т2":
+  "Коллеционный глайдер (Т2)":
     "https://archeagecodex.com/images/icon_grade11.png",
   "Коллекционный фамильяр":
     "https://archeagecodex.com/images/icon_grade10.png",
-  "Коллекционный фамильяр Т2":
+  "Коллекционный фамильяр (Т2)":
     "https://archeagecodex.com/images/icon_grade11.png",
-  "Баф фигура 3 эпоха": "https://archeagecodex.com/images/icon_grade10.png",
-  "Баф фигура 4 эпоха": "https://archeagecodex.com/images/icon_grade11.png",
-  "Баф фигура 5 эпоха": "https://archeagecodex.com/images/icon_grade12.png",
+  "Бафалка (3 эпоха)": "https://archeagecodex.com/images/icon_grade10.png",
+  "Бафалка (4 эпоха)": "https://archeagecodex.com/images/icon_grade11.png",
+  "Бафалка (5 эпоха)": "https://archeagecodex.com/images/icon_grade12.png",
   "Красный Дракон": "https://archeagecodex.com/images/icon_grade6.png",
   "Черный Дракон": "https://archeagecodex.com/images/icon_grade6.png",
   "Зеленый Дракон": "https://archeagecodex.com/images/icon_grade6.png",
-  Рокана: "https://archeagecodex.com/images/icon_grade5.png",
-  "Кряк. щит": "https://archeagecodex.com/images/icon_grade5.png",
-  "Коллекционный пет": "https://archeagecodex.com/images/icon_grade4.png",
-  "Коллекционный пет Т2": "https://archeagecodex.com/images/icon_grade11.png",
+  "Ро'кана, Безумие морей": "https://archeagecodex.com/images/icon_grade5.png",
+  "Анд'хакар, Чернильная тьма":
+    "https://archeagecodex.com/images/icon_grade5.png",
+  // Было icon_grade4 — не тот грейд, что у "Коллекционный фамильяр"/
+  // "Коллеционный глайдер" (icon_grade10), хотя это тот же тип предмета.
+  "Коллекционный пет": "https://archeagecodex.com/images/icon_grade10.png",
+  "Коллекционный пет (Т2)": "https://archeagecodex.com/images/icon_grade11.png",
 };
 
 function AvailableItemsColumns({ data }: { data: InventoryStockStat[] }) {

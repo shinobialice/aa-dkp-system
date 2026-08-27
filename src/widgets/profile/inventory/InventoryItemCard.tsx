@@ -130,7 +130,7 @@ export default function InventoryItemCard({
           )}
         </div>
       </div>
-      <span className="text-xs leading-tight">{item.name}</span>
+      <span className="text-xs leading-tight">{item.label ?? item.name}</span>
       <ItemSelector
         item={item}
         userItem={userItem}

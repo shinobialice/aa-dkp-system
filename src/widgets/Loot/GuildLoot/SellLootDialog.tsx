@@ -68,7 +68,7 @@ export function SellLootDialog({
 
   useEffect(() => {
     if (!manualPriceEdit) {
-      setPrice(isFree ? 0 : quantity * unitPrice);
+      setPrice(isFree ? 0 : Math.round(quantity * unitPrice));
     }
   }, [quantity, unitPrice, manualPriceEdit, isFree]);
 
@@ -79,7 +79,16 @@ export function SellLootDialog({
         setSoldToId(initialValues.soldToId);
         setQuantity(initialValues.quantity ?? 1);
         setPrice(initialValues.price ?? 0);
-        setUnitPrice(initialValues.price ?? 0);
+        // initialValues.price — это ОБЩАЯ цена за уже проданную партию, а не
+        // цена за 1 шт. Раньше сюда клали initialValues.price напрямую, и
+        // эффект ниже пересчитывал totalPrice = quantity * unitPrice, из-за
+        // чего при большом quantity цена улетала за пределы integer в БД
+        // (см. Postgres error "value ... is out of range for type integer").
+        setUnitPrice(
+          initialValues.quantity
+            ? (initialValues.price ?? 0) / initialValues.quantity
+            : (initialValues.price ?? 0),
+        );
         setComment(initialValues.comment ?? "");
         setIsFree(initialValues.isFree ?? false);
         setManualPriceEdit(false);
@@ -202,7 +211,7 @@ export function SellLootDialog({
                   setManualPriceEdit(false);
                   setPrice(0);
                 } else {
-                  setPrice(quantity * unitPrice);
+                  setPrice(Math.round(quantity * unitPrice));
                 }
               }}
             />
@@ -225,7 +234,7 @@ export function SellLootDialog({
               const val = Number(e.target.value);
               if (!isNaN(val)) {
                 setQuantity(val);
-                setPrice(val * unitPrice);
+                setPrice(Math.round(val * unitPrice));
               }
             }}
           />
@@ -249,7 +258,7 @@ export function SellLootDialog({
             onBlur={() => {
               if (!price || price < 1) {
                 setManualPriceEdit(false);
-                setPrice(quantity * unitPrice);
+                setPrice(Math.round(quantity * unitPrice));
               }
             }}
           />
