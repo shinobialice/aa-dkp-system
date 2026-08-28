@@ -12,6 +12,8 @@ const getUser = async (userId: number) => {
         class_gear_score,
         secondary_class,
         secondary_class_gear_score,
+        tertiary_class,
+        tertiary_class_gear_score,
         vk_id,
         vk_name,
         google_id,

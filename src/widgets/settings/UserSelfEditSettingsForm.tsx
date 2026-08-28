@@ -84,6 +84,32 @@ export function UserSelfEditSettingsForm() {
         />
       </div>
 
+      <div className="flex items-center justify-between gap-4 border rounded-lg p-3">
+        <Label>Класс (специализации)</Label>
+        <Switch
+          checked={settings.archetypeEditEnabled}
+          onCheckedChange={(v) =>
+            setSettings({ ...settings, archetypeEditEnabled: v })
+          }
+        />
+      </div>
+
+      <div className="flex items-center justify-between gap-4 border rounded-lg p-3">
+        <div>
+          <Label>Доп. роли (добавление)</Label>
+          <p className="text-xs text-muted-foreground">
+            Разрешает добавить себе 2-ю/3-ю роль, если её ещё нет. Изменение
+            ГС уже существующих ролей отдельно регулируется тумблером «ГС».
+          </p>
+        </div>
+        <Switch
+          checked={settings.extraRoleEditEnabled}
+          onCheckedChange={(v) =>
+            setSettings({ ...settings, extraRoleEditEnabled: v })
+          }
+        />
+      </div>
+
       <Button
         onClick={handleSave}
         disabled={saving}

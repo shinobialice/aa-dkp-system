@@ -10,6 +10,7 @@ import {
   Bell,
   PartyPopper,
   Package,
+  MapPin,
 } from "lucide-react";
 import { Button } from "@/shared/ui";
 import { Card } from "@/shared/ui";
@@ -33,6 +34,7 @@ import { MaintenanceWindowsForm } from "./MaintenanceWindowsForm";
 import { VkNotificationSettingsForm } from "./VkNotificationSettingsForm";
 import { EventSettingsForm } from "./EventSettingsForm";
 import { InventoryStockSettingsForm } from "./InventoryStockSettingsForm";
+import { GuildLocationSettingsForm } from "./GuildLocationSettingsForm";
 
 type UserOption = {
   id: number;
@@ -41,11 +43,12 @@ type UserOption = {
 
 const sections = [
   { id: "users", label: "Пользователи", icon: UsersIcon },
+  { id: "guild", label: "Гильдия", icon: MapPin },
   { id: "bosses", label: "Боссы и респаун", icon: Swords },
   { id: "salary", label: "Зарплата", icon: HandCoins },
   { id: "vk", label: "Уведомления ВК", icon: Bell },
   { id: "event", label: "Ивент", icon: PartyPopper },
-  { id: "inventory", label: "Инвентарь", icon: Package },
+  { id: "inventory", label: "Статистика Инвентаря", icon: Package },
 ] as const;
 
 type SectionId = (typeof sections)[number]["id"];
@@ -163,6 +166,14 @@ export function SettingsPageContainer() {
 
               <Card className="p-4 max-w-xl">
                 <UserSelfEditSettingsForm />
+              </Card>
+            </section>
+          )}
+
+          {active === "guild" && (
+            <section className="space-y-6">
+              <Card className="p-4">
+                <GuildLocationSettingsForm />
               </Card>
             </section>
           )}

@@ -21,8 +21,8 @@ import {
 } from "@/shared/config/bossRespawn";
 
 const bossImages: Partial<Record<BossName, string>> = {
-  Марли: "/images/marli.png",
-  Морф: "/images/morpheos.png",
+  Марли: "/images/bosses/marli.png",
+  Морф: "/images/bosses/morpheos.png",
 };
 type BossState = {
   lastKill: string | null;

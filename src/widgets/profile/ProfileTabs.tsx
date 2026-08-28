@@ -1,12 +1,14 @@
 "use client";
 import { useEffect, useState } from "react";
 import getUserInventory from "@/actions/getUserInventory";
+import type { UserArchetype } from "@/actions/getUserArchetype";
 import { UserActivityChart } from "@/widgets/profile/activity/UserActivityChart";
 import { UserMonthActivity } from "@/widgets/profile/activity/UserMonthActivity";
 import InventoryTabsClient from "./inventory/InventoryTabsClient";
 import PurchasesAndGiveaways from "./inventory/PurchasesAndGiveaways";
 import UserNotes from "./notes/UserNotes";
 import SealsTab from "./seals/SealsTab";
+import ClassArchetypeTab from "./archetype/ClassArchetypeTab";
 import UsernameHistoryTab from "./usernameHistory/UsernameHistoryTab";
 import UserMonthlyRaidsTab from "./raids/UserMonthlyRaidsTab";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/ui";
@@ -16,6 +18,8 @@ export default function ProfileTabs({
   inventory: initialInventory,
   seals,
   setSeals,
+  archetype,
+  setArchetype,
   tags,
   setTags,
   setUser,
@@ -24,11 +28,14 @@ export default function ProfileTabs({
   isAdmin,
   canEditInventory,
   canEditSeals,
+  canEditArchetype,
 }: {
   user: any;
   inventory: any[];
   seals: any[];
   setSeals: (seals: any[]) => void;
+  archetype: UserArchetype;
+  setArchetype: (archetype: UserArchetype) => void;
   tags: any[];
   setTags: (tags: any[]) => void;
   setUser: (user: any) => void;
@@ -42,6 +49,7 @@ export default function ProfileTabs({
   isAdmin: boolean;
   canEditInventory: boolean;
   canEditSeals: boolean;
+  canEditArchetype: boolean;
 }) {
   const [inventory, setInventory] = useState(initialInventory);
 
@@ -75,8 +83,8 @@ export default function ProfileTabs({
         <TabsTrigger className="cursor-pointer" value="username-history">
           История ников
         </TabsTrigger>
-        <TabsTrigger className="cursor-pointer" value="seals">
-          Печати
+        <TabsTrigger className="cursor-pointer" value="character">
+          Персонаж
         </TabsTrigger>
       </TabsList>
       <TabsContent value="inventory">
@@ -117,7 +125,14 @@ export default function ProfileTabs({
         <UsernameHistoryTab history={usernameHistory} />
       </TabsContent>
 
-      <TabsContent value="seals">
+      <TabsContent value="character" className="space-y-6">
+        <ClassArchetypeTab
+          userId={user.id}
+          user={user}
+          archetype={archetype}
+          onChange={setArchetype}
+          canEdit={canEditArchetype}
+        />
         <SealsTab
           userId={user.id}
           seals={seals}

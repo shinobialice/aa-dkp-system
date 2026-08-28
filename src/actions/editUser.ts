@@ -12,12 +12,15 @@ const editUser = async (
   classGearScore: number,
   secondaryClassName: string | null,
   secondaryClassGearScore: number | null,
+  tertiaryClassName: string | null,
+  tertiaryClassGearScore: number | null,
   vkName: string,
   joined_at: Date | string | null,
 ) => {
   const [existing] = await sql<any[]>`
     SELECT username, class, class_gear_score, secondary_class,
-           secondary_class_gear_score, vk_name, joined_at, active
+           secondary_class_gear_score, tertiary_class,
+           tertiary_class_gear_score, vk_name, joined_at, active
     FROM "user"
     WHERE id = ${userId}
   `;
@@ -55,11 +58,34 @@ const editUser = async (
     finalJoinedAt = existing.joined_at;
 
     const nicknameChanged = username !== existing.username;
-    const gsChanged =
-      className !== existing.class ||
-      classGearScore !== existing.class_gear_score ||
+    const primaryChanged =
+      className !== existing.class || classGearScore !== existing.class_gear_score;
+
+    // Добавление 2-й/3-й роли с нуля — отдельное разрешение
+    // (extraRoleEditEnabled) от правки ГС уже существующей роли
+    // (gsEditEnabled): админ может, например, разрешить добавлять доп. роль,
+    // но не разрешать менять ГС того, что уже выставлено.
+    const secondaryWasEmpty =
+      !existing.secondary_class && existing.secondary_class_gear_score == null;
+    const secondaryChanged =
       secondaryClassName !== existing.secondary_class ||
       secondaryClassGearScore !== existing.secondary_class_gear_score;
+    const secondaryIsNewAddition =
+      secondaryChanged && secondaryWasEmpty && !!secondaryClassName;
+
+    const tertiaryWasEmpty =
+      !existing.tertiary_class && existing.tertiary_class_gear_score == null;
+    const tertiaryChanged =
+      tertiaryClassName !== existing.tertiary_class ||
+      tertiaryClassGearScore !== existing.tertiary_class_gear_score;
+    const tertiaryIsNewAddition =
+      tertiaryChanged && tertiaryWasEmpty && !!tertiaryClassName;
+
+    const gsChanged =
+      primaryChanged ||
+      (secondaryChanged && !secondaryIsNewAddition) ||
+      (tertiaryChanged && !tertiaryIsNewAddition);
+    const addingExtraRole = secondaryIsNewAddition || tertiaryIsNewAddition;
 
     const selfEditSettings = await getUserSelfEditSettings();
     if (nicknameChanged && !selfEditSettings.nicknameEditEnabled) {
@@ -67,6 +93,9 @@ const editUser = async (
     }
     if (gsChanged && !selfEditSettings.gsEditEnabled) {
       throw new Error("Access denied: gs edit disabled");
+    }
+    if (addingExtraRole && !selfEditSettings.extraRoleEditEnabled) {
+      throw new Error("Access denied: extra role edit disabled");
     }
   }
 
@@ -79,6 +108,8 @@ const editUser = async (
         class_gear_score = ${classGearScore},
         secondary_class = ${secondaryClassName},
         secondary_class_gear_score = ${secondaryClassGearScore},
+        tertiary_class = ${tertiaryClassName},
+        tertiary_class_gear_score = ${tertiaryClassGearScore},
         vk_name = ${finalVkName},
         joined_at = ${finalJoinedAt}
       WHERE id = ${userId}

@@ -8,6 +8,7 @@ import { hasTag } from "@/actions/hasTag";
 import AppSidebar from "@/widgets/sidebar";
 import { HeartbeatTracker } from "@/widgets/sidebar/HeartbeatTracker";
 import { SessionGuard } from "@/widgets/sidebar/SessionGuard";
+import { GuildLocationBadge } from "@/widgets/sidebar/GuildLocationBadge";
 import { EventNotifications } from "@/widgets/EventNotifications/EventNotifications";
 import { cookies } from "next/headers";
 
@@ -24,12 +25,15 @@ export default async function DefaultLayout({
       <SessionGuard />
       <EventNotifications />
       <div className="flex bg-background text-foreground w-full">
-        <AppSidebar isAdmin={isAdmin} />
+        <AppSidebar isAdmin={isAdmin} locationBadge={<GuildLocationBadge />} />
         <div className="flex flex-col flex-1">
           <header className="lg:hidden flex h-12 items-center gap-2 border-b px-4">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mx-2 h-4" />
             <h1 className="text-base font-medium">No Fear</h1>
+            <div className="ml-auto">
+              <GuildLocationBadge variant="compact" />
+            </div>
           </header>
           <main className="flex-1 p-8">
             {children}

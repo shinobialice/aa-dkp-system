@@ -21,6 +21,7 @@ import {
   BadgeDollarSign,
   HandCoins,
   Swords,
+  Flag,
   UserX,
   Newspaper,
   Package,
@@ -44,6 +45,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarFooter,
+  Separator,
 } from "@/shared/ui";
 import Image from "next/image";
 import { NavUser } from "./NavUser";
@@ -51,9 +53,9 @@ import { OnlineUsersWidget } from "./OnlineUsersWidget";
 import DimonishMenuItem from "./DimonishMenuItem";
 import { FC } from "react";
 
-type Props = { isAdmin: boolean };
+type Props = { isAdmin: boolean; locationBadge?: React.ReactNode };
 
-const AppSidebar: FC<Props> = ({ isAdmin }) => {
+const AppSidebar: FC<Props> = ({ isAdmin, locationBadge }) => {
   const { setTheme } = useTheme();
   const router = useRouter();
 
@@ -75,6 +77,7 @@ const AppSidebar: FC<Props> = ({ isAdmin }) => {
     },
     { title: "Статистика", url: "/stats", icon: LineChart },
     { title: "Киллкаунт", url: "/kill_counter", icon: Swords },
+    { title: "Вар", url: "/war", icon: Flag },
   ];
 
   const managementItems = [
@@ -86,20 +89,28 @@ const AppSidebar: FC<Props> = ({ isAdmin }) => {
   return (
     <Sidebar>
       <SidebarContent>
-        <button
-          type="button"
-          onClick={() => router.push("/")}
-          className="inline-flex items-center gap-3 mb-6 border-b border-border pb-4 pt-4 pl-8 cursor-pointer text-left"
-        >
-          <Image
-            src="/images/logo.png"
-            alt="No Fear"
-            width={50}
-            height={50}
-            className="mb-0"
-          />
-          <h2 className="text-2xl font-bold text-primary">No Fear</h2>
-        </button>
+        <div className="mb-4 border-b border-border pb-3 pt-4 space-y-2.5">
+          <button
+            type="button"
+            onClick={() => router.push("/")}
+            className="flex w-full items-center justify-center gap-3 cursor-pointer"
+          >
+            <Image
+              src="/images/logo.png"
+              alt="No Fear"
+              width={64}
+              height={64}
+              className="mb-0"
+            />
+            <h2 className="text-2xl font-bold text-primary">No Fear</h2>
+          </button>
+          {locationBadge && (
+            <>
+              <Separator />
+              <div className="px-4">{locationBadge}</div>
+            </>
+          )}
+        </div>
 
         <SidebarGroup>
           <SidebarGroupLabel>Меню</SidebarGroupLabel>

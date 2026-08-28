@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import type { PrimeStreak } from "@/actions/getUserPrimeStreak";
+import type { UserArchetype } from "@/actions/getUserArchetype";
 import SealIcon from "@/widgets/profile/seals/SealIcon";
 import { getSealGradeLabel } from "@/widgets/profile/seals/sealsData";
 import ProfileAdditionalInfo from "./ProfileAdditionalInfo";
@@ -19,10 +20,12 @@ export default function ProfileInfoClient({
   user,
   tags: initialTags,
   seals,
+  archetype,
   setUsernameHistory,
   canEditProfile,
   canEditNickname,
   canEditGs,
+  canAddExtraRole,
   canEditAdminFields,
   isOwnProfile,
   activity,
@@ -32,6 +35,7 @@ export default function ProfileInfoClient({
   user: any;
   tags: any[];
   seals: any[];
+  archetype: UserArchetype;
   setUsernameHistory: (
     history: {
       id: number;
@@ -43,6 +47,7 @@ export default function ProfileInfoClient({
   canEditProfile: boolean;
   canEditNickname: boolean;
   canEditGs: boolean;
+  canAddExtraRole: boolean;
   canEditAdminFields: boolean;
   isOwnProfile: boolean;
   activity: {
@@ -63,6 +68,8 @@ export default function ProfileInfoClient({
     classGearScore: user.class_gear_score,
     secondaryClass: user.secondary_class,
     secondaryClassGearScore: user.secondary_class_gear_score,
+    tertiaryClass: user.tertiary_class,
+    tertiaryClassGearScore: user.tertiary_class_gear_score,
     vkName: user.vk_name,
     vkRealName: "",
     joined_at: user.joined_at ? user.joined_at.slice(0, 10) : "",
@@ -111,6 +118,8 @@ export default function ProfileInfoClient({
           setFormData={setFormData}
           editMode={editMode}
           canEditGs={canEditGs}
+          canAddExtraRole={canAddExtraRole}
+          archetype={archetype}
         />
         <div className="min-w-[140px] space-y-1.5">
           <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -149,7 +158,8 @@ export default function ProfileInfoClient({
             Баллы · {currentMonthLabel}
           </div>
           <div className="text-sm font-semibold">
-            {formatPoints(activity.dkp)} / {formatPoints(activity.totalPointsAvailable)}
+            {formatPoints(activity.dkp)} /{" "}
+            {formatPoints(activity.totalPointsAvailable)}
           </div>
         </div>
         <div className="min-w-[140px] space-y-1.5">

@@ -337,6 +337,7 @@ export function LootRawTable({
                     selectedItem.price ?? selectedItem.itemType?.price ?? 0,
                   comment: selectedItem.comment ?? "",
                   isFree: selectedItem.status === "Выдано",
+                  soldAt: selectedItem.sold_at ?? undefined,
                 }
               : undefined
           }
@@ -351,6 +352,7 @@ export function LootRawTable({
                 isFree: data.isFree ?? false,
                 comment: data.comment,
                 price: data.price,
+                soldAt: data.soldAt,
               });
               setSelectedItem(null);
               setDialogOpen(false);

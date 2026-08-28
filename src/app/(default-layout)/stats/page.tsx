@@ -8,6 +8,7 @@ import {
   getRosterComposition,
   getInventoryStock,
   getSealGradeStats,
+  getClassArchetypeStats,
 } from "@/actions/guildStats";
 import {
   mergeDailyAttendance,
@@ -44,6 +45,7 @@ export default async function StatsPage() {
     rosterComposition,
     inventoryStock,
     sealGradeStats,
+    classArchetypeStats,
   ] = await Promise.all([
     getGuildAttendancePrime({ year, month }),
     getGuildAttendanceAgl({ year, month }),
@@ -54,6 +56,7 @@ export default async function StatsPage() {
     getRosterComposition(),
     getInventoryStock(),
     getSealGradeStats(),
+    getClassArchetypeStats(),
   ]);
 
   return (
@@ -68,6 +71,7 @@ export default async function StatsPage() {
       initialRosterComposition={rosterComposition}
       initialInventoryStock={inventoryStock}
       initialSealGradeStats={sealGradeStats}
+      initialClassArchetypeStats={classArchetypeStats}
     />
   );
 }

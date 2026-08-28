@@ -11,6 +11,7 @@ import type {
   RosterClassStat,
   InventoryStockStat,
   SealGradeStat,
+  ClassArchetypeStat,
 } from "@/actions/guildStats";
 import type {
   mergeDailyAttendance,
@@ -28,6 +29,7 @@ export default function StatsPageClient({
   initialRosterComposition,
   initialInventoryStock,
   initialSealGradeStats,
+  initialClassArchetypeStats,
 }: {
   initialYear: number;
   initialMonth: number;
@@ -39,6 +41,7 @@ export default function StatsPageClient({
   initialRosterComposition: RosterClassStat[];
   initialInventoryStock: InventoryStockStat[];
   initialSealGradeStats: SealGradeStat[];
+  initialClassArchetypeStats: ClassArchetypeStat[];
 }) {
   const [year2, setYear2] = useState(initialYear);
   const [month2, setMonth2] = useState(initialMonth);
@@ -69,6 +72,7 @@ export default function StatsPageClient({
         rosterComposition={initialRosterComposition}
         sealGradeStats={initialSealGradeStats}
         inventoryStock={initialInventoryStock}
+        classArchetypeStats={initialClassArchetypeStats}
         className="self-start"
       />
       <DailyRaidsCard

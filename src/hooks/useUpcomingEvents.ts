@@ -23,20 +23,20 @@ import {
 import { useMaintenanceWindows } from "./useMaintenanceWindows";
 
 export const bossImages: Record<string, string> = {
-  АГЛ: "/images/ashyara.png",
-  Калидис: "/images/kalidis.png",
-  Кракен: "/images/kraken.png",
-  "Великий луг": "/images/velikii_lug.png",
-  Анталлон: "/images/antallon.png",
-  Ксанатос: "/images/ksanatos.png",
-  Левиафан: "/images/leviathan.png",
-  "Оборона Ифнира": "/images/ifnir.png",
-  "Осада замка": "/images/osada.png",
-  Кошка: "/images/koshka.png",
-  Марли: "/images/marli.png",
-  Морф: "/images/morpheos.png",
-  "Пепельные равнины": "/images/pepelki.png",
-  "Проф. работы": "/images/prof.png",
+  АГЛ: "/images/bosses/ashyara.png",
+  Калидис: "/images/bosses/kalidis.png",
+  Кракен: "/images/bosses/kraken.png",
+  "Великий луг": "/images/bosses/velikii_lug.png",
+  Анталлон: "/images/bosses/antallon.png",
+  Ксанатос: "/images/bosses/ksanatos.png",
+  Левиафан: "/images/bosses/leviathan.png",
+  "Оборона Ифнира": "/images/bosses/ifnir.png",
+  "Осада замка": "/images/bosses/osada.png",
+  Кошка: "/images/bosses/koshka.png",
+  Марли: "/images/bosses/marli.png",
+  Морф: "/images/bosses/morpheos.png",
+  "Пепельные равнины": "/images/bosses/pepelki.png",
+  "Проф. работы": "/images/bosses/prof.png",
 };
 
 const maintenanceEventName = "Проф. работы";

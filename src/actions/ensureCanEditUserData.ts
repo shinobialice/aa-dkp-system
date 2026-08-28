@@ -9,7 +9,8 @@ type SelfEditToggle =
   | "nicknameEditEnabled"
   | "gsEditEnabled"
   | "inventoryEditEnabled"
-  | "sealsEditEnabled";
+  | "sealsEditEnabled"
+  | "archetypeEditEnabled";
 
 // Разрешает Администратору/Секретутке всегда, а самому активному
 // пользователю — только если соответствующий тумблер включен в Настройках.

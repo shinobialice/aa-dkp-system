@@ -5,3 +5,4 @@ export * from "./dailyRaids";
 export * from "./rosterComposition";
 export * from "./inventoryStock";
 export * from "./sealStats";
+export * from "./classArchetypeStats";

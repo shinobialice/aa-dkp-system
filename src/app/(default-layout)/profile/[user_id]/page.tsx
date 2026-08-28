@@ -2,6 +2,7 @@ import { getAverageGuildGS } from "@/actions/getAverageGuildGS";
 import getUser from "@/actions/getUser";
 import getUserInventory from "@/actions/getUserInventory";
 import getUserSeals from "@/actions/getUserSeals";
+import getUserArchetype from "@/actions/getUserArchetype";
 import { getUserMonthlyAttendance } from "@/actions/getUserMonthlyAttendance";
 import { getUserPrimeStreak } from "@/actions/getUserPrimeStreak";
 import getUserNotes from "@/actions/getUserNotes";
@@ -35,6 +36,7 @@ export default async function Page(p: {
     salary,
     primeStreak,
     seals,
+    archetype,
   ] = await Promise.all([
     getUser(userId),
     getUserTags(userId),
@@ -44,6 +46,7 @@ export default async function Page(p: {
     getUserCurrentMonthSalary(userId),
     getUserPrimeStreak(userId),
     getUserSeals(userId),
+    getUserArchetype(userId),
   ]);
 
   const sessionToken = (await cookies()).get("session_token")?.value ?? "";
@@ -66,6 +69,12 @@ export default async function Page(p: {
     (canSelfEdit && selfEditSettings.inventoryEditEnabled);
   const canEditSeals =
     isPrivilegedEditor || (canSelfEdit && selfEditSettings.sealsEditEnabled);
+  const canEditArchetype =
+    isPrivilegedEditor ||
+    (canSelfEdit && selfEditSettings.archetypeEditEnabled);
+  const canAddExtraRole =
+    isPrivilegedEditor ||
+    (canSelfEdit && selfEditSettings.extraRoleEditEnabled);
   const canEditProfile = canEditNickname || canEditGs;
 
   return (
@@ -74,14 +83,17 @@ export default async function Page(p: {
       canEditProfile={canEditProfile}
       canEditNickname={canEditNickname}
       canEditGs={canEditGs}
+      canAddExtraRole={canAddExtraRole}
       canEditAdminFields={isPrivilegedEditor}
       canEditInventory={canEditInventory}
       canEditSeals={canEditSeals}
+      canEditArchetype={canEditArchetype}
       isOwnProfile={isOwnProfile}
       user={user}
       tags={tags}
       inventory={inventory}
       seals={seals}
+      archetype={archetype}
       notes={notes}
       usernameHistory={usernameHistory}
       averageGuildGS={averageGuildGS}

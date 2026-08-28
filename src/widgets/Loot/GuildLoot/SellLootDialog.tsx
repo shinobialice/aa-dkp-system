@@ -15,6 +15,7 @@ import {
 import { Input } from "@/shared/ui";
 import { Label } from "@/shared/ui";
 import { Popover, PopoverTrigger, PopoverContent } from "@/shared/ui";
+import { DateTimePicker } from "@/shared/ui";
 import { cn } from "@/shared/lib/tw-merge";
 
 type User = { id: number; username: string };
@@ -42,6 +43,7 @@ export function SellLootDialog({
     comment?: string;
     quantity: number;
     isFree?: boolean;
+    soldAt: string;
   }) => void;
   editMode?: boolean;
   initialValues?: {
@@ -51,6 +53,7 @@ export function SellLootDialog({
     price?: number;
     comment?: string;
     isFree?: boolean;
+    soldAt?: string | Date;
   };
   itemName?: string;
 }) {
@@ -64,6 +67,7 @@ export function SellLootDialog({
   const [isOpen, setIsOpen] = useState(false);
   const [manualPriceEdit, setManualPriceEdit] = useState(false);
   const [isFree, setIsFree] = useState(false);
+  const [soldAt, setSoldAt] = useState<Date>(new Date());
   const effectiveMaxQuantity = maxQuantity ?? 1;
 
   useEffect(() => {
@@ -92,6 +96,9 @@ export function SellLootDialog({
         setComment(initialValues.comment ?? "");
         setIsFree(initialValues.isFree ?? false);
         setManualPriceEdit(false);
+        setSoldAt(
+          initialValues.soldAt ? new Date(initialValues.soldAt) : new Date(),
+        );
       } else {
         const startPrice = initialPrice ?? 0;
         setUnitPrice(startPrice);
@@ -102,6 +109,7 @@ export function SellLootDialog({
         setComment("");
         setIsFree(false);
         setManualPriceEdit(false);
+        setSoldAt(new Date());
       }
     }
   }, [open, editMode, initialValues, initialPrice]);
@@ -124,6 +132,7 @@ export function SellLootDialog({
       comment,
       quantity,
       isFree,
+      soldAt: soldAt.toISOString(),
     });
 
     onClose();
@@ -199,6 +208,13 @@ export function SellLootDialog({
               </Command>
             </PopoverContent>
           </Popover>
+
+          <Label>Дата продажи</Label>
+          <DateTimePicker
+            hideTime
+            value={soldAt}
+            onChange={(date) => date && setSoldAt(date)}
+          />
 
           <Label className="flex items-center gap-2 mt-2">
             <input

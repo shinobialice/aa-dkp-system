@@ -149,6 +149,10 @@ export default function ProfileHeader({
                         formData.secondaryClassGearScore != null
                           ? Number(formData.secondaryClassGearScore)
                           : null,
+                        formData.tertiaryClass ?? null,
+                        formData.tertiaryClassGearScore != null
+                          ? Number(formData.tertiaryClassGearScore)
+                          : null,
                         formData.vkName,
                         formData.joined_at,
                       );
