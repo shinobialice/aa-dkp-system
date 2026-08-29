@@ -11,12 +11,13 @@ export type ClassArchetypeStat = {
 const UNSET_LABEL = "Не выбран";
 
 // Распределение игровых классов (3 специализации -> имя, см. user_archetype)
-// среди активных участников гильдии.
+// среди активных участников гильдии. Только мейн (role_slot = 1) — доп.
+// роли (2/3) не должны раздувать статистику по классам.
 export async function getClassArchetypeStats(): Promise<ClassArchetypeStat[]> {
   const rows = await sql<{ class_name: string | null }[]>`
     SELECT ua.class_name
     FROM "user" u
-    LEFT JOIN user_archetype ua ON ua.user_id = u.id
+    LEFT JOIN user_archetype ua ON ua.user_id = u.id AND ua.role_slot = 1
     WHERE u.active = true
   `.catch((error) => {
     console.error("Ошибка при получении статистики по классам:", error);
