@@ -2,11 +2,37 @@
 
 import sql from "@/shared/lib/db";
 import { getInventoryStockSettings } from "@/actions/inventoryStockSettings";
+import { sortPlayers, type NamedPlayer } from "./playerRef";
 
 export type InventoryStockStat = {
   label: string;
   count: number;
   iconUrl?: string | null;
+  players: NamedPlayer[];
+  // Отсутствует у "Бафалка" (см. NO_MISSING_LABELS) — для неё список
+  // отсутствующих не показываем.
+  missingPlayers?: NamedPlayer[];
+};
+
+// "Бафалка", драконы (Красный/Черный/Зеленый) и Авиара не показываем в
+// списке отсутствующих — список "у кого нет" по ним не нужен.
+const NO_MISSING_LABELS = new Set([
+  "Бафалка (3 эпоха)",
+  "Бафалка (4 эпоха)",
+  "Бафалка (5 эпоха)",
+  "Красный Дракон",
+  "Черный Дракон",
+  "Зеленый Дракон",
+  "Авиара",
+]);
+
+// T1 -> T2: у T2-предмета обязателен T1 (это апгрейд), поэтому владельца T2
+// не показываем повторно в списке "у кого есть" T1, а владение T2 засчитываем
+// как владение T1 при подсчёте "у кого нет".
+const T1_TO_T2_LABEL: Record<string, string> = {
+  "Коллеционный глайдер": "Коллеционный глайдер (Т2)",
+  "Коллекционный фамильяр": "Коллекционный фамильяр (Т2)",
+  "Коллекционный пет": "Коллекционный пет (Т2)",
 };
 
 export type InventoryStockItem = {
@@ -150,7 +176,7 @@ export async function getInventoryStock(): Promise<InventoryStockStat[]> {
   ).filter((row) => PROFILE_INVENTORY_TYPES.includes(row.type));
 
   const users = await sql<any[]>`
-    SELECT id, active FROM "user"
+    SELECT id, username, class, active FROM "user"
   `.catch((error) => {
     console.error("Ошибка при получении пользователей:", error);
     throw new Error("Не удалось загрузить пользователей");
@@ -159,24 +185,52 @@ export async function getInventoryStock(): Promise<InventoryStockStat[]> {
   const activeUserIds = new Set(
     users.filter((u) => u.active).map((u) => u.id),
   );
-
-  const curatedStats = sources.map(
-    ({ label, name, type, quality, excludeQuality }) => {
-      const owners = new Set(
-        inventory
-          .filter(
-            (row) =>
-              row.name === name &&
-              (!type || row.type === type) &&
-              (!quality || row.quality === quality) &&
-              (!excludeQuality || row.quality !== excludeQuality) &&
-              activeUserIds.has(row.user_id),
-          )
-          .map((row) => row.user_id),
-      );
-      return { label, count: owners.size };
-    },
+  const playerById = new Map<number, NamedPlayer>(
+    users.map((u) => [u.id, { username: u.username, class: u.class }]),
   );
+
+  const ownersByLabel = new Map<string, Set<number>>();
+  for (const { label, name, type, quality, excludeQuality } of sources) {
+    const owners = new Set(
+      inventory
+        .filter(
+          (row) =>
+            row.name === name &&
+            (!type || row.type === type) &&
+            (!quality || row.quality === quality) &&
+            (!excludeQuality || row.quality !== excludeQuality) &&
+            activeUserIds.has(row.user_id),
+        )
+        .map((row) => row.user_id),
+    );
+    ownersByLabel.set(label, owners);
+  }
+
+  const curatedStats = sources.map(({ label }) => {
+    const owners = ownersByLabel.get(label)!;
+    const t2Label = T1_TO_T2_LABEL[label];
+    const t2Owners = t2Label ? (ownersByLabel.get(t2Label) ?? new Set()) : new Set<number>();
+
+    const displayOwnerIds = t2Label
+      ? [...owners].filter((id) => !t2Owners.has(id))
+      : [...owners];
+    const players = sortPlayers(
+      displayOwnerIds.map((id) => playerById.get(id)).filter((p): p is NamedPlayer => !!p),
+    );
+
+    let missingPlayers: NamedPlayer[] | undefined;
+    if (!NO_MISSING_LABELS.has(label)) {
+      const countedOwnerIds = new Set([...owners, ...t2Owners]);
+      missingPlayers = sortPlayers(
+        [...activeUserIds]
+          .filter((id) => !countedOwnerIds.has(id))
+          .map((id) => playerById.get(id))
+          .filter((p): p is NamedPlayer => !!p),
+      );
+    }
+
+    return { label, count: owners.size, players, missingPlayers };
+  });
 
   // Всё остальное, что реально отмечено у игроков в категориях с каталогом,
   // но не входит в ITEM_SOURCES выше (например, только что заведённый в
@@ -218,6 +272,15 @@ export async function getInventoryStock(): Promise<InventoryStockStat[]> {
       label,
       count: owners.size,
       iconUrl: iconByName.get(label) ?? null,
+      players: sortPlayers(
+        [...owners].map((id) => playerById.get(id)).filter((p): p is NamedPlayer => !!p),
+      ),
+      missingPlayers: sortPlayers(
+        [...activeUserIds]
+          .filter((id) => !owners.has(id))
+          .map((id) => playerById.get(id))
+          .filter((p): p is NamedPlayer => !!p),
+      ),
     }))
     .sort((a, b) => a.label.localeCompare(b.label, "ru"));
 

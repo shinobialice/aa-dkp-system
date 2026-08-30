@@ -21,7 +21,6 @@ import {
   BadgeDollarSign,
   HandCoins,
   Swords,
-  Flag,
   UserX,
   Newspaper,
   Package,
@@ -77,7 +76,6 @@ const AppSidebar: FC<Props> = ({ isAdmin, locationBadge }) => {
     },
     { title: "Статистика", url: "/stats", icon: LineChart },
     { title: "Киллкаунт", url: "/kill_counter", icon: Swords },
-    { title: "Вар", url: "/war", icon: Flag },
   ];
 
   const managementItems = [

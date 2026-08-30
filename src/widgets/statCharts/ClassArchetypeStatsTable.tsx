@@ -1,15 +1,22 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
 import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
 } from "@/shared/ui";
 import type { ClassArchetypeStat } from "@/actions/guildStats";
+import PlayerNameList from "./PlayerNameList";
 
 function ClassArchetypeContent({ data }: { data: ClassArchetypeStat[] }) {
   if (data.length === 0) {
@@ -35,7 +42,20 @@ function ClassArchetypeContent({ data }: { data: ClassArchetypeStat[] }) {
             key={row.className}
             className={row.className === "Не выбран" ? "text-muted-foreground" : ""}
           >
-            <TableCell>{row.className}</TableCell>
+            <TableCell>
+              {row.players.length > 0 ? (
+                <Tooltip>
+                  <TooltipTrigger className="cursor-default underline decoration-dotted underline-offset-4">
+                    {row.className}
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <PlayerNameList players={row.players} />
+                  </TooltipContent>
+                </Tooltip>
+              ) : (
+                row.className
+              )}
+            </TableCell>
             <TableCell className="text-right">{row.count}</TableCell>
             <TableCell className="text-right">
               {row.percent.toFixed(1)}%

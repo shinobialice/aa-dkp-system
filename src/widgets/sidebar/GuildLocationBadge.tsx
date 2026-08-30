@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import {
   getGuildStatus,
   type GuildFaction,
@@ -38,22 +39,27 @@ export async function GuildLocationBadge({
   const modeIcon = MODE_ICON[mode];
   const modeLabel = MODE_LABEL[mode];
 
+  // Ведёт на "/war" — карточка со статусом сервера дублирует пункт меню
+  // "Вар" (см. sidebar/index.tsx), чтобы не занимать место в меню лишним
+  // пунктом.
   if (variant === "compact") {
     return (
-      <div
-        className={`flex items-center gap-2 rounded-full border border-border bg-muted/50 py-1 pr-3 pl-1 ${className ?? ""}`}
+      <Link
+        href="/war"
+        className={`flex items-center gap-2 rounded-full border border-border bg-muted/50 py-1 pr-3 pl-1 transition hover:bg-muted ${className ?? ""}`}
         title={`${server} · ${factionLabel} · ${modeLabel}`}
       >
         <Image src={icon} alt={factionLabel} width={26} height={26} />
         <span className="text-sm font-medium">{server}</span>
         <Image src={modeIcon} alt={modeLabel} width={18} height={18} />
-      </div>
+      </Link>
     );
   }
 
   return (
-    <div
-      className={`flex items-center gap-2.5 rounded-lg border border-border bg-muted/50 px-2.5 py-1.5 ${className ?? ""}`}
+    <Link
+      href="/war"
+      className={`flex items-center gap-2.5 rounded-lg border border-border bg-muted/50 px-2.5 py-1.5 transition hover:bg-muted ${className ?? ""}`}
       title={`${server} · ${factionLabel} · ${modeLabel}`}
     >
       <Image
@@ -74,6 +80,6 @@ export async function GuildLocationBadge({
         height={35}
         className="ml-auto shrink-0"
       />
-    </div>
+    </Link>
   );
 }

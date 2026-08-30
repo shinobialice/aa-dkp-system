@@ -1,16 +1,23 @@
 "use client";
 
 import Image from "next/image";
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
 import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
 } from "@/shared/ui";
 import type { InventoryStockStat } from "@/actions/guildStats";
+import PlayerNameList from "./PlayerNameList";
 import inventoryIcons from "@/widgets/profile/inventory/InventoryIcons";
 
 const ITEM_ICONS: Record<string, string> = {
@@ -95,21 +102,47 @@ function AvailableItemsColumns({ data }: { data: InventoryStockStat[] }) {
                             height={24}
                             className="rounded"
                           />
-                          {GRADE_FRAME_LABELS[item.label] && (
-                            <Image
-                              src={GRADE_FRAME_LABELS[item.label]}
-                              alt=""
-                              width={24}
-                              height={24}
-                              className="pointer-events-none absolute inset-0"
-                            />
-                          )}
+                          <Image
+                            src={
+                              GRADE_FRAME_LABELS[item.label] ??
+                              "https://archeagecodex.com/images/icon_grade1.png"
+                            }
+                            alt=""
+                            width={24}
+                            height={24}
+                            className="pointer-events-none absolute inset-0"
+                          />
                         </div>
                       )}
-                      {item.label}
+                      {item.players.length > 0 ? (
+                        <Tooltip>
+                          <TooltipTrigger className="cursor-default underline decoration-dotted underline-offset-4">
+                            {item.label}
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <PlayerNameList players={item.players} />
+                          </TooltipContent>
+                        </Tooltip>
+                      ) : (
+                        item.label
+                      )}
                     </div>
                   </TableCell>
-                  <TableCell className="text-right">{item.count}</TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      {item.count}
+                      {item.missingPlayers && item.missingPlayers.length > 0 && (
+                        <Tooltip>
+                          <TooltipTrigger className="cursor-default text-xs text-red-500 underline decoration-dotted underline-offset-2">
+                            −{item.missingPlayers.length}
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <PlayerNameList players={item.missingPlayers} />
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </div>
+                  </TableCell>
                 </TableRow>
               );
             })}
