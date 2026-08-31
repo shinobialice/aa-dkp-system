@@ -3,7 +3,7 @@
 import sql from "@/shared/lib/db";
 import ensurePrivilieges from "./ensurePrivilieges";
 import { triggerFinanceRecalc } from "./recalculateFinanceForMonth";
-import { getMoscowISOString } from "@/utils/getMoscowISOString";
+import { getMoscowISOString, getMoscowYearMonth } from "@/utils/getMoscowISOString";
 
 /**
  * Обновляет существующее событие по ID
@@ -88,9 +88,8 @@ const updateEvent = async (
 
   // Посещаемость/dkp влияют на веса зарплат за месяц рейда — пересчитываем
   // сразу, не дожидаясь таймера на /loot/finance.
-  const monthsToRecalc = new Set([
-    `${start_date.getFullYear()}-${start_date.getMonth() + 1}`,
-  ]);
+  const { year: newYear, month: newMonth } = getMoscowYearMonth(start_date);
+  const monthsToRecalc = new Set([`${newYear}-${newMonth}`]);
   if (previousRaid?.start_date) {
     const prevDate = new Date(previousRaid.start_date);
     monthsToRecalc.add(`${prevDate.getFullYear()}-${prevDate.getMonth() + 1}`);

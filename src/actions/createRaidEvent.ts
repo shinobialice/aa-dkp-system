@@ -2,7 +2,7 @@
 import sql from "@/shared/lib/db";
 import ensurePrivilieges from "./ensurePrivilieges";
 import { triggerFinanceRecalc } from "./recalculateFinanceForMonth";
-import { getMoscowISOString } from "@/utils/getMoscowISOString";
+import { getMoscowISOString, getMoscowYearMonth } from "@/utils/getMoscowISOString";
 
 const createRaidEvent = async (
   type: string,
@@ -83,10 +83,8 @@ const createRaidEvent = async (
 
   // Посещаемость влияет на веса зарплат за месяц рейда (см. generateSalaries)
   // — пересчитываем сразу, не дожидаясь таймера на /loot/finance.
-  await triggerFinanceRecalc(
-    start_date.getMonth() + 1,
-    start_date.getFullYear(),
-  );
+  const { year: recalcYear, month: recalcMonth } = getMoscowYearMonth(start_date);
+  await triggerFinanceRecalc(recalcMonth, recalcYear);
 
   return raid;
 };

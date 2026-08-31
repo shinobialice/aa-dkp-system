@@ -2,6 +2,7 @@
 
 import sql from "@/shared/lib/db";
 import { triggerFinanceRecalc } from "./recalculateFinanceForMonth";
+import { getUtcYearMonth } from "@/utils/getUtcYearMonth";
 
 export async function distributeLootItem({
   lootId,
@@ -109,8 +110,8 @@ export async function distributeLootItem({
   }
 
   if (!isFree) {
-    const soldAtDate = new Date(soldAt);
-    await triggerFinanceRecalc(soldAtDate.getMonth() + 1, soldAtDate.getFullYear());
+    const { year, month } = getUtcYearMonth(new Date(soldAt));
+    await triggerFinanceRecalc(month, year);
   }
 }
 
@@ -215,9 +216,9 @@ export async function updateLootSale({
     const oldDate = new Date(loot.sold_at);
     monthsToRecalc.add(`${oldDate.getFullYear()}-${oldDate.getMonth() + 1}`);
   }
-  if (newSoldAt) {
-    const newDate = new Date(newSoldAt);
-    monthsToRecalc.add(`${newDate.getFullYear()}-${newDate.getMonth() + 1}`);
+  if (soldAtInput) {
+    const { year, month } = getUtcYearMonth(new Date(soldAtInput));
+    monthsToRecalc.add(`${year}-${month}`);
   }
   for (const key of monthsToRecalc) {
     const [year, month] = key.split("-").map(Number);

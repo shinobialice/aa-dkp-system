@@ -2,6 +2,7 @@
 
 import sql from "@/shared/lib/db";
 import { triggerFinanceRecalc } from "./recalculateFinanceForMonth";
+import { getUtcYearMonth } from "@/utils/getUtcYearMonth";
 
 // Get list of item types
 export const getItemTypes = async () => {
@@ -87,7 +88,7 @@ export const addLootItem = async ({
   // "В казну"/"Продано" сразу с income (см. AddLootDialog — quick-add в
   // казну) — пересчитываем фонд месяца продажи, не дожидаясь таймера.
   if (sold_at && (status === "В казну" || status === "Продано")) {
-    const soldAt = new Date(sold_at);
-    await triggerFinanceRecalc(soldAt.getMonth() + 1, soldAt.getFullYear());
+    const { year, month } = getUtcYearMonth(new Date(sold_at));
+    await triggerFinanceRecalc(month, year);
   }
 };

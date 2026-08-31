@@ -214,12 +214,6 @@ export const generateSalaries = async (month: number, year: number) => {
     0,
   );
 
-  if (totalWeight === 0) {
-    throw new Error(
-      "Нет допущенных пользователей с ненулевым весом за указанный месяц",
-    );
-  }
-
   const existingSalaries = await sql<any[]>`
     SELECT "userId", "sentAmount", sent FROM "Salary" WHERE month = ${month} AND year = ${year}
   `;
@@ -267,7 +261,9 @@ export const generateSalaries = async (month: number, year: number) => {
     const amount = totalBasePoints
       ? Math.round((r.basePoints / totalBasePoints) * fund.salaryBudget)
       : 0;
-    const total = Math.round((r.finalWeight / totalWeight) * fund.salaryBudget);
+    const total = totalWeight
+      ? Math.round((r.finalWeight / totalWeight) * fund.salaryBudget)
+      : 0;
 
     return {
       year,

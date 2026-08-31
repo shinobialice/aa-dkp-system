@@ -3,6 +3,7 @@
 import { generateGuildFunds } from "./generateGuildFunds";
 import { generateSalaries } from "./financeActions";
 import ensurePrivilieges from "./ensurePrivilieges";
+import { getMoscowYearMonth } from "@/utils/getMoscowISOString";
 
 // Раньше фонд/зарплаты пересчитывались по таймеру на клиенте (каждые 60 сек,
 // причём для каждого открытого /loot/finance) — тяжело и с задержкой. Теперь
@@ -43,8 +44,8 @@ export async function triggerFinanceRecalc(month: number, year: number) {
 // текущий открытый месяц (это единственный, на который такое изменение
 // в принципе может повлиять прямо сейчас).
 export async function triggerFinanceRecalcForCurrentMonth() {
-  const now = new Date();
-  await triggerFinanceRecalc(now.getMonth() + 1, now.getFullYear());
+  const { year, month } = getMoscowYearMonth(new Date());
+  await triggerFinanceRecalc(month, year);
 }
 
 // Ручной пересчёт по кнопке "Пересчитать сейчас" на /loot/finance — в отличие

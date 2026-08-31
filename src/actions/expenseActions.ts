@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import sql from "@/shared/lib/db";
 import { triggerFinanceRecalc } from "./recalculateFinanceForMonth";
+import { getUtcYearMonth } from "@/utils/getUtcYearMonth";
 
 export const getExpenses = async () => {
   try {
@@ -62,8 +63,8 @@ export const addExpense = async ({
 
   revalidatePath("/loot");
 
-  const expenseDate = new Date(date);
-  await triggerFinanceRecalc(expenseDate.getMonth() + 1, expenseDate.getFullYear());
+  const { year, month } = getUtcYearMonth(new Date(date));
+  await triggerFinanceRecalc(month, year);
 };
 
 export const updateExpense = async ({
@@ -94,6 +95,10 @@ export const updateExpense = async ({
     throw new Error("Источник обязателен");
   }
 
+  const [previousExpense] = await sql<any[]>`
+    SELECT date FROM "Expense" WHERE id = ${id}
+  `;
+
   try {
     await sql<any[]>`
       UPDATE "Expense" SET
@@ -111,8 +116,18 @@ export const updateExpense = async ({
 
   revalidatePath("/loot");
 
-  const expenseDate = new Date(date);
-  await triggerFinanceRecalc(expenseDate.getMonth() + 1, expenseDate.getFullYear());
+  const monthsToRecalc = new Set<string>();
+  const { year: newYear, month: newMonth } = getUtcYearMonth(new Date(date));
+  monthsToRecalc.add(`${newYear}-${newMonth}`);
+  if (previousExpense?.date) {
+    const prevDate = new Date(previousExpense.date);
+    monthsToRecalc.add(`${prevDate.getFullYear()}-${prevDate.getMonth() + 1}`);
+  }
+
+  for (const key of monthsToRecalc) {
+    const [year, month] = key.split("-").map(Number);
+    await triggerFinanceRecalc(month, year);
+  }
 };
 
 export const deleteExpense = async (id: number, date: string) => {

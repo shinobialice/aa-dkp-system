@@ -18,6 +18,11 @@ export function getMoscowISOString(date: Date): string {
   return `${year}-${month}-${day}T${hour}:${minute}:${second}`;
 }
 
+export function getMoscowYearMonth(date: Date): { year: number; month: number } {
+  const msk = new Date(date.getTime() + MSK_OFFSET_MS);
+  return { year: msk.getUTCFullYear(), month: msk.getUTCMonth() + 1 };
+}
+
 // Обратная операция: превращает naive МСК-строку ("2026-08-01T16:00:00")
 // в Date с корректным абсолютным моментом времени, не полагаясь на
 // имплицитный локальный парсинг new Date(string) (который тоже зависит от
