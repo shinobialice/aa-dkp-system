@@ -1,30 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
+import { getGuildStatus } from "@/actions/guildStatusSettings";
 import {
-  getGuildStatus,
-  type GuildFaction,
-  type GuildMode,
-} from "@/actions/guildStatusSettings";
-
-const FACTION_LABEL: Record<GuildFaction, string> = {
-  nuian: "Запад",
-  hariharan: "Восток",
-};
-
-const FACTION_ICON: Record<GuildFaction, string> = {
-  nuian: "/images/server/west.png",
-  hariharan: "/images/server/east.png",
-};
-
-const MODE_LABEL: Record<GuildMode, string> = {
-  freeshard: "Фришка",
-  pvp: "ПВП",
-};
-
-const MODE_ICON: Record<GuildMode, string> = {
-  freeshard: "/images/nation/friendship.png",
-  pvp: "/images/nation/hostile.png",
-};
+  FACTION_LABEL,
+  FACTION_ICON,
+  MODE_LABEL,
+  MODE_ICON,
+} from "@/shared/config/guildStatus";
 
 export async function GuildLocationBadge({
   variant = "card",

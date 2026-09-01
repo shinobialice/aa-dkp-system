@@ -3,6 +3,7 @@ import sql from "@/shared/lib/db";
 import { saveUploadedFile } from "@/shared/lib/localStorage";
 import ensurePrivilieges from "./ensurePrivilieges";
 import { randomUUID } from "crypto";
+import { UTILITY_ITEM_NAMES } from "@/shared/config/lootUtilityItems";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
@@ -28,14 +29,8 @@ type ItemTypeInput = {
   category: string | null;
 };
 
-// Служебные строки item_type — не обычные предметы лута, а завязанные по
-// имени спецкейсы в других частях приложения (см. isOtherType в
-// AddLootDialog, MISC_LOOT_ITEM_NAMES в MiscLootSummary): "В казну" — приход
-// денег напрямую, "Всякие мелочи"/"Всякие мелочи 2" — помесячные сводки без
-// поштучного учёта. Переименование или удаление сломало бы эти спецкейсы, а
-// их собственная цена/иконка/грейд тут никак не используются — поэтому их
-// прячем из общей таблицы редактирования и блокируем правки/удаление.
-const UTILITY_ITEM_NAMES = ["В казну", "Всякие мелочи", "Всякие мелочи 2"];
+// UTILITY_ITEM_NAMES живёт в shared/config (см. комментарий там) — файл с
+// "use server" не может экспортировать константу-массив, только async-функции.
 
 async function assertNotUtilityItem(id: number) {
   const [row] = await sql<{ name: string }[]>`

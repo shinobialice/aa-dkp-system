@@ -1,28 +1,50 @@
-import Image from "next/image";
+import { cookies } from "next/headers";
+import { hasTag } from "@/actions/hasTag";
 import { getGuildStatus } from "@/actions/guildStatusSettings";
-
-const MODE_LABEL = {
-  freeshard: "Фришка",
-  pvp: "ПВП",
-} as const;
-
-const MODE_ICON = {
-  freeshard: "/images/nation/friendship.png",
-  pvp: "/images/nation/hostile.png",
-} as const;
+import {
+  getPeriodAttendanceTop,
+  getPeriodFinanceSummary,
+  getPeriodTopSales,
+  getPeriodTopIncomeSources,
+  getPeriodTopDrops,
+  getPeriodMembershipChanges,
+} from "@/actions/warActions";
+import WarPageClient from "@/widgets/War/WarPageClient";
 
 export default async function WarPage() {
-  const { mode } = await getGuildStatus();
+  const sessionToken = (await cookies()).get("session_token")?.value ?? "";
+  const isAdmin = await hasTag(sessionToken, ["Администратор"]);
+  const status = await getGuildStatus();
+  const periodStart = status.startedAt ?? new Date(0).toISOString();
+
+  const [initialAttendance, initialMembership] = await Promise.all([
+    getPeriodAttendanceTop(periodStart, null),
+    getPeriodMembershipChanges(periodStart, null),
+  ]);
+
+  // Экономика (доход, продажи, источники дохода, дроп) имеет смысл только
+  // на фришке — на варе этого либо нет, либо ещё не считается (килы/хонор).
+  // Состав гильдии (пришли/ушли) — не зависит от режима, считается всегда.
+  const initialEconomy =
+    status.mode === "freeshard"
+      ? await (async () => {
+          const [finance, topSales, incomeSources, drops] = await Promise.all([
+            getPeriodFinanceSummary(periodStart, null),
+            getPeriodTopSales(periodStart, null, 10),
+            getPeriodTopIncomeSources(periodStart, null),
+            getPeriodTopDrops(periodStart, null),
+          ]);
+          return { finance, topSales, incomeSources, drops };
+        })()
+      : null;
 
   return (
-    <div className="flex min-h-[70vh] flex-col items-center justify-center gap-4">
-      <Image
-        src={MODE_ICON[mode]}
-        alt={MODE_LABEL[mode]}
-        width={160}
-        height={160}
-      />
-      <h1 className="text-2xl font-bold">{MODE_LABEL[mode]}</h1>
-    </div>
+    <WarPageClient
+      isAdmin={isAdmin}
+      initialStatus={status}
+      initialAttendance={initialAttendance}
+      initialMembership={initialMembership}
+      initialEconomy={initialEconomy}
+    />
   );
 }
