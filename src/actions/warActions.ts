@@ -2,6 +2,7 @@
 
 import sql from "@/shared/lib/db";
 import { UTILITY_ITEM_NAMES } from "@/shared/config/lootUtilityItems";
+import { MISC_LOOT_ITEM_NAMES } from "@/widgets/Loot/GuildLoot/LootTypes";
 
 export type PeriodAttendanceEntry = {
   userId: number;
@@ -127,6 +128,49 @@ function moscowMonthsBetween(
   return months;
 }
 
+// Эссенции акхиума / Всякие мелочи / Всякие мелочи 2 не заводятся как
+// обычные строки лута с источником — их доход ведётся помесячной суммой в
+// misc_loot_totals (см. MISC_LOOT_ITEM_NAMES, MiscLootSummary), без дня
+// сделки. Для произвольного периода прорачиваем каждый затронутый месяц по
+// доле дней, попавших в период.
+async function getMiscIncomeForPeriod(
+  startedAt: string,
+  rangeEnd: string,
+): Promise<number> {
+  const startMs = new Date(startedAt).getTime();
+  const endMs = new Date(rangeEnd).getTime();
+  const months = moscowMonthsBetween(startMs, endMs);
+  if (months.length === 0) return 0;
+
+  try {
+    const first = months[0];
+    const last = months[months.length - 1];
+    const miscRows = await sql<any[]>`
+      SELECT year, month, COALESCE(SUM(amount), 0) AS amount
+      FROM misc_loot_totals
+      WHERE item_name = ANY(${MISC_LOOT_ITEM_NAMES})
+        AND make_date(year, month, 1) >= make_date(${first.year}, ${first.month}, 1)
+        AND make_date(year, month, 1) <= make_date(${last.year}, ${last.month}, 1)
+      GROUP BY year, month
+    `;
+    let total = 0;
+    for (const row of miscRows) {
+      const bounds = moscowMonthBoundsMs(row.year, row.month);
+      const overlapMs = Math.max(
+        0,
+        Math.min(bounds.endMs, endMs) - Math.max(bounds.startMs, startMs),
+      );
+      const totalMs = bounds.endMs - bounds.startMs;
+      const fraction = totalMs > 0 ? overlapMs / totalMs : 0;
+      total += Number(row.amount) * fraction;
+    }
+    return total;
+  } catch (error) {
+    console.error("Ошибка при получении дохода с мелочей за период:", error);
+    return 0;
+  }
+}
+
 export type PeriodFinanceSummary = {
   totalEarned: number; // валовый доход за период: продажи лута + "в казну" + прората по "мелочам"
   itemsSoldCount: number; // сколько предметов реально купили игроки (без "в казну")
@@ -169,36 +213,7 @@ export async function getPeriodFinanceSummary(
   const lootIncome = Number(sales?.income ?? 0) + Number(treasury?.income ?? 0);
   const itemsSoldCount = Number(sales?.qty ?? 0);
 
-  const startMs = new Date(startedAt).getTime();
-  const endMs = new Date(rangeEnd).getTime();
-  const months = moscowMonthsBetween(startMs, endMs);
-
-  let miscIncomeEstimate = 0;
-  if (months.length > 0) {
-    try {
-      const first = months[0];
-      const last = months[months.length - 1];
-      const miscRows = await sql<any[]>`
-        SELECT year, month, COALESCE(SUM(amount), 0) AS amount
-        FROM misc_loot_totals
-        WHERE make_date(year, month, 1) >= make_date(${first.year}, ${first.month}, 1)
-          AND make_date(year, month, 1) <= make_date(${last.year}, ${last.month}, 1)
-        GROUP BY year, month
-      `;
-      for (const row of miscRows) {
-        const bounds = moscowMonthBoundsMs(row.year, row.month);
-        const overlapMs = Math.max(
-          0,
-          Math.min(bounds.endMs, endMs) - Math.max(bounds.startMs, startMs),
-        );
-        const totalMs = bounds.endMs - bounds.startMs;
-        const fraction = totalMs > 0 ? overlapMs / totalMs : 0;
-        miscIncomeEstimate += Number(row.amount) * fraction;
-      }
-    } catch (error) {
-      console.error("Ошибка при получении дохода с мелочей за период:", error);
-    }
-  }
+  const miscIncomeEstimate = await getMiscIncomeForPeriod(startedAt, rangeEnd);
 
   return {
     totalEarned: Math.round(lootIncome + miscIncomeEstimate),
@@ -268,32 +283,40 @@ export async function getPeriodTopIncomeSources(
   limit?: number,
 ): Promise<PeriodIncomeSourceEntry[]> {
   const rangeEnd = endedAt ?? new Date().toISOString();
+  let entries: PeriodIncomeSourceEntry[] = [];
   try {
-    const rows = limit
-      ? await sql<any[]>`
-          SELECT source, SUM(price) AS income
-          FROM loot
-          WHERE status IN ('Продано', 'В казну')
-            AND sold_at >= ${startedAt} AND sold_at < ${rangeEnd}
-            AND source IS NOT NULL AND source != ''
-          GROUP BY source
-          ORDER BY income DESC
-          LIMIT ${limit}
-        `
-      : await sql<any[]>`
-          SELECT source, SUM(price) AS income
-          FROM loot
-          WHERE status IN ('Продано', 'В казну')
-            AND sold_at >= ${startedAt} AND sold_at < ${rangeEnd}
-            AND source IS NOT NULL AND source != ''
-          GROUP BY source
-          ORDER BY income DESC
-        `;
-    return rows.map((r) => ({ source: r.source, income: Number(r.income) }));
+    const rows = await sql<any[]>`
+      SELECT source, SUM(price) AS income
+      FROM loot
+      WHERE status IN ('Продано', 'В казну')
+        AND sold_at >= ${startedAt} AND sold_at < ${rangeEnd}
+        AND source IS NOT NULL AND source != ''
+      GROUP BY source
+      ORDER BY income DESC
+    `;
+    entries = rows.map((r) => ({ source: r.source, income: Number(r.income) }));
   } catch (error) {
     console.error("Ошибка при получении топа источников дохода:", error);
-    return [];
   }
+
+  // Всякие мелочи / Всякие мелочи 2 / Эссенции акхиума не заводятся как
+  // строки лута с источником (см. MISC_LOOT_ITEM_NAMES, MiscLootSummary) —
+  // без этого блока их доход вообще не попадал бы в разбивку по источникам,
+  // хотя "Заработано за период" (getPeriodFinanceSummary) его уже учитывает.
+  // Это фарм-доход не от конкретного босса, поэтому приплюсовываем к "АГЛ",
+  // как и в getBossIncomeByMonth.
+  const miscIncome = Math.round(await getMiscIncomeForPeriod(startedAt, rangeEnd));
+  if (miscIncome) {
+    const aglEntry = entries.find((e) => e.source === "АГЛ");
+    if (aglEntry) {
+      aglEntry.income += miscIncome;
+    } else {
+      entries.push({ source: "АГЛ", income: miscIncome });
+    }
+    entries.sort((a, b) => b.income - a.income);
+  }
+
+  return limit ? entries.slice(0, limit) : entries;
 }
 
 export type PeriodDropEntry = {
