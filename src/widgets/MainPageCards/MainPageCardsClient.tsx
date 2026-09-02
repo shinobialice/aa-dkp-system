@@ -22,8 +22,6 @@ import SoundNotificationToggle from "./SoundNotificationToggle";
 
 type Stats = Awaited<ReturnType<typeof getStats>>;
 
-const EVENT_LINK = "https://archeage.ru/promo/summerevent3/";
-
 const statIcons: Record<string, React.ReactNode> = {
   Общее: <Users className="size-4" />,
   ДД: <Swords className="size-4" />,
@@ -95,7 +93,7 @@ const MainPageCardsClient: FC = () => {
         const data = await getEventSettings();
         setEvent(data);
       } catch {
-        setEvent({ title: null, imageUrl: null, startsAt: null, endsAt: null });
+        setEvent({ title: null, imageUrl: null, startsAt: null, endsAt: null, link: null });
       }
     };
 
@@ -156,13 +154,15 @@ const MainPageCardsClient: FC = () => {
     },
   ];
 
+  const EventBanner = event.link ? "a" : "div";
+
   return (
     <div className="max-w-[1600px] mx-auto space-y-8 p-4">
       {eventActive && (
-        <a
-          href={EVENT_LINK}
-          target="_blank"
-          rel="noopener noreferrer"
+        <EventBanner
+          {...(event.link
+            ? { href: event.link, target: "_blank", rel: "noopener noreferrer" }
+            : {})}
           className="group relative flex h-[120px] w-full items-center justify-between gap-4 overflow-hidden rounded-xl bg-gradient-to-r from-orange-500 to-pink-600 px-6 text-white shadow-md transition-transform hover:scale-[1.01] hover:shadow-lg"
         >
           {event.imageUrl && (
@@ -178,8 +178,10 @@ const MainPageCardsClient: FC = () => {
             <Trophy className="size-6 shrink-0" />
             <span className="text-lg font-semibold">{event.title}</span>
           </div>
-          <ExternalLink className="relative size-5 shrink-0 opacity-80 transition-opacity group-hover:opacity-100" />
-        </a>
+          {event.link && (
+            <ExternalLink className="relative size-5 shrink-0 opacity-80 transition-opacity group-hover:opacity-100" />
+          )}
+        </EventBanner>
       )}
       <div className="grid w-full grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
         {statItems.map((item) => (

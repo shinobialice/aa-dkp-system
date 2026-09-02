@@ -10,6 +10,7 @@ export type EventSettings = {
   imageUrl: string | null;
   startsAt: string | null;
   endsAt: string | null;
+  link: string | null;
 };
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -19,7 +20,7 @@ export async function getEventSettings(): Promise<EventSettings> {
   let data;
   try {
     [data] = await sql<any[]>`
-      SELECT title, image_url, starts_at, ends_at FROM event_settings WHERE id = 1
+      SELECT title, image_url, starts_at, ends_at, link FROM event_settings WHERE id = 1
     `;
   } catch (error) {
     console.error("Ошибка при получении настроек ивента:", error);
@@ -31,6 +32,7 @@ export async function getEventSettings(): Promise<EventSettings> {
     imageUrl: data?.image_url ?? null,
     startsAt: data?.starts_at ?? null,
     endsAt: data?.ends_at ?? null,
+    link: data?.link ?? null,
   };
 }
 
@@ -38,6 +40,7 @@ export async function updateEventSettings(input: {
   title: string;
   startsAt: string;
   endsAt: string;
+  link: string;
 }) {
   await ensurePrivilieges(["Администратор"]);
 
@@ -47,12 +50,13 @@ export async function updateEventSettings(input: {
 
   try {
     await sql<any[]>`
-      INSERT INTO event_settings (id, title, starts_at, ends_at, updated_at)
-      VALUES (1, ${input.title}, ${input.startsAt}, ${input.endsAt}, now())
+      INSERT INTO event_settings (id, title, starts_at, ends_at, link, updated_at)
+      VALUES (1, ${input.title}, ${input.startsAt}, ${input.endsAt}, ${input.link}, now())
       ON CONFLICT (id) DO UPDATE SET
         title = EXCLUDED.title,
         starts_at = EXCLUDED.starts_at,
         ends_at = EXCLUDED.ends_at,
+        link = EXCLUDED.link,
         updated_at = EXCLUDED.updated_at
     `;
   } catch (error) {

@@ -27,6 +27,7 @@ function formatMoscowDateTime(iso: string): string {
 export function EventSettingsForm() {
   const [settings, setSettings] = useState<EventSettings | null>(null);
   const [title, setTitle] = useState("");
+  const [link, setLink] = useState("");
   const [startsAt, setStartsAt] = useState<Date | null>(null);
   const [endsAt, setEndsAt] = useState<Date | null>(null);
   const [saving, setSaving] = useState(false);
@@ -37,6 +38,7 @@ export function EventSettingsForm() {
     getEventSettings().then((s) => {
       setSettings(s);
       setTitle(s.title ?? "");
+      setLink(s.link ?? "");
       setStartsAt(s.startsAt ? new Date(s.startsAt) : null);
       setEndsAt(s.endsAt ? new Date(s.endsAt) : null);
     });
@@ -61,6 +63,7 @@ export function EventSettingsForm() {
         title: title.trim(),
         startsAt: startsAt.toISOString(),
         endsAt: endsAt.toISOString(),
+        link: link.trim(),
       });
       toast.success("Ивент сохранён");
       reload();
@@ -143,6 +146,18 @@ export function EventSettingsForm() {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Например: Игра стоит свеч"
+        />
+      </div>
+
+      <div className="space-y-2 border rounded-lg p-3">
+        <Label className="text-muted-foreground">Ссылка</Label>
+        <p className="text-xs text-muted-foreground">
+          Куда ведёт баннер ивента при клике.
+        </p>
+        <Input
+          value={link}
+          onChange={(e) => setLink(e.target.value)}
+          placeholder="https://..."
         />
       </div>
 
