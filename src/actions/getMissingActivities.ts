@@ -37,10 +37,6 @@ const WEEKDAY_NAMES = [
 const THURSDAY_MAINTENANCE_START = "05:00";
 const THURSDAY_MAINTENANCE_END = "11:00";
 
-// У Морфа нет фиксированного времени в расписании — только требование
-// "минимум один раз утром и один раз вечером". Делим сутки пополам.
-const MORPH_DAY_SPLIT = "12:00";
-
 // Эти боссы не входят в обязательный план и не проверяются на пропуски.
 const EXCLUDED_BOSSES = new Set([
   "Летучий Дельфиец",
@@ -156,9 +152,8 @@ export const getMissingActivitiesForMonth = async (
       `,
       sql<any[]>`SELECT weekday, time, boss_name FROM week_schedule_event`,
       sql<any[]>`
-        SELECT kill_time, status, created_at FROM boss_kill_raid_suggestions
-        WHERE boss_name = 'Морф'
-        ORDER BY created_at ASC
+        SELECT kill_time FROM boss_kill_raid_suggestions
+        WHERE boss_name = 'Морф' AND status = 'pending'
       `,
     ]);
   } catch (error) {
@@ -166,15 +161,13 @@ export const getMissingActivitiesForMonth = async (
     throw new Error("Не удалось загрузить рейды");
   }
 
-  // Подсказки по Морфу из трекера респавна ("Убит сейчас"/"Указано время" —
-  // та же таблица, что питает карточку "Создать рейд?"). У Морфа в сутки
-  // бывает 2 килла (12ч респаун) — по одному на утро/вечер, поэтому не берём
-  // "последнюю" подсказку, а раскладываем каждую по своей половине дня.
-  // Идём по created_at ASC и перезаписываем — если для одной половины есть
-  // несколько записей (например, поправили время), остаётся самая свежая.
-  // pending → показываем точное время вместо общего "утро"/"вечер";
-  // dismissed → админ явно решил, что рейд не нужен — не показываем вообще.
-  const morphSlotInfo = new Map<string, { status: string; time: string }>();
+  // У Морфа нет фиксированного расписания — рейд нужен ровно тогда, когда
+  // его реально убили. Источник "требуемых" времён — не week_schedule_event,
+  // а отметки в трекере респавна ("Убит сейчас"/"Указано время", та же
+  // таблица, что питает карточку "Создать рейд?"). Отклонённые (status
+  // 'dismissed', нажали ✕ — "рейд не нужен") и уже одобренные (строка к
+  // этому моменту удалена, а реальный рейд создан) сюда не попадают.
+  const requiredMorphTimesByDate = new Map<string, string[]>();
   for (const row of morphSuggestionRows ?? []) {
     const date = new Date(row.kill_time);
     const parts = new Intl.DateTimeFormat("en-CA", {
@@ -189,8 +182,9 @@ export const getMissingActivitiesForMonth = async (
     const get = (type: string) => parts.find((p) => p.type === type)!.value;
     const datePart = `${get("year")}-${get("month")}-${get("day")}`;
     const time = `${get("hour")}:${get("minute")}`;
-    const half = time < MORPH_DAY_SPLIT ? "morning" : "evening";
-    morphSlotInfo.set(`${datePart}|${half}`, { status: row.status, time });
+    if (!requiredMorphTimesByDate.has(datePart))
+      requiredMorphTimesByDate.set(datePart, []);
+    requiredMorphTimesByDate.get(datePart)!.push(time);
   }
 
   // Группируем плоский результат join'а обратно по рейдам.
@@ -287,6 +281,14 @@ export const getMissingActivitiesForMonth = async (
       requiredByBoss.get(row.boss_name)!.push(time);
     }
 
+    const requiredMorphTimes = requiredMorphTimesByDate.get(datePart);
+    if (requiredMorphTimes?.length) {
+      requiredByBoss.set("Морф", [
+        ...(requiredByBoss.get("Морф") ?? []),
+        ...requiredMorphTimes,
+      ]);
+    }
+
     for (const [bossName, requiredTimes] of requiredByBoss) {
       requiredTimes.sort();
       const actualTimes = (
@@ -295,30 +297,6 @@ export const getMissingActivitiesForMonth = async (
       const missingTimes = findMissingTimes(requiredTimes, actualTimes);
       for (const time of missingTimes) {
         missingSlots.push({ date: dateLabel, time, bossName });
-      }
-    }
-
-    const morphTimes = actualByDateAndBoss.get(`${datePart}|Морф`) || [];
-    const hasMorningMorph = morphTimes.some((t) => t < MORPH_DAY_SPLIT);
-    const hasEveningMorph = morphTimes.some((t) => t >= MORPH_DAY_SPLIT);
-    if (!hasMorningMorph) {
-      const info = morphSlotInfo.get(`${datePart}|morning`);
-      if (info?.status !== "dismissed") {
-        missingSlots.push({
-          date: dateLabel,
-          time: info ? info.time : "утро",
-          bossName: "Морф",
-        });
-      }
-    }
-    if (!hasEveningMorph) {
-      const info = morphSlotInfo.get(`${datePart}|evening`);
-      if (info?.status !== "dismissed") {
-        missingSlots.push({
-          date: dateLabel,
-          time: info ? info.time : "вечер",
-          bossName: "Морф",
-        });
       }
     }
   }
