@@ -72,7 +72,7 @@ export default function BossRespawnHistory() {
   }, [page]);
 
   return (
-    <div className="mt-4 pb-3">
+    <div className="mt-15 pb-3">
       <div className="mb-2 flex items-baseline gap-2">
         <h2 className="text-base leading-none font-semibold">
           История убийств боссов

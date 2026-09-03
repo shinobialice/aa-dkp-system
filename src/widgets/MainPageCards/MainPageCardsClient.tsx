@@ -2,7 +2,7 @@
 
 import { useEffect, useState, FC, ReactNode } from "react";
 import useCurrentUser from "@/hooks/useCurrentUser";
-import { ExternalLink, Loader, Swords, Trophy, Users } from "lucide-react";
+import { Loader, Swords, Users } from "lucide-react";
 import {
   Card,
   CardAction,
@@ -65,7 +65,7 @@ const InfoCard: FC<{
   content: ReactNode;
   compactHeader?: boolean;
   heightClassName?: string;
-}> = ({ title, action, content, compactHeader, heightClassName = "h-[780px]" }) => (
+}> = ({ title, action, content, compactHeader, heightClassName = "h-[650px]" }) => (
   <Card className={cn(heightClassName, "min-w-0", compactHeader && "gap-3 py-3")}>
     <CardHeader>
       <CardTitle className="text-base">{title}</CardTitle>
@@ -129,10 +129,6 @@ const MainPageCardsClient: FC = () => {
     {
       title: "Трекер респауна боссов",
       compactHeader: true,
-      // Раньше высота была фиксированной вместе со вторым блоком, но после
-      // сокращения истории убийств до 4 записей контент стал заметно короче
-      // 780px — под фиксированную высоту оставалось много пустого места.
-      heightClassName: "h-auto",
       content: (
         <>
           <RespawnTracker />
@@ -163,24 +159,16 @@ const MainPageCardsClient: FC = () => {
           {...(event.link
             ? { href: event.link, target: "_blank", rel: "noopener noreferrer" }
             : {})}
-          className="group relative flex h-[120px] w-full items-center justify-between gap-4 overflow-hidden rounded-xl bg-gradient-to-r from-orange-500 to-pink-600 px-6 text-white shadow-md transition-transform hover:scale-[1.01] hover:shadow-lg"
+          className="group relative block w-full overflow-hidden rounded-xl bg-gradient-to-r from-orange-500 to-pink-600 text-white shadow-md transition-transform hover:scale-[1.01] hover:shadow-lg"
         >
           {event.imageUrl && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={event.imageUrl}
-              alt=""
-              className="absolute inset-0 h-full w-full object-cover"
-            />
+            <img src={event.imageUrl} alt="" className="block w-full" />
           )}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/70" />
-          <div className="relative flex items-center gap-3">
-            <Trophy className="size-6 shrink-0" />
-            <span className="text-lg font-semibold">{event.title}</span>
+          <div className="absolute inset-0 flex items-center justify-between gap-4 px-6">
+            <div className="flex items-center gap-3">
+            </div>
           </div>
-          {event.link && (
-            <ExternalLink className="relative size-5 shrink-0 opacity-80 transition-opacity group-hover:opacity-100" />
-          )}
         </EventBanner>
       )}
       <div className="grid w-full grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
@@ -193,7 +181,6 @@ const MainPageCardsClient: FC = () => {
           title={infoItems[0].title}
           content={infoItems[0].content}
           compactHeader={infoItems[0].compactHeader}
-          heightClassName={infoItems[0].heightClassName}
         />
         <InfoCard
           title={infoItems[1].title}
