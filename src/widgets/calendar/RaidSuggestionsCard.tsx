@@ -29,7 +29,7 @@ export default function RaidSuggestionsCard({
   onRaidCreated?: () => void;
 }) {
   const [suggestions, setSuggestions] = useState<RaidSuggestion[]>([]);
-  const [pending, setPending] = useState<string | null>(null);
+  const [pending, setPending] = useState<number | null>(null);
 
   const reload = useCallback(() => {
     getPendingRaidSuggestions().then(setSuggestions).catch(() => {});
@@ -41,12 +41,12 @@ export default function RaidSuggestionsCard({
 
   useVisiblePolling(reload, 30_000);
 
-  const handleApprove = async (bossName: RaidSuggestion["bossName"]) => {
-    setPending(bossName);
+  const handleApprove = async (suggestion: RaidSuggestion) => {
+    setPending(suggestion.id);
     try {
-      await approveRaidSuggestion(bossName);
-      toast.success(`Рейд по «${bossName}» создан`);
-      setSuggestions((prev) => prev.filter((s) => s.bossName !== bossName));
+      await approveRaidSuggestion(suggestion.id);
+      toast.success(`Рейд по «${suggestion.bossName}» создан`);
+      setSuggestions((prev) => prev.filter((s) => s.id !== suggestion.id));
       onRaidCreated?.();
     } catch (error) {
       toast.error(
@@ -57,11 +57,11 @@ export default function RaidSuggestionsCard({
     }
   };
 
-  const handleDismiss = async (bossName: RaidSuggestion["bossName"]) => {
-    setPending(bossName);
+  const handleDismiss = async (suggestion: RaidSuggestion) => {
+    setPending(suggestion.id);
     try {
-      await dismissRaidSuggestion(bossName);
-      setSuggestions((prev) => prev.filter((s) => s.bossName !== bossName));
+      await dismissRaidSuggestion(suggestion.id);
+      setSuggestions((prev) => prev.filter((s) => s.id !== suggestion.id));
     } catch {
       toast.error("Не удалось убрать подсказку");
     } finally {
@@ -82,7 +82,7 @@ export default function RaidSuggestionsCard({
       <div className="flex flex-col gap-1.5">
         {suggestions.map((s) => (
           <div
-            key={s.bossName}
+            key={s.id}
             className="flex items-center justify-between gap-2 rounded-md border px-2 py-1.5 text-sm"
           >
             <div className="min-w-0">
@@ -96,8 +96,8 @@ export default function RaidSuggestionsCard({
                 size="icon-sm"
                 variant="outline"
                 className="cursor-pointer text-green-600 hover:text-green-600"
-                disabled={pending === s.bossName}
-                onClick={() => handleApprove(s.bossName)}
+                disabled={pending === s.id}
+                onClick={() => handleApprove(s)}
                 title="Создать рейд"
               >
                 <Check className="size-4" />
@@ -106,8 +106,8 @@ export default function RaidSuggestionsCard({
                 size="icon-sm"
                 variant="outline"
                 className="cursor-pointer text-destructive hover:text-destructive"
-                disabled={pending === s.bossName}
-                onClick={() => handleDismiss(s.bossName)}
+                disabled={pending === s.id}
+                onClick={() => handleDismiss(s)}
                 title="Не нужно"
               >
                 <X className="size-4" />

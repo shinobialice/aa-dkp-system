@@ -145,9 +145,9 @@ export const getMissingActivitiesForMonth = async (
     return { hasDeficit: false, missingSlots: [] };
   }
 
-  let raidRows, scheduleData;
+  let raidRows, scheduleData, morphSuggestionRows;
   try {
-    [raidRows, scheduleData] = await Promise.all([
+    [raidRows, scheduleData, morphSuggestionRows] = await Promise.all([
       sql<any[]>`
         SELECT r.id, r.start_date, r.type, b.id AS boss_id, b.boss_name AS boss_name
         FROM raid r
@@ -155,10 +155,42 @@ export const getMissingActivitiesForMonth = async (
         LEFT JOIN boss b ON b.id = rb.boss_id
       `,
       sql<any[]>`SELECT weekday, time, boss_name FROM week_schedule_event`,
+      sql<any[]>`
+        SELECT kill_time, status, created_at FROM boss_kill_raid_suggestions
+        WHERE boss_name = 'Морф'
+        ORDER BY created_at ASC
+      `,
     ]);
   } catch (error) {
     console.error("Ошибка при получении данных для проверки расписания:", error);
     throw new Error("Не удалось загрузить рейды");
+  }
+
+  // Подсказки по Морфу из трекера респавна ("Убит сейчас"/"Указано время" —
+  // та же таблица, что питает карточку "Создать рейд?"). У Морфа в сутки
+  // бывает 2 килла (12ч респаун) — по одному на утро/вечер, поэтому не берём
+  // "последнюю" подсказку, а раскладываем каждую по своей половине дня.
+  // Идём по created_at ASC и перезаписываем — если для одной половины есть
+  // несколько записей (например, поправили время), остаётся самая свежая.
+  // pending → показываем точное время вместо общего "утро"/"вечер";
+  // dismissed → админ явно решил, что рейд не нужен — не показываем вообще.
+  const morphSlotInfo = new Map<string, { status: string; time: string }>();
+  for (const row of morphSuggestionRows ?? []) {
+    const date = new Date(row.kill_time);
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Europe/Moscow",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).formatToParts(date);
+    const get = (type: string) => parts.find((p) => p.type === type)!.value;
+    const datePart = `${get("year")}-${get("month")}-${get("day")}`;
+    const time = `${get("hour")}:${get("minute")}`;
+    const half = time < MORPH_DAY_SPLIT ? "morning" : "evening";
+    morphSlotInfo.set(`${datePart}|${half}`, { status: row.status, time });
   }
 
   // Группируем плоский результат join'а обратно по рейдам.
@@ -270,10 +302,24 @@ export const getMissingActivitiesForMonth = async (
     const hasMorningMorph = morphTimes.some((t) => t < MORPH_DAY_SPLIT);
     const hasEveningMorph = morphTimes.some((t) => t >= MORPH_DAY_SPLIT);
     if (!hasMorningMorph) {
-      missingSlots.push({ date: dateLabel, time: "утро", bossName: "Морф" });
+      const info = morphSlotInfo.get(`${datePart}|morning`);
+      if (info?.status !== "dismissed") {
+        missingSlots.push({
+          date: dateLabel,
+          time: info ? info.time : "утро",
+          bossName: "Морф",
+        });
+      }
     }
     if (!hasEveningMorph) {
-      missingSlots.push({ date: dateLabel, time: "вечер", bossName: "Морф" });
+      const info = morphSlotInfo.get(`${datePart}|evening`);
+      if (info?.status !== "dismissed") {
+        missingSlots.push({
+          date: dateLabel,
+          time: info ? info.time : "вечер",
+          bossName: "Морф",
+        });
+      }
     }
   }
 
