@@ -5,9 +5,9 @@ import Image from "next/image";
 // Раньше рамка редкости грузилась напрямую с archeagecodex.com — на проде
 // что-то по пути к /_next/image дублировало параметр "w", и иконки молча
 // переставали грузиться (см. next.config.js: images.unoptimized). Плюс
-// сам archeagecodex.com блокирует нехостовые запросы. Держим 12 рамок
-// локально (см. BulkIconUploadDialog/uploadGradeIcon) — не зависим от
-// внешнего хоста вообще.
+// сам archeagecodex.com блокирует хотлинк-запросы с чужого домена. Держим
+// 12 рамок локально (загружены через /api/uploads/grade-icons) — не
+// зависим от внешнего хоста вообще.
 const GRADE_URL = "/api/uploads/grade-icons/grade";
 
 type LootIconProps = {

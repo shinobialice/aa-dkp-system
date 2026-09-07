@@ -37,10 +37,13 @@ const ITEM_ICONS: Record<string, string> = {
   "Красный Дракон": inventoryIcons["Красный Дракон"],
   "Черный Дракон": inventoryIcons["Черный Дракон"],
   "Зеленый Дракон": inventoryIcons["Зеленый Дракон"],
-  "Ро'кана, Безумие морей":
-    "https://archeagecodex.com/items/icon_item_staff_1h_0058.png",
+  // Совпадают с icon_url этих же предметов в item_type (id 40 и 39) на
+  // момент переезда с archeagecodex.com — если админ перезальёт им иконку
+  // на /items, тут путь придётся обновить руками (имя файла — случайный
+  // UUID, не привязан к id).
+  "Ро'кана, Безумие морей": "/api/uploads/item-icons/05acae8a-8535-40b2-a4a3-37456c6f2434.png",
   "Анд'хакар, Чернильная тьма":
-    "https://archeagecodex.com/items/icon_item_shield_0055.png",
+    "/api/uploads/item-icons/6661372a-84b3-48ba-906d-104130988af2.png",
   "Коллекционный фамильяр (Т2)": inventoryIcons["Коллекционный фамильяр т2"],
   "Коллекционный пет": inventoryIcons["Коллекционный пет"],
   "Коллекционный пет (Т2)": inventoryIcons["Коллекционный пет т2"],
@@ -49,26 +52,22 @@ const ITEM_ICONS: Record<string, string> = {
 };
 
 const GRADE_FRAME_LABELS: Record<string, string> = {
-  "Коллеционный глайдер": "https://archeagecodex.com/images/icon_grade10.png",
-  "Коллеционный глайдер (Т2)":
-    "https://archeagecodex.com/images/icon_grade11.png",
-  "Коллекционный фамильяр":
-    "https://archeagecodex.com/images/icon_grade10.png",
-  "Коллекционный фамильяр (Т2)":
-    "https://archeagecodex.com/images/icon_grade11.png",
-  "Бафалка (3 эпоха)": "https://archeagecodex.com/images/icon_grade10.png",
-  "Бафалка (4 эпоха)": "https://archeagecodex.com/images/icon_grade11.png",
-  "Бафалка (5 эпоха)": "https://archeagecodex.com/images/icon_grade12.png",
-  "Красный Дракон": "https://archeagecodex.com/images/icon_grade6.png",
-  "Черный Дракон": "https://archeagecodex.com/images/icon_grade6.png",
-  "Зеленый Дракон": "https://archeagecodex.com/images/icon_grade6.png",
-  "Ро'кана, Безумие морей": "https://archeagecodex.com/images/icon_grade5.png",
-  "Анд'хакар, Чернильная тьма":
-    "https://archeagecodex.com/images/icon_grade5.png",
+  "Коллеционный глайдер": "/api/uploads/grade-icons/grade10.png",
+  "Коллеционный глайдер (Т2)": "/api/uploads/grade-icons/grade11.png",
+  "Коллекционный фамильяр": "/api/uploads/grade-icons/grade10.png",
+  "Коллекционный фамильяр (Т2)": "/api/uploads/grade-icons/grade11.png",
+  "Бафалка (3 эпоха)": "/api/uploads/grade-icons/grade10.png",
+  "Бафалка (4 эпоха)": "/api/uploads/grade-icons/grade11.png",
+  "Бафалка (5 эпоха)": "/api/uploads/grade-icons/grade12.png",
+  "Красный Дракон": "/api/uploads/grade-icons/grade6.png",
+  "Черный Дракон": "/api/uploads/grade-icons/grade6.png",
+  "Зеленый Дракон": "/api/uploads/grade-icons/grade6.png",
+  "Ро'кана, Безумие морей": "/api/uploads/grade-icons/grade5.png",
+  "Анд'хакар, Чернильная тьма": "/api/uploads/grade-icons/grade5.png",
   // Было icon_grade4 — не тот грейд, что у "Коллекционный фамильяр"/
   // "Коллеционный глайдер" (icon_grade10), хотя это тот же тип предмета.
-  "Коллекционный пет": "https://archeagecodex.com/images/icon_grade10.png",
-  "Коллекционный пет (Т2)": "https://archeagecodex.com/images/icon_grade11.png",
+  "Коллекционный пет": "/api/uploads/grade-icons/grade10.png",
+  "Коллекционный пет (Т2)": "/api/uploads/grade-icons/grade11.png",
 };
 
 function AvailableItemsColumns({ data }: { data: InventoryStockStat[] }) {
@@ -105,7 +104,7 @@ function AvailableItemsColumns({ data }: { data: InventoryStockStat[] }) {
                           <Image
                             src={
                               GRADE_FRAME_LABELS[item.label] ??
-                              "https://archeagecodex.com/images/icon_grade1.png"
+                              "/api/uploads/grade-icons/grade1.png"
                             }
                             alt=""
                             width={24}

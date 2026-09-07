@@ -2,12 +2,12 @@
 
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { Button, Input, Label } from "@/shared/ui";
+import { Button, Label } from "@/shared/ui";
 
-// Общее поле "иконка предмета" для форм на /items — ровно 2 варианта, как
-// просил пользователь: вставить ссылку или загрузить файл. Переключение
-// режима никогда не трогает уже введённое значение с ходу — только то, что
-// реально сохранится при отправке формы.
+// Поле "иконка предмета" для форм на /items — только загрузка файла. Раньше
+// был ещё режим "вставить ссылку", но внешние ссылки (на archeagecodex.com и
+// т.п.) регулярно оказывались недоступны с проды (хотлинк-защита) — поэтому
+// оставили только загрузку на свой хостинг.
 export function IconField({
   value,
   onChange,
@@ -17,7 +17,6 @@ export function IconField({
   onChange: (url: string) => void;
   uploadAction: (formData: FormData) => Promise<string>;
 }) {
-  const [mode, setMode] = useState<"url" | "upload">("url");
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -54,55 +53,24 @@ export function IconField({
             <span className="text-[10px] text-muted-foreground">нет</span>
           )}
         </div>
-        <div className="flex-1 space-y-2">
-          <div className="flex gap-1">
-            <Button
-              type="button"
-              size="sm"
-              variant={mode === "url" ? "default" : "outline"}
-              className="cursor-pointer"
-              onClick={() => setMode("url")}
-            >
-              Ссылка
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant={mode === "upload" ? "default" : "outline"}
-              className="cursor-pointer"
-              onClick={() => setMode("upload")}
-            >
-              Загрузить файл
-            </Button>
-          </div>
-
-          {mode === "url" ? (
-            <Input
-              value={value}
-              onChange={(e) => onChange(e.target.value)}
-              placeholder="https://..."
-            />
-          ) : (
-            <>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/png,image/jpeg,image/webp,image/gif"
-                className="hidden"
-                onChange={handleFileChange}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={uploading}
-                className="cursor-pointer"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                {uploading ? "Загрузка..." : "Выбрать файл"}
-              </Button>
-            </>
-          )}
+        <div className="flex-1">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/gif"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={uploading}
+            className="cursor-pointer"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {uploading ? "Загрузка..." : "Выбрать файл"}
+          </Button>
         </div>
       </div>
     </div>

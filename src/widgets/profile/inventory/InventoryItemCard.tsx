@@ -118,7 +118,7 @@ export default function InventoryItemCard({
             <Image
               width={40}
               height={40}
-              src="https://archeagecodex.com/images/icon_grade6.png"
+              src="/api/uploads/grade-icons/grade6.png"
               alt="legendary"
               style={{
                 position: "absolute",

@@ -13,14 +13,17 @@ export default function ItemIcon({
 }: ItemIconProps) {
   const parsedQuality = quality ? parseInt(quality) : null;
 
-  let gradeUrl = "https://archeagecodex.com/images/icon_grade1.png";
+  // Раньше грузилось напрямую с archeagecodex.com — тот блокирует хотлинк-
+  // запросы с чужого домена, поэтому рамки молча не показывались. Держим
+  // локально в /api/uploads/grade-icons (см. LootIconComponent.tsx).
+  let gradeUrl = "/api/uploads/grade-icons/grade1.png";
 
   if (parsedQuality === 3) {
-    gradeUrl = "https://archeagecodex.com/images/icon_grade10.png";
+    gradeUrl = "/api/uploads/grade-icons/grade10.png";
   } else if (parsedQuality === 4) {
-    gradeUrl = "https://archeagecodex.com/images/icon_grade11.png";
+    gradeUrl = "/api/uploads/grade-icons/grade11.png";
   } else if (parsedQuality === 5) {
-    gradeUrl = "https://archeagecodex.com/images/icon_grade12.png";
+    gradeUrl = "/api/uploads/grade-icons/grade12.png";
   }
 
   return (

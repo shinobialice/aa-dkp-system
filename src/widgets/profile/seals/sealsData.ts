@@ -22,9 +22,9 @@ export type SealName = (typeof SEAL_NAMES)[number];
 
 export const MAX_USER_SEALS = 3;
 
-// Раньше грузилась напрямую с archeagecodex.com — залито локально через
-// BulkIconUploadDialog/uploadSealIcon, см. LootIconComponent.tsx (GRADE_URL)
-// про ту же причину переезда.
+// Раньше грузилась напрямую с archeagecodex.com — залито локально в
+// /api/uploads/misc-icons, см. LootIconComponent.tsx (GRADE_URL) про ту же
+// причину переезда.
 export const SEAL_ICON_URL = "/api/uploads/misc-icons/seal-icon.png";
 
 // Цвета — по цветам рамок icon_gradeN.png (архейджовская система грейдов).
