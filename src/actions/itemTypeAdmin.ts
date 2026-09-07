@@ -151,3 +151,83 @@ export async function uploadItemTypeIcon(formData: FormData): Promise<string> {
     throw new Error("Не удалось загрузить иконку");
   }
 }
+
+// Для массовой перезаливки иконок (см. BulkIconUploadDialog на /items) —
+// нужны ВСЕ предметы, включая служебные ("В казну" и т.п.), которые
+// getItemTypesForAdmin скрывает из обычной таблицы: их иконку тоже можно
+// перезалить (вся логика казны/лута завязана на name, не на icon_url), нужно
+// только с чем сопоставлять файлы по имени.
+export async function getIconMatchList(): Promise<
+  { id: number; name: string; icon_url: string | null }[]
+> {
+  await ensurePrivilieges(["Администратор"]);
+  return await sql<any[]>`
+    SELECT id, name, icon_url FROM item_type ORDER BY id
+  `;
+}
+
+// Точечно меняет только иконку — без assertNotUtilityItem/остальных полей,
+// поэтому безопасно применять и к служебным предметам ("В казну" и т.п.):
+// переименовать их этим нельзя, а любая логика казны/лута ключуется по name.
+export async function setItemIconUrl(id: number, iconUrl: string): Promise<void> {
+  await ensurePrivilieges(["Администратор"]);
+  await sql<any[]>`UPDATE item_type SET icon_url = ${iconUrl} WHERE id = ${id}`;
+}
+
+// Рамки редкости (icon_grade1..12, см. GRADE_URL в LootIconComponent) — не
+// строки item_type, а общий для всех иконок хардкод-константа с фиксированным
+// именем файла на грейд (не UUID), чтобы путь оставался стабильным между
+// перезаливками и не нужно было держать отдельную таблицу под 12 файлов.
+export async function uploadGradeIcon(
+  grade: number,
+  formData: FormData,
+): Promise<string> {
+  await ensurePrivilieges(["Администратор"]);
+  if (!Number.isInteger(grade) || grade < 1 || grade > 12) {
+    throw new Error("Некорректный номер грейда");
+  }
+
+  const file = formData.get("file");
+  if (!(file instanceof File)) {
+    throw new Error("Файл не передан");
+  }
+  if (!ALLOWED_TYPES.includes(file.type)) {
+    throw new Error("Допустимы только изображения PNG, JPEG, WEBP или GIF");
+  }
+  if (file.size > MAX_FILE_SIZE) {
+    throw new Error("Файл слишком большой (максимум 5 МБ)");
+  }
+
+  try {
+    return await saveUploadedFile("grade-icons", `grade${grade}`, file);
+  } catch (error) {
+    console.error("Failed to upload grade icon:", error);
+    throw new Error("Не удалось загрузить рамку редкости");
+  }
+}
+
+// Иконка печати профиля (SEAL_ICON_URL в sealsData.ts) — одна на всё
+// приложение (сама печать всегда одна и та же картинка, меняется только
+// рамка грейда сверху — см. getSealGradeIconUrl/grade-icons), поэтому тоже
+// фиксированное имя файла, как у рамок редкости.
+export async function uploadSealIcon(formData: FormData): Promise<string> {
+  await ensurePrivilieges(["Администратор"]);
+
+  const file = formData.get("file");
+  if (!(file instanceof File)) {
+    throw new Error("Файл не передан");
+  }
+  if (!ALLOWED_TYPES.includes(file.type)) {
+    throw new Error("Допустимы только изображения PNG, JPEG, WEBP или GIF");
+  }
+  if (file.size > MAX_FILE_SIZE) {
+    throw new Error("Файл слишком большой (максимум 5 МБ)");
+  }
+
+  try {
+    return await saveUploadedFile("misc-icons", "seal-icon", file);
+  } catch (error) {
+    console.error("Failed to upload seal icon:", error);
+    throw new Error("Не удалось загрузить иконку печати");
+  }
+}

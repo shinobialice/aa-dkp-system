@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Plus, ArrowUp, ArrowDown, ChevronsUpDown, Search } from "lucide-react";
+import { Plus, Upload, ArrowUp, ArrowDown, ChevronsUpDown, Search } from "lucide-react";
 import { ItemTypeForm } from "./ItemTypeForm";
+import { BulkIconUploadDialog } from "./BulkIconUploadDialog";
 import { LootIcon } from "@/widgets/Loot/LootBuy/icons/LootIconComponent";
 import {
   getItemTypesForAdmin,
@@ -92,6 +93,7 @@ export function ItemTypeTable() {
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<ItemTypeRow | null>(null);
+  const [bulkOpen, setBulkOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
@@ -165,16 +167,26 @@ export function ItemTypeTable() {
           Предметы казны, лута и покупки лута. Новый предмет сразу становится
           доступен для выбора при добавлении дохода в казну.
         </p>
-        <Button
-          className="cursor-pointer shrink-0"
-          onClick={() => {
-            setEditing(null);
-            setFormOpen(true);
-          }}
-        >
-          <Plus className="size-4" />
-          Добавить предмет
-        </Button>
+        <div className="flex gap-2 shrink-0">
+          <Button
+            className="cursor-pointer"
+            variant="outline"
+            onClick={() => setBulkOpen(true)}
+          >
+            <Upload className="size-4" />
+            Перезалить иконки
+          </Button>
+          <Button
+            className="cursor-pointer"
+            onClick={() => {
+              setEditing(null);
+              setFormOpen(true);
+            }}
+          >
+            <Plus className="size-4" />
+            Добавить предмет
+          </Button>
+        </div>
       </div>
 
       <div className="relative max-w-xs">
@@ -267,6 +279,12 @@ export function ItemTypeTable() {
         onClose={() => setFormOpen(false)}
         onSaved={reload}
         item={editing}
+      />
+
+      <BulkIconUploadDialog
+        open={bulkOpen}
+        onClose={() => setBulkOpen(false)}
+        onDone={reload}
       />
     </div>
   );
