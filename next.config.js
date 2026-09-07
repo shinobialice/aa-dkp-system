@@ -7,6 +7,15 @@ const nextConfig = {
         hostname: "archeagecodex.com",
       },
     ],
+    // В проде что-то перед приложением (прокси/CDN у Coolify) дублирует
+    // параметр "w" в запросах к встроенному оптимизатору /_next/image —
+    // Next тогда отвечает 400 ("w" parameter cannot be an array), и все
+    // иконки (LootIcon и т.п. — маленькие готовые картинки 22-40px, где
+    // ресайз/webp от оптимизатора всё равно почти ничего не даёт) молча
+    // не грузятся. Локально без этого слоя работает нормально. unoptimized
+    // убирает сам /_next/image из цепочки — <Image> отдаёт src как есть,
+    // без "w"/"q" в query, так что дублировать там нечему.
+    unoptimized: true,
   },
   experimental: {
     serverActions: {
