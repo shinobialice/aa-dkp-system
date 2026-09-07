@@ -8,6 +8,7 @@ import {
   uploadItemTypeIcon,
   uploadGradeIcon,
   uploadSealIcon,
+  uploadMiscIcon,
 } from "@/actions/itemTypeAdmin";
 import {
   Button,
@@ -92,7 +93,19 @@ export function BulkIconUploadDialog({
 
           const ids = byBasename.get(file.name);
           if (!ids || ids.length === 0) {
-            rows.push({ file: file.name, status: "skip", detail: "не найден предмет с таким файлом в icon_url" });
+            // Не нашли ни одного предмета с такой иконкой — не выкидываем
+            // файл, а кладём в общий misc-icons по имени без расширения:
+            // предсказуемый путь для любых других захардкоженных ссылок в
+            // коде (InventoryIcons.tsx и т.п.), которые не заведены в БД.
+            const safeName = file.name.replace(/\.[^.]+$/, "").replace(/[^a-zA-Z0-9_-]/g, "_");
+            const fd = new FormData();
+            fd.append("file", file);
+            const newUrl = await uploadMiscIcon(safeName, fd);
+            rows.push({
+              file: file.name,
+              status: "ok",
+              detail: `нет в списке предметов — залито как misc-иконка: ${newUrl}`,
+            });
             continue;
           }
 
@@ -147,7 +160,9 @@ export function BulkIconUploadDialog({
             Выбери сразу все файлы (имена должны совпадать с текущей ссылкой
             на иконку — например «icon_item_4383.png» или «icon_grade1.png»).
             Каждый файл зальётся на этот сервер и заменит внешнюю ссылку у
-            всех предметов, где она совпала.
+            всех предметов, где она совпала. Файлы, для которых не нашлось
+            предмета в базе, всё равно зальются — в общую папку misc-icons,
+            путь покажется в результате, чтобы подставить его вручную в код.
           </p>
           <input
             ref={inputRef}

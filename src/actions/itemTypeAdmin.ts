@@ -231,3 +231,38 @@ export async function uploadSealIcon(formData: FormData): Promise<string> {
     throw new Error("Не удалось загрузить иконку печати");
   }
 }
+
+// Общий "мусорный ящик" для любых других захардкоженных картинок с
+// archeagecodex.com, которые не сидят ни в item_type, ни в списке грейдов/
+// печати (см. BulkIconUploadDialog) — например фиксированный список из
+// InventoryIcons.tsx. Имя файла на диске берём из его же исходного имени
+// (без расширения) — предсказуемо и не нужно городить отдельную функцию под
+// каждую новую картинку. name уже отфильтрован на клиенте, но раз он всё
+// равно идёт в путь на диске — проверяем и здесь же, от path traversal.
+export async function uploadMiscIcon(
+  name: string,
+  formData: FormData,
+): Promise<string> {
+  await ensurePrivilieges(["Администратор"]);
+  if (!/^[a-zA-Z0-9_-]{1,100}$/.test(name)) {
+    throw new Error("Некорректное имя файла");
+  }
+
+  const file = formData.get("file");
+  if (!(file instanceof File)) {
+    throw new Error("Файл не передан");
+  }
+  if (!ALLOWED_TYPES.includes(file.type)) {
+    throw new Error("Допустимы только изображения PNG, JPEG, WEBP или GIF");
+  }
+  if (file.size > MAX_FILE_SIZE) {
+    throw new Error("Файл слишком большой (максимум 5 МБ)");
+  }
+
+  try {
+    return await saveUploadedFile("misc-icons", name, file);
+  } catch (error) {
+    console.error("Failed to upload misc icon:", error);
+    throw new Error("Не удалось загрузить иконку");
+  }
+}

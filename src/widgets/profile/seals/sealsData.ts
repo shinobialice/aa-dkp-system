@@ -22,7 +22,10 @@ export type SealName = (typeof SEAL_NAMES)[number];
 
 export const MAX_USER_SEALS = 3;
 
-export const SEAL_ICON_URL = "https://archeagecodex.com/items/icon_item_5888.png";
+// Раньше грузилась напрямую с archeagecodex.com — залито локально через
+// BulkIconUploadDialog/uploadSealIcon, см. LootIconComponent.tsx (GRADE_URL)
+// про ту же причину переезда.
+export const SEAL_ICON_URL = "/api/uploads/misc-icons/seal-icon.png";
 
 // Цвета — по цветам рамок icon_gradeN.png (архейджовская система грейдов).
 // Для грейда 1 (Обычный) цвет не задан — в игровом клиенте это белый,
@@ -61,7 +64,7 @@ export function getSealGradeLabel(grade: number): string {
 }
 
 export function getSealGradeIconUrl(grade: number): string {
-  return `https://archeagecodex.com/images/icon_grade${grade}.png`;
+  return `/api/uploads/grade-icons/grade${grade}.png`;
 }
 
 export function getSealGradeColor(grade: number): string | null {
