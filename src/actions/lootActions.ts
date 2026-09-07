@@ -63,6 +63,7 @@ export const addLootItem = async ({
   status,
   sold_at,
   raidId,
+  price,
 }: {
   itemTypeId: number;
   source?: string;
@@ -71,13 +72,14 @@ export const addLootItem = async ({
   status?: string;
   sold_at?: string;
   raidId?: number | null;
+  price?: number;
 }) => {
   try {
     await sql<any[]>`
-      INSERT INTO loot (item_type_id, status, sold_at, source, acquired_at, quantity, created_at, raid_id)
+      INSERT INTO loot (item_type_id, status, sold_at, source, acquired_at, quantity, created_at, raid_id, price)
       VALUES (
         ${itemTypeId}, ${status ?? "В наличии"}, ${sold_at ?? null}, ${source ?? null},
-        ${new Date(acquired_at).toISOString()}, ${quantity ?? 1}, now(), ${raidId ?? null}
+        ${new Date(acquired_at).toISOString()}, ${quantity ?? 1}, now(), ${raidId ?? null}, ${price ?? null}
       )
     `;
   } catch (error) {
@@ -88,6 +90,49 @@ export const addLootItem = async ({
   // "В казну"/"Продано" сразу с income (см. AddLootDialog — quick-add в
   // казну) — пересчитываем фонд месяца продажи, не дожидаясь таймера.
   if (sold_at && (status === "В казну" || status === "Продано")) {
+    const { year, month } = getUtcYearMonth(new Date(sold_at));
+    await triggerFinanceRecalc(month, year);
+  }
+};
+
+// Правка уже занесённой в казну ручной строки дохода ("В казну" — см.
+// AddLootDialog/lootUtilityItems.ts). В отличие от updateLootSale — это не
+// продажа предмету покупателю, а просто сумма/источник/дата поступления,
+// поэтому отдельная узкая функция вместо переиспользования той. sold_at
+// (месяц, за который считается доход в generateGuildFunds) не трогаем —
+// правка суммы/источника не должна тихо переносить доход в другой месяц.
+export const updateTreasuryIncome = async ({
+  lootId,
+  source,
+  acquired_at,
+  price,
+}: {
+  lootId: number;
+  source?: string;
+  acquired_at: string;
+  price: number;
+}) => {
+  let sold_at: Date | null = null;
+  try {
+    const [loot] = await sql<any[]>`
+      UPDATE loot SET
+        source = ${source ?? null},
+        acquired_at = ${new Date(acquired_at).toISOString()},
+        quantity = 1,
+        price = ${price}
+      WHERE id = ${lootId} AND status = 'В казну'
+      RETURNING sold_at
+    `;
+    if (!loot) {
+      throw new Error("Запись не найдена");
+    }
+    sold_at = loot.sold_at;
+  } catch (error) {
+    console.error("Ошибка при изменении поступления в казну:", error);
+    throw new Error("Не удалось изменить поступление в казну");
+  }
+
+  if (sold_at) {
     const { year, month } = getUtcYearMonth(new Date(sold_at));
     await triggerFinanceRecalc(month, year);
   }

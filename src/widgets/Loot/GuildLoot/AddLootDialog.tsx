@@ -61,11 +61,16 @@ export function AddLootDialog({
     }
     let itemToAdd = { ...form };
     if (isOtherType) {
+      // Поле выше — это сумма дохода, а не количество предметов: цена
+      // строки "В казну" в казне считается по price (см. generateGuildFunds),
+      // а quantity для нее не имеет смысла — фиксируем 1, чтобы в таблице не
+      // отображалось "35000 шт." вместо реальной суммы.
       itemToAdd = {
         ...itemToAdd,
         status: "В казну",
         sold_at: new Date().toISOString(),
         price: form.quantity,
+        quantity: 1,
       };
     }
     await onAdd(itemToAdd);

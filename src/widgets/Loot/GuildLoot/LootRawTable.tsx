@@ -16,12 +16,13 @@ import { Button } from "@/shared/ui";
 import { Input } from "@/shared/ui";
 import { ScrollArea } from "@/shared/ui";
 import { SellLootDialog } from "./SellLootDialog";
+import { EditTreasuryIncomeDialog } from "./EditTreasuryIncomeDialog";
 import { getActiveUsers } from "@/actions/getActiveUsers";
 import {
   distributeLootItem,
   updateLootSale,
 } from "@/actions/distributeLootItems";
-import { getLoot } from "@/actions/lootActions";
+import { getLoot, updateTreasuryIncome } from "@/actions/lootActions";
 
 const STATUS_FILTERS: { value: string; label: string }[] = [
   { value: "all", label: "Все" },
@@ -57,6 +58,9 @@ export function LootRawTable({
 }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<LootItem | null>(null);
+  const [treasuryDialogOpen, setTreasuryDialogOpen] = useState(false);
+  const [editingTreasuryItem, setEditingTreasuryItem] =
+    useState<LootItem | null>(null);
   const [activeUsers, setActiveUsers] = useState<
     { id: number; username: string }[]
   >([]);
@@ -280,7 +284,18 @@ export function LootRawTable({
                 {isAdmin && (
                   <TableCell>
                     <div className="flex gap-2">
-                        {item.status !== "В казну" && (
+                        {item.status === "В казну" ? (
+                          <Button
+                            size="sm"
+                            className="cursor-pointer"
+                            onClick={() => {
+                              setEditingTreasuryItem(item);
+                              setTreasuryDialogOpen(true);
+                            }}
+                          >
+                            Изменить
+                          </Button>
+                        ) : (
                           <Button
                             size="sm"
                             className={`cursor-pointer ${
@@ -363,6 +378,27 @@ export function LootRawTable({
           }}
         />
       )}
+
+      <EditTreasuryIncomeDialog
+        open={treasuryDialogOpen}
+        onClose={() => {
+          setTreasuryDialogOpen(false);
+          setEditingTreasuryItem(null);
+        }}
+        item={editingTreasuryItem}
+        onSave={async (data) => {
+          if (!editingTreasuryItem) return;
+          try {
+            await updateTreasuryIncome({
+              lootId: editingTreasuryItem.id,
+              ...data,
+            });
+            location.reload();
+          } catch (err: any) {
+            alert(err.message ?? "Ошибка при изменении поступления");
+          }
+        }}
+      />
     </div>
   );
 }
