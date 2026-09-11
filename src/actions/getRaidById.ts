@@ -14,20 +14,21 @@ export const getRaidById = async (id: string) => {
       throw new Error("Raid not found");
     }
 
-    const [raidBossRows, attendanceRows, lootRows] = await Promise.all([
-      sql<any[]>`
+    const [raidBossRows, attendanceRows, lootRows, [activeMembersRow]] =
+      await Promise.all([
+        sql<any[]>`
         SELECT b.id, b.boss_name, b.dkp_points, b.category
         FROM raid_boss rb
         JOIN boss b ON b.id = rb.boss_id
         WHERE rb.raid_id = ${raidId}
       `,
-      sql<any[]>`
-        SELECT ra.is_late, u.id, u.username, u.active, u.class
+        sql<any[]>`
+        SELECT ra.is_late, u.id, u.username, u.active, u.class, u.joined_at
         FROM raid_attendance ra
         JOIN "user" u ON u.id = ra.user_id
         WHERE ra.raid_id = ${raidId}
       `,
-      sql<any[]>`
+        sql<any[]>`
         SELECT
           l.id, l.status, l.source, l.quantity, l.price, l.sold_to,
           l.acquired_at, l.sold_at,
@@ -37,10 +38,17 @@ export const getRaidById = async (id: string) => {
         JOIN item_type it ON it.id = l.item_type_id
         WHERE l.raid_id = ${raidId}
       `,
-    ]);
+        sql<any[]>`
+        SELECT COUNT(*)::int AS count
+        FROM "user"
+        WHERE active = true
+          AND (joined_at IS NULL OR joined_at <= ${raid.start_date})
+      `,
+      ]);
 
     return {
       ...raid,
+      guildActiveMembersAtTime: activeMembersRow?.count ?? 0,
       raid_boss: raidBossRows.map((b) => ({
         boss: {
           id: b.id,
@@ -51,7 +59,13 @@ export const getRaidById = async (id: string) => {
       })),
       raid_attendance: attendanceRows.map((a) => ({
         is_late: a.is_late,
-        user: { id: a.id, username: a.username, active: a.active, class: a.class },
+        user: {
+          id: a.id,
+          username: a.username,
+          active: a.active,
+          class: a.class,
+          joined_at: a.joined_at,
+        },
       })),
       loot: lootRows.map((l) => ({
         id: l.id,

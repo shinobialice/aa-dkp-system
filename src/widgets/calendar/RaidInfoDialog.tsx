@@ -47,7 +47,7 @@ export function RaidInfoDialog({
     (item: any) => item.status !== "Распродано",
   );
 
-  const [sortKey, setSortKey] = useState<SortKey | null>(null);
+  const [sortKey, setSortKey] = useState<SortKey | null>("class");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
 
   const toggleSort = (key: SortKey) => {
@@ -66,7 +66,14 @@ export function RaidInfoDialog({
         String(b.user?.[sortKey] ?? ""),
         "ru",
       );
-      return sortDir === "asc" ? cmp : -cmp;
+      if (cmp !== 0) return sortDir === "asc" ? cmp : -cmp;
+      const aJoined = a.user?.joined_at
+        ? new Date(a.user.joined_at).getTime()
+        : 0;
+      const bJoined = b.user?.joined_at
+        ? new Date(b.user.joined_at).getTime()
+        : 0;
+      return aJoined - bJoined;
     });
   }, [attendance, sortKey, sortDir]);
 
@@ -229,7 +236,13 @@ export function RaidInfoDialog({
         )}
 
         <div className="shrink-0">
-          <h3 className="text-sm font-semibold mb-2">Участники</h3>
+          <h3 className="text-sm font-semibold mb-2">
+            Участники ({attendance.length}
+            {raid.guildActiveMembersAtTime != null
+              ? ` из ${raid.guildActiveMembersAtTime}`
+              : ""}
+            )
+          </h3>
         </div>
         <div className="rounded-md border flex-1 min-h-0 overflow-y-auto">
           {attendanceTable}

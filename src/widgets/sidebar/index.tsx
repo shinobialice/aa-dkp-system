@@ -24,6 +24,8 @@ import {
   UserX,
   Newspaper,
   Package,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -45,18 +47,40 @@ import {
   SidebarMenuItem,
   SidebarFooter,
   Separator,
+  Switch,
 } from "@/shared/ui";
 import Image from "next/image";
 import { NavUser } from "./NavUser";
 import { OnlineUsersWidget } from "./OnlineUsersWidget";
 import DimonishMenuItem from "./DimonishMenuItem";
-import { FC } from "react";
+import { FC, useState, useTransition } from "react";
+import { setViewAsRegular } from "@/actions/viewAsRegular";
 
-type Props = { isAdmin: boolean; locationBadge?: React.ReactNode };
+type Props = {
+  isAdmin: boolean;
+  isRealAdmin?: boolean;
+  viewingAsRegular?: boolean;
+  locationBadge?: React.ReactNode;
+};
 
-const AppSidebar: FC<Props> = ({ isAdmin, locationBadge }) => {
+const AppSidebar: FC<Props> = ({
+  isAdmin,
+  isRealAdmin,
+  viewingAsRegular,
+  locationBadge,
+}) => {
   const { setTheme } = useTheme();
   const router = useRouter();
+  const [checked, setChecked] = useState(!!viewingAsRegular);
+  const [isPending, startTransition] = useTransition();
+
+  const handleToggleView = (next: boolean) => {
+    setChecked(next);
+    startTransition(async () => {
+      await setViewAsRegular(next);
+      router.refresh();
+    });
+  };
 
   const menuItems = [
     { title: "Основная информация", url: "/news", icon: Info },
@@ -198,6 +222,29 @@ const AppSidebar: FC<Props> = ({ isAdmin, locationBadge }) => {
       <SidebarFooter>
         <SidebarMenu>
           <OnlineUsersWidget />
+
+          {isRealAdmin && (
+            <SidebarMenuItem>
+              <div
+                className={`flex items-center gap-2 rounded-md p-2 text-sm ${
+                  checked ? "bg-sidebar-accent text-sidebar-accent-foreground" : ""
+                }`}
+              >
+                {checked ? (
+                  <EyeOff className="h-5 w-5 shrink-0" />
+                ) : (
+                  <Eye className="h-5 w-5 shrink-0" />
+                )}
+                <span className="flex-1 truncate">Глазами игрока</span>
+                <Switch
+                  className="cursor-pointer"
+                  checked={checked}
+                  disabled={isPending}
+                  onCheckedChange={handleToggleView}
+                />
+              </div>
+            </SidebarMenuItem>
+          )}
 
           <SidebarMenuItem>
             <DropdownMenu>

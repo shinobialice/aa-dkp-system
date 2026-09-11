@@ -33,6 +33,7 @@ export type User = {
   username: string;
   class: string;
   active: boolean;
+  joined_at?: string | null;
 };
 
 type SelectRaidListProps = {
@@ -104,6 +105,20 @@ function buildColumns(
       },
       enableSorting: false,
     },
+    {
+      accessorKey: "joined_at",
+      header: () => null,
+      cell: () => null,
+      sortingFn: (rowA, rowB) => {
+        const a = rowA.original.joined_at
+          ? new Date(rowA.original.joined_at).getTime()
+          : 0;
+        const b = rowB.original.joined_at
+          ? new Date(rowB.original.joined_at).getTime()
+          : 0;
+        return a - b;
+      },
+    },
   ];
 }
 
@@ -116,12 +131,15 @@ export function SelectedRaidList({
     () => buildColumns(lateUserIds, setLateUserIds),
     [lateUserIds, setLateUserIds],
   );
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [sorting, setSorting] = React.useState<SortingState>([
+    { id: "class", desc: false },
+    { id: "joined_at", desc: false },
+  ]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
   );
   const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
+    React.useState<VisibilityState>({ joined_at: false });
 
   const activeUsers = React.useMemo(
     () => users.filter((u) => u.active),

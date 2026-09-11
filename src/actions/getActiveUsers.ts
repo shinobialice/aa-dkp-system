@@ -5,7 +5,7 @@ import sql from "@/shared/lib/db";
 export const getActiveUsers = async () => {
   try {
     const users = await sql<any[]>`
-      SELECT id, username, class, active FROM "user" WHERE active = true
+      SELECT id, username, class, active, joined_at FROM "user" WHERE active = true
     `;
     return users;
   } catch (error) {
