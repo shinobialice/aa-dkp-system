@@ -1,5 +1,6 @@
 import { JSX } from "react";
 import { BowArrow, Drum, HeartPlus, Music, Shield, Sword, Wand } from "lucide-react";
+import { Pistol } from "@/shared/ui/icons/Pistol";
 
 export const classColors: Record<string, string> = {
   Хил: "#ec4899",
@@ -9,6 +10,7 @@ export const classColors: Record<string, string> = {
   Тактик: "#22c55e",
   Танцор: "#3b82f6",
   Бард: "#ef4444",
+  Стрелок: "#64748b",
 };
 
 export const classIcons: Record<string, JSX.Element> = {
@@ -19,4 +21,5 @@ export const classIcons: Record<string, JSX.Element> = {
   Милик: <Sword className="size-4" />,
   Маг: <Wand className="size-4" />,
   Бард: <Music className="size-4" />,
+  Стрелок: <Pistol className="size-4" />,
 };

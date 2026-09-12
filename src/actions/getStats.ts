@@ -18,7 +18,8 @@ const getStats = async () => {
       (user) =>
         user.class?.includes("Милик") ||
         user.class?.includes("Лук") ||
-        user.class?.includes("Маг"),
+        user.class?.includes("Маг") ||
+        user.class?.includes("Стрелок"),
     ).length,
     healers: users.filter((user) => user.class?.includes("Хил")).length,
     dancers: users.filter((user) => user.class?.includes("Танцор")).length,

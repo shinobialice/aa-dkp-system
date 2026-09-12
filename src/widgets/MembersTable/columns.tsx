@@ -8,6 +8,23 @@ import { Button } from "@/shared/ui";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/ui";
 import { Avatar, AvatarImage, AvatarFallback } from "@/shared/ui";
 
+const CLASS_SORT_ORDER = [
+  "Бард",
+  "Лук",
+  "Стрелок",
+  "Маг",
+  "Милик",
+  "Тактик",
+  "Танцор",
+  "Хил",
+];
+
+function classRank(cls: string | null): number {
+  if (!cls) return CLASS_SORT_ORDER.length;
+  const index = CLASS_SORT_ORDER.indexOf(cls);
+  return index === -1 ? CLASS_SORT_ORDER.length : index;
+}
+
 export const columns: ColumnDef<any>[] = [
   {
     accessorKey: "username",
@@ -73,6 +90,8 @@ export const columns: ColumnDef<any>[] = [
       }
       return filterValue.includes(row.getValue(columnId));
     },
+    sortingFn: (rowA, rowB) =>
+      classRank(rowA.original.class) - classRank(rowB.original.class),
   },
   {
     accessorKey: "class_gear_score",

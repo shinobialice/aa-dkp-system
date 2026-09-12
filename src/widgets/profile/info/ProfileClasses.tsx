@@ -9,6 +9,7 @@ import {
   Sword,
   Wand,
 } from "lucide-react";
+import { Pistol } from "@/shared/ui/icons/Pistol";
 import { Input } from "@/shared/ui";
 import {
   Select,
@@ -28,9 +29,19 @@ const classIcons: Record<string, JSX.Element> = {
   Милик: <Sword className="size-4" />,
   Маг: <Wand className="size-4" />,
   Бард: <Music className="size-4" />,
+  Стрелок: <Pistol className="size-4" />,
 };
 
-const classList = ["Хил", "Танцор", "Тактик", "Лук", "Милик", "Маг", "Бард"];
+const classList = [
+  "Хил",
+  "Танцор",
+  "Тактик",
+  "Лук",
+  "Милик",
+  "Маг",
+  "Бард",
+  "Стрелок",
+];
 
 // Второстепенная роль (2-я/3-я) — тот же вид, что и основная роль:
 // без лейбла, просто иконка + название + ГС.

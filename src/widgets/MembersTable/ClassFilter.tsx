@@ -26,6 +26,7 @@ export function ClassFilter<TData>({ table }: ClassFilterProps<TData>) {
     "Бард",
     "Тактик",
     "Танцор",
+    "Стрелок",
   ];
 
   const toggleClass = (className: string) => {
