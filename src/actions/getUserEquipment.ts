@@ -9,12 +9,13 @@ export type UserEquipment = {
   grade: number;
   enchant: number;
   extra_protection: number;
+  engravings: number[];
 };
 
 const getUserEquipment = async (userId: number): Promise<UserEquipment[]> => {
   try {
     return await sql<UserEquipment[]>`
-      SELECT id, user_id, slot, item_name, grade, enchant, extra_protection
+      SELECT id, user_id, slot, item_name, grade, enchant, extra_protection, engravings
       FROM user_equipment
       WHERE user_id = ${userId}
     `;

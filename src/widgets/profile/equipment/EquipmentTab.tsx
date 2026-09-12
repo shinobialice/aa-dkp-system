@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { toast } from "sonner";
+import { Trash2 } from "lucide-react";
 import saveUserEquipment, { EquipmentInput } from "@/actions/saveUserEquipment";
 import type { UserEquipment } from "@/actions/getUserEquipment";
 import { EQUIPMENT_SLOTS, type EquipmentSlot } from "./equipmentData";
@@ -20,6 +21,10 @@ import {
 } from "./itemsData/statsFormula";
 import { GearItemIcon } from "./GearItemIcon";
 import { GearItemPicker } from "./GearItemPicker";
+import { EngravingPicker, EngravingIcon, EngravingTooltip } from "./EngravingPicker";
+import { findEngraving } from "./itemsData/engravings";
+import { WEAPON_HANDEDNESS } from "./itemsData/weaponHandedness";
+import { highlightNumbers } from "./highlightNumbers";
 import { ItemStats } from "./ItemStats";
 import { CharacterStatsPanel } from "./CharacterStatsPanel";
 import { DetailedStatsPanel } from "./DetailedStatsPanel";
@@ -112,14 +117,92 @@ const TOP = EQUIPMENT_SLOTS.find((s) => s.key === TOP_SLOT)!;
 const LEFT = slotsFor(LEFT_SLOTS);
 const RIGHT = slotsFor(RIGHT_SLOTS);
 
-function EngravingSlots({ count }: { count: number }) {
+function EngravingDisplay({
+  count,
+  engravings,
+}: {
+  count: number;
+  engravings: number[];
+}) {
   if (count === 0) return null;
 
   return (
     <div className="flex flex-col gap-1">
-      {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="size-5 rounded-sm border border-border bg-muted" />
-      ))}
+      {Array.from({ length: count }).map((_, i) => {
+        const engraving = findEngraving(engravings[i] ?? 0);
+        if (!engraving) {
+          return (
+            <div
+              key={i}
+              className="size-5 shrink-0 rounded-sm border border-border bg-muted"
+            />
+          );
+        }
+        return (
+          <div key={i} className="flex items-center gap-1.5">
+            <EngravingIcon engraving={engraving} size={20} />
+            {engraving.effect && (
+              <span className="text-xs text-green-500">
+                {highlightNumbers(engraving.effect)}
+              </span>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function EngravingSlots({
+  count,
+  engravings,
+  selectedEngravingId,
+  onToggle,
+  onClearAll,
+}: {
+  count: number;
+  engravings: number[];
+  selectedEngravingId: number;
+  onToggle: (index: number) => void;
+  onClearAll: () => void;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      {Array.from({ length: count }).map((_, i) => {
+        const engraving = findEngraving(engravings[i] ?? 0);
+        const square = (
+          <button
+            type="button"
+            onClick={() => onToggle(i)}
+            disabled={!engraving && !selectedEngravingId}
+            className={`flex size-9 shrink-0 items-center justify-center rounded-md border transition-colors ${
+              engraving
+                ? "cursor-pointer border-border bg-input/30 hover:border-destructive/60"
+                : selectedEngravingId
+                  ? "cursor-pointer border-dashed border-primary/60 bg-muted hover:bg-accent"
+                  : "cursor-default border-border bg-muted"
+            }`}
+          >
+            {engraving && <EngravingIcon engraving={engraving} size={28} />}
+          </button>
+        );
+        return engraving ? (
+          <EngravingTooltip key={i} engraving={engraving} side="top">
+            {square}
+          </EngravingTooltip>
+        ) : (
+          <span key={i}>{square}</span>
+        );
+      })}
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="cursor-pointer text-destructive hover:text-destructive"
+        onClick={onClearAll}
+      >
+        <Trash2 className="size-4" />
+      </Button>
     </div>
   );
 }
@@ -149,6 +232,7 @@ function EquipmentSlotButton({
     grade: number,
     enchant: number,
     extraProtection: number,
+    engravings: number[],
   ) => Promise<void>;
 }) {
   const [open, setOpen] = useState(false);
@@ -158,6 +242,8 @@ function EquipmentSlotButton({
   const [extraProtection, setExtraProtection] = useState(
     item?.extra_protection ?? DEFAULT_EXTRA_PROTECTION,
   );
+  const [engravings, setEngravings] = useState<number[]>(item?.engravings ?? []);
+  const [selectedEngravingId, setSelectedEngravingId] = useState(0);
   const [saving, setSaving] = useState(false);
 
   const filled = !!item?.item_name;
@@ -165,6 +251,10 @@ function EquipmentSlotButton({
   const selectedGearItem = findGearItem(slot.key, item?.item_name);
   const draftGearItem = findGearItem(slot.key, itemName);
   const isFixedGradeItem = !!draftGearItem && isFixedGradeItemName(draftGearItem.name);
+  const maxEngravingSlots = getEngravingSlotCount(slot.key, grade);
+  const draftHandedness = draftGearItem
+    ? WEAPON_HANDEDNESS[draftGearItem.id]
+    : undefined;
 
   const handleOpenChange = (next: boolean) => {
     if (next) {
@@ -172,6 +262,8 @@ function EquipmentSlotButton({
       setGrade(item?.grade ?? DEFAULT_GRADE);
       setEnchant(item?.enchant ?? DEFAULT_ENCHANT);
       setExtraProtection(item?.extra_protection ?? DEFAULT_EXTRA_PROTECTION);
+      setEngravings(item?.engravings ?? []);
+      setSelectedEngravingId(0);
     }
     setOpen(next);
   };
@@ -179,7 +271,13 @@ function EquipmentSlotButton({
   const handleSave = async () => {
     setSaving(true);
     try {
-      await onSave(itemName, grade, enchant, extraProtection);
+      await onSave(
+        itemName,
+        grade,
+        enchant,
+        extraProtection,
+        engravings.slice(0, maxEngravingSlots),
+      );
       setOpen(false);
     } finally {
       setSaving(false);
@@ -189,7 +287,7 @@ function EquipmentSlotButton({
   const handleClear = async () => {
     setSaving(true);
     try {
-      await onSave("", DEFAULT_GRADE, DEFAULT_ENCHANT, DEFAULT_EXTRA_PROTECTION);
+      await onSave("", DEFAULT_GRADE, DEFAULT_ENCHANT, DEFAULT_EXTRA_PROTECTION, []);
       setOpen(false);
     } finally {
       setSaving(false);
@@ -287,11 +385,12 @@ function EquipmentSlotButton({
                 0 && (
                 <>
                   <div className="border-t border-border" />
-                  <EngravingSlots
+                  <EngravingDisplay
                     count={getEngravingSlotCount(
                       slot.key,
                       item?.grade ?? DEFAULT_GRADE,
                     )}
+                    engravings={item?.engravings ?? []}
                   />
                 </>
               )}
@@ -310,7 +409,7 @@ function EquipmentSlotButton({
       )}
       <DialogContent
         aria-describedby={undefined}
-        className="dark w-full max-w-md border-border bg-background text-foreground"
+        className="dark w-full max-w-2xl border-border bg-background text-foreground"
       >
         <DialogHeader>
           <DialogTitle>{slot.label}</DialogTitle>
@@ -412,6 +511,33 @@ function EquipmentSlotButton({
               </div>
             )}
 
+            {itemName.trim() !== "" && maxEngravingSlots > 0 && (
+              <div className="space-y-1.5">
+                <div className="text-xs text-muted-foreground">Гравировки:</div>
+                <EngravingPicker
+                  slot={slot.key}
+                  handedness={draftHandedness}
+                  itemId={draftGearItem?.id}
+                  value={selectedEngravingId}
+                  onSelect={setSelectedEngravingId}
+                />
+                <EngravingSlots
+                  count={maxEngravingSlots}
+                  engravings={engravings}
+                  selectedEngravingId={selectedEngravingId}
+                  onToggle={(i) => {
+                    setEngravings((prev) => {
+                      const next = [...prev];
+                      while (next.length <= i) next.push(0);
+                      next[i] = next[i] ? 0 : selectedEngravingId;
+                      return next;
+                    });
+                  }}
+                  onClearAll={() => setEngravings([])}
+                />
+              </div>
+            )}
+
             <div className="flex justify-end gap-2">
               {filled && (
                 <Button
@@ -470,6 +596,12 @@ function EquipmentSlotButton({
                 enchant={item!.enchant}
               />
             )}
+            {getEngravingSlotCount(slot.key, item!.grade) > 0 && (
+              <EngravingDisplay
+                count={getEngravingSlotCount(slot.key, item!.grade)}
+                engravings={item!.engravings}
+              />
+            )}
           </div>
         ) : (
           <div className="text-sm text-muted-foreground">Пусто</div>
@@ -502,10 +634,11 @@ export default function EquipmentTab({
     grade: number,
     enchant: number,
     extraProtection: number,
+    engravings: number[],
   ) => {
     const payload: EquipmentInput[] = EQUIPMENT_SLOTS.map((slot) => {
       if (slot.key === slotKey) {
-        return { slot: slot.key, itemName, grade, enchant, extraProtection };
+        return { slot: slot.key, itemName, grade, enchant, extraProtection, engravings };
       }
       const existing = equipmentBySlot[slot.key];
       return {
@@ -514,6 +647,7 @@ export default function EquipmentTab({
         grade: existing?.grade ?? DEFAULT_GRADE,
         enchant: existing?.enchant ?? DEFAULT_ENCHANT,
         extraProtection: existing?.extra_protection ?? DEFAULT_EXTRA_PROTECTION,
+        engravings: existing?.engravings ?? [],
       };
     });
 
@@ -550,8 +684,15 @@ export default function EquipmentTab({
               item={equipmentBySlot[TOP.key]}
               equipment={equipment}
               canEdit={canEdit}
-              onSave={(itemName, grade, enchant, extraProtection) =>
-                handleSaveSlot(TOP.key, itemName, grade, enchant, extraProtection)
+              onSave={(itemName, grade, enchant, extraProtection, engravings) =>
+                handleSaveSlot(
+                  TOP.key,
+                  itemName,
+                  grade,
+                  enchant,
+                  extraProtection,
+                  engravings,
+                )
               }
             />
           </div>
@@ -565,8 +706,15 @@ export default function EquipmentTab({
                   item={equipmentBySlot[slot.key]}
                   equipment={equipment}
                   canEdit={canEdit}
-                  onSave={(itemName, grade, enchant, extraProtection) =>
-                    handleSaveSlot(slot.key, itemName, grade, enchant, extraProtection)
+                  onSave={(itemName, grade, enchant, extraProtection, engravings) =>
+                    handleSaveSlot(
+                      slot.key,
+                      itemName,
+                      grade,
+                      enchant,
+                      extraProtection,
+                      engravings,
+                    )
                   }
                 />
               ))}
@@ -598,8 +746,15 @@ export default function EquipmentTab({
                   item={equipmentBySlot[slot.key]}
                   equipment={equipment}
                   canEdit={canEdit}
-                  onSave={(itemName, grade, enchant, extraProtection) =>
-                    handleSaveSlot(slot.key, itemName, grade, enchant, extraProtection)
+                  onSave={(itemName, grade, enchant, extraProtection, engravings) =>
+                    handleSaveSlot(
+                      slot.key,
+                      itemName,
+                      grade,
+                      enchant,
+                      extraProtection,
+                      engravings,
+                    )
                   }
                 />
               ))}

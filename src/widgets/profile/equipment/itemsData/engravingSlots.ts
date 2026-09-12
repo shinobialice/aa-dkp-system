@@ -1,4 +1,10 @@
-export type EngravingCategory = "armor" | "cloak" | "underwear" | "weapon" | "none";
+export type EngravingCategory =
+  | "armor"
+  | "cloak"
+  | "underwear"
+  | "weapon"
+  | "jewelry"
+  | "none";
 
 const ARMOR_SLOT_KEYS = new Set([
   "head",
@@ -17,16 +23,29 @@ const WEAPON_SLOT_KEYS = new Set([
   "instrument",
 ]);
 
+// Гравировки вставляются в кольца и серьги, но не в ожерелье.
+const JEWELRY_SLOT_KEYS = new Set(["ring1", "ring2", "earring1", "earring2"]);
+
 export function getEngravingCategory(slotKey: string): EngravingCategory {
   if (ARMOR_SLOT_KEYS.has(slotKey)) return "armor";
   if (slotKey === "cloak") return "cloak";
   if (slotKey === "underwear") return "underwear";
   if (WEAPON_SLOT_KEYS.has(slotKey)) return "weapon";
+  if (JEWELRY_SLOT_KEYS.has(slotKey)) return "jewelry";
   return "none";
 }
 
 export function getEngravingSlotCount(slotKey: string, grade: number): number {
   const category = getEngravingCategory(slotKey);
+
+  // У пояса и наручей своя, меньшая шкала слотов гравировки.
+  if (slotKey === "belt" || slotKey === "bracers") {
+    if (grade >= 12) return 6;
+    if (grade >= 11) return 5;
+    if (grade >= 8) return 4;
+    if (grade >= 2) return 3;
+    return 0;
+  }
 
   if (category === "armor") {
     if (grade >= 12) return 8;
@@ -49,6 +68,13 @@ export function getEngravingSlotCount(slotKey: string, grade: number): number {
     if (grade >= 11) return 8;
     if (grade >= 8) return 7;
     if (grade >= 2) return 6;
+    return 0;
+  }
+
+  if (category === "jewelry") {
+    if (grade >= 12) return 3;
+    if (grade >= 10) return 2;
+    if (grade >= 7) return 1;
     return 0;
   }
 

@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 export const NUMBER_COLOR = "#f0a020";
 
 const NUMBER_PATTERN =
-  /\d+(?:[.,]\d+)?\s?(?:%|единиц(?:ы|у)?|ед\.|метра|метров|метр\b|м\.)?/g;
+  /(?:[+-]?\d+(?:[.,]\d+)?\s?(?:%|единиц(?:ы|у)?|ед\.|метра|метров|метр\b|м\.)?)|(?:«[^»]+»)/g;
 
 export function highlightNumbers(text: string) {
   const matches = text.match(NUMBER_PATTERN);
