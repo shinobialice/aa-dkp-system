@@ -5,6 +5,7 @@ import {
   getPeriodAttendanceTop,
   getPeriodFinanceSummary,
   getPeriodTopSales,
+  getPeriodTopBuyers,
   getPeriodTopIncomeSources,
   getPeriodTopDrops,
   getPeriodMembershipChanges,
@@ -28,13 +29,15 @@ export default async function WarPage() {
   const initialEconomy =
     status.mode === "freeshard"
       ? await (async () => {
-          const [finance, topSales, incomeSources, drops] = await Promise.all([
-            getPeriodFinanceSummary(periodStart, null),
-            getPeriodTopSales(periodStart, null, 10),
-            getPeriodTopIncomeSources(periodStart, null),
-            getPeriodTopDrops(periodStart, null),
-          ]);
-          return { finance, topSales, incomeSources, drops };
+          const [finance, topSales, topBuyers, incomeSources, drops] =
+            await Promise.all([
+              getPeriodFinanceSummary(periodStart, null),
+              getPeriodTopSales(periodStart, null),
+              getPeriodTopBuyers(periodStart, null),
+              getPeriodTopIncomeSources(periodStart, null),
+              getPeriodTopDrops(periodStart, null),
+            ]);
+          return { finance, topSales, topBuyers, incomeSources, drops };
         })()
       : null;
 

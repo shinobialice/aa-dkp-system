@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { ChevronLeft, Users, Coins } from "lucide-react";
+import { ChevronLeft, Users, Coins, ShoppingCart } from "lucide-react";
 import { Button, Card } from "@/shared/ui";
 import {
   MODE_LABEL,
@@ -13,6 +13,7 @@ import {
   getPeriodAttendanceTop,
   getPeriodFinanceSummary,
   getPeriodTopSales,
+  getPeriodTopBuyers,
   getPeriodTopIncomeSources,
   getPeriodTopDrops,
   getPeriodMembershipChanges,
@@ -78,11 +79,13 @@ export default function WarHistoryDetail({
     if (period.mode === "freeshard") {
       Promise.all([
         getPeriodFinanceSummary(period.startedAt, period.endedAt),
-        getPeriodTopSales(period.startedAt, period.endedAt, 10),
+        getPeriodTopSales(period.startedAt, period.endedAt),
+        getPeriodTopBuyers(period.startedAt, period.endedAt),
         getPeriodTopIncomeSources(period.startedAt, period.endedAt),
         getPeriodTopDrops(period.startedAt, period.endedAt),
-      ]).then(([finance, topSales, incomeSources, drops]) => {
-        if (isMounted) setEconomy({ finance, topSales, incomeSources, drops });
+      ]).then(([finance, topSales, topBuyers, incomeSources, drops]) => {
+        if (isMounted)
+          setEconomy({ finance, topSales, topBuyers, incomeSources, drops });
       });
     } else {
       setEconomy(null);
@@ -105,6 +108,13 @@ export default function WarHistoryDetail({
       rank: i + 1,
       name: s.source,
       value: formatNum(s.income),
+    })) ?? [];
+
+  const buyerRows: LeaderboardRow[] =
+    economy?.topBuyers.map((b, i) => ({
+      rank: i + 1,
+      name: b.buyerUsername,
+      value: formatNum(b.totalSpent),
     })) ?? [];
 
   const startedAtMs = new Date(period.startedAt).getTime();
@@ -176,6 +186,11 @@ export default function WarHistoryDetail({
               icon={Coins}
               title="Топ источников дохода"
               rows={incomeSourceRows}
+            />
+            <WarLeaderboardCard
+              icon={ShoppingCart}
+              title="Топ покупателей"
+              rows={buyerRows}
             />
             <WarTopSalesCard rows={economy?.topSales ?? []} />
             <WarDropsCard rows={economy?.drops ?? []} />

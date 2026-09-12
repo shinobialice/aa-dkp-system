@@ -7,8 +7,9 @@ function formatNum(n: number): string {
   return n.toLocaleString("ru-RU");
 }
 
-// Топ ПРОДАЖ — самые дорогие отдельные сделки за период (предмет + цена +
-// кому продали), не агрегат по покупателю. Фикс. высота + скролл — как у
+// Топ ПРОДАЖ — все отдельные сделки за период (предмет + цена + кому
+// продали), от большего к меньшему, не агрегат по покупателю (агрегат — в
+// WarLeaderboardCard с getPeriodTopBuyers). Фикс. высота + скролл — как у
 // остальных карточек в этой сетке.
 export default function WarTopSalesCard({ rows }: { rows: PeriodSaleEntry[] }) {
   return (

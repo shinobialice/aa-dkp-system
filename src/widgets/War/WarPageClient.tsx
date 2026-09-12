@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Swords, Trophy, Users, Gift, Coins } from "lucide-react";
+import { Swords, Trophy, Users, Gift, Coins, ShoppingCart } from "lucide-react";
 import { Card, CardContent, Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui";
 import { MODE_LABEL, MODE_ICON } from "@/shared/config/guildStatus";
 import type { GuildStatus } from "@/actions/guildStatusSettings";
@@ -112,6 +112,13 @@ export default function WarPageClient({
       value: formatNum(s.income),
     })) ?? [];
 
+  const buyerRows: LeaderboardRow[] =
+    initialEconomy?.topBuyers.map((b, i) => ({
+      rank: i + 1,
+      name: b.buyerUsername,
+      value: formatNum(b.totalSpent),
+    })) ?? [];
+
   return (
     <div className="space-y-6">
       <Card className="flex flex-col items-center gap-3 p-6 text-center">
@@ -201,6 +208,11 @@ export default function WarPageClient({
                   icon={Coins}
                   title="Топ источников дохода"
                   rows={incomeSourceRows}
+                />
+                <WarLeaderboardCard
+                  icon={ShoppingCart}
+                  title="Топ покупателей"
+                  rows={buyerRows}
                 />
                 <WarTopSalesCard rows={initialEconomy?.topSales ?? []} />
                 <WarDropsCard rows={initialEconomy?.drops ?? []} />

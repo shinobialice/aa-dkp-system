@@ -229,14 +229,13 @@ export type PeriodSaleEntry = {
   buyerUsername: string | null;
 };
 
-// Топ ПРОДАЖ — самые дорогие отдельные сделки за период (не агрегат по
-// покупателю): предмет + цена + кому продали. Заменяет "топ покупателей
-// лута" — сумма покупок по игроку интереснее видеть тут как "кто чаще всего
-// в топе продаж", а не отдельным топом.
+// Топ ПРОДАЖ — отдельные сделки за период (предмет + цена + кому продали),
+// не агрегат по покупателю (см. getPeriodTopBuyers для агрегата). Без limit
+// — все продажи, от большего к меньшему, карточка сама скроллится.
 export async function getPeriodTopSales(
   startedAt: string,
   endedAt: string | null,
-  limit: number = 5,
+  limit?: number,
 ): Promise<PeriodSaleEntry[]> {
   const rangeEnd = endedAt ?? new Date().toISOString();
   try {
@@ -245,17 +244,28 @@ export async function getPeriodTopSales(
     // user_id (см. l.sold_to: "Аук"/"Рандом" и т.п. свободным текстом),
     // поэтому берём username, только если реальной привязки нет — свободный
     // текст sold_to как есть.
-    const rows = await sql<any[]>`
-      SELECT l.price, it.name AS item_name, it.icon_url, it.grade,
-        COALESCE(u.username, l.sold_to) AS buyer
-      FROM loot l
-      JOIN item_type it ON it.id = l.item_type_id
-      LEFT JOIN "user" u ON u.id = l.sold_to_user_id
-      WHERE l.status = 'Продано'
-        AND l.sold_at >= ${startedAt} AND l.sold_at < ${rangeEnd}
-      ORDER BY l.price DESC
-      LIMIT ${limit}
-    `;
+    const rows = limit
+      ? await sql<any[]>`
+          SELECT l.price, it.name AS item_name, it.icon_url, it.grade,
+            COALESCE(u.username, l.sold_to) AS buyer
+          FROM loot l
+          JOIN item_type it ON it.id = l.item_type_id
+          LEFT JOIN "user" u ON u.id = l.sold_to_user_id
+          WHERE l.status = 'Продано'
+            AND l.sold_at >= ${startedAt} AND l.sold_at < ${rangeEnd}
+          ORDER BY l.price DESC
+          LIMIT ${limit}
+        `
+      : await sql<any[]>`
+          SELECT l.price, it.name AS item_name, it.icon_url, it.grade,
+            COALESCE(u.username, l.sold_to) AS buyer
+          FROM loot l
+          JOIN item_type it ON it.id = l.item_type_id
+          LEFT JOIN "user" u ON u.id = l.sold_to_user_id
+          WHERE l.status = 'Продано'
+            AND l.sold_at >= ${startedAt} AND l.sold_at < ${rangeEnd}
+          ORDER BY l.price DESC
+        `;
     return rows.map((r) => ({
       itemName: r.item_name,
       iconUrl: r.icon_url ?? null,
@@ -265,6 +275,51 @@ export async function getPeriodTopSales(
     }));
   } catch (error) {
     console.error("Ошибка при получении топа продаж:", error);
+    return [];
+  }
+}
+
+export type PeriodBuyerEntry = {
+  buyerUsername: string;
+  totalSpent: number;
+  itemsCount: number;
+};
+
+// Топ ПОКУПАТЕЛЕЙ — агрегат по игроку (в отличие от getPeriodTopSales, где
+// строка — отдельная сделка): сколько предметов и на какую сумму купил за
+// период. Только реальные игроки-участники гильдии — продажи с sold_to
+// без привязки к user_id (свободный текст, "Аук"/"Рандом" и т.п.) сюда не
+// попадают, в отличие от getPeriodTopSales.
+export async function getPeriodTopBuyers(
+  startedAt: string,
+  endedAt: string | null,
+  limit?: number,
+): Promise<PeriodBuyerEntry[]> {
+  const rangeEnd = endedAt ?? new Date().toISOString();
+  try {
+    // В отличие от getPeriodTopSales, тут нужны только реальные
+    // игроки-участники гильдии (u.active = true), а не свободный текст
+    // sold_to вроде "Аук"/"Рандом" — поэтому INNER JOIN по sold_to_user_id
+    // без фолбэка на l.sold_to.
+    const rows = await sql<any[]>`
+      SELECT u.username AS buyer,
+        SUM(l.price) AS total_spent, COUNT(*) AS items_count
+      FROM loot l
+      JOIN "user" u ON u.id = l.sold_to_user_id
+      WHERE l.status = 'Продано'
+        AND u.active = true
+        AND l.sold_at >= ${startedAt} AND l.sold_at < ${rangeEnd}
+      GROUP BY u.username
+      ORDER BY total_spent DESC
+    `;
+    const entries = rows.map((r) => ({
+      buyerUsername: r.buyer,
+      totalSpent: Number(r.total_spent),
+      itemsCount: Number(r.items_count),
+    }));
+    return limit ? entries.slice(0, limit) : entries;
+  } catch (error) {
+    console.error("Ошибка при получении топа покупателей:", error);
     return [];
   }
 }
@@ -329,6 +384,7 @@ export type PeriodDropEntry = {
 export type WarEconomySnapshot = {
   finance: PeriodFinanceSummary;
   topSales: PeriodSaleEntry[];
+  topBuyers: PeriodBuyerEntry[];
   incomeSources: PeriodIncomeSourceEntry[];
   drops: PeriodDropEntry[];
 };
