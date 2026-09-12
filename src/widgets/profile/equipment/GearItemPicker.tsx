@@ -48,9 +48,9 @@ export function GearItemPicker({
         className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-md border bg-input/30 px-3 py-2 text-sm"
       >
         {selected ? (
-          <span className="flex min-w-0 items-center gap-2">
+          <span className="flex min-w-0 flex-1 items-center gap-2">
             <GearItemIcon item={selected} grade={selected.grade} size={20} />
-            <span className="truncate">{selected.name}</span>
+            <span className="min-w-0 flex-1 truncate text-left">{selected.name}</span>
           </span>
         ) : (
           <span className="text-muted-foreground">Выберите предмет</span>

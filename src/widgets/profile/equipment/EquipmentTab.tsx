@@ -14,6 +14,9 @@ import {
   DEFAULT_ENCHANT,
   MAX_ENCHANT,
   isValidEnchantLevel,
+  DEFAULT_EXTRA_PROTECTION,
+  MAX_EXTRA_PROTECTION,
+  isValidExtraProtectionLevel,
 } from "./itemsData/statsFormula";
 import { GearItemIcon } from "./GearItemIcon";
 import { GearItemPicker } from "./GearItemPicker";
@@ -74,9 +77,7 @@ const RIGHT_SLOTS = [
   "instrument",
 ];
 
-// Заточка кубами доступна только для брони и оружия (основного, доп. и
-// дальнобойного) — не для инструмента, украшений, плаща, белья, костюма.
-const CUBE_ELIGIBLE_SLOTS = new Set([
+const ARMOR_SLOTS = new Set([
   "head",
   "chest",
   "belt",
@@ -84,6 +85,12 @@ const CUBE_ELIGIBLE_SLOTS = new Set([
   "hands",
   "legs",
   "feet",
+]);
+
+// Заточка кубами доступна только для брони и оружия (основного, доп. и
+// дальнобойного) — не для инструмента, украшений, плаща, белья, костюма.
+const CUBE_ELIGIBLE_SLOTS = new Set([
+  ...ARMOR_SLOTS,
   "weapon_main",
   "weapon_off",
   "weapon_ranged",
@@ -137,12 +144,20 @@ function EquipmentSlotButton({
   item: UserEquipment | undefined;
   equipment: UserEquipment[];
   canEdit: boolean;
-  onSave: (itemName: string, grade: number, enchant: number) => Promise<void>;
+  onSave: (
+    itemName: string,
+    grade: number,
+    enchant: number,
+    extraProtection: number,
+  ) => Promise<void>;
 }) {
   const [open, setOpen] = useState(false);
   const [itemName, setItemName] = useState(item?.item_name ?? "");
   const [grade, setGrade] = useState(item?.grade ?? DEFAULT_GRADE);
   const [enchant, setEnchant] = useState(item?.enchant ?? DEFAULT_ENCHANT);
+  const [extraProtection, setExtraProtection] = useState(
+    item?.extra_protection ?? DEFAULT_EXTRA_PROTECTION,
+  );
   const [saving, setSaving] = useState(false);
 
   const filled = !!item?.item_name;
@@ -156,6 +171,7 @@ function EquipmentSlotButton({
       setItemName(item?.item_name ?? "");
       setGrade(item?.grade ?? DEFAULT_GRADE);
       setEnchant(item?.enchant ?? DEFAULT_ENCHANT);
+      setExtraProtection(item?.extra_protection ?? DEFAULT_EXTRA_PROTECTION);
     }
     setOpen(next);
   };
@@ -163,7 +179,7 @@ function EquipmentSlotButton({
   const handleSave = async () => {
     setSaving(true);
     try {
-      await onSave(itemName, grade, enchant);
+      await onSave(itemName, grade, enchant, extraProtection);
       setOpen(false);
     } finally {
       setSaving(false);
@@ -173,7 +189,7 @@ function EquipmentSlotButton({
   const handleClear = async () => {
     setSaving(true);
     try {
-      await onSave("", DEFAULT_GRADE, DEFAULT_ENCHANT);
+      await onSave("", DEFAULT_GRADE, DEFAULT_ENCHANT, DEFAULT_EXTRA_PROTECTION);
       setOpen(false);
     } finally {
       setSaving(false);
@@ -251,6 +267,13 @@ function EquipmentSlotButton({
                 </div>
               </div>
 
+              {ARMOR_SLOTS.has(slot.key) && (
+                <div className="text-xs text-muted-foreground/70">
+                  Защита от доп. урона оружия Lv.
+                  {item?.extra_protection ?? DEFAULT_EXTRA_PROTECTION}
+                </div>
+              )}
+
               <div className="border-t border-border" />
 
               <ItemStats
@@ -287,7 +310,7 @@ function EquipmentSlotButton({
       )}
       <DialogContent
         aria-describedby={undefined}
-        className="dark w-full max-w-sm border-border bg-background text-foreground"
+        className="dark w-full max-w-md border-border bg-background text-foreground"
       >
         <DialogHeader>
           <DialogTitle>{slot.label}</DialogTitle>
@@ -369,6 +392,26 @@ function EquipmentSlotButton({
               </div>
             )}
 
+            {itemName.trim() !== "" && ARMOR_SLOTS.has(slot.key) && (
+              <div className="space-y-1.5">
+                <div className="text-xs text-muted-foreground">Доп.:</div>
+                <Input
+                  type="number"
+                  min={0}
+                  max={MAX_EXTRA_PROTECTION}
+                  step={1}
+                  value={extraProtection}
+                  onChange={(e) => {
+                    const next = Math.round(Number(e.target.value));
+                    if (isValidExtraProtectionLevel(next)) setExtraProtection(next);
+                    else if (e.target.value === "")
+                      setExtraProtection(DEFAULT_EXTRA_PROTECTION);
+                  }}
+                  className="w-24"
+                />
+              </div>
+            )}
+
             <div className="flex justify-end gap-2">
               {filled && (
                 <Button
@@ -415,6 +458,11 @@ function EquipmentSlotButton({
                 <Badge variant="outline">+{item!.enchant}</Badge>
               )}
             </div>
+            {selectedGearItem && ARMOR_SLOTS.has(slot.key) && (
+              <div className="text-xs text-muted-foreground/70">
+                Защита от доп. урона оружия Lv.{item!.extra_protection}
+              </div>
+            )}
             {selectedGearItem && (
               <ItemStats
                 itemId={selectedGearItem.id}
@@ -453,10 +501,11 @@ export default function EquipmentTab({
     itemName: string,
     grade: number,
     enchant: number,
+    extraProtection: number,
   ) => {
     const payload: EquipmentInput[] = EQUIPMENT_SLOTS.map((slot) => {
       if (slot.key === slotKey) {
-        return { slot: slot.key, itemName, grade, enchant };
+        return { slot: slot.key, itemName, grade, enchant, extraProtection };
       }
       const existing = equipmentBySlot[slot.key];
       return {
@@ -464,6 +513,7 @@ export default function EquipmentTab({
         itemName: existing?.item_name ?? "",
         grade: existing?.grade ?? DEFAULT_GRADE,
         enchant: existing?.enchant ?? DEFAULT_ENCHANT,
+        extraProtection: existing?.extra_protection ?? DEFAULT_EXTRA_PROTECTION,
       };
     });
 
@@ -500,8 +550,8 @@ export default function EquipmentTab({
               item={equipmentBySlot[TOP.key]}
               equipment={equipment}
               canEdit={canEdit}
-              onSave={(itemName, grade, enchant) =>
-                handleSaveSlot(TOP.key, itemName, grade, enchant)
+              onSave={(itemName, grade, enchant, extraProtection) =>
+                handleSaveSlot(TOP.key, itemName, grade, enchant, extraProtection)
               }
             />
           </div>
@@ -515,8 +565,8 @@ export default function EquipmentTab({
                   item={equipmentBySlot[slot.key]}
                   equipment={equipment}
                   canEdit={canEdit}
-                  onSave={(itemName, grade, enchant) =>
-                    handleSaveSlot(slot.key, itemName, grade, enchant)
+                  onSave={(itemName, grade, enchant, extraProtection) =>
+                    handleSaveSlot(slot.key, itemName, grade, enchant, extraProtection)
                   }
                 />
               ))}
@@ -548,8 +598,8 @@ export default function EquipmentTab({
                   item={equipmentBySlot[slot.key]}
                   equipment={equipment}
                   canEdit={canEdit}
-                  onSave={(itemName, grade, enchant) =>
-                    handleSaveSlot(slot.key, itemName, grade, enchant)
+                  onSave={(itemName, grade, enchant, extraProtection) =>
+                    handleSaveSlot(slot.key, itemName, grade, enchant, extraProtection)
                   }
                 />
               ))}

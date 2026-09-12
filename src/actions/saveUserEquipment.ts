@@ -4,13 +4,17 @@ import ensureCanEditUserData from "./ensureCanEditUserData";
 import getUserEquipment, { UserEquipment } from "./getUserEquipment";
 import { isValidEquipmentSlot } from "@/widgets/profile/equipment/equipmentData";
 import { isValidSealGrade } from "@/widgets/profile/seals/sealsData";
-import { isValidEnchantLevel } from "@/widgets/profile/equipment/itemsData/statsFormula";
+import {
+  isValidEnchantLevel,
+  isValidExtraProtectionLevel,
+} from "@/widgets/profile/equipment/itemsData/statsFormula";
 
 export type EquipmentInput = {
   slot: string;
   itemName: string | null;
   grade: number;
   enchant: number;
+  extraProtection: number;
 };
 
 // Полностью заменяет экипировку игрока. Пустые слоты (без названия
@@ -36,6 +40,11 @@ const saveUserEquipment = async (
     if (!isValidEnchantLevel(item.enchant)) {
       throw new Error(`Некорректный уровень заточки: ${item.enchant}`);
     }
+    if (!isValidExtraProtectionLevel(item.extraProtection)) {
+      throw new Error(
+        `Некорректный уровень защиты от доп. урона: ${item.extraProtection}`,
+      );
+    }
   }
 
   const filled = items.filter((i) => (i.itemName ?? "").trim() !== "");
@@ -45,8 +54,8 @@ const saveUserEquipment = async (
       await tx`DELETE FROM user_equipment WHERE user_id = ${userId}`;
       for (const item of filled) {
         await tx`
-          INSERT INTO user_equipment (user_id, slot, item_name, grade, enchant)
-          VALUES (${userId}, ${item.slot}, ${item.itemName!.trim()}, ${item.grade}, ${item.enchant})
+          INSERT INTO user_equipment (user_id, slot, item_name, grade, enchant, extra_protection)
+          VALUES (${userId}, ${item.slot}, ${item.itemName!.trim()}, ${item.grade}, ${item.enchant}, ${item.extraProtection})
         `;
       }
     });
