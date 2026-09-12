@@ -21,6 +21,7 @@ export async function getSealGradeStats(): Promise<SealGradeStat[]> {
     FROM user_seals us
     JOIN "user" u ON u.id = us.user_id
     WHERE u.active = true
+      AND u.id NOT IN (SELECT user_id FROM user_tags WHERE tag = 'АФК' AND removed_at IS NULL)
   `.catch((error) => {
     console.error("Ошибка при получении статистики по печатям:", error);
     throw new Error("Не удалось загрузить статистику по печатям");

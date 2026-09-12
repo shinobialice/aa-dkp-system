@@ -7,6 +7,7 @@ export async function getAverageGuildGS() {
     users = await sql<any[]>`
       SELECT class_gear_score FROM "user"
       WHERE active = true AND class_gear_score IS NOT NULL
+        AND id NOT IN (SELECT user_id FROM user_tags WHERE tag = 'АФК' AND removed_at IS NULL)
     `;
   } catch {
     return 0;

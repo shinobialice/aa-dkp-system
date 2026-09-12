@@ -5,7 +5,9 @@ const getStats = async () => {
   let users;
   try {
     users = await sql<any[]>`
-      SELECT id, username, class, joined_at FROM "user" WHERE active = true
+      SELECT id, username, class, joined_at FROM "user"
+      WHERE active = true
+        AND id NOT IN (SELECT user_id FROM user_tags WHERE tag = 'АФК' AND removed_at IS NULL)
     `;
   } catch (usersError) {
     console.error("Ошибка при загрузке пользователей:", usersError);

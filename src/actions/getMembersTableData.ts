@@ -12,6 +12,7 @@ export async function getMembersTableData() {
       SELECT id, username, avatar_url, class, class_gear_score, joined_at, active, is_eligible_for_salary, probation_bypass
       FROM "user"
       WHERE active = true
+        AND id NOT IN (SELECT user_id FROM user_tags WHERE tag = 'АФК' AND removed_at IS NULL)
       ORDER BY joined_at ASC, is_eligible_for_salary DESC
     `;
   } catch (error) {

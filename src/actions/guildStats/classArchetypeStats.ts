@@ -23,6 +23,7 @@ export async function getClassArchetypeStats(): Promise<ClassArchetypeStat[]> {
     FROM "user" u
     LEFT JOIN user_archetype ua ON ua.user_id = u.id AND ua.role_slot = 1
     WHERE u.active = true
+      AND u.id NOT IN (SELECT user_id FROM user_tags WHERE tag = 'АФК' AND removed_at IS NULL)
   `.catch((error) => {
     console.error("Ошибка при получении статистики по классам:", error);
     throw new Error("Не удалось загрузить статистику по классам");

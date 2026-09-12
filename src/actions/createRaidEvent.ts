@@ -25,7 +25,11 @@ const createRaidEvent = async (
 
   let activeUsers;
   try {
-    activeUsers = await sql<any[]>`SELECT id FROM "user" WHERE active = true`;
+    activeUsers = await sql<any[]>`
+      SELECT id FROM "user"
+      WHERE active = true
+        AND id NOT IN (SELECT user_id FROM user_tags WHERE tag = 'АФК' AND removed_at IS NULL)
+    `;
   } catch (activeError) {
     console.error("Failed to fetch active users:", activeError);
     throw new Error("Ошибка при определении активного состава");
