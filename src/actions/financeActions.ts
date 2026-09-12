@@ -32,6 +32,7 @@ export const getSalariesForMonth = async (month: number, year: number) => {
       FROM "Salary" s
       LEFT JOIN "user" u ON u.id = s."userId"
       WHERE s.month = ${month} AND s.year = ${year}
+        AND s."userId" NOT IN (SELECT user_id FROM user_tags WHERE tag = 'АФК' AND removed_at IS NULL)
     `;
   } catch {
     throw new Error("Ошибка при получении зарплат");
