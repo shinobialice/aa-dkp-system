@@ -3,6 +3,7 @@ import getUser from "@/actions/getUser";
 import getUserInventory from "@/actions/getUserInventory";
 import getUserSeals from "@/actions/getUserSeals";
 import getUserArchetype from "@/actions/getUserArchetype";
+import getUserEquipment from "@/actions/getUserEquipment";
 import { getUserMonthlyAttendance } from "@/actions/getUserMonthlyAttendance";
 import { getUserPrimeStreak } from "@/actions/getUserPrimeStreak";
 import getUserNotes from "@/actions/getUserNotes";
@@ -37,6 +38,7 @@ export default async function Page(p: {
     primeStreak,
     seals,
     archetype,
+    equipment,
   ] = await Promise.all([
     getUser(userId),
     getUserTags(userId),
@@ -47,6 +49,7 @@ export default async function Page(p: {
     getUserPrimeStreak(userId),
     getUserSeals(userId),
     getUserArchetype(userId),
+    getUserEquipment(userId),
   ]);
 
   const sessionToken = (await cookies()).get("session_token")?.value ?? "";
@@ -72,6 +75,9 @@ export default async function Page(p: {
   const canEditArchetype =
     isPrivilegedEditor ||
     (canSelfEdit && selfEditSettings.archetypeEditEnabled);
+  const canEditEquipment =
+    isPrivilegedEditor ||
+    (canSelfEdit && selfEditSettings.equipmentEditEnabled);
   const canAddExtraRole =
     isPrivilegedEditor ||
     (canSelfEdit && selfEditSettings.extraRoleEditEnabled);
@@ -88,12 +94,14 @@ export default async function Page(p: {
       canEditInventory={canEditInventory}
       canEditSeals={canEditSeals}
       canEditArchetype={canEditArchetype}
+      canEditEquipment={canEditEquipment}
       isOwnProfile={isOwnProfile}
       user={user}
       tags={tags}
       inventory={inventory}
       seals={seals}
       archetype={archetype}
+      equipment={equipment}
       notes={notes}
       usernameHistory={usernameHistory}
       averageGuildGS={averageGuildGS}

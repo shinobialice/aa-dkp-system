@@ -2,6 +2,7 @@
 import { useState } from "react";
 import type { PrimeStreak } from "@/actions/getUserPrimeStreak";
 import type { UserArchetype } from "@/actions/getUserArchetype";
+import type { UserEquipment } from "@/actions/getUserEquipment";
 import ProfileInfoClient from "@/widgets/profile/info/ProfileInfoClient";
 import ProfileTabs from "@/widgets/profile/ProfileTabs";
 
@@ -11,6 +12,7 @@ export default function ProfilePageWrapper({
   inventory,
   seals: initialSeals,
   archetype: initialArchetype,
+  equipment: initialEquipment,
   usernameHistory: initialUsernameHistory,
   averageGuildGS,
   activity,
@@ -25,6 +27,7 @@ export default function ProfilePageWrapper({
   canEditInventory,
   canEditSeals,
   canEditArchetype,
+  canEditEquipment,
   isOwnProfile,
 }: {
   user: any;
@@ -32,6 +35,7 @@ export default function ProfilePageWrapper({
   inventory: any[];
   seals: any[];
   archetype: UserArchetype;
+  equipment: UserEquipment[];
   notes: any[];
   usernameHistory: {
     id: number;
@@ -58,12 +62,14 @@ export default function ProfilePageWrapper({
   canEditInventory: boolean;
   canEditSeals: boolean;
   canEditArchetype: boolean;
+  canEditEquipment: boolean;
   isOwnProfile: boolean;
 }) {
   const [user, setUser] = useState(initialUser);
   const [tags, setTags] = useState(initialTags);
   const [seals, setSeals] = useState(initialSeals);
   const [archetype, setArchetype] = useState(initialArchetype);
+  const [equipment, setEquipment] = useState(initialEquipment);
   const [usernameHistory, setUsernameHistory] = useState(
     initialUsernameHistory,
   );
@@ -94,6 +100,8 @@ export default function ProfilePageWrapper({
         setSeals={setSeals}
         archetype={archetype}
         setArchetype={setArchetype}
+        equipment={equipment}
+        setEquipment={setEquipment}
         tags={tags}
         setTags={setTags}
         usernameHistory={usernameHistory}
@@ -102,6 +110,7 @@ export default function ProfilePageWrapper({
         canEditInventory={canEditInventory}
         canEditSeals={canEditSeals}
         canEditArchetype={canEditArchetype}
+        canEditEquipment={canEditEquipment}
       />
     </div>
   );

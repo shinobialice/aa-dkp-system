@@ -14,7 +14,6 @@ import {
 import { Badge } from "@/shared/ui";
 import { Button } from "@/shared/ui";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
-import { Checkbox } from "@/shared/ui";
 import {
   Select,
   SelectTrigger,
@@ -30,55 +29,57 @@ type Props = {
   canEdit: boolean;
 };
 
+const NONE = "Нет";
+
+type SealSlot = { name: string | null; grade: number };
+
 export default function SealsTab({ userId, seals, onChange, canEdit }: Props) {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  // Черновик выбора на время редактирования: имя печати -> редкость.
-  const [draft, setDraft] = useState<Record<string, number>>({});
+  // Черновик на время редактирования: MAX_USER_SEALS слотов, как в
+  // "Класс персонажа" (селект на слот вместо чекбоксов на все печати сразу).
+  const [draft, setDraft] = useState<SealSlot[]>([]);
 
   const startEditing = () => {
-    const map: Record<string, number> = {};
-    seals.forEach((s) => {
-      map[s.seal_name] = s.grade;
-    });
-    setDraft(map);
+    setDraft(
+      Array.from({ length: MAX_USER_SEALS }, (_, i) => ({
+        name: seals[i]?.seal_name ?? null,
+        grade: seals[i]?.grade ?? DEFAULT_SEAL_GRADE,
+      })),
+    );
     setEditing(true);
   };
 
   const cancelEditing = () => {
     setEditing(false);
-    setDraft({});
+    setDraft([]);
   };
 
-  const selectedCount = Object.keys(draft).length;
-
-  const toggleSeal = (name: string) => {
+  const setSealName = (index: number, value: string) => {
     setDraft((prev) => {
-      const next = { ...prev };
-      if (name in next) {
-        delete next[name];
-        return next;
-      }
-      if (Object.keys(next).length >= MAX_USER_SEALS) {
-        toast.error(`Можно выбрать не больше ${MAX_USER_SEALS} печатей`);
-        return prev;
-      }
-      next[name] = DEFAULT_SEAL_GRADE;
+      const next = [...prev];
+      next[index] =
+        value === NONE
+          ? { name: null, grade: DEFAULT_SEAL_GRADE }
+          : { name: value, grade: next[index]?.grade ?? DEFAULT_SEAL_GRADE };
       return next;
     });
   };
 
-  const setGrade = (name: string, grade: number) => {
-    setDraft((prev) => ({ ...prev, [name]: grade }));
+  const setGrade = (index: number, grade: number) => {
+    setDraft((prev) => {
+      const next = [...prev];
+      next[index] = { ...next[index], grade };
+      return next;
+    });
   };
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      const payload = Object.entries(draft).map(([sealName, grade]) => ({
-        sealName,
-        grade,
-      }));
+      const payload = draft
+        .filter((slot): slot is { name: string; grade: number } => !!slot.name)
+        .map((slot) => ({ sealName: slot.name, grade: slot.grade }));
       const updated = await saveUserSeals(userId, payload);
       onChange(updated);
       setEditing(false);
@@ -93,7 +94,7 @@ export default function SealsTab({ userId, seals, onChange, canEdit }: Props) {
   };
 
   return (
-    <Card>
+    <Card className="gap-3 py-4">
       <CardHeader className="border-b">
         <CardTitle className="flex items-center justify-between">
           Печати героя
@@ -127,37 +128,45 @@ export default function SealsTab({ userId, seals, onChange, canEdit }: Props) {
           )}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4 pt-4">
+      <CardContent className="space-y-4 pt-3">
         {(() => {
           if (editing) {
             return (
-              <>
-                <div className="text-sm text-muted-foreground">
-                  Выбрано {selectedCount} из {MAX_USER_SEALS}
-                </div>
-                <div className="space-y-2">
-                  {SEAL_NAMES.map((name) => {
-                    const isSelected = name in draft;
-                    const grade = draft[name] ?? DEFAULT_SEAL_GRADE;
-                    return (
-                      <div
-                        key={name}
-                        className="flex items-center gap-3 rounded-md border p-2"
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                {draft.map((slot, i) => {
+                  const otherChosen = draft
+                    .filter((_, j) => j !== i)
+                    .map((s) => s.name)
+                    .filter((name): name is string => !!name);
+                  return (
+                    <div key={i} className="space-y-1.5">
+                      <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Печать {i + 1}
+                      </div>
+                      <Select
+                        value={slot.name ?? NONE}
+                        onValueChange={(v) => setSealName(i, v)}
                       >
-                        <Checkbox
-                          checked={isSelected}
-                          onCheckedChange={() => toggleSeal(name)}
-                          disabled={!isSelected && selectedCount >= MAX_USER_SEALS}
-                          className="cursor-pointer"
-                        />
-                        <SealIcon grade={isSelected ? grade : 1} size={32} />
-                        <span className="flex-1 text-sm font-medium">{name}</span>
+                        <SelectTrigger className="w-full cursor-pointer">
+                          <SelectValue placeholder="Не выбрано" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value={NONE}>Нет</SelectItem>
+                          {SEAL_NAMES.filter(
+                            (name) => !otherChosen.includes(name),
+                          ).map((name) => (
+                            <SelectItem key={name} value={name}>
+                              {name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {slot.name && (
                         <Select
-                          value={String(grade)}
-                          onValueChange={(value) => setGrade(name, Number(value))}
-                          disabled={!isSelected}
+                          value={String(slot.grade)}
+                          onValueChange={(v) => setGrade(i, Number(v))}
                         >
-                          <SelectTrigger className="w-[190px] cursor-pointer">
+                          <SelectTrigger className="w-full cursor-pointer">
                             <SelectValue placeholder="Редкость" />
                           </SelectTrigger>
                           <SelectContent>
@@ -168,31 +177,31 @@ export default function SealsTab({ userId, seals, onChange, canEdit }: Props) {
                             ))}
                           </SelectContent>
                         </Select>
-                      </div>
-                    );
-                  })}
-                </div>
-              </>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             );
           }
 
           if (seals.length === 0) {
             return (
-              <div className="py-8 text-center text-muted-foreground">
+              <div className="py-6 text-center text-sm text-muted-foreground">
                 Печати не выбраны
               </div>
             );
           }
 
           return (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               {Array.from({ length: MAX_USER_SEALS }).map((_, i) => {
                 const seal = seals[i];
                 if (!seal) {
                   return (
                     <div
                       key={`empty-${i}`}
-                      className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
+                      className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed p-3 text-sm text-muted-foreground"
                     >
                       Не выбрано
                     </div>
@@ -201,11 +210,15 @@ export default function SealsTab({ userId, seals, onChange, canEdit }: Props) {
                 return (
                   <div
                     key={seal.id}
-                    className="flex flex-col items-center gap-2 rounded-lg border p-4"
+                    className="flex flex-col items-center gap-2 rounded-lg border p-3"
                   >
-                    <SealIcon grade={seal.grade} size={56} />
-                    <div className="text-sm font-semibold">{seal.seal_name}</div>
-                    <Badge variant="outline">{getSealGradeLabel(seal.grade)}</Badge>
+                    <SealIcon grade={seal.grade} size={44} />
+                    <div className="text-sm font-semibold">
+                      {seal.seal_name}
+                    </div>
+                    <Badge variant="outline">
+                      {getSealGradeLabel(seal.grade)}
+                    </Badge>
                   </div>
                 );
               })}

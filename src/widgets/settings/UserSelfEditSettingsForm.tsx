@@ -95,11 +95,21 @@ export function UserSelfEditSettingsForm() {
       </div>
 
       <div className="flex items-center justify-between gap-4 border rounded-lg p-3">
+        <Label>Экипировка</Label>
+        <Switch
+          checked={settings.equipmentEditEnabled}
+          onCheckedChange={(v) =>
+            setSettings({ ...settings, equipmentEditEnabled: v })
+          }
+        />
+      </div>
+
+      <div className="flex items-center justify-between gap-4 border rounded-lg p-3">
         <div>
           <Label>Доп. роли (добавление)</Label>
           <p className="text-xs text-muted-foreground">
-            Разрешает добавить себе 2-ю/3-ю роль, если её ещё нет. Изменение
-            ГС уже существующих ролей отдельно регулируется тумблером «ГС».
+            Разрешает добавить себе 2-ю/3-ю роль, если её ещё нет. Изменение ГС
+            уже существующих ролей отдельно регулируется тумблером «ГС».
           </p>
         </div>
         <Switch
@@ -110,11 +120,7 @@ export function UserSelfEditSettingsForm() {
         />
       </div>
 
-      <Button
-        onClick={handleSave}
-        disabled={saving}
-        className="cursor-pointer"
-      >
+      <Button onClick={handleSave} disabled={saving} className="cursor-pointer">
         {saving ? "Сохранение..." : "Сохранить"}
       </Button>
     </div>

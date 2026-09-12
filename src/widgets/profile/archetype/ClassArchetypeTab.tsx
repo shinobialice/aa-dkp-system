@@ -138,14 +138,14 @@ function BuildView({
           {ROLE_LABELS[slot]}
         </div>
       )}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {specs.map((id, i) => {
           const spec = getSpecialization(id);
           if (!spec) {
             return (
               <div
                 key={i}
-                className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed p-4 text-sm text-muted-foreground"
+                className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed p-3 text-sm text-muted-foreground"
               >
                 Не выбрано
               </div>
@@ -154,10 +154,10 @@ function BuildView({
           return (
             <div
               key={i}
-              className="flex flex-col items-center gap-2 rounded-lg border p-4"
+              className="flex flex-col items-center gap-2 rounded-lg border p-3"
             >
-              <div className="flex size-14 items-center justify-center rounded-md bg-muted">
-                <SpecializationIcon id={spec.id} size={28} />
+              <div className="flex size-10 items-center justify-center rounded-md bg-muted">
+                <SpecializationIcon id={spec.id} size={22} />
               </div>
               <div className="text-sm font-semibold">{spec.name}</div>
             </div>
@@ -238,7 +238,7 @@ export default function ClassArchetypeTab({
   };
 
   return (
-    <Card>
+    <Card className="gap-3 py-4">
       <CardHeader className="border-b">
         <CardTitle className="flex items-center justify-between">
           Класс персонажа
@@ -272,11 +272,11 @@ export default function ClassArchetypeTab({
           )}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6 pt-4">
+      <CardContent className="space-y-4 pt-3">
         {editing && (
           <p className="text-sm text-muted-foreground">
-            Класс собирается из 3 специализаций — название подставляется само
-            по таблице сочетаний.
+            Класс собирается из 3 специализаций — название подставляется само по
+            таблице сочетаний.
           </p>
         )}
         {activeSlots.map((slot, i) => (

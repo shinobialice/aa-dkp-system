@@ -10,7 +10,8 @@ type SelfEditToggle =
   | "gsEditEnabled"
   | "inventoryEditEnabled"
   | "sealsEditEnabled"
-  | "archetypeEditEnabled";
+  | "archetypeEditEnabled"
+  | "equipmentEditEnabled";
 
 // Разрешает Администратору/Секретутке всегда, а самому активному
 // пользователю — только если соответствующий тумблер включен в Настройках.

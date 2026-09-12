@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import getUserInventory from "@/actions/getUserInventory";
 import type { UserArchetype } from "@/actions/getUserArchetype";
+import type { UserEquipment } from "@/actions/getUserEquipment";
 import { UserActivityChart } from "@/widgets/profile/activity/UserActivityChart";
 import { UserMonthActivity } from "@/widgets/profile/activity/UserMonthActivity";
 import InventoryTabsClient from "./inventory/InventoryTabsClient";
@@ -9,6 +10,7 @@ import PurchasesAndGiveaways from "./inventory/PurchasesAndGiveaways";
 import UserNotes from "./notes/UserNotes";
 import SealsTab from "./seals/SealsTab";
 import ClassArchetypeTab from "./archetype/ClassArchetypeTab";
+import EquipmentTab from "./equipment/EquipmentTab";
 import UsernameHistoryTab from "./usernameHistory/UsernameHistoryTab";
 import UserMonthlyRaidsTab from "./raids/UserMonthlyRaidsTab";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/ui";
@@ -20,6 +22,8 @@ export default function ProfileTabs({
   setSeals,
   archetype,
   setArchetype,
+  equipment,
+  setEquipment,
   tags,
   setTags,
   setUser,
@@ -29,6 +33,7 @@ export default function ProfileTabs({
   canEditInventory,
   canEditSeals,
   canEditArchetype,
+  canEditEquipment,
 }: {
   user: any;
   inventory: any[];
@@ -36,6 +41,8 @@ export default function ProfileTabs({
   setSeals: (seals: any[]) => void;
   archetype: UserArchetype;
   setArchetype: (archetype: UserArchetype) => void;
+  equipment: UserEquipment[];
+  setEquipment: (equipment: UserEquipment[]) => void;
   tags: any[];
   setTags: (tags: any[]) => void;
   setUser: (user: any) => void;
@@ -50,6 +57,7 @@ export default function ProfileTabs({
   canEditInventory: boolean;
   canEditSeals: boolean;
   canEditArchetype: boolean;
+  canEditEquipment: boolean;
 }) {
   const [inventory, setInventory] = useState(initialInventory);
 
@@ -125,20 +133,49 @@ export default function ProfileTabs({
         <UsernameHistoryTab history={usernameHistory} />
       </TabsContent>
 
-      <TabsContent value="character" className="space-y-6">
-        <ClassArchetypeTab
-          userId={user.id}
-          user={user}
-          archetype={archetype}
-          onChange={setArchetype}
-          canEdit={canEditArchetype}
-        />
-        <SealsTab
-          userId={user.id}
-          seals={seals}
-          onChange={setSeals}
-          canEdit={canEditSeals}
-        />
+      <TabsContent value="character">
+        <Tabs defaultValue="equipment">
+          <TabsList className="mb-4">
+            <TabsTrigger className="cursor-pointer" value="equipment">
+              Экипировка
+            </TabsTrigger>
+            <TabsTrigger className="cursor-pointer" value="seals">
+              Печати героя
+            </TabsTrigger>
+            <TabsTrigger className="cursor-pointer" value="class">
+              Класс персонажа
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="equipment">
+            <EquipmentTab
+              userId={user.id}
+              user={user}
+              equipment={equipment}
+              onChange={setEquipment}
+              canEdit={canEditEquipment}
+            />
+          </TabsContent>
+
+          <TabsContent value="seals">
+            <SealsTab
+              userId={user.id}
+              seals={seals}
+              onChange={setSeals}
+              canEdit={canEditSeals}
+            />
+          </TabsContent>
+
+          <TabsContent value="class">
+            <ClassArchetypeTab
+              userId={user.id}
+              user={user}
+              archetype={archetype}
+              onChange={setArchetype}
+              canEdit={canEditArchetype}
+            />
+          </TabsContent>
+        </Tabs>
       </TabsContent>
     </Tabs>
   );
