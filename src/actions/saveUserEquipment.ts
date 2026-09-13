@@ -13,6 +13,16 @@ import { isValidEngravingId } from "@/widgets/profile/equipment/itemsData/engrav
 import { isValidRuneId } from "@/widgets/profile/equipment/itemsData/runes";
 import { WEAPON_HANDEDNESS } from "@/widgets/profile/equipment/itemsData/weaponHandedness";
 import { findGearItem } from "@/widgets/profile/equipment/itemsData";
+import {
+  getCostumeRole,
+  getCostumeSynthesisSlotCount,
+  isValidCostumeSynthesisEffectId,
+} from "@/widgets/profile/equipment/itemsData/costumeSynthesis";
+import {
+  getUnderwearRole,
+  getUnderwearSynthesisSlotCount,
+  isValidUnderwearSynthesisEffectId,
+} from "@/widgets/profile/equipment/itemsData/underwearSynthesis";
 
 export type EquipmentInput = {
   slot: string;
@@ -22,6 +32,8 @@ export type EquipmentInput = {
   extraProtection: number;
   engravings: number[];
   runeId: number;
+  costumeSynthesisEffects: number[];
+  underwearSynthesisEffects: number[];
 };
 
 const saveUserEquipment = async (
@@ -71,6 +83,32 @@ const saveUserEquipment = async (
     ) {
       throw new Error(`Некорректный лунный камень / руна в слоте: ${item.slot}`);
     }
+    if (item.costumeSynthesisEffects.length > 0) {
+      const role = getCostumeRole(item.itemName ?? "");
+      const maxSlots = getCostumeSynthesisSlotCount(item.grade);
+      if (
+        !role ||
+        item.costumeSynthesisEffects.length > maxSlots ||
+        !item.costumeSynthesisEffects.every((id) =>
+          isValidCostumeSynthesisEffectId(id, role),
+        )
+      ) {
+        throw new Error(`Некорректные эффекты синтеза костюма в слоте: ${item.slot}`);
+      }
+    }
+    if (item.underwearSynthesisEffects.length > 0) {
+      const role = getUnderwearRole(item.itemName ?? "");
+      const maxSlots = getUnderwearSynthesisSlotCount(item.grade);
+      if (
+        !role ||
+        item.underwearSynthesisEffects.length > maxSlots ||
+        !item.underwearSynthesisEffects.every((id) =>
+          isValidUnderwearSynthesisEffectId(id, role),
+        )
+      ) {
+        throw new Error(`Некорректные эффекты синтеза белья в слоте: ${item.slot}`);
+      }
+    }
   }
 
   const filled = items.filter((i) => (i.itemName ?? "").trim() !== "");
@@ -80,8 +118,8 @@ const saveUserEquipment = async (
       await tx`DELETE FROM user_equipment WHERE user_id = ${userId}`;
       for (const item of filled) {
         await tx`
-          INSERT INTO user_equipment (user_id, slot, item_name, grade, enchant, extra_protection, engravings, rune_id)
-          VALUES (${userId}, ${item.slot}, ${item.itemName!.trim()}, ${item.grade}, ${item.enchant}, ${item.extraProtection}, ${sql.array(item.engravings)}::integer[], ${item.runeId})
+          INSERT INTO user_equipment (user_id, slot, item_name, grade, enchant, extra_protection, engravings, rune_id, costume_synthesis_effects, underwear_synthesis_effects)
+          VALUES (${userId}, ${item.slot}, ${item.itemName!.trim()}, ${item.grade}, ${item.enchant}, ${item.extraProtection}, ${sql.array(item.engravings)}::integer[], ${item.runeId}, ${sql.array(item.costumeSynthesisEffects)}::integer[], ${sql.array(item.underwearSynthesisEffects)}::integer[])
         `;
       }
     });

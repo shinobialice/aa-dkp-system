@@ -60,6 +60,27 @@ export const columns: ColumnDef<any>[] = [
     ),
   },
   {
+    id: "vk",
+    accessorKey: "vk_name",
+    header: "Имя(ВК)",
+    cell: ({ row }) => {
+      const vkName: string | null = row.original.vk_name;
+      const vkId: string | null = row.original.vk_id;
+      const vkRealName: string | null = row.original.vk_real_name;
+      const href = vkName
+        ? `https://vk.ru/${vkName}`
+        : vkId
+          ? `https://vk.com/id${vkId}`
+          : null;
+      if (!href) return "—";
+      return (
+        <a href={href} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+          {vkRealName ?? "VK"}
+        </a>
+      );
+    },
+  },
+  {
     accessorKey: "class",
     header: ({ column }) => (
       <Button

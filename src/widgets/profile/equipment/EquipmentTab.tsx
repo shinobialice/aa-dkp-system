@@ -23,6 +23,19 @@ import { EngravingPicker, EngravingIcon, EngravingTooltip } from "./EngravingPic
 import { findEngraving } from "./itemsData/engravings";
 import { RunePicker, RuneIcon, RuneTooltip } from "./RunePicker";
 import { findRune } from "./itemsData/runes";
+import { SynthesisEffectPicker } from "./SynthesisEffectPicker";
+import {
+  getCostumeRole,
+  getCostumeSynthesisSlotCount,
+  getCostumeSynthesisEffectsForRole,
+  findCostumeSynthesisEffect,
+} from "./itemsData/costumeSynthesis";
+import {
+  getUnderwearRole,
+  getUnderwearSynthesisSlotCount,
+  getUnderwearSynthesisEffectsForRole,
+  findUnderwearSynthesisEffect,
+} from "./itemsData/underwearSynthesis";
 import { WEAPON_HANDEDNESS } from "./itemsData/weaponHandedness";
 import { EffectText, highlightNumbers } from "./highlightNumbers";
 import { ItemStats } from "./ItemStats";
@@ -147,6 +160,35 @@ function EngravingDisplay({
                 <EffectText text={engraving.effect} />
               </div>
             )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function SynthesisEffectsDisplay({
+  slotKey,
+  effectIds,
+}: {
+  slotKey: string;
+  effectIds: number[];
+}) {
+  if (effectIds.length === 0) return null;
+
+  const findEffect =
+    slotKey === "costume" ? findCostumeSynthesisEffect : findUnderwearSynthesisEffect;
+
+  return (
+    <div className="space-y-0.5">
+      <div className="text-xs text-muted-foreground">Эффекты синтеза</div>
+      {effectIds.map((id) => {
+        const effect = findEffect(id);
+        if (!effect) return null;
+        const value = effect.isPercent ? `${effect.value}%` : `${effect.value} ед.`;
+        return (
+          <div key={id} className="text-xs">
+            {highlightNumbers(`${effect.label}: ${value}`)}
           </div>
         );
       })}
@@ -308,6 +350,7 @@ function EquipmentSlotButton({
     extraProtection: number,
     engravings: number[],
     runeId: number,
+    synthesisEffects: number[],
   ) => Promise<void>;
   tooltipSide?: "left" | "right";
 }) {
@@ -321,6 +364,14 @@ function EquipmentSlotButton({
   const [engravings, setEngravings] = useState<number[]>(item?.engravings ?? []);
   const [selectedEngravingId, setSelectedEngravingId] = useState(0);
   const [runeId, setRuneId] = useState(item?.rune_id ?? 0);
+  const initialSynthesisEffects =
+    slot.key === "costume"
+      ? (item?.costume_synthesis_effects ?? [])
+      : slot.key === "underwear"
+        ? (item?.underwear_synthesis_effects ?? [])
+        : [];
+  const [synthesisEffects, setSynthesisEffects] =
+    useState<number[]>(initialSynthesisEffects);
   const [saving, setSaving] = useState(false);
 
   const filled = !!item?.item_name;
@@ -332,6 +383,23 @@ function EquipmentSlotButton({
   const draftHandedness = draftGearItem
     ? WEAPON_HANDEDNESS[draftGearItem.id]
     : undefined;
+  const draftSynthesisRole =
+    slot.key === "costume"
+      ? getCostumeRole(itemName)
+      : slot.key === "underwear"
+        ? getUnderwearRole(itemName)
+        : undefined;
+  const maxSynthesisSlots =
+    slot.key === "costume"
+      ? getCostumeSynthesisSlotCount(grade)
+      : slot.key === "underwear"
+        ? getUnderwearSynthesisSlotCount(grade)
+        : 0;
+  const synthesisEffectOptions = !draftSynthesisRole
+    ? []
+    : slot.key === "costume"
+      ? getCostumeSynthesisEffectsForRole(draftSynthesisRole)
+      : getUnderwearSynthesisEffectsForRole(draftSynthesisRole);
 
   const handleOpenChange = (next: boolean) => {
     if (next) {
@@ -342,6 +410,7 @@ function EquipmentSlotButton({
       setEngravings(item?.engravings ?? []);
       setSelectedEngravingId(0);
       setRuneId(item?.rune_id ?? 0);
+      setSynthesisEffects(initialSynthesisEffects);
     }
     setOpen(next);
   };
@@ -356,6 +425,7 @@ function EquipmentSlotButton({
         extraProtection,
         engravings.slice(0, maxEngravingSlots),
         runeId,
+        synthesisEffects.slice(0, maxSynthesisSlots),
       );
       setOpen(false);
     } finally {
@@ -373,6 +443,7 @@ function EquipmentSlotButton({
         DEFAULT_EXTRA_PROTECTION,
         [],
         0,
+        [],
       );
       setOpen(false);
     } finally {
@@ -416,6 +487,12 @@ function EquipmentSlotButton({
   const gradeColor = getSealGradeColor(grade);
   const tooltipGradeColor = getSealGradeColor(item?.grade ?? DEFAULT_GRADE);
   const equippedRune = item?.rune_id ? findRune(item.rune_id) : undefined;
+  const equippedSynthesisEffects =
+    slot.key === "costume"
+      ? (item?.costume_synthesis_effects ?? [])
+      : slot.key === "underwear"
+        ? (item?.underwear_synthesis_effects ?? [])
+        : [];
 
   return (
     <div className="relative">
@@ -493,6 +570,16 @@ function EquipmentSlotButton({
                         item?.grade ?? DEFAULT_GRADE,
                       )}
                       engravings={item?.engravings ?? []}
+                    />
+                  </>
+                )}
+
+                {(equippedSynthesisEffects.length ?? 0) > 0 && (
+                  <>
+                    <div className="border-t border-border" />
+                    <SynthesisEffectsDisplay
+                      slotKey={slot.key}
+                      effectIds={equippedSynthesisEffects}
                     />
                   </>
                 )}
@@ -650,6 +737,27 @@ function EquipmentSlotButton({
                 </div>
               )}
 
+              {draftSynthesisRole && (
+                <div className="space-y-1.5">
+                  <div className="text-xs text-muted-foreground">
+                    Эффекты синтеза:
+                  </div>
+                  {maxSynthesisSlots > 0 ? (
+                    <SynthesisEffectPicker
+                      effects={synthesisEffectOptions}
+                      slotCount={maxSynthesisSlots}
+                      value={synthesisEffects}
+                      onChange={setSynthesisEffects}
+                    />
+                  ) : (
+                    <div className="text-xs text-muted-foreground">
+                      Доступны начиная с качества «Необычный» — выберите
+                      качество выше.
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="flex justify-end gap-2">
                 {filled && (
                   <Button
@@ -724,6 +832,12 @@ function EquipmentSlotButton({
                   engravings={item!.engravings}
                 />
               )}
+              {equippedSynthesisEffects.length > 0 && (
+                <SynthesisEffectsDisplay
+                  slotKey={slot.key}
+                  effectIds={equippedSynthesisEffects}
+                />
+              )}
             </div>
           ) : (
             <div className="text-sm text-muted-foreground">Пусто</div>
@@ -775,10 +889,22 @@ export default function EquipmentTab({
     extraProtection: number,
     engravings: number[],
     runeId: number,
+    synthesisEffects: number[],
   ) => {
     const payload: EquipmentInput[] = EQUIPMENT_SLOTS.map((slot) => {
       if (slot.key === slotKey) {
-        return { slot: slot.key, itemName, grade, enchant, extraProtection, engravings, runeId };
+        return {
+          slot: slot.key,
+          itemName,
+          grade,
+          enchant,
+          extraProtection,
+          engravings,
+          runeId,
+          costumeSynthesisEffects: slotKey === "costume" ? synthesisEffects : [],
+          underwearSynthesisEffects:
+            slotKey === "underwear" ? synthesisEffects : [],
+        };
       }
       const existing = equipmentBySlot[slot.key];
       return {
@@ -789,6 +915,8 @@ export default function EquipmentTab({
         extraProtection: existing?.extra_protection ?? DEFAULT_EXTRA_PROTECTION,
         engravings: existing?.engravings ?? [],
         runeId: existing?.rune_id ?? 0,
+        costumeSynthesisEffects: existing?.costume_synthesis_effects ?? [],
+        underwearSynthesisEffects: existing?.underwear_synthesis_effects ?? [],
       };
     });
 
@@ -832,7 +960,15 @@ export default function EquipmentTab({
               item={equipmentBySlot[TOP.key]}
               equipment={equipment}
               canEdit={canEdit}
-              onSave={(itemName, grade, enchant, extraProtection, engravings, runeId) =>
+              onSave={(
+                itemName,
+                grade,
+                enchant,
+                extraProtection,
+                engravings,
+                runeId,
+                synthesisEffects,
+              ) =>
                 handleSaveSlot(
                   TOP.key,
                   itemName,
@@ -841,6 +977,7 @@ export default function EquipmentTab({
                   extraProtection,
                   engravings,
                   runeId,
+                  synthesisEffects,
                 )
               }
             />
@@ -855,7 +992,15 @@ export default function EquipmentTab({
                   item={equipmentBySlot[slot.key]}
                   equipment={equipment}
                   canEdit={canEdit}
-                  onSave={(itemName, grade, enchant, extraProtection, engravings, runeId) =>
+                  onSave={(
+                    itemName,
+                    grade,
+                    enchant,
+                    extraProtection,
+                    engravings,
+                    runeId,
+                    synthesisEffects,
+                  ) =>
                     handleSaveSlot(
                       slot.key,
                       itemName,
@@ -864,6 +1009,7 @@ export default function EquipmentTab({
                       extraProtection,
                       engravings,
                       runeId,
+                      synthesisEffects,
                     )
                   }
                 />
@@ -917,7 +1063,15 @@ export default function EquipmentTab({
                   equipment={equipment}
                   canEdit={canEdit}
                   tooltipSide="right"
-                  onSave={(itemName, grade, enchant, extraProtection, engravings, runeId) =>
+                  onSave={(
+                    itemName,
+                    grade,
+                    enchant,
+                    extraProtection,
+                    engravings,
+                    runeId,
+                    synthesisEffects,
+                  ) =>
                     handleSaveSlot(
                       slot.key,
                       itemName,
@@ -926,6 +1080,7 @@ export default function EquipmentTab({
                       extraProtection,
                       engravings,
                       runeId,
+                      synthesisEffects,
                     )
                   }
                 />

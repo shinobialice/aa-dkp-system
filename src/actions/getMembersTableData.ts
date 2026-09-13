@@ -4,12 +4,13 @@ import sql from "@/shared/lib/db";
 import { computeMonthlyAttendanceForUsers } from "@/actions/getAllUsersActivityWithPercent";
 import { getCurrentMonthSalaries } from "@/actions/getCurrentMonthSalaries";
 import { getSalaryReasons } from "@/actions/getSalaryReasons";
+import { getVkRealNames } from "@/shared/lib/vkNames";
 
 export async function getMembersTableData() {
   let users;
   try {
     users = await sql<any[]>`
-      SELECT id, username, avatar_url, class, class_gear_score, joined_at, active, is_eligible_for_salary, probation_bypass
+      SELECT id, username, avatar_url, class, class_gear_score, joined_at, active, is_eligible_for_salary, probation_bypass, vk_id, vk_name
       FROM "user"
       WHERE active = true
         AND id NOT IN (SELECT user_id FROM user_tags WHERE tag = 'АФК' AND removed_at IS NULL)
@@ -24,10 +25,11 @@ export async function getMembersTableData() {
   const month = now.getMonth() + 1;
   const year = now.getFullYear();
 
-  const [activity, salaries, salaryReasons] = await Promise.all([
+  const [activity, salaries, salaryReasons, vkRealNames] = await Promise.all([
     computeMonthlyAttendanceForUsers(users, month, year),
     getCurrentMonthSalaries(),
     getSalaryReasons(month, year, users),
+    getVkRealNames(users.map((user) => user.vk_name).filter(Boolean)),
   ]);
 
   return users.map((user) => {
@@ -52,6 +54,9 @@ export async function getMembersTableData() {
         : "-",
       salary: salaries[user.id] ?? null,
       salaryReason: salaryReasons[user.id] ?? null,
+      vk_real_name: user.vk_name
+        ? (vkRealNames[user.vk_name.toLowerCase()] ?? null)
+        : null,
       ...act,
     };
   });
