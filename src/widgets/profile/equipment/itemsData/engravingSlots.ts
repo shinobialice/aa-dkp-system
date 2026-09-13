@@ -23,7 +23,6 @@ const WEAPON_SLOT_KEYS = new Set([
   "instrument",
 ]);
 
-// Гравировки вставляются в кольца и серьги, но не в ожерелье.
 const JEWELRY_SLOT_KEYS = new Set(["ring1", "ring2", "earring1", "earring2"]);
 
 export function getEngravingCategory(slotKey: string): EngravingCategory {
@@ -38,7 +37,6 @@ export function getEngravingCategory(slotKey: string): EngravingCategory {
 export function getEngravingSlotCount(slotKey: string, grade: number): number {
   const category = getEngravingCategory(slotKey);
 
-  // У пояса и наручей своя, меньшая шкала слотов гравировки.
   if (slotKey === "belt" || slotKey === "bracers") {
     if (grade >= 12) return 6;
     if (grade >= 11) return 5;

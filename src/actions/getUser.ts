@@ -22,7 +22,9 @@ const getUser = async (userId: number) => {
         is_eligible_for_salary,
         probation_bypass,
         joined_at,
-        avatar_url
+        avatar_url,
+        character_level,
+        character_portrait_url
       FROM "user"
       WHERE id = ${userId}
     `;

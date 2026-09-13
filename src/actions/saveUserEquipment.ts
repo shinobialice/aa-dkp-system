@@ -22,8 +22,6 @@ export type EquipmentInput = {
   engravings: number[];
 };
 
-// Полностью заменяет экипировку игрока. Пустые слоты (без названия
-// предмета) в базе не хранятся.
 const saveUserEquipment = async (
   userId: number,
   items: EquipmentInput[],

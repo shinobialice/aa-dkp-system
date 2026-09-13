@@ -28,6 +28,7 @@ import { highlightNumbers } from "./highlightNumbers";
 import { ItemStats } from "./ItemStats";
 import { CharacterStatsPanel } from "./CharacterStatsPanel";
 import { DetailedStatsPanel } from "./DetailedStatsPanel";
+import { CharacterPortraitUpload } from "./CharacterPortraitUpload";
 import {
   SEAL_GRADES,
   getSealGradeLabel,
@@ -222,6 +223,7 @@ function EquipmentSlotButton({
   equipment,
   canEdit,
   onSave,
+  tooltipSide = "left",
 }: {
   slot: EquipmentSlot;
   item: UserEquipment | undefined;
@@ -234,6 +236,7 @@ function EquipmentSlotButton({
     extraProtection: number,
     engravings: number[],
   ) => Promise<void>;
+  tooltipSide?: "left" | "right";
 }) {
   const [open, setOpen] = useState(false);
   const [itemName, setItemName] = useState(item?.item_name ?? "");
@@ -338,7 +341,7 @@ function EquipmentSlotButton({
             <DialogTrigger asChild>{button}</DialogTrigger>
           </TooltipTrigger>
           <TooltipContent
-            side="left"
+            side={tooltipSide}
             className="dark w-64 border-border bg-background p-3 text-foreground"
           >
             <div className="space-y-2">
@@ -628,6 +631,11 @@ export default function EquipmentTab({
     equipment.map((e) => [e.slot, e]),
   ) as Record<string, UserEquipment>;
 
+  const [level, setLevel] = useState(user?.character_level ?? 1);
+  const [portraitUrl, setPortraitUrl] = useState<string | null>(
+    user?.character_portrait_url ?? null,
+  );
+
   const handleSaveSlot = async (
     slotKey: string,
     itemName: string,
@@ -674,10 +682,17 @@ export default function EquipmentTab({
           <div className="mb-2 text-sm font-semibold">
             Характеристики персонажа
           </div>
-          <CharacterStatsPanel equipment={equipment} user={user} />
+          <CharacterStatsPanel
+            userId={userId}
+            equipment={equipment}
+            user={user}
+            canEdit={canEdit}
+            level={level}
+            onLevelChange={setLevel}
+          />
         </div>
 
-        <div className="flex-1">
+        <div className="flex flex-1 flex-col justify-center">
           <div className="mb-3 flex justify-center">
             <EquipmentSlotButton
               slot={TOP}
@@ -720,23 +735,43 @@ export default function EquipmentTab({
               ))}
             </div>
 
-            <div className="flex w-32 flex-col items-center justify-center gap-2 rounded-xl border bg-muted/40 p-3 sm:w-56">
-              <Avatar className="size-16 border-4 border-card shadow-sm sm:size-24">
-                <AvatarImage
-                  src={
-                    user?.avatar_url ??
-                    `https://api.dicebear.com/6.x/initials/svg?seed=${user?.username ?? "?"}`
-                  }
-                  alt={user?.username ?? ""}
-                />
-                <AvatarFallback className="text-xl">
-                  {user?.username?.slice(0, 2) ?? "?"}
-                </AvatarFallback>
-              </Avatar>
-              <div className="max-w-full truncate text-center text-sm font-medium">
-                {user?.username}
+            {portraitUrl ? (
+              <div className="relative flex w-40 flex-col rounded-xl border bg-muted/40 p-3 sm:w-[300px]">
+                <div className="relative h-full w-full overflow-hidden rounded-lg">
+                  <Image
+                    src={portraitUrl}
+                    alt={user?.username ?? ""}
+                    fill
+                    unoptimized
+                    className="object-cover object-center"
+                  />
+                </div>
+                {canEdit && (
+                  <CharacterPortraitUpload userId={userId} onUploaded={setPortraitUrl} />
+                )}
               </div>
-            </div>
+            ) : (
+              <div className="relative flex w-32 flex-col items-center justify-center gap-2 rounded-xl border bg-muted/40 p-3 sm:w-56">
+                <Avatar className="size-16 border-4 border-card shadow-sm sm:size-24">
+                  <AvatarImage
+                    src={
+                      user?.avatar_url ??
+                      `https://api.dicebear.com/6.x/initials/svg?seed=${user?.username ?? "?"}`
+                    }
+                    alt={user?.username ?? ""}
+                  />
+                  <AvatarFallback className="text-xl">
+                    {user?.username?.slice(0, 2) ?? "?"}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="max-w-full truncate text-center text-sm font-medium">
+                  {user?.username}
+                </div>
+                {canEdit && (
+                  <CharacterPortraitUpload userId={userId} onUploaded={setPortraitUrl} />
+                )}
+              </div>
+            )}
 
             <div className="flex flex-col gap-4">
               {RIGHT.map((slot) => (
@@ -746,6 +781,7 @@ export default function EquipmentTab({
                   item={equipmentBySlot[slot.key]}
                   equipment={equipment}
                   canEdit={canEdit}
+                  tooltipSide="right"
                   onSave={(itemName, grade, enchant, extraProtection, engravings) =>
                     handleSaveSlot(
                       slot.key,
@@ -766,7 +802,7 @@ export default function EquipmentTab({
           <div className="mb-2 text-sm font-semibold">
             Подробные характеристики
           </div>
-          <DetailedStatsPanel />
+          <DetailedStatsPanel equipment={equipment} level={level} />
         </div>
       </CardContent>
     </Card>

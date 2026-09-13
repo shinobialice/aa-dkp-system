@@ -1,6 +1,14 @@
 @import "tailwindcss";
 @custom-variant dark (&:is(.dark *));
 
+@font-face {
+  font-family: "FrizQuadrataCTT";
+  src: url("/fonts/frizquadratactt-mod.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --radius: 0.5rem;
   --background: oklch(1 0 0);
