@@ -187,7 +187,7 @@ export function SettingsPageContainer() {
               </Card>
 
               <Card className="p-4">
-                <MaintenanceWindowsForm />
+                <AttendanceBonusSettingsForm />
               </Card>
             </section>
           )}
@@ -198,10 +198,6 @@ export function SettingsPageContainer() {
 
               <Card className="p-4">
                 <SalaryEligibilitySettingsForm />
-              </Card>
-
-              <Card className="p-4">
-                <AttendanceBonusSettingsForm />
               </Card>
             </section>
           )}
@@ -218,6 +214,10 @@ export function SettingsPageContainer() {
             <section className="space-y-6">
               <Card className="p-4 max-w-xl">
                 <EventSettingsForm />
+              </Card>
+
+              <Card className="p-4">
+                <MaintenanceWindowsForm />
               </Card>
             </section>
           )}

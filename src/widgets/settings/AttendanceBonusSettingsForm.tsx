@@ -47,7 +47,7 @@ export function AttendanceBonusSettingsForm() {
     setSaving(true);
     try {
       await updateAttendanceBonusSettings(settings);
-      toast.success("Бонусы за посещение сохранены");
+      toast.success("Баллы за посещаемость сохранены");
     } catch {
       toast.error("Не удалось сохранить бонусы");
     } finally {
@@ -57,7 +57,7 @@ export function AttendanceBonusSettingsForm() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-bold">Бонусы за посещение</h2>
+      <h2 className="text-xl font-bold">Баллы за посещаемость</h2>
 
       <div className="grid grid-cols-[1fr_80px_80px] items-center gap-2 text-sm text-muted-foreground">
         <span></span>

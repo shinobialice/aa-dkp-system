@@ -7,10 +7,8 @@ import saveUserEquipment, { EquipmentInput } from "@/actions/saveUserEquipment";
 import type { UserEquipment } from "@/actions/getUserEquipment";
 import { EQUIPMENT_SLOTS, type EquipmentSlot } from "./equipmentData";
 import { ITEMS_BY_SLOT, findGearItem } from "./itemsData";
-import {
-  getEngravingSlotCount,
-  getEngravingCategory,
-} from "./itemsData/engravingSlots";
+import { getEngravingSlotCount } from "./itemsData/engravingSlots";
+import { getNamedSetForItem } from "./namedSetBonus";
 import {
   DEFAULT_ENCHANT,
   MAX_ENCHANT,
@@ -26,7 +24,7 @@ import { findEngraving } from "./itemsData/engravings";
 import { RunePicker, RuneIcon, RuneTooltip } from "./RunePicker";
 import { findRune } from "./itemsData/runes";
 import { WEAPON_HANDEDNESS } from "./itemsData/weaponHandedness";
-import { EffectText } from "./highlightNumbers";
+import { EffectText, highlightNumbers } from "./highlightNumbers";
 import { ItemStats } from "./ItemStats";
 import { CharacterStatsPanel } from "./CharacterStatsPanel";
 import { DetailedStatsPanel } from "./DetailedStatsPanel";
@@ -210,12 +208,84 @@ function EngravingSlots({
   );
 }
 
-function SetProgress() {
+function SetTierRow({
+  count,
+  text,
+  active,
+}: {
+  count: number;
+  text: string;
+  active: boolean;
+}) {
   return (
-    <div className="space-y-1">
-      <div className="text-xs font-semibold">Эффекты комплекта</div>
-      <div className="text-xs text-muted-foreground">В процессе</div>
+    <div className={active ? "text-green-500" : "text-muted-foreground/70"}>
+      <div className="text-[11px] font-semibold">[{count} шт.]</div>
+      {text.split("\n").map((line, i) => (
+        <div key={i} className="text-xs">
+          {active ? highlightNumbers(line) : line}
+        </div>
+      ))}
     </div>
+  );
+}
+
+function SetProgress({
+  itemId,
+  equipment,
+}: {
+  itemId: number;
+  equipment: UserEquipment[];
+}) {
+  const namedSet = getNamedSetForItem(itemId, equipment);
+
+  if (!namedSet) return null;
+
+  return (
+    <>
+      <div className="border-t border-border" />
+      <div className="space-y-1">
+        <div className="text-xs font-semibold">
+          {namedSet.name} ({namedSet.ownedCount}/{namedSet.totalCount})
+        </div>
+        <div className="space-y-1">
+          {namedSet.pieceRows.map((row, i) => (
+            <div key={i} className="flex gap-1">
+              {row.map((piece) => (
+                <div
+                  key={piece.itemId}
+                  title={piece.name}
+                  className={`relative size-6 shrink-0 overflow-hidden rounded-sm border ${
+                    piece.owned
+                      ? "border-border"
+                      : "border-border/50 opacity-30 grayscale"
+                  }`}
+                >
+                  {piece.iconUrl && (
+                    <Image
+                      src={piece.iconUrl}
+                      alt=""
+                      fill
+                      sizes="24px"
+                      className="object-cover"
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+        <div className="space-y-1.5">
+          {namedSet.tiers.map((tier) => (
+            <SetTierRow
+              key={tier.count}
+              count={tier.count}
+              text={tier.text}
+              active={tier.active}
+            />
+          ))}
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -427,12 +497,7 @@ function EquipmentSlotButton({
                   </>
                 )}
 
-                {getEngravingCategory(slot.key) === "armor" && (
-                  <>
-                    <div className="border-t border-border" />
-                    <SetProgress />
-                  </>
-                )}
+                <SetProgress itemId={selectedGearItem.id} equipment={equipment} />
               </div>
             </TooltipContent>
           </Tooltip>

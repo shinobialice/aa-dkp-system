@@ -49,3 +49,11 @@ export function findGearItem(
   if (!itemName) return undefined;
   return ITEMS_BY_SLOT[slotKey]?.find((i) => i.name === itemName);
 }
+
+export function findGearItemById(id: number): GearItem | undefined {
+  for (const items of Object.values(ITEMS_BY_SLOT)) {
+    const found = items.find((i) => i.id === id);
+    if (found) return found;
+  }
+  return undefined;
+}
