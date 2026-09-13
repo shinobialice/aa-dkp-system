@@ -269,6 +269,27 @@ export const ITEM_STATS: Record<number, Record<string, number>> = {
   53056: { wearable_armor: 1027, wearable_magic_resistance: 93 }, // Совершенные рамианские латные сапоги
   53057: { wearable_armor: 513, wearable_magic_resistance: 46 }, // Совершенные рамианские латные наручи
   53058: { wearable_armor: 513, wearable_magic_resistance: 46 }, // Совершенный рамианский латный пояс
+  910001: { wearable_armor: 1636.2, wearable_magic_resistance: 148.75 }, // Амальгамный рамианский латный шлем
+  910002: { wearable_armor: 892.47, wearable_magic_resistance: 892.47 }, // Амальгамный рамианский кожаный капюшон
+  910003: { wearable_armor: 446.24, wearable_magic_resistance: 1338.71 }, // Амальгамный рамианский налобник
+  910004: { wearable_armor: 2727.03, wearable_magic_resistance: 247.91 }, // Амальгамный рамианский латный нагрудник
+  910005: { wearable_armor: 1487.47, wearable_magic_resistance: 1487.47 }, // Амальгамная рамианская кожаная куртка
+  910006: { wearable_armor: 743.74, wearable_magic_resistance: 2231.21 }, // Амальгамный рамианский камзол
+  910007: { wearable_armor: 545.01, wearable_magic_resistance: 49.55 }, // Амальгамный рамианский латный пояс
+  910008: { wearable_armor: 297.28, wearable_magic_resistance: 297.28 }, // Амальгамный рамианский кожаный пояс
+  910009: { wearable_armor: 148.64, wearable_magic_resistance: 445.92 }, // Амальгамный рамианский матерчатый пояс
+  910010: { wearable_armor: 545.01, wearable_magic_resistance: 49.55 }, // Амальгамные рамианские латные наручи
+  910011: { wearable_armor: 297.28, wearable_magic_resistance: 297.28 }, // Амальгамные рамианские кожаные наручи
+  910012: { wearable_armor: 148.64, wearable_magic_resistance: 445.92 }, // Амальгамные рамианские матерчатые наручи
+  910013: { wearable_armor: 1090.83, wearable_magic_resistance: 99.17 }, // Амальгамные рамианские латные перчатки
+  910014: { wearable_armor: 595, wearable_magic_resistance: 595 }, // Амальгамные рамианские кожаные перчатки
+  910015: { wearable_armor: 297.5, wearable_magic_resistance: 892.5 }, // Амальгамные рамианские матерчатые перчатки
+  910016: { wearable_armor: 2181.14, wearable_magic_resistance: 198.29 }, // Амальгамные рамианские латные поножи
+  910017: { wearable_armor: 1189.71, wearable_magic_resistance: 1189.71 }, // Амальгамные рамианские кожаные поножи
+  910018: { wearable_armor: 594.86, wearable_magic_resistance: 1784.57 }, // Амальгамные рамианские матерчатые поножи
+  910019: { wearable_armor: 1090.83, wearable_magic_resistance: 99.17 }, // Амальгамные рамианские латные сапоги
+  910020: { wearable_armor: 595, wearable_magic_resistance: 595 }, // Амальгамные рамианские кожаные сапоги
+  910021: { wearable_armor: 297.5, wearable_magic_resistance: 892.5 }, // Амальгамные рамианские матерчатые сапоги
   54953: { wearable_armor: 1541, wearable_magic_resistance: 140 }, // Эфенский латный шлем
   54954: { wearable_armor: 2569, wearable_magic_resistance: 233 }, // Эфенский латный нагрудник
   54955: { wearable_armor: 2055, wearable_magic_resistance: 186 }, // Эфенские латные поножи
@@ -562,6 +583,8 @@ export const ITEM_STATS: Record<number, Record<string, number>> = {
   53025: { weapon_dps: 420.9, weapon_heal_power: 520 }, // Совершенная рамианская булава
   53026: { weapon_dps: 569.4, weapon_heal_power: 668 }, // Совершенный рамианский боевой молот
   53027: { weapon_dps: 495.1 }, // Совершенное рамианское копье
+  910034: { weapon_dps: 562.1 }, // Амальгамное рамианское копье
+  910028: { weapon_dps: 562.1 }, // Амальгамный рамианский кинжал
   53028: { weapon_dps: 693.2 }, // Совершенная рамианская алебарда
   53030: { weapon_dps: 420.9, weapon_magic_power: 519.9 }, // Совершенный рамианский посох
   53031: { weapon_dps: 569.4, weapon_magic_power: 668.4 }, // Совершенный рамианский боевой посох

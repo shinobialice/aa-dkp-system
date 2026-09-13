@@ -14,7 +14,7 @@ import {
   MAX_ENCHANT,
   isValidEnchantLevel,
   DEFAULT_EXTRA_PROTECTION,
-  MAX_EXTRA_PROTECTION,
+  getMaxExtraProtectionLevel,
   isValidExtraProtectionLevel,
 } from "./itemsData/statsFormula";
 import { GearItemIcon } from "./GearItemIcon";
@@ -36,6 +36,10 @@ import {
   getUnderwearSynthesisEffectsForRole,
   findUnderwearSynthesisEffect,
 } from "./itemsData/underwearSynthesis";
+import {
+  getCursedArmorSynthesisSlotPools,
+  findCursedArmorSynthesisEffect,
+} from "./itemsData/cursedArmorSynthesis";
 import { WEAPON_HANDEDNESS } from "./itemsData/weaponHandedness";
 import { EffectText, highlightNumbers } from "./highlightNumbers";
 import { ItemStats } from "./ItemStats";
@@ -187,7 +191,27 @@ function SynthesisEffectsDisplay({
         if (!effect) return null;
         const value = effect.isPercent ? `${effect.value}%` : `${effect.value} ед.`;
         return (
-          <div key={id} className="text-xs">
+          <div key={id} className="text-xs text-green-500">
+            {highlightNumbers(`${effect.label}: ${value}`)}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function CursedArmorSynthesisDisplay({ effectIds }: { effectIds: number[] }) {
+  if (effectIds.length === 0) return null;
+
+  return (
+    <div className="space-y-0.5">
+      <div className="text-xs text-muted-foreground">Эффекты синтеза</div>
+      {effectIds.map((id) => {
+        const effect = findCursedArmorSynthesisEffect(id);
+        if (!effect) return null;
+        const value = effect.isPercent ? `${effect.value}%` : `${effect.value} ед.`;
+        return (
+          <div key={id} className="text-xs text-green-500">
             {highlightNumbers(`${effect.label}: ${value}`)}
           </div>
         );
@@ -351,6 +375,7 @@ function EquipmentSlotButton({
     engravings: number[],
     runeId: number,
     synthesisEffects: number[],
+    cursedSynthesisEffects: number[],
   ) => Promise<void>;
   tooltipSide?: "left" | "right";
 }) {
@@ -372,6 +397,9 @@ function EquipmentSlotButton({
         : [];
   const [synthesisEffects, setSynthesisEffects] =
     useState<number[]>(initialSynthesisEffects);
+  const [cursedSynthesisEffects, setCursedSynthesisEffects] = useState<number[]>(
+    item?.cursed_synthesis_effects ?? [],
+  );
   const [saving, setSaving] = useState(false);
 
   const filled = !!item?.item_name;
@@ -400,6 +428,9 @@ function EquipmentSlotButton({
     : slot.key === "costume"
       ? getCostumeSynthesisEffectsForRole(draftSynthesisRole)
       : getUnderwearSynthesisEffectsForRole(draftSynthesisRole);
+  const cursedSynthesisPools = draftGearItem
+    ? getCursedArmorSynthesisSlotPools(draftGearItem.id)
+    : [];
 
   const handleOpenChange = (next: boolean) => {
     if (next) {
@@ -411,6 +442,7 @@ function EquipmentSlotButton({
       setSelectedEngravingId(0);
       setRuneId(item?.rune_id ?? 0);
       setSynthesisEffects(initialSynthesisEffects);
+      setCursedSynthesisEffects(item?.cursed_synthesis_effects ?? []);
     }
     setOpen(next);
   };
@@ -418,6 +450,12 @@ function EquipmentSlotButton({
   const handleSave = async () => {
     setSaving(true);
     try {
+      const finalCursedSynthesisEffects: number[] = [];
+      for (let i = 0; i < cursedSynthesisPools.length; i++) {
+        const value = cursedSynthesisEffects[i];
+        if (value === undefined || value === -1) break;
+        finalCursedSynthesisEffects.push(value);
+      }
       await onSave(
         itemName,
         grade,
@@ -426,6 +464,7 @@ function EquipmentSlotButton({
         engravings.slice(0, maxEngravingSlots),
         runeId,
         synthesisEffects.slice(0, maxSynthesisSlots),
+        finalCursedSynthesisEffects,
       );
       setOpen(false);
     } finally {
@@ -443,6 +482,7 @@ function EquipmentSlotButton({
         DEFAULT_EXTRA_PROTECTION,
         [],
         0,
+        [],
         [],
       );
       setOpen(false);
@@ -493,6 +533,7 @@ function EquipmentSlotButton({
       : slot.key === "underwear"
         ? (item?.underwear_synthesis_effects ?? [])
         : [];
+  const equippedCursedSynthesisEffects = item?.cursed_synthesis_effects ?? [];
 
   return (
     <div className="relative">
@@ -530,7 +571,7 @@ function EquipmentSlotButton({
                   </div>
                 </div>
 
-                {ARMOR_SLOTS.has(slot.key) && (
+                {CUBE_ELIGIBLE_SLOTS.has(slot.key) && (
                   <div className="text-xs text-muted-foreground/70">
                     Защита от доп. урона оружия Lv.
                     {item?.extra_protection ?? DEFAULT_EXTRA_PROTECTION}
@@ -580,6 +621,15 @@ function EquipmentSlotButton({
                     <SynthesisEffectsDisplay
                       slotKey={slot.key}
                       effectIds={equippedSynthesisEffects}
+                    />
+                  </>
+                )}
+
+                {equippedCursedSynthesisEffects.length > 0 && (
+                  <>
+                    <div className="border-t border-border" />
+                    <CursedArmorSynthesisDisplay
+                      effectIds={equippedCursedSynthesisEffects}
                     />
                   </>
                 )}
@@ -675,18 +725,19 @@ function EquipmentSlotButton({
                 </div>
               )}
 
-              {itemName.trim() !== "" && ARMOR_SLOTS.has(slot.key) && (
+              {itemName.trim() !== "" && CUBE_ELIGIBLE_SLOTS.has(slot.key) && (
                 <div className="space-y-1.5">
                   <div className="text-xs text-muted-foreground">Доп.:</div>
                   <Input
                     type="number"
                     min={0}
-                    max={MAX_EXTRA_PROTECTION}
+                    max={getMaxExtraProtectionLevel(slot.key)}
                     step={1}
                     value={extraProtection}
                     onChange={(e) => {
                       const next = Math.round(Number(e.target.value));
-                      if (isValidExtraProtectionLevel(next)) setExtraProtection(next);
+                      if (isValidExtraProtectionLevel(next, slot.key))
+                        setExtraProtection(next);
                       else if (e.target.value === "")
                         setExtraProtection(DEFAULT_EXTRA_PROTECTION);
                     }}
@@ -758,6 +809,42 @@ function EquipmentSlotButton({
                 </div>
               )}
 
+              {cursedSynthesisPools.length > 0 && (
+                <div className="space-y-1.5">
+                  <div className="text-xs text-muted-foreground">
+                    Эффекты синтеза:
+                  </div>
+                  <div className="space-y-1.5">
+                    {cursedSynthesisPools.map((pool, i) => (
+                      <Select
+                        key={i}
+                        value={String(cursedSynthesisEffects[i] ?? -1)}
+                        onValueChange={(v) => {
+                          const next = [...cursedSynthesisEffects];
+                          next[i] = Number(v);
+                          setCursedSynthesisEffects(next);
+                        }}
+                      >
+                        <SelectTrigger className="w-full cursor-pointer">
+                          <SelectValue placeholder="Выберите" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="-1">Выберите</SelectItem>
+                          {pool.map((effect) => (
+                            <SelectItem key={effect.id} value={String(effect.id)}>
+                              {effect.label}:{" "}
+                              {effect.isPercent
+                                ? `${effect.value}%`
+                                : `${effect.value} ед.`}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="flex justify-end gap-2">
                 {filled && (
                   <Button
@@ -804,7 +891,7 @@ function EquipmentSlotButton({
                   <Badge variant="outline">+{item!.enchant}</Badge>
                 )}
               </div>
-              {selectedGearItem && ARMOR_SLOTS.has(slot.key) && (
+              {selectedGearItem && CUBE_ELIGIBLE_SLOTS.has(slot.key) && (
                 <div className="text-xs text-muted-foreground/70">
                   Защита от доп. урона оружия Lv.{item!.extra_protection}
                 </div>
@@ -836,6 +923,11 @@ function EquipmentSlotButton({
                 <SynthesisEffectsDisplay
                   slotKey={slot.key}
                   effectIds={equippedSynthesisEffects}
+                />
+              )}
+              {equippedCursedSynthesisEffects.length > 0 && (
+                <CursedArmorSynthesisDisplay
+                  effectIds={equippedCursedSynthesisEffects}
                 />
               )}
             </div>
@@ -890,6 +982,7 @@ export default function EquipmentTab({
     engravings: number[],
     runeId: number,
     synthesisEffects: number[],
+    cursedSynthesisEffects: number[],
   ) => {
     const payload: EquipmentInput[] = EQUIPMENT_SLOTS.map((slot) => {
       if (slot.key === slotKey) {
@@ -904,6 +997,7 @@ export default function EquipmentTab({
           costumeSynthesisEffects: slotKey === "costume" ? synthesisEffects : [],
           underwearSynthesisEffects:
             slotKey === "underwear" ? synthesisEffects : [],
+          cursedSynthesisEffects,
         };
       }
       const existing = equipmentBySlot[slot.key];
@@ -917,6 +1011,7 @@ export default function EquipmentTab({
         runeId: existing?.rune_id ?? 0,
         costumeSynthesisEffects: existing?.costume_synthesis_effects ?? [],
         underwearSynthesisEffects: existing?.underwear_synthesis_effects ?? [],
+        cursedSynthesisEffects: existing?.cursed_synthesis_effects ?? [],
       };
     });
 
@@ -968,6 +1063,7 @@ export default function EquipmentTab({
                 engravings,
                 runeId,
                 synthesisEffects,
+                cursedSynthesisEffects,
               ) =>
                 handleSaveSlot(
                   TOP.key,
@@ -978,6 +1074,7 @@ export default function EquipmentTab({
                   engravings,
                   runeId,
                   synthesisEffects,
+                  cursedSynthesisEffects,
                 )
               }
             />
@@ -1000,6 +1097,7 @@ export default function EquipmentTab({
                     engravings,
                     runeId,
                     synthesisEffects,
+                    cursedSynthesisEffects,
                   ) =>
                     handleSaveSlot(
                       slot.key,
@@ -1010,6 +1108,7 @@ export default function EquipmentTab({
                       engravings,
                       runeId,
                       synthesisEffects,
+                      cursedSynthesisEffects,
                     )
                   }
                 />
@@ -1071,6 +1170,7 @@ export default function EquipmentTab({
                     engravings,
                     runeId,
                     synthesisEffects,
+                    cursedSynthesisEffects,
                   ) =>
                     handleSaveSlot(
                       slot.key,
@@ -1081,6 +1181,7 @@ export default function EquipmentTab({
                       engravings,
                       runeId,
                       synthesisEffects,
+                      cursedSynthesisEffects,
                     )
                   }
                 />

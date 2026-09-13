@@ -4,6 +4,7 @@ import { scaleStat } from "./itemsData/statsFormula";
 import { computeEngravingBonuses, ENGRAVING_STAT } from "./engravingBonuses";
 import { computeCostumeSynthesisBonuses } from "./costumeSynthesisBonuses";
 import { computeUnderwearSynthesisBonuses } from "./underwearSynthesisBonuses";
+import { computeCursedArmorSynthesisBonuses } from "./cursedArmorSynthesisBonuses";
 import {
   computeParry,
   computeDodge,
@@ -105,10 +106,14 @@ export function computeEquippedBonuses(
   const engravingBonus = computeEngravingBonuses(equipment);
   const costumeSynthesisBonus = computeCostumeSynthesisBonuses(equipment);
   const underwearSynthesisBonus = computeUnderwearSynthesisBonuses(equipment);
+  const cursedArmorSynthesisBonus = computeCursedArmorSynthesisBonuses(equipment);
   for (const [label, value] of costumeSynthesisBonus) {
     engravingBonus.set(label, (engravingBonus.get(label) ?? 0) + value);
   }
   for (const [label, value] of underwearSynthesisBonus) {
+    engravingBonus.set(label, (engravingBonus.get(label) ?? 0) + value);
+  }
+  for (const [label, value] of cursedArmorSynthesisBonus) {
     engravingBonus.set(label, (engravingBonus.get(label) ?? 0) + value);
   }
   totals.defense += engravingBonus.get(ENGRAVING_STAT.DEFENSE) ?? 0;

@@ -23,6 +23,7 @@ import {
   getUnderwearSynthesisSlotCount,
   isValidUnderwearSynthesisEffectId,
 } from "@/widgets/profile/equipment/itemsData/underwearSynthesis";
+import { isValidCursedArmorSynthesisEffectIds } from "@/widgets/profile/equipment/itemsData/cursedArmorSynthesis";
 
 export type EquipmentInput = {
   slot: string;
@@ -34,6 +35,7 @@ export type EquipmentInput = {
   runeId: number;
   costumeSynthesisEffects: number[];
   underwearSynthesisEffects: number[];
+  cursedSynthesisEffects: number[];
 };
 
 const saveUserEquipment = async (
@@ -57,7 +59,7 @@ const saveUserEquipment = async (
     if (!isValidEnchantLevel(item.enchant)) {
       throw new Error(`Некорректный уровень заточки: ${item.enchant}`);
     }
-    if (!isValidExtraProtectionLevel(item.extraProtection)) {
+    if (!isValidExtraProtectionLevel(item.extraProtection, item.slot)) {
       throw new Error(
         `Некорректный уровень защиты от доп. урона: ${item.extraProtection}`,
       );
@@ -109,6 +111,15 @@ const saveUserEquipment = async (
         throw new Error(`Некорректные эффекты синтеза белья в слоте: ${item.slot}`);
       }
     }
+    if (
+      item.cursedSynthesisEffects.length > 0 &&
+      !isValidCursedArmorSynthesisEffectIds(
+        gearItem?.id ?? -1,
+        item.cursedSynthesisEffects,
+      )
+    ) {
+      throw new Error(`Некорректные эффекты синтеза в слоте: ${item.slot}`);
+    }
   }
 
   const filled = items.filter((i) => (i.itemName ?? "").trim() !== "");
@@ -118,8 +129,8 @@ const saveUserEquipment = async (
       await tx`DELETE FROM user_equipment WHERE user_id = ${userId}`;
       for (const item of filled) {
         await tx`
-          INSERT INTO user_equipment (user_id, slot, item_name, grade, enchant, extra_protection, engravings, rune_id, costume_synthesis_effects, underwear_synthesis_effects)
-          VALUES (${userId}, ${item.slot}, ${item.itemName!.trim()}, ${item.grade}, ${item.enchant}, ${item.extraProtection}, ${sql.array(item.engravings)}::integer[], ${item.runeId}, ${sql.array(item.costumeSynthesisEffects)}::integer[], ${sql.array(item.underwearSynthesisEffects)}::integer[])
+          INSERT INTO user_equipment (user_id, slot, item_name, grade, enchant, extra_protection, engravings, rune_id, costume_synthesis_effects, underwear_synthesis_effects, cursed_synthesis_effects)
+          VALUES (${userId}, ${item.slot}, ${item.itemName!.trim()}, ${item.grade}, ${item.enchant}, ${item.extraProtection}, ${sql.array(item.engravings)}::integer[], ${item.runeId}, ${sql.array(item.costumeSynthesisEffects)}::integer[], ${sql.array(item.underwearSynthesisEffects)}::integer[], ${sql.array(item.cursedSynthesisEffects)}::integer[])
         `;
       }
     });
