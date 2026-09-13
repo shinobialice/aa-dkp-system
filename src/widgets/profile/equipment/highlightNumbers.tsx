@@ -23,3 +23,14 @@ export function highlightNumbers(text: string) {
   });
   return nodes;
 }
+
+export function EffectText({ text }: { text: string }) {
+  const lines = text.split(" / ");
+  return (
+    <>
+      {lines.map((line, i) => (
+        <div key={i}>{highlightNumbers(line)}</div>
+      ))}
+    </>
+  );
+}

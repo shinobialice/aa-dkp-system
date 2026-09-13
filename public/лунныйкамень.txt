@@ -1,0 +1,430 @@
+так. теперь у каждой брони может быть 1 Лунный камень / руна:
+шлем
+<div class="aa-combo-list"><button type="button" class="aa-combo-option is-active"><!--!--><span class="aa-combo-item-icon aa-combo-item-icon--empty"></span>
+                                      <!--!--><span class="aa-combo-item-name">Выберите</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/39943.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Сияющая звезда ясного разума</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14716.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна багрового полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14726.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна янтарного полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14755.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна изумрудного полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14766.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна лазурного полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14775.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна лилового полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/45577.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ограненный лунный камень чтеца</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/24753.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Звезда следопыта</span></button></div>
+
+                                          нагрудник
+                                          <div class="aa-combo-list"><button type="button" class="aa-combo-option is-active"><!--!--><span class="aa-combo-item-icon aa-combo-item-icon--empty"></span>
+                                      <!--!--><span class="aa-combo-item-name">Выберите</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/39916.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Сияющая звезда ярости</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/39917.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Сияющая звезда стойкости</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/39918.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Сияющая звезда славы</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/39944.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Сияющая звезда нерушимой защиты</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14716.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна багрового полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14726.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна янтарного полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14755.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна изумрудного полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14766.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна лазурного полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14775.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна лилового полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/24757.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Звезда милосердия</span></button></div>
+
+                                          пояс
+                                          <div class="aa-combo-list"><button type="button" class="aa-combo-option is-active"><!--!--><span class="aa-combo-item-icon aa-combo-item-icon--empty"></span>
+                                      <!--!--><span class="aa-combo-item-name">Выберите</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/47465.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Призрачная руна искусного целителя</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/47466.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Призрачная руна меткого стрелка</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/47464.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Призрачная руна могущественного мага</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/47467.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Призрачная руна яростного воина</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14716.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна багрового полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14726.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна янтарного полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14755.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна изумрудного полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14766.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна лазурного полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14775.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна лилового полумесяца</span></button></div>
+
+                                          наручи
+                                          <div class="aa-combo-list"><button type="button" class="aa-combo-option is-active"><!--!--><span class="aa-combo-item-icon aa-combo-item-icon--empty"></span>
+                                      <!--!--><span class="aa-combo-item-name">Выберите</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/47465.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Призрачная руна искусного целителя</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/47466.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Призрачная руна меткого стрелка</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/47464.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Призрачная руна могущественного мага</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/47467.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Призрачная руна яростного воина</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14716.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна багрового полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14726.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна янтарного полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14755.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна изумрудного полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14766.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна лазурного полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14775.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна лилового полумесяца</span></button></div>
+
+                                          перчатки
+                                          <div class="aa-combo-list"><button type="button" class="aa-combo-option is-active"><!--!--><span class="aa-combo-item-icon aa-combo-item-icon--empty"></span>
+                                      <!--!--><span class="aa-combo-item-name">Выберите</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/47465.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Призрачная руна искусного целителя</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/47466.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Призрачная руна меткого стрелка</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/47464.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Призрачная руна могущественного мага</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/47467.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Призрачная руна яростного воина</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/39945.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Сияющая звезда ледяного гнева</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/39946.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Сияющая звезда яростного пламени</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/39947.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Сияющая звезда жалящих стрел</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/39965.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Сияющая звезда капеллана</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14716.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна багрового полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14726.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна янтарного полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14755.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна изумрудного полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14766.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна лазурного полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14775.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна лилового полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/45576.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ограненный лунный камень смертоносного меча</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/45582.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ограненный лунный камень смертоносных стрел</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/45569.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ограненный лунный камень смертоносного огня</span></button></div>
+
+                                          плащ
+                                          <div class="aa-combo-list"><button type="button" class="aa-combo-option is-active"><!--!--><span class="aa-combo-item-icon aa-combo-item-icon--empty"></span>
+                                      <!--!--><span class="aa-combo-item-name">Выберите</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/26855.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Лунный бриллиант мощи</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/26856.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Лунный бриллиант теней</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/26857.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Лунный бриллиант надежды</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/26858.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Лунный бриллиант зыбких чар</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/26859.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Лунный бриллиант озарения</span></button></div>
+
+                                          поножи
+                                          <div class="aa-combo-list"><button type="button" class="aa-combo-option is-active"><!--!--><span class="aa-combo-item-icon aa-combo-item-icon--empty"></span>
+                                      <!--!--><span class="aa-combo-item-name">Выберите</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/47465.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Призрачная руна искусного целителя</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/47466.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Призрачная руна меткого стрелка</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/47464.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Призрачная руна могущественного мага</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/47467.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Призрачная руна яростного воина</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/39916.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Сияющая звезда ярости</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/39917.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Сияющая звезда стойкости</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/39918.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Сияющая звезда славы</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14716.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна багрового полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14726.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна янтарного полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14755.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна изумрудного полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14766.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна лазурного полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14775.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна лилового полумесяца</span></button></div>
+
+                                          сапоги
+                                          <div class="aa-combo-list"><button type="button" class="aa-combo-option is-active"><!--!--><span class="aa-combo-item-icon aa-combo-item-icon--empty"></span>
+                                      <!--!--><span class="aa-combo-item-name">Выберите</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/47465.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Призрачная руна искусного целителя</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/47466.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Призрачная руна меткого стрелка</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/47464.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Призрачная руна могущественного мага</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/47467.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Призрачная руна яростного воина</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/39916.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Сияющая звезда ярости</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/39917.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Сияющая звезда стойкости</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/39918.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Сияющая звезда славы</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14716.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна багрового полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14726.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна янтарного полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14755.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна изумрудного полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14766.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна лазурного полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14775.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна лилового полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-2 "><span class="aa-combo-item-icon"><img src="images/runes/24719.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Grand.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Обработанный лунный камень грации</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/45571.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ограненный лунный камень легкой поступи</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/24717.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ограненный лунный камень пяти морей</span></button></div>
+
+                                          белье
+                                          <div class="aa-combo-list"><button type="button" class="aa-combo-option is-active"><!--!--><span class="aa-combo-item-icon aa-combo-item-icon--empty"></span>
+                                      <!--!--><span class="aa-combo-item-name">Выберите</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14716.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна багрового полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14726.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна янтарного полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14755.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна изумрудного полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14766.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна лазурного полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/14775.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ослепительная руна лилового полумесяца</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/38513.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Хрустальная руна багровой луны</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/38514.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Хрустальная руна осенней луны</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/38515.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Хрустальная руна молодой луны</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/38516.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Хрустальная руна колдовской луны</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/38517.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Хрустальная руна безмолвной луны</span></button></div>
+
+                                          костюм
+                                          <div class="aa-combo-list"><button type="button" class="aa-combo-option is-active"><!--!--><span class="aa-combo-item-icon aa-combo-item-icon--empty"></span>
+                                      <!--!--><span class="aa-combo-item-name">Выберите</span></button><button type="button" class="aa-combo-option aa-grade-8 "><span class="aa-combo-item-icon"><img src="images/runes/8001898.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Divine.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Руна чиалайя</span></button><button type="button" class="aa-combo-option aa-grade-8 "><span class="aa-combo-item-icon"><img src="images/runes/8001846.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Divine.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Руна мстителя Соколиной Тени</span></button><button type="button" class="aa-combo-option aa-grade-8 "><span class="aa-combo-item-icon"><img src="images/runes/8001845.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Divine.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Руна жреца Пантеона</span></button><button type="button" class="aa-combo-option aa-grade-8 "><span class="aa-combo-item-icon"><img src="images/runes/8001844.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Divine.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Руна стража Крепости Ели</span></button><button type="button" class="aa-combo-option aa-grade-8 "><span class="aa-combo-item-icon"><img src="images/runes/8001843.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Divine.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Руна вечного странника</span></button><button type="button" class="aa-combo-option aa-grade-8 "><span class="aa-combo-item-icon"><img src="images/runes/8001463.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Divine.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Руна змееуста</span></button><button type="button" class="aa-combo-option aa-grade-8 "><span class="aa-combo-item-icon"><img src="images/runes/55764.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Divine.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ледяная руна</span></button><button type="button" class="aa-combo-option aa-grade-9 "><span class="aa-combo-item-icon"><img src="images/runes/55765.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Epic.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ледяная руна</span></button><button type="button" class="aa-combo-option aa-grade-10 "><span class="aa-combo-item-icon"><img src="images/runes/55766.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Legendary.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ледяная руна</span></button><button type="button" class="aa-combo-option aa-grade-11 "><span class="aa-combo-item-icon"><img src="images/runes/55767.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Mythic.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ледяная руна</span></button><button type="button" class="aa-combo-option aa-grade-12 "><span class="aa-combo-item-icon"><img src="images/runes/55762.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Eternal.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ледяная руна</span></button></div>
+
+                                          бижутерия
+                                          <div class="aa-combo-list"><button type="button" class="aa-combo-option is-active"><!--!--><span class="aa-combo-item-icon aa-combo-item-icon--empty"></span>
+                                      <!--!--><span class="aa-combo-item-name">Выберите</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/8001337.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Королевский лунный изумруд кирасира</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/8001338.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Королевский лунный изумруд заклинателя</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/8001339.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Королевский лунный изумруд мстителя</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/8001340.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Королевский лунный изумруд волхва</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/8001341.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Королевский лунный изумруд берсерка</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/8001342.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Королевский лунный изумруд карателя</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/8001343.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Королевский лунный изумруд оракула</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/8001344.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Королевский лунный изумруд знахаря</span></button><button type="button" class="aa-combo-option aa-grade-2 "><span class="aa-combo-item-icon"><img src="images/runes/55258.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Grand.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Необычная руна ифнирского бойца</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/55259.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Редкая руна ифнирского бойца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/55260.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Уникальная руна ифнирского бойца</span></button><button type="button" class="aa-combo-option aa-grade-5 "><span class="aa-combo-item-icon"><img src="images/runes/55261.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Heroic.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Эпическая руна ифнирского бойца</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/55262.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Легендарная руна ифнирского бойца</span></button><button type="button" class="aa-combo-option aa-grade-2 "><span class="aa-combo-item-icon"><img src="images/runes/55263.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Grand.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Необычная руна ифнирского лучника</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/55264.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Редкая руна ифнирского лучника</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/55265.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Уникальная руна ифнирского лучника</span></button><button type="button" class="aa-combo-option aa-grade-5 "><span class="aa-combo-item-icon"><img src="images/runes/55266.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Heroic.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Эпическая руна ифнирского лучника</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/55267.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Легендарная руна ифнирского лучника</span></button><button type="button" class="aa-combo-option aa-grade-2 "><span class="aa-combo-item-icon"><img src="images/runes/55268.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Grand.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Необычная руна ифнирского чародея</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/55269.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Редкая руна ифнирского чародея</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/55270.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Уникальная руна ифнирского чародея</span></button><button type="button" class="aa-combo-option aa-grade-5 "><span class="aa-combo-item-icon"><img src="images/runes/55271.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Heroic.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Эпическая руна ифнирского чародея</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/55272.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Легендарная руна ифнирского чародея</span></button><button type="button" class="aa-combo-option aa-grade-2 "><span class="aa-combo-item-icon"><img src="images/runes/55273.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Grand.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Необычная руна ифнирского лекаря</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/55274.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Редкая руна ифнирского лекаря</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/55275.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Уникальная руна ифнирского лекаря</span></button><button type="button" class="aa-combo-option aa-grade-5 "><span class="aa-combo-item-icon"><img src="images/runes/55276.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Heroic.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Эпическая руна ифнирского лекаря</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/55277.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Легендарная руна ифнирского лекаря</span></button></div>
+
+                                          двуручное оружие
+                                          <div class="aa-combo-list"><button type="button" class="aa-combo-option is-active"><!--!--><span class="aa-combo-item-icon aa-combo-item-icon--empty"></span>
+                                      <!--!--><span class="aa-combo-item-name">Выберите</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/39950.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Сияющая звезда завоевателя</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/39951.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Сияющая звезда чародея</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/39962.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Сияющая звезда целителя</span></button></div>
+
+                                          одноручное оружие
+                                          <div class="aa-combo-list"><button type="button" class="aa-combo-option is-active"><!--!--><span class="aa-combo-item-icon aa-combo-item-icon--empty"></span>
+                                      <!--!--><span class="aa-combo-item-name">Выберите</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/39948.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Сияющая звезда стража</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/39949.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Сияющая звезда пророка</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/39959.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Сияющая звезда жреца</span></button></div>
+
+                                          щит
+                                          <div class="aa-combo-list"><button type="button" class="aa-combo-option is-active"><!--!--><span class="aa-combo-item-icon aa-combo-item-icon--empty"></span>
+                                      <!--!--><span class="aa-combo-item-name">Выберите</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/39948.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Сияющая звезда стража</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/39949.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Сияющая звезда пророка</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/39959.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Сияющая звезда жреца</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/24745.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Ограненный лунный камень бастиона</span></button></div>
+
+                                          дальнобойное оружие
+                                          <div class="aa-combo-list"><button type="button" class="aa-combo-option is-active"><!--!--><span class="aa-combo-item-icon aa-combo-item-icon--empty"></span>
+                                      <!--!--><span class="aa-combo-item-name">Выберите</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/39952.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Сияющая звезда стрелка</span></button></div>
+
+                                          инструмент
+                                          <div class="aa-combo-list"><button type="button" class="aa-combo-option is-active"><!--!--><span class="aa-combo-item-icon aa-combo-item-icon--empty"></span>
+                                      <!--!--><span class="aa-combo-item-name">Выберите</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/8001337.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Королевский лунный изумруд кирасира</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/8001338.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Королевский лунный изумруд заклинателя</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/8001339.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Королевский лунный изумруд мстителя</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/8001340.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Королевский лунный изумруд волхва</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/8001341.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Королевский лунный изумруд берсерка</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/8001342.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Королевский лунный изумруд карателя</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/8001343.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Королевский лунный изумруд оракула</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/8001344.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Королевский лунный изумруд знахаря</span></button><button type="button" class="aa-combo-option aa-grade-2 "><span class="aa-combo-item-icon"><img src="images/runes/55258.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Grand.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Необычная руна ифнирского бойца</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/55259.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Редкая руна ифнирского бойца</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/55260.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Уникальная руна ифнирского бойца</span></button><button type="button" class="aa-combo-option aa-grade-5 "><span class="aa-combo-item-icon"><img src="images/runes/55261.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Heroic.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Эпическая руна ифнирского бойца</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/55262.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Легендарная руна ифнирского бойца</span></button><button type="button" class="aa-combo-option aa-grade-2 "><span class="aa-combo-item-icon"><img src="images/runes/55263.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Grand.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Необычная руна ифнирского лучника</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/55264.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Редкая руна ифнирского лучника</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/55265.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Уникальная руна ифнирского лучника</span></button><button type="button" class="aa-combo-option aa-grade-5 "><span class="aa-combo-item-icon"><img src="images/runes/55266.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Heroic.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Эпическая руна ифнирского лучника</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/55267.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Легендарная руна ифнирского лучника</span></button><button type="button" class="aa-combo-option aa-grade-2 "><span class="aa-combo-item-icon"><img src="images/runes/55268.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Grand.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Необычная руна ифнирского чародея</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/55269.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Редкая руна ифнирского чародея</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/55270.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Уникальная руна ифнирского чародея</span></button><button type="button" class="aa-combo-option aa-grade-5 "><span class="aa-combo-item-icon"><img src="images/runes/55271.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Heroic.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Эпическая руна ифнирского чародея</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/55272.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Легендарная руна ифнирского чародея</span></button><button type="button" class="aa-combo-option aa-grade-2 "><span class="aa-combo-item-icon"><img src="images/runes/55273.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Grand.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Необычная руна ифнирского лекаря</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/55274.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Rare.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Редкая руна ифнирского лекаря</span></button><button type="button" class="aa-combo-option aa-grade-4 "><span class="aa-combo-item-icon"><img src="images/runes/55275.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Arcane.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Уникальная руна ифнирского лекаря</span></button><button type="button" class="aa-combo-option aa-grade-5 "><span class="aa-combo-item-icon"><img src="images/runes/55276.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Heroic.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Эпическая руна ифнирского лекаря</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/55277.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Легендарная руна ифнирского лекаря</span></button></div>
+
+
+                                          так же у эфена есть руны которые для других предметов не доступны. Эфен это: эфенская кожаная куртная, искаженная эфенская, изначальная эфенская, обновленная эфенская. вот руны для шлема нагрудника наручей перчаток поножей сапог пояс основное оружие доп оружие щит лук :
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Эфенская руна карающего огня</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/43155.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Эфенская руна изначальных ветров</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/43156.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Эфенская руна земной тверди</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/43157.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Эфенская руна ледяных штормов</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/43158.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Эфенская руна вечной жизни</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/44000.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Эфенская руна искрящихся молний</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/44001.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Эфенская руна грозовых вихрей</span></button><button type="button" class="aa-combo-option aa-grade-6 "><span class="aa-combo-item-icon"><img src="images/runes/44002.jpg" width="32" height="32" alt=""><!--!-->
+                                              <img class="aa-combo-item-grade" src="images/grades/item_grade_Unique.png" alt=""></span><!--!-->
+                                          <span class="aa-combo-item-name">Эфенская руна неукротимого смерча</span></button><button type="button" class="aa-combo-option aa-grade-3 "><span class="aa-combo-item-icon"><img src="images/runes/24757.jpg" width="32" height="32" alt=""><!--!-->
+
+                            
+

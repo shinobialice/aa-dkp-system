@@ -2,35 +2,33 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ChevronDown } from "lucide-react";
-import { getEngravingsForSlot, type Engraving } from "./itemsData/engravings";
-import { getEngravingCategory } from "./itemsData/engravingSlots";
-import type { WeaponHandedness } from "./itemsData/weaponHandedness";
+import { getRunesForSlot, type Rune } from "./itemsData/runes";
 import { getItemGradeIconUrl } from "./itemsData/paths";
+import type { WeaponHandedness } from "./itemsData/weaponHandedness";
 import {
   getSealGradeColor,
   getSealGradeLabel,
 } from "@/widgets/profile/seals/sealsData";
-import { Input, Tooltip, TooltipTrigger, TooltipContent } from "@/shared/ui";
+import {
+  Input,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/shared/ui";
 import { EffectText } from "./highlightNumbers";
 
-export function EngravingIcon({
-  engraving,
-  size,
-}: {
-  engraving: Engraving;
-  size: number;
-}) {
+export function RuneIcon({ rune, size }: { rune: Rune; size: number }) {
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}>
       <Image
-        src={engraving.iconUrl}
-        alt={engraving.name}
+        src={rune.iconUrl}
+        alt={rune.name}
         width={size}
         height={size}
         className="absolute inset-0"
       />
       <Image
-        src={getItemGradeIconUrl(engraving.grade)}
+        src={getItemGradeIconUrl(rune.grade)}
         alt=""
         width={size}
         height={size}
@@ -40,43 +38,43 @@ export function EngravingIcon({
   );
 }
 
-export function EngravingTooltip({
-  engraving,
+export function RuneTooltip({
+  rune,
   side = "left",
   children,
 }: {
-  engraving: Engraving;
+  rune: Rune;
   side?: "left" | "right" | "top" | "bottom";
   children: React.ReactNode;
 }) {
-  const color = getSealGradeColor(engraving.grade);
+  const color = getSealGradeColor(rune.grade);
   return (
     <Tooltip>
       <TooltipTrigger asChild>{children}</TooltipTrigger>
       <TooltipContent
         side={side}
-        className="dark w-56 border-border bg-background p-3 text-foreground"
+        className="dark pointer-events-none w-64 border-border bg-background p-3 text-foreground"
       >
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <EngravingIcon engraving={engraving} size={32} />
+            <RuneIcon rune={rune} size={32} />
             <div className="min-w-0">
               <div className="text-xs" style={{ color: color ?? undefined }}>
-                {getSealGradeLabel(engraving.grade)} предмет
+                {getSealGradeLabel(rune.grade)} предмет
               </div>
               <div
                 className="truncate text-sm font-semibold"
                 style={{ color: color ?? undefined }}
               >
-                {engraving.name}
+                {rune.name}
               </div>
             </div>
           </div>
-          {engraving.effect && (
+          {rune.effect && (
             <>
               <div className="border-t border-border" />
               <div className="space-y-0.5 text-xs text-muted-foreground">
-                <EffectText text={engraving.effect} />
+                <EffectText text={rune.effect} />
               </div>
             </>
           )}
@@ -86,28 +84,7 @@ export function EngravingTooltip({
   );
 }
 
-function pickerPriority(name: string): number {
-  if (name.startsWith("Зачарованная")) return 0;
-  if (name.startsWith("Шестигранная")) return 1;
-  return 2;
-}
-
-const JEWELRY_TIER_PREFIXES: [string, number][] = [
-  ["Драгоценная ", 4],
-  ["Зачарованная ", 3],
-  ["Искусная ", 2],
-];
-
-function getJewelryTierAndFamily(name: string): { tier: number; family: string } {
-  for (const [prefix, tier] of JEWELRY_TIER_PREFIXES) {
-    if (name.startsWith(prefix)) {
-      return { tier, family: name.slice(prefix.length).toLowerCase() };
-    }
-  }
-  return { tier: 1, family: name.toLowerCase() };
-}
-
-export function EngravingPicker({
+export function RunePicker({
   slot,
   handedness,
   itemId,
@@ -124,19 +101,7 @@ export function EngravingPicker({
   const [query, setQuery] = useState("");
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const isJewelry = getEngravingCategory(slot) === "jewelry";
-  const available = getEngravingsForSlot(slot, handedness, itemId)
-    .slice()
-    .sort((a, b) => {
-      if (isJewelry) {
-        const fa = getJewelryTierAndFamily(a.name);
-        const fb = getJewelryTierAndFamily(b.name);
-        return (
-          fa.family.localeCompare(fb.family, "ru") || fb.tier - fa.tier
-        );
-      }
-      return pickerPriority(a.name) - pickerPriority(b.name);
-    });
+  const available = getRunesForSlot(slot, handedness, itemId);
 
   useEffect(() => {
     if (!open) return;
@@ -152,11 +117,11 @@ export function EngravingPicker({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
 
-  const selected = available.find((e) => e.id === value);
+  const selected = available.find((r) => r.id === value);
 
   const filtered = query.trim()
-    ? available.filter((e) =>
-        e.name.toLowerCase().includes(query.trim().toLowerCase()),
+    ? available.filter((r) =>
+        r.name.toLowerCase().includes(query.trim().toLowerCase()),
       )
     : available;
 
@@ -169,7 +134,7 @@ export function EngravingPicker({
       >
         {selected ? (
           <span className="flex min-w-0 flex-1 items-center gap-2">
-            <EngravingIcon engraving={selected} size={20} />
+            <RuneIcon rune={selected} size={20} />
             <span className="min-w-0 flex-1 truncate text-left">
               {selected.name}
             </span>
@@ -213,23 +178,23 @@ export function EngravingPicker({
                 Ничего не найдено
               </div>
             )}
-            {filtered.map((engraving) => (
-              <EngravingTooltip key={engraving.id} engraving={engraving} side="right">
+            {filtered.map((rune) => (
+              <RuneTooltip key={rune.id} rune={rune} side="right">
                 <button
                   type="button"
                   onClick={() => {
-                    onSelect(engraving.id);
+                    onSelect(rune.id);
                     setOpen(false);
                     setQuery("");
                   }}
                   className={`flex w-full cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-sm hover:bg-accent ${
-                    value === engraving.id ? "bg-accent" : ""
+                    value === rune.id ? "bg-accent" : ""
                   }`}
                 >
-                  <EngravingIcon engraving={engraving} size={28} />
-                  <span className="min-w-0 flex-1 truncate">{engraving.name}</span>
+                  <RuneIcon rune={rune} size={28} />
+                  <span className="min-w-0 flex-1 truncate">{rune.name}</span>
                 </button>
-              </EngravingTooltip>
+              </RuneTooltip>
             ))}
           </div>
         </div>

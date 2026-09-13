@@ -10,6 +10,7 @@ import {
 } from "@/widgets/profile/equipment/itemsData/statsFormula";
 import { getEngravingSlotCount } from "@/widgets/profile/equipment/itemsData/engravingSlots";
 import { isValidEngravingId } from "@/widgets/profile/equipment/itemsData/engravings";
+import { isValidRuneId } from "@/widgets/profile/equipment/itemsData/runes";
 import { WEAPON_HANDEDNESS } from "@/widgets/profile/equipment/itemsData/weaponHandedness";
 import { findGearItem } from "@/widgets/profile/equipment/itemsData";
 
@@ -20,6 +21,7 @@ export type EquipmentInput = {
   enchant: number;
   extraProtection: number;
   engravings: number[];
+  runeId: number;
 };
 
 const saveUserEquipment = async (
@@ -63,6 +65,12 @@ const saveUserEquipment = async (
     if (item.engravings.length > maxSlots) {
       throw new Error(`Слишком много гравировок для слота: ${item.slot}`);
     }
+    if (
+      item.runeId !== 0 &&
+      !isValidRuneId(item.runeId, item.slot, handedness, gearItem?.id)
+    ) {
+      throw new Error(`Некорректный лунный камень / руна в слоте: ${item.slot}`);
+    }
   }
 
   const filled = items.filter((i) => (i.itemName ?? "").trim() !== "");
@@ -72,8 +80,8 @@ const saveUserEquipment = async (
       await tx`DELETE FROM user_equipment WHERE user_id = ${userId}`;
       for (const item of filled) {
         await tx`
-          INSERT INTO user_equipment (user_id, slot, item_name, grade, enchant, extra_protection, engravings)
-          VALUES (${userId}, ${item.slot}, ${item.itemName!.trim()}, ${item.grade}, ${item.enchant}, ${item.extraProtection}, ${sql.array(item.engravings)}::integer[])
+          INSERT INTO user_equipment (user_id, slot, item_name, grade, enchant, extra_protection, engravings, rune_id)
+          VALUES (${userId}, ${item.slot}, ${item.itemName!.trim()}, ${item.grade}, ${item.enchant}, ${item.extraProtection}, ${sql.array(item.engravings)}::integer[], ${item.runeId})
         `;
       }
     });

@@ -23,8 +23,10 @@ import { GearItemIcon } from "./GearItemIcon";
 import { GearItemPicker } from "./GearItemPicker";
 import { EngravingPicker, EngravingIcon, EngravingTooltip } from "./EngravingPicker";
 import { findEngraving } from "./itemsData/engravings";
+import { RunePicker, RuneIcon, RuneTooltip } from "./RunePicker";
+import { findRune } from "./itemsData/runes";
 import { WEAPON_HANDEDNESS } from "./itemsData/weaponHandedness";
-import { highlightNumbers } from "./highlightNumbers";
+import { EffectText } from "./highlightNumbers";
 import { ItemStats } from "./ItemStats";
 import { CharacterStatsPanel } from "./CharacterStatsPanel";
 import { DetailedStatsPanel } from "./DetailedStatsPanel";
@@ -143,9 +145,9 @@ function EngravingDisplay({
           <div key={i} className="flex items-center gap-1.5">
             <EngravingIcon engraving={engraving} size={20} />
             {engraving.effect && (
-              <span className="text-xs text-green-500">
-                {highlightNumbers(engraving.effect)}
-              </span>
+              <div className="text-xs text-green-500">
+                <EffectText text={engraving.effect} />
+              </div>
             )}
           </div>
         );
@@ -235,6 +237,7 @@ function EquipmentSlotButton({
     enchant: number,
     extraProtection: number,
     engravings: number[],
+    runeId: number,
   ) => Promise<void>;
   tooltipSide?: "left" | "right";
 }) {
@@ -247,6 +250,7 @@ function EquipmentSlotButton({
   );
   const [engravings, setEngravings] = useState<number[]>(item?.engravings ?? []);
   const [selectedEngravingId, setSelectedEngravingId] = useState(0);
+  const [runeId, setRuneId] = useState(item?.rune_id ?? 0);
   const [saving, setSaving] = useState(false);
 
   const filled = !!item?.item_name;
@@ -267,6 +271,7 @@ function EquipmentSlotButton({
       setExtraProtection(item?.extra_protection ?? DEFAULT_EXTRA_PROTECTION);
       setEngravings(item?.engravings ?? []);
       setSelectedEngravingId(0);
+      setRuneId(item?.rune_id ?? 0);
     }
     setOpen(next);
   };
@@ -280,6 +285,7 @@ function EquipmentSlotButton({
         enchant,
         extraProtection,
         engravings.slice(0, maxEngravingSlots),
+        runeId,
       );
       setOpen(false);
     } finally {
@@ -290,7 +296,14 @@ function EquipmentSlotButton({
   const handleClear = async () => {
     setSaving(true);
     try {
-      await onSave("", DEFAULT_GRADE, DEFAULT_ENCHANT, DEFAULT_EXTRA_PROTECTION, []);
+      await onSave(
+        "",
+        DEFAULT_GRADE,
+        DEFAULT_ENCHANT,
+        DEFAULT_EXTRA_PROTECTION,
+        [],
+        0,
+      );
       setOpen(false);
     } finally {
       setSaving(false);
@@ -332,285 +345,338 @@ function EquipmentSlotButton({
 
   const gradeColor = getSealGradeColor(grade);
   const tooltipGradeColor = getSealGradeColor(item?.grade ?? DEFAULT_GRADE);
+  const equippedRune = item?.rune_id ? findRune(item.rune_id) : undefined;
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      {selectedGearItem ? (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <DialogTrigger asChild>{button}</DialogTrigger>
-          </TooltipTrigger>
-          <TooltipContent
-            side={tooltipSide}
-            className="dark w-64 border-border bg-background p-3 text-foreground"
-          >
-            <div className="space-y-2">
-              <div className="flex items-start gap-2">
-                <GearItemIcon
-                  item={selectedGearItem}
-                  grade={item?.grade ?? DEFAULT_GRADE}
-                  size={40}
-                />
-                <div className="min-w-0">
-                  <div
-                    className="text-xs"
-                    style={{ color: tooltipGradeColor ?? undefined }}
-                  >
-                    {getSealGradeLabel(item?.grade ?? DEFAULT_GRADE)} предмет
-                  </div>
-                  <div
-                    className="text-sm font-semibold"
-                    style={{ color: tooltipGradeColor ?? undefined }}
-                  >
-                    {(item?.enchant ?? 0) > 0 && `+${item?.enchant} `}
-                    {selectedGearItem.name}
-                  </div>
-                </div>
-              </div>
-
-              {ARMOR_SLOTS.has(slot.key) && (
-                <div className="text-xs text-muted-foreground/70">
-                  Защита от доп. урона оружия Lv.
-                  {item?.extra_protection ?? DEFAULT_EXTRA_PROTECTION}
-                </div>
-              )}
-
-              <div className="border-t border-border" />
-
-              <ItemStats
-                itemId={selectedGearItem.id}
-                grade={item?.grade ?? DEFAULT_GRADE}
-                enchant={item?.enchant ?? DEFAULT_ENCHANT}
-                bare
-              />
-
-              {getEngravingSlotCount(slot.key, item?.grade ?? DEFAULT_GRADE) >
-                0 && (
-                <>
-                  <div className="border-t border-border" />
-                  <EngravingDisplay
-                    count={getEngravingSlotCount(
-                      slot.key,
-                      item?.grade ?? DEFAULT_GRADE,
-                    )}
-                    engravings={item?.engravings ?? []}
+    <div className="relative">
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        {selectedGearItem ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DialogTrigger asChild>{button}</DialogTrigger>
+            </TooltipTrigger>
+            <TooltipContent
+              side={tooltipSide}
+              className="dark pointer-events-none w-64 border-border bg-background p-3 text-foreground"
+            >
+              <div className="space-y-2">
+                <div className="flex items-start gap-2">
+                  <GearItemIcon
+                    item={selectedGearItem}
+                    grade={item?.grade ?? DEFAULT_GRADE}
+                    size={40}
                   />
-                </>
-              )}
-
-              {getEngravingCategory(slot.key) === "armor" && (
-                <>
-                  <div className="border-t border-border" />
-                  <SetProgress />
-                </>
-              )}
-            </div>
-          </TooltipContent>
-        </Tooltip>
-      ) : (
-        <DialogTrigger asChild>{button}</DialogTrigger>
-      )}
-      <DialogContent
-        aria-describedby={undefined}
-        className="dark w-full max-w-2xl border-border bg-background text-foreground"
-      >
-        <DialogHeader>
-          <DialogTitle>{slot.label}</DialogTitle>
-        </DialogHeader>
-
-        {canEdit ? (
-          <div className="space-y-4">
-            <div className="space-y-1.5">
-              <div className="text-xs text-muted-foreground">Предмет:</div>
-              {knownItems ? (
-                <GearItemPicker
-                  items={knownItems}
-                  value={itemName}
-                  onSelect={(gearItem) => {
-                    setItemName(gearItem.name);
-                    setGrade(gearItem.grade);
-                  }}
-                />
-              ) : (
-                <Input
-                  value={itemName}
-                  onChange={(e) => setItemName(e.target.value)}
-                  placeholder="Название предмета"
-                />
-              )}
-            </div>
-
-            {itemName.trim() !== "" && (
-              <div className="space-y-1.5">
-                <div className="text-xs text-muted-foreground">
-                  Качество предмета:
+                  <div className="min-w-0">
+                    <div
+                      className="text-xs"
+                      style={{ color: tooltipGradeColor ?? undefined }}
+                    >
+                      {getSealGradeLabel(item?.grade ?? DEFAULT_GRADE)} предмет
+                    </div>
+                    <div
+                      className="text-sm font-semibold"
+                      style={{ color: tooltipGradeColor ?? undefined }}
+                    >
+                      {(item?.enchant ?? 0) > 0 && `+${item?.enchant} `}
+                      {selectedGearItem.name}
+                    </div>
+                  </div>
                 </div>
-                <Select
-                  value={String(grade)}
-                  onValueChange={(v) => setGrade(Number(v))}
-                >
-                  <SelectTrigger className="w-full cursor-pointer">
-                    <SelectValue placeholder="Грейд" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(isFixedGradeItem
-                      ? SEAL_GRADES.filter((g) => g.grade === 12)
-                      : SEAL_GRADES
-                    ).map((g) => {
-                      const optionColor = getSealGradeColor(g.grade);
-                      return (
-                        <SelectItem key={g.grade} value={String(g.grade)}>
-                          <span
-                            style={
-                              optionColor ? { color: optionColor } : undefined
-                            }
-                          >
-                            {g.label}
-                          </span>
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
 
-            {itemName.trim() !== "" && CUBE_ELIGIBLE_SLOTS.has(slot.key) && (
+                {ARMOR_SLOTS.has(slot.key) && (
+                  <div className="text-xs text-muted-foreground/70">
+                    Защита от доп. урона оружия Lv.
+                    {item?.extra_protection ?? DEFAULT_EXTRA_PROTECTION}
+                  </div>
+                )}
+
+                <div className="border-t border-border" />
+
+                <ItemStats
+                  itemId={selectedGearItem.id}
+                  grade={item?.grade ?? DEFAULT_GRADE}
+                  enchant={item?.enchant ?? DEFAULT_ENCHANT}
+                  bare
+                />
+
+                {equippedRune && (
+                  <>
+                    <div className="border-t border-border" />
+                    <div className="flex items-start gap-1.5">
+                      <RuneIcon rune={equippedRune} size={20} />
+                      {equippedRune.effect && (
+                        <div className="min-w-0 flex-1 space-y-0.5 text-xs text-green-500">
+                          <EffectText text={equippedRune.effect} />
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {getEngravingSlotCount(slot.key, item?.grade ?? DEFAULT_GRADE) >
+                  0 && (
+                  <>
+                    <div className="border-t border-border" />
+                    <EngravingDisplay
+                      count={getEngravingSlotCount(
+                        slot.key,
+                        item?.grade ?? DEFAULT_GRADE,
+                      )}
+                      engravings={item?.engravings ?? []}
+                    />
+                  </>
+                )}
+
+                {getEngravingCategory(slot.key) === "armor" && (
+                  <>
+                    <div className="border-t border-border" />
+                    <SetProgress />
+                  </>
+                )}
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        ) : (
+          <DialogTrigger asChild>{button}</DialogTrigger>
+        )}
+        <DialogContent
+          aria-describedby={undefined}
+          className="dark w-full max-w-2xl border-border bg-background text-foreground"
+        >
+          <DialogHeader>
+            <DialogTitle>{slot.label}</DialogTitle>
+          </DialogHeader>
+
+          {canEdit ? (
+            <div className="space-y-4">
               <div className="space-y-1.5">
-                <div className="text-xs text-muted-foreground">Куб:</div>
-                <Input
-                  type="number"
-                  min={0}
-                  max={MAX_ENCHANT}
-                  step={1}
-                  value={enchant}
-                  onChange={(e) => {
-                    const next = Math.round(Number(e.target.value));
-                    if (isValidEnchantLevel(next)) setEnchant(next);
-                    else if (e.target.value === "") setEnchant(DEFAULT_ENCHANT);
-                  }}
-                  className="w-24"
-                />
+                <div className="text-xs text-muted-foreground">Предмет:</div>
+                {knownItems ? (
+                  <GearItemPicker
+                    items={knownItems}
+                    value={itemName}
+                    onSelect={(gearItem) => {
+                      setItemName(gearItem.name);
+                      setGrade(gearItem.grade);
+                    }}
+                  />
+                ) : (
+                  <Input
+                    value={itemName}
+                    onChange={(e) => setItemName(e.target.value)}
+                    placeholder="Название предмета"
+                  />
+                )}
               </div>
-            )}
 
-            {itemName.trim() !== "" && ARMOR_SLOTS.has(slot.key) && (
-              <div className="space-y-1.5">
-                <div className="text-xs text-muted-foreground">Доп.:</div>
-                <Input
-                  type="number"
-                  min={0}
-                  max={MAX_EXTRA_PROTECTION}
-                  step={1}
-                  value={extraProtection}
-                  onChange={(e) => {
-                    const next = Math.round(Number(e.target.value));
-                    if (isValidExtraProtectionLevel(next)) setExtraProtection(next);
-                    else if (e.target.value === "")
-                      setExtraProtection(DEFAULT_EXTRA_PROTECTION);
-                  }}
-                  className="w-24"
-                />
-              </div>
-            )}
+              {itemName.trim() !== "" && (
+                <div className="space-y-1.5">
+                  <div className="text-xs text-muted-foreground">
+                    Качество предмета:
+                  </div>
+                  <Select
+                    value={String(grade)}
+                    onValueChange={(v) => setGrade(Number(v))}
+                  >
+                    <SelectTrigger className="w-full cursor-pointer">
+                      <SelectValue placeholder="Грейд" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(isFixedGradeItem
+                        ? SEAL_GRADES.filter((g) => g.grade === 12)
+                        : SEAL_GRADES
+                      ).map((g) => {
+                        const optionColor = getSealGradeColor(g.grade);
+                        return (
+                          <SelectItem key={g.grade} value={String(g.grade)}>
+                            <span
+                              style={
+                                optionColor ? { color: optionColor } : undefined
+                              }
+                            >
+                              {g.label}
+                            </span>
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
-            {itemName.trim() !== "" && maxEngravingSlots > 0 && (
-              <div className="space-y-1.5">
-                <div className="text-xs text-muted-foreground">Гравировки:</div>
-                <EngravingPicker
-                  slot={slot.key}
-                  handedness={draftHandedness}
-                  itemId={draftGearItem?.id}
-                  value={selectedEngravingId}
-                  onSelect={setSelectedEngravingId}
-                />
-                <EngravingSlots
-                  count={maxEngravingSlots}
-                  engravings={engravings}
-                  selectedEngravingId={selectedEngravingId}
-                  onToggle={(i) => {
-                    setEngravings((prev) => {
-                      const next = [...prev];
-                      while (next.length <= i) next.push(0);
-                      next[i] = next[i] ? 0 : selectedEngravingId;
-                      return next;
-                    });
-                  }}
-                  onClearAll={() => setEngravings([])}
-                />
-              </div>
-            )}
+              {itemName.trim() !== "" && CUBE_ELIGIBLE_SLOTS.has(slot.key) && (
+                <div className="space-y-1.5">
+                  <div className="text-xs text-muted-foreground">Куб:</div>
+                  <Input
+                    type="number"
+                    min={0}
+                    max={MAX_ENCHANT}
+                    step={1}
+                    value={enchant}
+                    onChange={(e) => {
+                      const next = Math.round(Number(e.target.value));
+                      if (isValidEnchantLevel(next)) setEnchant(next);
+                      else if (e.target.value === "") setEnchant(DEFAULT_ENCHANT);
+                    }}
+                    className="w-24"
+                  />
+                </div>
+              )}
 
-            <div className="flex justify-end gap-2">
-              {filled && (
+              {itemName.trim() !== "" && ARMOR_SLOTS.has(slot.key) && (
+                <div className="space-y-1.5">
+                  <div className="text-xs text-muted-foreground">Доп.:</div>
+                  <Input
+                    type="number"
+                    min={0}
+                    max={MAX_EXTRA_PROTECTION}
+                    step={1}
+                    value={extraProtection}
+                    onChange={(e) => {
+                      const next = Math.round(Number(e.target.value));
+                      if (isValidExtraProtectionLevel(next)) setExtraProtection(next);
+                      else if (e.target.value === "")
+                        setExtraProtection(DEFAULT_EXTRA_PROTECTION);
+                    }}
+                    className="w-24"
+                  />
+                </div>
+              )}
+
+              {itemName.trim() !== "" && maxEngravingSlots > 0 && (
+                <div className="space-y-1.5">
+                  <div className="text-xs text-muted-foreground">Гравировки:</div>
+                  <EngravingPicker
+                    slot={slot.key}
+                    handedness={draftHandedness}
+                    itemId={draftGearItem?.id}
+                    value={selectedEngravingId}
+                    onSelect={setSelectedEngravingId}
+                  />
+                  <EngravingSlots
+                    count={maxEngravingSlots}
+                    engravings={engravings}
+                    selectedEngravingId={selectedEngravingId}
+                    onToggle={(i) => {
+                      setEngravings((prev) => {
+                        const next = [...prev];
+                        while (next.length <= i) next.push(0);
+                        next[i] = next[i] ? 0 : selectedEngravingId;
+                        return next;
+                      });
+                    }}
+                    onClearAll={() => setEngravings([])}
+                  />
+                </div>
+              )}
+
+              {itemName.trim() !== "" && (
+                <div className="space-y-1.5">
+                  <div className="text-xs text-muted-foreground">
+                    Лунный камень / руна:
+                  </div>
+                  <RunePicker
+                    slot={slot.key}
+                    handedness={draftHandedness}
+                    itemId={draftGearItem?.id}
+                    value={runeId}
+                    onSelect={setRuneId}
+                  />
+                </div>
+              )}
+
+              <div className="flex justify-end gap-2">
+                {filled && (
+                  <Button
+                    variant="ghost"
+                    className="cursor-pointer"
+                    onClick={handleClear}
+                    disabled={saving}
+                  >
+                    Очистить
+                  </Button>
+                )}
                 <Button
-                  variant="ghost"
                   className="cursor-pointer"
-                  onClick={handleClear}
+                  onClick={handleSave}
                   disabled={saving}
                 >
-                  Очистить
+                  {saving ? "Сохранение..." : "Сохранить"}
                 </Button>
-              )}
-              <Button
-                className="cursor-pointer"
-                onClick={handleSave}
-                disabled={saving}
-              >
-                {saving ? "Сохранение..." : "Сохранить"}
-              </Button>
+              </div>
             </div>
-          </div>
-        ) : filled ? (
-          <div className="space-y-1.5">
-            {selectedGearItem && (
-              <div className="flex items-center gap-2">
-                <GearItemIcon
-                  item={selectedGearItem}
+          ) : filled ? (
+            <div className="space-y-1.5">
+              {selectedGearItem && (
+                <div className="flex items-center gap-2">
+                  <GearItemIcon
+                    item={selectedGearItem}
+                    grade={item!.grade}
+                    size={32}
+                  />
+                  <span
+                    className="min-w-0 flex-1 truncate text-sm"
+                    style={{ color: gradeColor ?? undefined }}
+                  >
+                    {selectedGearItem.name}
+                  </span>
+                </div>
+              )}
+              {!selectedGearItem && (
+                <div className="text-sm">{item!.item_name}</div>
+              )}
+              <div className="flex gap-1.5">
+                <Badge variant="outline">{getSealGradeLabel(item!.grade)}</Badge>
+                {item!.enchant > 0 && (
+                  <Badge variant="outline">+{item!.enchant}</Badge>
+                )}
+              </div>
+              {selectedGearItem && ARMOR_SLOTS.has(slot.key) && (
+                <div className="text-xs text-muted-foreground/70">
+                  Защита от доп. урона оружия Lv.{item!.extra_protection}
+                </div>
+              )}
+              {selectedGearItem && (
+                <ItemStats
+                  itemId={selectedGearItem.id}
                   grade={item!.grade}
-                  size={32}
+                  enchant={item!.enchant}
                 />
-                <span
-                  className="min-w-0 flex-1 truncate text-sm"
-                  style={{ color: gradeColor ?? undefined }}
-                >
-                  {selectedGearItem.name}
-                </span>
-              </div>
-            )}
-            {!selectedGearItem && (
-              <div className="text-sm">{item!.item_name}</div>
-            )}
-            <div className="flex gap-1.5">
-              <Badge variant="outline">{getSealGradeLabel(item!.grade)}</Badge>
-              {item!.enchant > 0 && (
-                <Badge variant="outline">+{item!.enchant}</Badge>
+              )}
+              {equippedRune && (
+                <div className="flex items-start gap-1.5">
+                  <RuneIcon rune={equippedRune} size={20} />
+                  {equippedRune.effect && (
+                    <div className="min-w-0 flex-1 space-y-0.5 text-xs text-green-500">
+                      <EffectText text={equippedRune.effect} />
+                    </div>
+                  )}
+                </div>
+              )}
+              {getEngravingSlotCount(slot.key, item!.grade) > 0 && (
+                <EngravingDisplay
+                  count={getEngravingSlotCount(slot.key, item!.grade)}
+                  engravings={item!.engravings}
+                />
               )}
             </div>
-            {selectedGearItem && ARMOR_SLOTS.has(slot.key) && (
-              <div className="text-xs text-muted-foreground/70">
-                Защита от доп. урона оружия Lv.{item!.extra_protection}
-              </div>
-            )}
-            {selectedGearItem && (
-              <ItemStats
-                itemId={selectedGearItem.id}
-                grade={item!.grade}
-                enchant={item!.enchant}
-              />
-            )}
-            {getEngravingSlotCount(slot.key, item!.grade) > 0 && (
-              <EngravingDisplay
-                count={getEngravingSlotCount(slot.key, item!.grade)}
-                engravings={item!.engravings}
-              />
-            )}
+          ) : (
+            <div className="text-sm text-muted-foreground">Пусто</div>
+          )}
+        </DialogContent>
+      </Dialog>
+      {equippedRune && (
+        <RuneTooltip rune={equippedRune} side={tooltipSide}>
+          <div
+            className={`absolute top-1/2 flex size-7 -translate-y-1/2 cursor-default items-center justify-center overflow-hidden rounded-md border border-border bg-background shadow-sm ${
+              tooltipSide === "left" ? "-left-8" : "-right-8"
+            }`}
+          >
+            <RuneIcon rune={equippedRune} size={24} />
           </div>
-        ) : (
-          <div className="text-sm text-muted-foreground">Пусто</div>
-        )}
-      </DialogContent>
-    </Dialog>
+        </RuneTooltip>
+      )}
+    </div>
   );
 }
 
@@ -643,10 +709,11 @@ export default function EquipmentTab({
     enchant: number,
     extraProtection: number,
     engravings: number[],
+    runeId: number,
   ) => {
     const payload: EquipmentInput[] = EQUIPMENT_SLOTS.map((slot) => {
       if (slot.key === slotKey) {
-        return { slot: slot.key, itemName, grade, enchant, extraProtection, engravings };
+        return { slot: slot.key, itemName, grade, enchant, extraProtection, engravings, runeId };
       }
       const existing = equipmentBySlot[slot.key];
       return {
@@ -656,6 +723,7 @@ export default function EquipmentTab({
         enchant: existing?.enchant ?? DEFAULT_ENCHANT,
         extraProtection: existing?.extra_protection ?? DEFAULT_EXTRA_PROTECTION,
         engravings: existing?.engravings ?? [],
+        runeId: existing?.rune_id ?? 0,
       };
     });
 
@@ -699,7 +767,7 @@ export default function EquipmentTab({
               item={equipmentBySlot[TOP.key]}
               equipment={equipment}
               canEdit={canEdit}
-              onSave={(itemName, grade, enchant, extraProtection, engravings) =>
+              onSave={(itemName, grade, enchant, extraProtection, engravings, runeId) =>
                 handleSaveSlot(
                   TOP.key,
                   itemName,
@@ -707,6 +775,7 @@ export default function EquipmentTab({
                   enchant,
                   extraProtection,
                   engravings,
+                  runeId,
                 )
               }
             />
@@ -721,7 +790,7 @@ export default function EquipmentTab({
                   item={equipmentBySlot[slot.key]}
                   equipment={equipment}
                   canEdit={canEdit}
-                  onSave={(itemName, grade, enchant, extraProtection, engravings) =>
+                  onSave={(itemName, grade, enchant, extraProtection, engravings, runeId) =>
                     handleSaveSlot(
                       slot.key,
                       itemName,
@@ -729,6 +798,7 @@ export default function EquipmentTab({
                       enchant,
                       extraProtection,
                       engravings,
+                      runeId,
                     )
                   }
                 />
@@ -782,7 +852,7 @@ export default function EquipmentTab({
                   equipment={equipment}
                   canEdit={canEdit}
                   tooltipSide="right"
-                  onSave={(itemName, grade, enchant, extraProtection, engravings) =>
+                  onSave={(itemName, grade, enchant, extraProtection, engravings, runeId) =>
                     handleSaveSlot(
                       slot.key,
                       itemName,
@@ -790,6 +860,7 @@ export default function EquipmentTab({
                       enchant,
                       extraProtection,
                       engravings,
+                      runeId,
                     )
                   }
                 />

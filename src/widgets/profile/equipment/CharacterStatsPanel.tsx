@@ -270,12 +270,12 @@ export function CharacterStatsPanel({
           <StatBar value={stats.health} color="#72a91a" borderColor="#b9d48d" />
           <StatBar value={stats.mana} color="#3190f4" borderColor="#98c8fa" />
 
-          <div className="pointer-events-none absolute -top-11 -left-1 z-10 size-23">
+          <div className="pointer-events-none absolute -top-10 -left-1 z-10 size-23">
             <Image
-              src="/images/equipment/ramka.png"
+              src="/images/equipment/frame.png"
               alt=""
               fill
-              sizes="48px"
+              sizes="92px"
               className="object-contain"
             />
           </div>
