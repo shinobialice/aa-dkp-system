@@ -73,10 +73,7 @@ export async function approveRaidSuggestion(id: number) {
     new Date(suggestion.kill_time),
     [],
     [raidBoss.id],
-    false,
-    false,
-    false,
-    false,
+    [],
     [],
   );
 

@@ -14,7 +14,7 @@ export const getRaidById = async (id: string) => {
       throw new Error("Raid not found");
     }
 
-    const [raidBossRows, attendanceRows, lootRows, [activeMembersRow]] =
+    const [raidBossRows, attendanceRows, lootRows, [activeMembersRow], bonusRows] =
       await Promise.all([
         sql<any[]>`
         SELECT b.id, b.boss_name, b.dkp_points, b.category
@@ -44,11 +44,15 @@ export const getRaidById = async (id: string) => {
         WHERE active = true
           AND (joined_at IS NULL OR joined_at <= ${raid.start_date})
       `,
+        sql<any[]>`
+        SELECT bonus_type_id FROM raid_bonus WHERE raid_id = ${raidId}
+      `,
       ]);
 
     return {
       ...raid,
       guildActiveMembersAtTime: activeMembersRow?.count ?? 0,
+      bonusTypeIds: bonusRows.map((b) => b.bonus_type_id),
       raid_boss: raidBossRows.map((b) => ({
         boss: {
           id: b.id,

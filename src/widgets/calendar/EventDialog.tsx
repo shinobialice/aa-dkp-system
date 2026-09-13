@@ -41,10 +41,7 @@ export function EventDialog({
   const [selectedBosses, setSelectedBosses] = useState<any[]>([]);
   const [dkpPoints, setDkpPoints] = useState<number>(0);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [isPvp, setIsPvp] = useState(false);
-  const [isPvpLong, setIsPvpLong] = useState(false);
-  const [isProc, setIsProc] = useState(false);
-  const [isDoubleProc, setIsDoubleProc] = useState(false);
+  const [activeBonusIds, setActiveBonusIds] = useState<Record<number, boolean>>({});
   const [rowSelection, setRowSelection] = useState<Record<number, boolean>>({});
   const [lateUserIds, setLateUserIds] = useState<Record<number, boolean>>({});
   const [lootLinkIds, setLootLinkIds] = useState<Record<number, boolean>>({});
@@ -73,10 +70,11 @@ export function EventDialog({
           ? parseMoscowISOString(selectedEvent.start_date)
           : null,
       );
-      setIsPvp(selectedEvent.is_pvp);
-      setIsPvpLong(selectedEvent.is_pvp_long);
-      setIsProc(selectedEvent.is_proc ?? false);
-      setIsDoubleProc(selectedEvent.is_double_proc ?? false);
+      const bonusIds: Record<number, boolean> = {};
+      (selectedEvent.bonusTypeIds ?? []).forEach((id: number) => {
+        bonusIds[id] = true;
+      });
+      setActiveBonusIds(bonusIds);
 
       const bosses = selectedEvent.raid_boss?.map((rb: any) => rb.boss) || [];
       setSelectedBosses(bosses);
@@ -119,10 +117,7 @@ export function EventDialog({
       setSelectedBosses([]);
       setDkpPoints(0);
       setSelectedDate(null);
-      setIsPvp(false);
-      setIsPvpLong(false);
-      setIsProc(false);
-      setIsDoubleProc(false);
+      setActiveBonusIds({});
       setRowSelection({});
       setLateUserIds({});
       setLootLinkIds({});
@@ -150,6 +145,9 @@ export function EventDialog({
 
     const userIds = selectedUsers.map((u) => u.id);
     const bossIds = selectedBosses.map((b) => b.id);
+    const bonusTypeIds = Object.entries(activeBonusIds)
+      .filter(([, checked]) => checked)
+      .map(([id]) => Number(id));
     const lateIds = userIds.filter((id) => lateUserIds[id]);
     const lootIdsToLink = Object.entries(lootLinkIds)
       .filter(([, checked]) => checked)
@@ -164,10 +162,7 @@ export function EventDialog({
           selectedDate!,
           userIds,
           bossIds,
-          isPvp,
-          isPvpLong,
-          isProc,
-          isDoubleProc,
+          bonusTypeIds,
           lateIds,
         );
         if (lootIdsToLink.length > 0) {
@@ -181,10 +176,7 @@ export function EventDialog({
           selectedDate!,
           userIds,
           bossIds,
-          isPvp,
-          isPvpLong,
-          isProc,
-          isDoubleProc,
+          bonusTypeIds,
           lateIds,
         );
         if (lootIdsToLink.length > 0) {
@@ -235,14 +227,8 @@ export function EventDialog({
               errors={errors}
               setErrors={setErrors}
               bosses={bosses}
-              isPvp={isPvp}
-              setIsPvp={setIsPvp}
-              isPvpLong={isPvpLong}
-              setIsPvpLong={setIsPvpLong}
-              isProc={isProc}
-              setIsProc={setIsProc}
-              isDoubleProc={isDoubleProc}
-              setIsDoubleProc={setIsDoubleProc}
+              activeBonusIds={activeBonusIds}
+              setActiveBonusIds={setActiveBonusIds}
               loot={mode === "edit" ? selectedEvent?.loot : undefined}
               lootLinkIds={lootLinkIds}
               setLootLinkIds={setLootLinkIds}

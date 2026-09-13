@@ -15,10 +15,7 @@ const updateEvent = async (
   start_date: Date,
   userIds: number[],
   bossIds: number[],
-  is_pvp: boolean,
-  is_pvp_long: boolean,
-  is_proc: boolean = false,
-  is_double_proc: boolean = false,
+  bonusTypeIds: number[],
   lateUserIds: number[] = [],
 ) => {
   await ensurePrivilieges([
@@ -39,11 +36,7 @@ const updateEvent = async (
       UPDATE raid SET
         type = ${type},
         dkp_summary = ${dkp_summary},
-        start_date = ${getMoscowISOString(start_date)},
-        is_pvp = ${is_pvp},
-        is_pvp_long = ${is_pvp_long},
-        is_proc = ${is_proc},
-        is_double_proc = ${is_double_proc}
+        start_date = ${getMoscowISOString(start_date)}
       WHERE id = ${id}
     `;
   } catch (updateError) {
@@ -54,6 +47,7 @@ const updateEvent = async (
   try {
     await sql<any[]>`DELETE FROM raid_attendance WHERE raid_id = ${id}`;
     await sql<any[]>`DELETE FROM raid_boss WHERE raid_id = ${id}`;
+    await sql<any[]>`DELETE FROM raid_bonus WHERE raid_id = ${id}`;
   } catch {
     throw new Error("Не удалось очистить старые связи рейда");
   }
@@ -83,6 +77,19 @@ const updateEvent = async (
       await sql<any[]>`INSERT INTO raid_boss ${sql(raidBossInsert)}`;
     } catch {
       throw new Error("Не удалось добавить боссов к рейду");
+    }
+  }
+
+  if (bonusTypeIds.length > 0) {
+    const raidBonusInsert = bonusTypeIds.map((bonus_type_id) => ({
+      raid_id: id,
+      bonus_type_id,
+    }));
+
+    try {
+      await sql<any[]>`INSERT INTO raid_bonus ${sql(raidBonusInsert)}`;
+    } catch {
+      throw new Error("Не удалось добавить бонусы к рейду");
     }
   }
 

@@ -8,12 +8,9 @@ import { Checkbox } from "@/shared/ui";
 import { Label } from "@/shared/ui";
 import { Input } from "@/shared/ui";
 import { getActiveUsers } from "@/actions/getActiveUsers";
-import { getAttendanceBonusSettings } from "@/actions/attendanceBonusSettings";
-import {
-  DEFAULT_ATTENDANCE_BONUS_SETTINGS,
-  type AttendanceBonusSettings,
-} from "@/utils/attendanceBonusDefaults";
-import eventDkpCalculator from "@/utils/eventDkpCalculator";
+import { getAttendanceBonusTypesForRaid } from "@/actions/attendanceBonusSettings";
+import type { ResolvedAttendanceBonus } from "@/utils/attendanceBonusDefaults";
+import computeRaidDkp from "@/utils/eventDkpCalculator";
 import { LootIcon } from "@/widgets/Loot/LootBuy/icons/LootIconComponent";
 import { getUnlinkedLootCandidates } from "@/actions/getUnlinkedLootCandidates";
 import { isPrimeLinkableSource } from "@/widgets/Loot/GuildLoot/LootTypes";
@@ -33,14 +30,8 @@ export function RaidDetailsForm({
   errors,
   setErrors,
   bosses,
-  isPvp,
-  setIsPvp,
-  isPvpLong,
-  setIsPvpLong,
-  isProc,
-  setIsProc,
-  isDoubleProc,
-  setIsDoubleProc,
+  activeBonusIds,
+  setActiveBonusIds,
   loot,
   lootLinkIds,
   setLootLinkIds,
@@ -61,20 +52,14 @@ export function RaidDetailsForm({
   errors: any;
   setErrors: React.Dispatch<React.SetStateAction<any>>;
   bosses: any[];
-  isPvp: boolean;
-  setIsPvp: (val: boolean) => void;
-  isPvpLong: boolean;
-  setIsPvpLong: (val: boolean) => void;
-  isProc: boolean;
-  setIsProc: (val: boolean) => void;
-  isDoubleProc: boolean;
-  setIsDoubleProc: (val: boolean) => void;
+  activeBonusIds: Record<number, boolean>;
+  setActiveBonusIds: React.Dispatch<React.SetStateAction<Record<number, boolean>>>;
   loot?: any[];
   lootLinkIds: Record<number, boolean>;
   setLootLinkIds: React.Dispatch<React.SetStateAction<Record<number, boolean>>>;
   mode?: "create" | "edit";
 }) {
-  const [bonus, setBonus] = React.useState<AttendanceBonusSettings | null>(
+  const [bonuses, setBonuses] = React.useState<ResolvedAttendanceBonus[] | null>(
     null,
   );
 
@@ -87,43 +72,47 @@ export function RaidDetailsForm({
   }, [setUsers]);
 
   React.useEffect(() => {
-    getAttendanceBonusSettings()
-      .then(setBonus)
-      .catch(() => setBonus(DEFAULT_ATTENDANCE_BONUS_SETTINGS));
+    getAttendanceBonusTypesForRaid()
+      .then(setBonuses)
+      .catch(() => setBonuses([]));
   }, []);
 
   React.useEffect(() => {
-    if (!bonus) return;
-    let dkp = 0;
-    if (category === "АГЛ") {
-      dkp = selectedBosses.reduce(
-        (sum, boss) => sum + (boss.dkp_points || 0),
-        0,
-      );
-      if (isPvp) dkp += bonus.pvpPoints;
-      else if (isPvpLong) dkp += bonus.pvpLongPoints;
-      if (isProc) dkp += bonus.procPoints;
-      if (isDoubleProc) dkp += bonus.doubleProcPoints;
-    } else {
-      dkp = eventDkpCalculator(selectedBosses[0], isPvp, isPvpLong, bonus);
-    }
-    setDkpPoints(dkp);
-  }, [selectedBosses, isPvp, isPvpLong, isProc, isDoubleProc, category, bonus]);
+    if (!bonuses) return;
+    const baseDkp = selectedBosses.reduce(
+      (sum, boss) => sum + (boss.dkp_points || 0),
+      0,
+    );
+    const active = bonuses.filter((b) => activeBonusIds[b.id]);
+    setDkpPoints(computeRaidDkp(baseDkp, active));
+  }, [selectedBosses, activeBonusIds, bonuses]);
 
-  // Прок/х2 Прок относятся только к обычному АГЛ — для Морфа, Марли Прока
-  // и Кошки этих чекбоксов нет. Сбрасываем их только когда босса меняет
-  // сам пользователь (см. handleSelectBoss) — НЕ через эффект на
-  // selectedBoss, иначе это срабатывало бы и при загрузке старого рейда в
-  // режиме редактирования, тихо обнуляя уже сохранённый исторический бонус
-  // ещё до того, как админ вообще коснулся формы.
+  // У каждого бонуса свой набор боссов, на которых он применяется (настраивается
+  // в Settings). Если выбранный босс сменился и бонус к нему больше не
+  // относится — снимаем галку. НЕ трогаем, пока bonuses ещё не загружены,
+  // иначе это тихо обнуляло бы уже сохранённый исторический бонус при
+  // загрузке старого рейда в режиме редактирования ещё до того, как админ
+  // вообще коснулся формы.
+  React.useEffect(() => {
+    if (!bonuses) return;
+    setActiveBonusIds((prev) => {
+      const next: Record<number, boolean> = {};
+      for (const [idStr, checked] of Object.entries(prev)) {
+        if (!checked) continue;
+        const id = Number(idStr);
+        const bonus = bonuses.find((b) => b.id === id);
+        if (bonus && selectedBosses.some((boss) => bonus.bossIds.includes(boss.id))) {
+          next[id] = true;
+        }
+      }
+      return next;
+    });
+  }, [selectedBosses, bonuses, setActiveBonusIds]);
+
   const handleSelectBoss = (boss: any) => {
     setSelectedBoss(boss.boss_name);
     setSelectedBosses([boss]);
     setErrors((prev: any) => ({ ...prev, selectedBoss: false }));
-    if (category === "АГЛ" && boss.boss_name !== "АГЛ") {
-      setIsProc(false);
-      setIsDoubleProc(false);
-    }
   };
 
   const visibleLoot = (loot ?? []).filter(
@@ -157,10 +146,7 @@ export function RaidDetailsForm({
         setCategory={setCategory}
         setSelectedBoss={setSelectedBoss}
         setSelectedBosses={setSelectedBosses}
-        setIsPvp={setIsPvp}
-        setIsPvpLong={setIsPvpLong}
-        setIsProc={setIsProc}
-        setIsDoubleProc={setIsDoubleProc}
+        setActiveBonusIds={setActiveBonusIds}
         setErrors={setErrors}
         errors={errors}
       />
@@ -172,88 +158,28 @@ export function RaidDetailsForm({
         errors={errors}
       />
 
-      {category === "АГЛ" && (
-        <>
-          <div className="flex items-center space-x-2">
+      {bonuses
+        ?.filter((b) =>
+          selectedBosses.some((boss) => b.bossIds.includes(boss.id)),
+        )
+        .map((b) => (
+          <div key={b.id} className="flex items-center space-x-2">
             <Checkbox
               className="cursor-pointer"
-              id="pvp_agl"
-              checked={isPvp}
-              disabled={isPvpLong}
-              onCheckedChange={(checked) => {
-                setIsPvp(checked === true);
-                if (checked) {
-                  setIsPvpLong(false);
-                }
-              }}
+              id={`bonus_${b.id}`}
+              checked={!!activeBonusIds[b.id]}
+              onCheckedChange={(checked) =>
+                setActiveBonusIds((prev) => ({
+                  ...prev,
+                  [b.id]: checked === true,
+                }))
+              }
             />
-            <label htmlFor="pvp_agl" className="text-sm">
-              ПВП
+            <label htmlFor={`bonus_${b.id}`} className="text-sm">
+              {b.label}
             </label>
           </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              className="cursor-pointer"
-              id="long_pvp_agl"
-              checked={isPvpLong}
-              disabled={isPvp}
-              onCheckedChange={(checked) => {
-                setIsPvpLong(checked === true);
-                if (checked) {
-                  setIsPvp(false);
-                }
-              }}
-            />
-            <label htmlFor="long_pvp_agl" className="text-sm">
-              ПВП дольше 30 минут
-            </label>
-          </div>
-          {selectedBoss === "АГЛ" && (
-            <>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  className="cursor-pointer"
-                  id="proc_agl"
-                  checked={isProc}
-                  onCheckedChange={(checked) => setIsProc(checked === true)}
-                />
-                <label htmlFor="proc_agl" className="text-sm">
-                  Прок
-                </label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  className="cursor-pointer"
-                  id="double_proc_agl"
-                  checked={isDoubleProc}
-                  onCheckedChange={(checked) =>
-                    setIsDoubleProc(checked === true)
-                  }
-                />
-                <label htmlFor="double_proc_agl" className="text-sm">
-                  х2 Прок
-                </label>
-              </div>
-            </>
-          )}
-        </>
-      )}
-
-      {category === "Прайм" && (
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            className="cursor-pointer"
-            id="pvp_prime"
-            checked={isPvp}
-            onCheckedChange={(checked) => {
-              setIsPvp(checked === true);
-            }}
-          />
-          <label htmlFor="pvp_prime" className="text-sm">
-            ПВП
-          </label>
-        </div>
-      )}
+        ))}
       <div className="space-y-2">
         <Label>Дата и время (МСК)</Label>
         {mode === "edit" ? (

@@ -10,10 +10,7 @@ const createRaidEvent = async (
   start_date: Date,
   userIds: number[],
   bossIds: number[],
-  is_pvp: boolean,
-  is_pvp_long: boolean,
-  is_proc: boolean = false,
-  is_double_proc: boolean = false,
+  bonusTypeIds: number[],
   lateUserIds: number[] = [],
 ) => {
   await ensurePrivilieges([
@@ -41,10 +38,9 @@ const createRaidEvent = async (
   try {
     [raid] = await sql<any[]>`
       INSERT INTO raid
-        (type, dkp_summary, start_date, created_at, is_pvp, is_pvp_long, is_proc, is_double_proc, active_user_count)
+        (type, dkp_summary, start_date, created_at, active_user_count)
       VALUES (
-        ${type}, ${dkp_summary}, ${getMoscowISOString(start_date)}, now(),
-        ${is_pvp}, ${is_pvp_long}, ${is_proc}, ${is_double_proc}, ${active_user_count}
+        ${type}, ${dkp_summary}, ${getMoscowISOString(start_date)}, now(), ${active_user_count}
       )
       RETURNING *
     `;
@@ -82,6 +78,20 @@ const createRaidEvent = async (
     } catch (bossError) {
       console.error("Failed to insert raid bosses:", bossError);
       throw new Error("Ошибка при добавлении боссов");
+    }
+  }
+
+  if (bonusTypeIds.length > 0) {
+    const bonusData = bonusTypeIds.map((bonus_type_id) => ({
+      raid_id: raid.id,
+      bonus_type_id,
+    }));
+
+    try {
+      await sql<any[]>`INSERT INTO raid_bonus ${sql(bonusData)}`;
+    } catch (bonusError) {
+      console.error("Failed to insert raid bonuses:", bonusError);
+      throw new Error("Ошибка при добавлении бонусов");
     }
   }
 

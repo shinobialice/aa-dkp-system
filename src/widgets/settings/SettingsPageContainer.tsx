@@ -44,7 +44,7 @@ type UserOption = {
 const sections = [
   { id: "users", label: "Пользователи", icon: UsersIcon },
   { id: "guild", label: "Гильдия", icon: MapPin },
-  { id: "bosses", label: "Боссы и респаун", icon: Swords },
+  { id: "bosses", label: "Баллы за посещаемость", icon: Swords },
   { id: "salary", label: "Зарплата", icon: HandCoins },
   { id: "vk", label: "Уведомления ВК", icon: Bell },
   { id: "event", label: "Ивент", icon: PartyPopper },
@@ -180,7 +180,7 @@ export function SettingsPageContainer() {
 
           {active === "bosses" && (
             <section className="space-y-6">
-              <h2 className="text-2xl font-bold">Боссы и респаун</h2>
+              <h2 className="text-2xl font-bold">Баллы за посещаемость</h2>
 
               <Card className="p-4">
                 <BossPointsSettingsForm />
