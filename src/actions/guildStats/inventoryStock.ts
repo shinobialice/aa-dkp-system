@@ -175,15 +175,24 @@ export async function getInventoryStock(): Promise<InventoryStockStat[]> {
     })
   ).filter((row) => PROFILE_INVENTORY_TYPES.includes(row.type));
 
-  const users = await sql<any[]>`
-    SELECT id, username, class, active FROM "user"
-  `.catch((error) => {
-    console.error("Ошибка при получении пользователей:", error);
-    throw new Error("Не удалось загрузить пользователей");
-  });
+  const [users, afkTagRows] = await Promise.all([
+    sql<any[]>`
+      SELECT id, username, class, active FROM "user"
+    `.catch((error) => {
+      console.error("Ошибка при получении пользователей:", error);
+      throw new Error("Не удалось загрузить пользователей");
+    }),
+    sql<{ user_id: number }[]>`
+      SELECT user_id FROM user_tags WHERE tag = 'АФК' AND removed_at IS NULL
+    `.catch((error) => {
+      console.error("Ошибка при получении тэгов АФК:", error);
+      throw new Error("Не удалось загрузить тэги АФК");
+    }),
+  ]);
 
+  const afkUserIds = new Set(afkTagRows.map((r) => r.user_id));
   const activeUserIds = new Set(
-    users.filter((u) => u.active).map((u) => u.id),
+    users.filter((u) => u.active && !afkUserIds.has(u.id)).map((u) => u.id),
   );
   const playerById = new Map<number, NamedPlayer>(
     users.map((u) => [u.id, { username: u.username, class: u.class }]),
