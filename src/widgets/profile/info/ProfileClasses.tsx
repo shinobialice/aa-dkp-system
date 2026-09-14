@@ -32,6 +32,11 @@ const classIcons: Record<string, JSX.Element> = {
   Стрелок: <Pistol className="size-4" />,
 };
 
+// ГС — только цифры, не больше 5 знаков (макс. 99999).
+function sanitizeGearScoreInput(value: string): string {
+  return value.replace(/\D/g, "").slice(0, 5);
+}
+
 const classList = [
   "Хил",
   "Танцор",
@@ -84,8 +89,10 @@ function ExtraRoleField({
           </Select>
           <Input
             className="w-[70px]"
+            inputMode="numeric"
+            maxLength={5}
             value={gsValue ?? ""}
-            onChange={(e) => onGsChange(e.target.value)}
+            onChange={(e) => onGsChange(sanitizeGearScoreInput(e.target.value))}
             disabled={!roleValue}
           />
         </div>
@@ -155,8 +162,7 @@ export default function ProfileClasses({
     },
     {
       key: "tertiary",
-      hasData:
-        !!user.tertiary_class || user.tertiary_class_gear_score != null,
+      hasData: !!user.tertiary_class || user.tertiary_class_gear_score != null,
       roleValue: formData.tertiaryClass ?? null,
       gsValue: formData.tertiaryClassGearScore ?? null,
       archetype: archetype[3],
@@ -206,11 +212,13 @@ export default function ProfileClasses({
             </Select>
             <Input
               className="w-[70px]"
+              inputMode="numeric"
+              maxLength={5}
               value={formData.classGearScore ?? ""}
               onChange={(e) =>
                 setFormData((prev: any) => ({
                   ...prev,
-                  classGearScore: e.target.value,
+                  classGearScore: sanitizeGearScoreInput(e.target.value),
                 }))
               }
             />
