@@ -4,11 +4,11 @@ import ensureCanEditUserData from "./ensureCanEditUserData";
 import getUserSeals, { UserSeal } from "./getUserSeals";
 import {
   MAX_USER_SEALS,
-  isValidSealGrade,
+  isValidSealLevel,
   isValidSealName,
 } from "@/widgets/profile/seals/sealsData";
 
-export type SealInput = { sealName: string; grade: number };
+export type SealInput = { sealName: string; level: number };
 
 // Полностью заменяет набор печатей игрока (не более MAX_USER_SEALS штук).
 // Администраторам/Секретуткам — всегда, самому игроку — только если включен
@@ -32,8 +32,8 @@ const saveUserSeals = async (
     if (!isValidSealName(seal.sealName)) {
       throw new Error(`Неизвестная печать: ${seal.sealName}`);
     }
-    if (!isValidSealGrade(seal.grade)) {
-      throw new Error(`Некорректная редкость печати: ${seal.grade}`);
+    if (!isValidSealLevel(seal.level)) {
+      throw new Error(`Некорректный уровень печати: ${seal.level}`);
     }
   }
 
@@ -42,8 +42,8 @@ const saveUserSeals = async (
       await tx`DELETE FROM user_seals WHERE user_id = ${userId}`;
       for (const seal of seals) {
         await tx`
-          INSERT INTO user_seals (user_id, seal_name, grade)
-          VALUES (${userId}, ${seal.sealName}, ${seal.grade})
+          INSERT INTO user_seals (user_id, seal_name, level)
+          VALUES (${userId}, ${seal.sealName}, ${seal.level})
         `;
       }
     });

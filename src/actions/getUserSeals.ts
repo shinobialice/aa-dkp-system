@@ -5,13 +5,13 @@ export type UserSeal = {
   id: number;
   user_id: number;
   seal_name: string;
-  grade: number;
+  level: number;
 };
 
 const getUserSeals = async (userId: number): Promise<UserSeal[]> => {
   try {
     return await sql<UserSeal[]>`
-      SELECT id, user_id, seal_name, grade
+      SELECT id, user_id, seal_name, level
       FROM user_seals
       WHERE user_id = ${userId}
       ORDER BY id

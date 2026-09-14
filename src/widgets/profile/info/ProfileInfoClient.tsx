@@ -4,7 +4,10 @@ import Image from "next/image";
 import type { PrimeStreak } from "@/actions/getUserPrimeStreak";
 import type { UserArchetype } from "@/actions/getUserArchetype";
 import SealIcon from "@/widgets/profile/seals/SealIcon";
-import { getSealGradeLabel } from "@/widgets/profile/seals/sealsData";
+import {
+  getSealGradeLabel,
+  getSealGradeForLevel,
+} from "@/widgets/profile/seals/sealsData";
 import ProfileAdditionalInfo from "./ProfileAdditionalInfo";
 import ProfileClasses from "./ProfileClasses";
 import ProfileHeader from "./ProfileHeader";
@@ -131,11 +134,15 @@ export default function ProfileInfoClient({
                 <Tooltip key={seal.id}>
                   <TooltipTrigger asChild>
                     <div>
-                      <SealIcon grade={seal.grade} size={28} />
+                      <SealIcon
+                        grade={getSealGradeForLevel(seal.level)}
+                        size={28}
+                      />
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>
-                    {seal.seal_name} · {getSealGradeLabel(seal.grade)}
+                    {seal.seal_name} · уровень {seal.level} (
+                    {getSealGradeLabel(getSealGradeForLevel(seal.level))})
                   </TooltipContent>
                 </Tooltip>
               ))}

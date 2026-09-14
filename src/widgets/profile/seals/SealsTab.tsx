@@ -4,16 +4,27 @@ import { toast } from "sonner";
 import saveUserSeals from "@/actions/saveUserSeals";
 import type { UserSeal } from "@/actions/getUserSeals";
 import SealIcon from "./SealIcon";
+import SealLevelList from "./SealLevelList";
 import {
   SEAL_NAMES,
-  SEAL_GRADES,
+  SEAL_INFO,
+  SEAL_ROLE_COLORS,
   MAX_USER_SEALS,
-  DEFAULT_SEAL_GRADE,
+  MAX_SEAL_LEVEL,
+  DEFAULT_SEAL_LEVEL,
+  getSealGradeForLevel,
   getSealGradeLabel,
 } from "./sealsData";
 import { Badge } from "@/shared/ui";
 import { Button } from "@/shared/ui";
+import { Input } from "@/shared/ui";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/shared/ui";
 import {
   Select,
   SelectTrigger,
@@ -31,7 +42,24 @@ type Props = {
 
 const NONE = "Нет";
 
-type SealSlot = { name: string | null; grade: number };
+type SealSlot = { name: string | null; level: number };
+
+function SealOptionLabel({ name }: { name: string }) {
+  const info = SEAL_INFO[name as keyof typeof SEAL_INFO];
+  if (!info) return <>{name}</>;
+  return (
+    <>
+      {name} — {info.playstyle} (
+      {info.roles.map((role, i) => (
+        <span key={role}>
+          {i > 0 && ", "}
+          <span style={{ color: SEAL_ROLE_COLORS[role] }}>{role}</span>
+        </span>
+      ))}
+      )
+    </>
+  );
+}
 
 export default function SealsTab({ userId, seals, onChange, canEdit }: Props) {
   const [editing, setEditing] = useState(false);
@@ -44,7 +72,7 @@ export default function SealsTab({ userId, seals, onChange, canEdit }: Props) {
     setDraft(
       Array.from({ length: MAX_USER_SEALS }, (_, i) => ({
         name: seals[i]?.seal_name ?? null,
-        grade: seals[i]?.grade ?? DEFAULT_SEAL_GRADE,
+        level: seals[i]?.level ?? DEFAULT_SEAL_LEVEL,
       })),
     );
     setEditing(true);
@@ -60,16 +88,16 @@ export default function SealsTab({ userId, seals, onChange, canEdit }: Props) {
       const next = [...prev];
       next[index] =
         value === NONE
-          ? { name: null, grade: DEFAULT_SEAL_GRADE }
-          : { name: value, grade: next[index]?.grade ?? DEFAULT_SEAL_GRADE };
+          ? { name: null, level: DEFAULT_SEAL_LEVEL }
+          : { name: value, level: next[index]?.level ?? DEFAULT_SEAL_LEVEL };
       return next;
     });
   };
 
-  const setGrade = (index: number, grade: number) => {
+  const setLevel = (index: number, level: number) => {
     setDraft((prev) => {
       const next = [...prev];
-      next[index] = { ...next[index], grade };
+      next[index] = { ...next[index], level };
       return next;
     });
   };
@@ -78,8 +106,8 @@ export default function SealsTab({ userId, seals, onChange, canEdit }: Props) {
     setSaving(true);
     try {
       const payload = draft
-        .filter((slot): slot is { name: string; grade: number } => !!slot.name)
-        .map((slot) => ({ sealName: slot.name, grade: slot.grade }));
+        .filter((slot): slot is { name: string; level: number } => !!slot.name)
+        .map((slot) => ({ sealName: slot.name, level: slot.level }));
       const updated = await saveUserSeals(userId, payload);
       onChange(updated);
       setEditing(false);
@@ -132,12 +160,24 @@ export default function SealsTab({ userId, seals, onChange, canEdit }: Props) {
         {(() => {
           if (editing) {
             return (
+              <div className="text-sm text-muted-foreground">
+                Выбрано веток: {draft.filter((s) => s.name).length} /{" "}
+                {MAX_USER_SEALS}
+              </div>
+            );
+          }
+          return null;
+        })()}
+        {(() => {
+          if (editing) {
+            return (
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 {draft.map((slot, i) => {
                   const otherChosen = draft
                     .filter((_, j) => j !== i)
                     .map((s) => s.name)
                     .filter((name): name is string => !!name);
+                  const grade = getSealGradeForLevel(slot.level);
                   return (
                     <div key={i} className="space-y-1.5">
                       <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -156,27 +196,57 @@ export default function SealsTab({ userId, seals, onChange, canEdit }: Props) {
                             (name) => !otherChosen.includes(name),
                           ).map((name) => (
                             <SelectItem key={name} value={name}>
-                              {name}
+                              <SealOptionLabel name={name} />
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                       {slot.name && (
-                        <Select
-                          value={String(slot.grade)}
-                          onValueChange={(v) => setGrade(i, Number(v))}
-                        >
-                          <SelectTrigger className="w-full cursor-pointer">
-                            <SelectValue placeholder="Редкость" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {SEAL_GRADES.map((g) => (
-                              <SelectItem key={g.grade} value={String(g.grade)}>
-                                {g.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <div className="space-y-1.5 rounded-lg border p-2">
+                          <div className="flex items-center justify-between gap-2 text-sm">
+                            <span>
+                              Уровень{" "}
+                              <span className="font-semibold">
+                                {slot.level}
+                              </span>{" "}
+                              — {getSealGradeLabel(grade)}
+                            </span>
+                            <Input
+                              type="number"
+                              min={0}
+                              max={MAX_SEAL_LEVEL}
+                              value={slot.level}
+                              onChange={(e) => {
+                                const v = Math.max(
+                                  0,
+                                  Math.min(
+                                    MAX_SEAL_LEVEL,
+                                    Number(e.target.value) || 0,
+                                  ),
+                                );
+                                setLevel(i, v);
+                              }}
+                              className="h-8 w-16 text-right"
+                            />
+                          </div>
+                          <Accordion type="single" collapsible>
+                            <AccordionItem
+                              value="levels"
+                              className="border-none"
+                            >
+                              <AccordionTrigger className="py-1 text-xs hover:no-underline">
+                                Выбрать по списку уровней
+                              </AccordionTrigger>
+                              <AccordionContent className="pb-0">
+                                <SealLevelList
+                                  sealName={slot.name}
+                                  level={slot.level}
+                                  onSelectLevel={(level) => setLevel(i, level)}
+                                />
+                              </AccordionContent>
+                            </AccordionItem>
+                          </Accordion>
+                        </div>
                       )}
                     </div>
                   );
@@ -207,18 +277,44 @@ export default function SealsTab({ userId, seals, onChange, canEdit }: Props) {
                     </div>
                   );
                 }
+                const grade = getSealGradeForLevel(seal.level);
+                const info =
+                  SEAL_INFO[seal.seal_name as keyof typeof SEAL_INFO];
                 return (
                   <div
                     key={seal.id}
                     className="flex flex-col items-center gap-2 rounded-lg border p-3"
                   >
-                    <SealIcon grade={seal.grade} size={44} />
-                    <div className="text-sm font-semibold">
-                      {seal.seal_name}
+                    <SealIcon grade={grade} size={44} />
+                    <div className="text-center">
+                      <div className="text-sm font-semibold">
+                        {seal.seal_name}
+                      </div>
+                      {info && (
+                        <div className="text-xs text-muted-foreground">
+                          {info.playstyle}
+                        </div>
+                      )}
                     </div>
-                    <Badge variant="outline">
-                      {getSealGradeLabel(seal.grade)}
-                    </Badge>
+                    <div className="flex flex-wrap items-center justify-center gap-1">
+                      <Badge variant="outline">
+                        {getSealGradeLabel(grade)}
+                      </Badge>
+                      <Badge variant="secondary">Ур. {seal.level}</Badge>
+                    </div>
+                    <Accordion type="single" collapsible className="w-full">
+                      <AccordionItem value="levels" className="border-none">
+                        <AccordionTrigger className="justify-center py-1 text-xs hover:no-underline">
+                          Бонусы по уровням
+                        </AccordionTrigger>
+                        <AccordionContent className="pb-0">
+                          <SealLevelList
+                            sealName={seal.seal_name}
+                            level={seal.level}
+                          />
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
                   </div>
                 );
               })}

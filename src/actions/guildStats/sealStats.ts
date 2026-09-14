@@ -1,7 +1,10 @@
 "use server";
 
 import sql from "@/shared/lib/db";
-import { SEAL_GRADES } from "@/widgets/profile/seals/sealsData";
+import {
+  SEAL_GRADES,
+  getSealGradeForLevel,
+} from "@/widgets/profile/seals/sealsData";
 import { sortPlayers, type NamedPlayer } from "./playerRef";
 
 export type SealGradeStat = {
@@ -12,12 +15,13 @@ export type SealGradeStat = {
   players: NamedPlayer[];
 };
 
-// Сколько печатей какой редкости у активных участников гильдии.
+// Сколько печатей какой редкости у активных участников гильдии (редкость
+// считается по уровню прокачки — см. getSealGradeForLevel).
 export async function getSealGradeStats(): Promise<SealGradeStat[]> {
   const rows = await sql<
-    { grade: number; user_id: number; username: string; class: string | null }[]
+    { level: number; user_id: number; username: string; class: string | null }[]
   >`
-    SELECT us.grade, us.user_id, u.username, u.class
+    SELECT us.level, us.user_id, u.username, u.class
     FROM user_seals us
     JOIN "user" u ON u.id = us.user_id
     WHERE u.active = true
@@ -28,7 +32,9 @@ export async function getSealGradeStats(): Promise<SealGradeStat[]> {
   });
 
   return SEAL_GRADES.map(({ grade, label }) => {
-    const matching = rows.filter((r) => r.grade === grade);
+    const matching = rows.filter(
+      (r) => getSealGradeForLevel(r.level) === grade,
+    );
 
     const perUser = new Map<string, { class: string | null; count: number }>();
     for (const r of matching) {
