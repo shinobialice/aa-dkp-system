@@ -66,5 +66,8 @@ export const LEGS_ITEMS: GearItem[] = [
   { id: 49378, name: "Поножи избранника Изы", grade: 1, iconUrl: ITEM_ICON("legs", "поножи_избранника_изы"), sealIconUrl: SEAL_ICON("top_fire") },
   { id: 49385, name: "Поножи иферийского визиря", grade: 1, iconUrl: ITEM_ICON("legs", "поножи_иферийского_визиря"), sealIconUrl: SEAL_ICON("top_fire") },
   { id: 49373, name: "Поножи владыки морей", grade: 1, iconUrl: ITEM_ICON("legs", "поножи_владыки_морей"), sealIconUrl: SEAL_ICON("top_fire") },
+  { id: 55212, name: "Поножи пророка Изы", grade: 1, iconUrl: ITEM_ICON("legs", "поножи_пророка_изы"), sealIconUrl: SEAL_ICON("top_khalideeth") },
+  { id: 55203, name: "Поножи иферийского наместника", grade: 1, iconUrl: ITEM_ICON("legs", "поножи_иферийского_наместника"), sealIconUrl: SEAL_ICON("top_ankeesh") },
+  { id: 55207, name: "Поножи повелителя морей", grade: 1, iconUrl: ITEM_ICON("legs", "поножи_повелителя_морей"), sealIconUrl: SEAL_ICON("top_khalideeth") },
   { id: 20806, name: "Иферийские кожаные поножи охотника", grade: 1, iconUrl: ITEM_ICON("legs", "иферийские_кожаные_поножи_охотника"), sealIconUrl: null },
 ];

@@ -66,5 +66,8 @@ export const HANDS_ITEMS: GearItem[] = [
   { id: 49379, name: "Перчатки избранника Изы", grade: 1, iconUrl: ITEM_ICON("hands", "перчатки_избранника_изы"), sealIconUrl: SEAL_ICON("top_fire") },
   { id: 49384, name: "Перчатки иферийского визиря", grade: 1, iconUrl: ITEM_ICON("hands", "перчатки_иферийского_визиря"), sealIconUrl: SEAL_ICON("top_fire") },
   { id: 49374, name: "Перчатки владыки морей", grade: 1, iconUrl: ITEM_ICON("hands", "перчатки_владыки_морей"), sealIconUrl: SEAL_ICON("top_fire") },
+  { id: 55213, name: "Перчатки пророка Изы", grade: 1, iconUrl: ITEM_ICON("hands", "перчатки_пророка_изы"), sealIconUrl: SEAL_ICON("top_khalideeth") },
+  { id: 55202, name: "Перчатки иферийского наместника", grade: 1, iconUrl: ITEM_ICON("hands", "перчатки_иферийского_наместника"), sealIconUrl: SEAL_ICON("top_ankeesh") },
+  { id: 55208, name: "Перчатки повелителя морей", grade: 1, iconUrl: ITEM_ICON("hands", "перчатки_повелителя_морей"), sealIconUrl: SEAL_ICON("top_khalideeth") },
   { id: 20833, name: "Иферийские кожаные перчатки охотника", grade: 1, iconUrl: ITEM_ICON("hands", "иферийские_кожаные_перчатки_охотника"), sealIconUrl: null },
 ];
