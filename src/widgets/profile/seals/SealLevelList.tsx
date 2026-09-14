@@ -1,18 +1,13 @@
 "use client";
 
 import { SEAL_LEVEL_STATS } from "./sealLevelsData";
+import { formatStatValue } from "./sealBonusSummary";
 import {
   LEVELS_PER_GRADE,
   getSealGradeColor,
   getSealGradeForLevel,
   getSealGradeLabel,
 } from "./sealsData";
-
-function formatStatValue(value: number, isPercent: boolean): string {
-  const sign = value > 0 ? "+" : "";
-  const rounded = Number.isInteger(value) ? value.toFixed(0) : value.toFixed(1);
-  return `${sign}${rounded}${isPercent ? "%" : ""}`;
-}
 
 type Props = {
   sealName: string;

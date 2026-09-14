@@ -5,6 +5,7 @@ import saveUserSeals from "@/actions/saveUserSeals";
 import type { UserSeal } from "@/actions/getUserSeals";
 import SealIcon from "./SealIcon";
 import SealLevelList from "./SealLevelList";
+import SealBonusSummaryButton from "./SealBonusSummaryButton";
 import {
   SEAL_NAMES,
   SEAL_INFO,
@@ -19,12 +20,6 @@ import { Badge } from "@/shared/ui";
 import { Button } from "@/shared/ui";
 import { Input } from "@/shared/ui";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from "@/shared/ui";
 import {
   Select,
   SelectTrigger,
@@ -102,6 +97,12 @@ export default function SealsTab({ userId, seals, onChange, canEdit }: Props) {
     });
   };
 
+  const currentPicks = (
+    editing
+      ? draft.map((s) => ({ sealName: s.name, level: s.level }))
+      : seals.map((s) => ({ sealName: s.seal_name, level: s.level }))
+  ).filter((p): p is { sealName: string; level: number } => !!p.sealName);
+
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -124,36 +125,39 @@ export default function SealsTab({ userId, seals, onChange, canEdit }: Props) {
   return (
     <Card className="gap-3 py-4">
       <CardHeader className="border-b">
-        <CardTitle className="flex items-center justify-between">
+        <CardTitle className="flex items-center justify-between gap-2">
           Печати героя
-          {canEdit && !editing && (
-            <Button
-              variant="outline"
-              className="cursor-pointer"
-              onClick={startEditing}
-            >
-              Изменить
-            </Button>
-          )}
-          {canEdit && editing && (
-            <div className="flex gap-2">
+          <div className="flex gap-2">
+            <SealBonusSummaryButton picks={currentPicks} />
+            {canEdit && !editing && (
               <Button
-                variant="ghost"
+                variant="outline"
                 className="cursor-pointer"
-                onClick={cancelEditing}
-                disabled={saving}
+                onClick={startEditing}
               >
-                Отмена
+                Изменить
               </Button>
-              <Button
-                className="cursor-pointer"
-                onClick={handleSave}
-                disabled={saving}
-              >
-                {saving ? "Сохранение..." : "Сохранить"}
-              </Button>
-            </div>
-          )}
+            )}
+            {canEdit && editing && (
+              <>
+                <Button
+                  variant="ghost"
+                  className="cursor-pointer"
+                  onClick={cancelEditing}
+                  disabled={saving}
+                >
+                  Отмена
+                </Button>
+                <Button
+                  className="cursor-pointer"
+                  onClick={handleSave}
+                  disabled={saving}
+                >
+                  {saving ? "Сохранение..." : "Сохранить"}
+                </Button>
+              </>
+            )}
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 pt-3">
@@ -229,23 +233,14 @@ export default function SealsTab({ userId, seals, onChange, canEdit }: Props) {
                               className="h-8 w-16 text-right"
                             />
                           </div>
-                          <Accordion type="single" collapsible>
-                            <AccordionItem
-                              value="levels"
-                              className="border-none"
-                            >
-                              <AccordionTrigger className="py-1 text-xs hover:no-underline">
-                                Выбрать по списку уровней
-                              </AccordionTrigger>
-                              <AccordionContent className="pb-0">
-                                <SealLevelList
-                                  sealName={slot.name}
-                                  level={slot.level}
-                                  onSelectLevel={(level) => setLevel(i, level)}
-                                />
-                              </AccordionContent>
-                            </AccordionItem>
-                          </Accordion>
+                          <div className="space-y-1 text-xs font-medium text-muted-foreground">
+                            Выбрать по списку уровней
+                          </div>
+                          <SealLevelList
+                            sealName={slot.name}
+                            level={slot.level}
+                            onSelectLevel={(level) => setLevel(i, level)}
+                          />
                         </div>
                       )}
                     </div>
@@ -302,19 +297,13 @@ export default function SealsTab({ userId, seals, onChange, canEdit }: Props) {
                       </Badge>
                       <Badge variant="secondary">Ур. {seal.level}</Badge>
                     </div>
-                    <Accordion type="single" collapsible className="w-full">
-                      <AccordionItem value="levels" className="border-none">
-                        <AccordionTrigger className="justify-center py-1 text-xs hover:no-underline">
-                          Бонусы по уровням
-                        </AccordionTrigger>
-                        <AccordionContent className="pb-0">
-                          <SealLevelList
-                            sealName={seal.seal_name}
-                            level={seal.level}
-                          />
-                        </AccordionContent>
-                      </AccordionItem>
-                    </Accordion>
+                    <div className="w-full space-y-1 text-center text-xs font-medium text-muted-foreground">
+                      Бонусы по уровням
+                    </div>
+                    <SealLevelList
+                      sealName={seal.seal_name}
+                      level={seal.level}
+                    />
                   </div>
                 );
               })}
