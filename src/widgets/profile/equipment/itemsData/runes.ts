@@ -41,6 +41,26 @@ const EPHEN_RUNE_SLOTS = [
   "ranged",
 ];
 
+const idRange = (start: number, end: number) =>
+  Array.from({ length: end - start + 1 }, (_, i) => start + i);
+
+const LIBRARY_ITEM_IDS = [
+  ...idRange(47271, 47305),
+  ...idRange(49582, 49616),
+  ...idRange(55412, 55446),
+  ...idRange(900001, 900035),
+];
+
+const LIBRARY_RUNE_SLOTS = [
+  "head",
+  "chest",
+  "belt",
+  "bracers",
+  "hands",
+  "legs",
+  "feet",
+];
+
 const RUNE_ICON = (slug: string) =>
   `/images/equipment/runes/${slug}.jpg`;
 
@@ -60,10 +80,10 @@ export const RUNES: Rune[] = [
   { id: 55277, name: "Легендарная руна ифнирского лекаря", grade: 6, iconUrl: RUNE_ICON("легендарная_руна_ифнирского_лекаря_55277"), effect: "Устойчивость к критическому урону: +150 ед. / Эффективность исцеления: +15 ед.", slots: ["earring1", "earring2", "instrument", "necklace", "ring1", "ring2"] },
   { id: 55267, name: "Легендарная руна ифнирского лучника", grade: 6, iconUrl: RUNE_ICON("легендарная_руна_ифнирского_лучника_55267"), effect: "Устойчивость к критическому урону: +150 ед. / Сила атаки в дальнем бою: +15 ед.", slots: ["earring1", "earring2", "instrument", "necklace", "ring1", "ring2"] },
   { id: 55272, name: "Легендарная руна ифнирского чародея", grade: 6, iconUrl: RUNE_ICON("легендарная_руна_ифнирского_чародея_55272"), effect: "Устойчивость к критическому урону: +150 ед. / Сила заклинаний: +15 ед.", slots: ["earring1", "earring2", "instrument", "necklace", "ring1", "ring2"] },
-  { id: 47465, name: "Призрачная руна искусного целителя", grade: 6, iconUrl: RUNE_ICON("призрачная_руна_искусного_целителя_47465"), effect: "Эффективность исцеления: +15 ед.", slots: ["belt", "bracers", "feet", "hands", "legs"] },
-  { id: 47466, name: "Призрачная руна меткого стрелка", grade: 6, iconUrl: RUNE_ICON("призрачная_руна_меткого_стрелка_47466"), effect: "Сила атаки в дальнем бою: +15 ед.", slots: ["belt", "bracers", "feet", "hands", "legs"] },
-  { id: 47464, name: "Призрачная руна могущественного мага", grade: 6, iconUrl: RUNE_ICON("призрачная_руна_могущественного_мага_47464"), effect: "Сила заклинаний: +15 ед.", slots: ["belt", "bracers", "feet", "hands", "legs"] },
-  { id: 47467, name: "Призрачная руна яростного воина", grade: 6, iconUrl: RUNE_ICON("призрачная_руна_яростного_воина_47467"), effect: "Сила атаки в ближнем бою: +15 ед.", slots: ["belt", "bracers", "feet", "hands", "legs"] },
+  { id: 47465, name: "Призрачная руна искусного целителя", grade: 6, iconUrl: RUNE_ICON("призрачная_руна_искусного_целителя_47465"), effect: "Эффективность исцеления: +15 ед.", slots: LIBRARY_RUNE_SLOTS, restrictedToItemIds: LIBRARY_ITEM_IDS },
+  { id: 47466, name: "Призрачная руна меткого стрелка", grade: 6, iconUrl: RUNE_ICON("призрачная_руна_меткого_стрелка_47466"), effect: "Сила атаки в дальнем бою: +15 ед.", slots: LIBRARY_RUNE_SLOTS, restrictedToItemIds: LIBRARY_ITEM_IDS },
+  { id: 47464, name: "Призрачная руна могущественного мага", grade: 6, iconUrl: RUNE_ICON("призрачная_руна_могущественного_мага_47464"), effect: "Сила заклинаний: +15 ед.", slots: LIBRARY_RUNE_SLOTS, restrictedToItemIds: LIBRARY_ITEM_IDS },
+  { id: 47467, name: "Призрачная руна яростного воина", grade: 6, iconUrl: RUNE_ICON("призрачная_руна_яростного_воина_47467"), effect: "Сила атаки в ближнем бою: +15 ед.", slots: LIBRARY_RUNE_SLOTS, restrictedToItemIds: LIBRARY_ITEM_IDS },
   { id: 38513, name: "Хрустальная руна багровой луны", grade: 6, iconUrl: RUNE_ICON("хрустальная_руна_багровой_луны_38513"), effect: "Сила: +15 ед.", slots: ["underwear"] },
   { id: 38517, name: "Хрустальная руна безмолвной луны", grade: 6, iconUrl: RUNE_ICON("хрустальная_руна_безмолвной_луны_38517"), effect: "Сила духа: +15 ед.", slots: ["underwear"] },
   { id: 38516, name: "Хрустальная руна колдовской луны", grade: 6, iconUrl: RUNE_ICON("хрустальная_руна_колдовской_луны_38516"), effect: "Интеллект: +15 ед.", slots: ["underwear"] },
