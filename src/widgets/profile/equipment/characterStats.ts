@@ -5,6 +5,8 @@ import { computeEngravingBonuses, ENGRAVING_STAT } from "./engravingBonuses";
 import { computeCostumeSynthesisBonuses } from "./costumeSynthesisBonuses";
 import { computeUnderwearSynthesisBonuses } from "./underwearSynthesisBonuses";
 import { computeCursedArmorSynthesisBonuses } from "./cursedArmorSynthesisBonuses";
+import { computeEphenRuneSetBonuses } from "./ephenRuneSetBonus";
+import { computeEphenSynthesisBonuses } from "./ephenSynthesisBonus";
 import {
   computeParry,
   computeDodge,
@@ -107,6 +109,13 @@ export function computeEquippedBonuses(
   const costumeSynthesisBonus = computeCostumeSynthesisBonuses(equipment);
   const underwearSynthesisBonus = computeUnderwearSynthesisBonuses(equipment);
   const cursedArmorSynthesisBonus = computeCursedArmorSynthesisBonuses(equipment);
+  const ephenRuneSetBonus = computeEphenRuneSetBonuses(equipment);
+  const ephenSynthesisBonus = computeEphenSynthesisBonuses(equipment);
+  totals.str += ephenSynthesisBonus.attributes.str;
+  totals.dex += ephenSynthesisBonus.attributes.dex;
+  totals.int += ephenSynthesisBonus.attributes.int;
+  totals.spi += ephenSynthesisBonus.attributes.spi;
+  totals.sta += ephenSynthesisBonus.attributes.sta;
   for (const [label, value] of costumeSynthesisBonus) {
     engravingBonus.set(label, (engravingBonus.get(label) ?? 0) + value);
   }
@@ -114,6 +123,12 @@ export function computeEquippedBonuses(
     engravingBonus.set(label, (engravingBonus.get(label) ?? 0) + value);
   }
   for (const [label, value] of cursedArmorSynthesisBonus) {
+    engravingBonus.set(label, (engravingBonus.get(label) ?? 0) + value);
+  }
+  for (const [label, value] of ephenRuneSetBonus) {
+    engravingBonus.set(label, (engravingBonus.get(label) ?? 0) + value);
+  }
+  for (const [label, value] of ephenSynthesisBonus.stats) {
     engravingBonus.set(label, (engravingBonus.get(label) ?? 0) + value);
   }
   totals.defense += engravingBonus.get(ENGRAVING_STAT.DEFENSE) ?? 0;

@@ -9,6 +9,7 @@ import { EQUIPMENT_SLOTS, type EquipmentSlot } from "./equipmentData";
 import { ITEMS_BY_SLOT, findGearItem } from "./itemsData";
 import { getEngravingSlotCount } from "./itemsData/engravingSlots";
 import { getNamedSetForItem } from "./namedSetBonus";
+import { getEphenRuneSetForRune } from "./ephenRuneSetBonus";
 import {
   DEFAULT_ENCHANT,
   MAX_ENCHANT,
@@ -40,6 +41,11 @@ import {
   getCursedArmorSynthesisSlotPools,
   findCursedArmorSynthesisEffect,
 } from "./itemsData/cursedArmorSynthesis";
+import { getEphenSynthesisCategory } from "./itemsData/ephenSynthesis";
+import {
+  getEphenSynthesisRolls,
+  hasEphenSynthesisSelection,
+} from "./ephenSynthesisBonus";
 import { WEAPON_HANDEDNESS } from "./itemsData/weaponHandedness";
 import { EffectText, highlightNumbers } from "./highlightNumbers";
 import { ItemStats } from "./ItemStats";
@@ -220,6 +226,27 @@ function CursedArmorSynthesisDisplay({ effectIds }: { effectIds: number[] }) {
   );
 }
 
+function EphenSynthesisDisplay({ item }: { item: UserEquipment }) {
+  if (!hasEphenSynthesisSelection(item)) return null;
+  const rolls = getEphenSynthesisRolls(item);
+  if (rolls.length === 0) return null;
+
+  return (
+    <div className="space-y-0.5">
+      <div className="text-xs text-muted-foreground">
+        Эффект синтеза ({item.ephen_synthesis_percent}%)
+      </div>
+      {rolls.map((roll) => (
+        <div key={roll.key} className="text-xs text-green-500">
+          {highlightNumbers(
+            `${roll.label}: +${roll.value}${roll.isPercent ? "%" : " ед."}`,
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function EngravingSlots({
   count,
   engravings,
@@ -297,60 +324,90 @@ function SetTierRow({
 
 function SetProgress({
   itemId,
+  runeId,
   equipment,
 }: {
   itemId: number;
+  runeId?: number;
   equipment: UserEquipment[];
 }) {
   const namedSet = getNamedSetForItem(itemId, equipment);
+  const ephenRuneSet = runeId
+    ? getEphenRuneSetForRune(runeId, equipment)
+    : null;
 
-  if (!namedSet) return null;
+  if (!namedSet && !ephenRuneSet) return null;
 
   return (
     <>
-      <div className="border-t border-border" />
-      <div className="space-y-1">
-        <div className="text-xs font-semibold">
-          {namedSet.name} ({namedSet.ownedCount}/{namedSet.totalCount})
-        </div>
-        <div className="space-y-1">
-          {namedSet.pieceRows.map((row, i) => (
-            <div key={i} className="flex gap-1">
-              {row.map((piece) => (
-                <div
-                  key={piece.itemId}
-                  title={piece.name}
-                  className={`relative size-6 shrink-0 overflow-hidden rounded-sm border ${
-                    piece.owned
-                      ? "border-border"
-                      : "border-border/50 opacity-30 grayscale"
-                  }`}
-                >
-                  {piece.iconUrl && (
-                    <Image
-                      src={piece.iconUrl}
-                      alt=""
-                      fill
-                      sizes="24px"
-                      className="object-cover"
-                    />
-                  )}
+      {namedSet && (
+        <>
+          <div className="border-t border-border" />
+          <div className="space-y-1">
+            <div className="text-xs font-semibold">
+              {namedSet.name} ({namedSet.ownedCount}/{namedSet.totalCount})
+            </div>
+            <div className="space-y-1">
+              {namedSet.pieceRows.map((row, i) => (
+                <div key={i} className="flex gap-1">
+                  {row.map((piece) => (
+                    <div
+                      key={piece.itemId}
+                      title={piece.name}
+                      className={`relative size-6 shrink-0 overflow-hidden rounded-sm border ${
+                        piece.owned
+                          ? "border-border"
+                          : "border-border/50 opacity-30 grayscale"
+                      }`}
+                    >
+                      {piece.iconUrl && (
+                        <Image
+                          src={piece.iconUrl}
+                          alt=""
+                          fill
+                          sizes="24px"
+                          className="object-cover"
+                        />
+                      )}
+                    </div>
+                  ))}
                 </div>
               ))}
             </div>
-          ))}
-        </div>
-        <div className="space-y-1.5">
-          {namedSet.tiers.map((tier) => (
-            <SetTierRow
-              key={tier.count}
-              count={tier.count}
-              text={tier.text}
-              active={tier.active}
-            />
-          ))}
-        </div>
-      </div>
+            <div className="space-y-1.5">
+              {namedSet.tiers.map((tier) => (
+                <SetTierRow
+                  key={tier.count}
+                  count={tier.count}
+                  text={tier.text}
+                  active={tier.active}
+                />
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+
+      {ephenRuneSet && (
+        <>
+          <div className="border-t border-border" />
+          <div className="space-y-1">
+            <div className="text-xs font-semibold">
+              {ephenRuneSet.name} ({ephenRuneSet.count}/8)
+            </div>
+            <div className="space-y-1.5">
+              {ephenRuneSet.tiers.map((tier) => (
+                <SetTierRow
+                  key={tier.count}
+                  count={tier.count}
+                  text={tier.text}
+                  active={tier.active}
+                />
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 }
@@ -376,6 +433,10 @@ function EquipmentSlotButton({
     runeId: number,
     synthesisEffects: number[],
     cursedSynthesisEffects: number[],
+    ephenSynthesisPercent: number,
+    ephenSynthesisPrimary: string,
+    ephenSynthesisSecondary: string,
+    ephenSynthesisTertiary: string[],
   ) => Promise<void>;
   tooltipSide?: "left" | "right";
 }) {
@@ -399,6 +460,18 @@ function EquipmentSlotButton({
     useState<number[]>(initialSynthesisEffects);
   const [cursedSynthesisEffects, setCursedSynthesisEffects] = useState<number[]>(
     item?.cursed_synthesis_effects ?? [],
+  );
+  const [ephenSynthesisPercent, setEphenSynthesisPercent] = useState(
+    item?.ephen_synthesis_percent ?? 0,
+  );
+  const [ephenSynthesisPrimary, setEphenSynthesisPrimary] = useState(
+    item?.ephen_synthesis_primary ?? "",
+  );
+  const [ephenSynthesisSecondary, setEphenSynthesisSecondary] = useState(
+    item?.ephen_synthesis_secondary ?? "",
+  );
+  const [ephenSynthesisTertiary, setEphenSynthesisTertiary] = useState<string[]>(
+    item?.ephen_synthesis_tertiary ?? [],
   );
   const [saving, setSaving] = useState(false);
 
@@ -431,6 +504,11 @@ function EquipmentSlotButton({
   const cursedSynthesisPools = draftGearItem
     ? getCursedArmorSynthesisSlotPools(draftGearItem.id)
     : [];
+  const ephenSynthesisCategory = draftGearItem
+    ? getEphenSynthesisCategory(draftGearItem.id)
+    : undefined;
+  const ephenSynthesisEligible =
+    !!ephenSynthesisCategory && grade >= ephenSynthesisCategory.minGrade;
 
   const handleOpenChange = (next: boolean) => {
     if (next) {
@@ -443,6 +521,10 @@ function EquipmentSlotButton({
       setRuneId(item?.rune_id ?? 0);
       setSynthesisEffects(initialSynthesisEffects);
       setCursedSynthesisEffects(item?.cursed_synthesis_effects ?? []);
+      setEphenSynthesisPercent(item?.ephen_synthesis_percent ?? 0);
+      setEphenSynthesisPrimary(item?.ephen_synthesis_primary ?? "");
+      setEphenSynthesisSecondary(item?.ephen_synthesis_secondary ?? "");
+      setEphenSynthesisTertiary(item?.ephen_synthesis_tertiary ?? []);
     }
     setOpen(next);
   };
@@ -465,6 +547,10 @@ function EquipmentSlotButton({
         runeId,
         synthesisEffects.slice(0, maxSynthesisSlots),
         finalCursedSynthesisEffects,
+        ephenSynthesisEligible ? ephenSynthesisPercent : 0,
+        ephenSynthesisEligible ? ephenSynthesisPrimary : "",
+        ephenSynthesisEligible ? ephenSynthesisSecondary : "",
+        ephenSynthesisEligible ? ephenSynthesisTertiary : [],
       );
       setOpen(false);
     } finally {
@@ -483,6 +569,10 @@ function EquipmentSlotButton({
         [],
         0,
         [],
+        [],
+        0,
+        "",
+        "",
         [],
       );
       setOpen(false);
@@ -634,7 +724,18 @@ function EquipmentSlotButton({
                   </>
                 )}
 
-                <SetProgress itemId={selectedGearItem.id} equipment={equipment} />
+                {item && hasEphenSynthesisSelection(item) && (
+                  <>
+                    <div className="border-t border-border" />
+                    <EphenSynthesisDisplay item={item} />
+                  </>
+                )}
+
+                <SetProgress
+                  itemId={selectedGearItem.id}
+                  runeId={item?.rune_id}
+                  equipment={equipment}
+                />
               </div>
             </TooltipContent>
           </Tooltip>
@@ -784,6 +885,7 @@ function EquipmentSlotButton({
                     itemId={draftGearItem?.id}
                     value={runeId}
                     onSelect={setRuneId}
+                    equipment={equipment}
                   />
                 </div>
               )}
@@ -842,6 +944,133 @@ function EquipmentSlotButton({
                       </Select>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {ephenSynthesisCategory && (
+                <div className="space-y-1.5">
+                  <div className="text-xs text-muted-foreground">
+                    Эффект синтеза:
+                  </div>
+                  {!ephenSynthesisEligible ? (
+                    <div className="text-xs text-muted-foreground">
+                      Доступен начиная с качества «
+                      {getSealGradeLabel(ephenSynthesisCategory.minGrade)}» —
+                      выберите качество выше.
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          <span>Опыт синтеза</span>
+                          <span>{ephenSynthesisPercent}%</span>
+                        </div>
+                        <input
+                          type="range"
+                          min={0}
+                          max={100}
+                          step={1}
+                          value={ephenSynthesisPercent}
+                          onChange={(e) =>
+                            setEphenSynthesisPercent(Number(e.target.value))
+                          }
+                          className="w-full cursor-pointer"
+                        />
+                      </div>
+                      {ephenSynthesisCategory.groups.slice(0, 2).map((group, gi) => {
+                        const value = gi === 0 ? ephenSynthesisPrimary : ephenSynthesisSecondary;
+                        const setValue = gi === 0 ? setEphenSynthesisPrimary : setEphenSynthesisSecondary;
+                        const otherValue = gi === 0 ? ephenSynthesisSecondary : ephenSynthesisPrimary;
+                        return (
+                          <Select
+                            key={gi}
+                            value={value || "none"}
+                            onValueChange={(v) => setValue(v === "none" ? "" : v)}
+                          >
+                            <SelectTrigger className="w-full cursor-pointer">
+                              <SelectValue
+                                placeholder={
+                                  gi === 0 ? "Первая характеристика" : "Вторая характеристика"
+                                }
+                              />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">Выберите</SelectItem>
+                              {group.options
+                                .filter((option) => option.key !== otherValue)
+                                .map((option) => {
+                                  const range = option.ranges[
+                                    grade >= 12
+                                      ? 12
+                                      : grade >= 11
+                                        ? 11
+                                        : ephenSynthesisCategory.minGrade
+                                  ];
+                                  return (
+                                    <SelectItem key={option.key} value={option.key}>
+                                      {option.label}
+                                      {range ? `: +${range[0]}..+${range[1]}${option.isPercent ? "%" : ""}` : ""}
+                                    </SelectItem>
+                                  );
+                                })}
+                            </SelectContent>
+                          </Select>
+                        );
+                      })}
+                      {ephenSynthesisCategory.groups[2] && (
+                        <div className="max-h-48 space-y-0.5 overflow-y-auto rounded-md border p-1">
+                          {ephenSynthesisCategory.groups[2].options.map((option) => {
+                            const checked = ephenSynthesisTertiary.includes(option.key);
+                            const pickCount = ephenSynthesisCategory.groups[2].pickCount;
+                            const disabled =
+                              !checked && ephenSynthesisTertiary.length >= pickCount;
+                            const range = option.ranges[
+                              grade >= 12
+                                ? 12
+                                : grade >= 11
+                                  ? 11
+                                  : ephenSynthesisCategory.minGrade
+                            ];
+                            return (
+                              <label
+                                key={option.key}
+                                className={`flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-sm hover:bg-accent ${
+                                  disabled
+                                    ? "cursor-not-allowed opacity-40 hover:bg-transparent"
+                                    : ""
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={checked}
+                                  disabled={disabled}
+                                  onChange={() => {
+                                    if (checked) {
+                                      setEphenSynthesisTertiary(
+                                        ephenSynthesisTertiary.filter(
+                                          (k) => k !== option.key,
+                                        ),
+                                      );
+                                    } else {
+                                      setEphenSynthesisTertiary([
+                                        ...ephenSynthesisTertiary,
+                                        option.key,
+                                      ]);
+                                    }
+                                  }}
+                                  className="cursor-pointer"
+                                />
+                                <span className="min-w-0 flex-1 truncate">
+                                  {option.label}
+                                  {range ? `: +${range[0]}..+${range[1]}${option.isPercent ? "%" : ""}` : ""}
+                                </span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -930,6 +1159,9 @@ function EquipmentSlotButton({
                   effectIds={equippedCursedSynthesisEffects}
                 />
               )}
+              {item && hasEphenSynthesisSelection(item) && (
+                <EphenSynthesisDisplay item={item} />
+              )}
             </div>
           ) : (
             <div className="text-sm text-muted-foreground">Пусто</div>
@@ -937,7 +1169,7 @@ function EquipmentSlotButton({
         </DialogContent>
       </Dialog>
       {equippedRune && (
-        <RuneTooltip rune={equippedRune} side={tooltipSide}>
+        <RuneTooltip rune={equippedRune} side={tooltipSide} equipment={equipment}>
           <div
             className={`absolute top-1/2 flex size-7 -translate-y-1/2 cursor-default items-center justify-center overflow-hidden rounded-md border border-border bg-background shadow-sm ${
               tooltipSide === "left" ? "-left-8" : "-right-8"
@@ -983,6 +1215,10 @@ export default function EquipmentTab({
     runeId: number,
     synthesisEffects: number[],
     cursedSynthesisEffects: number[],
+    ephenSynthesisPercent: number,
+    ephenSynthesisPrimary: string,
+    ephenSynthesisSecondary: string,
+    ephenSynthesisTertiary: string[],
   ) => {
     const payload: EquipmentInput[] = EQUIPMENT_SLOTS.map((slot) => {
       if (slot.key === slotKey) {
@@ -998,6 +1234,10 @@ export default function EquipmentTab({
           underwearSynthesisEffects:
             slotKey === "underwear" ? synthesisEffects : [],
           cursedSynthesisEffects,
+          ephenSynthesisPercent,
+          ephenSynthesisPrimary,
+          ephenSynthesisSecondary,
+          ephenSynthesisTertiary,
         };
       }
       const existing = equipmentBySlot[slot.key];
@@ -1012,6 +1252,10 @@ export default function EquipmentTab({
         costumeSynthesisEffects: existing?.costume_synthesis_effects ?? [],
         underwearSynthesisEffects: existing?.underwear_synthesis_effects ?? [],
         cursedSynthesisEffects: existing?.cursed_synthesis_effects ?? [],
+        ephenSynthesisPercent: existing?.ephen_synthesis_percent ?? 0,
+        ephenSynthesisPrimary: existing?.ephen_synthesis_primary ?? "",
+        ephenSynthesisSecondary: existing?.ephen_synthesis_secondary ?? "",
+        ephenSynthesisTertiary: existing?.ephen_synthesis_tertiary ?? [],
       };
     });
 
@@ -1064,6 +1308,10 @@ export default function EquipmentTab({
                 runeId,
                 synthesisEffects,
                 cursedSynthesisEffects,
+                ephenSynthesisPercent,
+                ephenSynthesisPrimary,
+                ephenSynthesisSecondary,
+                ephenSynthesisTertiary,
               ) =>
                 handleSaveSlot(
                   TOP.key,
@@ -1075,6 +1323,10 @@ export default function EquipmentTab({
                   runeId,
                   synthesisEffects,
                   cursedSynthesisEffects,
+                  ephenSynthesisPercent,
+                  ephenSynthesisPrimary,
+                  ephenSynthesisSecondary,
+                  ephenSynthesisTertiary,
                 )
               }
             />
@@ -1098,6 +1350,10 @@ export default function EquipmentTab({
                     runeId,
                     synthesisEffects,
                     cursedSynthesisEffects,
+                    ephenSynthesisPercent,
+                    ephenSynthesisPrimary,
+                    ephenSynthesisSecondary,
+                    ephenSynthesisTertiary,
                   ) =>
                     handleSaveSlot(
                       slot.key,
@@ -1109,6 +1365,10 @@ export default function EquipmentTab({
                       runeId,
                       synthesisEffects,
                       cursedSynthesisEffects,
+                      ephenSynthesisPercent,
+                      ephenSynthesisPrimary,
+                      ephenSynthesisSecondary,
+                      ephenSynthesisTertiary,
                     )
                   }
                 />
@@ -1171,6 +1431,10 @@ export default function EquipmentTab({
                     runeId,
                     synthesisEffects,
                     cursedSynthesisEffects,
+                    ephenSynthesisPercent,
+                    ephenSynthesisPrimary,
+                    ephenSynthesisSecondary,
+                    ephenSynthesisTertiary,
                   ) =>
                     handleSaveSlot(
                       slot.key,
@@ -1182,6 +1446,10 @@ export default function EquipmentTab({
                       runeId,
                       synthesisEffects,
                       cursedSynthesisEffects,
+                      ephenSynthesisPercent,
+                      ephenSynthesisPrimary,
+                      ephenSynthesisSecondary,
+                      ephenSynthesisTertiary,
                     )
                   }
                 />

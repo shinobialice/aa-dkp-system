@@ -5,6 +5,8 @@ import { ChevronDown } from "lucide-react";
 import { getRunesForSlot, type Rune } from "./itemsData/runes";
 import { getItemGradeIconUrl } from "./itemsData/paths";
 import type { WeaponHandedness } from "./itemsData/weaponHandedness";
+import type { UserEquipment } from "@/actions/getUserEquipment";
+import { getEphenRuneSetForRune } from "./ephenRuneSetBonus";
 import {
   getSealGradeColor,
   getSealGradeLabel,
@@ -15,7 +17,28 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/shared/ui";
-import { EffectText } from "./highlightNumbers";
+import { EffectText, highlightNumbers } from "./highlightNumbers";
+
+function RuneSetTierRow({
+  count,
+  text,
+  active,
+}: {
+  count: number;
+  text: string;
+  active: boolean;
+}) {
+  return (
+    <div className={active ? "text-green-500" : "text-muted-foreground/70"}>
+      <div className="text-[11px] font-semibold">[{count} шт.]</div>
+      {text.split("\n").map((line, i) => (
+        <div key={i} className="text-xs">
+          {active ? highlightNumbers(line) : line}
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export function RuneIcon({ rune, size }: { rune: Rune; size: number }) {
   return (
@@ -41,13 +64,17 @@ export function RuneIcon({ rune, size }: { rune: Rune; size: number }) {
 export function RuneTooltip({
   rune,
   side = "left",
+  equipment,
   children,
 }: {
   rune: Rune;
   side?: "left" | "right" | "top" | "bottom";
+  equipment?: UserEquipment[];
   children: React.ReactNode;
 }) {
   const color = getSealGradeColor(rune.grade);
+  const ephenSet = equipment ? getEphenRuneSetForRune(rune.id, equipment) : null;
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>{children}</TooltipTrigger>
@@ -78,6 +105,26 @@ export function RuneTooltip({
               </div>
             </>
           )}
+          {ephenSet && (
+            <>
+              <div className="border-t border-border" />
+              <div className="space-y-1">
+                <div className="text-xs font-semibold">
+                  {ephenSet.name} ({ephenSet.count}/8)
+                </div>
+                <div className="space-y-1.5">
+                  {ephenSet.tiers.map((tier) => (
+                    <RuneSetTierRow
+                      key={tier.count}
+                      count={tier.count}
+                      text={tier.text}
+                      active={tier.active}
+                    />
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </TooltipContent>
     </Tooltip>
@@ -90,12 +137,14 @@ export function RunePicker({
   itemId,
   value,
   onSelect,
+  equipment,
 }: {
   slot: string;
   handedness?: WeaponHandedness;
   itemId?: number;
   value: number;
   onSelect: (id: number) => void;
+  equipment?: UserEquipment[];
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -179,7 +228,12 @@ export function RunePicker({
               </div>
             )}
             {filtered.map((rune) => (
-              <RuneTooltip key={rune.id} rune={rune} side="right">
+              <RuneTooltip
+                key={rune.id}
+                rune={rune}
+                side="right"
+                equipment={equipment}
+              >
                 <button
                   type="button"
                   onClick={() => {

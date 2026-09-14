@@ -66,5 +66,8 @@ export const HEAD_ITEMS: GearItem[] = [
   { id: 49376, name: "Шлем избранника Изы", grade: 1, iconUrl: ITEM_ICON("head", "шлем_избранника_изы"), sealIconUrl: SEAL_ICON("top_fire") },
   { id: 49381, name: "Капюшон иферийского визиря", grade: 1, iconUrl: ITEM_ICON("head", "капюшон_иферийского_визиря"), sealIconUrl: SEAL_ICON("top_fire") },
   { id: 49371, name: "Шлем владыки морей", grade: 1, iconUrl: ITEM_ICON("head", "шлем_владыки_морей"), sealIconUrl: SEAL_ICON("top_fire") },
+  { id: 55210, name: "Шлем пророка Изы", grade: 1, iconUrl: ITEM_ICON("head", "шлем_пророка_изы"), sealIconUrl: SEAL_ICON("top_khalideeth") },
+  { id: 55200, name: "Капюшон иферийского наместника", grade: 1, iconUrl: ITEM_ICON("head", "капюшон_иферийского_наместника"), sealIconUrl: SEAL_ICON("top_ankeesh") },
+  { id: 55205, name: "Шлем повелителя морей", grade: 1, iconUrl: ITEM_ICON("head", "шлем_повелителя_морей"), sealIconUrl: SEAL_ICON("top_khalideeth") },
   { id: 20752, name: "Иферийская кожаная маска охотника", grade: 1, iconUrl: ITEM_ICON("head", "иферийская_кожаная_маска_охотника"), sealIconUrl: null },
 ];

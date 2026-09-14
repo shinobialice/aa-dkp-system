@@ -66,5 +66,8 @@ export const CHEST_ITEMS: GearItem[] = [
   { id: 49377, name: "Доспех избранника Изы", grade: 1, iconUrl: ITEM_ICON("chest", "доспех_избранника_изы"), sealIconUrl: SEAL_ICON("top_fire") },
   { id: 49382, name: "Мантия иферийского визиря", grade: 1, iconUrl: ITEM_ICON("chest", "мантия_иферийского_визиря"), sealIconUrl: SEAL_ICON("top_fire") },
   { id: 49372, name: "Бригантина владыки морей", grade: 1, iconUrl: ITEM_ICON("chest", "бригантина_владыки_морей"), sealIconUrl: SEAL_ICON("top_fire") },
+  { id: 55211, name: "Доспех пророка Изы", grade: 1, iconUrl: ITEM_ICON("chest", "доспех_пророка_изы"), sealIconUrl: SEAL_ICON("top_khalideeth") },
+  { id: 55201, name: "Мантия иферийского наместника", grade: 1, iconUrl: ITEM_ICON("chest", "мантия_иферийского_наместника"), sealIconUrl: SEAL_ICON("top_ankeesh") },
+  { id: 55206, name: "Бригантина повелителя морей", grade: 1, iconUrl: ITEM_ICON("chest", "бригантина_повелителя_морей"), sealIconUrl: SEAL_ICON("top_khalideeth") },
   { id: 20779, name: "Иферийская кожаная куртка охотника", grade: 1, iconUrl: ITEM_ICON("chest", "иферийская_кожаная_куртка_охотника"), sealIconUrl: null },
 ];
