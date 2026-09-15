@@ -45,7 +45,21 @@ export async function registerBossKill(
   }
 
   try {
-    await upsertRaidSuggestion(boss, killTimeIso);
+    // Рейд нужен провести в момент респауна (когда босс стал доступен), а не
+    // в момент фактического килла — тот может случиться позже, если респаун
+    // словили не сразу. Момент респауна для этого килла — это prev_kill_time
+    // (last_kill до перезаписи, только что вставленный в историю) + окно
+    // респауна, а не killTimeIso + окно (это уже респаун для СЛЕДУЮЩЕГО килла).
+    const [historyRow] = await sql<{ prev_kill_time: string | null }[]>`
+      SELECT prev_kill_time FROM boss_respawn_history
+      WHERE boss_name = ${boss}
+      ORDER BY created_at DESC
+      LIMIT 1
+    `;
+    const requiredRaidTime = historyRow?.prev_kill_time
+      ? getRespawnStart(historyRow.prev_kill_time, respawnHoursByBoss[boss])
+      : new Date(killTimeIso);
+    await upsertRaidSuggestion(boss, requiredRaidTime.toISOString());
   } catch (suggestionError) {
     console.error(
       "Не удалось обновить подсказку по созданию рейда:",
