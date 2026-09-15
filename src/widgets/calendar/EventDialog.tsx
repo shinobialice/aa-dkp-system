@@ -58,8 +58,8 @@ export function EventDialog({
   const selectedUsers = users.filter((_, index) => rowSelection[index]);
 
   useEffect(() => {
-    getBosses().then(setBosses);
-  }, []);
+    getBosses(selectedDate ?? undefined).then(setBosses);
+  }, [selectedDate]);
 
   useEffect(() => {
     if (mode === "edit" && selectedEvent) {

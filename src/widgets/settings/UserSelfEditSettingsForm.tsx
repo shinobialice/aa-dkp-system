@@ -65,6 +65,16 @@ export function UserSelfEditSettingsForm() {
       </div>
 
       <div className="flex items-center justify-between gap-4 border rounded-lg p-3">
+        <Label>VK</Label>
+        <Switch
+          checked={settings.vkEditEnabled}
+          onCheckedChange={(v) =>
+            setSettings({ ...settings, vkEditEnabled: v })
+          }
+        />
+      </div>
+
+      <div className="flex items-center justify-between gap-4 border rounded-lg p-3">
         <Label>Инвентарь</Label>
         <Switch
           checked={settings.inventoryEditEnabled}

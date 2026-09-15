@@ -81,6 +81,8 @@ export default async function Page(p: {
   const canAddExtraRole =
     isPrivilegedEditor ||
     (canSelfEdit && selfEditSettings.extraRoleEditEnabled);
+  const canEditVk =
+    isPrivilegedEditor || (canSelfEdit && selfEditSettings.vkEditEnabled);
   const canEditProfile = canEditNickname || canEditGs;
 
   return (
@@ -91,6 +93,7 @@ export default async function Page(p: {
       canEditGs={canEditGs}
       canAddExtraRole={canAddExtraRole}
       canEditAdminFields={isPrivilegedEditor}
+      canEditVk={canEditVk}
       canEditInventory={canEditInventory}
       canEditSeals={canEditSeals}
       canEditArchetype={canEditArchetype}

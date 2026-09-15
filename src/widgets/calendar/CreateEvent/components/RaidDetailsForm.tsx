@@ -72,20 +72,24 @@ export function RaidDetailsForm({
   }, [setUsers]);
 
   React.useEffect(() => {
-    getAttendanceBonusTypesForRaid()
+    getAttendanceBonusTypesForRaid(selectedDate ?? undefined)
       .then(setBonuses)
       .catch(() => setBonuses([]));
-  }, []);
+  }, [selectedDate]);
 
   React.useEffect(() => {
     if (!bonuses) return;
-    const baseDkp = selectedBosses.reduce(
-      (sum, boss) => sum + (boss.dkp_points || 0),
-      0,
-    );
+    // dkp_points на самом selectedBosses может быть резолвлен под другую дату
+    // (например, ещё до того, как выбрали дату рейда, или для отредактированного
+    // рейда — из старого значения в БД) — берём актуальное значение из bosses,
+    // который уже пересчитан под режим гильдии на selectedDate.
+    const baseDkp = selectedBosses.reduce((sum, boss) => {
+      const resolved = bosses.find((b) => b.id === boss.id);
+      return sum + (resolved?.dkp_points ?? boss.dkp_points ?? 0);
+    }, 0);
     const active = bonuses.filter((b) => activeBonusIds[b.id]);
     setDkpPoints(computeRaidDkp(baseDkp, active));
-  }, [selectedBosses, activeBonusIds, bonuses]);
+  }, [selectedBosses, activeBonusIds, bonuses, bosses]);
 
   // У каждого бонуса свой набор боссов, на которых он применяется (настраивается
   // в Settings). Если выбранный босс сменился и бонус к нему больше не

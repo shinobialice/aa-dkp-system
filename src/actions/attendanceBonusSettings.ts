@@ -3,7 +3,7 @@
 import sql from "@/shared/lib/db";
 import ensurePrivilieges from "./ensurePrivilieges";
 import { revalidatePath } from "next/cache";
-import { getGuildStatus } from "./guildStatusSettings";
+import { getGuildStatus, getGuildModeAtDate } from "./guildStatusSettings";
 import type {
   AttendanceBonusMode,
   AttendanceBonusTypeRow,
@@ -48,16 +48,19 @@ export async function getAttendanceBonusTypesForSettings(): Promise<
   }));
 }
 
-// Используется при создании/редактировании рейда — резолвит сразу под текущий
-// режим гильдии (фришка/пвп), как getBosses() делает для dkp_points.
-export async function getAttendanceBonusTypesForRaid(): Promise<
-  ResolvedAttendanceBonus[]
-> {
-  let rows, status, bossIdsByBonus;
+// Используется при создании/редактировании рейда — резолвит под режим гильдии
+// (фришка/пвп), как getBosses() делает для dkp_points. Если передана дата
+// рейда (atDate), резолвит по режиму, действовавшему на неё, а не по текущему
+// — иначе рейд, добавленный/отредактированный задним числом после смены
+// режима, посчитался бы по ставкам "не своего" периода.
+export async function getAttendanceBonusTypesForRaid(
+  atDate?: Date | string,
+): Promise<ResolvedAttendanceBonus[]> {
+  let rows, mode, bossIdsByBonus;
   try {
-    [rows, status, bossIdsByBonus] = await Promise.all([
+    [rows, mode, bossIdsByBonus] = await Promise.all([
       sql<any[]>`SELECT * FROM attendance_bonus_types ORDER BY sort_order, id`,
-      getGuildStatus(),
+      atDate ? getGuildModeAtDate(atDate) : getGuildStatus().then((s) => s.mode),
       getBossIdsByBonus(),
     ]);
   } catch (error) {
@@ -65,7 +68,7 @@ export async function getAttendanceBonusTypesForRaid(): Promise<
     throw new Error("Не удалось загрузить бонусы за посещение");
   }
 
-  const isPvp = status.mode === "pvp";
+  const isPvp = mode === "pvp";
 
   return rows.map((r) => ({
     id: r.id,

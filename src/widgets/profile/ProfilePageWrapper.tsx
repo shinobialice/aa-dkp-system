@@ -24,6 +24,7 @@ export default function ProfilePageWrapper({
   canEditGs,
   canAddExtraRole,
   canEditAdminFields,
+  canEditVk,
   canEditInventory,
   canEditSeals,
   canEditArchetype,
@@ -59,6 +60,7 @@ export default function ProfilePageWrapper({
   canEditGs: boolean;
   canAddExtraRole: boolean;
   canEditAdminFields: boolean;
+  canEditVk: boolean;
   canEditInventory: boolean;
   canEditSeals: boolean;
   canEditArchetype: boolean;
@@ -82,6 +84,7 @@ export default function ProfilePageWrapper({
         canEditGs={canEditGs}
         canAddExtraRole={canAddExtraRole}
         canEditAdminFields={canEditAdminFields}
+        canEditVk={canEditVk}
         isOwnProfile={isOwnProfile}
         user={user}
         tags={tags}

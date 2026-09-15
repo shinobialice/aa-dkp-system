@@ -35,13 +35,14 @@ const editUser = async (
     "Секретутка",
   ]);
 
-  // Поля, которые самоправщик физически не видит в форме (vkName, joined_at).
-  // Раньше сервер сравнивал присланное значение с текущим в БД и отклонял
-  // правку при расхождении — но эти два снимка могут разъехаться по любой
-  // причине, не связанной с действием пользователя (админ поправил дату,
-  // вкладка провисела открытой и т.п.), и тогда обычная смена ника/ГС ложно
-  // блокировалась. Проще и надёжнее для не-админов не доверять клиенту эти
-  // поля вовсе, а всегда сохранять то, что уже есть в БД.
+  // joined_at самоправщик физически не видит в форме. vkName видит и может
+  // менять только если включён vkEditEnabled — иначе тоже сохраняем то, что
+  // уже есть в БД. Раньше сервер сравнивал присланное значение с текущим в
+  // БД и отклонял правку при расхождении — но эти два снимка могут
+  // разъехаться по любой причине, не связанной с действием пользователя
+  // (админ поправил дату, вкладка провисела открытой и т.п.), и тогда
+  // обычная смена ника/ГС ложно блокировалась. Проще и надёжнее не
+  // доверять клиенту эти поля напрямую, а решать по серверным настройкам.
   let finalVkName = vkName;
   let finalJoinedAt = joined_at ? new Date(joined_at).toISOString() : null;
 
@@ -54,7 +55,9 @@ const editUser = async (
       throw new Error("Access denied: profile not active");
     }
 
-    finalVkName = existing.vk_name;
+    const selfEditSettings = await getUserSelfEditSettings();
+
+    finalVkName = selfEditSettings.vkEditEnabled ? vkName : existing.vk_name;
     finalJoinedAt = existing.joined_at;
 
     const nicknameChanged = username !== existing.username;
@@ -87,7 +90,6 @@ const editUser = async (
       (tertiaryChanged && !tertiaryIsNewAddition);
     const addingExtraRole = secondaryIsNewAddition || tertiaryIsNewAddition;
 
-    const selfEditSettings = await getUserSelfEditSettings();
     if (nicknameChanged && !selfEditSettings.nicknameEditEnabled) {
       throw new Error("Access denied: nickname edit disabled");
     }

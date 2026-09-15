@@ -14,14 +14,17 @@ export default function ProfileAdditionalInfo({
   setFormData,
   editMode,
   canEditAdminFields,
+  canEditVk,
 }: {
   user: any;
   formData: any;
   setFormData: (data: any) => void;
   editMode: boolean;
   canEditAdminFields: boolean;
+  canEditVk: boolean;
 }) {
   const canEdit = editMode && canEditAdminFields;
+  const canEditVkField = editMode && canEditVk;
   const joinedDate = user.joined_at ? new Date(user.joined_at) : null;
   const now = new Date();
 
@@ -60,14 +63,16 @@ export default function ProfileAdditionalInfo({
           VK
         </div>
         {(() => {
-          if (canEdit) {
+          if (canEditVkField) {
             return (
               <Input
                 className="w-[180px]"
                 value={formData.vkName ?? ""}
                 onChange={(e) => {
                   const input = e.target.value;
-                  const match = input.match(/vk\.com\/([a-zA-Z0-9_\.]+)/);
+                  const match = input.match(
+                    /vk\.(?:com|ru)\/([a-zA-Z0-9_.]+)/,
+                  );
                   const vkName = match ? match[1] : input;
                   setFormData((prev: any) => ({ ...prev, vkName }));
                 }}

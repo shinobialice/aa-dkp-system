@@ -5,6 +5,7 @@ import ensurePrivilieges from "./ensurePrivilieges";
 import { getSessionUserId } from "./getSessionUserId";
 import { revalidatePath } from "next/cache";
 import type { GuildServer } from "@/utils/guildServers";
+import { getMoscowISOString } from "@/utils/getMoscowISOString";
 
 export type GuildMode = "freeshard" | "pvp";
 export type GuildFaction = "nuian" | "hariharan";
@@ -62,6 +63,49 @@ export async function getGuildStatus(): Promise<GuildStatus> {
     startedAt: toMoscowIso(data.started_at ?? null),
     opponentGuild: data.opponent_guild ?? null,
   };
+}
+
+// Режим гильдии, действовавший на указанную дату/время (а не текущий) —
+// нужен, чтобы рейд, задним числом созданный или отредактированный уже после
+// смены фришка<->пвп, всё равно считался по ставкам того периода, в который
+// реально попадает дата рейда. Периоды не пересекаются (см. updateGuildStatus:
+// смена режима закрывает предыдущий период его же started_at/ended_at), так
+// что "последний период, начавшийся не позже даты" однозначно её содержит.
+export async function getGuildModeAtDate(
+  date: Date | string,
+): Promise<GuildMode> {
+  const naive = typeof date === "string" ? date : getMoscowISOString(date);
+
+  try {
+    const [match] = await sql<any[]>`
+      SELECT mode FROM (
+        SELECT mode, started_at FROM guild_period_history
+        UNION ALL
+        SELECT mode, started_at FROM guild_status_settings WHERE id = 1
+      ) periods
+      WHERE started_at IS NOT NULL AND started_at <= ${naive}::timestamp
+      ORDER BY started_at DESC
+      LIMIT 1
+    `;
+    if (match) return match.mode as GuildMode;
+
+    // Дата раньше самого раннего зафиксированного периода (например, рейд
+    // старше всей истории переключений) — берём режим самого старого
+    // известного периода как лучшее приближение.
+    const [earliest] = await sql<any[]>`
+      SELECT mode FROM (
+        SELECT mode, started_at FROM guild_period_history
+        UNION ALL
+        SELECT mode, started_at FROM guild_status_settings WHERE id = 1
+      ) periods
+      ORDER BY started_at ASC NULLS LAST
+      LIMIT 1
+    `;
+    return (earliest?.mode as GuildMode) ?? DEFAULT_MODE;
+  } catch (error) {
+    console.error("Ошибка при определении режима гильдии на дату:", error);
+    throw new Error("Не удалось определить режим гильдии на указанную дату");
+  }
 }
 
 export async function updateGuildStatus(mode: GuildMode) {

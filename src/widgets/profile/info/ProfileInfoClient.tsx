@@ -30,6 +30,7 @@ export default function ProfileInfoClient({
   canEditGs,
   canAddExtraRole,
   canEditAdminFields,
+  canEditVk,
   isOwnProfile,
   activity,
   salary,
@@ -52,6 +53,7 @@ export default function ProfileInfoClient({
   canEditGs: boolean;
   canAddExtraRole: boolean;
   canEditAdminFields: boolean;
+  canEditVk: boolean;
   isOwnProfile: boolean;
   activity: {
     aglPercent: number;
@@ -159,6 +161,7 @@ export default function ProfileInfoClient({
           setFormData={setFormData}
           editMode={editMode}
           canEditAdminFields={canEditAdminFields}
+          canEditVk={canEditVk}
         />
         <div className="min-w-[140px] space-y-1.5">
           <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
