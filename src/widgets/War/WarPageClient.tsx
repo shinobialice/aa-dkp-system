@@ -219,29 +219,6 @@ export default function WarPageClient({
               </>
             )}
           </div>
-
-          {/* МОК: статичная информационная карточка, не подключена к
-              addUserSalaryBonus/user_salary_bonus — админ по-прежнему выдаёт
-              бонусы вручную с профиля игрока. Только для вара — доп. ЗП
-              завязана на итоги вара, на фришке этой механики нет. */}
-          {isWar && (
-            <Card className="p-4">
-              <CardContent className="space-y-2 p-0">
-                <div className="flex items-center gap-2 text-sm font-semibold">
-                  <Gift className="size-4 text-muted-foreground" />
-                  Дополнительная ЗП по итогам вара
-                  <span className="ml-auto text-[11px] text-muted-foreground">
-                    скоро
-                  </span>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  MVP по киллам, 100% посещаемость и топ-3 по хонору получают
-                  бонус к ЗП. Начисляется вручную админом с профиля игрока
-                  после окончания вара.
-                </p>
-              </CardContent>
-            </Card>
-          )}
         </TabsContent>
 
         <TabsContent value="history">
