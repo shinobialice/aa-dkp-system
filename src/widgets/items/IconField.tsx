@@ -12,10 +12,14 @@ export function IconField({
   value,
   onChange,
   uploadAction,
+  label = "Иконка (40×40)",
+  size = 40,
 }: {
   value: string;
   onChange: (url: string) => void;
   uploadAction: (formData: FormData) => Promise<string>;
+  label?: string;
+  size?: number;
 }) {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -43,12 +47,20 @@ export function IconField({
 
   return (
     <div className="space-y-2">
-      <Label>Иконка (40×40)</Label>
+      <Label>{label}</Label>
       <div className="flex items-center gap-3">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded border bg-muted overflow-hidden">
+        <div
+          className="flex shrink-0 items-center justify-center rounded border bg-muted overflow-hidden"
+          style={{ width: size, height: size }}
+        >
           {value ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={value} alt="" className="size-10 object-contain" />
+            <img
+              src={value}
+              alt=""
+              className="object-contain"
+              style={{ width: size, height: size }}
+            />
           ) : (
             <span className="text-[10px] text-muted-foreground">нет</span>
           )}

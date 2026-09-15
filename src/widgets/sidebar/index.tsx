@@ -26,6 +26,7 @@ import {
   Package,
   Eye,
   EyeOff,
+  Megaphone,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -85,6 +86,7 @@ const AppSidebar: FC<Props> = ({
   const menuItems = [
     { title: "Основная информация", url: "/news", icon: Info },
     { title: "Новости", url: "/game-news", icon: Newspaper },
+    { title: "Доска объявлений", url: "/marketplace", icon: Megaphone },
     { title: "Участники", url: "/members", icon: Users },
     { title: "Посещаемость", url: "/activities", icon: CalendarDays },
     { title: "Расписание", url: "/schedule", icon: Calendar },
