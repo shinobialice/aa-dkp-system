@@ -170,7 +170,7 @@ function EferundRow({
                 )}
               </button>
             </TooltipTrigger>
-            <TooltipContent className="max-w-none p-3">
+            <TooltipContent className="max-w-none pointer-events-none p-3">
               <SkillTooltipBody skill={opt.display} kind={skill.kind} />
             </TooltipContent>
           </Tooltip>
@@ -230,7 +230,7 @@ function SkillButton({
           )}
         </button>
       </TooltipTrigger>
-      <TooltipContent className="max-w-none p-3">
+      <TooltipContent className="max-w-none pointer-events-none p-3">
         <SkillTooltipBody skill={display} kind={skill.kind} />
         {!selected && thresholdLocked && (
           <p className="mt-1.5 text-xs text-amber-500">
