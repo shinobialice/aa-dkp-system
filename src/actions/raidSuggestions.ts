@@ -5,7 +5,7 @@ import ensurePrivilieges from "./ensurePrivilieges";
 import createRaidEvent from "./createRaidEvent";
 import { getBosses } from "./getBosses";
 import { revalidatePath } from "next/cache";
-import type { BossName } from "@/shared/config/bossRespawn";
+import { getRespawnStart, respawnHoursByBoss, type BossName } from "@/shared/config/bossRespawn";
 
 const SUGGESTION_MANAGER_TAGS = ["Администратор", "Секретутка"];
 
@@ -70,7 +70,7 @@ export async function approveRaidSuggestion(id: number) {
   const raid = await createRaidEvent(
     "АГЛ",
     raidBoss.dkp_points ?? 0,
-    new Date(suggestion.kill_time),
+    getRespawnStart(suggestion.kill_time, respawnHoursByBoss[suggestion.boss_name]),
     [],
     [raidBoss.id],
     [],

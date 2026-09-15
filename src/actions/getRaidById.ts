@@ -38,11 +38,13 @@ export const getRaidById = async (id: string) => {
         JOIN item_type it ON it.id = l.item_type_id
         WHERE l.raid_id = ${raidId}
       `,
+        // Фолбэк для рейдов, созданных до появления active_user_count.
         sql<any[]>`
         SELECT COUNT(*)::int AS count
         FROM "user"
         WHERE active = true
           AND (joined_at IS NULL OR joined_at <= ${raid.start_date})
+          AND id NOT IN (SELECT user_id FROM user_tags WHERE tag = 'АФК' AND removed_at IS NULL)
       `,
         sql<any[]>`
         SELECT bonus_type_id FROM raid_bonus WHERE raid_id = ${raidId}
@@ -51,7 +53,7 @@ export const getRaidById = async (id: string) => {
 
     return {
       ...raid,
-      guildActiveMembersAtTime: activeMembersRow?.count ?? 0,
+      guildActiveMembersAtTime: raid.active_user_count ?? activeMembersRow?.count ?? 0,
       bonusTypeIds: bonusRows.map((b) => b.bonus_type_id),
       raid_boss: raidBossRows.map((b) => ({
         boss: {
