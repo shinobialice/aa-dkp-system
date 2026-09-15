@@ -3,6 +3,7 @@ import getUser from "@/actions/getUser";
 import getUserInventory from "@/actions/getUserInventory";
 import getUserSeals from "@/actions/getUserSeals";
 import getUserArchetype from "@/actions/getUserArchetype";
+import getUserSkillBuild from "@/actions/getUserSkillBuild";
 import getUserEquipment from "@/actions/getUserEquipment";
 import { getUserMonthlyAttendance } from "@/actions/getUserMonthlyAttendance";
 import { getUserPrimeStreak } from "@/actions/getUserPrimeStreak";
@@ -38,6 +39,7 @@ export default async function Page(p: {
     primeStreak,
     seals,
     archetype,
+    skillBuild,
     equipment,
   ] = await Promise.all([
     getUser(userId),
@@ -49,6 +51,7 @@ export default async function Page(p: {
     getUserPrimeStreak(userId),
     getUserSeals(userId),
     getUserArchetype(userId),
+    getUserSkillBuild(userId),
     getUserEquipment(userId),
   ]);
 
@@ -104,6 +107,7 @@ export default async function Page(p: {
       inventory={inventory}
       seals={seals}
       archetype={archetype}
+      skillBuild={skillBuild}
       equipment={equipment}
       notes={notes}
       usernameHistory={usernameHistory}

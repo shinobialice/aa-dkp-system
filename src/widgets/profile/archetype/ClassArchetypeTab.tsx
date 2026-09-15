@@ -2,14 +2,17 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import saveUserArchetype from "@/actions/saveUserArchetype";
+import saveUserSkillBuild from "@/actions/saveUserSkillBuild";
 import type {
   ArchetypeSlot,
   RoleSlot,
   UserArchetype,
 } from "@/actions/getUserArchetype";
+import type { RoleSkillBuild, UserSkillBuild } from "@/actions/getUserSkillBuild";
 import { SpecializationIcon } from "./SpecializationIcon";
 import { SPECIALIZATIONS, getSpecialization } from "./specializationsData";
 import { lookupClassName } from "./classCombinations";
+import SkillBuildEditor from "./SkillBuildEditor";
 import { Badge } from "@/shared/ui";
 import { Button } from "@/shared/ui";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
@@ -174,22 +177,38 @@ function BuildView({
   );
 }
 
+function specIdsOf(slot: ArchetypeSlot): string[] {
+  return [slot.specialization1, slot.specialization2, slot.specialization3].filter(
+    (s): s is string => !!s,
+  );
+}
+
+function hasAnySkillSelected(roleBuild: RoleSkillBuild | undefined): boolean {
+  if (!roleBuild) return false;
+  return Object.values(roleBuild).some((spec) => (spec?.selected?.length ?? 0) > 0);
+}
+
 export default function ClassArchetypeTab({
   userId,
   user,
   archetype,
   onChange,
+  skillBuild,
+  onSkillBuildChange,
   canEdit,
 }: {
   userId: number;
   user: any;
   archetype: UserArchetype;
   onChange: (archetype: UserArchetype) => void;
+  skillBuild: UserSkillBuild;
+  onSkillBuildChange: (skillBuild: UserSkillBuild) => void;
   canEdit: boolean;
 }) {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [draft, setDraft] = useState<UserArchetype>(archetype);
+  const [skillBuildDraft, setSkillBuildDraft] = useState<UserSkillBuild>(skillBuild);
 
   const activeSlots = ([1, 2, 3] as RoleSlot[]).filter((slot) =>
     hasRole(user, slot),
@@ -198,12 +217,14 @@ export default function ClassArchetypeTab({
 
   const startEditing = () => {
     setDraft(archetype);
+    setSkillBuildDraft(skillBuild);
     setEditing(true);
   };
 
   const cancelEditing = () => {
     setEditing(false);
     setDraft(archetype);
+    setSkillBuildDraft(skillBuild);
   };
 
   const setSpec = (slot: RoleSlot, key: SpecKey, value: string) => {
@@ -216,16 +237,26 @@ export default function ClassArchetypeTab({
   const handleSave = async () => {
     setSaving(true);
     try {
-      let updated = archetype;
+      let updatedArchetype = archetype;
+      let updatedSkillBuild = skillBuild;
       for (const slot of activeSlots) {
         const slotDraft = draft[slot];
-        updated = await saveUserArchetype(userId, slot, {
+        updatedArchetype = await saveUserArchetype(userId, slot, {
           specialization1: slotDraft.specialization1,
           specialization2: slotDraft.specialization2,
           specialization3: slotDraft.specialization3,
         });
+
+        const slotSpecs = specIdsOf(slotDraft);
+        const slotBuildDraft = Object.fromEntries(
+          Object.entries(skillBuildDraft[slot] ?? {}).filter(([specId]) =>
+            slotSpecs.includes(specId),
+          ),
+        );
+        updatedSkillBuild = await saveUserSkillBuild(userId, slot, slotBuildDraft);
       }
-      onChange(updated);
+      onChange(updatedArchetype);
+      onSkillBuildChange(updatedSkillBuild);
       setEditing(false);
       toast.success("Класс сохранён");
     } catch (error) {
@@ -238,7 +269,7 @@ export default function ClassArchetypeTab({
   };
 
   return (
-    <Card className="gap-3 py-4">
+    <Card className="mx-auto max-w-2xl gap-3 py-4">
       <CardHeader className="border-b">
         <CardTitle className="flex items-center justify-between">
           Класс персонажа
@@ -279,24 +310,45 @@ export default function ClassArchetypeTab({
             таблице сочетаний.
           </p>
         )}
-        {activeSlots.map((slot, i) => (
-          <div key={slot} className={i > 0 ? "border-t pt-4" : undefined}>
-            {editing ? (
-              <BuildEditor
-                slot={slot}
-                showLabel={showLabels}
-                draft={draft[slot]}
-                onSpecChange={(key, value) => setSpec(slot, key, value)}
-              />
-            ) : (
-              <BuildView
-                slot={slot}
-                showLabel={showLabels}
-                archetype={archetype[slot]}
-              />
-            )}
-          </div>
-        ))}
+        {activeSlots.map((slot, i) => {
+          const specIds = specIdsOf(editing ? draft[slot] : archetype[slot]);
+          const showBuild =
+            specIds.length > 0 &&
+            (editing || hasAnySkillSelected(skillBuild[slot]));
+
+          return (
+            <div key={slot} className={i > 0 ? "border-t pt-4" : undefined}>
+              {editing ? (
+                <BuildEditor
+                  slot={slot}
+                  showLabel={showLabels}
+                  draft={draft[slot]}
+                  onSpecChange={(key, value) => setSpec(slot, key, value)}
+                />
+              ) : (
+                <BuildView
+                  slot={slot}
+                  showLabel={showLabels}
+                  archetype={archetype[slot]}
+                />
+              )}
+              {showBuild && (
+                <div className="mt-3">
+                  <SkillBuildEditor
+                    specializationIds={specIds}
+                    build={
+                      (editing ? skillBuildDraft[slot] : skillBuild[slot]) ?? {}
+                    }
+                    editable={editing}
+                    onChange={(next) =>
+                      setSkillBuildDraft((prev) => ({ ...prev, [slot]: next }))
+                    }
+                  />
+                </div>
+              )}
+            </div>
+          );
+        })}
       </CardContent>
     </Card>
   );

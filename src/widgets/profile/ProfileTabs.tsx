@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import getUserInventory from "@/actions/getUserInventory";
 import type { UserArchetype } from "@/actions/getUserArchetype";
+import type { UserSkillBuild } from "@/actions/getUserSkillBuild";
 import type { UserEquipment } from "@/actions/getUserEquipment";
 import { UserActivityChart } from "@/widgets/profile/activity/UserActivityChart";
 import { UserMonthActivity } from "@/widgets/profile/activity/UserMonthActivity";
@@ -22,6 +23,8 @@ export default function ProfileTabs({
   setSeals,
   archetype,
   setArchetype,
+  skillBuild,
+  setSkillBuild,
   equipment,
   setEquipment,
   tags,
@@ -41,6 +44,8 @@ export default function ProfileTabs({
   setSeals: (seals: any[]) => void;
   archetype: UserArchetype;
   setArchetype: (archetype: UserArchetype) => void;
+  skillBuild: UserSkillBuild;
+  setSkillBuild: (skillBuild: UserSkillBuild) => void;
   equipment: UserEquipment[];
   setEquipment: (equipment: UserEquipment[]) => void;
   tags: any[];
@@ -172,6 +177,8 @@ export default function ProfileTabs({
               user={user}
               archetype={archetype}
               onChange={setArchetype}
+              skillBuild={skillBuild}
+              onSkillBuildChange={setSkillBuild}
               canEdit={canEditArchetype}
             />
           </TabsContent>

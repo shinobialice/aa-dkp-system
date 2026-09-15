@@ -2,6 +2,7 @@
 import { useState } from "react";
 import type { PrimeStreak } from "@/actions/getUserPrimeStreak";
 import type { UserArchetype } from "@/actions/getUserArchetype";
+import type { UserSkillBuild } from "@/actions/getUserSkillBuild";
 import type { UserEquipment } from "@/actions/getUserEquipment";
 import ProfileInfoClient from "@/widgets/profile/info/ProfileInfoClient";
 import ProfileTabs from "@/widgets/profile/ProfileTabs";
@@ -12,6 +13,7 @@ export default function ProfilePageWrapper({
   inventory,
   seals: initialSeals,
   archetype: initialArchetype,
+  skillBuild: initialSkillBuild,
   equipment: initialEquipment,
   usernameHistory: initialUsernameHistory,
   averageGuildGS,
@@ -36,6 +38,7 @@ export default function ProfilePageWrapper({
   inventory: any[];
   seals: any[];
   archetype: UserArchetype;
+  skillBuild: UserSkillBuild;
   equipment: UserEquipment[];
   notes: any[];
   usernameHistory: {
@@ -71,6 +74,7 @@ export default function ProfilePageWrapper({
   const [tags, setTags] = useState(initialTags);
   const [seals, setSeals] = useState(initialSeals);
   const [archetype, setArchetype] = useState(initialArchetype);
+  const [skillBuild, setSkillBuild] = useState(initialSkillBuild);
   const [equipment, setEquipment] = useState(initialEquipment);
   const [usernameHistory, setUsernameHistory] = useState(
     initialUsernameHistory,
@@ -103,6 +107,8 @@ export default function ProfilePageWrapper({
         setSeals={setSeals}
         archetype={archetype}
         setArchetype={setArchetype}
+        skillBuild={skillBuild}
+        setSkillBuild={setSkillBuild}
         equipment={equipment}
         setEquipment={setEquipment}
         tags={tags}
