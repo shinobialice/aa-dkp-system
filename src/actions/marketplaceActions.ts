@@ -10,11 +10,13 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
 
 export type MarketplaceCurrency = "gold" | "rub";
+export type MarketplaceListingType = "buy" | "sell";
 
 export type MarketplaceListing = {
   id: number;
   user_id: number;
-  item_type_id: number | null;
+  listing_type: MarketplaceListingType;
+  catalog_item_id: number | null;
   item_name: string;
   quantity: number;
   price: number | null;
@@ -26,12 +28,12 @@ export type MarketplaceListing = {
   seller_avatar_url: string | null;
   seller_vk_id: string | null;
   seller_vk_name: string | null;
-  icon_url: string | null;
-  grade: number | null;
+  catalog_icon_url: string | null;
 };
 
 type ListingInput = {
-  itemTypeId: number | null;
+  listingType: MarketplaceListingType;
+  catalogItemId: number | null;
   itemName: string;
   quantity: number;
   price: number | null;
@@ -40,10 +42,19 @@ type ListingInput = {
   imageUrl: string | null;
 };
 
-function validateListingInput({ itemName, quantity, price, currency }: ListingInput) {
+function validateListingInput({
+  listingType,
+  itemName,
+  quantity,
+  price,
+  currency,
+}: ListingInput) {
   const trimmedName = itemName.trim();
   if (!trimmedName) {
     throw new Error("Укажите название предмета");
+  }
+  if (listingType !== "buy" && listingType !== "sell") {
+    throw new Error("Некорректный тип объявления");
   }
   if (!Number.isFinite(quantity) || quantity < 1) {
     throw new Error("Количество должно быть не меньше 1");
@@ -69,20 +80,22 @@ async function ensureCanEditListing(id: number, userId: number) {
   }
 }
 
-// Доска объявлений: участники сами продают друг другу предметы (кастомные
-// или из каталога item_type), никак не затрагивая казну/финансы — отдельная
-// таблица marketplace_listings без связи с loot/finance.
+// Доска объявлений: участники сами продают/покупают друг у друга предметы
+// (кастомные или из отдельного каталога marketplace_item_type — см.
+// marketplaceItemTypeAdmin.ts, не путать с item_type казны/лута), никак не
+// затрагивая казну/финансы — отдельная таблица marketplace_listings без
+// связи с loot/finance.
 export async function getMarketplaceListings(): Promise<MarketplaceListing[]> {
   return await sql<MarketplaceListing[]>`
     SELECT
-      ml.id, ml.user_id, ml.item_type_id, ml.item_name, ml.quantity,
+      ml.id, ml.user_id, ml.listing_type, ml.catalog_item_id, ml.item_name, ml.quantity,
       ml.price, ml.currency, ml.description, ml.image_url, ml.created_at,
       u.username AS seller_username, u.avatar_url AS seller_avatar_url,
       u.vk_id AS seller_vk_id, u.vk_name AS seller_vk_name,
-      it.icon_url, it.grade
+      mit.icon_url AS catalog_icon_url
     FROM marketplace_listings ml
     JOIN "user" u ON u.id = ml.user_id
-    LEFT JOIN item_type it ON it.id = ml.item_type_id
+    LEFT JOIN marketplace_item_type mit ON mit.id = ml.catalog_item_id
     ORDER BY ml.created_at DESC
   `;
 }
@@ -124,12 +137,12 @@ export async function createMarketplaceListing(input: ListingInput) {
   }
 
   const trimmedName = validateListingInput(input);
-  const { itemTypeId, quantity, price, currency, description, imageUrl } = input;
+  const { listingType, catalogItemId, quantity, price, currency, description, imageUrl } = input;
 
   try {
     await sql`
-      INSERT INTO marketplace_listings (user_id, item_type_id, item_name, quantity, price, currency, description, image_url)
-      VALUES (${userId}, ${itemTypeId}, ${trimmedName}, ${quantity}, ${price}, ${currency}, ${description?.trim() || null}, ${imageUrl})
+      INSERT INTO marketplace_listings (user_id, listing_type, catalog_item_id, item_name, quantity, price, currency, description, image_url)
+      VALUES (${userId}, ${listingType}, ${catalogItemId}, ${trimmedName}, ${quantity}, ${price}, ${currency}, ${description?.trim() || null}, ${imageUrl})
     `;
   } catch (error) {
     console.error("Ошибка при создании объявления:", error);
@@ -145,12 +158,13 @@ export async function updateMarketplaceListing(id: number, input: ListingInput) 
 
   await ensureCanEditListing(id, userId);
   const trimmedName = validateListingInput(input);
-  const { itemTypeId, quantity, price, currency, description, imageUrl } = input;
+  const { listingType, catalogItemId, quantity, price, currency, description, imageUrl } = input;
 
   try {
     await sql`
       UPDATE marketplace_listings SET
-        item_type_id = ${itemTypeId},
+        listing_type = ${listingType},
+        catalog_item_id = ${catalogItemId},
         item_name = ${trimmedName},
         quantity = ${quantity},
         price = ${price},

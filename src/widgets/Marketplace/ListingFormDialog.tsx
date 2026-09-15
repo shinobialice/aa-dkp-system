@@ -2,18 +2,18 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { RussianRuble } from "lucide-react";
+import { RussianRuble, ShoppingCart, Tag, Package } from "lucide-react";
 import { toast } from "sonner";
-import { LootItemSelector } from "@/widgets/Loot/GuildLoot/LootItemSelector";
-import { LootIcon } from "@/widgets/Loot/LootBuy/icons/LootIconComponent";
+import { MarketplaceItemSelector } from "./MarketplaceItemSelector";
 import { IconField } from "@/widgets/items/IconField";
-import { ItemType } from "@/widgets/Loot/GuildLoot/LootTypes";
+import { MarketplaceItemTypeRow } from "@/actions/marketplaceItemTypeAdmin";
 import {
   createMarketplaceListing,
   updateMarketplaceListing,
   uploadMarketplaceListingImage,
   MarketplaceCurrency,
   MarketplaceListing,
+  MarketplaceListingType,
 } from "@/actions/marketplaceActions";
 import { Button } from "@/shared/ui";
 import {
@@ -30,6 +30,7 @@ import { Label } from "@/shared/ui";
 import { Textarea } from "@/shared/ui";
 
 type FormState = {
+  listingType: MarketplaceListingType;
   itemName: string;
   quantity: number;
   price: string;
@@ -41,6 +42,7 @@ type FormState = {
 function buildInitialForm(listing?: MarketplaceListing): FormState {
   if (!listing) {
     return {
+      listingType: "sell",
       itemName: "",
       quantity: 1,
       price: "",
@@ -50,6 +52,7 @@ function buildInitialForm(listing?: MarketplaceListing): FormState {
     };
   }
   return {
+    listingType: listing.listing_type,
     itemName: listing.item_name,
     quantity: listing.quantity,
     price: listing.price != null ? String(listing.price) : "",
@@ -60,12 +63,12 @@ function buildInitialForm(listing?: MarketplaceListing): FormState {
 }
 
 export function ListingFormDialog({
-  itemTypes,
+  catalogItems,
   onSaved,
   listing,
   trigger,
 }: {
-  itemTypes: ItemType[];
+  catalogItems: MarketplaceItemTypeRow[];
   onSaved: () => void;
   listing?: MarketplaceListing;
   trigger: React.ReactNode;
@@ -73,18 +76,18 @@ export function ListingFormDialog({
   const isEdit = !!listing;
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"catalog" | "custom">(
-    !listing || listing.item_type_id ? "catalog" : "custom",
+    !listing || listing.catalog_item_id ? "catalog" : "custom",
   );
   const [form, setForm] = useState<FormState>(() => buildInitialForm(listing));
   const [submitting, setSubmitting] = useState(false);
 
-  const selectedItemType = itemTypes.find(
+  const selectedCatalogItem = catalogItems.find(
     (item) => item.name === form.itemName,
   );
 
   const reset = () => {
     setForm(buildInitialForm(listing));
-    setMode(!listing || listing.item_type_id ? "catalog" : "custom");
+    setMode(!listing || listing.catalog_item_id ? "catalog" : "custom");
   };
 
   const handleSubmit = async () => {
@@ -97,7 +100,8 @@ export function ListingFormDialog({
     setSubmitting(true);
     try {
       const input = {
-        itemTypeId: mode === "catalog" ? (selectedItemType?.id ?? null) : null,
+        listingType: form.listingType,
+        catalogItemId: mode === "catalog" ? (selectedCatalogItem?.id ?? null) : null,
         itemName: form.itemName,
         quantity: form.quantity,
         price,
@@ -139,6 +143,27 @@ export function ListingFormDialog({
           </DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-3">
+          <div className="flex rounded-md border p-1 gap-1">
+            <Button
+              type="button"
+              variant={form.listingType === "sell" ? "default" : "ghost"}
+              className="flex-1 cursor-pointer gap-1.5"
+              onClick={() => setForm((prev) => ({ ...prev, listingType: "sell" }))}
+            >
+              <Tag className="h-4 w-4" />
+              Продам
+            </Button>
+            <Button
+              type="button"
+              variant={form.listingType === "buy" ? "default" : "ghost"}
+              className="flex-1 cursor-pointer gap-1.5"
+              onClick={() => setForm((prev) => ({ ...prev, listingType: "buy" }))}
+            >
+              <ShoppingCart className="h-4 w-4" />
+              Куплю
+            </Button>
+          </div>
+
           <Tabs
             value={mode}
             onValueChange={(v) => {
@@ -155,19 +180,24 @@ export function ListingFormDialog({
               <Label>Предмет</Label>
               {form.itemName && (
                 <div className="flex items-center gap-2">
-                  <LootIcon
-                    itemName={form.itemName}
-                    iconUrl={selectedItemType?.icon_url}
-                    grade={selectedItemType?.grade}
-                    size={32}
-                  />
+                  {selectedCatalogItem?.icon_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={selectedCatalogItem.icon_url}
+                      alt=""
+                      className="rounded object-cover"
+                      style={{ width: 32, height: 32 }}
+                    />
+                  ) : (
+                    <Package className="size-8 text-muted-foreground" />
+                  )}
                   <span className="font-medium">{form.itemName}</span>
                 </div>
               )}
-              <LootItemSelector
+              <MarketplaceItemSelector
                 value={form.itemName}
                 onSelect={(name) => setForm((prev) => ({ ...prev, itemName: name }))}
-                itemTypes={itemTypes}
+                catalogItems={catalogItems}
               />
             </TabsContent>
 

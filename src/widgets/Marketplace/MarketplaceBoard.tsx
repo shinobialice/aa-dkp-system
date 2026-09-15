@@ -3,19 +3,19 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { MarketplaceListing, getMarketplaceListings } from "@/actions/marketplaceActions";
-import { ItemType } from "@/widgets/Loot/GuildLoot/LootTypes";
+import { MarketplaceItemTypeRow } from "@/actions/marketplaceItemTypeAdmin";
 import { Button } from "@/shared/ui";
 import { ListingFormDialog } from "./ListingFormDialog";
 import { ListingCard } from "./ListingCard";
 
 export function MarketplaceBoard({
   initialListings,
-  itemTypes,
+  catalogItems,
   currentUserId,
   isAdmin,
 }: {
   initialListings: MarketplaceListing[];
-  itemTypes: ItemType[];
+  catalogItems: MarketplaceItemTypeRow[];
   currentUserId: number | null;
   isAdmin: boolean;
 }) {
@@ -29,7 +29,7 @@ export function MarketplaceBoard({
     <div className="flex flex-col gap-6">
       <div>
         <ListingFormDialog
-          itemTypes={itemTypes}
+          catalogItems={catalogItems}
           onSaved={refresh}
           trigger={
             <Button className="cursor-pointer gap-1.5">
@@ -50,7 +50,7 @@ export function MarketplaceBoard({
             <ListingCard
               key={listing.id}
               listing={listing}
-              itemTypes={itemTypes}
+              catalogItems={catalogItems}
               canEdit={listing.user_id === currentUserId}
               canDelete={isAdmin || listing.user_id === currentUserId}
               onChanged={refresh}

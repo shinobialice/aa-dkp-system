@@ -3,12 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Trash2, Pencil, RussianRuble } from "lucide-react";
+import { Trash2, Pencil, RussianRuble, ShoppingCart, Tag } from "lucide-react";
 import { toast } from "sonner";
-import { LootIcon } from "@/widgets/Loot/LootBuy/icons/LootIconComponent";
 import { deleteMarketplaceListing } from "@/actions/marketplaceActions";
 import { MarketplaceListing } from "@/actions/marketplaceActions";
-import { ItemType } from "@/widgets/Loot/GuildLoot/LootTypes";
+import { MarketplaceItemTypeRow } from "@/actions/marketplaceItemTypeAdmin";
 import { ListingFormDialog } from "./ListingFormDialog";
 import { Card, CardContent } from "@/shared/ui";
 import { Avatar, AvatarImage, AvatarFallback } from "@/shared/ui";
@@ -26,15 +25,42 @@ import {
   AlertDialogAction,
 } from "@/shared/ui";
 
+// Заглушка вместо картинки, когда её вообще нет ни у объявления (свой
+// предмет без фото), ни у выбранного предмета каталога (marketplace_item_type
+// без иконки) — показывает суть объявления (куплю/продам) вместо пустого
+// места.
+function ListingTypeIcon({
+  listingType,
+  size,
+}: {
+  listingType: MarketplaceListing["listing_type"];
+  size: number;
+}) {
+  const isBuy = listingType === "buy";
+  const Icon = isBuy ? ShoppingCart : Tag;
+  return (
+    <div
+      className={`flex shrink-0 items-center justify-center rounded ${
+        isBuy
+          ? "bg-blue-500/15 text-blue-600 dark:text-blue-400"
+          : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+      }`}
+      style={{ width: size, height: size }}
+    >
+      <Icon style={{ width: size * 0.5, height: size * 0.5 }} />
+    </div>
+  );
+}
+
 export function ListingCard({
   listing,
-  itemTypes,
+  catalogItems,
   canEdit,
   canDelete,
   onChanged,
 }: {
   listing: MarketplaceListing;
-  itemTypes: ItemType[];
+  catalogItems: MarketplaceItemTypeRow[];
   canEdit: boolean;
   canDelete: boolean;
   onChanged: () => void;
@@ -67,24 +93,22 @@ export function ListingCard({
     <Card className="relative">
       <CardContent className="flex flex-col gap-3">
         <div className="flex items-start gap-3">
-          {listing.image_url ? (
+          {listing.image_url || listing.catalog_icon_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={listing.image_url}
+              src={listing.image_url ?? listing.catalog_icon_url!}
               alt={listing.item_name}
               className="rounded object-cover shrink-0"
               style={{ width: 48, height: 48 }}
             />
           ) : (
-            <LootIcon
-              itemName={listing.item_name}
-              iconUrl={listing.icon_url}
-              grade={listing.grade}
-              size={48}
-            />
+            <ListingTypeIcon listingType={listing.listing_type} size={48} />
           )}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
+              <Badge variant={listing.listing_type === "buy" ? "default" : "secondary"}>
+                {listing.listing_type === "buy" ? "Куплю" : "Продам"}
+              </Badge>
               <span className="font-semibold truncate">{listing.item_name}</span>
               {listing.quantity > 1 && (
                 <Badge variant="secondary">x{listing.quantity}</Badge>
@@ -151,7 +175,7 @@ export function ListingCard({
           <div className="absolute top-2 right-2 flex gap-1">
             {canEdit && (
               <ListingFormDialog
-                itemTypes={itemTypes}
+                catalogItems={catalogItems}
                 listing={listing}
                 onSaved={onChanged}
                 trigger={
