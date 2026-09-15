@@ -1,6 +1,3 @@
-// Раньше грузились напрямую с archeagecodex.com — залито локально в
-// /api/uploads/misc-icons (archeagecodex.com блокирует хотлинк-запросы с
-// другого домена, см. LootIconComponent.tsx про ту же причину переезда).
 const inventoryIcons: { [key: string]: string } = {
   Фрегат: "/api/uploads/misc-icons/icon_item_2121.png",
   Кобуксон: "/api/uploads/misc-icons/icon_item_4147.png",

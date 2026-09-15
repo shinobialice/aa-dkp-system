@@ -1,14 +1,12 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Package } from "lucide-react";
 import { MarketplaceItemTypeRow } from "@/actions/marketplaceItemTypeAdmin";
+import { LootIcon } from "@/widgets/Loot/LootBuy/icons/LootIconComponent";
 import { Command, CommandInput, CommandItem, CommandList, CommandEmpty } from "@/shared/ui";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui";
 
-// Тот же паттерн, что и LootItemSelector (казна/лут), но без рамки редкости —
-// у каталога доски объявлений (marketplace_item_type) её нет: просто
-// название + иконка, без грейда.
+// Тот же паттерн, что и LootItemSelector (казна/лут).
 export function MarketplaceItemSelector({
   value,
   onSelect,
@@ -53,17 +51,12 @@ export function MarketplaceItemSelector({
                 }}
                 className="flex items-center gap-2 cursor-pointer"
               >
-                {item.icon_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={item.icon_url}
-                    alt=""
-                    className="rounded object-cover"
-                    style={{ width: 24, height: 24 }}
-                  />
-                ) : (
-                  <Package className="size-6 text-muted-foreground" />
-                )}
+                <LootIcon
+                  itemName={item.name}
+                  iconUrl={item.icon_url}
+                  grade={item.grade}
+                  size={24}
+                />
                 <span>{item.name}</span>
               </CommandItem>
             ))}

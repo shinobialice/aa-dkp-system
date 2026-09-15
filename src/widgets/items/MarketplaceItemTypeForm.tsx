@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { IconField } from "./IconField";
+import { getSealGradeLabel, getSealGradeColor } from "@/widgets/profile/seals/sealsData";
 import {
   createMarketplaceItemType,
   updateMarketplaceItemType,
@@ -18,7 +19,14 @@ import {
   DialogFooter,
   Input,
   Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/shared/ui";
+
+const GRADE_OPTIONS = Array.from({ length: 12 }, (_, i) => i + 1);
 
 export function MarketplaceItemTypeForm({
   open,
@@ -33,12 +41,14 @@ export function MarketplaceItemTypeForm({
 }) {
   const [name, setName] = useState("");
   const [iconUrl, setIconUrl] = useState("");
+  const [grade, setGrade] = useState("1");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!open) return;
     setName(item?.name ?? "");
     setIconUrl(item?.icon_url ?? "");
+    setGrade(String(item?.grade ?? 1));
   }, [open, item]);
 
   const handleSave = async () => {
@@ -48,7 +58,11 @@ export function MarketplaceItemTypeForm({
     }
     setSaving(true);
     try {
-      const payload = { name, iconUrl: iconUrl.trim() === "" ? null : iconUrl.trim() };
+      const payload = {
+        name,
+        iconUrl: iconUrl.trim() === "" ? null : iconUrl.trim(),
+        grade: Number(grade),
+      };
       if (item) {
         await updateMarketplaceItemType(item.id, payload);
       } else {
@@ -89,6 +103,27 @@ export function MarketplaceItemTypeForm({
             onChange={setIconUrl}
             uploadAction={uploadMarketplaceItemTypeIcon}
           />
+
+          <div className="space-y-2">
+            <Label>Рамка редкости</Label>
+            <Select value={grade} onValueChange={setGrade}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {GRADE_OPTIONS.map((g) => {
+                  const color = getSealGradeColor(g);
+                  return (
+                    <SelectItem key={g} value={String(g)}>
+                      <span style={color ? { color } : undefined}>
+                        {g} — {getSealGradeLabel(g)}
+                      </span>
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         <DialogFooter>
           <Button

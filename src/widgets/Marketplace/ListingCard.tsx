@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { deleteMarketplaceListing } from "@/actions/marketplaceActions";
 import { MarketplaceListing } from "@/actions/marketplaceActions";
 import { MarketplaceItemTypeRow } from "@/actions/marketplaceItemTypeAdmin";
+import { LootIcon } from "@/widgets/Loot/LootBuy/icons/LootIconComponent";
 import { ListingFormDialog } from "./ListingFormDialog";
 import { Card, CardContent } from "@/shared/ui";
 import { Avatar, AvatarImage, AvatarFallback } from "@/shared/ui";
@@ -93,10 +94,17 @@ export function ListingCard({
     <Card className="relative">
       <CardContent className="flex flex-col gap-3">
         <div className="flex items-start gap-3">
-          {listing.image_url || listing.catalog_icon_url ? (
+          {listing.catalog_item_id ? (
+            <LootIcon
+              itemName={listing.item_name}
+              iconUrl={listing.catalog_icon_url}
+              grade={listing.catalog_grade}
+              size={48}
+            />
+          ) : listing.image_url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={listing.image_url ?? listing.catalog_icon_url!}
+              src={listing.image_url}
               alt={listing.item_name}
               className="rounded object-cover shrink-0"
               style={{ width: 48, height: 48 }}

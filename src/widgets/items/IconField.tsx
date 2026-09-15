@@ -4,10 +4,6 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button, Label } from "@/shared/ui";
 
-// Поле "иконка предмета" для форм на /items — только загрузка файла. Раньше
-// был ещё режим "вставить ссылку", но внешние ссылки (на archeagecodex.com и
-// т.п.) регулярно оказывались недоступны с проды (хотлинк-защита) — поэтому
-// оставили только загрузку на свой хостинг.
 export function IconField({
   value,
   onChange,

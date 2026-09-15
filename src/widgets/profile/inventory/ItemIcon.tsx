@@ -13,9 +13,6 @@ export default function ItemIcon({
 }: ItemIconProps) {
   const parsedQuality = quality ? parseInt(quality) : null;
 
-  // Раньше грузилось напрямую с archeagecodex.com — тот блокирует хотлинк-
-  // запросы с чужого домена, поэтому рамки молча не показывались. Держим
-  // локально в /api/uploads/grade-icons (см. LootIconComponent.tsx).
   let gradeUrl = "/api/uploads/grade-icons/grade1.png";
 
   if (parsedQuality === 3) {

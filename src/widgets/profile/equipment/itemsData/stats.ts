@@ -775,7 +775,7 @@ export const ITEM_STATS: Record<number, Record<string, number>> = {
   35410: { int: 11.87, spi: 8.08 }, // Иферийское ожерелье магистра
   40622: { str: 20.66, dex: 13.94, sta: 34.1 }, // Лютня Солнечной Башни
   40624: { sta: 27.38, int: 22.9, spi: 18.42 }, // Кларнет Тростникового Короля
-  // Ожерелья доблести (фиксированные статы, не масштабируются по грейду — archeagecodex.com)
+  // Ожерелья доблести 
   29731: { damage_taken_reduction: -0.3, flat_sta: 10 }, // Ожерелье доблести I ранга
   29743: { damage_taken_reduction: -0.6, flat_sta: 12 }, // Ожерелье доблести II ранга
   29744: { damage_taken_reduction: -0.9, flat_sta: 14 }, // Ожерелье доблести III ранга

@@ -29,6 +29,7 @@ export type MarketplaceListing = {
   seller_vk_id: string | null;
   seller_vk_name: string | null;
   catalog_icon_url: string | null;
+  catalog_grade: number | null;
 };
 
 type ListingInput = {
@@ -92,7 +93,7 @@ export async function getMarketplaceListings(): Promise<MarketplaceListing[]> {
       ml.price, ml.currency, ml.description, ml.image_url, ml.created_at,
       u.username AS seller_username, u.avatar_url AS seller_avatar_url,
       u.vk_id AS seller_vk_id, u.vk_name AS seller_vk_name,
-      mit.icon_url AS catalog_icon_url
+      mit.icon_url AS catalog_icon_url, mit.grade AS catalog_grade
     FROM marketplace_listings ml
     JOIN "user" u ON u.id = ml.user_id
     LEFT JOIN marketplace_item_type mit ON mit.id = ml.catalog_item_id

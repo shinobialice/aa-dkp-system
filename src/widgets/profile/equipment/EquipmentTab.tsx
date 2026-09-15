@@ -131,11 +131,6 @@ const CUBE_ELIGIBLE_SLOTS = new Set([
   "weapon_ranged",
 ]);
 
-// "Проклятого X" / "Возрожденного X" — фиксированные рейдовые сеты, всегда
-// Эпохи Двенадцати. Ожерелья доблести ("... N ранга") — каждый ранг это
-// отдельный предмет с зашитым качеством (I ранга = Обычный, ..., XIV ранга =
-// Эпоха Двенадцати, см. archeagecodex.com) — игрок его тоже не выбирает,
-// только качество зависит от конкретного ранга, а не всегда 12.
 function getFixedGrade(name: string, grade: number): number | null {
   if (name.includes("проклятого") || name.includes("возрожденного")) return 12;
   if (name.includes("ранга")) return grade;

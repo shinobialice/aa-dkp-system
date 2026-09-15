@@ -11,24 +11,27 @@ export type MarketplaceItemTypeRow = {
   id: number;
   name: string;
   icon_url: string | null;
+  grade: number;
 };
 
-// Отдельный каталог "название + иконка" под доску объявлений — не путать с
-// item_type (казна/лут/покупка лута). Управляется на вкладке "Доска
-// объявлений" на /items. Чтение доступно любому авторизованному участнику
-// (нужно всем при создании объявления), запись — только админам.
+// Отдельный каталог "название + иконка + грейд" под доску объявлений — не
+// путать с item_type (казна/лут/покупка лута). Управляется на вкладке
+// "Доска объявлений" на /items. Чтение доступно любому авторизованному
+// участнику (нужно всем при создании объявления), запись — только админам.
 export async function getMarketplaceItemTypes(): Promise<MarketplaceItemTypeRow[]> {
   return await sql<MarketplaceItemTypeRow[]>`
-    SELECT id, name, icon_url FROM marketplace_item_type ORDER BY name
+    SELECT id, name, icon_url, grade FROM marketplace_item_type ORDER BY name
   `;
 }
 
 export async function createMarketplaceItemType({
   name,
   iconUrl,
+  grade,
 }: {
   name: string;
   iconUrl: string | null;
+  grade: number;
 }) {
   await ensurePrivilieges(["Администратор"]);
   const trimmed = name.trim();
@@ -37,8 +40,8 @@ export async function createMarketplaceItemType({
   }
   try {
     await sql`
-      INSERT INTO marketplace_item_type (name, icon_url)
-      VALUES (${trimmed}, ${iconUrl})
+      INSERT INTO marketplace_item_type (name, icon_url, grade)
+      VALUES (${trimmed}, ${iconUrl}, ${grade})
     `;
   } catch (error: any) {
     console.error("Ошибка при создании предмета доски объявлений:", error);
@@ -51,7 +54,7 @@ export async function createMarketplaceItemType({
 
 export async function updateMarketplaceItemType(
   id: number,
-  { name, iconUrl }: { name: string; iconUrl: string | null },
+  { name, iconUrl, grade }: { name: string; iconUrl: string | null; grade: number },
 ) {
   await ensurePrivilieges(["Администратор"]);
   const trimmed = name.trim();
@@ -61,7 +64,7 @@ export async function updateMarketplaceItemType(
   try {
     await sql`
       UPDATE marketplace_item_type
-      SET name = ${trimmed}, icon_url = ${iconUrl}
+      SET name = ${trimmed}, icon_url = ${iconUrl}, grade = ${grade}
       WHERE id = ${id}
     `;
   } catch (error: any) {

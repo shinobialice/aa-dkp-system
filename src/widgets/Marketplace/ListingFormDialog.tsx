@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { RussianRuble, ShoppingCart, Tag, Package } from "lucide-react";
+import { RussianRuble, ShoppingCart, Tag } from "lucide-react";
 import { toast } from "sonner";
 import { MarketplaceItemSelector } from "./MarketplaceItemSelector";
 import { IconField } from "@/widgets/items/IconField";
+import { LootIcon } from "@/widgets/Loot/LootBuy/icons/LootIconComponent";
 import { MarketplaceItemTypeRow } from "@/actions/marketplaceItemTypeAdmin";
 import {
   createMarketplaceListing,
@@ -180,17 +181,12 @@ export function ListingFormDialog({
               <Label>Предмет</Label>
               {form.itemName && (
                 <div className="flex items-center gap-2">
-                  {selectedCatalogItem?.icon_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={selectedCatalogItem.icon_url}
-                      alt=""
-                      className="rounded object-cover"
-                      style={{ width: 32, height: 32 }}
-                    />
-                  ) : (
-                    <Package className="size-8 text-muted-foreground" />
-                  )}
+                  <LootIcon
+                    itemName={form.itemName}
+                    iconUrl={selectedCatalogItem?.icon_url}
+                    grade={selectedCatalogItem?.grade}
+                    size={32}
+                  />
                   <span className="font-medium">{form.itemName}</span>
                 </div>
               )}

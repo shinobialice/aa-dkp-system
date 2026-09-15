@@ -37,10 +37,6 @@ const ITEM_ICONS: Record<string, string> = {
   "Красный Дракон": inventoryIcons["Красный Дракон"],
   "Черный Дракон": inventoryIcons["Черный Дракон"],
   "Зеленый Дракон": inventoryIcons["Зеленый Дракон"],
-  // Совпадают с icon_url этих же предметов в item_type (id 40 и 39) на
-  // момент переезда с archeagecodex.com — если админ перезальёт им иконку
-  // на /items, тут путь придётся обновить руками (имя файла — случайный
-  // UUID, не привязан к id).
   "Ро'кана, Безумие морей": "/api/uploads/item-icons/05acae8a-8535-40b2-a4a3-37456c6f2434.png",
   "Анд'хакар, Чернильная тьма":
     "/api/uploads/item-icons/6661372a-84b3-48ba-906d-104130988af2.png",

@@ -1,9 +1,3 @@
-// Специализации ArcheAge. Игровой класс собирается из 3 специализаций.
-// Список взят из реального HTML калькулятора archeagecodex.com/ru/calc —
-// специализаций всего 14 (id — data-clid): 12 "обычных" плюс Стрельба и
-// Танец, которые в сочетаниях дают именные вариации уже существующих
-// классов (см. classCombinations.ts). Иконки лежат в
-// public/images/classes/<id>.png.
 export type Specialization = {
   id: string;
   name: string;

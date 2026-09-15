@@ -54,9 +54,6 @@ export const SEAL_ROLE_COLORS: Record<string, string> = {
   "для хилов": "#FF6FA5",
 };
 
-// Раньше грузилась напрямую с archeagecodex.com — залито локально в
-// /api/uploads/misc-icons, см. LootIconComponent.tsx (GRADE_URL) про ту же
-// причину переезда.
 export const SEAL_ICON_URL = "/api/uploads/misc-icons/seal-icon.png";
 
 // Цвета — по цветам рамок icon_gradeN.png (архейджовская система грейдов).

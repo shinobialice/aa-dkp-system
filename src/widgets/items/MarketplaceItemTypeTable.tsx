@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Plus, Search, Package } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { MarketplaceItemTypeForm } from "./MarketplaceItemTypeForm";
+import { LootIcon } from "@/widgets/Loot/LootBuy/icons/LootIconComponent";
 import {
   getMarketplaceItemTypes,
   deleteMarketplaceItemType,
@@ -61,7 +62,7 @@ export function MarketplaceItemTypeTable() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground max-w-md">
           Каталог предметов для вкладки «Предмет из базы» на доске
-          объявлений — отдельный от казны и лута, только название и иконка.
+          объявлений — отдельный от казны и лута.
         </p>
         <Button
           className="cursor-pointer shrink-0"
@@ -97,17 +98,12 @@ export function MarketplaceItemTypeTable() {
           {visibleItems.map((item) => (
             <TableRow key={item.id}>
               <TableCell>
-                {item.icon_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={item.icon_url}
-                    alt=""
-                    className="rounded object-cover"
-                    style={{ width: 32, height: 32 }}
-                  />
-                ) : (
-                  <Package className="size-8 text-muted-foreground" />
-                )}
+                <LootIcon
+                  itemName={item.name}
+                  iconUrl={item.icon_url}
+                  grade={item.grade}
+                  size={32}
+                />
               </TableCell>
               <TableCell>{item.name}</TableCell>
               <TableCell>
