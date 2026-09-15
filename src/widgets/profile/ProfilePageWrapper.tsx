@@ -94,6 +94,7 @@ export default function ProfilePageWrapper({
         tags={tags}
         seals={seals}
         archetype={archetype}
+        usernameHistory={usernameHistory}
         setUsernameHistory={setUsernameHistory}
         activity={activity}
         salary={salary}
@@ -113,7 +114,6 @@ export default function ProfilePageWrapper({
         setEquipment={setEquipment}
         tags={tags}
         setTags={setTags}
-        usernameHistory={usernameHistory}
         averageGuildGS={averageGuildGS}
         isAdmin={isAdmin}
         canEditInventory={canEditInventory}

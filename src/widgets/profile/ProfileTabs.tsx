@@ -12,7 +12,6 @@ import UserNotes from "./notes/UserNotes";
 import SealsTab from "./seals/SealsTab";
 import ClassArchetypeTab from "./archetype/ClassArchetypeTab";
 import EquipmentTab from "./equipment/EquipmentTab";
-import UsernameHistoryTab from "./usernameHistory/UsernameHistoryTab";
 import UserMonthlyRaidsTab from "./raids/UserMonthlyRaidsTab";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/ui";
 
@@ -30,7 +29,6 @@ export default function ProfileTabs({
   tags,
   setTags,
   setUser,
-  usernameHistory,
   averageGuildGS,
   isAdmin,
   canEditInventory,
@@ -51,12 +49,6 @@ export default function ProfileTabs({
   tags: any[];
   setTags: (tags: any[]) => void;
   setUser: (user: any) => void;
-  usernameHistory: {
-    id: number;
-    old_username: string;
-    new_username: string;
-    changed_at: string;
-  }[];
   averageGuildGS: number;
   isAdmin: boolean;
   canEditInventory: boolean;
@@ -92,9 +84,6 @@ export default function ProfileTabs({
         </TabsTrigger>
         <TabsTrigger className="cursor-pointer" value="purchases">
           Куплено/Выдано
-        </TabsTrigger>
-        <TabsTrigger className="cursor-pointer" value="username-history">
-          История ников
         </TabsTrigger>
         <TabsTrigger className="cursor-pointer" value="character">
           Персонаж
@@ -132,10 +121,6 @@ export default function ProfileTabs({
 
       <TabsContent value="purchases">
         <PurchasesAndGiveaways userId={user.id} username={user.username} />
-      </TabsContent>
-
-      <TabsContent value="username-history">
-        <UsernameHistoryTab history={usernameHistory} />
       </TabsContent>
 
       <TabsContent value="character">

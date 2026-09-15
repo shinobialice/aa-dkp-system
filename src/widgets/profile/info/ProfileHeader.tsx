@@ -1,11 +1,12 @@
 "use client";
 import { useRef, useState } from "react";
-import { Pencil, Check, Camera } from "lucide-react";
+import { Pencil, Check, Camera, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { Avatar, AvatarImage, AvatarFallback } from "@/shared/ui";
 import { Badge } from "@/shared/ui";
 import { Button } from "@/shared/ui";
 import { Input } from "@/shared/ui";
+import { Popover, PopoverTrigger, PopoverContent } from "@/shared/ui";
 import editUser from "@/actions/editUser";
 import { uploadAvatar } from "@/actions/uploadAvatar";
 import { getUsernameHistory } from "@/actions/usernameHistoryActions";
@@ -36,6 +37,7 @@ export default function ProfileHeader({
   editMode,
   setEditMode,
   tags,
+  usernameHistory,
   setUsernameHistory,
   canEditProfile,
   canEditNickname,
@@ -48,6 +50,12 @@ export default function ProfileHeader({
   editMode: boolean;
   setEditMode: (v: boolean) => void;
   tags: { id: number; tag: string }[];
+  usernameHistory: {
+    id: number;
+    old_username: string;
+    new_username: string;
+    changed_at: string;
+  }[];
   setUsernameHistory: (
     history: {
       id: number;
@@ -194,6 +202,41 @@ export default function ProfileHeader({
                   <h1 className="text-xl font-bold md:text-2xl">
                     {formData.username}
                   </h1>
+                  {usernameHistory.length > 0 && (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          type="button"
+                          aria-label="История ников"
+                          className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                        >
+                          <ChevronDown className="size-4" />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent align="start" className="w-72 p-3">
+                        <div className="mb-2 text-xs font-medium text-muted-foreground">
+                          Этот пользователь также использовал ники:
+                        </div>
+                        <div className="flex flex-col divide-y">
+                          {usernameHistory.map((h) => (
+                            <div
+                              key={h.id}
+                              className="flex items-center justify-between gap-3 py-2"
+                            >
+                              <span className="truncate text-sm font-medium">
+                                {h.old_username}
+                              </span>
+                              <span className="shrink-0 text-xs text-muted-foreground">
+                                {new Date(h.changed_at).toLocaleDateString(
+                                  "ru-RU",
+                                )}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  )}
                   <PrimeStreakBadge {...primeStreak} />
                 </div>
               )}

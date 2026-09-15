@@ -24,6 +24,7 @@ export default function ProfileInfoClient({
   tags: initialTags,
   seals,
   archetype,
+  usernameHistory,
   setUsernameHistory,
   canEditProfile,
   canEditNickname,
@@ -40,6 +41,12 @@ export default function ProfileInfoClient({
   tags: any[];
   seals: any[];
   archetype: UserArchetype;
+  usernameHistory: {
+    id: number;
+    old_username: string;
+    new_username: string;
+    changed_at: string;
+  }[];
   setUsernameHistory: (
     history: {
       id: number;
@@ -113,6 +120,7 @@ export default function ProfileInfoClient({
         editMode={editMode}
         setEditMode={setEditMode}
         tags={tags}
+        usernameHistory={usernameHistory}
         setUsernameHistory={setUsernameHistory}
         primeStreak={primeStreak}
       />
