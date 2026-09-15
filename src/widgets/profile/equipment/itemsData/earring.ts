@@ -13,6 +13,7 @@ export const EARRING_ITEMS: GearItem[] = [
   { id: 54992, name: "Эфенская серьга", grade: 1, iconUrl: ITEM_ICON("earring", "эфенская_серьга"), sealIconUrl: SEAL_ICON("top_seal_ipnir") },
   { id: 55036, name: "Искаженная эфенская серьга", grade: 1, iconUrl: ITEM_ICON("earring", "искаженная_эфенская_серьга"), sealIconUrl: SEAL_ICON("top_seal_ipnir_2") },
   { id: 55078, name: "Изначальная эфенская серьга", grade: 1, iconUrl: ITEM_ICON("earring", "изначальная_эфенская_серьга"), sealIconUrl: SEAL_ICON("top_seal_ipnir_3") },
+  { id: 940041, name: "Амальгамная эфенская серьга", grade: 1, iconUrl: ITEM_ICON("earring", "амальгамная_эфенская_серьга"), sealIconUrl: null },
   { id: 46593, name: "Серьга Дома Норьетт", grade: 1, iconUrl: ITEM_ICON("earring", "серьга_дома_норьетт"), sealIconUrl: null },
   { id: 46594, name: "Серьга фаворита Дома Норьетт", grade: 1, iconUrl: ITEM_ICON("earring", "серьга_фаворита_дома_норьетт"), sealIconUrl: null },
   { id: 46595, name: "Серьга чемпиона Дома Норьетт", grade: 1, iconUrl: ITEM_ICON("earring", "серьга_чемпиона_дома_норьетт"), sealIconUrl: null },

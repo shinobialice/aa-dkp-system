@@ -12,6 +12,7 @@ export const RING_ITEMS: GearItem[] = [
   { id: 54993, name: "Эфенское кольцо", grade: 1, iconUrl: ITEM_ICON("ring", "эфенское_кольцо"), sealIconUrl: SEAL_ICON("top_seal_ipnir") },
   { id: 55034, name: "Искаженное эфенское кольцо", grade: 1, iconUrl: ITEM_ICON("ring", "искаженное_эфенское_кольцо"), sealIconUrl: SEAL_ICON("top_seal_ipnir_2") },
   { id: 55076, name: "Изначальное эфенское кольцо", grade: 1, iconUrl: ITEM_ICON("ring", "изначальное_эфенское_кольцо"), sealIconUrl: SEAL_ICON("top_seal_ipnir_3") },
+  { id: 940040, name: "Амальгамное эфенское кольцо", grade: 1, iconUrl: ITEM_ICON("ring", "амальгамное_эфенское_кольцо"), sealIconUrl: null },
   { id: 55808, name: "Драгоценное кольцо ифнирского лекаря", grade: 7, iconUrl: ITEM_ICON("ring", "драгоценное_кольцо_ифнирского_лекаря"), sealIconUrl: SEAL_ICON("top_seal_ipnir") },
   { id: 55807, name: "Драгоценное кольцо ифнирского чародея", grade: 7, iconUrl: ITEM_ICON("ring", "драгоценное_кольцо_ифнирского_чародея"), sealIconUrl: SEAL_ICON("top_seal_ipnir") },
   { id: 55806, name: "Драгоценное кольцо ифнирского лучника", grade: 7, iconUrl: ITEM_ICON("ring", "драгоценное_кольцо_ифнирского_лучника"), sealIconUrl: SEAL_ICON("top_seal_ipnir") },
