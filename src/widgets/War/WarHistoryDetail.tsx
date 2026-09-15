@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { ChevronLeft, Users, Coins, ShoppingCart } from "lucide-react";
+import { ChevronLeft, Loader2, Users, Coins, ShoppingCart } from "lucide-react";
 import { Button, Card } from "@/shared/ui";
 import {
   MODE_LABEL,
@@ -65,31 +65,44 @@ export default function WarHistoryDetail({
   const [membership, setMembership] = useState<PeriodMembershipChanges | null>(
     null,
   );
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
-    getPeriodAttendanceTop(period.startedAt, period.endedAt).then((result) => {
-      if (isMounted) setAttendance(result);
+    setLoading(true);
+    setAttendance(null);
+    setEconomy(null);
+    setMembership(null);
+
+    const economyPromise: Promise<WarEconomySnapshot | null> =
+      period.mode === "freeshard"
+        ? Promise.all([
+            getPeriodFinanceSummary(period.startedAt, period.endedAt),
+            getPeriodTopSales(period.startedAt, period.endedAt),
+            getPeriodTopBuyers(period.startedAt, period.endedAt),
+            getPeriodTopIncomeSources(period.startedAt, period.endedAt),
+            getPeriodTopDrops(period.startedAt, period.endedAt),
+          ]).then(([finance, topSales, topBuyers, incomeSources, drops]) => ({
+            finance,
+            topSales,
+            topBuyers,
+            incomeSources,
+            drops,
+          }))
+        : Promise.resolve(null);
+
+    Promise.all([
+      getPeriodAttendanceTop(period.startedAt, period.endedAt),
+      getPeriodMembershipChanges(period.startedAt, period.endedAt),
+      economyPromise,
+    ]).then(([attendanceResult, membershipResult, economyResult]) => {
+      if (!isMounted) return;
+      setAttendance(attendanceResult);
+      setMembership(membershipResult);
+      setEconomy(economyResult);
+      setLoading(false);
     });
-    getPeriodMembershipChanges(period.startedAt, period.endedAt).then(
-      (result) => {
-        if (isMounted) setMembership(result);
-      },
-    );
-    if (period.mode === "freeshard") {
-      Promise.all([
-        getPeriodFinanceSummary(period.startedAt, period.endedAt),
-        getPeriodTopSales(period.startedAt, period.endedAt),
-        getPeriodTopBuyers(period.startedAt, period.endedAt),
-        getPeriodTopIncomeSources(period.startedAt, period.endedAt),
-        getPeriodTopDrops(period.startedAt, period.endedAt),
-      ]).then(([finance, topSales, topBuyers, incomeSources, drops]) => {
-        if (isMounted)
-          setEconomy({ finance, topSales, topBuyers, incomeSources, drops });
-      });
-    } else {
-      setEconomy(null);
-    }
+
     return () => {
       isMounted = false;
     };
@@ -156,47 +169,59 @@ export default function WarHistoryDetail({
         </p>
       </Card>
 
-      {period.mode === "freeshard" && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Card className="flex flex-col justify-center gap-1 p-4">
-            <p className="text-2xl font-bold tabular-nums">
-              {economy ? formatNum(economy.finance.totalEarned) : "…"}
-            </p>
-            <p className="text-sm text-muted-foreground">Заработано за период</p>
-          </Card>
-          <Card className="flex flex-col justify-center gap-1 p-4">
-            <p className="text-2xl font-bold tabular-nums">
-              {economy?.finance.itemsSoldCount ?? "…"}
-            </p>
-            <p className="text-sm text-muted-foreground">Куплено предметов</p>
-          </Card>
+      {loading ? (
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="size-8 animate-spin text-muted-foreground" />
         </div>
-      )}
+      ) : (
+        <>
+          {period.mode === "freeshard" && (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <Card className="flex flex-col justify-center gap-1 p-4">
+                <p className="text-2xl font-bold tabular-nums">
+                  {formatNum(economy?.finance.totalEarned ?? 0)}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Заработано за период
+                </p>
+              </Card>
+              <Card className="flex flex-col justify-center gap-1 p-4">
+                <p className="text-2xl font-bold tabular-nums">
+                  {economy?.finance.itemsSoldCount ?? 0}
+                </p>
+                <p className="text-sm text-muted-foreground">Куплено предметов</p>
+              </Card>
+            </div>
+          )}
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <WarLeaderboardCard
-          icon={Users}
-          title="Посещаемость"
-          rows={attendanceRows}
-        />
-        <WarMembershipCard changes={membership ?? { joined: [], left: [] }} />
-        {period.mode === "freeshard" && (
-          <>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <WarLeaderboardCard
-              icon={Coins}
-              title="Топ источников дохода"
-              rows={incomeSourceRows}
+              icon={Users}
+              title="Посещаемость"
+              rows={attendanceRows}
             />
-            <WarLeaderboardCard
-              icon={ShoppingCart}
-              title="Топ покупателей"
-              rows={buyerRows}
+            <WarMembershipCard
+              changes={membership ?? { joined: [], left: [] }}
             />
-            <WarTopSalesCard rows={economy?.topSales ?? []} />
-            <WarDropsCard rows={economy?.drops ?? []} />
-          </>
-        )}
-      </div>
+            {period.mode === "freeshard" && (
+              <>
+                <WarLeaderboardCard
+                  icon={Coins}
+                  title="Топ источников дохода"
+                  rows={incomeSourceRows}
+                />
+                <WarLeaderboardCard
+                  icon={ShoppingCart}
+                  title="Топ покупателей"
+                  rows={buyerRows}
+                />
+                <WarTopSalesCard rows={economy?.topSales ?? []} />
+                <WarDropsCard rows={economy?.drops ?? []} />
+              </>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }

@@ -1,10 +1,12 @@
 import type { UserEquipment } from "@/actions/getUserEquipment";
 import { ITEM_STATS, findGearItem } from "./itemsData";
+import { getItemGradeStats } from "./itemsData/itemGradeStats";
 import { scaleStat } from "./itemsData/statsFormula";
 import { computeEngravingBonuses, ENGRAVING_STAT } from "./engravingBonuses";
 import { computeCostumeSynthesisBonuses } from "./costumeSynthesisBonuses";
 import { computeUnderwearSynthesisBonuses } from "./underwearSynthesisBonuses";
 import { computeCursedArmorSynthesisBonuses } from "./cursedArmorSynthesisBonuses";
+import { computeRingSynthesisBonuses } from "./ringSynthesisBonuses";
 import { computeEphenRuneSetBonuses } from "./ephenRuneSetBonus";
 import { computeEphenSynthesisBonuses } from "./ephenSynthesisBonus";
 import {
@@ -82,33 +84,38 @@ export function computeEquippedBonuses(
   for (const eq of equipment) {
     const gearItem = findGearItem(eq.slot, eq.item_name);
     if (!gearItem) continue;
-    const base = ITEM_STATS[gearItem.id];
+    const gradeStats = getItemGradeStats(gearItem.id, eq.grade);
+    const base = gradeStats ?? ITEM_STATS[gearItem.id];
     if (!base) continue;
 
     const enchant = eq.enchant ?? 0;
+    // Предметы из ITEM_GRADE_STATS (серьги ифнирского героя и т.п.) хранят
+    // уже финальное значение на конкретный грейд — scaleStat к ним не
+    // применяется, в отличие от обычной ITEM_STATS-брони.
+    const stat = (key: string): number => {
+      const value = base[key];
+      if (value === undefined) return 0;
+      return gradeStats ? value : scaleStat(value, eq.grade, enchant, key);
+    };
 
-    if (base.wearable_armor) {
-      totals.defense += scaleStat(base.wearable_armor, eq.grade, enchant, "wearable_armor");
-    }
-    if (base.wearable_magic_resistance) {
-      totals.resist += scaleStat(
-        base.wearable_magic_resistance,
-        eq.grade,
-        enchant,
-        "wearable_magic_resistance",
-      );
-    }
-    if (base.str) totals.str += scaleStat(base.str, eq.grade, enchant, "str");
-    if (base.int) totals.int += scaleStat(base.int, eq.grade, enchant, "int");
-    if (base.dex) totals.dex += scaleStat(base.dex, eq.grade, enchant, "dex");
-    if (base.spi) totals.spi += scaleStat(base.spi, eq.grade, enchant, "spi");
-    if (base.sta) totals.sta += scaleStat(base.sta, eq.grade, enchant, "sta");
+    totals.defense += stat("wearable_armor");
+    totals.resist += stat("wearable_magic_resistance");
+    totals.str += stat("str");
+    totals.int += stat("int");
+    totals.dex += stat("dex");
+    totals.spi += stat("spi");
+    totals.sta += stat("sta");
+    if (base.flat_sta) totals.sta += base.flat_sta;
+    if (base.flat_spi) totals.spi += base.flat_spi;
+    if (base.skill_speed) totals.skillSpeed += base.skill_speed;
+    if (base.tactical_readiness) totals.tacticalReadiness += base.tactical_readiness;
   }
 
   const engravingBonus = computeEngravingBonuses(equipment);
   const costumeSynthesisBonus = computeCostumeSynthesisBonuses(equipment);
   const underwearSynthesisBonus = computeUnderwearSynthesisBonuses(equipment);
   const cursedArmorSynthesisBonus = computeCursedArmorSynthesisBonuses(equipment);
+  const ringSynthesisBonus = computeRingSynthesisBonuses(equipment);
   const ephenRuneSetBonus = computeEphenRuneSetBonuses(equipment);
   const ephenSynthesisBonus = computeEphenSynthesisBonuses(equipment);
   totals.str += ephenSynthesisBonus.attributes.str;
@@ -123,6 +130,9 @@ export function computeEquippedBonuses(
     engravingBonus.set(label, (engravingBonus.get(label) ?? 0) + value);
   }
   for (const [label, value] of cursedArmorSynthesisBonus) {
+    engravingBonus.set(label, (engravingBonus.get(label) ?? 0) + value);
+  }
+  for (const [label, value] of ringSynthesisBonus) {
     engravingBonus.set(label, (engravingBonus.get(label) ?? 0) + value);
   }
   for (const [label, value] of ephenRuneSetBonus) {

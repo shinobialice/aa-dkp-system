@@ -41,6 +41,12 @@ import {
   getCursedArmorSynthesisSlotPools,
   findCursedArmorSynthesisEffect,
 } from "./itemsData/cursedArmorSynthesis";
+import {
+  RING_SYNTHESIS_EFFECTS,
+  RING_SYNTHESIS_SLOT_COUNT,
+  isRingSynthesisItem,
+  findRingSynthesisEffect,
+} from "./itemsData/ringSynthesis";
 import { getEphenSynthesisCategory } from "./itemsData/ephenSynthesis";
 import {
   getEphenSynthesisRolls,
@@ -126,9 +132,14 @@ const CUBE_ELIGIBLE_SLOTS = new Set([
 ]);
 
 // "Проклятого X" / "Возрожденного X" — фиксированные рейдовые сеты, всегда
-// Эпохи Двенадцати, качество для них игрок выбрать не может.
-function isFixedGradeItemName(name: string): boolean {
-  return name.includes("проклятого") || name.includes("возрожденного");
+// Эпохи Двенадцати. Ожерелья доблести ("... N ранга") — каждый ранг это
+// отдельный предмет с зашитым качеством (I ранга = Обычный, ..., XIV ранга =
+// Эпоха Двенадцати, см. archeagecodex.com) — игрок его тоже не выбирает,
+// только качество зависит от конкретного ранга, а не всегда 12.
+function getFixedGrade(name: string, grade: number): number | null {
+  if (name.includes("проклятого") || name.includes("возрожденного")) return 12;
+  if (name.includes("ранга")) return grade;
+  return null;
 }
 
 function slotsFor(keys: string[]): EquipmentSlot[] {
@@ -214,6 +225,26 @@ function CursedArmorSynthesisDisplay({ effectIds }: { effectIds: number[] }) {
       <div className="text-xs text-muted-foreground">Эффекты синтеза</div>
       {effectIds.map((id) => {
         const effect = findCursedArmorSynthesisEffect(id);
+        if (!effect) return null;
+        const value = effect.isPercent ? `${effect.value}%` : `${effect.value} ед.`;
+        return (
+          <div key={id} className="text-xs text-green-500">
+            {highlightNumbers(`${effect.label}: ${value}`)}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function RingSynthesisDisplay({ effectIds }: { effectIds: number[] }) {
+  if (effectIds.length === 0) return null;
+
+  return (
+    <div className="space-y-0.5">
+      <div className="text-xs text-muted-foreground">Эффекты синтеза</div>
+      {effectIds.map((id) => {
+        const effect = findRingSynthesisEffect(id);
         if (!effect) return null;
         const value = effect.isPercent ? `${effect.value}%` : `${effect.value} ед.`;
         return (
@@ -433,6 +464,7 @@ function EquipmentSlotButton({
     runeId: number,
     synthesisEffects: number[],
     cursedSynthesisEffects: number[],
+    ringSynthesisEffects: number[],
     ephenSynthesisPercent: number,
     ephenSynthesisPrimary: string,
     ephenSynthesisSecondary: string,
@@ -461,6 +493,9 @@ function EquipmentSlotButton({
   const [cursedSynthesisEffects, setCursedSynthesisEffects] = useState<number[]>(
     item?.cursed_synthesis_effects ?? [],
   );
+  const [ringSynthesisEffects, setRingSynthesisEffects] = useState<number[]>(
+    item?.ring_synthesis_effects ?? [],
+  );
   const [ephenSynthesisPercent, setEphenSynthesisPercent] = useState(
     item?.ephen_synthesis_percent ?? 0,
   );
@@ -479,7 +514,10 @@ function EquipmentSlotButton({
   const knownItems = ITEMS_BY_SLOT[slot.key];
   const selectedGearItem = findGearItem(slot.key, item?.item_name);
   const draftGearItem = findGearItem(slot.key, itemName);
-  const isFixedGradeItem = !!draftGearItem && isFixedGradeItemName(draftGearItem.name);
+  const fixedGrade = draftGearItem
+    ? getFixedGrade(draftGearItem.name, draftGearItem.grade)
+    : null;
+  const isFixedGradeItem = fixedGrade !== null;
   const maxEngravingSlots = getEngravingSlotCount(slot.key, grade);
   const draftHandedness = draftGearItem
     ? WEAPON_HANDEDNESS[draftGearItem.id]
@@ -504,6 +542,7 @@ function EquipmentSlotButton({
   const cursedSynthesisPools = draftGearItem
     ? getCursedArmorSynthesisSlotPools(draftGearItem.id)
     : [];
+  const isRingSynthDraft = !!draftGearItem && isRingSynthesisItem(draftGearItem.id);
   const ephenSynthesisCategory = draftGearItem
     ? getEphenSynthesisCategory(draftGearItem.id)
     : undefined;
@@ -513,7 +552,11 @@ function EquipmentSlotButton({
   const handleOpenChange = (next: boolean) => {
     if (next) {
       setItemName(item?.item_name ?? "");
-      setGrade(item?.grade ?? DEFAULT_GRADE);
+      const openingItem = findGearItem(slot.key, item?.item_name);
+      const openingFixedGrade = openingItem
+        ? getFixedGrade(openingItem.name, openingItem.grade)
+        : null;
+      setGrade(openingFixedGrade ?? item?.grade ?? DEFAULT_GRADE);
       setEnchant(item?.enchant ?? DEFAULT_ENCHANT);
       setExtraProtection(item?.extra_protection ?? DEFAULT_EXTRA_PROTECTION);
       setEngravings(item?.engravings ?? []);
@@ -521,6 +564,7 @@ function EquipmentSlotButton({
       setRuneId(item?.rune_id ?? 0);
       setSynthesisEffects(initialSynthesisEffects);
       setCursedSynthesisEffects(item?.cursed_synthesis_effects ?? []);
+      setRingSynthesisEffects(item?.ring_synthesis_effects ?? []);
       setEphenSynthesisPercent(item?.ephen_synthesis_percent ?? 0);
       setEphenSynthesisPrimary(item?.ephen_synthesis_primary ?? "");
       setEphenSynthesisSecondary(item?.ephen_synthesis_secondary ?? "");
@@ -547,6 +591,9 @@ function EquipmentSlotButton({
         runeId,
         synthesisEffects.slice(0, maxSynthesisSlots),
         finalCursedSynthesisEffects,
+        isRingSynthDraft
+          ? ringSynthesisEffects.slice(0, RING_SYNTHESIS_SLOT_COUNT)
+          : [],
         ephenSynthesisEligible ? ephenSynthesisPercent : 0,
         ephenSynthesisEligible ? ephenSynthesisPrimary : "",
         ephenSynthesisEligible ? ephenSynthesisSecondary : "",
@@ -568,6 +615,7 @@ function EquipmentSlotButton({
         DEFAULT_EXTRA_PROTECTION,
         [],
         0,
+        [],
         [],
         [],
         0,
@@ -624,6 +672,7 @@ function EquipmentSlotButton({
         ? (item?.underwear_synthesis_effects ?? [])
         : [];
   const equippedCursedSynthesisEffects = item?.cursed_synthesis_effects ?? [];
+  const equippedRingSynthesisEffects = item?.ring_synthesis_effects ?? [];
 
   return (
     <div className="relative">
@@ -724,6 +773,13 @@ function EquipmentSlotButton({
                   </>
                 )}
 
+                {equippedRingSynthesisEffects.length > 0 && (
+                  <>
+                    <div className="border-t border-border" />
+                    <RingSynthesisDisplay effectIds={equippedRingSynthesisEffects} />
+                  </>
+                )}
+
                 {item && hasEphenSynthesisSelection(item) && (
                   <>
                     <div className="border-t border-border" />
@@ -786,7 +842,7 @@ function EquipmentSlotButton({
                     </SelectTrigger>
                     <SelectContent>
                       {(isFixedGradeItem
-                        ? SEAL_GRADES.filter((g) => g.grade === 12)
+                        ? SEAL_GRADES.filter((g) => g.grade === fixedGrade)
                         : SEAL_GRADES
                       ).map((g) => {
                         const optionColor = getSealGradeColor(g.grade);
@@ -944,6 +1000,20 @@ function EquipmentSlotButton({
                       </Select>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {isRingSynthDraft && (
+                <div className="space-y-1.5">
+                  <div className="text-xs text-muted-foreground">
+                    Эффекты синтеза:
+                  </div>
+                  <SynthesisEffectPicker
+                    effects={RING_SYNTHESIS_EFFECTS}
+                    slotCount={RING_SYNTHESIS_SLOT_COUNT}
+                    value={ringSynthesisEffects}
+                    onChange={setRingSynthesisEffects}
+                  />
                 </div>
               )}
 
@@ -1159,6 +1229,9 @@ function EquipmentSlotButton({
                   effectIds={equippedCursedSynthesisEffects}
                 />
               )}
+              {equippedRingSynthesisEffects.length > 0 && (
+                <RingSynthesisDisplay effectIds={equippedRingSynthesisEffects} />
+              )}
               {item && hasEphenSynthesisSelection(item) && (
                 <EphenSynthesisDisplay item={item} />
               )}
@@ -1215,6 +1288,7 @@ export default function EquipmentTab({
     runeId: number,
     synthesisEffects: number[],
     cursedSynthesisEffects: number[],
+    ringSynthesisEffects: number[],
     ephenSynthesisPercent: number,
     ephenSynthesisPrimary: string,
     ephenSynthesisSecondary: string,
@@ -1234,6 +1308,7 @@ export default function EquipmentTab({
           underwearSynthesisEffects:
             slotKey === "underwear" ? synthesisEffects : [],
           cursedSynthesisEffects,
+          ringSynthesisEffects,
           ephenSynthesisPercent,
           ephenSynthesisPrimary,
           ephenSynthesisSecondary,
@@ -1252,6 +1327,7 @@ export default function EquipmentTab({
         costumeSynthesisEffects: existing?.costume_synthesis_effects ?? [],
         underwearSynthesisEffects: existing?.underwear_synthesis_effects ?? [],
         cursedSynthesisEffects: existing?.cursed_synthesis_effects ?? [],
+        ringSynthesisEffects: existing?.ring_synthesis_effects ?? [],
         ephenSynthesisPercent: existing?.ephen_synthesis_percent ?? 0,
         ephenSynthesisPrimary: existing?.ephen_synthesis_primary ?? "",
         ephenSynthesisSecondary: existing?.ephen_synthesis_secondary ?? "",
@@ -1308,6 +1384,7 @@ export default function EquipmentTab({
                 runeId,
                 synthesisEffects,
                 cursedSynthesisEffects,
+                ringSynthesisEffects,
                 ephenSynthesisPercent,
                 ephenSynthesisPrimary,
                 ephenSynthesisSecondary,
@@ -1323,6 +1400,7 @@ export default function EquipmentTab({
                   runeId,
                   synthesisEffects,
                   cursedSynthesisEffects,
+                  ringSynthesisEffects,
                   ephenSynthesisPercent,
                   ephenSynthesisPrimary,
                   ephenSynthesisSecondary,
@@ -1350,6 +1428,7 @@ export default function EquipmentTab({
                     runeId,
                     synthesisEffects,
                     cursedSynthesisEffects,
+                    ringSynthesisEffects,
                     ephenSynthesisPercent,
                     ephenSynthesisPrimary,
                     ephenSynthesisSecondary,
@@ -1365,6 +1444,7 @@ export default function EquipmentTab({
                       runeId,
                       synthesisEffects,
                       cursedSynthesisEffects,
+                      ringSynthesisEffects,
                       ephenSynthesisPercent,
                       ephenSynthesisPrimary,
                       ephenSynthesisSecondary,
@@ -1431,6 +1511,7 @@ export default function EquipmentTab({
                     runeId,
                     synthesisEffects,
                     cursedSynthesisEffects,
+                    ringSynthesisEffects,
                     ephenSynthesisPercent,
                     ephenSynthesisPrimary,
                     ephenSynthesisSecondary,
@@ -1446,6 +1527,7 @@ export default function EquipmentTab({
                       runeId,
                       synthesisEffects,
                       cursedSynthesisEffects,
+                      ringSynthesisEffects,
                       ephenSynthesisPercent,
                       ephenSynthesisPrimary,
                       ephenSynthesisSecondary,

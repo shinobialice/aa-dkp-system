@@ -1,7 +1,3 @@
-// Данные навыков для "Билда" — необязательной детализации внутри уже
-// выбранной специализации (см. specializationsData.ts). Источник — калькулятор
-// archa.ge. Пока заполнена только ветка "Исцеление" (isceleine.ts), остальные
-// специализации возвращают пустой список из getSkillsForSpecialization().
 export type SkillKind = "active" | "passive";
 
 export type EferundVariant = {

@@ -14,6 +14,7 @@ export type UserEquipment = {
   costume_synthesis_effects: number[];
   underwear_synthesis_effects: number[];
   cursed_synthesis_effects: number[];
+  ring_synthesis_effects: number[];
   ephen_synthesis_percent: number;
   ephen_synthesis_primary: string;
   ephen_synthesis_secondary: string;
@@ -23,7 +24,7 @@ export type UserEquipment = {
 const getUserEquipment = async (userId: number): Promise<UserEquipment[]> => {
   try {
     return await sql<UserEquipment[]>`
-      SELECT id, user_id, slot, item_name, grade, enchant, extra_protection, engravings, rune_id, costume_synthesis_effects, underwear_synthesis_effects, cursed_synthesis_effects, ephen_synthesis_percent, ephen_synthesis_primary, ephen_synthesis_secondary, ephen_synthesis_tertiary
+      SELECT id, user_id, slot, item_name, grade, enchant, extra_protection, engravings, rune_id, costume_synthesis_effects, underwear_synthesis_effects, cursed_synthesis_effects, ring_synthesis_effects, ephen_synthesis_percent, ephen_synthesis_primary, ephen_synthesis_secondary, ephen_synthesis_tertiary
       FROM user_equipment
       WHERE user_id = ${userId}
     `;

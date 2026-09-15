@@ -18,6 +18,20 @@ const ATTRIBUTE_MULTIPLIERS = [
 
 const ATTRIBUTE_STATS = new Set(["str", "dex", "sta", "int", "spi"]);
 
+// Статы ожерелий доблести зашиты в конкретный предмет напрямую (проверено
+// на archeagecodex.com: значения не меняются при переключении грейда через
+// ?grade=N ни на клиенте, ни на сервере) — в отличие от обычной брони, где
+// та же "Сила духа" масштабируется через stat_multiplier.
+const FLAT_STATS = new Set([
+  "flat_sta",
+  "flat_spi",
+  "skill_speed",
+  "damage_taken_reduction",
+  "pvp_resist",
+  "crit_damage_resist",
+  "tactical_readiness",
+]);
+
 export function scaleStatByGrade(base: number, grade: number): number {
   const mult = GRADE_MULTIPLIERS[grade] ?? GRADE_MULTIPLIERS[1];
   return Math.round(base * mult);
@@ -107,6 +121,8 @@ export function scaleStat(
   enchant: number,
   statKey: string,
 ): number {
+  if (FLAT_STATS.has(statKey)) return base;
+
   const multipliers = ATTRIBUTE_STATS.has(statKey)
     ? ATTRIBUTE_MULTIPLIERS
     : GRADE_MULTIPLIERS;
@@ -132,6 +148,37 @@ export const STAT_ORDER = [
   "sta",
   "int",
   "spi",
+  "flat_sta",
+  "flat_spi",
+  "skill_speed",
+  "damage_taken_reduction",
+  "pvp_resist",
+  "crit_damage_resist",
+  "tactical_readiness",
+  "crit_dmg_melee",
+  "crit_dmg_ranged",
+  "crit_dmg_spell",
+  "heal_crit_effect",
+  "crit_resist_ignore",
+  "heal_effectiveness_bonus",
+  "pvp_skill_dmg_melee",
+  "pvp_skill_dmg_ranged",
+  "pvp_skill_dmg_spell",
+  "euphoria_cooldown",
+  "atk_power_melee",
+  "atk_power_ranged",
+  "vuln_ignore_melee",
+  "vuln_ignore_ranged",
+  "vuln_ignore_spell",
+  "heal_crit_chance",
+  "armor_penetration",
+  "resist_ignore",
+  "euphoria_duration",
+  "skill_dmg_melee",
+  "skill_dmg_ranged",
+  "skill_dmg_spell",
+  "heal_skill_dmg",
+  "pvp_resist_ignore",
 ];
 
 export const STAT_LABELS: Record<string, string> = {
@@ -145,4 +192,59 @@ export const STAT_LABELS: Record<string, string> = {
   sta: "Выносливость",
   int: "Интеллект",
   spi: "Сила духа",
+  flat_sta: "Выносливость",
+  flat_spi: "Сила духа",
+  skill_speed: "Время применения умений",
+  damage_taken_reduction: "Получаемый урон",
+  pvp_resist: "Устойчивость к атакам в PvP",
+  crit_damage_resist: "Устойчивость к критическому урону",
+  tactical_readiness: "Тактическая подготовка",
+  crit_dmg_melee: "Критический урон в ближнем бою",
+  crit_dmg_ranged: "Критический урон в дальнем бою",
+  crit_dmg_spell: "Критический урон заклинаний",
+  heal_crit_effect: "Критический эффект исцеления",
+  crit_resist_ignore: "Игнорирование устойчивости к критическому урону",
+  heal_effectiveness_bonus: "Дополнительная эффективность исцеления",
+  pvp_skill_dmg_melee: "Доп. урон умений ближнего боя в PvP",
+  pvp_skill_dmg_ranged: "Доп. урон умений дальнего боя в PvP",
+  pvp_skill_dmg_spell: "Доп. урон умений заклинателя в PvP",
+  euphoria_cooldown: "Время восстановления умения «Эйфория»",
+  atk_power_melee: "Сила атаки в ближнем бою",
+  atk_power_ranged: "Сила атаки в дальнем бою",
+  vuln_ignore_melee: "Игнорирование устойчивости к атакам ближнего боя",
+  vuln_ignore_ranged: "Игнорирование устойчивости к атакам дальнего боя",
+  vuln_ignore_spell: "Игнорирование устойчивости к заклинаниям",
+  heal_crit_chance: "Шанс критического эффекта исцеления",
+  armor_penetration: "Пробивание брони",
+  resist_ignore: "Игнорирование сопротивления",
+  euphoria_duration: "Время действия эффекта неуязвимости умения «Эйфория»",
+  skill_dmg_melee: "Дополнительный урон умений ближнего боя",
+  skill_dmg_ranged: "Дополнительный урон умений дальнего боя",
+  skill_dmg_spell: "Дополнительный урон умений заклинателя",
+  heal_skill_dmg: "Урон исцеляющими умениями",
+  pvp_resist_ignore: "Игнорирование устойчивости к атакам в PvP",
+};
+
+// Проценты выводим со знаком %, секунды — с пробелом перед "сек.", остальное — как есть (в ед.).
+export const STAT_UNITS: Record<string, string> = {
+  skill_speed: "%",
+  damage_taken_reduction: "%",
+  crit_dmg_melee: "%",
+  crit_dmg_ranged: "%",
+  crit_dmg_spell: "%",
+  heal_crit_effect: "%",
+  heal_effectiveness_bonus: "%",
+  pvp_skill_dmg_melee: "%",
+  pvp_skill_dmg_ranged: "%",
+  pvp_skill_dmg_spell: "%",
+  euphoria_cooldown: " сек.",
+  vuln_ignore_melee: "%",
+  vuln_ignore_ranged: "%",
+  vuln_ignore_spell: "%",
+  heal_crit_chance: "%",
+  euphoria_duration: " сек.",
+  skill_dmg_melee: "%",
+  skill_dmg_ranged: "%",
+  skill_dmg_spell: "%",
+  heal_skill_dmg: "%",
 };

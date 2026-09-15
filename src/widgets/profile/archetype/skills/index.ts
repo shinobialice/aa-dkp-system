@@ -20,9 +20,6 @@ export * from "./types";
 // выбранными ветками специализаций (не по 21 на каждую).
 export const SKILL_POINTS_BUDGET = 21;
 
-// Заполнены только те ветки, для которых есть данные по навыкам с archa.ge.
-// У остальных специализаций (см. specializationsData.ts) — пустой список,
-// getSkillsForSpecialization() вернёт [] и UI покажет "нет данных".
 const SKILLS_BY_SPECIALIZATION: Record<string, Skill[]> = {
   isceleine: ISCELEINE_SKILLS,
   napadenie: NAPADENIE_SKILLS,

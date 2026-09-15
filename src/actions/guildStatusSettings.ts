@@ -120,6 +120,12 @@ export async function updateGuildStatus(mode: GuildMode) {
     if (current && current.mode !== mode) {
       // Реальная смена режима (фришка <-> вар) — закрываем текущий период
       // в историю и открываем новый: обнуляем таймер и имя соперника.
+      // started_at/ended_at хранятся как naive-московское время (см. toMoscowIso
+      // выше) — нельзя писать сюда postgres now() напрямую: он вернёт текущее
+      // время в таймзоне сессии БД (обычно UTC), а не Москвы, и toMoscowIso
+      // потом ошибочно добавит +03:00 поверх уже UTC-времени, сдвигая момент
+      // старта на 3 часа в прошлое.
+      const nowMoscow = getMoscowISOString(new Date());
       const userId = await getSessionUserId();
       try {
         await sql`
@@ -127,7 +133,7 @@ export async function updateGuildStatus(mode: GuildMode) {
             (mode, server, faction, opponent_guild, started_at, ended_at, ended_by_user_id)
           VALUES (
             ${current.mode}, ${current.server}, ${current.faction},
-            ${current.opponent_guild}, ${current.started_at}, now(), ${userId}
+            ${current.opponent_guild}, ${current.started_at}, ${nowMoscow}, ${userId}
           )
         `;
       } catch (historyError) {
@@ -138,7 +144,7 @@ export async function updateGuildStatus(mode: GuildMode) {
 
       await sql`
         INSERT INTO guild_status_settings (id, mode, opponent_guild, started_at, updated_at)
-        VALUES (1, ${mode}, NULL, now(), now())
+        VALUES (1, ${mode}, NULL, ${nowMoscow}, now())
         ON CONFLICT (id) DO UPDATE SET
           mode = EXCLUDED.mode,
           opponent_guild = EXCLUDED.opponent_guild,

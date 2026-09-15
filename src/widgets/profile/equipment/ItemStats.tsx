@@ -1,5 +1,6 @@
 import { ITEM_STATS } from "./itemsData";
-import { STAT_ORDER, STAT_LABELS, scaleStat } from "./itemsData/statsFormula";
+import { getItemGradeStats } from "./itemsData/itemGradeStats";
+import { STAT_ORDER, STAT_LABELS, STAT_UNITS, scaleStat } from "./itemsData/statsFormula";
 
 export function ItemStats({
   itemId,
@@ -12,7 +13,8 @@ export function ItemStats({
   enchant?: number;
   bare?: boolean;
 }) {
-  const base = ITEM_STATS[itemId];
+  const gradeStats = getItemGradeStats(itemId, grade);
+  const base = gradeStats ?? ITEM_STATS[itemId];
   if (!base) return null;
 
   const entries = STAT_ORDER.filter((key) => key in base);
@@ -20,14 +22,20 @@ export function ItemStats({
 
   return (
     <div className={bare ? "space-y-1 text-sm" : "space-y-1 rounded-md border p-2 text-sm"}>
-      {entries.map((key) => (
-        <div key={key} className="flex items-center justify-between">
-          <span className="text-muted-foreground">{STAT_LABELS[key]}</span>
-          <span className="font-medium">
-            {scaleStat(base[key], grade, enchant, key)}
-          </span>
-        </div>
-      ))}
+      {entries.map((key) => {
+        const value = gradeStats ? base[key] : scaleStat(base[key], grade, enchant, key);
+        const sign = value > 0 ? "+" : "";
+        return (
+          <div key={key} className="flex items-center justify-between">
+            <span className="text-muted-foreground">{STAT_LABELS[key]}</span>
+            <span className="font-medium">
+              {sign}
+              {value}
+              {STAT_UNITS[key] ?? ""}
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }

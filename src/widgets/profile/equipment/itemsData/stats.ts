@@ -775,4 +775,28 @@ export const ITEM_STATS: Record<number, Record<string, number>> = {
   35410: { int: 11.87, spi: 8.08 }, // Иферийское ожерелье магистра
   40622: { str: 20.66, dex: 13.94, sta: 34.1 }, // Лютня Солнечной Башни
   40624: { sta: 27.38, int: 22.9, spi: 18.42 }, // Кларнет Тростникового Короля
+  // Ожерелья доблести (фиксированные статы, не масштабируются по грейду — archeagecodex.com)
+  29731: { damage_taken_reduction: -0.3, flat_sta: 10 }, // Ожерелье доблести I ранга
+  29743: { damage_taken_reduction: -0.6, flat_sta: 12 }, // Ожерелье доблести II ранга
+  29744: { damage_taken_reduction: -0.9, flat_sta: 14 }, // Ожерелье доблести III ранга
+  29745: { damage_taken_reduction: -2.2, flat_sta: 16 }, // Ожерелье доблести IV ранга
+  29746: { damage_taken_reduction: -2.5, flat_sta: 20 }, // Ожерелье доблести V ранга
+  29747: { damage_taken_reduction: -2.8, flat_sta: 24 }, // Ожерелье доблести VI ранга
+  29748: { damage_taken_reduction: -4.1, flat_sta: 28 }, // Ожерелье доблести воина VII ранга
+  29749: { damage_taken_reduction: -4.4, flat_sta: 40 }, // Ожерелье доблести воина VIII ранга
+  29750: { damage_taken_reduction: -4.7, flat_sta: 52 }, // Ожерелье доблести воина IX ранга
+  29751: { damage_taken_reduction: -6, flat_sta: 64 }, // Ожерелье доблести воина X ранга
+  37908: { damage_taken_reduction: -6, flat_sta: 76, pvp_resist: 50, tactical_readiness: 60 }, // Ожерелье доблести воина XI ранга
+  37909: { damage_taken_reduction: -6, flat_sta: 88, pvp_resist: 100, tactical_readiness: 120 }, // Ожерелье доблести воина XII ранга
+  40366: { damage_taken_reduction: -6, flat_sta: 100, pvp_resist: 150, tactical_readiness: 180 }, // Ожерелье доблести воина XIII ранга
+  44634: { damage_taken_reduction: -6, flat_sta: 112, pvp_resist: 200, tactical_readiness: 240 }, // Ожерелье доблести воина XIV ранга
+  40477: { skill_speed: -4.1, flat_spi: 28 }, // Ожерелье доблести целителя VII ранга
+  40478: { skill_speed: -4.4, flat_spi: 40 }, // Ожерелье доблести целителя VIII ранга
+  40479: { skill_speed: -4.7, flat_spi: 52 }, // Ожерелье доблести целителя IX ранга
+  40480: { skill_speed: -6, flat_spi: 64 }, // Ожерелье доблести целителя X ранга
+  40481: { skill_speed: -6, flat_spi: 76, pvp_resist: 50, crit_damage_resist: 60 }, // Ожерелье доблести целителя XI ранга
+  40482: { skill_speed: -6, flat_spi: 88, pvp_resist: 75, crit_damage_resist: 120 }, // Ожерелье доблести целителя XII ранга
+  40483: { skill_speed: -6, flat_spi: 100, pvp_resist: 100, crit_damage_resist: 180 }, // Ожерелье доблести целителя XIII ранга
+  44635: { skill_speed: -6, flat_spi: 112, pvp_resist: 125, crit_damage_resist: 240 }, // Ожерелье доблести целителя XIV ранга
+  48628: { flat_sta: 60 }, // Амальгамный перстень говорящего с духами (фикс. характеристика, + 3 из 9 синтезируемых, см. ringSynthesis.ts)
 };
