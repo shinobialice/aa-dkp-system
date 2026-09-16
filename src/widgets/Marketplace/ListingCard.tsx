@@ -14,6 +14,7 @@ import { Card, CardContent } from "@/shared/ui";
 import { Avatar, AvatarImage, AvatarFallback } from "@/shared/ui";
 import { Badge } from "@/shared/ui";
 import { Button } from "@/shared/ui";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/shared/ui";
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -102,13 +103,26 @@ export function ListingCard({
               size={48}
             />
           ) : listing.image_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={listing.image_url}
-              alt={listing.item_name}
-              className="rounded object-cover shrink-0"
-              style={{ width: 48, height: 48 }}
-            />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={listing.image_url}
+                  alt={listing.item_name}
+                  className="rounded object-cover shrink-0"
+                  style={{ width: 48, height: 48 }}
+                />
+              </TooltipTrigger>
+              <TooltipContent side="right" className="p-1">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={listing.image_url}
+                  alt={listing.item_name}
+                  className="rounded object-contain"
+                  style={{ maxWidth: 320, maxHeight: 320 }}
+                />
+              </TooltipContent>
+            </Tooltip>
           ) : (
             <ListingTypeIcon listingType={listing.listing_type} size={48} />
           )}
