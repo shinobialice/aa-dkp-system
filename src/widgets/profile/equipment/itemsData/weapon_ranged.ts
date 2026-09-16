@@ -30,7 +30,7 @@ export const WEAPON_RANGED_ITEMS: GearItem[] = [
   { id: 28897, name: "Пламенеющий лук из драконьей кости", grade: 1, iconUrl: ITEM_ICON("weapon_ranged", "пламенеющий_лук_из_драконьей_кости"), sealIconUrl: null },
   { id: 45301, name: "Иг'нис, Пламя возмездия", grade: 1, iconUrl: ITEM_ICON("weapon_ranged", "игнис_пламя_возмездия"), sealIconUrl: null },
   { id: 49367, name: "Иг'нис, Пробужденное пламя", grade: 1, iconUrl: ITEM_ICON("weapon_ranged", "игнис_пробужденное_пламя"), sealIconUrl: SEAL_ICON("top_fire") },
-  { id: 920009, name: "Иг'нис, Всепоглощающее пламя", grade: 1, iconUrl: ITEM_ICON("weapon_ranged", "игнис_всепоглощающее_пламя"), sealIconUrl: SEAL_ICON("top_thiol_2") },
+  { id: 920009, name: "Иг'нис, Всепоглощающее пламя", grade: 1, iconUrl: ITEM_ICON("weapon_ranged", "игнис_всепоглощающее_пламя"), sealIconUrl: SEAL_ICON("top_thiol_1") },
   { id: 50868, name: "Джераб, слуга смерти", grade: 1, iconUrl: ITEM_ICON("weapon_ranged", "джераб_слуга_смерти"), sealIconUrl: null },
   { id: 51164, name: "Укрепленная Джераб, слуга смерти", grade: 1, iconUrl: ITEM_ICON("weapon_ranged", "укрепленная_джераб_слуга_смерти"), sealIconUrl: SEAL_ICON("top_obsidian") },
   { id: 920004, name: "Возрожденная Джераб, слуга смерти", grade: 1, iconUrl: ITEM_ICON("weapon_ranged", "возрожденная_джераб_слуга_смерти"), sealIconUrl: SEAL_ICON("top_thiol_2") },
@@ -38,5 +38,5 @@ export const WEAPON_RANGED_ITEMS: GearItem[] = [
   { id: 50848, name: "Пламенеющая винтовка охотника на драконов", grade: 1, iconUrl: ITEM_ICON("weapon_ranged", "пламенеющая_винтовка_охотника_на_драконов"), sealIconUrl: null },
   { id: 50849, name: "Дра'орис, Дыхание дракона", grade: 1, iconUrl: ITEM_ICON("weapon_ranged", "драорис_дыхание_дракона"), sealIconUrl: null },
   { id: 51169, name: "Дра'орис, Пробужденное разрушение", grade: 1, iconUrl: ITEM_ICON("weapon_ranged", "драорис_пробужденное_разрушение"), sealIconUrl: SEAL_ICON("top_fire") },
-  { id: 920013, name: "Дра'орис, Всепоглощающее разрушение", grade: 1, iconUrl: ITEM_ICON("weapon_ranged", "драорис_всепоглощающее_разрушение"), sealIconUrl: SEAL_ICON("top_thiol_2") },
+  { id: 920013, name: "Дра'орис, Всепоглощающее разрушение", grade: 1, iconUrl: ITEM_ICON("weapon_ranged", "драорис_всепоглощающее_разрушение"), sealIconUrl: SEAL_ICON("top_thiol_1") },
 ];

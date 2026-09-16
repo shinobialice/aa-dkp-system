@@ -9,13 +9,20 @@ type BaseSlotKey =
   | "weapon_1h"
   | "weapon_2h"
   | "weapon_bow"
-  | "instrument";
+  | "instrument"
+  | "earring";
+
+// Уникальное легендарное оружие — синтез устроен иначе, чем у обычной брони
+// и оружия (нет пары "1-я/2-я характеристика", вместо этого 2 независимых
+// пула с собственным числом выборов каждый).
+type LegendaryWeaponKey = "dracordis_omniconsuming";
 
 export type EphenSynthesisCategoryKey =
   | BaseSlotKey
   | `${BaseSlotKey}_base`
   | `${BaseSlotKey}_brilliant`
-  | `${BaseSlotKey}_refined`;
+  | `${BaseSlotKey}_refined`
+  | LegendaryWeaponKey;
 
 export type EphenSynthesisOption = {
   key: string;
@@ -35,7 +42,7 @@ export type EphenSynthesisCategory = {
   groups: EphenSynthesisGroup[];
 };
 
-export const EPHEN_SYNTHESIS_CATEGORIES: Record<EphenSynthesisCategoryKey, EphenSynthesisCategory> = {
+export const EPHEN_SYNTHESIS_CATEGORIES: Partial<Record<EphenSynthesisCategoryKey, EphenSynthesisCategory>> = {
   weapon_1h: {
     id: 594,
     minGrade: 10,
@@ -1756,6 +1763,80 @@ export const EPHEN_SYNTHESIS_CATEGORIES: Record<EphenSynthesisCategoryKey, Ephen
           { key: "dodge_mul", label: "Уклонение", isPercent: true, ranges: { 11: [2.4, 2.5], 12: [2.6, 2.7] } },
           { key: "move_speed_mul", label: "Скорость передвижения", isPercent: true, ranges: { 11: [3.1, 3.2], 12: [3.2, 3.4] } },
           { key: "melee_parry_mul", label: "Парирование атак ближнего боя", isPercent: true, ranges: { 11: [4.9, 5], 12: [5, 5.2] } },
+        ],
+      },
+    ],
+  },
+  earring_brilliant: {
+    id: 4,
+    minGrade: 12,
+    groups: [
+      {
+        pickCount: 1,
+        options: [
+          { key: "str", label: "Сила", isPercent: false, ranges: { 12: [42, 46] } },
+          { key: "dex", label: "Ловкость", isPercent: false, ranges: { 12: [42, 46] } },
+          { key: "sta", label: "Выносливость", isPercent: false, ranges: { 12: [42, 46] } },
+          { key: "int", label: "Интеллект", isPercent: false, ranges: { 12: [42, 46] } },
+          { key: "spi", label: "Сила духа", isPercent: false, ranges: { 12: [42, 46] } },
+        ],
+      },
+      {
+        pickCount: 1,
+        options: [
+          { key: "str", label: "Сила", isPercent: false, ranges: { 12: [9, 9] } },
+          { key: "dex", label: "Ловкость", isPercent: false, ranges: { 12: [9, 9] } },
+          { key: "sta", label: "Выносливость", isPercent: false, ranges: { 12: [9, 9] } },
+          { key: "int", label: "Интеллект", isPercent: false, ranges: { 12: [9, 9] } },
+          { key: "spi", label: "Сила духа", isPercent: false, ranges: { 12: [9, 9] } },
+        ],
+      },
+      {
+        pickCount: 2,
+        options: [
+          { key: "resist", label: "Сопротивление", isPercent: false, ranges: { 12: [366, 398] } },
+          { key: "dodge_mul", label: "Уклонение", isPercent: true, ranges: { 12: [3.6, 3.7] } },
+          { key: "melee_parry_mul", label: "Парирование атак ближнего боя", isPercent: true, ranges: { 12: [3.6, 3.7] } },
+          { key: "hit_reaction_delay_mul", label: "Задержка применения умений при получении удара", isPercent: true, ranges: { 12: [73, 75] } },
+          { key: "max_mana", label: "Мана", isPercent: false, ranges: { 12: [848, 930] } },
+          { key: "armor", label: "Защита", isPercent: false, ranges: { 12: [366, 398] } },
+          { key: "incoming_damage_mul", label: "Получаемый урон", isPercent: true, ranges: { 12: [-3.6, -3.7] } },
+          { key: "max_health", label: "Здоровье", isPercent: false, ranges: { 12: [1146, 1270] } },
+        ],
+      },
+    ],
+  },
+  dracordis_omniconsuming: {
+    id: 5,
+    minGrade: 12,
+    groups: [
+      {
+        pickCount: 2,
+        options: [
+          { key: "melee_critical_mul", label: "Шанс критического удара в ближнем бою", isPercent: true, ranges: { 12: [6.9, 7.2] } },
+          { key: "ranged_critical_mul", label: "Шанс критического удара в дальнем бою", isPercent: true, ranges: { 12: [6.9, 7.2] } },
+          { key: "spell_critical_mul", label: "Шанс критического удара заклинанием", isPercent: true, ranges: { 12: [6.9, 7.2] } },
+          { key: "heal_critical_mul", label: "Шанс критического эффекта исцеления", isPercent: true, ranges: { 12: [6.9, 7.2] } },
+          { key: "melee_skill_dmg", label: "Доп. урон умений ближнего боя", isPercent: true, ranges: { 12: [4.5, 4.7] } },
+          { key: "ranged_skill_dmg", label: "Доп. урон умений дальнего боя", isPercent: true, ranges: { 12: [4.5, 4.7] } },
+          { key: "spell_skill_dmg", label: "Доп. урон умений заклинателя", isPercent: true, ranges: { 12: [4.5, 4.7] } },
+          { key: "skill_time_mul", label: "Время применения умений", isPercent: true, ranges: { 12: [-4.2, -4.4] } },
+          { key: "proficiency", label: "Сноровка", isPercent: false, ranges: { 12: [65, 68] } },
+          { key: "armor_penetration", label: "Пробивание брони", isPercent: false, ranges: { 12: [760, 797] } },
+          { key: "resist_ignore", label: "Игнорирование сопротивления", isPercent: false, ranges: { 12: [760, 797] } },
+          { key: "heal_effectiveness_bonus", label: "Доп. эффективность умений целителя", isPercent: true, ranges: { 12: [4.5, 4.7] } },
+        ],
+      },
+      {
+        pickCount: 1,
+        options: [
+          { key: "melee_skill_dmg_pvp", label: "Дополнительный урон умений ближнего боя в PvP", isPercent: true, ranges: { 12: [0.1, 0.5] } },
+          { key: "ranged_skill_dmg_pvp", label: "Дополнительный урон умений дальнего боя в PvP", isPercent: true, ranges: { 12: [0.1, 0.5] } },
+          { key: "spell_skill_dmg_pvp", label: "Дополнительный урон умений заклинателя в PvP", isPercent: true, ranges: { 12: [0.1, 0.5] } },
+          { key: "melee_skill_dmg_pve", label: "Доп. урон умений ближнего боя в PvE", isPercent: true, ranges: { 12: [0.5, 1.0] } },
+          { key: "ranged_skill_dmg_pve", label: "Доп. урон умений дальнего боя в PvE", isPercent: true, ranges: { 12: [0.5, 1.0] } },
+          { key: "spell_skill_dmg_pve", label: "Доп. урон умений заклинателя в PvE", isPercent: true, ranges: { 12: [0.5, 1.0] } },
+          { key: "heal_skill_dmg_pve", label: "Урон исцеляющими умениями в PvE", isPercent: true, ranges: { 12: [0.5, 1.0] } },
         ],
       },
     ],

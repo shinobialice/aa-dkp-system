@@ -40,11 +40,16 @@ export function getEphenSynthesisRolls(
     eq.grade >= 12 ? 12 : eq.grade >= 11 ? 11 : category.minGrade
   ) as 10 | 11 | 12;
   const percent = eq.ephen_synthesis_percent;
-  const selectedKeysByGroup = [
-    eq.ephen_synthesis_primary ? [eq.ephen_synthesis_primary] : [],
-    eq.ephen_synthesis_secondary ? [eq.ephen_synthesis_secondary] : [],
-    eq.ephen_synthesis_tertiary,
-  ];
+  // Уникальное легендарное оружие (2 независимых пула): pool А — в tertiary,
+  // pool Б — в secondary (см. isValidEphenSynthesisSelection).
+  const selectedKeysByGroup =
+    category.groups.length === 2
+      ? [eq.ephen_synthesis_tertiary, eq.ephen_synthesis_secondary ? [eq.ephen_synthesis_secondary] : []]
+      : [
+          eq.ephen_synthesis_primary ? [eq.ephen_synthesis_primary] : [],
+          eq.ephen_synthesis_secondary ? [eq.ephen_synthesis_secondary] : [],
+          eq.ephen_synthesis_tertiary,
+        ];
 
   const rolls: EphenSynthesisRoll[] = [];
   category.groups.forEach((group, i) => {

@@ -167,6 +167,10 @@ const ITEM_CATEGORY: Record<number, EphenSynthesisCategoryKey> = {
   55115: "weapon_1h_refined",
   55116: "instrument_refined",
   55117: "instrument_refined",
+
+  55078: "earring_brilliant",
+
+  920012: "dracordis_omniconsuming",
 };
 
 export function getEphenSynthesisCategory(
@@ -212,6 +216,20 @@ export function isValidEphenSynthesisSelection(
   if (!category) return false;
   if (grade < category.minGrade) return false;
   if (!Number.isInteger(percent) || percent < 0 || percent > 100) return false;
+
+  // Уникальное легендарное оружие: 2 независимых пула вместо пары
+  // "1-я/2-я характеристика" + доп. — pool А (может быть >1 выбора)
+  // хранится в tertiary, pool Б (1 выбор) — в secondary, primary не используется.
+  if (category.groups.length === 2) {
+    const [poolA, poolB] = category.groups;
+    if (primary) return false;
+    if (secondary && !poolB.options.some((o) => o.key === secondary)) return false;
+    if (tertiary.length > poolA.pickCount) return false;
+    if (new Set(tertiary).size !== tertiary.length) return false;
+    if (!tertiary.every((key) => poolA.options.some((o) => o.key === key))) return false;
+    return true;
+  }
+
   const tertiaryGroup = category.groups[2];
   if (primary && !ATTRIBUTE_KEYS.has(primary)) return false;
   if (secondary && !ATTRIBUTE_KEYS.has(secondary)) return false;

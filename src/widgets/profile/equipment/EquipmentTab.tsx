@@ -1042,97 +1042,192 @@ function EquipmentSlotButton({
                           className="w-full cursor-pointer"
                         />
                       </div>
-                      {ephenSynthesisCategory.groups.slice(0, 2).map((group, gi) => {
-                        const value = gi === 0 ? ephenSynthesisPrimary : ephenSynthesisSecondary;
-                        const setValue = gi === 0 ? setEphenSynthesisPrimary : setEphenSynthesisSecondary;
-                        const otherValue = gi === 0 ? ephenSynthesisSecondary : ephenSynthesisPrimary;
-                        return (
-                          <Select
-                            key={gi}
-                            value={value || "none"}
-                            onValueChange={(v) => setValue(v === "none" ? "" : v)}
-                          >
-                            <SelectTrigger className="w-full cursor-pointer">
-                              <SelectValue
-                                placeholder={
-                                  gi === 0 ? "Первая характеристика" : "Вторая характеристика"
-                                }
-                              />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="none">Выберите</SelectItem>
-                              {group.options
-                                .filter((option) => option.key !== otherValue)
-                                .map((option) => {
-                                  const range = option.ranges[
-                                    grade >= 12
-                                      ? 12
-                                      : grade >= 11
-                                        ? 11
-                                        : ephenSynthesisCategory.minGrade
-                                  ];
-                                  return (
-                                    <SelectItem key={option.key} value={option.key}>
-                                      {option.label}
-                                      {range ? `: +${range[0]}..+${range[1]}${option.isPercent ? "%" : ""}` : ""}
-                                    </SelectItem>
-                                  );
-                                })}
-                            </SelectContent>
-                          </Select>
-                        );
-                      })}
-                      {ephenSynthesisCategory.groups[2] && (
-                        <div className="max-h-48 space-y-0.5 overflow-y-auto rounded-md border p-1">
-                          {ephenSynthesisCategory.groups[2].options.map((option) => {
-                            const checked = ephenSynthesisTertiary.includes(option.key);
-                            const pickCount = ephenSynthesisCategory.groups[2].pickCount;
-                            const disabled =
-                              !checked && ephenSynthesisTertiary.length >= pickCount;
-                            const range = option.ranges[
-                              grade >= 12
-                                ? 12
-                                : grade >= 11
-                                  ? 11
-                                  : ephenSynthesisCategory.minGrade
-                            ];
-                            return (
-                              <label
-                                key={option.key}
-                                className={`flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-sm hover:bg-accent ${
-                                  disabled
-                                    ? "cursor-not-allowed opacity-40 hover:bg-transparent"
-                                    : ""
-                                }`}
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={checked}
-                                  disabled={disabled}
-                                  onChange={() => {
-                                    if (checked) {
-                                      setEphenSynthesisTertiary(
-                                        ephenSynthesisTertiary.filter(
-                                          (k) => k !== option.key,
-                                        ),
-                                      );
-                                    } else {
-                                      setEphenSynthesisTertiary([
-                                        ...ephenSynthesisTertiary,
-                                        option.key,
-                                      ]);
+                      {ephenSynthesisCategory.groups.length === 2 ? (
+                        <>
+                          <div className="text-xs text-muted-foreground">
+                            Первый пул (выбрано {ephenSynthesisTertiary.length}/
+                            {ephenSynthesisCategory.groups[0].pickCount})
+                          </div>
+                          <div className="max-h-48 space-y-0.5 overflow-y-auto rounded-md border p-1">
+                            {ephenSynthesisCategory.groups[0].options.map((option) => {
+                              const checked = ephenSynthesisTertiary.includes(option.key);
+                              const pickCount = ephenSynthesisCategory.groups[0].pickCount;
+                              const disabled =
+                                !checked && ephenSynthesisTertiary.length >= pickCount;
+                              const range = option.ranges[
+                                grade >= 12
+                                  ? 12
+                                  : grade >= 11
+                                    ? 11
+                                    : ephenSynthesisCategory.minGrade
+                              ];
+                              return (
+                                <label
+                                  key={option.key}
+                                  className={`flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-sm hover:bg-accent ${
+                                    disabled
+                                      ? "cursor-not-allowed opacity-40 hover:bg-transparent"
+                                      : ""
+                                  }`}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={checked}
+                                    disabled={disabled}
+                                    onChange={() => {
+                                      if (checked) {
+                                        setEphenSynthesisTertiary(
+                                          ephenSynthesisTertiary.filter(
+                                            (k) => k !== option.key,
+                                          ),
+                                        );
+                                      } else {
+                                        setEphenSynthesisTertiary([
+                                          ...ephenSynthesisTertiary,
+                                          option.key,
+                                        ]);
+                                      }
+                                    }}
+                                    className="cursor-pointer"
+                                  />
+                                  <span className="min-w-0 flex-1 truncate">
+                                    {option.label}
+                                    {range ? `: +${range[0]}..+${range[1]}${option.isPercent ? "%" : ""}` : ""}
+                                  </span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Второй пул (выбрано {ephenSynthesisSecondary ? 1 : 0}/1)
+                          </div>
+                          <div className="max-h-48 space-y-0.5 overflow-y-auto rounded-md border p-1">
+                            {ephenSynthesisCategory.groups[1].options.map((option) => {
+                              const checked = ephenSynthesisSecondary === option.key;
+                              const range = option.ranges[
+                                grade >= 12
+                                  ? 12
+                                  : grade >= 11
+                                    ? 11
+                                    : ephenSynthesisCategory.minGrade
+                              ];
+                              return (
+                                <label
+                                  key={option.key}
+                                  className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-sm hover:bg-accent"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={checked}
+                                    onChange={() =>
+                                      setEphenSynthesisSecondary(checked ? "" : option.key)
                                     }
-                                  }}
-                                  className="cursor-pointer"
-                                />
-                                <span className="min-w-0 flex-1 truncate">
-                                  {option.label}
-                                  {range ? `: +${range[0]}..+${range[1]}${option.isPercent ? "%" : ""}` : ""}
-                                </span>
-                              </label>
+                                    className="cursor-pointer"
+                                  />
+                                  <span className="min-w-0 flex-1 truncate">
+                                    {option.label}
+                                    {range ? `: +${range[0]}..+${range[1]}${option.isPercent ? "%" : ""}` : ""}
+                                  </span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          {ephenSynthesisCategory.groups.slice(0, 2).map((group, gi) => {
+                            const value = gi === 0 ? ephenSynthesisPrimary : ephenSynthesisSecondary;
+                            const setValue = gi === 0 ? setEphenSynthesisPrimary : setEphenSynthesisSecondary;
+                            const otherValue = gi === 0 ? ephenSynthesisSecondary : ephenSynthesisPrimary;
+                            return (
+                              <Select
+                                key={gi}
+                                value={value || "none"}
+                                onValueChange={(v) => setValue(v === "none" ? "" : v)}
+                              >
+                                <SelectTrigger className="w-full cursor-pointer">
+                                  <SelectValue
+                                    placeholder={
+                                      gi === 0 ? "Первая характеристика" : "Вторая характеристика"
+                                    }
+                                  />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="none">Выберите</SelectItem>
+                                  {group.options
+                                    .filter((option) => option.key !== otherValue)
+                                    .map((option) => {
+                                      const range = option.ranges[
+                                        grade >= 12
+                                          ? 12
+                                          : grade >= 11
+                                            ? 11
+                                            : ephenSynthesisCategory.minGrade
+                                      ];
+                                      return (
+                                        <SelectItem key={option.key} value={option.key}>
+                                          {option.label}
+                                          {range ? `: +${range[0]}..+${range[1]}${option.isPercent ? "%" : ""}` : ""}
+                                        </SelectItem>
+                                      );
+                                    })}
+                                </SelectContent>
+                              </Select>
                             );
                           })}
-                        </div>
+                          {ephenSynthesisCategory.groups[2] && (
+                            <div className="max-h-48 space-y-0.5 overflow-y-auto rounded-md border p-1">
+                              {ephenSynthesisCategory.groups[2].options.map((option) => {
+                                const checked = ephenSynthesisTertiary.includes(option.key);
+                                const pickCount = ephenSynthesisCategory.groups[2].pickCount;
+                                const disabled =
+                                  !checked && ephenSynthesisTertiary.length >= pickCount;
+                                const range = option.ranges[
+                                  grade >= 12
+                                    ? 12
+                                    : grade >= 11
+                                      ? 11
+                                      : ephenSynthesisCategory.minGrade
+                                ];
+                                return (
+                                  <label
+                                    key={option.key}
+                                    className={`flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-sm hover:bg-accent ${
+                                      disabled
+                                        ? "cursor-not-allowed opacity-40 hover:bg-transparent"
+                                        : ""
+                                    }`}
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={checked}
+                                      disabled={disabled}
+                                      onChange={() => {
+                                        if (checked) {
+                                          setEphenSynthesisTertiary(
+                                            ephenSynthesisTertiary.filter(
+                                              (k) => k !== option.key,
+                                            ),
+                                          );
+                                        } else {
+                                          setEphenSynthesisTertiary([
+                                            ...ephenSynthesisTertiary,
+                                            option.key,
+                                          ]);
+                                        }
+                                      }}
+                                      className="cursor-pointer"
+                                    />
+                                    <span className="min-w-0 flex-1 truncate">
+                                      {option.label}
+                                      {range ? `: +${range[0]}..+${range[1]}${option.isPercent ? "%" : ""}` : ""}
+                                    </span>
+                                  </label>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </>
                       )}
                     </div>
                   )}

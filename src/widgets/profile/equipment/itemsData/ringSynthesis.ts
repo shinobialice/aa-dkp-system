@@ -11,7 +11,7 @@ export type RingSynthesisEffect = {
 export const RING_SYNTHESIS_EFFECTS: RingSynthesisEffect[] = [
   { id: 1, label: "Пробивание брони", value: 1200, isPercent: false },
   { id: 2, label: "Игнорирование сопротивления", value: 1200, isPercent: false },
-  { id: 3, label: "Снижение получаемого урона", value: 3.0, isPercent: true },
+  { id: 3, label: "Получаемый урон", value: -3.0, isPercent: true },
   { id: 4, label: "Устойчивость к критическому урону", value: 750, isPercent: false },
   { id: 5, label: "Устойчивость к атакам в PVP", value: 500, isPercent: false },
   { id: 6, label: "Доп. урон умений в ближнем бою", value: 3.5, isPercent: true },
