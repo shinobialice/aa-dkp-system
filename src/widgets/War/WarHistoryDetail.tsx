@@ -201,7 +201,7 @@ export default function WarHistoryDetail({
               rows={attendanceRows}
             />
             <WarMembershipCard
-              changes={membership ?? { joined: [], left: [] }}
+              changes={membership ?? { joined: [], left: [], afk: [] }}
             />
             {period.mode === "freeshard" && (
               <>

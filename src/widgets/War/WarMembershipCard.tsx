@@ -10,6 +10,10 @@ function formatDate(iso: string) {
   });
 }
 
+function formatAfkRange(from: string, to: string | null) {
+  return to ? `${formatDate(from)} — ${formatDate(to)}` : `с ${formatDate(from)}`;
+}
+
 // Кто пришёл в гильдию и кто ушёл за период — реальные joined_at/inactive_since
 // с "user", не привязано к режиму (вар/фришка).
 export default function WarMembershipCard({
@@ -17,8 +21,8 @@ export default function WarMembershipCard({
 }: {
   changes: PeriodMembershipChanges;
 }) {
-  const { joined, left } = changes;
-  const isEmpty = joined.length === 0 && left.length === 0;
+  const { joined, left, afk } = changes;
+  const isEmpty = joined.length === 0 && left.length === 0 && afk.length === 0;
 
   return (
     <Card className="gap-3 py-4">
@@ -66,6 +70,26 @@ export default function WarMembershipCard({
                         <span className="min-w-0 truncate">{m.username}</span>
                         <span className="shrink-0 text-xs text-muted-foreground">
                           {formatDate(m.at)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {afk.length > 0 && (
+                <div>
+                  <p className="mb-1 text-xs font-medium text-muted-foreground">
+                    АФК ({afk.length})
+                  </p>
+                  <div className="space-y-1">
+                    {afk.map((m, i) => (
+                      <div
+                        key={`${m.userId}-${i}`}
+                        className="flex items-center justify-between gap-2 text-sm"
+                      >
+                        <span className="min-w-0 truncate">{m.username}</span>
+                        <span className="shrink-0 text-xs text-muted-foreground">
+                          {formatAfkRange(m.from, m.to)}
                         </span>
                       </div>
                     ))}

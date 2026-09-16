@@ -442,22 +442,33 @@ export type PeriodMembershipEntry = {
   at: string; // когда вступил ("user".joined_at) или ушёл ("user".inactive_since)
 };
 
+export type PeriodAfkEntry = {
+  userId: number;
+  username: string;
+  from: string; // user_tags.created_at — с какой даты ушёл в АФК
+  to: string | null; // user_tags.removed_at — с какой вернулся, null = всё ещё АФК
+};
+
 export type PeriodMembershipChanges = {
   joined: PeriodMembershipEntry[];
   left: PeriodMembershipEntry[];
+  afk: PeriodAfkEntry[];
 };
 
 // Кто вступил в гильдию и кто ушёл за период — не привязано к режиму
 // (вар/фришка), состав меняется независимо от того, что сейчас идёт.
 // "Ушёл" = active стал false, inactive_since выставляется в этот момент
 // (см. updateUser.ts) — реальное событие с датой, не догадка.
+// "АФК" — тэг user_tags с tag='АФК' (см. userTagsActions.ts), created_at/removed_at
+// хранят период; берём все тэги, пересекающиеся с [startedAt, rangeEnd), чтобы
+// показать и тех, кто ушёл в АФК в этом периоде, и тех, кто из него вернулся.
 export async function getPeriodMembershipChanges(
   startedAt: string,
   endedAt: string | null,
 ): Promise<PeriodMembershipChanges> {
   const rangeEnd = endedAt ?? new Date().toISOString();
   try {
-    const [joinedRows, leftRows] = await Promise.all([
+    const [joinedRows, leftRows, afkRows] = await Promise.all([
       sql<any[]>`
         SELECT id, username, joined_at
         FROM "user"
@@ -471,6 +482,15 @@ export async function getPeriodMembershipChanges(
           AND inactive_since >= ${startedAt} AND inactive_since < ${rangeEnd}
         ORDER BY inactive_since
       `,
+      sql<any[]>`
+        SELECT ut.user_id, u.username, ut.created_at, ut.removed_at
+        FROM user_tags ut
+        JOIN "user" u ON u.id = ut.user_id
+        WHERE ut.tag = 'АФК'
+          AND ut.created_at < ${rangeEnd}
+          AND (ut.removed_at IS NULL OR ut.removed_at >= ${startedAt})
+        ORDER BY ut.created_at
+      `,
     ]);
     return {
       joined: joinedRows.map((r) => ({
@@ -483,12 +503,18 @@ export async function getPeriodMembershipChanges(
         username: r.username,
         at: r.inactive_since,
       })),
+      afk: afkRows.map((r) => ({
+        userId: r.user_id,
+        username: r.username,
+        from: r.created_at,
+        to: r.removed_at,
+      })),
     };
   } catch (error) {
     console.error(
       "Ошибка при получении изменений состава гильдии за период:",
       error,
     );
-    return { joined: [], left: [] };
+    return { joined: [], left: [], afk: [] };
   }
 }
