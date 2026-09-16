@@ -9,6 +9,7 @@ A comprehensive **Dragon Kill Points (DKP)** system for managing guild raids, lo
 
 This system provides a full suite of tools for guild leaders and officers:
 
+
 - Track attendance and participation
 - Manage fair loot distribution
 - Calculate and assign DKP
