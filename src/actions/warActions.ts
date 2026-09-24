@@ -7,19 +7,23 @@ import { MISC_LOOT_ITEM_NAMES } from "@/widgets/Loot/GuildLoot/LootTypes";
 export type PeriodAttendanceEntry = {
   userId: number;
   username: string;
-  raidsAttended: number; // взвешено: is_late ? 0.5 : 1
+  raidsAttended: number; 
 };
 
 export type PeriodAttendanceResult = {
   top: PeriodAttendanceEntry[];
-  participantsCount: number; // сколько разных игроков был хотя бы на одном рейде за период
+  participantsCount: number; 
   totalRaidsInPeriod: number;
 };
 
-// Топ по посещаемости за произвольный период (вар/фришка): тот же паттерн
-// запроса, что в computeMonthlyAttendanceForUsers (getAllUsersActivityWithPercent.ts),
-// но по датам периода, а не по календарному месяцу. endedAt = null — период ещё
-// идёт, считаем "с startedAt по сейчас".
+const PVP_RAID_FILTER = sql`
+  EXISTS (
+    SELECT 1 FROM raid_bonus rb
+    JOIN attendance_bonus_types bt ON bt.id = rb.bonus_type_id
+    WHERE rb.raid_id = r.id AND bt.label = 'ПВП'
+  )
+`;
+
 export async function getPeriodAttendanceTop(
   startedAt: string,
   endedAt: string | null,
@@ -34,6 +38,7 @@ export async function getPeriodAttendanceTop(
           LEFT JOIN raid_attendance ra ON ra.raid_id = r.id
           LEFT JOIN "user" u ON u.id = ra.user_id
           WHERE r.start_date >= ${startedAt} AND r.start_date < ${endedAt}
+            AND ${PVP_RAID_FILTER}
         `
       : await sql<any[]>`
           SELECT r.id, ra.user_id, ra.is_late, u.username
@@ -41,6 +46,7 @@ export async function getPeriodAttendanceTop(
           LEFT JOIN raid_attendance ra ON ra.raid_id = r.id
           LEFT JOIN "user" u ON u.id = ra.user_id
           WHERE r.start_date >= ${startedAt}
+            AND ${PVP_RAID_FILTER}
         `;
   } catch (error) {
     console.error("Ошибка при получении посещаемости за период:", error);
@@ -78,11 +84,6 @@ export async function getPeriodAttendanceTop(
   };
 }
 
-// ── Экономика фришки ────────────────────────────────────────────────────
-// Реальные данные из loot/item_type/misc_loot_totals за произвольный период.
-// "Топ по вложениям в казну" сюда не входит — в базе нет игрока, который
-// занёс лут в казну (запись "В казну" — ручная строка дохода без user_id),
-// поэтому вместо него ниже топ ИСТОЧНИКОВ дохода (боссы/источники).
 
 function moscowYearMonth(date: Date): { year: number; month: number } {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -96,8 +97,6 @@ function moscowYearMonth(date: Date): { year: number; month: number } {
   };
 }
 
-// Границы календарного месяца в московском времени (у Москвы нет перехода
-// на летнее с 2014 — фиксированный +03:00), как моменты в мс.
 function moscowMonthBoundsMs(year: number, month: number) {
   const pad = (n: number) => String(n).padStart(2, "0");
   const startMs = new Date(`${year}-${pad(month)}-01T00:00:00+03:00`).getTime();
@@ -128,11 +127,6 @@ function moscowMonthsBetween(
   return months;
 }
 
-// Эссенции акхиума / Всякие мелочи / Всякие мелочи 2 не заводятся как
-// обычные строки лута с источником — их доход ведётся помесячной суммой в
-// misc_loot_totals (см. MISC_LOOT_ITEM_NAMES, MiscLootSummary), без дня
-// сделки. Для произвольного периода прорачиваем каждый затронутый месяц по
-// доле дней, попавших в период.
 async function getMiscIncomeForPeriod(
   startedAt: string,
   rangeEnd: string,
@@ -458,7 +452,10 @@ export type PeriodMembershipChanges = {
 // Кто вступил в гильдию и кто ушёл за период — не привязано к режиму
 // (вар/фришка), состав меняется независимо от того, что сейчас идёт.
 // "Ушёл" = active стал false, inactive_since выставляется в этот момент
-// (см. updateUser.ts) — реальное событие с датой, не догадка.
+// (см. updateUser.ts) — реальное событие с датой, не догадка. Тех, кто сейчас
+// помечен тэгом АФК (ещё не снят), в "Ушли" не показываем — они не забыты,
+// админ просто не снял тэг при деактивации, реальное место такого игрока —
+// список АФК ниже.
 // "АФК" — тэг user_tags с tag='АФК' (см. userTagsActions.ts), created_at/removed_at
 // хранят период; берём все тэги, пересекающиеся с [startedAt, rangeEnd), чтобы
 // показать и тех, кто ушёл в АФК в этом периоде, и тех, кто из него вернулся.
@@ -477,9 +474,13 @@ export async function getPeriodMembershipChanges(
       `,
       sql<any[]>`
         SELECT id, username, inactive_since
-        FROM "user"
+        FROM "user" u
         WHERE active = false
           AND inactive_since >= ${startedAt} AND inactive_since < ${rangeEnd}
+          AND NOT EXISTS (
+            SELECT 1 FROM user_tags ut
+            WHERE ut.user_id = u.id AND ut.tag = 'АФК' AND ut.removed_at IS NULL
+          )
         ORDER BY inactive_since
       `,
       sql<any[]>`

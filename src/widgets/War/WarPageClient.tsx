@@ -183,7 +183,7 @@ export default function WarPageClient({
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <WarLeaderboardCard
               icon={Users}
-              title="Посещаемость"
+              title="Посещаемость ПВП-рейдов"
               rows={attendanceRows}
             />
             <WarMembershipCard changes={initialMembership} />
