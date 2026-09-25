@@ -4,6 +4,7 @@ import { hasTag } from "@/actions/hasTag";
 import LootGiveaway from "@/widgets/Loot/LootGiveaway";
 import { lootColumns } from "@/widgets/Loot/LootGiveaway/lootColumns";
 import { gliderTypes } from "@/widgets/Loot/LootGiveaway/gliderTypes";
+import { treasuryNameByGiveawayName } from "@/widgets/Loot/LootGiveaway/treasuryGiveawaySync";
 import { cookies } from "next/headers";
 
 export default async function Page() {
@@ -69,7 +70,9 @@ export default async function Page() {
       }),
       gliders: gliderTypes.map((type) => {
         const record = givenawayloot.find((i) => i.name === type);
-        const itemType = itemTypeByName.get(type);
+        const itemType =
+          itemTypeByName.get(type) ??
+          itemTypeByName.get(treasuryNameByGiveawayName.get(type) ?? "");
         return {
           type,
           date: record?.date?.split("T")[0] || "",

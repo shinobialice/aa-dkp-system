@@ -3,6 +3,7 @@
 import sql from "@/shared/lib/db";
 import { triggerFinanceRecalc } from "./recalculateFinanceForMonth";
 import { getUtcYearMonth } from "@/utils/getUtcYearMonth";
+import { syncTreasuryGiveaway } from "./syncTreasuryGiveaway";
 
 export async function distributeLootItem({
   lootId,
@@ -102,6 +103,14 @@ export async function distributeLootItem({
             VALUES (${soldToId}, ${loot.item_type_name}, ${isFree ? "Выдано" : "Куплено"}, now(), ${quantity}, ${created.id})
           `;
         }
+
+        if (isFree) {
+          await syncTreasuryGiveaway(sql, {
+            treasuryName: loot.item_type_name,
+            userId: soldToId,
+            givenAt: soldAt,
+          });
+        }
       }
     });
   } catch (txError) {
@@ -195,6 +204,14 @@ export async function updateLootSale({
             INSERT INTO user_inventory (user_id, name, type, created_at, quantity, loot_id)
             VALUES (${soldToId}, ${loot.item_type_name}, ${isFree ? "Выдано" : "Куплено"}, now(), ${quantity}, ${lootId})
           `;
+        }
+
+        if (isFree) {
+          await syncTreasuryGiveaway(sql, {
+            treasuryName: loot.item_type_name,
+            userId: soldToId,
+            givenAt: newSoldAt ?? new Date().toISOString(),
+          });
         }
       } else if (existingInventory) {
         // Покупателя сменили на произвольный текст без привязки к аккаунту —
