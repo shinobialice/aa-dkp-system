@@ -1,6 +1,7 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import { treasuryGiveawaySyncItems } from "@/widgets/Loot/LootGiveaway/treasuryGiveawaySync";
 
 export type InventoryLogEntry = {
   id: string;
@@ -58,7 +59,21 @@ export const getUserPurchaseLog = async (
     grade: row.item_type_grade ?? null,
   }));
 
-  const fromGiveaway: InventoryLogEntry[] = giveawayRows.map((row) => ({
+  const giveawayNamesGivenFromTreasury = new Set(
+    lootRows
+      .filter((row) => row.status === "Выдано")
+      .map(
+        (row) =>
+          treasuryGiveawaySyncItems.find(
+            (i) => i.treasuryName === row.item_type_name,
+          )?.giveawayName,
+      )
+      .filter(Boolean),
+  );
+
+  const fromGiveaway: InventoryLogEntry[] = giveawayRows
+    .filter((row) => !giveawayNamesGivenFromTreasury.has(row.name))
+    .map((row) => ({
     id: `giveaway-${row.id}`,
     name: row.name,
     type: "Выдано",
