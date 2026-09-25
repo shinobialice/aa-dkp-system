@@ -13,7 +13,6 @@ const ATTRIBUTE_MULTIPLIERS = [
 
 const ATTRIBUTE_STATS = new Set(["str", "dex", "sta", "int", "spi"]);
 
-
 const FLAT_STATS = new Set([
   "flat_sta",
   "flat_spi",
@@ -69,7 +68,11 @@ export const DEFAULT_EXTRA_PROTECTION = 0;
 export const MAX_EXTRA_PROTECTION = 5;
 export const MAX_EXTRA_PROTECTION_WEAPON = 10;
 
-const WEAPON_SLOT_KEYS = new Set(["weapon_main", "weapon_off", "weapon_ranged"]);
+const WEAPON_SLOT_KEYS = new Set([
+  "weapon_main",
+  "weapon_off",
+  "weapon_ranged",
+]);
 
 export function getMaxExtraProtectionLevel(slotKey: string): number {
   return WEAPON_SLOT_KEYS.has(slotKey)
@@ -171,6 +174,17 @@ export const STAT_ORDER = [
   "skill_dmg_spell",
   "heal_skill_dmg",
   "pvp_resist_ignore",
+  "max_hp",
+  "max_mana",
+  "dodge_chance",
+  "block_chance",
+  "attack_speed",
+  "damage_taken_reduction_pve",
+  "swim_speed",
+  "skill_dmg_melee_pve",
+  "skill_dmg_ranged_pve",
+  "skill_dmg_spell_pve",
+  "heal_skill_dmg_pve",
 ];
 
 export const STAT_LABELS: Record<string, string> = {
@@ -215,6 +229,17 @@ export const STAT_LABELS: Record<string, string> = {
   skill_dmg_spell: "Дополнительный урон умений заклинателя",
   heal_skill_dmg: "Урон исцеляющими умениями",
   pvp_resist_ignore: "Игнорирование устойчивости к атакам в PvP",
+  max_hp: "Объем здоровья",
+  max_mana: "Максимум маны",
+  dodge_chance: "Уклонение",
+  block_chance: "Блокирование",
+  attack_speed: "Скорость атаки",
+  damage_taken_reduction_pve: "Получаемый урон от монстров",
+  swim_speed: "Скорость плавания",
+  skill_dmg_melee_pve: "Доп. урон умений ближнего боя по монстрам",
+  skill_dmg_ranged_pve: "Доп. урон умений дальнего боя по монстрам",
+  skill_dmg_spell_pve: "Доп. урон умений заклинателя по монстрам",
+  heal_skill_dmg_pve: "Урон исцеляющими умениями по монстрам",
 };
 
 // Проценты выводим со знаком %, секунды — с пробелом перед "сек.", остальное — как есть (в ед.).
@@ -239,4 +264,13 @@ export const STAT_UNITS: Record<string, string> = {
   skill_dmg_ranged: "%",
   skill_dmg_spell: "%",
   heal_skill_dmg: "%",
+  dodge_chance: "%",
+  block_chance: "%",
+  attack_speed: "%",
+  damage_taken_reduction_pve: "%",
+  swim_speed: "%",
+  skill_dmg_melee_pve: "%",
+  skill_dmg_ranged_pve: "%",
+  skill_dmg_spell_pve: "%",
+  heal_skill_dmg_pve: "%",
 };

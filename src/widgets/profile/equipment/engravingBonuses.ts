@@ -5,6 +5,7 @@ export const ENGRAVING_STAT = {
   DEFENSE: "Защита",
   RESIST: "Сопротивление",
   HEALTH: "Здоровье",
+  MANA: "Мана",
   MELEE_ATTACK: "Сила атаки в ближнем бою",
   RANGED_ATTACK: "Сила атаки в дальнем бою",
   SPELL_POWER: "Сила заклинаний",

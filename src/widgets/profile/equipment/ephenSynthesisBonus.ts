@@ -4,14 +4,16 @@ import {
   getEphenSynthesisCategory,
   interpolateSynthesisValue,
 } from "./itemsData/ephenSynthesis";
+import { getEphenSynthesisOptionRange } from "./itemsData/ephenSynthesisData";
 
-const ATTRIBUTE_LABELS: Record<string, "str" | "dex" | "int" | "spi" | "sta"> = {
-  str: "str",
-  dex: "dex",
-  sta: "sta",
-  int: "int",
-  spi: "spi",
-};
+const ATTRIBUTE_LABELS: Record<string, "str" | "dex" | "int" | "spi" | "sta"> =
+  {
+    str: "str",
+    dex: "dex",
+    sta: "sta",
+    int: "int",
+    spi: "spi",
+  };
 
 export type EphenSynthesisRoll = {
   key: string;
@@ -36,15 +38,16 @@ export function getEphenSynthesisRolls(
   const category = getEphenSynthesisCategory(gearItem.id);
   if (!category) return [];
 
-  const grade = (
-    eq.grade >= 12 ? 12 : eq.grade >= 11 ? 11 : category.minGrade
-  ) as 10 | 11 | 12;
+  const grade = eq.grade;
   const percent = eq.ephen_synthesis_percent;
   // Уникальное легендарное оружие (2 независимых пула): pool А — в tertiary,
   // pool Б — в secondary (см. isValidEphenSynthesisSelection).
   const selectedKeysByGroup =
     category.groups.length === 2
-      ? [eq.ephen_synthesis_tertiary, eq.ephen_synthesis_secondary ? [eq.ephen_synthesis_secondary] : []]
+      ? [
+          eq.ephen_synthesis_tertiary,
+          eq.ephen_synthesis_secondary ? [eq.ephen_synthesis_secondary] : [],
+        ]
       : [
           eq.ephen_synthesis_primary ? [eq.ephen_synthesis_primary] : [],
           eq.ephen_synthesis_secondary ? [eq.ephen_synthesis_secondary] : [],
@@ -56,10 +59,19 @@ export function getEphenSynthesisRolls(
     const selectedKeys = selectedKeysByGroup[i] ?? [];
     for (const option of group.options) {
       if (!selectedKeys.includes(option.key)) continue;
-      const range = option.ranges[grade];
+      const range = getEphenSynthesisOptionRange(
+        option,
+        grade,
+        category.minGrade,
+      );
       if (!range) continue;
       const value = interpolateSynthesisValue(range, percent, option.isPercent);
-      rolls.push({ key: option.key, label: option.label, value, isPercent: option.isPercent });
+      rolls.push({
+        key: option.key,
+        label: option.label,
+        value,
+        isPercent: option.isPercent,
+      });
     }
   });
   return rolls;

@@ -89,8 +89,11 @@ function findMissingTimes(
 
 export type MissingSlot = {
   date: string; // "DD.MM"
+  rawDate: string; // "YYYY-MM-DD", для dismissMissingSlot/removeManualMissingSlot
   time: string; // "HH:MM"
   bossName: string;
+  isManual: boolean;
+  overrideId?: number; // задан только для isManual — id строки в missing_activity_overrides
 };
 
 export type MissingActivities = {
@@ -141,9 +144,12 @@ export const getMissingActivitiesForMonth = async (
     return { hasDeficit: false, missingSlots: [] };
   }
 
-  let raidRows, scheduleData, morphSuggestionRows;
+  const monthStart = `${year}-${String(month).padStart(2, "0")}-01`;
+  const monthEnd = `${year}-${String(month).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
+
+  let raidRows, scheduleData, morphSuggestionRows, overrideRows;
   try {
-    [raidRows, scheduleData, morphSuggestionRows] = await Promise.all([
+    [raidRows, scheduleData, morphSuggestionRows, overrideRows] = await Promise.all([
       sql<any[]>`
         SELECT r.id, r.start_date, r.type, b.id AS boss_id, b.boss_name AS boss_name
         FROM raid r
@@ -155,10 +161,36 @@ export const getMissingActivitiesForMonth = async (
         SELECT kill_time FROM boss_kill_raid_suggestions
         WHERE boss_name = 'Морф' AND status = 'pending'
       `,
+      sql<any[]>`
+        SELECT id, activity_date, time, boss_name, kind FROM missing_activity_overrides
+        WHERE activity_date BETWEEN ${monthStart} AND ${monthEnd}
+      `,
     ]);
   } catch (error) {
     console.error("Ошибка при получении данных для проверки расписания:", error);
     throw new Error("Не удалось загрузить рейды");
+  }
+
+  // Ручные правки к списку "Не заполнены" (см. missingActivityOverrides.ts):
+  // dismiss — скрыть конкретный вычисленный пропуск, manual — добавить свой.
+  const dismissedKeys = new Set<string>();
+  const manualSlots: MissingSlot[] = [];
+  for (const row of overrideRows ?? []) {
+    const datePart: string = row.activity_date;
+    const time = String(row.time).slice(0, 5);
+    if (row.kind === "dismiss") {
+      dismissedKeys.add(`${datePart}|${time}|${row.boss_name}`);
+    } else if (row.kind === "manual") {
+      const [, m, d] = datePart.split("-");
+      manualSlots.push({
+        date: `${d}.${m}`,
+        rawDate: datePart,
+        time,
+        bossName: row.boss_name,
+        isManual: true,
+        overrideId: row.id,
+      });
+    }
   }
 
   // У Морфа нет фиксированного расписания — рейд нужен ровно тогда, когда
@@ -296,11 +328,19 @@ export const getMissingActivitiesForMonth = async (
       ).slice();
       const missingTimes = findMissingTimes(requiredTimes, actualTimes);
       for (const time of missingTimes) {
-        missingSlots.push({ date: dateLabel, time, bossName });
+        if (dismissedKeys.has(`${datePart}|${time}|${bossName}`)) continue;
+        missingSlots.push({
+          date: dateLabel,
+          rawDate: datePart,
+          time,
+          bossName,
+          isManual: false,
+        });
       }
     }
   }
 
+  missingSlots.push(...manualSlots);
   missingSlots.sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
 
   return { hasDeficit: missingSlots.length > 0, missingSlots };

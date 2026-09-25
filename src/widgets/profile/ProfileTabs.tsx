@@ -125,23 +125,12 @@ export default function ProfileTabs({
 
       <TabsContent value="character">
         <Tabs defaultValue="equipment">
-          <TabsList className="mb-4">
-            <TabsTrigger className="cursor-pointer" value="equipment">
-              Экипировка
-            </TabsTrigger>
-            <TabsTrigger className="cursor-pointer" value="seals">
-              Печати героя
-            </TabsTrigger>
-            <TabsTrigger className="cursor-pointer" value="class">
-              Класс персонажа
-            </TabsTrigger>
-          </TabsList>
-
           <TabsContent value="equipment">
             <EquipmentTab
               userId={user.id}
               user={user}
               equipment={equipment}
+              seals={seals}
               onChange={setEquipment}
               canEdit={canEditEquipment}
             />

@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
 import saveUserEquipment, { EquipmentInput } from "@/actions/saveUserEquipment";
 import type { UserEquipment } from "@/actions/getUserEquipment";
+import type { UserSeal } from "@/actions/getUserSeals";
 import { EQUIPMENT_SLOTS, type EquipmentSlot } from "./equipmentData";
 import { ITEMS_BY_SLOT, findGearItem } from "./itemsData";
 import { getEngravingSlotCount } from "./itemsData/engravingSlots";
@@ -20,7 +21,11 @@ import {
 } from "./itemsData/statsFormula";
 import { GearItemIcon } from "./GearItemIcon";
 import { GearItemPicker } from "./GearItemPicker";
-import { EngravingPicker, EngravingIcon, EngravingTooltip } from "./EngravingPicker";
+import {
+  EngravingPicker,
+  EngravingIcon,
+  EngravingTooltip,
+} from "./EngravingPicker";
 import { findEngraving } from "./itemsData/engravings";
 import { RunePicker, RuneIcon, RuneTooltip } from "./RunePicker";
 import { findRune } from "./itemsData/runes";
@@ -48,6 +53,7 @@ import {
   findRingSynthesisEffect,
 } from "./itemsData/ringSynthesis";
 import { getEphenSynthesisCategory } from "./itemsData/ephenSynthesis";
+import { getEphenSynthesisOptionRange } from "./itemsData/ephenSynthesisData";
 import {
   getEphenSynthesisRolls,
   hasEphenSynthesisSelection,
@@ -67,6 +73,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/shared/ui";
 import { Badge } from "@/shared/ui";
 import { Button } from "@/shared/ui";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
+import CharacterTabsSwitcher from "@/widgets/profile/CharacterTabsSwitcher";
 import { Input } from "@/shared/ui";
 import {
   Dialog,
@@ -193,7 +200,9 @@ function SynthesisEffectsDisplay({
   if (effectIds.length === 0) return null;
 
   const findEffect =
-    slotKey === "costume" ? findCostumeSynthesisEffect : findUnderwearSynthesisEffect;
+    slotKey === "costume"
+      ? findCostumeSynthesisEffect
+      : findUnderwearSynthesisEffect;
 
   return (
     <div className="space-y-0.5">
@@ -201,7 +210,9 @@ function SynthesisEffectsDisplay({
       {effectIds.map((id) => {
         const effect = findEffect(id);
         if (!effect) return null;
-        const value = effect.isPercent ? `${effect.value}%` : `${effect.value} ед.`;
+        const value = effect.isPercent
+          ? `${effect.value}%`
+          : `${effect.value} ед.`;
         return (
           <div key={id} className="text-xs text-green-500">
             {highlightNumbers(`${effect.label}: ${value}`)}
@@ -221,7 +232,9 @@ function CursedArmorSynthesisDisplay({ effectIds }: { effectIds: number[] }) {
       {effectIds.map((id) => {
         const effect = findCursedArmorSynthesisEffect(id);
         if (!effect) return null;
-        const value = effect.isPercent ? `${effect.value}%` : `${effect.value} ед.`;
+        const value = effect.isPercent
+          ? `${effect.value}%`
+          : `${effect.value} ед.`;
         return (
           <div key={id} className="text-xs text-green-500">
             {highlightNumbers(`${effect.label}: ${value}`)}
@@ -241,7 +254,9 @@ function RingSynthesisDisplay({ effectIds }: { effectIds: number[] }) {
       {effectIds.map((id) => {
         const effect = findRingSynthesisEffect(id);
         if (!effect) return null;
-        const value = effect.isPercent ? `${effect.value}%` : `${effect.value} ед.`;
+        const value = effect.isPercent
+          ? `${effect.value}%`
+          : `${effect.value} ед.`;
         return (
           <div key={id} className="text-xs text-green-500">
             {highlightNumbers(`${effect.label}: ${value}`)}
@@ -474,7 +489,9 @@ function EquipmentSlotButton({
   const [extraProtection, setExtraProtection] = useState(
     item?.extra_protection ?? DEFAULT_EXTRA_PROTECTION,
   );
-  const [engravings, setEngravings] = useState<number[]>(item?.engravings ?? []);
+  const [engravings, setEngravings] = useState<number[]>(
+    item?.engravings ?? [],
+  );
   const [selectedEngravingId, setSelectedEngravingId] = useState(0);
   const [runeId, setRuneId] = useState(item?.rune_id ?? 0);
   const initialSynthesisEffects =
@@ -483,11 +500,12 @@ function EquipmentSlotButton({
       : slot.key === "underwear"
         ? (item?.underwear_synthesis_effects ?? [])
         : [];
-  const [synthesisEffects, setSynthesisEffects] =
-    useState<number[]>(initialSynthesisEffects);
-  const [cursedSynthesisEffects, setCursedSynthesisEffects] = useState<number[]>(
-    item?.cursed_synthesis_effects ?? [],
+  const [synthesisEffects, setSynthesisEffects] = useState<number[]>(
+    initialSynthesisEffects,
   );
+  const [cursedSynthesisEffects, setCursedSynthesisEffects] = useState<
+    number[]
+  >(item?.cursed_synthesis_effects ?? []);
   const [ringSynthesisEffects, setRingSynthesisEffects] = useState<number[]>(
     item?.ring_synthesis_effects ?? [],
   );
@@ -500,9 +518,9 @@ function EquipmentSlotButton({
   const [ephenSynthesisSecondary, setEphenSynthesisSecondary] = useState(
     item?.ephen_synthesis_secondary ?? "",
   );
-  const [ephenSynthesisTertiary, setEphenSynthesisTertiary] = useState<string[]>(
-    item?.ephen_synthesis_tertiary ?? [],
-  );
+  const [ephenSynthesisTertiary, setEphenSynthesisTertiary] = useState<
+    string[]
+  >(item?.ephen_synthesis_tertiary ?? []);
   const [saving, setSaving] = useState(false);
 
   const filled = !!item?.item_name;
@@ -537,7 +555,8 @@ function EquipmentSlotButton({
   const cursedSynthesisPools = draftGearItem
     ? getCursedArmorSynthesisSlotPools(draftGearItem.id)
     : [];
-  const isRingSynthDraft = !!draftGearItem && isRingSynthesisItem(draftGearItem.id);
+  const isRingSynthDraft =
+    !!draftGearItem && isRingSynthesisItem(draftGearItem.id);
   const ephenSynthesisCategory = draftGearItem
     ? getEphenSynthesisCategory(draftGearItem.id)
     : undefined;
@@ -771,7 +790,9 @@ function EquipmentSlotButton({
                 {equippedRingSynthesisEffects.length > 0 && (
                   <>
                     <div className="border-t border-border" />
-                    <RingSynthesisDisplay effectIds={equippedRingSynthesisEffects} />
+                    <RingSynthesisDisplay
+                      effectIds={equippedRingSynthesisEffects}
+                    />
                   </>
                 )}
 
@@ -870,7 +891,8 @@ function EquipmentSlotButton({
                     onChange={(e) => {
                       const next = Math.round(Number(e.target.value));
                       if (isValidEnchantLevel(next)) setEnchant(next);
-                      else if (e.target.value === "") setEnchant(DEFAULT_ENCHANT);
+                      else if (e.target.value === "")
+                        setEnchant(DEFAULT_ENCHANT);
                     }}
                     className="w-24"
                   />
@@ -900,7 +922,9 @@ function EquipmentSlotButton({
 
               {itemName.trim() !== "" && maxEngravingSlots > 0 && (
                 <div className="space-y-1.5">
-                  <div className="text-xs text-muted-foreground">Гравировки:</div>
+                  <div className="text-xs text-muted-foreground">
+                    Гравировки:
+                  </div>
                   <EngravingPicker
                     slot={slot.key}
                     handedness={draftHandedness}
@@ -984,7 +1008,10 @@ function EquipmentSlotButton({
                         <SelectContent>
                           <SelectItem value="-1">Выберите</SelectItem>
                           {pool.map((effect) => (
-                            <SelectItem key={effect.id} value={String(effect.id)}>
+                            <SelectItem
+                              key={effect.id}
+                              value={String(effect.id)}
+                            >
                               {effect.label}:{" "}
                               {effect.isPercent
                                 ? `${effect.value}%`
@@ -1049,146 +1076,21 @@ function EquipmentSlotButton({
                             {ephenSynthesisCategory.groups[0].pickCount})
                           </div>
                           <div className="max-h-48 space-y-0.5 overflow-y-auto rounded-md border p-1">
-                            {ephenSynthesisCategory.groups[0].options.map((option) => {
-                              const checked = ephenSynthesisTertiary.includes(option.key);
-                              const pickCount = ephenSynthesisCategory.groups[0].pickCount;
-                              const disabled =
-                                !checked && ephenSynthesisTertiary.length >= pickCount;
-                              const range = option.ranges[
-                                grade >= 12
-                                  ? 12
-                                  : grade >= 11
-                                    ? 11
-                                    : ephenSynthesisCategory.minGrade
-                              ];
-                              return (
-                                <label
-                                  key={option.key}
-                                  className={`flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-sm hover:bg-accent ${
-                                    disabled
-                                      ? "cursor-not-allowed opacity-40 hover:bg-transparent"
-                                      : ""
-                                  }`}
-                                >
-                                  <input
-                                    type="checkbox"
-                                    checked={checked}
-                                    disabled={disabled}
-                                    onChange={() => {
-                                      if (checked) {
-                                        setEphenSynthesisTertiary(
-                                          ephenSynthesisTertiary.filter(
-                                            (k) => k !== option.key,
-                                          ),
-                                        );
-                                      } else {
-                                        setEphenSynthesisTertiary([
-                                          ...ephenSynthesisTertiary,
-                                          option.key,
-                                        ]);
-                                      }
-                                    }}
-                                    className="cursor-pointer"
-                                  />
-                                  <span className="min-w-0 flex-1 truncate">
-                                    {option.label}
-                                    {range ? `: +${range[0]}..+${range[1]}${option.isPercent ? "%" : ""}` : ""}
-                                  </span>
-                                </label>
-                              );
-                            })}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            Второй пул (выбрано {ephenSynthesisSecondary ? 1 : 0}/1)
-                          </div>
-                          <div className="max-h-48 space-y-0.5 overflow-y-auto rounded-md border p-1">
-                            {ephenSynthesisCategory.groups[1].options.map((option) => {
-                              const checked = ephenSynthesisSecondary === option.key;
-                              const range = option.ranges[
-                                grade >= 12
-                                  ? 12
-                                  : grade >= 11
-                                    ? 11
-                                    : ephenSynthesisCategory.minGrade
-                              ];
-                              return (
-                                <label
-                                  key={option.key}
-                                  className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-sm hover:bg-accent"
-                                >
-                                  <input
-                                    type="checkbox"
-                                    checked={checked}
-                                    onChange={() =>
-                                      setEphenSynthesisSecondary(checked ? "" : option.key)
-                                    }
-                                    className="cursor-pointer"
-                                  />
-                                  <span className="min-w-0 flex-1 truncate">
-                                    {option.label}
-                                    {range ? `: +${range[0]}..+${range[1]}${option.isPercent ? "%" : ""}` : ""}
-                                  </span>
-                                </label>
-                              );
-                            })}
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          {ephenSynthesisCategory.groups.slice(0, 2).map((group, gi) => {
-                            const value = gi === 0 ? ephenSynthesisPrimary : ephenSynthesisSecondary;
-                            const setValue = gi === 0 ? setEphenSynthesisPrimary : setEphenSynthesisSecondary;
-                            const otherValue = gi === 0 ? ephenSynthesisSecondary : ephenSynthesisPrimary;
-                            return (
-                              <Select
-                                key={gi}
-                                value={value || "none"}
-                                onValueChange={(v) => setValue(v === "none" ? "" : v)}
-                              >
-                                <SelectTrigger className="w-full cursor-pointer">
-                                  <SelectValue
-                                    placeholder={
-                                      gi === 0 ? "Первая характеристика" : "Вторая характеристика"
-                                    }
-                                  />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="none">Выберите</SelectItem>
-                                  {group.options
-                                    .filter((option) => option.key !== otherValue)
-                                    .map((option) => {
-                                      const range = option.ranges[
-                                        grade >= 12
-                                          ? 12
-                                          : grade >= 11
-                                            ? 11
-                                            : ephenSynthesisCategory.minGrade
-                                      ];
-                                      return (
-                                        <SelectItem key={option.key} value={option.key}>
-                                          {option.label}
-                                          {range ? `: +${range[0]}..+${range[1]}${option.isPercent ? "%" : ""}` : ""}
-                                        </SelectItem>
-                                      );
-                                    })}
-                                </SelectContent>
-                              </Select>
-                            );
-                          })}
-                          {ephenSynthesisCategory.groups[2] && (
-                            <div className="max-h-48 space-y-0.5 overflow-y-auto rounded-md border p-1">
-                              {ephenSynthesisCategory.groups[2].options.map((option) => {
-                                const checked = ephenSynthesisTertiary.includes(option.key);
-                                const pickCount = ephenSynthesisCategory.groups[2].pickCount;
+                            {ephenSynthesisCategory.groups[0].options.map(
+                              (option) => {
+                                const checked = ephenSynthesisTertiary.includes(
+                                  option.key,
+                                );
+                                const pickCount =
+                                  ephenSynthesisCategory.groups[0].pickCount;
                                 const disabled =
-                                  !checked && ephenSynthesisTertiary.length >= pickCount;
-                                const range = option.ranges[
-                                  grade >= 12
-                                    ? 12
-                                    : grade >= 11
-                                      ? 11
-                                      : ephenSynthesisCategory.minGrade
-                                ];
+                                  !checked &&
+                                  ephenSynthesisTertiary.length >= pickCount;
+                                const range = getEphenSynthesisOptionRange(
+                                  option,
+                                  grade,
+                                  ephenSynthesisCategory.minGrade,
+                                );
                                 return (
                                   <label
                                     key={option.key}
@@ -1220,11 +1122,176 @@ function EquipmentSlotButton({
                                     />
                                     <span className="min-w-0 flex-1 truncate">
                                       {option.label}
-                                      {range ? `: +${range[0]}..+${range[1]}${option.isPercent ? "%" : ""}` : ""}
+                                      {range
+                                        ? `: +${range[0]}..+${range[1]}${option.isPercent ? "%" : ""}`
+                                        : ""}
                                     </span>
                                   </label>
                                 );
-                              })}
+                              },
+                            )}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Второй пул (выбрано{" "}
+                            {ephenSynthesisSecondary ? 1 : 0}/1)
+                          </div>
+                          <div className="max-h-48 space-y-0.5 overflow-y-auto rounded-md border p-1">
+                            {ephenSynthesisCategory.groups[1].options.map(
+                              (option) => {
+                                const checked =
+                                  ephenSynthesisSecondary === option.key;
+                                const range = getEphenSynthesisOptionRange(
+                                  option,
+                                  grade,
+                                  ephenSynthesisCategory.minGrade,
+                                );
+                                return (
+                                  <label
+                                    key={option.key}
+                                    className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-sm hover:bg-accent"
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={checked}
+                                      onChange={() =>
+                                        setEphenSynthesisSecondary(
+                                          checked ? "" : option.key,
+                                        )
+                                      }
+                                      className="cursor-pointer"
+                                    />
+                                    <span className="min-w-0 flex-1 truncate">
+                                      {option.label}
+                                      {range
+                                        ? `: +${range[0]}..+${range[1]}${option.isPercent ? "%" : ""}`
+                                        : ""}
+                                    </span>
+                                  </label>
+                                );
+                              },
+                            )}
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          {ephenSynthesisCategory.groups
+                            .slice(0, 2)
+                            .map((group, gi) => {
+                              const value =
+                                gi === 0
+                                  ? ephenSynthesisPrimary
+                                  : ephenSynthesisSecondary;
+                              const setValue =
+                                gi === 0
+                                  ? setEphenSynthesisPrimary
+                                  : setEphenSynthesisSecondary;
+                              const otherValue =
+                                gi === 0
+                                  ? ephenSynthesisSecondary
+                                  : ephenSynthesisPrimary;
+                              return (
+                                <Select
+                                  key={gi}
+                                  value={value || "none"}
+                                  onValueChange={(v) =>
+                                    setValue(v === "none" ? "" : v)
+                                  }
+                                >
+                                  <SelectTrigger className="w-full cursor-pointer">
+                                    <SelectValue
+                                      placeholder={
+                                        gi === 0
+                                          ? "Первая характеристика"
+                                          : "Вторая характеристика"
+                                      }
+                                    />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="none">
+                                      Выберите
+                                    </SelectItem>
+                                    {group.options
+                                      .filter(
+                                        (option) => option.key !== otherValue,
+                                      )
+                                      .map((option) => {
+                                        const range =
+                                          getEphenSynthesisOptionRange(
+                                            option,
+                                            grade,
+                                            ephenSynthesisCategory.minGrade,
+                                          );
+                                        return (
+                                          <SelectItem
+                                            key={option.key}
+                                            value={option.key}
+                                          >
+                                            {option.label}
+                                            {range
+                                              ? `: +${range[0]}..+${range[1]}${option.isPercent ? "%" : ""}`
+                                              : ""}
+                                          </SelectItem>
+                                        );
+                                      })}
+                                  </SelectContent>
+                                </Select>
+                              );
+                            })}
+                          {ephenSynthesisCategory.groups[2] && (
+                            <div className="max-h-48 space-y-0.5 overflow-y-auto rounded-md border p-1">
+                              {ephenSynthesisCategory.groups[2].options.map(
+                                (option) => {
+                                  const checked =
+                                    ephenSynthesisTertiary.includes(option.key);
+                                  const pickCount =
+                                    ephenSynthesisCategory.groups[2].pickCount;
+                                  const disabled =
+                                    !checked &&
+                                    ephenSynthesisTertiary.length >= pickCount;
+                                  const range = getEphenSynthesisOptionRange(
+                                    option,
+                                    grade,
+                                    ephenSynthesisCategory.minGrade,
+                                  );
+                                  return (
+                                    <label
+                                      key={option.key}
+                                      className={`flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-sm hover:bg-accent ${
+                                        disabled
+                                          ? "cursor-not-allowed opacity-40 hover:bg-transparent"
+                                          : ""
+                                      }`}
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        checked={checked}
+                                        disabled={disabled}
+                                        onChange={() => {
+                                          if (checked) {
+                                            setEphenSynthesisTertiary(
+                                              ephenSynthesisTertiary.filter(
+                                                (k) => k !== option.key,
+                                              ),
+                                            );
+                                          } else {
+                                            setEphenSynthesisTertiary([
+                                              ...ephenSynthesisTertiary,
+                                              option.key,
+                                            ]);
+                                          }
+                                        }}
+                                        className="cursor-pointer"
+                                      />
+                                      <span className="min-w-0 flex-1 truncate">
+                                        {option.label}
+                                        {range
+                                          ? `: +${range[0]}..+${range[1]}${option.isPercent ? "%" : ""}`
+                                          : ""}
+                                      </span>
+                                    </label>
+                                  );
+                                },
+                              )}
                             </div>
                           )}
                         </>
@@ -1275,7 +1342,9 @@ function EquipmentSlotButton({
                 <div className="text-sm">{item!.item_name}</div>
               )}
               <div className="flex gap-1.5">
-                <Badge variant="outline">{getSealGradeLabel(item!.grade)}</Badge>
+                <Badge variant="outline">
+                  {getSealGradeLabel(item!.grade)}
+                </Badge>
                 {item!.enchant > 0 && (
                   <Badge variant="outline">+{item!.enchant}</Badge>
                 )}
@@ -1320,7 +1389,9 @@ function EquipmentSlotButton({
                 />
               )}
               {equippedRingSynthesisEffects.length > 0 && (
-                <RingSynthesisDisplay effectIds={equippedRingSynthesisEffects} />
+                <RingSynthesisDisplay
+                  effectIds={equippedRingSynthesisEffects}
+                />
               )}
               {item && hasEphenSynthesisSelection(item) && (
                 <EphenSynthesisDisplay item={item} />
@@ -1332,7 +1403,11 @@ function EquipmentSlotButton({
         </DialogContent>
       </Dialog>
       {equippedRune && (
-        <RuneTooltip rune={equippedRune} side={tooltipSide} equipment={equipment}>
+        <RuneTooltip
+          rune={equippedRune}
+          side={tooltipSide}
+          equipment={equipment}
+        >
           <div
             className={`absolute top-1/2 flex size-7 -translate-y-1/2 cursor-default items-center justify-center overflow-hidden rounded-md border border-border bg-background shadow-sm ${
               tooltipSide === "left" ? "-left-8" : "-right-8"
@@ -1350,12 +1425,14 @@ export default function EquipmentTab({
   userId,
   user,
   equipment,
+  seals,
   onChange,
   canEdit,
 }: {
   userId: number;
   user: any;
   equipment: UserEquipment[];
+  seals: UserSeal[];
   onChange: (equipment: UserEquipment[]) => void;
   canEdit: boolean;
 }) {
@@ -1394,7 +1471,8 @@ export default function EquipmentTab({
           extraProtection,
           engravings,
           runeId,
-          costumeSynthesisEffects: slotKey === "costume" ? synthesisEffects : [],
+          costumeSynthesisEffects:
+            slotKey === "costume" ? synthesisEffects : [],
           underwearSynthesisEffects:
             slotKey === "underwear" ? synthesisEffects : [],
           cursedSynthesisEffects,
@@ -1439,9 +1517,11 @@ export default function EquipmentTab({
   };
 
   return (
-    <Card className="gap-3 py-4">
+    <Card className="min-h-[750px] gap-3 py-4">
       <CardHeader className="border-b">
-        <CardTitle>Экипировка  (В ПРОЦЕССЕ РАЗРАБОТКИ!!!! Я УЕЗЖАЮ В ИТАЛИЮ!!! ВЕРНУСЬ 24.09 И ДОДЕЛАЮ)</CardTitle>
+        <CardTitle>
+          <CharacterTabsSwitcher />
+        </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-4 pt-4 lg:flex-row">
         <div className="flex flex-col">
@@ -1451,6 +1531,7 @@ export default function EquipmentTab({
           <CharacterStatsPanel
             userId={userId}
             equipment={equipment}
+            seals={seals}
             user={user}
             canEdit={canEdit}
             level={level}
@@ -1557,7 +1638,10 @@ export default function EquipmentTab({
                   />
                 </div>
                 {canEdit && (
-                  <CharacterPortraitUpload userId={userId} onUploaded={setPortraitUrl} />
+                  <CharacterPortraitUpload
+                    userId={userId}
+                    onUploaded={setPortraitUrl}
+                  />
                 )}
               </div>
             ) : (
@@ -1578,7 +1662,10 @@ export default function EquipmentTab({
                   {user?.username}
                 </div>
                 {canEdit && (
-                  <CharacterPortraitUpload userId={userId} onUploaded={setPortraitUrl} />
+                  <CharacterPortraitUpload
+                    userId={userId}
+                    onUploaded={setPortraitUrl}
+                  />
                 )}
               </div>
             )}

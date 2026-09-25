@@ -248,7 +248,7 @@ export default function CalendarView({
         <aside className="flex flex-col gap-3 lg:w-64 lg:flex-none">
           <ScreenshotsLinkButton canEdit={isAdmin || !!isSecretutka} />
 
-          <MissingActivitiesBanner />
+          <MissingActivitiesBanner canEdit={canEditEvents} />
 
           <div className="rounded-lg border bg-card p-3">
             <p className="mb-1 px-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">

@@ -1,4 +1,6 @@
 import type { UserEquipment } from "@/actions/getUserEquipment";
+import type { UserSeal } from "@/actions/getUserSeals";
+import { computeSealBonusSummary } from "@/widgets/profile/seals/sealBonusSummary";
 import { ITEM_STATS, findGearItem } from "./itemsData";
 import { getItemGradeStats } from "./itemsData/itemGradeStats";
 import { scaleStat } from "./itemsData/statsFormula";
@@ -43,6 +45,7 @@ export type EquippedBonuses = {
   spi: number;
   sta: number;
   health: number;
+  mana: number;
   meleeAttack: number;
   rangedAttack: number;
   spellPower: number;
@@ -58,6 +61,7 @@ export type EquippedBonuses = {
 
 export function computeEquippedBonuses(
   equipment: UserEquipment[],
+  seals: UserSeal[] = [],
 ): EquippedBonuses {
   const totals: EquippedBonuses = {
     defense: 0,
@@ -68,6 +72,7 @@ export function computeEquippedBonuses(
     spi: 0,
     sta: 0,
     health: 0,
+    mana: 0,
     meleeAttack: 0,
     rangedAttack: 0,
     spellPower: 0,
@@ -141,9 +146,14 @@ export function computeEquippedBonuses(
   for (const [label, value] of ephenSynthesisBonus.stats) {
     engravingBonus.set(label, (engravingBonus.get(label) ?? 0) + value);
   }
+  const sealPicks = seals.map((s) => ({ sealName: s.seal_name, level: s.level }));
+  for (const { stat, value } of computeSealBonusSummary(sealPicks)) {
+    engravingBonus.set(stat, (engravingBonus.get(stat) ?? 0) + value);
+  }
   totals.defense += engravingBonus.get(ENGRAVING_STAT.DEFENSE) ?? 0;
   totals.resist += engravingBonus.get(ENGRAVING_STAT.RESIST) ?? 0;
   totals.health += engravingBonus.get(ENGRAVING_STAT.HEALTH) ?? 0;
+  totals.mana += engravingBonus.get(ENGRAVING_STAT.MANA) ?? 0;
   totals.meleeAttack += engravingBonus.get(ENGRAVING_STAT.MELEE_ATTACK) ?? 0;
   totals.rangedAttack += engravingBonus.get(ENGRAVING_STAT.RANGED_ATTACK) ?? 0;
   totals.spellPower += engravingBonus.get(ENGRAVING_STAT.SPELL_POWER) ?? 0;
@@ -214,7 +224,7 @@ export function computeDerivedStats(
     rangedAttack: dex * 0.25 + bonus.rangedAttack,
     spellPower: int * 0.25 + bonus.spellPower,
     healPower: spi * 0.25 + bonus.healPower,
-    mana: FLAT_MANA_POOL + int * 10,
+    mana: FLAT_MANA_POOL + int * 10 + bonus.mana,
     health: FLAT_HEALTH_POOL + sta * 12 + bonus.health,
     defense: sta * 1 + bonus.defense,
     resist: sta * 1 + bonus.resist,

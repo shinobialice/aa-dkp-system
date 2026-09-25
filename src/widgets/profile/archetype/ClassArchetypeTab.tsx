@@ -16,6 +16,7 @@ import SkillBuildEditor from "./SkillBuildEditor";
 import { Badge } from "@/shared/ui";
 import { Button } from "@/shared/ui";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
+import CharacterTabsSwitcher from "@/widgets/profile/CharacterTabsSwitcher";
 import {
   Select,
   SelectTrigger,
@@ -269,10 +270,10 @@ export default function ClassArchetypeTab({
   };
 
   return (
-    <Card className="mx-auto max-w-2xl gap-3 py-4">
+    <Card className="min-h-[750px] gap-3 py-4">
       <CardHeader className="border-b">
         <CardTitle className="flex items-center justify-between">
-          Класс персонажа
+          <CharacterTabsSwitcher />
           {canEdit && !editing && (
             <Button
               variant="outline"

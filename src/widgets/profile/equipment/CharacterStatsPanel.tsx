@@ -3,6 +3,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { toast } from "sonner";
 import type { UserEquipment } from "@/actions/getUserEquipment";
+import type { UserSeal } from "@/actions/getUserSeals";
 import saveCharacterLevel from "@/actions/saveCharacterLevel";
 import { isValidCharacterLevel } from "./characterLevel";
 import {
@@ -176,6 +177,7 @@ function BuffIcon({
 export function CharacterStatsPanel({
   userId,
   equipment,
+  seals,
   user,
   canEdit,
   level,
@@ -183,6 +185,7 @@ export function CharacterStatsPanel({
 }: {
   userId: number;
   equipment: UserEquipment[];
+  seals: UserSeal[];
   user?: { username?: string | null } | null;
   canEdit: boolean;
   level: number;
@@ -191,7 +194,7 @@ export function CharacterStatsPanel({
   const [savingLevel, setSavingLevel] = useState(false);
   const [levelEditing, setLevelEditing] = useState(false);
 
-  const bonus = computeEquippedBonuses(equipment);
+  const bonus = computeEquippedBonuses(equipment, seals);
   const stats = computeDerivedStats(bonus, level);
   const weaponBuff = getActiveWeaponBuff(equipment);
   const setBuffs = [

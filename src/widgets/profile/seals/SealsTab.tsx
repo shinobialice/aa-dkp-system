@@ -20,6 +20,7 @@ import { Badge } from "@/shared/ui";
 import { Button } from "@/shared/ui";
 import { Input } from "@/shared/ui";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
+import CharacterTabsSwitcher from "@/widgets/profile/CharacterTabsSwitcher";
 import {
   Select,
   SelectTrigger,
@@ -123,10 +124,10 @@ export default function SealsTab({ userId, seals, onChange, canEdit }: Props) {
   };
 
   return (
-    <Card className="gap-3 py-4">
+    <Card className="min-h-[750px] gap-3 py-4">
       <CardHeader className="border-b">
         <CardTitle className="flex items-center justify-between gap-2">
-          Печати героя
+          <CharacterTabsSwitcher />
           <div className="flex gap-2">
             <SealBonusSummaryButton picks={currentPicks} />
             {canEdit && !editing && (

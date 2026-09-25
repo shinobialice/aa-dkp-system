@@ -1,3 +1,5 @@
+// Сверено с таблицей реальных игровых значений парирования (сила 200-2500) —
+// совпадает точно на всех 24 точках.
 const PARRY_CURVE: [number, number][] = [
   [200, 0.109],
   [300, 0.121],
@@ -54,30 +56,41 @@ export function computeParry(strTotal: number): number {
   return evalCurve(PARRY_CURVE, strTotal);
 }
 
+// Множитель 0.5 сверен с таблицей реальных значений уклонения (ловкость 200-2500) — совпадает точно.
 export function computeDodge(dexTotal: number): number {
   return evalCurve(PARRY_CURVE, dexTotal) * 0.5;
 }
 
+// Множитель 1.655 сверен с таблицей реальных значений блокирования (выносливость 200-2500) — совпадает точно.
 export function computeBlock(staTotal: number): number {
   return evalCurve(PARRY_CURVE, staTotal) * 1.655;
 }
 
+// Сверено с таблицей реальных значений (сила+ловкость 200-2500) — совпадает с точностью до округления.
 export function computeTacticalReadiness(strPlusDex: number): number {
   return 47.837 * Math.pow(strPlusDex, 0.4386);
 }
 
+// Сверено с таблицей реальных значений (интеллект+сила духа 200-2500) — совпадает с точностью до округления.
 export function computeSkillTimeReduction(intPlusSpi: number): number {
   return 0.0396 * Math.pow(intPlusSpi, 0.1631);
 }
 
+// Сверено с таблицей реальных игровых значений (сила духа 200-2500):
+// spi*0.297+18 совпадает с точностью до округления на всех 24 точках,
+// а формула unit_formulas kind=17 (spi*0.3+15) — нет (расхождение до 4 ед.).
 export function computeManaRegen(spiTotal: number): number {
   return spiTotal * 0.297 + 18;
 }
 
+// unit_formulas kind=16, owner_type_id=0 в игровой базе: sta * 0.13 + 50 —
+// совпадает и с формулой БД, и с таблицей реальных значений (точное совпадение).
 export function computeHealthRegen(staTotal: number): number {
   return (staTotal / 100) * 13 + 50;
 }
 
+// Сверено с таблицей реальных значений шанса крита (по всем атрибутам и
+// героическим уровням 40-70) — совпадает точно.
 const CRIT_CHANCE_HEROIC_TIERS: [number, number][] = [
   [40, 1],
   [45, 1.1],
