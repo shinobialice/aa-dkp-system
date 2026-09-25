@@ -8,13 +8,13 @@ import { getUserSelfEditSettings } from "./userSelfEditSettings";
 const editUser = async (
   userId: number,
   username: string,
-  className: string,
-  classGearScore: number,
+  className: string | null,
+  classGearScore: number | null,
   secondaryClassName: string | null,
   secondaryClassGearScore: number | null,
   tertiaryClassName: string | null,
   tertiaryClassGearScore: number | null,
-  vkName: string,
+  vkName: string | null,
   joined_at: Date | string | null,
 ) => {
   const [existing] = await sql<any[]>`
@@ -60,9 +60,13 @@ const editUser = async (
     finalVkName = selfEditSettings.vkEditEnabled ? vkName : existing.vk_name;
     finalJoinedAt = existing.joined_at;
 
+    const toGs = (v: unknown) => (v == null || v === "" ? null : Number(v));
+    const toStr = (v: unknown) => (v == null || v === "" ? null : String(v));
+
     const nicknameChanged = username !== existing.username;
     const primaryChanged =
-      className !== existing.class || classGearScore !== existing.class_gear_score;
+      toStr(className) !== toStr(existing.class) ||
+      toGs(classGearScore) !== toGs(existing.class_gear_score);
 
     // Добавление 2-й/3-й роли с нуля — отдельное разрешение
     // (extraRoleEditEnabled) от правки ГС уже существующей роли
@@ -71,16 +75,16 @@ const editUser = async (
     const secondaryWasEmpty =
       !existing.secondary_class && existing.secondary_class_gear_score == null;
     const secondaryChanged =
-      secondaryClassName !== existing.secondary_class ||
-      secondaryClassGearScore !== existing.secondary_class_gear_score;
+      toStr(secondaryClassName) !== toStr(existing.secondary_class) ||
+      toGs(secondaryClassGearScore) !== toGs(existing.secondary_class_gear_score);
     const secondaryIsNewAddition =
       secondaryChanged && secondaryWasEmpty && !!secondaryClassName;
 
     const tertiaryWasEmpty =
       !existing.tertiary_class && existing.tertiary_class_gear_score == null;
     const tertiaryChanged =
-      tertiaryClassName !== existing.tertiary_class ||
-      tertiaryClassGearScore !== existing.tertiary_class_gear_score;
+      toStr(tertiaryClassName) !== toStr(existing.tertiary_class) ||
+      toGs(tertiaryClassGearScore) !== toGs(existing.tertiary_class_gear_score);
     const tertiaryIsNewAddition =
       tertiaryChanged && tertiaryWasEmpty && !!tertiaryClassName;
 

@@ -148,22 +148,25 @@ export default function ProfileHeader({
                     size="icon"
                     className="size-8 text-green-500 cursor-pointer"
                     onClick={async () => {
-                      await editUser(
-                        user.id,
-                        formData.username,
-                        formData.class,
-                        Number(formData.classGearScore),
-                        formData.secondaryClass ?? null,
-                        formData.secondaryClassGearScore != null
-                          ? Number(formData.secondaryClassGearScore)
-                          : null,
-                        formData.tertiaryClass ?? null,
-                        formData.tertiaryClassGearScore != null
-                          ? Number(formData.tertiaryClassGearScore)
-                          : null,
-                        formData.vkName,
-                        formData.joined_at,
-                      );
+                      const toGs = (v: unknown) =>
+                        v == null || v === "" ? null : Number(v);
+                      try {
+                        await editUser(
+                          user.id,
+                          formData.username,
+                          formData.class ?? null,
+                          toGs(formData.classGearScore),
+                          formData.secondaryClass ?? null,
+                          toGs(formData.secondaryClassGearScore),
+                          formData.tertiaryClass ?? null,
+                          toGs(formData.tertiaryClassGearScore),
+                          formData.vkName?.trim() || null,
+                          formData.joined_at,
+                        );
+                      } catch {
+                        toast.error("Не удалось сохранить профиль");
+                        return;
+                      }
                       setUsernameHistory(await getUsernameHistory(user.id));
                       setEditMode(false);
                     }}
