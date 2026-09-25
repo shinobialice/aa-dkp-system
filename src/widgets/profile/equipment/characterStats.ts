@@ -12,6 +12,10 @@ import { computeRingSynthesisBonuses } from "./ringSynthesisBonuses";
 import { computeEphenRuneSetBonuses } from "./ephenRuneSetBonus";
 import { computeEphenSynthesisBonuses } from "./ephenSynthesisBonus";
 import {
+  computeEpheSealsFlatBonus,
+  getEpheArmorMultiplier,
+} from "../ephe/epheSealsBonus";
+import {
   computeParry,
   computeDodge,
   computeBlock,
@@ -57,6 +61,8 @@ export type EquippedBonuses = {
   parry: number;
   dodge: number;
   block: number;
+  pvpResist: number;
+  critDamageResist: number;
 };
 
 export function computeEquippedBonuses(
@@ -84,6 +90,8 @@ export function computeEquippedBonuses(
     parry: 0,
     dodge: 0,
     block: 0,
+    pvpResist: 0,
+    critDamageResist: 0,
   };
 
   for (const eq of equipment) {
@@ -103,8 +111,9 @@ export function computeEquippedBonuses(
       return gradeStats ? value : scaleStat(value, eq.grade, enchant, key);
     };
 
-    totals.defense += stat("wearable_armor");
-    totals.resist += stat("wearable_magic_resistance");
+    const epheArmorMultiplier = getEpheArmorMultiplier(eq);
+    totals.defense += stat("wearable_armor") * epheArmorMultiplier;
+    totals.resist += stat("wearable_magic_resistance") * epheArmorMultiplier;
     totals.str += stat("str");
     totals.int += stat("int");
     totals.dex += stat("dex");
@@ -113,13 +122,15 @@ export function computeEquippedBonuses(
     if (base.flat_sta) totals.sta += base.flat_sta;
     if (base.flat_spi) totals.spi += base.flat_spi;
     if (base.skill_speed) totals.skillSpeed += base.skill_speed;
-    if (base.tactical_readiness) totals.tacticalReadiness += base.tactical_readiness;
+    if (base.tactical_readiness)
+      totals.tacticalReadiness += base.tactical_readiness;
   }
 
   const engravingBonus = computeEngravingBonuses(equipment);
   const costumeSynthesisBonus = computeCostumeSynthesisBonuses(equipment);
   const underwearSynthesisBonus = computeUnderwearSynthesisBonuses(equipment);
-  const cursedArmorSynthesisBonus = computeCursedArmorSynthesisBonuses(equipment);
+  const cursedArmorSynthesisBonus =
+    computeCursedArmorSynthesisBonuses(equipment);
   const ringSynthesisBonus = computeRingSynthesisBonuses(equipment);
   const ephenRuneSetBonus = computeEphenRuneSetBonuses(equipment);
   const ephenSynthesisBonus = computeEphenSynthesisBonuses(equipment);
@@ -146,9 +157,15 @@ export function computeEquippedBonuses(
   for (const [label, value] of ephenSynthesisBonus.stats) {
     engravingBonus.set(label, (engravingBonus.get(label) ?? 0) + value);
   }
-  const sealPicks = seals.map((s) => ({ sealName: s.seal_name, level: s.level }));
+  const sealPicks = seals.map((s) => ({
+    sealName: s.seal_name,
+    level: s.level,
+  }));
   for (const { stat, value } of computeSealBonusSummary(sealPicks)) {
     engravingBonus.set(stat, (engravingBonus.get(stat) ?? 0) + value);
+  }
+  for (const [label, value] of computeEpheSealsFlatBonus(equipment)) {
+    engravingBonus.set(label, (engravingBonus.get(label) ?? 0) + value);
   }
   totals.defense += engravingBonus.get(ENGRAVING_STAT.DEFENSE) ?? 0;
   totals.resist += engravingBonus.get(ENGRAVING_STAT.RESIST) ?? 0;
@@ -166,13 +183,17 @@ export function computeEquippedBonuses(
   totals.parry += engravingBonus.get(ENGRAVING_STAT.PARRY) ?? 0;
   totals.dodge += engravingBonus.get(ENGRAVING_STAT.DODGE) ?? 0;
   totals.block += engravingBonus.get(ENGRAVING_STAT.BLOCK) ?? 0;
+  totals.pvpResist += engravingBonus.get(ENGRAVING_STAT.PVP_RESIST) ?? 0;
+  totals.critDamageResist +=
+    engravingBonus.get(ENGRAVING_STAT.CRIT_DAMAGE_RESIST) ?? 0;
 
   return totals;
 }
 
 const FLAT_HEALTH_POOL =
   BASE_CHARACTER_STATS.health - BASE_CHARACTER_STATS.sta * 12;
-const FLAT_MANA_POOL = BASE_CHARACTER_STATS.mana - BASE_CHARACTER_STATS.int * 10;
+const FLAT_MANA_POOL =
+  BASE_CHARACTER_STATS.mana - BASE_CHARACTER_STATS.int * 10;
 
 export type DerivedStats = {
   str: number;
@@ -201,6 +222,8 @@ export type DerivedStats = {
   critChanceRanged: number;
   critChanceSpell: number;
   critChanceHeal: number;
+  pvpResist: number;
+  critDamageResist: number;
 };
 
 export function computeDerivedStats(
@@ -229,17 +252,21 @@ export function computeDerivedStats(
     defense: sta * 1 + bonus.defense,
     resist: sta * 1 + bonus.resist,
     moveSpeed: base.moveSpeed + bonus.moveSpeed,
-    skillSpeed: 100 - computeSkillTimeReduction(int + spi) * 100 + bonus.skillSpeed,
+    skillSpeed:
+      100 - computeSkillTimeReduction(int + spi) * 100 + bonus.skillSpeed,
     proficiency: base.proficiency + bonus.proficiency,
     parry: computeParry(str) * 100 + bonus.parry,
     dodge: computeDodge(dex) * 100 + bonus.dodge,
     block: computeBlock(sta) * 100 + bonus.block,
-    tacticalReadiness: computeTacticalReadiness(str + dex) + bonus.tacticalReadiness,
+    tacticalReadiness:
+      computeTacticalReadiness(str + dex) + bonus.tacticalReadiness,
     manaRegen: computeManaRegen(spi),
     healthRegen: computeHealthRegen(sta),
     critChanceMelee: computeCritChance(str, heroicLevel),
     critChanceRanged: computeCritChance(dex, heroicLevel),
     critChanceSpell: computeCritChance(int, heroicLevel),
     critChanceHeal: computeCritChance(spi, heroicLevel),
+    pvpResist: bonus.pvpResist,
+    critDamageResist: bonus.critDamageResist,
   };
 }

@@ -441,6 +441,12 @@ export function isEphenSynthesisEligible(itemId: number): boolean {
   return itemId in ITEM_CATEGORY;
 }
 
+export function getEphenSynthesisCategoryKey(
+  itemId: number,
+): EphenSynthesisCategoryKey | undefined {
+  return ITEM_CATEGORY[itemId];
+}
+
 export function getEphenSynthesisMinGrade(itemId: number): number {
   return getEphenSynthesisCategory(itemId)?.minGrade ?? 10;
 }

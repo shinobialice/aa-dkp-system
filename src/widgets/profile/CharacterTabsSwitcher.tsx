@@ -9,6 +9,9 @@ export default function CharacterTabsSwitcher() {
       <TabsTrigger className="cursor-pointer" value="seals">
         Печати героя
       </TabsTrigger>
+      <TabsTrigger className="cursor-pointer" value="ephe">
+        Печати Эфе
+      </TabsTrigger>
       <TabsTrigger className="cursor-pointer" value="class">
         Класс персонажа
       </TabsTrigger>

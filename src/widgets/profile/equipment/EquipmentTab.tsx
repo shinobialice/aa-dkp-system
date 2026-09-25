@@ -1462,6 +1462,7 @@ export default function EquipmentTab({
     ephenSynthesisTertiary: string[],
   ) => {
     const payload: EquipmentInput[] = EQUIPMENT_SLOTS.map((slot) => {
+      const existing = equipmentBySlot[slot.key];
       if (slot.key === slotKey) {
         return {
           slot: slot.key,
@@ -1481,9 +1482,9 @@ export default function EquipmentTab({
           ephenSynthesisPrimary,
           ephenSynthesisSecondary,
           ephenSynthesisTertiary,
+          epheSealLevel: existing?.ephe_seal_level ?? 0,
         };
       }
-      const existing = equipmentBySlot[slot.key];
       return {
         slot: slot.key,
         itemName: existing?.item_name ?? "",
@@ -1500,6 +1501,7 @@ export default function EquipmentTab({
         ephenSynthesisPrimary: existing?.ephen_synthesis_primary ?? "",
         ephenSynthesisSecondary: existing?.ephen_synthesis_secondary ?? "",
         ephenSynthesisTertiary: existing?.ephen_synthesis_tertiary ?? [],
+        epheSealLevel: existing?.ephe_seal_level ?? 0,
       };
     });
 

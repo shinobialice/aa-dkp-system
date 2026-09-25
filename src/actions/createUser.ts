@@ -10,8 +10,8 @@ export async function createUser(username: string) {
   let data;
   try {
     [data] = await sql<any[]>`
-      INSERT INTO "user" (username, active, created_at, is_eligible_for_salary)
-      VALUES (${username}, true, now(), false)
+      INSERT INTO "user" (username, active, created_at, joined_at, is_eligible_for_salary)
+      VALUES (${username}, true, now(), now(), false)
       RETURNING *
     `;
   } catch (error) {

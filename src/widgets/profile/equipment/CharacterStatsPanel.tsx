@@ -6,10 +6,7 @@ import type { UserEquipment } from "@/actions/getUserEquipment";
 import type { UserSeal } from "@/actions/getUserSeals";
 import saveCharacterLevel from "@/actions/saveCharacterLevel";
 import { isValidCharacterLevel } from "./characterLevel";
-import {
-  computeEquippedBonuses,
-  computeDerivedStats,
-} from "./characterStats";
+import { computeEquippedBonuses, computeDerivedStats } from "./characterStats";
 import { ATTRIBUTE_TOOLTIPS } from "./attributeTooltips";
 import { getActiveSetBuffs } from "./setBonuses";
 import { getActiveQualitySetBuffs } from "./qualitySetBonus";
@@ -148,7 +145,13 @@ function BuffIcon({
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <div className="relative size-8 shrink-0 overflow-hidden rounded-md">
-              <Image src={icon} alt={title} fill sizes="32px" className="object-cover" />
+              <Image
+                src={icon}
+                alt={title}
+                fill
+                sizes="32px"
+                className="object-cover"
+              />
             </div>
             <div className="min-w-0">
               <div className="text-[10px] text-muted-foreground">Эффект</div>
@@ -389,6 +392,16 @@ export function CharacterStatsPanel({
           label="Сноровка"
           value={String(stats.proficiency)}
           boosted={bonus.proficiency !== 0}
+        />
+        <StatRow
+          label="Устойчивость к атакам в PvP"
+          value={String(stats.pvpResist)}
+          boosted={bonus.pvpResist !== 0}
+        />
+        <StatRow
+          label="Устойчивость к критическому урону"
+          value={String(stats.critDamageResist)}
+          boosted={bonus.critDamageResist !== 0}
         />
       </div>
     </div>

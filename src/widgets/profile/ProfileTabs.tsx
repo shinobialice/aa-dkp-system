@@ -12,6 +12,7 @@ import UserNotes from "./notes/UserNotes";
 import SealsTab from "./seals/SealsTab";
 import ClassArchetypeTab from "./archetype/ClassArchetypeTab";
 import EquipmentTab from "./equipment/EquipmentTab";
+import EpheSealsTab from "./ephe/EpheSealsTab";
 import UserMonthlyRaidsTab from "./raids/UserMonthlyRaidsTab";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/ui";
 
@@ -142,6 +143,15 @@ export default function ProfileTabs({
               seals={seals}
               onChange={setSeals}
               canEdit={canEditSeals}
+            />
+          </TabsContent>
+
+          <TabsContent value="ephe">
+            <EpheSealsTab
+              userId={user.id}
+              equipment={equipment}
+              onChange={setEquipment}
+              canEdit={canEditEquipment}
             />
           </TabsContent>
 
