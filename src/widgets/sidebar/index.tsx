@@ -27,6 +27,7 @@ import {
   Eye,
   EyeOff,
   Megaphone,
+  History,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -108,6 +109,7 @@ const AppSidebar: FC<Props> = ({
     { title: "Настройки", url: "/settings", icon: Settings },
     { title: "Предметы", url: "/items", icon: Package },
     { title: "АФК", url: "/afk", icon: UserX },
+    { title: "Список изменений", url: "/changelog", icon: History },
   ];
 
   return (
