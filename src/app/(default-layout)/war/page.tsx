@@ -19,7 +19,7 @@ export default async function WarPage() {
   const periodStart = status.startedAt ?? new Date(0).toISOString();
 
   const [initialAttendance, initialMembership] = await Promise.all([
-    getPeriodAttendanceTop(periodStart, null),
+    getPeriodAttendanceTop(periodStart, null, status.mode),
     getPeriodMembershipChanges(periodStart, null),
   ]);
 

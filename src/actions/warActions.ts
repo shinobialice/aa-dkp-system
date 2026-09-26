@@ -3,6 +3,7 @@
 import sql from "@/shared/lib/db";
 import { UTILITY_ITEM_NAMES } from "@/shared/config/lootUtilityItems";
 import { MISC_LOOT_ITEM_NAMES } from "@/widgets/Loot/GuildLoot/LootTypes";
+import type { GuildMode } from "./guildStatusSettings";
 
 export type PeriodAttendanceEntry = {
   userId: number;
@@ -16,6 +17,10 @@ export type PeriodAttendanceResult = {
   totalRaidsInPeriod: number;
 };
 
+// В режиме "пвп" считаем только рейды, где реально было ПВП — отмечается
+// галочкой "ПВП" при создании рейда (attendance_bonus_types.label = 'ПВП',
+// привязка в raid_bonus), а не любой рейд, попавший в варный период по дате.
+// На фришке такого разделения нет — считаем все рейды периода.
 const PVP_RAID_FILTER = sql`
   EXISTS (
     SELECT 1 FROM raid_bonus rb
@@ -23,12 +28,15 @@ const PVP_RAID_FILTER = sql`
     WHERE rb.raid_id = r.id AND bt.label = 'ПВП'
   )
 `;
+const NO_RAID_FILTER = sql`TRUE`;
 
 export async function getPeriodAttendanceTop(
   startedAt: string,
   endedAt: string | null,
+  mode: GuildMode,
   limit?: number,
 ): Promise<PeriodAttendanceResult> {
+  const raidFilter = mode === "pvp" ? PVP_RAID_FILTER : NO_RAID_FILTER;
   let rows;
   try {
     rows = endedAt
@@ -38,7 +46,7 @@ export async function getPeriodAttendanceTop(
           LEFT JOIN raid_attendance ra ON ra.raid_id = r.id
           LEFT JOIN "user" u ON u.id = ra.user_id
           WHERE r.start_date >= ${startedAt} AND r.start_date < ${endedAt}
-            AND ${PVP_RAID_FILTER}
+            AND ${raidFilter}
         `
       : await sql<any[]>`
           SELECT r.id, ra.user_id, ra.is_late, u.username
@@ -46,7 +54,7 @@ export async function getPeriodAttendanceTop(
           LEFT JOIN raid_attendance ra ON ra.raid_id = r.id
           LEFT JOIN "user" u ON u.id = ra.user_id
           WHERE r.start_date >= ${startedAt}
-            AND ${PVP_RAID_FILTER}
+            AND ${raidFilter}
         `;
   } catch (error) {
     console.error("Ошибка при получении посещаемости за период:", error);

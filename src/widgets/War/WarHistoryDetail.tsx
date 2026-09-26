@@ -92,7 +92,7 @@ export default function WarHistoryDetail({
         : Promise.resolve(null);
 
     Promise.all([
-      getPeriodAttendanceTop(period.startedAt, period.endedAt),
+      getPeriodAttendanceTop(period.startedAt, period.endedAt, period.mode),
       getPeriodMembershipChanges(period.startedAt, period.endedAt),
       economyPromise,
     ]).then(([attendanceResult, membershipResult, economyResult]) => {
