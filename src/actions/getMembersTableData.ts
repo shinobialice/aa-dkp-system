@@ -5,8 +5,11 @@ import { computeMonthlyAttendanceForUsers } from "@/actions/getAllUsersActivityW
 import { getCurrentMonthSalaries } from "@/actions/getCurrentMonthSalaries";
 import { getSalaryReasons } from "@/actions/getSalaryReasons";
 import { getVkRealNames } from "@/shared/lib/vkNames";
+import { grantSalaryAfterProbation } from "@/shared/lib/grantSalaryAfterProbation";
 
 export async function getMembersTableData() {
+  await grantSalaryAfterProbation();
+
   let users;
   try {
     users = await sql<any[]>`

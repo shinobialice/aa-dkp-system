@@ -117,7 +117,11 @@ const editUser = async (
         tertiary_class = ${tertiaryClassName},
         tertiary_class_gear_score = ${tertiaryClassGearScore},
         vk_name = ${finalVkName},
-        joined_at = ${finalJoinedAt}
+        joined_at = ${finalJoinedAt},
+        probation_salary_granted = CASE
+          WHEN joined_at::date IS DISTINCT FROM ${finalJoinedAt}::timestamptz::date THEN false
+          ELSE probation_salary_granted
+        END
       WHERE id = ${userId}
       RETURNING *
     `;

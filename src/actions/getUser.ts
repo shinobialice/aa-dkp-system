@@ -1,8 +1,10 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import { grantSalaryAfterProbation } from "@/shared/lib/grantSalaryAfterProbation";
 
 const getUser = async (userId: number) => {
+  await grantSalaryAfterProbation();
   try {
     const [user] = await sql<any[]>`
       SELECT

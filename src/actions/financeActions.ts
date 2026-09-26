@@ -8,6 +8,7 @@ import { getUserPenaltyPointsBatch } from "./penaltyActions";
 import { buildSalaryWeightResult } from "@/utils/buildSalaryWeightResult";
 import getSalaryAsOfDate from "@/utils/getSalaryAsOfDate";
 import { getAverageGuildGS } from "./getAverageGuildGS";
+import { grantSalaryAfterProbation } from "@/shared/lib/grantSalaryAfterProbation";
 import {
   getSalaryEligibilitySettings,
   type SalaryEligibilitySettings,
@@ -145,6 +146,8 @@ export const generateSalaries = async (month: number, year: number) => {
   }
 
   const asOf = getSalaryAsOfDate(month, year);
+
+  await grantSalaryAfterProbation();
 
   let allEligible;
   try {
