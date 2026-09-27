@@ -10,30 +10,13 @@ import type {
 } from "@/actions/getUserArchetype";
 import type { RoleSkillBuild, UserSkillBuild } from "@/actions/getUserSkillBuild";
 import { SpecializationIcon } from "./SpecializationIcon";
-import { SPECIALIZATIONS, getSpecialization } from "./specializationsData";
-import { lookupClassName } from "./classCombinations";
+import { getSpecialization } from "./specializationsData";
+import ArchetypeSpecPicker, { type SpecKey } from "./ArchetypeSpecPicker";
 import SkillBuildEditor from "./SkillBuildEditor";
 import { Badge } from "@/shared/ui";
 import { Button } from "@/shared/ui";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
 import CharacterTabsSwitcher from "@/widgets/profile/CharacterTabsSwitcher";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/shared/ui";
-
-type SpecKey = "specialization1" | "specialization2" | "specialization3";
-
-const SPEC_KEYS: SpecKey[] = [
-  "specialization1",
-  "specialization2",
-  "specialization3",
-];
-
-const NONE = "Нет";
 
 const ROLE_LABELS: Record<RoleSlot, string> = {
   1: "Роль 1",
@@ -59,14 +42,8 @@ function BuildEditor({
   slot: RoleSlot;
   showLabel: boolean;
   draft: ArchetypeSlot;
-  onSpecChange: (key: SpecKey, value: string) => void;
+  onSpecChange: (key: SpecKey, value: string | null) => void;
 }) {
-  const comboMatch = lookupClassName([
-    draft.specialization1,
-    draft.specialization2,
-    draft.specialization3,
-  ]);
-
   return (
     <div className="space-y-3">
       {showLabel && (
@@ -74,48 +51,7 @@ function BuildEditor({
           {ROLE_LABELS[slot]}
         </div>
       )}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        {SPEC_KEYS.map((key, i) => {
-          const otherChosen = SPEC_KEYS.filter((k) => k !== key)
-            .map((k) => draft[k])
-            .filter(Boolean);
-          const value = draft[key] ?? NONE;
-          return (
-            <div key={key} className="space-y-1.5">
-              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Специализация {i + 1}
-              </div>
-              <Select value={value} onValueChange={(v) => onSpecChange(key, v)}>
-                <SelectTrigger className="w-full cursor-pointer">
-                  <SelectValue placeholder="Не выбрано" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={NONE}>Нет</SelectItem>
-                  {SPECIALIZATIONS.filter(
-                    (spec) => !otherChosen.includes(spec.id),
-                  ).map((spec) => (
-                    <SelectItem key={spec.id} value={spec.id}>
-                      <span className="flex items-center gap-2">
-                        <SpecializationIcon id={spec.id} size={16} />
-                        {spec.name}
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          );
-        })}
-      </div>
-      <p className="text-sm">
-        {comboMatch ? (
-          <span className="font-semibold">{comboMatch}</span>
-        ) : (
-          <span className="text-muted-foreground">
-            Выбери 3 специализации — название класса подставится само
-          </span>
-        )}
-      </p>
+      <ArchetypeSpecPicker value={draft} onChange={onSpecChange} />
     </div>
   );
 }
@@ -228,10 +164,10 @@ export default function ClassArchetypeTab({
     setSkillBuildDraft(skillBuild);
   };
 
-  const setSpec = (slot: RoleSlot, key: SpecKey, value: string) => {
+  const setSpec = (slot: RoleSlot, key: SpecKey, value: string | null) => {
     setDraft((prev) => ({
       ...prev,
-      [slot]: { ...prev[slot], [key]: value === NONE ? null : value },
+      [slot]: { ...prev[slot], [key]: value },
     }));
   };
 

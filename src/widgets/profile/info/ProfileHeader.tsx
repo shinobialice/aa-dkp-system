@@ -1,15 +1,12 @@
 "use client";
 import { useRef, useState } from "react";
-import { Pencil, Check, Camera, ChevronDown } from "lucide-react";
+import { Pencil, Camera, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { Avatar, AvatarImage, AvatarFallback } from "@/shared/ui";
 import { Badge } from "@/shared/ui";
 import { Button } from "@/shared/ui";
-import { Input } from "@/shared/ui";
 import { Popover, PopoverTrigger, PopoverContent } from "@/shared/ui";
-import editUser from "@/actions/editUser";
 import { uploadAvatar } from "@/actions/uploadAvatar";
-import { getUsernameHistory } from "@/actions/usernameHistoryActions";
 import type { PrimeStreak } from "@/actions/getUserPrimeStreak";
 import RankProgress from "./RankProgress";
 import AnniversaryCelebration from "./AnniversaryCelebration";
@@ -32,23 +29,14 @@ const badgeColors: { [key: string]: string } = {
 
 export default function ProfileHeader({
   user,
-  formData,
-  setFormData,
-  editMode,
-  setEditMode,
   tags,
   usernameHistory,
-  setUsernameHistory,
   canEditProfile,
-  canEditNickname,
+  onEdit,
   isOwnProfile,
   primeStreak,
 }: {
   user: any;
-  formData: any;
-  setFormData: (data: any) => void;
-  editMode: boolean;
-  setEditMode: (v: boolean) => void;
   tags: { id: number; tag: string }[];
   usernameHistory: {
     id: number;
@@ -56,16 +44,8 @@ export default function ProfileHeader({
     new_username: string;
     changed_at: string;
   }[];
-  setUsernameHistory: (
-    history: {
-      id: number;
-      old_username: string;
-      new_username: string;
-      changed_at: string;
-    }[],
-  ) => void;
   canEditProfile: boolean;
-  canEditNickname: boolean;
+  onEdit: () => void;
   isOwnProfile: boolean;
   primeStreak: PrimeStreak;
 }) {
@@ -104,7 +84,7 @@ export default function ProfileHeader({
 
       <div className="px-6 pb-6">
         <div className="flex flex-wrap items-center gap-4">
-          <div className="min-w-0 shrink-0">
+          <div className="min-w-0 flex-1">
             <div className="flex items-end justify-between gap-4 -mt-12 md:-mt-14">
               <div className="relative h-24 w-24 shrink-0 md:h-28 md:w-28">
                 <Avatar className="h-24 w-24 border-4 border-card shadow-sm md:h-28 md:w-28">
@@ -140,141 +120,95 @@ export default function ProfileHeader({
                   </>
                 )}
               </div>
-
-              <div className="flex gap-2 pb-1">
-                {editMode && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="size-8 text-green-500 cursor-pointer"
-                    onClick={async () => {
-                      const toGs = (v: unknown) =>
-                        v == null || v === "" ? null : Number(v);
-                      try {
-                        await editUser(
-                          user.id,
-                          formData.username,
-                          formData.class ?? null,
-                          toGs(formData.classGearScore),
-                          formData.secondaryClass ?? null,
-                          toGs(formData.secondaryClassGearScore),
-                          formData.tertiaryClass ?? null,
-                          toGs(formData.tertiaryClassGearScore),
-                          formData.vkName?.trim() || null,
-                          formData.joined_at,
-                        );
-                      } catch {
-                        toast.error("Не удалось сохранить профиль");
-                        return;
-                      }
-                      setUsernameHistory(await getUsernameHistory(user.id));
-                      setEditMode(false);
-                    }}
-                  >
-                    <Check />
-                  </Button>
-                )}
-
-                {canEditProfile && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="size-8 text-muted-foreground cursor-pointer"
-                    onClick={() => setEditMode(!editMode)}
-                  >
-                    <Pencil />
-                  </Button>
-                )}
-              </div>
             </div>
 
             <div className="mt-3 space-y-2">
-              {editMode && canEditNickname ? (
-                <Input
-                  className="text-xl font-bold md:text-2xl"
-                  value={formData.username}
-                  onChange={(e) =>
-                    setFormData((prev: any) => ({
-                      ...prev,
-                      username: e.target.value,
-                    }))
-                  }
-                />
-              ) : (
-                <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="text-xl font-bold md:text-2xl">
-                    {formData.username}
-                  </h1>
-                  {usernameHistory.length > 0 && (
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <button
-                          type="button"
-                          aria-label="История ников"
-                          className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-                        >
-                          <ChevronDown className="size-4" />
-                        </button>
-                      </PopoverTrigger>
-                      <PopoverContent align="start" className="w-72 p-3">
-                        <div className="mb-2 text-xs font-medium text-muted-foreground">
-                          Этот пользователь также использовал ники:
-                        </div>
-                        <div className="flex flex-col divide-y">
-                          {usernameHistory.map((h) => (
-                            <div
-                              key={h.id}
-                              className="flex items-center justify-between gap-3 py-2"
-                            >
-                              <span className="truncate text-sm font-medium">
-                                {h.old_username}
-                              </span>
-                              <span className="shrink-0 text-xs text-muted-foreground">
-                                {new Date(h.changed_at).toLocaleDateString(
-                                  "ru-RU",
-                                )}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-                  )}
-                  <PrimeStreakBadge {...primeStreak} />
-                </div>
-              )}
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-xl font-bold md:text-2xl">
+                  {user.username}
+                </h1>
+                {usernameHistory.length > 0 && (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        aria-label="История ников"
+                        className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                      >
+                        <ChevronDown className="size-4" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent align="start" className="w-72 p-3">
+                      <div className="mb-2 text-xs font-medium text-muted-foreground">
+                        Этот пользователь также использовал ники:
+                      </div>
+                      <div className="flex flex-col divide-y">
+                        {usernameHistory.map((h) => (
+                          <div
+                            key={h.id}
+                            className="flex items-center justify-between gap-3 py-2"
+                          >
+                            <span className="truncate text-sm font-medium">
+                              {h.old_username}
+                            </span>
+                            <span className="shrink-0 text-xs text-muted-foreground">
+                              {new Date(h.changed_at).toLocaleDateString(
+                                "ru-RU",
+                              )}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                )}
+                <PrimeStreakBadge {...primeStreak} />
+              </div>
 
-              <div className="flex flex-wrap gap-2">
-                {user.active && (
-                  <Badge
-                    className="text-background"
-                    style={{ backgroundColor: badgeColors["Активен"] }}
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex flex-wrap gap-2">
+                  {user.active && (
+                    <Badge
+                      className="text-background"
+                      style={{ backgroundColor: badgeColors["Активен"] }}
+                    >
+                      Активен
+                    </Badge>
+                  )}
+                  {user.is_eligible_for_salary && (
+                    <Badge
+                      className="text-background"
+                      style={{
+                        backgroundColor: badgeColors["Получает зарплату"],
+                      }}
+                    >
+                      Получает зарплату
+                    </Badge>
+                  )}
+                  {tags?.map((tag) => (
+                    <Badge
+                      key={tag.id}
+                      className="text-background"
+                      style={{
+                        backgroundColor:
+                          badgeColors[tag.tag] || "rgb(59, 130, 246)",
+                      }}
+                    >
+                      {tag.tag}
+                    </Badge>
+                  ))}
+                </div>
+                {canEditProfile && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0 cursor-pointer"
+                    onClick={onEdit}
                   >
-                    Активен
-                  </Badge>
+                    <Pencil />
+                    Редактировать
+                  </Button>
                 )}
-                {user.is_eligible_for_salary && (
-                  <Badge
-                    className="text-background"
-                    style={{
-                      backgroundColor: badgeColors["Получает зарплату"],
-                    }}
-                  >
-                    Получает зарплату
-                  </Badge>
-                )}
-                {tags?.map((tag) => (
-                  <Badge
-                    key={tag.id}
-                    className="text-background"
-                    style={{
-                      backgroundColor:
-                        badgeColors[tag.tag] || "rgb(59, 130, 246)",
-                    }}
-                  >
-                    {tag.tag}
-                  </Badge>
-                ))}
               </div>
             </div>
           </div>

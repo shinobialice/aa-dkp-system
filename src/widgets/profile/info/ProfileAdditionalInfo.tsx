@@ -5,26 +5,14 @@ import {
 } from "date-fns";
 
 import { format, parse } from "date-fns";
-import { DateTimePicker } from "@/shared/ui";
-import { Input } from "@/shared/ui";
 
 export default function ProfileAdditionalInfo({
   user,
-  formData,
-  setFormData,
-  editMode,
-  canEditAdminFields,
-  canEditVk,
+  vkRealName,
 }: {
   user: any;
-  formData: any;
-  setFormData: (data: any) => void;
-  editMode: boolean;
-  canEditAdminFields: boolean;
-  canEditVk: boolean;
+  vkRealName: string;
 }) {
-  const canEdit = editMode && canEditAdminFields;
-  const canEditVkField = editMode && canEditVk;
   const joinedDate = user.joined_at ? new Date(user.joined_at) : null;
   const now = new Date();
 
@@ -62,72 +50,38 @@ export default function ProfileAdditionalInfo({
         <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           VK
         </div>
-        {(() => {
-          if (canEditVkField) {
-            return (
-              <Input
-                className="w-[180px]"
-                value={formData.vkName ?? ""}
-                onChange={(e) => {
-                  const input = e.target.value;
-                  const match = input.match(
-                    /vk\.(?:com|ru)\/([a-zA-Z0-9_.]+)/,
-                  );
-                  const vkName = match ? match[1] : input;
-                  setFormData((prev: any) => ({ ...prev, vkName }));
-                }}
-              />
-            );
-          } else if (user.vk_name) {
-            return (
-              <a
-                href={`https://vk.ru/${formData.vkName}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm font-semibold text-primary hover:underline"
-              >
-                {formData.vkRealName ? formData.vkRealName : "—"}
-              </a>
-            );
-          }
-          return (
-            <div className="text-sm font-semibold text-muted-foreground">
-              Нет данных
-            </div>
-          );
-        })()}
+        {user.vk_name || user.vk_id ? (
+          <a
+            href={
+              user.vk_name
+                ? `https://vk.ru/${user.vk_name}`
+                : `https://vk.com/id${user.vk_id}`
+            }
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm font-semibold text-primary hover:underline"
+          >
+            {vkRealName || "—"}
+          </a>
+        ) : (
+          <div className="text-sm font-semibold text-muted-foreground">
+            Нет данных
+          </div>
+        )}
       </div>
 
       <div className="min-w-[140px] space-y-1.5">
         <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Дата вступления
         </div>
-        {canEdit ? (
-          <DateTimePicker
-            classNames={{ trigger: "w-[180px]" }}
-            hideTime
-            value={
-              formData.joined_at
-                ? parse(formData.joined_at, "yyyy-MM-dd", new Date())
-                : undefined
-            }
-            onChange={(date) =>
-              setFormData((prev: any) => ({
-                ...prev,
-                joined_at: date ? format(date, "yyyy-MM-dd") : "",
-              }))
-            }
-          />
-        ) : (
-          <div className="text-sm font-semibold">
-            {formData.joined_at
-              ? format(
-                  parse(formData.joined_at, "yyyy-MM-dd", new Date()),
-                  "dd.MM.yyyy",
-                )
-              : "Неизвестно"}
-          </div>
-        )}
+        <div className="text-sm font-semibold">
+          {user.joined_at
+            ? format(
+                parse(user.joined_at.slice(0, 10), "yyyy-MM-dd", new Date()),
+                "dd.MM.yyyy",
+              )
+            : "Неизвестно"}
+        </div>
       </div>
 
       <div className="min-w-[140px] space-y-1.5">

@@ -86,7 +86,13 @@ export default async function Page(p: {
     (canSelfEdit && selfEditSettings.extraRoleEditEnabled);
   const canEditVk =
     isPrivilegedEditor || (canSelfEdit && selfEditSettings.vkEditEnabled);
-  const canEditProfile = canEditNickname || canEditGs;
+  const canEditProfile =
+    canEditNickname ||
+    canEditGs ||
+    canAddExtraRole ||
+    canEditArchetype ||
+    canEditVk ||
+    canEditInventory;
 
   return (
     <ProfilePageWrapper

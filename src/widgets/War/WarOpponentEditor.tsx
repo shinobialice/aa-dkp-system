@@ -7,8 +7,7 @@ import { Button, Input } from "@/shared/ui";
 import { updateWarOpponent } from "@/actions/guildStatusSettings";
 
 // Инлайн-редактирование имени гильдии-противника: карандаш -> инпут ->
-// галочка/крестик. Паттерн взят из ProfileHeader.tsx (там так же редактируют
-// ник — без Dialog/Popover, просто условный рендер Input вместо текста).
+// галочка/крестик.
 export default function WarOpponentEditor({
   initialOpponent,
   isAdmin,

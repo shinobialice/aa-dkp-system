@@ -10,6 +10,7 @@ import {
 } from "@/widgets/profile/seals/sealsData";
 import ProfileAdditionalInfo from "./ProfileAdditionalInfo";
 import ProfileClasses from "./ProfileClasses";
+import ProfileEditDialog from "./ProfileEditDialog";
 import ProfileHeader from "./ProfileHeader";
 import { Card, CardContent } from "@/shared/ui";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/shared/ui";
@@ -21,9 +22,13 @@ const currentMonthLabel = new Date().toLocaleDateString("ru-RU", {
 
 export default function ProfileInfoClient({
   user,
+  setUser,
   tags: initialTags,
   seals,
   archetype,
+  setArchetype,
+  inventory,
+  onInventoryChange,
   usernameHistory,
   setUsernameHistory,
   canEditProfile,
@@ -32,15 +37,21 @@ export default function ProfileInfoClient({
   canAddExtraRole,
   canEditAdminFields,
   canEditVk,
+  canEditArchetype,
+  canEditInventory,
   isOwnProfile,
   activity,
   salary,
   primeStreak,
 }: {
   user: any;
+  setUser: (user: any) => void;
   tags: any[];
   seals: any[];
   archetype: UserArchetype;
+  setArchetype: (archetype: UserArchetype) => void;
+  inventory: any[];
+  onInventoryChange: () => void;
   usernameHistory: {
     id: number;
     old_username: string;
@@ -61,6 +72,8 @@ export default function ProfileInfoClient({
   canAddExtraRole: boolean;
   canEditAdminFields: boolean;
   canEditVk: boolean;
+  canEditArchetype: boolean;
+  canEditInventory: boolean;
   isOwnProfile: boolean;
   activity: {
     aglPercent: number;
@@ -73,19 +86,9 @@ export default function ProfileInfoClient({
   primeStreak: PrimeStreak;
 }) {
   const [tags, setTags] = useState(initialTags);
-  const [editMode, setEditMode] = useState(false);
-  const [formData, setFormData] = useState({
-    username: user.username,
-    class: user.class,
-    classGearScore: user.class_gear_score,
-    secondaryClass: user.secondary_class,
-    secondaryClassGearScore: user.secondary_class_gear_score,
-    tertiaryClass: user.tertiary_class,
-    tertiaryClassGearScore: user.tertiary_class_gear_score,
-    vkName: user.vk_name,
-    vkRealName: "",
-    joined_at: user.joined_at ? user.joined_at.slice(0, 10) : "",
-  });
+  const [editOpen, setEditOpen] = useState(false);
+  const [editSession, setEditSession] = useState(0);
+  const [vkRealName, setVkRealName] = useState("");
 
   useEffect(() => {
     setTags(initialTags);
@@ -93,47 +96,62 @@ export default function ProfileInfoClient({
 
   useEffect(() => {
     const fetchVkName = async () => {
-      if (!formData.vkName) {
+      const lookup = user.vk_name || user.vk_id;
+      if (!lookup) {
+        setVkRealName("");
         return;
       }
 
-      const res = await fetch(`/api/vk-name?username=${formData.vkName}`);
+      const res = await fetch(
+        `/api/vk-name?username=${encodeURIComponent(lookup)}`,
+      );
       const data = await res.json();
 
-      if (data.name) {
-        setFormData((prev) => ({ ...prev, vkRealName: data.name }));
-      }
+      setVkRealName(data.name ?? "");
     };
 
     fetchVkName();
-  }, [formData.vkName]);
+  }, [user.vk_name, user.vk_id]);
 
   return (
     <Card className="gap-0 overflow-hidden py-0">
       <ProfileHeader
         canEditProfile={canEditProfile}
-        canEditNickname={canEditNickname}
+        onEdit={() => {
+          setEditSession((n) => n + 1);
+          setEditOpen(true);
+        }}
         isOwnProfile={isOwnProfile}
         user={user}
-        formData={formData}
-        setFormData={setFormData}
-        editMode={editMode}
-        setEditMode={setEditMode}
         tags={tags}
         usernameHistory={usernameHistory}
-        setUsernameHistory={setUsernameHistory}
         primeStreak={primeStreak}
       />
-      <CardContent className="flex flex-wrap gap-x-8 gap-y-4 border-t py-5">
-        <ProfileClasses
+      {canEditProfile && (
+        <ProfileEditDialog
+          key={editSession}
+          open={editOpen}
+          onOpenChange={setEditOpen}
           user={user}
-          formData={formData}
-          setFormData={setFormData}
-          editMode={editMode}
+          archetype={archetype}
+          inventory={inventory}
+          onInventoryChange={onInventoryChange}
+          onSaved={(result) => {
+            setUser(result.user);
+            setArchetype(result.archetype);
+            setUsernameHistory(result.usernameHistory);
+          }}
+          canEditNickname={canEditNickname}
           canEditGs={canEditGs}
           canAddExtraRole={canAddExtraRole}
-          archetype={archetype}
+          canEditArchetype={canEditArchetype}
+          canEditVk={canEditVk}
+          canEditJoinedAt={canEditAdminFields}
+          canEditInventory={canEditInventory}
         />
+      )}
+      <CardContent className="flex flex-wrap gap-x-8 gap-y-4 border-t py-5">
+        <ProfileClasses user={user} archetype={archetype} />
         <div className="min-w-[140px] space-y-1.5">
           <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Печати
@@ -163,14 +181,7 @@ export default function ProfileInfoClient({
             </div>
           )}
         </div>
-        <ProfileAdditionalInfo
-          user={user}
-          formData={formData}
-          setFormData={setFormData}
-          editMode={editMode}
-          canEditAdminFields={canEditAdminFields}
-          canEditVk={canEditVk}
-        />
+        <ProfileAdditionalInfo user={user} vkRealName={vkRealName} />
         <div className="min-w-[140px] space-y-1.5">
           <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Баллы · {currentMonthLabel}

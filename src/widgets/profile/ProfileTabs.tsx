@@ -1,6 +1,4 @@
 "use client";
-import { useEffect, useState } from "react";
-import getUserInventory from "@/actions/getUserInventory";
 import type { UserArchetype } from "@/actions/getUserArchetype";
 import type { UserSkillBuild } from "@/actions/getUserSkillBuild";
 import type { UserEquipment } from "@/actions/getUserEquipment";
@@ -18,7 +16,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/ui";
 
 export default function ProfileTabs({
   user,
-  inventory: initialInventory,
+  inventory,
   seals,
   setSeals,
   archetype,
@@ -32,7 +30,6 @@ export default function ProfileTabs({
   setUser,
   averageGuildGS,
   isAdmin,
-  canEditInventory,
   canEditSeals,
   canEditArchetype,
   canEditEquipment,
@@ -52,22 +49,10 @@ export default function ProfileTabs({
   setUser: (user: any) => void;
   averageGuildGS: number;
   isAdmin: boolean;
-  canEditInventory: boolean;
   canEditSeals: boolean;
   canEditArchetype: boolean;
   canEditEquipment: boolean;
 }) {
-  const [inventory, setInventory] = useState(initialInventory);
-
-  useEffect(() => {
-    setInventory(initialInventory);
-  }, [initialInventory]);
-
-  const handleInventoryChange = async () => {
-    const updated = await getUserInventory(user.id);
-    setInventory(updated);
-  };
-
   return (
     <Tabs defaultValue="inventory">
       <TabsList className="mb-4">
@@ -92,11 +77,8 @@ export default function ProfileTabs({
       </TabsList>
       <TabsContent value="inventory">
         <InventoryTabsClient
-          canEdit={canEditInventory}
-          isAdmin={isAdmin}
           inventory={inventory}
           userId={user.id}
-          onChange={handleInventoryChange}
         />
       </TabsContent>
 

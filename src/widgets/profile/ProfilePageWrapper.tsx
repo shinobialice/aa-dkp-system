@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import getUserInventory from "@/actions/getUserInventory";
 import type { PrimeStreak } from "@/actions/getUserPrimeStreak";
 import type { UserArchetype } from "@/actions/getUserArchetype";
 import type { UserSkillBuild } from "@/actions/getUserSkillBuild";
@@ -10,7 +11,7 @@ import ProfileTabs from "@/widgets/profile/ProfileTabs";
 export default function ProfilePageWrapper({
   user: initialUser,
   tags: initialTags,
-  inventory,
+  inventory: initialInventory,
   seals: initialSeals,
   archetype: initialArchetype,
   skillBuild: initialSkillBuild,
@@ -79,6 +80,11 @@ export default function ProfilePageWrapper({
   const [usernameHistory, setUsernameHistory] = useState(
     initialUsernameHistory,
   );
+  const [inventory, setInventory] = useState(initialInventory);
+
+  const reloadInventory = async () => {
+    setInventory(await getUserInventory(user.id));
+  };
 
   return (
     <div className="-mt-4 space-y-6 px-4 pb-4">
@@ -89,11 +95,17 @@ export default function ProfilePageWrapper({
         canAddExtraRole={canAddExtraRole}
         canEditAdminFields={canEditAdminFields}
         canEditVk={canEditVk}
+        canEditArchetype={canEditArchetype}
+        canEditInventory={canEditInventory}
         isOwnProfile={isOwnProfile}
         user={user}
+        setUser={setUser}
         tags={tags}
         seals={seals}
         archetype={archetype}
+        setArchetype={setArchetype}
+        inventory={inventory}
+        onInventoryChange={reloadInventory}
         usernameHistory={usernameHistory}
         setUsernameHistory={setUsernameHistory}
         activity={activity}
@@ -116,7 +128,6 @@ export default function ProfilePageWrapper({
         setTags={setTags}
         averageGuildGS={averageGuildGS}
         isAdmin={isAdmin}
-        canEditInventory={canEditInventory}
         canEditSeals={canEditSeals}
         canEditArchetype={canEditArchetype}
         canEditEquipment={canEditEquipment}

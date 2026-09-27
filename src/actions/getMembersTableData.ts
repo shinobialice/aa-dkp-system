@@ -7,6 +7,10 @@ import { getSalaryReasons } from "@/actions/getSalaryReasons";
 import { getVkRealNames } from "@/shared/lib/vkNames";
 import { grantSalaryAfterProbation } from "@/shared/lib/grantSalaryAfterProbation";
 
+function vkLookupKey(user: { vk_name: string | null; vk_id: string | null }) {
+  return user.vk_name || (user.vk_id ? `id${user.vk_id}` : null);
+}
+
 export async function getMembersTableData() {
   await grantSalaryAfterProbation();
 
@@ -32,7 +36,7 @@ export async function getMembersTableData() {
     computeMonthlyAttendanceForUsers(users, month, year),
     getCurrentMonthSalaries(),
     getSalaryReasons(month, year, users),
-    getVkRealNames(users.map((user) => user.vk_name).filter(Boolean)),
+    getVkRealNames(users.map(vkLookupKey).filter(Boolean) as string[]),
   ]);
 
   return users.map((user) => {
@@ -49,6 +53,8 @@ export async function getMembersTableData() {
         )
       : 0;
 
+    const vkKey = vkLookupKey(user);
+
     return {
       ...user,
       daysInGuild,
@@ -57,9 +63,7 @@ export async function getMembersTableData() {
         : "-",
       salary: salaries[user.id] ?? null,
       salaryReason: salaryReasons[user.id] ?? null,
-      vk_real_name: user.vk_name
-        ? (vkRealNames[user.vk_name.toLowerCase()] ?? null)
-        : null,
+      vk_real_name: vkKey ? (vkRealNames[vkKey.toLowerCase()] ?? null) : null,
       ...act,
     };
   });
