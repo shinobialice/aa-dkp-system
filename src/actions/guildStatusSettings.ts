@@ -297,7 +297,7 @@ export async function getStatsForPeriod(
       JOIN "user" u ON s.user_id = u.id
       WHERE s.recorded_at >= ${startDate}
       GROUP BY u.id, u.username
-      ORDER BY "totalKills" DESC
+      ORDER BY "totalKills" DESC, SUM(s.end_honor - s.start_honor) DESC, u.id
       LIMIT ${TOP_LIMIT}
     `,
 

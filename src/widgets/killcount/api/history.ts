@@ -5,19 +5,81 @@ import {
   DB_GetKillCountDto,
   DB_UpdateKillCountDto,
 } from "@/widgets/killcount/types";
-import { KillCountHistoryData } from "@/widgets/killcount/ui/history-table/history-table";
+import {
+  KillCountHistoryData,
+  KillCountWar,
+} from "@/widgets/killcount/ui/history-table/history-table";
+
+export const getKillCountWars = async () => {
+  try {
+    return await sql<KillCountWar[]>`
+      SELECT
+        'current' AS id,
+        opponent_guild AS "opponentGuild",
+        started_at AS "startedAt",
+        NULL::timestamp AS "endedAt"
+      FROM guild_status_settings
+      WHERE id = 1 AND mode = 'pvp' AND started_at IS NOT NULL
+      UNION ALL
+      SELECT
+        id::text,
+        opponent_guild,
+        started_at,
+        ended_at
+      FROM guild_period_history
+      WHERE mode = 'pvp'
+      ORDER BY "startedAt" DESC
+    `;
+  } catch (error) {
+    throw new Error("Не удалось получить список варов для killcount", {
+      cause: error,
+    });
+  }
+};
 
 export const getKillCountHistory = async () => {
   try {
     const currentData = await sql<KillCountHistoryData[]>`
-		SELECT 
-			DATE_TRUNC('day', recorded_at) AS date,
-			SUM(end_kills - start_kills) AS "totalKills"
-			FROM killcount_stats
-			GROUP BY DATE_TRUNC('day', recorded_at)
-			ORDER BY date DESC
-			LIMIT 30;
-			`;
+      WITH wars AS (
+        SELECT 'current' AS id, started_at, NULL::timestamp AS ended_at
+        FROM guild_status_settings
+        WHERE id = 1 AND mode = 'pvp' AND started_at IS NOT NULL
+        UNION ALL
+        SELECT id::text, started_at, ended_at
+        FROM guild_period_history
+        WHERE mode = 'pvp'
+      ),
+      days AS (
+        SELECT
+          DATE_TRUNC('day', s.recorded_at) AS date,
+          SUM(s.end_kills - s.start_kills) AS "totalKills",
+          COUNT(DISTINCT s.user_id)::int AS "playersCount",
+          (ARRAY_AGG(w.id ORDER BY s.recorded_at DESC))[1] AS "warId"
+        FROM killcount_stats s
+        LEFT JOIN wars w
+          ON s.recorded_at >= w.started_at
+          AND (w.ended_at IS NULL OR s.recorded_at < w.ended_at)
+        GROUP BY DATE_TRUNC('day', s.recorded_at)
+      )
+      SELECT
+        days.*,
+        top.user_id AS "topUserId",
+        top.username AS "topUserName",
+        top.kills AS "topKills"
+      FROM days
+      LEFT JOIN LATERAL (
+        SELECT
+          s.user_id,
+          u.username,
+          (s.end_kills - s.start_kills) AS kills
+        FROM killcount_stats s
+        JOIN "user" u ON u.id = s.user_id
+        WHERE DATE_TRUNC('day', s.recorded_at) = days.date
+        ORDER BY kills DESC, (s.end_honor - s.start_honor) DESC
+        LIMIT 1
+      ) top ON true
+      ORDER BY days.date DESC
+    `;
 
     return currentData;
   } catch (error) {
@@ -33,6 +95,7 @@ export const getKillCountByDate = async (date: string) => {
     SELECT 
       u.username AS "userName",
 			u.id AS "userId",
+			u.class AS "role",
 			s.id,
       s.start_honor AS "startHonor",
       s.end_honor AS "endHonor",

@@ -1,27 +1,55 @@
 import Image from "next/image";
+import type { KillcountStats } from "@/actions/getUserKillcountStats";
+import { getKillcountRank } from "@/shared/config/killcountRanks";
+import { cn } from "@/shared/lib";
 
-const TARGET_USERNAME = "Mnrqw";
-const KILLS = 1380;
-const NEXT_RANK_KILLS = 2000;
-const AVG_KILLS = 67;
-const AVG_HONOR = 812;
+export default function RankProgress({
+  stats,
+  className,
+}: {
+  stats: KillcountStats | null;
+  className?: string;
+}) {
+  if (!stats) return null;
 
-export default function RankProgress({ username }: { username: string }) {
-  if (username !== TARGET_USERNAME) return null;
+  const { current, next, leaderboardPlace } = getKillcountRank(
+    stats.kills,
+    stats.place,
+  );
 
-  const percent = Math.min(100, (KILLS / NEXT_RANK_KILLS) * 100);
+  const percent = next
+    ? Math.min(
+        100,
+        ((stats.kills - current.minKills) /
+          (next.minKills - current.minKills)) *
+          100,
+      )
+    : 100;
+
+  const kills = stats.kills.toLocaleString("ru-RU");
 
   return (
-    <div className="mt-3 w-fit max-w-[340px] space-y-2.5 rounded-lg border p-3">
+    <div
+      className={cn(
+        "w-fit max-w-[340px] space-y-2.5 rounded-lg border bg-card p-3",
+        className,
+      )}
+    >
       <div className="flex items-center gap-2.5">
-        <Image
-          src="/images/ranks/140px-SeasonalRank4-3.png"
-          alt="Ранг 4-3"
-          width={64}
-          height={64}
-          className="shrink-0"
-        />
-        <span className="text-base font-semibold">Ранг 4-3</span>
+        <div className="relative shrink-0">
+          <Image src={current.icon} alt={current.name} width={64} height={64} />
+          {leaderboardPlace && (
+            <span className="absolute left-1/2 top-[83%] -translate-x-1/2 -translate-y-1/2 text-[11px] font-bold leading-none text-white [text-shadow:0_0_3px_black,0_0_2px_black]">
+              {leaderboardPlace}
+            </span>
+          )}
+        </div>
+        <div>
+          <div className="text-base font-semibold">{current.name}</div>
+          <div className="text-xs text-muted-foreground">
+            {stats.isCurrentWar ? "Текущий вар" : "Итог прошлого вара"}
+          </div>
+        </div>
       </div>
       <div className="space-y-1">
         <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
@@ -31,18 +59,26 @@ export default function RankProgress({ username }: { username: string }) {
           />
         </div>
         <div className="text-xs text-muted-foreground">
-          {KILLS.toLocaleString("ru-RU")} /{" "}
-          {NEXT_RANK_KILLS.toLocaleString("ru-RU")} килов до следующего ранга
+          {next ? (
+            <>
+              {kills} / {next.minKills.toLocaleString("ru-RU")} килов до ранга «
+              {next.name}»
+            </>
+          ) : (
+            <>
+              {kills} килов — {stats.place} место в гильдии
+            </>
+          )}
         </div>
       </div>
       <div className="flex gap-4 text-xs">
         <div>
           <div className="text-muted-foreground">Ср. киллов</div>
-          <div className="font-semibold">{AVG_KILLS}</div>
+          <div className="font-semibold">{stats.avgKills}</div>
         </div>
         <div>
           <div className="text-muted-foreground">Ср. хонор</div>
-          <div className="font-semibold">{AVG_HONOR}</div>
+          <div className="font-semibold">{stats.avgHonor}</div>
         </div>
       </div>
     </div>

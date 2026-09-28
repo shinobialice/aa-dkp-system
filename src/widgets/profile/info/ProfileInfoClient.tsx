@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import type { PrimeStreak } from "@/actions/getUserPrimeStreak";
+import type { KillcountStats } from "@/actions/getUserKillcountStats";
 import type { UserArchetype } from "@/actions/getUserArchetype";
 import SealIcon from "@/widgets/profile/seals/SealIcon";
 import {
@@ -43,6 +44,7 @@ export default function ProfileInfoClient({
   activity,
   salary,
   primeStreak,
+  killcountStats,
 }: {
   user: any;
   setUser: (user: any) => void;
@@ -84,6 +86,7 @@ export default function ProfileInfoClient({
   };
   salary: number | null;
   primeStreak: PrimeStreak;
+  killcountStats: KillcountStats | null;
 }) {
   const [tags, setTags] = useState(initialTags);
   const [editOpen, setEditOpen] = useState(false);
@@ -126,6 +129,7 @@ export default function ProfileInfoClient({
         tags={tags}
         usernameHistory={usernameHistory}
         primeStreak={primeStreak}
+        killcountStats={killcountStats}
       />
       {canEditProfile && (
         <ProfileEditDialog

@@ -8,6 +8,7 @@ import { Button } from "@/shared/ui";
 import { Popover, PopoverTrigger, PopoverContent } from "@/shared/ui";
 import { uploadAvatar } from "@/actions/uploadAvatar";
 import type { PrimeStreak } from "@/actions/getUserPrimeStreak";
+import type { KillcountStats } from "@/actions/getUserKillcountStats";
 import RankProgress from "./RankProgress";
 import AnniversaryCelebration from "./AnniversaryCelebration";
 import DragonFlyby from "./DragonFlyby";
@@ -35,6 +36,7 @@ export default function ProfileHeader({
   onEdit,
   isOwnProfile,
   primeStreak,
+  killcountStats,
 }: {
   user: any;
   tags: { id: number; tag: string }[];
@@ -48,6 +50,7 @@ export default function ProfileHeader({
   onEdit: () => void;
   isOwnProfile: boolean;
   primeStreak: PrimeStreak;
+  killcountStats: KillcountStats | null;
 }) {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(
     user.avatar_url ?? null,
@@ -82,9 +85,9 @@ export default function ProfileHeader({
       <DragonFlyby username={user.username} />
       <div className="h-16 w-full bg-gradient-to-br from-primary/25 via-chart-1/15 to-transparent md:h-20" />
 
-      <div className="px-6 pb-6">
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="min-w-0 flex-1">
+      <div className="px-6 pb-4">
+        <div className="flex flex-wrap items-start gap-4 lg:flex-nowrap">
+          <div className="min-w-0">
             <div className="flex items-end justify-between gap-4 -mt-12 md:-mt-14">
               <div className="relative h-24 w-24 shrink-0 md:h-28 md:w-28">
                 <Avatar className="h-24 w-24 border-4 border-card shadow-sm md:h-28 md:w-28">
@@ -165,55 +168,54 @@ export default function ProfileHeader({
                 <PrimeStreakBadge {...primeStreak} />
               </div>
 
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex flex-wrap gap-2">
-                  {user.active && (
-                    <Badge
-                      className="text-background"
-                      style={{ backgroundColor: badgeColors["Активен"] }}
-                    >
-                      Активен
-                    </Badge>
-                  )}
-                  {user.is_eligible_for_salary && (
-                    <Badge
-                      className="text-background"
-                      style={{
-                        backgroundColor: badgeColors["Получает зарплату"],
-                      }}
-                    >
-                      Получает зарплату
-                    </Badge>
-                  )}
-                  {tags?.map((tag) => (
-                    <Badge
-                      key={tag.id}
-                      className="text-background"
-                      style={{
-                        backgroundColor:
-                          badgeColors[tag.tag] || "rgb(59, 130, 246)",
-                      }}
-                    >
-                      {tag.tag}
-                    </Badge>
-                  ))}
-                </div>
-                {canEditProfile && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="shrink-0 cursor-pointer"
-                    onClick={onEdit}
+              <div className="flex flex-wrap gap-2">
+                {user.active && (
+                  <Badge
+                    className="text-background"
+                    style={{ backgroundColor: badgeColors["Активен"] }}
                   >
-                    <Pencil />
-                    Редактировать
-                  </Button>
+                    Активен
+                  </Badge>
                 )}
+                {user.is_eligible_for_salary && (
+                  <Badge
+                    className="text-background"
+                    style={{
+                      backgroundColor: badgeColors["Получает зарплату"],
+                    }}
+                  >
+                    Получает зарплату
+                  </Badge>
+                )}
+                {tags?.map((tag) => (
+                  <Badge
+                    key={tag.id}
+                    className="text-background"
+                    style={{
+                      backgroundColor:
+                        badgeColors[tag.tag] || "rgb(59, 130, 246)",
+                    }}
+                  >
+                    {tag.tag}
+                  </Badge>
+                ))}
               </div>
             </div>
           </div>
 
-          <RankProgress username={user.username} />
+          <RankProgress className="shrink-0 lg:-mt-10" stats={killcountStats} />
+
+          {canEditProfile && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="ml-auto shrink-0 self-end cursor-pointer"
+              onClick={onEdit}
+            >
+              <Pencil />
+              Редактировать
+            </Button>
+          )}
         </div>
       </div>
     </div>

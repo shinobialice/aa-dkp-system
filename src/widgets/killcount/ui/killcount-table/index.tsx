@@ -1,8 +1,10 @@
 "use client";
-import { Button, DataTable, Input, Typography } from "@/shared/ui";
+import { Badge, Button, DataTable, Input, Typography } from "@/shared/ui";
 import { DB_GetKillCountDto, KillCount } from "@/widgets/killcount/types";
+import { classColors, classIcons } from "@/widgets/MembersTable/classStyles";
 import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { Edit3Icon, PlusIcon } from "lucide-react";
+import Link from "next/link";
 import { FC, useEffect, useMemo, useState } from "react";
 import { KillCountEditModal } from "../killcount-edit-modal";
 import { updateKillCountById } from "../../api/history";
@@ -86,14 +88,44 @@ export const KillCountTable: FC<KillCountTableProps> = ({
 
         const comment = info.row.original?.comment;
 
-        if (!comment) {
-          return userName;
-        }
+        const userId = info.row.original?.userId;
 
-        return `${userName} (${comment})`;
+        return (
+          <>
+            {userId ? (
+              <Link href={`/profile/${userId}`} className="underline">
+                {userName}
+              </Link>
+            ) : (
+              userName
+            )}
+            {comment && ` (${comment})`}
+          </>
+        );
       },
     }),
-    columnHelper.accessor("playerClass", { header: "Класс" }),
+    columnHelper.accessor("playerClass", {
+      header: "Класс",
+      cell: (info) => {
+        const playerClass = info.getValue();
+
+        const role = info.row.original?.role;
+
+        if (!role || !classColors[role]) {
+          return playerClass;
+        }
+
+        return (
+          <Badge
+            className="text-background gap-1"
+            style={{ backgroundColor: classColors[role] }}
+          >
+            {classIcons[role]}
+            {playerClass}
+          </Badge>
+        );
+      },
+    }),
     columnHelper.accessor("startHonor", { header: "Хонора в начале" }),
     columnHelper.accessor("endHonor", { header: "Хонора в конце" }),
     columnHelper.accessor("startKills", { header: "Килов в начале" }),
@@ -161,7 +193,11 @@ export const KillCountTable: FC<KillCountTableProps> = ({
         )}
       </div>
 
-      <DataTable columns={columns} data={filteredData} />
+      <DataTable
+        columns={columns}
+        data={filteredData}
+        viewportClassName="max-h-[calc(100dvh-18rem)]"
+      />
       <Typography>
         Всего:{" "}
         {tableData.reduce(

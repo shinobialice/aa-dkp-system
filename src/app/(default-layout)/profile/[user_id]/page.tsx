@@ -7,6 +7,7 @@ import getUserSkillBuild from "@/actions/getUserSkillBuild";
 import getUserEquipment from "@/actions/getUserEquipment";
 import { getUserMonthlyAttendance } from "@/actions/getUserMonthlyAttendance";
 import { getUserPrimeStreak } from "@/actions/getUserPrimeStreak";
+import { getUserKillcountStats } from "@/actions/getUserKillcountStats";
 import getUserNotes from "@/actions/getUserNotes";
 import { getUserCurrentMonthSalary } from "@/actions/getUserCurrentMonthSalary";
 import { getSessionUserId } from "@/actions/getSessionUserId";
@@ -41,6 +42,7 @@ export default async function Page(p: {
     archetype,
     skillBuild,
     equipment,
+    killcountStats,
   ] = await Promise.all([
     getUser(userId),
     getUserTags(userId),
@@ -53,6 +55,7 @@ export default async function Page(p: {
     getUserArchetype(userId),
     getUserSkillBuild(userId),
     getUserEquipment(userId),
+    getUserKillcountStats(userId),
   ]);
 
   const sessionToken = (await cookies()).get("session_token")?.value ?? "";
@@ -121,6 +124,7 @@ export default async function Page(p: {
       activity={activity}
       salary={salary}
       primeStreak={primeStreak}
+      killcountStats={killcountStats}
     />
   );
 }

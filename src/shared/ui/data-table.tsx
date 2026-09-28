@@ -25,6 +25,7 @@ import { ScrollArea } from "./scroll-area";
 
 interface DataTableProps<TData> {
   tableClassName?: string;
+  viewportClassName?: string;
   columns: ColumnDef<TData, any>[];
   data: TData[];
   onSortingChange?: OnChangeFn<SortingState>;
@@ -35,6 +36,7 @@ export const DataTable = <TData,>({
   columns,
   data,
   tableClassName,
+  viewportClassName,
   onSortingChange,
   globalFilter,
 }: DataTableProps<TData>) => {
@@ -48,9 +50,12 @@ export const DataTable = <TData,>({
   });
 
   return (
-    <ScrollArea className="w-full min-h-32 rounded-md border">
+    <ScrollArea
+      className="w-full min-h-32 rounded-md border"
+      viewportClassName={viewportClassName}
+    >
       <Table className={tableClassName}>
-        <TableHeader className="sticky top-0 z-10 bg-background">
+        <TableHeader className="sticky top-0 z-10 bg-background shadow-[0_1px_0_var(--color-border)]">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (

@@ -8,7 +8,8 @@ export const getKillCountCurrent = async () => {
     const currentData = await sql<KillCount[]>`
 			SELECT 
 			u.username AS "userName",
-			u.id AS "userId", 
+			u.id AS "userId",
+			u.class AS "role",
 			s.id AS "id",
 			s.start_honor AS "startHonor", 
 			s.end_honor AS "endHonor", 

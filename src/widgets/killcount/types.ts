@@ -18,6 +18,8 @@ export interface KillCounterDto {
 export interface KillCount {
   playerClass: string;
   userName: string;
+  userId?: Id;
+  role?: string | null;
   startHonor: number;
   endHonor: number;
   startKills: number;
@@ -28,6 +30,7 @@ export interface KillCount {
 
 export interface DB_GetKillCountDto {
   userName: string;
+  role?: string | null;
   id: Id;
   userId?: string;
   eventId: number;

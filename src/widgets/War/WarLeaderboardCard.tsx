@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { LucideIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, ScrollArea } from "@/shared/ui";
 
@@ -5,6 +6,8 @@ export type LeaderboardRow = {
   rank: number;
   name: string;
   value: string;
+  icon?: string;
+  iconTitle?: string;
 };
 
 // Один общий компонент карточки-топа, переиспользуется для нескольких топов
@@ -48,6 +51,16 @@ export default function WarLeaderboardCard({
                     <span className="w-4 shrink-0 text-muted-foreground">
                       {row.rank}
                     </span>
+                    {row.icon && (
+                      <Image
+                        src={row.icon}
+                        alt={row.iconTitle ?? ""}
+                        title={row.iconTitle}
+                        width={24}
+                        height={24}
+                        className="shrink-0"
+                      />
+                    )}
                     <span className="truncate">{row.name}</span>
                   </span>
                   <span className="shrink-0 font-medium tabular-nums">

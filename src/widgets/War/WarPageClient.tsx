@@ -11,6 +11,7 @@ import {
   TabsTrigger,
 } from "@/shared/ui";
 import { MODE_LABEL, MODE_ICON } from "@/shared/config/guildStatus";
+import { getKillcountRank } from "@/shared/config/killcountRanks";
 import type { GuildPvpStats, GuildStatus } from "@/actions/guildStatusSettings";
 import type {
   PeriodAttendanceResult,
@@ -107,11 +108,17 @@ export default function WarPageClient({
   const isWar = mode === "pvp";
 
   const topByKillsRows: LeaderboardRow[] = guildPvpStats.topByKills.map(
-    (item, index) => ({
-      name: item.userName,
-      rank: index + 1,
-      value: item.totalKills.toString(),
-    }),
+    (item, index) => {
+      const { current } = getKillcountRank(Number(item.totalKills), index + 1);
+
+      return {
+        name: item.userName,
+        rank: index + 1,
+        value: item.totalKills.toString(),
+        icon: current.icon,
+        iconTitle: current.name,
+      };
+    },
   );
   const topByHonorRows: LeaderboardRow[] = guildPvpStats.topByHonor.map(
     (item, index) => ({

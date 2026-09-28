@@ -2,6 +2,7 @@
 import { useState } from "react";
 import getUserInventory from "@/actions/getUserInventory";
 import type { PrimeStreak } from "@/actions/getUserPrimeStreak";
+import type { KillcountStats } from "@/actions/getUserKillcountStats";
 import type { UserArchetype } from "@/actions/getUserArchetype";
 import type { UserSkillBuild } from "@/actions/getUserSkillBuild";
 import type { UserEquipment } from "@/actions/getUserEquipment";
@@ -21,6 +22,7 @@ export default function ProfilePageWrapper({
   activity,
   salary,
   primeStreak,
+  killcountStats,
   isAdmin,
   canEditProfile,
   canEditNickname,
@@ -58,6 +60,7 @@ export default function ProfilePageWrapper({
   };
   salary: number | null;
   primeStreak: PrimeStreak;
+  killcountStats: KillcountStats | null;
   isAdmin: boolean;
   canEditProfile: boolean;
   canEditNickname: boolean;
@@ -111,6 +114,7 @@ export default function ProfilePageWrapper({
         activity={activity}
         salary={salary}
         primeStreak={primeStreak}
+        killcountStats={killcountStats}
       />
       <ProfileTabs
         user={user}
