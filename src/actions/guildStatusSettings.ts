@@ -113,7 +113,7 @@ export async function updateGuildStatus(mode: GuildMode) {
 
   try {
     const [current] = await sql<any[]>`
-      SELECT mode, server, faction, opponent_guild, started_at
+      SELECT mode, server, faction, opponent_guild, opponent_ended_at, started_at
       FROM guild_status_settings WHERE id = 1
     `;
 
@@ -128,14 +128,24 @@ export async function updateGuildStatus(mode: GuildMode) {
       const nowMoscow = getMoscowISOString(new Date());
       const userId = await getSessionUserId();
       try {
-        await sql`
-          INSERT INTO guild_period_history
-            (mode, server, faction, opponent_guild, started_at, ended_at, ended_by_user_id)
-          VALUES (
-            ${current.mode}, ${current.server}, ${current.faction},
-            ${current.opponent_guild}, ${current.started_at}, ${nowMoscow}, ${userId}
-          )
-        `;
+        await sql.begin(async (tx) => {
+          const [history] = await tx<any[]>`
+            INSERT INTO guild_period_history
+              (mode, server, faction, opponent_guild, opponent_ended_at,
+               started_at, ended_at, ended_by_user_id)
+            VALUES (
+              ${current.mode}, ${current.server}, ${current.faction},
+              ${current.opponent_guild}, ${current.opponent_ended_at},
+              ${current.started_at}, ${nowMoscow}, ${userId}
+            )
+            RETURNING id
+          `;
+          await tx`
+            UPDATE guild_war_opponents
+            SET period_history_id = ${history.id}
+            WHERE period_history_id IS NULL
+          `;
+        });
       } catch (historyError) {
         // Не блокируем саму смену режима, если запись истории не удалась
         // (как с user_username_history в editUser.ts).
@@ -143,11 +153,13 @@ export async function updateGuildStatus(mode: GuildMode) {
       }
 
       await sql`
-        INSERT INTO guild_status_settings (id, mode, opponent_guild, started_at, updated_at)
-        VALUES (1, ${mode}, NULL, ${nowMoscow}, now())
+        INSERT INTO guild_status_settings
+          (id, mode, opponent_guild, opponent_ended_at, started_at, updated_at)
+        VALUES (1, ${mode}, NULL, NULL, ${nowMoscow}, now())
         ON CONFLICT (id) DO UPDATE SET
           mode = EXCLUDED.mode,
           opponent_guild = EXCLUDED.opponent_guild,
+          opponent_ended_at = EXCLUDED.opponent_ended_at,
           started_at = EXCLUDED.started_at,
           updated_at = EXCLUDED.updated_at
       `;
@@ -170,22 +182,122 @@ export async function updateGuildStatus(mode: GuildMode) {
   revalidatePath("/", "layout");
 }
 
-export async function updateWarOpponent(opponentGuild: string | null) {
+export type WarOpponent = {
+  id: number;
+  name: string;
+  startedAt: string;
+  endedAt: string | null;
+};
+
+export type WarOpponentsState = {
+  primary: { name: string | null; endedAt: string | null };
+  opponents: WarOpponent[];
+};
+
+const EMPTY_WAR_OPPONENTS: WarOpponentsState = {
+  primary: { name: null, endedAt: null },
+  opponents: [],
+};
+
+async function selectWarOpponentsState(): Promise<WarOpponentsState> {
+  const [[status], rows] = await Promise.all([
+    sql<any[]>`
+      SELECT opponent_guild, opponent_ended_at
+      FROM guild_status_settings WHERE id = 1
+    `,
+    sql<any[]>`
+      SELECT id, name, started_at, ended_at
+      FROM guild_war_opponents
+      WHERE period_history_id IS NULL
+      ORDER BY started_at, id
+    `,
+  ]);
+  return {
+    primary: {
+      name: status?.opponent_guild ?? null,
+      endedAt: toMoscowIso(status?.opponent_ended_at ?? null),
+    },
+    opponents: rows.map((r) => ({
+      id: r.id,
+      name: r.name,
+      startedAt: toMoscowIso(r.started_at)!,
+      endedAt: toMoscowIso(r.ended_at),
+    })),
+  };
+}
+
+export async function getCurrentWarOpponents(): Promise<WarOpponentsState> {
+  try {
+    return await selectWarOpponentsState();
+  } catch (error) {
+    console.error("Ошибка при получении противников вара:", error);
+    return EMPTY_WAR_OPPONENTS;
+  }
+}
+
+export type WarOpponentDraft = {
+  id: number | null;
+  name: string;
+  ended: boolean;
+};
+
+export async function saveWarOpponents(
+  primary: { name: string | null; ended: boolean },
+  opponents: WarOpponentDraft[],
+): Promise<WarOpponentsState> {
   await ensurePrivilieges(["Администратор"]);
-  const trimmed = opponentGuild?.trim() || null;
+  const primaryName = primary.name?.trim() || null;
+  const drafts = opponents.map((o) => ({ ...o, name: o.name.trim() }));
+  if (drafts.some((o) => !o.name)) {
+    throw new Error("Укажите название гильдии-противника");
+  }
+  const nowMoscow = getMoscowISOString(new Date());
+
+  const [status] = await sql<any[]>`
+    SELECT mode FROM guild_status_settings WHERE id = 1
+  `;
+  if (status?.mode !== "pvp") throw new Error("Вар сейчас не идёт");
 
   try {
-    await sql<any[]>`
-      UPDATE guild_status_settings
-      SET opponent_guild = ${trimmed}, updated_at = now()
-      WHERE id = 1
-    `;
+    await sql.begin(async (tx) => {
+      await tx`
+        UPDATE guild_status_settings
+        SET
+          opponent_guild = ${primaryName},
+          opponent_ended_at = CASE
+            WHEN ${primary.ended}::boolean
+            THEN COALESCE(opponent_ended_at, ${nowMoscow}::timestamp)
+          END,
+          updated_at = now()
+        WHERE id = 1
+      `;
+      for (const draft of drafts) {
+        if (draft.id === null) {
+          await tx`
+            INSERT INTO guild_war_opponents (name, started_at)
+            VALUES (${draft.name}, ${nowMoscow})
+          `;
+        } else {
+          await tx`
+            UPDATE guild_war_opponents
+            SET
+              name = ${draft.name},
+              ended_at = CASE
+                WHEN ${draft.ended}::boolean
+                THEN COALESCE(ended_at, ${nowMoscow}::timestamp)
+              END
+            WHERE id = ${draft.id} AND period_history_id IS NULL
+          `;
+        }
+      }
+    });
   } catch (error) {
-    console.error("Ошибка при сохранении названия гильдии-противника:", error);
-    throw new Error("Не удалось сохранить название гильдии-противника");
+    console.error("Ошибка при сохранении противников вара:", error);
+    throw new Error("Не удалось сохранить противников");
   }
 
   revalidatePath("/war");
+  return selectWarOpponentsState();
 }
 
 export type WarPeriodHistoryRow = {
@@ -194,6 +306,8 @@ export type WarPeriodHistoryRow = {
   server: GuildServer;
   faction: GuildFaction;
   opponentGuild: string | null;
+  opponentEndedAt: string | null;
+  extraOpponents: { name: string; startedAt: string; endedAt: string | null }[];
   startedAt: string;
   endedAt: string;
   endedByUserId: number | null;
@@ -208,9 +322,26 @@ export async function getWarPeriodHistory(
       SELECT count(*)::int AS count FROM guild_period_history
     `;
     const rows = await sql<any[]>`
-      SELECT id, mode, server, faction, opponent_guild, started_at, ended_at, ended_by_user_id
-      FROM guild_period_history
-      ORDER BY ended_at DESC
+      SELECT
+        h.id, h.mode, h.server, h.faction, h.opponent_guild, h.opponent_ended_at,
+        h.started_at, h.ended_at, h.ended_by_user_id,
+        COALESCE(
+          (
+            SELECT json_agg(
+              json_build_object(
+                'name', o.name,
+                'startedAt', o.started_at,
+                'endedAt', o.ended_at
+              )
+              ORDER BY o.started_at, o.id
+            )
+            FROM guild_war_opponents o
+            WHERE o.period_history_id = h.id
+          ),
+          '[]'::json
+        ) AS extra_opponents
+      FROM guild_period_history h
+      ORDER BY h.ended_at DESC
       LIMIT ${pageSize} OFFSET ${(page - 1) * pageSize}
     `;
     return {
@@ -220,6 +351,18 @@ export async function getWarPeriodHistory(
         server: r.server as GuildServer,
         faction: r.faction as GuildFaction,
         opponentGuild: r.opponent_guild ?? null,
+        opponentEndedAt: toMoscowIso(r.opponent_ended_at ?? null),
+        extraOpponents: (
+          r.extra_opponents as {
+            name: string;
+            startedAt: string;
+            endedAt: string | null;
+          }[]
+        ).map((o) => ({
+          name: o.name,
+          startedAt: toMoscowIso(o.startedAt)!,
+          endedAt: toMoscowIso(o.endedAt),
+        })),
         startedAt: toMoscowIso(r.started_at)!,
         endedAt: toMoscowIso(r.ended_at)!,
         endedByUserId: r.ended_by_user_id ?? null,

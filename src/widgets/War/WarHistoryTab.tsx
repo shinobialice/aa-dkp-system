@@ -109,37 +109,43 @@ export default function WarHistoryTab() {
 
   return (
     <div className="space-y-2">
-      {rows.map((row) => (
-        <button
-          key={row.id}
-          type="button"
-          onClick={() => setSelected(row)}
-          className="flex w-full items-center gap-3 rounded-lg border p-3 text-left hover:bg-muted cursor-pointer"
-        >
-          <Image
-            src={MODE_ICON[row.mode]}
-            alt={MODE_LABEL[row.mode]}
-            width={28}
-            height={28}
-          />
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium">
-              {MODE_LABEL[row.mode]}
-              {row.opponentGuild && (
-                <span className="text-muted-foreground">
-                  {" "}
-                  против {row.opponentGuild}
-                </span>
-              )}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {row.server} · {FACTION_LABEL[row.faction]} ·{" "}
-              {formatDT(row.startedAt)} – {formatDT(row.endedAt)}
-            </p>
-          </div>
-          <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
-        </button>
-      ))}
+      {rows.map((row) => {
+        const opponents = [
+          row.opponentGuild,
+          ...row.extraOpponents.map((o) => o.name),
+        ].filter(Boolean);
+        return (
+          <button
+            key={row.id}
+            type="button"
+            onClick={() => setSelected(row)}
+            className="flex w-full items-center gap-3 rounded-lg border p-3 text-left hover:bg-muted cursor-pointer"
+          >
+            <Image
+              src={MODE_ICON[row.mode]}
+              alt={MODE_LABEL[row.mode]}
+              width={28}
+              height={28}
+            />
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-medium">
+                {MODE_LABEL[row.mode]}
+                {opponents.length > 0 && (
+                  <span className="text-muted-foreground">
+                    {" "}
+                    против {opponents.join(", ")}
+                  </span>
+                )}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {row.server} · {FACTION_LABEL[row.faction]} ·{" "}
+                {formatDT(row.startedAt)} – {formatDT(row.endedAt)}
+              </p>
+            </div>
+            <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+          </button>
+        );
+      })}
 
       {maxPage > 1 && (
         <Pagination className="mt-3">
@@ -181,7 +187,9 @@ export default function WarHistoryTab() {
                   setPage((p) => Math.min(maxPage, p + 1));
                 }}
                 aria-disabled={page >= maxPage}
-                className={page >= maxPage ? "pointer-events-none opacity-50" : ""}
+                className={
+                  page >= maxPage ? "pointer-events-none opacity-50" : ""
+                }
               />
             </PaginationItem>
           </PaginationContent>

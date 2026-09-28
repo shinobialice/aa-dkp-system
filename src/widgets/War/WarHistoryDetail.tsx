@@ -135,6 +135,20 @@ export default function WarHistoryDetail({
   const startedAtMs = new Date(period.startedAt).getTime();
   const endedAtMs = new Date(period.endedAt).getTime();
 
+  const opponents = [
+    ...(period.opponentGuild
+      ? [
+          {
+            name: period.opponentGuild,
+            startedAt: period.startedAt,
+            endedAt: period.opponentEndedAt,
+            isPrimary: true,
+          },
+        ]
+      : []),
+    ...period.extraOpponents.map((o) => ({ ...o, isPrimary: false })),
+  ];
+
   return (
     <div className="space-y-6">
       <Button
@@ -155,11 +169,33 @@ export default function WarHistoryDetail({
           height={90}
         />
         <h2 className="text-xl font-bold">{MODE_LABEL[period.mode]}</h2>
-        {period.opponentGuild && (
-          <p>
-            против <strong className="text-destructive">{period.opponentGuild}</strong>
+        {opponents.map((opponent) => (
+          <p key={`${opponent.name}-${opponent.startedAt}`}>
+            против{" "}
+            <strong
+              className={
+                opponent.endedAt ? "text-muted-foreground" : "text-destructive"
+              }
+            >
+              {opponent.name}
+            </strong>
+            {(opponent.endedAt || !opponent.isPrimary) && (
+              <span className="text-sm text-muted-foreground">
+                {" "}
+                {opponent.endedAt
+                  ? `слились · с ${formatDT(opponent.startedAt)} по ${formatDT(opponent.endedAt)}`
+                  : `с ${formatDT(opponent.startedAt)}`}{" "}
+                ·{" "}
+                {formatDuration(
+                  new Date(opponent.startedAt).getTime(),
+                  opponent.endedAt
+                    ? new Date(opponent.endedAt).getTime()
+                    : endedAtMs,
+                )}
+              </span>
+            )}
           </p>
-        )}
+        ))}
         <p className="text-sm text-muted-foreground">
           {period.server} · {FACTION_LABEL[period.faction]}
         </p>
@@ -191,7 +227,9 @@ export default function WarHistoryDetail({
                 <p className="text-2xl font-bold tabular-nums">
                   {economy?.finance.itemsSoldCount ?? 0}
                 </p>
-                <p className="text-sm text-muted-foreground">Куплено предметов</p>
+                <p className="text-sm text-muted-foreground">
+                  Куплено предметов
+                </p>
               </Card>
             </div>
           )}

@@ -15,19 +15,33 @@ export const getKillCountWars = async () => {
     return await sql<KillCountWar[]>`
       SELECT
         'current' AS id,
-        opponent_guild AS "opponentGuild",
+        NULLIF(
+          concat_ws(', ', opponent_guild, (
+            SELECT string_agg(o.name, ', ' ORDER BY o.started_at, o.id)
+            FROM guild_war_opponents o
+            WHERE o.period_history_id IS NULL
+          )),
+          ''
+        ) AS "opponentGuild",
         started_at AS "startedAt",
         NULL::timestamp AS "endedAt"
       FROM guild_status_settings
       WHERE id = 1 AND mode = 'pvp' AND started_at IS NOT NULL
       UNION ALL
       SELECT
-        id::text,
-        opponent_guild,
-        started_at,
-        ended_at
-      FROM guild_period_history
-      WHERE mode = 'pvp'
+        h.id::text,
+        NULLIF(
+          concat_ws(', ', h.opponent_guild, (
+            SELECT string_agg(o.name, ', ' ORDER BY o.started_at, o.id)
+            FROM guild_war_opponents o
+            WHERE o.period_history_id = h.id
+          )),
+          ''
+        ),
+        h.started_at,
+        h.ended_at
+      FROM guild_period_history h
+      WHERE h.mode = 'pvp'
       ORDER BY "startedAt" DESC
     `;
   } catch (error) {

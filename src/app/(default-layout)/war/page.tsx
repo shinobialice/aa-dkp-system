@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { hasTag } from "@/actions/hasTag";
 import {
+  getCurrentWarOpponents,
   getGuildStatus,
   getStatsForPeriod,
 } from "@/actions/guildStatusSettings";
@@ -21,10 +22,12 @@ export default async function WarPage() {
   const status = await getGuildStatus();
   const periodStart = status.startedAt ?? new Date(0).toISOString();
 
-  const [initialAttendance, initialMembership] = await Promise.all([
-    getPeriodAttendanceTop(periodStart, null, status.mode),
-    getPeriodMembershipChanges(periodStart, null),
-  ]);
+  const [initialAttendance, initialMembership, initialWarOpponents] =
+    await Promise.all([
+      getPeriodAttendanceTop(periodStart, null, status.mode),
+      getPeriodMembershipChanges(periodStart, null),
+      getCurrentWarOpponents(),
+    ]);
 
   const stats = await getStatsForPeriod(periodStart);
 
@@ -50,6 +53,7 @@ export default async function WarPage() {
     <WarPageClient
       isAdmin={isAdmin}
       initialStatus={status}
+      initialWarOpponents={initialWarOpponents}
       initialAttendance={initialAttendance}
       initialMembership={initialMembership}
       initialEconomy={initialEconomy}

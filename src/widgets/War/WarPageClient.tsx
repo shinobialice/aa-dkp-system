@@ -12,14 +12,18 @@ import {
 } from "@/shared/ui";
 import { MODE_LABEL, MODE_ICON } from "@/shared/config/guildStatus";
 import { getKillcountRank } from "@/shared/config/killcountRanks";
-import type { GuildPvpStats, GuildStatus } from "@/actions/guildStatusSettings";
+import type {
+  GuildPvpStats,
+  GuildStatus,
+  WarOpponentsState,
+} from "@/actions/guildStatusSettings";
 import type {
   PeriodAttendanceResult,
   PeriodMembershipChanges,
   WarEconomySnapshot,
 } from "@/actions/warActions";
-import WarOpponentEditor from "./WarOpponentEditor";
-import WarLiveDuration from "./WarLiveDuration";
+import WarOpponents from "./WarOpponents";
+import WarPeriodTimer from "./WarPeriodTimer";
 import WarLeaderboardCard, { type LeaderboardRow } from "./WarLeaderboardCard";
 import WarDropsCard from "./WarDropsCard";
 import WarTopSalesCard from "./WarTopSalesCard";
@@ -55,15 +59,6 @@ function formatNum(n: number): string {
   return n.toLocaleString("ru-RU");
 }
 
-function formatStartDate(iso: string): string {
-  return new Intl.DateTimeFormat("ru-RU", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "Europe/Moscow",
-  }).format(new Date(iso));
-}
-
 function MockTile({ value, label }: { value: string; label: string }) {
   return (
     <Card className="p-4">
@@ -92,6 +87,7 @@ function RealTile({ value, label }: { value: string | number; label: string }) {
 export default function WarPageClient({
   isAdmin,
   initialStatus,
+  initialWarOpponents,
   initialAttendance,
   initialMembership,
   initialEconomy,
@@ -99,12 +95,13 @@ export default function WarPageClient({
 }: {
   isAdmin: boolean;
   initialStatus: GuildStatus;
+  initialWarOpponents: WarOpponentsState;
   initialAttendance: PeriodAttendanceResult;
   initialMembership: PeriodMembershipChanges;
   initialEconomy: WarEconomySnapshot | null;
   guildPvpStats: GuildPvpStats;
 }) {
-  const { mode, startedAt, opponentGuild } = initialStatus;
+  const { mode, startedAt } = initialStatus;
   const isWar = mode === "pvp";
 
   const topByKillsRows: LeaderboardRow[] = guildPvpStats.topByKills.map(
@@ -163,23 +160,20 @@ export default function WarPageClient({
           width={110}
           height={110}
         />
-        <h1 className="text-2xl font-bold">{MODE_LABEL[mode]}</h1>
-        {isWar && (
-          <WarOpponentEditor
-            initialOpponent={opponentGuild}
+        {isWar ? (
+          <WarOpponents
+            title={MODE_LABEL[mode]}
+            initialState={initialWarOpponents}
+            warStartedAt={startedAt}
             isAdmin={isAdmin}
           />
-        )}
-        {startedAt && (
-          <div className="flex flex-col items-center gap-0.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              {isWar ? "Вар идёт" : "Фришка идёт"}
-            </span>
-            <WarLiveDuration startedAt={startedAt} />
-            <span className="text-xs text-muted-foreground">
-              с {formatStartDate(startedAt)}
-            </span>
-          </div>
+        ) : (
+          <>
+            <h1 className="text-2xl font-bold">{MODE_LABEL[mode]}</h1>
+            {startedAt && (
+              <WarPeriodTimer label="Фришка идёт" startedAt={startedAt} />
+            )}
+          </>
         )}
       </Card>
 
