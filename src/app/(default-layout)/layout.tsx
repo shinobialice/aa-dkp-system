@@ -11,6 +11,7 @@ import { HeartbeatTracker } from "@/widgets/sidebar/HeartbeatTracker";
 import { SessionGuard } from "@/widgets/sidebar/SessionGuard";
 import { GuildLocationBadge } from "@/widgets/sidebar/GuildLocationBadge";
 import { EventNotifications } from "@/widgets/EventNotifications/EventNotifications";
+import { AnniversaryBalloons } from "@/widgets/AnniversaryBalloons/AnniversaryBalloons";
 import { cookies } from "next/headers";
 
 export default async function DefaultLayout({
@@ -29,6 +30,7 @@ export default async function DefaultLayout({
       <HeartbeatTracker />
       <SessionGuard />
       <EventNotifications />
+      <AnniversaryBalloons />
       <div className="flex bg-background text-foreground w-full">
         <AppSidebar
           isAdmin={isAdmin}

@@ -210,6 +210,44 @@
   animation: anniversary-banner-in 0.4s ease-out;
 }
 
+@keyframes anniversary-balloons-in {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.anniversary-balloons {
+  animation: anniversary-balloons-in 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes anniversary-balloon-sway {
+  0%,
+  100% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(4deg);
+  }
+}
+
+.anniversary-balloon {
+  transform-box: fill-box;
+  transform-origin: 50% 0%;
+  animation: anniversary-balloon-sway 3.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anniversary-balloons,
+  .anniversary-balloon {
+    animation: none;
+  }
+}
+
 @keyframes dragon-flyby {
   0% {
     left: -15%;
