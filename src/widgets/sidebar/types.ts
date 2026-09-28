@@ -3,7 +3,7 @@ import { LucideIcon } from "lucide-react";
 interface BaseSidebarItem {
   title: string;
   isVisible: boolean;
-  icon: LucideIcon;
+  icon?: LucideIcon;
 }
 
 interface LinkSidebarItem extends BaseSidebarItem {

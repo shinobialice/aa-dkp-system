@@ -255,3 +255,79 @@ export async function updateGuildLocation(
   revalidatePath("/settings");
   revalidatePath("/", "layout");
 }
+
+const TOP_LIMIT = 20;
+
+export interface GuildPvpStats {
+  totalHonor: number;
+  totalKills: number;
+  topByHonor: {
+    userName: string;
+    userId: number;
+    totalHonor: number;
+  }[];
+  topByKills: {
+    userName: string;
+    userId: number;
+    totalKills: number;
+  }[];
+}
+
+export async function getStatsForPeriod(
+  startDate: string,
+): Promise<GuildPvpStats> {
+  try {
+    const [totalStats, topKills, topHonor] = await Promise.all([
+      // Суммарное количество килов за период
+      sql`
+      SELECT 
+        SUM(end_kills - start_kills) AS "totalKills",
+        SUM(end_honor - start_honor) AS "totalHonor"
+      FROM killcount_stats
+      WHERE recorded_at >= ${startDate}
+    `,
+
+      // Топ игроков по килам
+      sql<GuildPvpStats["topByKills"]>`
+      SELECT 
+        u.id AS "userId",
+        u.username AS "userName",
+        SUM(s.end_kills - s.start_kills) AS "totalKills"
+      FROM killcount_stats s
+      JOIN "user" u ON s.user_id = u.id
+      WHERE s.recorded_at >= ${startDate}
+      GROUP BY u.id, u.username
+      ORDER BY "totalKills" DESC
+      LIMIT ${TOP_LIMIT}
+    `,
+
+      // Топ игроков по хонору
+      sql<GuildPvpStats["topByHonor"]>`
+      SELECT 
+        u.id AS "userId",
+        u.username AS "userName",
+        SUM(s.end_honor - s.start_honor) AS "totalHonor"
+      FROM killcount_stats s
+      JOIN "user" u ON s.user_id = u.id
+      WHERE s.recorded_at >= ${startDate}
+      GROUP BY u.id, u.username
+      ORDER BY "totalHonor" DESC
+      LIMIT ${TOP_LIMIT}
+    `,
+    ]);
+
+    return {
+      totalHonor: totalStats?.at(0)?.totalHonor || 0,
+      totalKills: totalStats?.at(0)?.totalKills || 0,
+      topByKills: topKills,
+      topByHonor: topHonor,
+    };
+  } catch (error) {
+    return {
+      totalHonor: 0,
+      totalKills: 0,
+      topByKills: [],
+      topByHonor: [],
+    };
+  }
+}

@@ -101,7 +101,14 @@ const AppSidebar: FC<Props> = ({
       ],
     },
     { title: "Статистика", url: "/stats", icon: LineChart },
-    { title: "Киллкаунт", url: "/kill_counter", icon: Swords },
+    {
+      title: "Киллкаунт α",
+      icon: Swords,
+      items: [
+        { title: "Сегодня", url: "/kill-counter/current", icon: Swords },
+        { title: "История", url: "/kill-counter/history", icon: Swords },
+      ],
+    },
   ];
 
   const managementItems = [
