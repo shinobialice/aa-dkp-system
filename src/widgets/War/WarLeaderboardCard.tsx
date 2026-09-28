@@ -1,10 +1,12 @@
 import Image from "next/image";
 import type { LucideIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, ScrollArea } from "@/shared/ui";
+import WarUserLink from "./WarUserLink";
 
 export type LeaderboardRow = {
   rank: number;
   name: string;
+  userId?: number;
   value: string;
   icon?: string;
   iconTitle?: string;
@@ -61,7 +63,11 @@ export default function WarLeaderboardCard({
                         className="shrink-0"
                       />
                     )}
-                    <span className="truncate">{row.name}</span>
+                    {row.userId ? (
+                      <WarUserLink userId={row.userId} name={row.name} />
+                    ) : (
+                      <span className="truncate">{row.name}</span>
+                    )}
                   </span>
                   <span className="shrink-0 font-medium tabular-nums">
                     {row.value}

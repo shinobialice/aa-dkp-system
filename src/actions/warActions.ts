@@ -229,6 +229,7 @@ export type PeriodSaleEntry = {
   grade: number | null;
   price: number;
   buyerUsername: string | null;
+  buyerUserId: number | null;
 };
 
 // Топ ПРОДАЖ — отдельные сделки за период (предмет + цена + кому продали),
@@ -249,7 +250,7 @@ export async function getPeriodTopSales(
     const rows = limit
       ? await sql<any[]>`
           SELECT l.price, it.name AS item_name, it.icon_url, it.grade,
-            COALESCE(u.username, l.sold_to) AS buyer
+            COALESCE(u.username, l.sold_to) AS buyer, u.id AS buyer_id
           FROM loot l
           JOIN item_type it ON it.id = l.item_type_id
           LEFT JOIN "user" u ON u.id = l.sold_to_user_id
@@ -260,7 +261,7 @@ export async function getPeriodTopSales(
         `
       : await sql<any[]>`
           SELECT l.price, it.name AS item_name, it.icon_url, it.grade,
-            COALESCE(u.username, l.sold_to) AS buyer
+            COALESCE(u.username, l.sold_to) AS buyer, u.id AS buyer_id
           FROM loot l
           JOIN item_type it ON it.id = l.item_type_id
           LEFT JOIN "user" u ON u.id = l.sold_to_user_id
@@ -274,6 +275,7 @@ export async function getPeriodTopSales(
       grade: r.grade ?? null,
       price: Number(r.price),
       buyerUsername: r.buyer ?? null,
+      buyerUserId: r.buyer_id ?? null,
     }));
   } catch (error) {
     console.error("Ошибка при получении топа продаж:", error);
@@ -283,6 +285,7 @@ export async function getPeriodTopSales(
 
 export type PeriodBuyerEntry = {
   buyerUsername: string;
+  buyerUserId: number;
   totalSpent: number;
   itemsCount: number;
 };
@@ -304,18 +307,19 @@ export async function getPeriodTopBuyers(
     // sold_to вроде "Аук"/"Рандом" — поэтому INNER JOIN по sold_to_user_id
     // без фолбэка на l.sold_to.
     const rows = await sql<any[]>`
-      SELECT u.username AS buyer,
+      SELECT u.id AS buyer_id, u.username AS buyer,
         SUM(l.price) AS total_spent, COUNT(*) AS items_count
       FROM loot l
       JOIN "user" u ON u.id = l.sold_to_user_id
       WHERE l.status = 'Продано'
         AND u.active = true
         AND l.sold_at >= ${startedAt} AND l.sold_at < ${rangeEnd}
-      GROUP BY u.username
+      GROUP BY u.id, u.username
       ORDER BY total_spent DESC
     `;
     const entries = rows.map((r) => ({
       buyerUsername: r.buyer,
+      buyerUserId: r.buyer_id,
       totalSpent: Number(r.total_spent),
       itemsCount: Number(r.items_count),
     }));

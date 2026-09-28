@@ -2,6 +2,7 @@ import { ShoppingBag, ArrowRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, ScrollArea } from "@/shared/ui";
 import { LootIcon } from "@/widgets/Loot/LootBuy/icons/LootIconComponent";
 import type { PeriodSaleEntry } from "@/actions/warActions";
+import WarUserLink from "./WarUserLink";
 
 function formatNum(n: number): string {
   return n.toLocaleString("ru-RU");
@@ -36,7 +37,14 @@ export default function WarTopSalesCard({ rows }: { rows: PeriodSaleEntry[] }) {
                     <p className="truncate text-sm">{row.itemName}</p>
                     <p className="flex items-center gap-1 truncate text-xs text-muted-foreground">
                       <ArrowRight className="size-3 shrink-0" />
-                      {row.buyerUsername ?? "неизвестно"}
+                      {row.buyerUserId && row.buyerUsername ? (
+                        <WarUserLink
+                          userId={row.buyerUserId}
+                          name={row.buyerUsername}
+                        />
+                      ) : (
+                        (row.buyerUsername ?? "неизвестно")
+                      )}
                     </p>
                   </div>
                   <span className="shrink-0 text-sm font-semibold tabular-nums">

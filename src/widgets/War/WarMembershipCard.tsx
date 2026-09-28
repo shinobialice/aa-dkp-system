@@ -1,6 +1,7 @@
 import { Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, ScrollArea } from "@/shared/ui";
 import type { PeriodMembershipChanges } from "@/actions/warActions";
+import WarUserLink from "./WarUserLink";
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("ru-RU", {
@@ -47,7 +48,11 @@ export default function WarMembershipCard({
                         key={m.userId}
                         className="flex items-center justify-between gap-2 text-sm"
                       >
-                        <span className="min-w-0 truncate">{m.username}</span>
+                        <WarUserLink
+                          userId={m.userId}
+                          name={m.username}
+                          className="min-w-0"
+                        />
                         <span className="shrink-0 text-xs text-muted-foreground">
                           {formatDate(m.at)}
                         </span>
@@ -67,7 +72,11 @@ export default function WarMembershipCard({
                         key={m.userId}
                         className="flex items-center justify-between gap-2 text-sm"
                       >
-                        <span className="min-w-0 truncate">{m.username}</span>
+                        <WarUserLink
+                          userId={m.userId}
+                          name={m.username}
+                          className="min-w-0"
+                        />
                         <span className="shrink-0 text-xs text-muted-foreground">
                           {formatDate(m.at)}
                         </span>
@@ -87,7 +96,11 @@ export default function WarMembershipCard({
                         key={`${m.userId}-${i}`}
                         className="flex items-center justify-between gap-2 text-sm"
                       >
-                        <span className="min-w-0 truncate">{m.username}</span>
+                        <WarUserLink
+                          userId={m.userId}
+                          name={m.username}
+                          className="min-w-0"
+                        />
                         <span className="shrink-0 text-xs text-muted-foreground">
                           {formatAfkRange(m.from, m.to)}
                         </span>

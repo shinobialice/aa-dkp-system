@@ -113,6 +113,7 @@ export default function WarPageClient({
 
       return {
         name: item.userName,
+        userId: item.userId,
         rank: index + 1,
         value: item.totalKills.toString(),
         icon: current.icon,
@@ -123,6 +124,7 @@ export default function WarPageClient({
   const topByHonorRows: LeaderboardRow[] = guildPvpStats.topByHonor.map(
     (item, index) => ({
       name: item.userName,
+      userId: item.userId,
       rank: index + 1,
       value: item.totalHonor.toString(),
     }),
@@ -132,6 +134,7 @@ export default function WarPageClient({
     (e, i) => ({
       rank: i + 1,
       name: e.username,
+      userId: e.userId,
       value: `${e.raidsAttended}/${initialAttendance.totalRaidsInPeriod}`,
     }),
   );
@@ -147,6 +150,7 @@ export default function WarPageClient({
     initialEconomy?.topBuyers.map((b, i) => ({
       rank: i + 1,
       name: b.buyerUsername,
+      userId: b.buyerUserId,
       value: formatNum(b.totalSpent),
     })) ?? [];
 
@@ -199,7 +203,7 @@ export default function WarPageClient({
               <>
                 <RealTile
                   value={guildPvpStats.totalKills}
-                  label="Килы гильдии"
+                  label="Киллы гильдии"
                 />
                 <RealTile
                   value={guildPvpStats.totalHonor}
@@ -231,15 +235,13 @@ export default function WarPageClient({
               <>
                 <WarLeaderboardCard
                   icon={Swords}
-                  title="Килы"
+                  title="Киллы"
                   rows={topByKillsRows}
-                  // isMock
                 />
                 <WarLeaderboardCard
                   icon={Trophy}
                   title="Хонор"
                   rows={topByHonorRows}
-                  // isMock
                 />
               </>
             ) : (

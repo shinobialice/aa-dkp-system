@@ -112,6 +112,7 @@ export default function WarHistoryDetail({
     (e, i) => ({
       rank: i + 1,
       name: e.username,
+      userId: e.userId,
       value: `${e.raidsAttended}/${attendance?.totalRaidsInPeriod ?? "?"}`,
     }),
   );
@@ -127,6 +128,7 @@ export default function WarHistoryDetail({
     economy?.topBuyers.map((b, i) => ({
       rank: i + 1,
       name: b.buyerUsername,
+      userId: b.buyerUserId,
       value: formatNum(b.totalSpent),
     })) ?? [];
 
