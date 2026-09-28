@@ -2,9 +2,16 @@
 
 import Image from "next/image";
 import { Swords, Trophy, Users, Gift, Coins, ShoppingCart } from "lucide-react";
-import { Card, CardContent, Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui";
+import {
+  Card,
+  CardContent,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/shared/ui";
 import { MODE_LABEL, MODE_ICON } from "@/shared/config/guildStatus";
-import type { GuildStatus } from "@/actions/guildStatusSettings";
+import type { GuildPvpStats, GuildStatus } from "@/actions/guildStatusSettings";
 import type {
   PeriodAttendanceResult,
   PeriodMembershipChanges,
@@ -87,15 +94,32 @@ export default function WarPageClient({
   initialAttendance,
   initialMembership,
   initialEconomy,
+  guildPvpStats,
 }: {
   isAdmin: boolean;
   initialStatus: GuildStatus;
   initialAttendance: PeriodAttendanceResult;
   initialMembership: PeriodMembershipChanges;
   initialEconomy: WarEconomySnapshot | null;
+  guildPvpStats: GuildPvpStats;
 }) {
   const { mode, startedAt, opponentGuild } = initialStatus;
   const isWar = mode === "pvp";
+
+  const topByKillsRows: LeaderboardRow[] = guildPvpStats.topByKills.map(
+    (item, index) => ({
+      name: item.userName,
+      rank: index + 1,
+      value: item.totalKills.toString(),
+    }),
+  );
+  const topByHonorRows: LeaderboardRow[] = guildPvpStats.topByHonor.map(
+    (item, index) => ({
+      name: item.userName,
+      rank: index + 1,
+      value: item.totalHonor.toString(),
+    }),
+  );
 
   const attendanceRows: LeaderboardRow[] = initialAttendance.top.map(
     (e, i) => ({
@@ -130,7 +154,10 @@ export default function WarPageClient({
         />
         <h1 className="text-2xl font-bold">{MODE_LABEL[mode]}</h1>
         {isWar && (
-          <WarOpponentEditor initialOpponent={opponentGuild} isAdmin={isAdmin} />
+          <WarOpponentEditor
+            initialOpponent={opponentGuild}
+            isAdmin={isAdmin}
+          />
         )}
         {startedAt && (
           <div className="flex flex-col items-center gap-0.5">
@@ -163,8 +190,14 @@ export default function WarPageClient({
             />
             {isWar ? (
               <>
-                <MockTile value={MOCK_TOTAL_KILLS} label="Килы гильдии" />
-                <MockTile value={MOCK_TOTAL_HONOR} label="Хонор гильдии" />
+                <RealTile
+                  value={guildPvpStats.totalKills}
+                  label="Килы гильдии"
+                />
+                <RealTile
+                  value={guildPvpStats.totalHonor}
+                  label="Хонор гильдии"
+                />
               </>
             ) : (
               <>
@@ -192,14 +225,14 @@ export default function WarPageClient({
                 <WarLeaderboardCard
                   icon={Swords}
                   title="Килы"
-                  rows={MOCK_KILLS_LEADERBOARD}
-                  isMock
+                  rows={topByKillsRows}
+                  // isMock
                 />
                 <WarLeaderboardCard
                   icon={Trophy}
                   title="Хонор"
-                  rows={MOCK_HONOR_LEADERBOARD}
-                  isMock
+                  rows={topByHonorRows}
+                  // isMock
                 />
               </>
             ) : (

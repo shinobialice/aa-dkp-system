@@ -1,6 +1,9 @@
 import { cookies } from "next/headers";
 import { hasTag } from "@/actions/hasTag";
-import { getGuildStatus } from "@/actions/guildStatusSettings";
+import {
+  getGuildStatus,
+  getStatsForPeriod,
+} from "@/actions/guildStatusSettings";
 import {
   getPeriodAttendanceTop,
   getPeriodFinanceSummary,
@@ -22,6 +25,8 @@ export default async function WarPage() {
     getPeriodAttendanceTop(periodStart, null, status.mode),
     getPeriodMembershipChanges(periodStart, null),
   ]);
+
+  const stats = await getStatsForPeriod(periodStart);
 
   // Экономика (доход, продажи, источники дохода, дроп) имеет смысл только
   // на фришке — на варе этого либо нет, либо ещё не считается (килы/хонор).
@@ -48,6 +53,7 @@ export default async function WarPage() {
       initialAttendance={initialAttendance}
       initialMembership={initialMembership}
       initialEconomy={initialEconomy}
+      guildPvpStats={stats}
     />
   );
 }

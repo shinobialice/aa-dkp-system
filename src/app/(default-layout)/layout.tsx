@@ -1,3 +1,4 @@
+import "@/shared/lib/valibot";
 import {
   SidebarProvider,
   SidebarTrigger,
