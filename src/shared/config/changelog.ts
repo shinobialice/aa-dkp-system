@@ -12,6 +12,15 @@ export type ChangelogDay = {
 
 export const changelog: ChangelogDay[] = [
   {
+    date: "2026-09-29",
+    entries: [
+      {
+        type: "fix",
+        text: "Ползунок прокрутки в списках (участники, топы на странице вара и др.) больше не отстаёт и не едет в обратную сторону",
+      },
+    ],
+  },
+  {
     date: "2026-09-28",
     entries: [
       {

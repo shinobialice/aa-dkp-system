@@ -1,0 +1,26 @@
+diff --git a/dist/index.js b/dist/index.js
+index 54e1bd29d062ad8cab1568bf43905ee3371faa87..8db4c9eb282b030965458c7e1e325457dfa666f0 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -748,7 +748,7 @@ var addUnlinkedScrollListener = /* @__PURE__ */ __name((node, handler = () => {
+ }) => {
+   let prevPosition = { left: node.scrollLeft, top: node.scrollTop };
+   let rAF = 0;
+-  (/* @__PURE__ */ __name((function loop() {
++  (__name((function loop() {
+     const position = { left: node.scrollLeft, top: node.scrollTop };
+     const isHorizontalScroll = prevPosition.left !== position.left;
+     const isVerticalScroll = prevPosition.top !== position.top;
+diff --git a/dist/index.mjs b/dist/index.mjs
+index b98d4bc14ad4184b2f46b28679fb5f8d55767782..349cca53425d243d4531ba3d3fe305ffe8c51d64 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -704,7 +704,7 @@ var addUnlinkedScrollListener = /* @__PURE__ */ __name((node, handler = () => {
+ }) => {
+   let prevPosition = { left: node.scrollLeft, top: node.scrollTop };
+   let rAF = 0;
+-  (/* @__PURE__ */ __name((function loop() {
++  (__name((function loop() {
+     const position = { left: node.scrollLeft, top: node.scrollTop };
+     const isHorizontalScroll = prevPosition.left !== position.left;
+     const isVerticalScroll = prevPosition.top !== position.top;
