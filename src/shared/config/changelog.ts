@@ -12,6 +12,15 @@ export type ChangelogDay = {
 
 export const changelog: ChangelogDay[] = [
   {
+    date: "2026-10-01",
+    entries: [
+      {
+        type: "fix",
+        text: "Юбилей в гильдии празднуется только у активных игроков — у неактивных в профиле больше нет баннера и конфетти",
+      },
+    ],
+  },
+  {
     date: "2026-09-29",
     entries: [
       {

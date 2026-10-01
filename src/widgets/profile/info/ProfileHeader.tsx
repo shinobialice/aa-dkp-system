@@ -81,7 +81,9 @@ export default function ProfileHeader({
 
   return (
     <div className="relative">
-      <AnniversaryCelebration joinedAt={user.joined_at ?? null} />
+      {user.active && (
+        <AnniversaryCelebration joinedAt={user.joined_at ?? null} />
+      )}
       <DragonFlyby username={user.username} />
       <div className="h-16 w-full bg-gradient-to-br from-primary/25 via-chart-1/15 to-transparent md:h-20" />
 
