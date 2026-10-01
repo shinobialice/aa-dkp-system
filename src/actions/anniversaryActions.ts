@@ -35,6 +35,7 @@ async function selectTodayAnniversaries(userId: number | null = null) {
              ((u.joined_at AT TIME ZONE 'UTC') AT TIME ZONE 'Europe/Moscow')::date AS joined
       FROM "user" u
       WHERE u.active = true
+        AND u.id NOT IN (SELECT user_id FROM user_tags WHERE tag = 'АФК' AND removed_at IS NULL)
         AND u.joined_at IS NOT NULL
         AND (${userId}::int IS NULL OR u.id = ${userId}::int)
     )

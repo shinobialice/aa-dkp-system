@@ -81,7 +81,7 @@ export default function ProfileHeader({
 
   return (
     <div className="relative">
-      {user.active && (
+      {user.active && !tags?.some((t) => t.tag === "АФК") && (
         <AnniversaryCelebration joinedAt={user.joined_at ?? null} />
       )}
       <DragonFlyby username={user.username} />
