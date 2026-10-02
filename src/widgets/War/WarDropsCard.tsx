@@ -4,7 +4,7 @@ import { LootIcon } from "@/widgets/Loot/LootBuy/icons/LootIconComponent";
 import type { PeriodDropEntry } from "@/actions/warActions";
 
 // Полный список того, что выпало с боссов за период — с иконкой и рамкой
-// качества предмета (переиспользуем LootIcon, как в LootRawTable.tsx), не
+// качества предмета (переиспользуем LootIcon, как в Treasury/StockTab.tsx), не
 // только топ-N: показываем всё, что реально выпало, и по сколько штук.
 export default function WarDropsCard({ rows }: { rows: PeriodDropEntry[] }) {
   return (

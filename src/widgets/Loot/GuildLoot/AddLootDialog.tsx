@@ -22,19 +22,24 @@ export function AddLootDialog({
   onClose,
   onAdd,
   itemTypes,
+  presetItemName,
 }: {
   open: boolean;
   onClose: () => void;
   onAdd: (item: NewLootItem) => Promise<void>;
   itemTypes: ItemType[];
+  presetItemName?: string;
 }) {
-  const [form, setForm] = useState<NewLootItem>({
-    itemTypeId: 0,
-    source: "",
-    acquired_at: new Date().toISOString().split("T")[0],
-    quantity: 1,
-    itemName: "",
-    raidId: null,
+  const [form, setForm] = useState<NewLootItem>(() => {
+    const preset = itemTypes.find((item) => item.name === presetItemName);
+    return {
+      itemTypeId: preset?.id ?? 0,
+      source: "",
+      acquired_at: new Date().toISOString().split("T")[0],
+      quantity: 1,
+      itemName: preset?.name ?? "",
+      raidId: null,
+    };
   });
 
   const getItemTypeIdByName = (name: string): number | undefined =>
@@ -89,7 +94,7 @@ export function AddLootDialog({
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent aria-describedby={undefined} className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Добавить доход</DialogTitle>
+          <DialogTitle>{isOtherType ? "Золото в казну" : "Дроп с босса"}</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-2 py-4">
           <Label>Предмет</Label>
