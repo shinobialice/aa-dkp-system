@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import { Button, Checkbox, Label } from "@/shared/ui";
+import { Checkbox, Label } from "@/shared/ui";
+import { cn } from "@/shared/lib/tw-merge";
 import {
   getInventoryStockSettings,
   updateInventoryStockSettings,
@@ -12,93 +11,86 @@ import {
   getInventoryStockItems,
   type InventoryStockItem,
 } from "@/actions/guildStats";
+import { useSettingsDraft } from "./settingsDraft";
+import { Loading, SettingsCard } from "./settingsUi";
+
+type InventoryDraft = {
+  items: InventoryStockItem[];
+  settings: InventoryStockSettings;
+};
 
 export function InventoryStockSettingsForm() {
-  const [items, setItems] = useState<InventoryStockItem[] | null>(null);
-  const [settings, setSettings] = useState<InventoryStockSettings | null>(
-    null,
-  );
-  const [saving, setSaving] = useState(false);
+  const inventory = useSettingsDraft<InventoryDraft>({
+    id: "inventory",
+    section: "inventory",
+    label: "Статистика инвентаря",
+    load: async () => {
+      const [items, settings] = await Promise.all([
+        getInventoryStockItems(),
+        getInventoryStockSettings(),
+      ]);
+      return { items, settings };
+    },
+    save: (value) => updateInventoryStockSettings(value.settings),
+  });
 
-  useEffect(() => {
-    Promise.all([getInventoryStockItems(), getInventoryStockSettings()]).then(
-      ([loadedItems, loadedSettings]) => {
-        setItems(loadedItems);
-        setSettings(loadedSettings);
-      },
-    );
-  }, []);
-
-  if (!items || !settings) {
-    return <p className="text-sm text-muted-foreground">Загрузка...</p>;
-  }
-
-  async function handleSave() {
-    if (!settings) return;
-    setSaving(true);
-    try {
-      await updateInventoryStockSettings(settings);
-      toast.success("Настройки сохранены");
-    } catch {
-      toast.error("Не удалось сохранить настройки");
-    } finally {
-      setSaving(false);
-    }
-  }
+  const value = inventory.value;
+  if (!value) return <Loading />;
+  const { items, settings } = value;
 
   function toggle(label: string, checked: boolean) {
-    if (!settings) return;
-    setSettings({
-      ...settings,
-      hiddenLabels: checked
-        ? settings.hiddenLabels.filter((l) => l !== label)
-        : [...settings.hiddenLabels, label],
-    });
+    inventory.setValue((v) => ({
+      ...v,
+      settings: {
+        ...v.settings,
+        hiddenLabels: checked
+          ? v.settings.hiddenLabels.filter((l) => l !== label)
+          : [...v.settings.hiddenLabels, label],
+      },
+    }));
   }
 
   const groups = Array.from(new Set(items.map((i) => i.group)));
 
   return (
-    <div className="space-y-4 max-w-xl">
-      <div>
-        <h2 className="text-xl font-bold">Имеющиеся предметы</h2>
-        <p className="text-sm text-muted-foreground">
-          Какие предметы игроков показывать на странице статистики во
-          вкладке «Имеющиеся предметы».
-        </p>
-      </div>
-
+    <>
       {groups.map((group) => (
-        <div key={group} className="space-y-2">
-          <Label className="text-muted-foreground">{group}</Label>
-          <div className="space-y-2 border rounded-lg p-3">
+        <SettingsCard key={group} title={group}>
+          <div className="grid gap-x-4 gap-y-1 px-4 py-3 sm:grid-cols-2">
             {items
               .filter((i) => i.group === group)
-              .map((item) => (
-                <div key={item.label} className="flex items-center gap-2">
-                  <Checkbox
-                    id={`inv-stock-${item.label}`}
-                    className="cursor-pointer"
-                    checked={!settings.hiddenLabels.includes(item.label)}
-                    onCheckedChange={(checked) =>
-                      toggle(item.label, checked === true)
-                    }
-                  />
-                  <Label
-                    htmlFor={`inv-stock-${item.label}`}
-                    className="font-normal cursor-pointer"
+              .map((item) => {
+                const changed = inventory.changed((v) =>
+                  v.settings.hiddenLabels.includes(item.label),
+                );
+                return (
+                  <div
+                    key={item.label}
+                    className={cn(
+                      "-mx-2 flex items-center gap-2 rounded-md px-2 py-1",
+                      changed && "bg-amber-50 dark:bg-amber-500/10",
+                    )}
                   >
-                    {item.label}
-                  </Label>
-                </div>
-              ))}
+                    <Checkbox
+                      id={`inv-stock-${item.label}`}
+                      className="cursor-pointer"
+                      checked={!settings.hiddenLabels.includes(item.label)}
+                      onCheckedChange={(checked) =>
+                        toggle(item.label, checked === true)
+                      }
+                    />
+                    <Label
+                      htmlFor={`inv-stock-${item.label}`}
+                      className="cursor-pointer font-normal"
+                    >
+                      {item.label}
+                    </Label>
+                  </div>
+                );
+              })}
           </div>
-        </div>
+        </SettingsCard>
       ))}
-
-      <Button onClick={handleSave} disabled={saving} className="cursor-pointer">
-        {saving ? "Сохранение..." : "Сохранить"}
-      </Button>
-    </div>
+    </>
   );
 }

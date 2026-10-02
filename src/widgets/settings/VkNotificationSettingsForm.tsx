@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import { Button, Checkbox, Input, Label, Switch } from "@/shared/ui";
+import { Input, Switch } from "@/shared/ui";
+import { cn } from "@/shared/lib/tw-merge";
 import {
   getVkNotificationSettings,
   updateVkNotificationSettings,
@@ -14,6 +13,10 @@ import {
 } from "@/shared/config/vkNotificationDefaults";
 import { bosses } from "@/shared/config/bossRespawn";
 import { fixedScheduleEvents } from "@/shared/config/fixedSchedule";
+import { useSettingsDraft } from "./settingsDraft";
+import { Loading, SettingRow, SettingsCard, Unit } from "./settingsUi";
+
+export const VK_DRAFT_ID = "vk";
 
 // Разбираем "HH:MM" на часы/минуты для двух отдельных числовых полей —
 // это (в отличие от <input type="time">) даёт гарантированно 24-часовой
@@ -26,8 +29,14 @@ function splitPrimeTime(value: string | null): [string, string] {
 
 function joinPrimeTime(hour: string, minute: string): string | null {
   if (hour === "" && minute === "") return null;
-  const h = String(Math.min(23, Math.max(0, Number(hour) || 0))).padStart(2, "0");
-  const m = String(Math.min(59, Math.max(0, Number(minute) || 0))).padStart(2, "0");
+  const h = String(Math.min(23, Math.max(0, Number(hour) || 0))).padStart(
+    2,
+    "0",
+  );
+  const m = String(Math.min(59, Math.max(0, Number(minute) || 0))).padStart(
+    2,
+    "0",
+  );
   return `${h}:${m}`;
 }
 
@@ -41,269 +50,194 @@ const weekDays: { label: string; value: number }[] = [
   { label: "Вс", value: 0 },
 ];
 
-function EventRow({
-  name,
-  settings,
-  onToggle,
-  onMinutesChange,
-}: {
-  name: string;
-  settings: VkNotificationSettings;
-  onToggle: (checked: boolean) => void;
-  onMinutesChange: (minutes: number) => void;
-}) {
+type Vk = ReturnType<typeof useSettingsDraft<VkNotificationSettings>>;
+
+/** Строка события: включено ли напоминание и за сколько минут. */
+function EventRow({ name, vk }: { name: string; vk: Vk }) {
+  const settings = vk.value!;
+  const enabled = settings.enabledBosses.includes(name);
   return (
-    <div className="flex items-center gap-2">
-      <Checkbox
-        id={`vk-event-${name}`}
-        className="cursor-pointer"
-        checked={settings.enabledBosses.includes(name)}
-        onCheckedChange={(checked) => onToggle(checked === true)}
-      />
-      <Label
-        htmlFor={`vk-event-${name}`}
-        className="font-normal flex-1 cursor-pointer"
-      >
-        {name}
-      </Label>
+    <SettingRow
+      title={name}
+      changed={vk.changed((v) => [
+        v.enabledBosses.includes(name),
+        resolveNotifyMinutes(v, name),
+      ])}
+    >
       <Input
         type="number"
         min={0}
-        className="w-16"
+        aria-label={`За сколько минут: ${name}`}
+        className="h-8 w-16 text-right"
+        disabled={!enabled}
         value={resolveNotifyMinutes(settings, name)}
-        onChange={(e) => onMinutesChange(Number(e.target.value))}
+        onChange={(e) =>
+          vk.setValue((v) => ({
+            ...v,
+            notifyMinutesByEvent: {
+              ...v.notifyMinutesByEvent,
+              [name]: Number(e.target.value),
+            },
+          }))
+        }
       />
-      <span className="text-xs text-muted-foreground">мин</span>
-    </div>
+      <Unit>мин</Unit>
+      <Switch
+        aria-label={`Напоминать: ${name}`}
+        checked={enabled}
+        onCheckedChange={(checked) =>
+          vk.setValue((v) => ({
+            ...v,
+            enabledBosses: checked
+              ? [...v.enabledBosses, name]
+              : v.enabledBosses.filter((b) => b !== name),
+          }))
+        }
+      />
+    </SettingRow>
   );
 }
 
 export function VkNotificationSettingsForm() {
-  const [settings, setSettings] = useState<VkNotificationSettings | null>(
-    null,
-  );
-  const [saving, setSaving] = useState(false);
+  const vk = useSettingsDraft<VkNotificationSettings>({
+    id: VK_DRAFT_ID,
+    section: "vk",
+    label: "Уведомления ВК",
+    load: getVkNotificationSettings,
+    save: updateVkNotificationSettings,
+  });
 
-  useEffect(() => {
-    getVkNotificationSettings().then(setSettings);
-  }, []);
-
-  if (!settings) {
-    return <p className="text-sm text-muted-foreground">Загрузка...</p>;
-  }
-
-  async function handleSave() {
-    if (!settings) return;
-    setSaving(true);
-    try {
-      await updateVkNotificationSettings(settings);
-      toast.success("Настройки уведомлений ВК сохранены");
-    } catch {
-      toast.error("Не удалось сохранить настройки уведомлений ВК");
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  function toggleEvent(name: string, checked: boolean) {
-    if (!settings) return;
-    setSettings({
-      ...settings,
-      enabledBosses: checked
-        ? [...settings.enabledBosses, name]
-        : settings.enabledBosses.filter((b) => b !== name),
-    });
-  }
-
-  function setEventMinutes(name: string, minutes: number) {
-    if (!settings) return;
-    setSettings({
-      ...settings,
-      notifyMinutesByEvent: { ...settings.notifyMinutesByEvent, [name]: minutes },
-    });
-  }
-
-  function togglePrimeDay(day: number, checked: boolean) {
-    if (!settings) return;
-    setSettings({
-      ...settings,
-      primeDays: checked
-        ? [...settings.primeDays, day].sort((a, b) => a - b)
-        : settings.primeDays.filter((d) => d !== day),
-    });
-  }
+  const settings = vk.value;
+  if (!settings) return <Loading />;
+  const set = (patch: Partial<VkNotificationSettings>) =>
+    vk.setValue((v) => ({ ...v, ...patch }));
+  const [hour, minute] = splitPrimeTime(settings.primeTime);
 
   return (
-    <div className="space-y-6 max-w-xl">
-      <div>
-        <h2 className="text-xl font-bold">Уведомления ВК</h2>
-        <p className="text-sm text-muted-foreground">
-          Сообщения ВК-бота о скором начале боссов и рейдов — отдельно от
-          звуковых оповещений в браузере.
-        </p>
-      </div>
-
-      <div className="space-y-2">
-        <Label>Плавающие боссы (без фиксированного времени)</Label>
-        <div className="space-y-2 border rounded-lg p-3">
-          {bosses.map((boss) => (
-            <EventRow
-              key={boss}
-              name={boss}
-              settings={settings}
-              onToggle={(checked) => toggleEvent(boss, checked)}
-              onMinutesChange={(minutes) => setEventMinutes(boss, minutes)}
-            />
-          ))}
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label>Прайм</Label>
-        <div className="space-y-2 border rounded-lg p-3">
-          <EventRow
-            name={PRIME_EVENT_NAME}
-            settings={settings}
-            onToggle={(checked) => toggleEvent(PRIME_EVENT_NAME, checked)}
-            onMinutesChange={(minutes) =>
-              setEventMinutes(PRIME_EVENT_NAME, minutes)
+    <>
+      <SettingsCard title="Прайм">
+        <EventRow name={PRIME_EVENT_NAME} vk={vk} />
+        <SettingRow
+          title="Время прайма"
+          hint="МСК, 24 часа"
+          htmlFor="vk-prime-hour"
+          changed={vk.changed((v) => v.primeTime)}
+        >
+          <Input
+            id="vk-prime-hour"
+            type="number"
+            min={0}
+            max={23}
+            placeholder="ЧЧ"
+            aria-label="Часы"
+            className="h-8 w-16 text-right"
+            value={hour}
+            onChange={(e) =>
+              set({ primeTime: joinPrimeTime(e.target.value, minute) })
             }
           />
-          <div className="flex items-center gap-2">
-            <Label htmlFor="vk-prime-hour" className="flex-1 font-normal">
-              Время (МСК, 24ч)
-            </Label>
-            <Input
-              id="vk-prime-hour"
-              type="number"
-              min={0}
-              max={23}
-              placeholder="ЧЧ"
-              className="w-16"
-              value={splitPrimeTime(settings.primeTime)[0]}
-              onChange={(e) =>
-                setSettings({
-                  ...settings,
-                  primeTime: joinPrimeTime(
-                    e.target.value,
-                    splitPrimeTime(settings.primeTime)[1],
-                  ),
-                })
-              }
-            />
-            <span className="text-muted-foreground">:</span>
-            <Input
-              type="number"
-              min={0}
-              max={59}
-              placeholder="ММ"
-              className="w-16"
-              value={splitPrimeTime(settings.primeTime)[1]}
-              onChange={(e) =>
-                setSettings({
-                  ...settings,
-                  primeTime: joinPrimeTime(
-                    splitPrimeTime(settings.primeTime)[0],
-                    e.target.value,
-                  ),
-                })
-              }
-            />
+          <span className="text-muted-foreground">:</span>
+          <Input
+            type="number"
+            min={0}
+            max={59}
+            placeholder="ММ"
+            aria-label="Минуты"
+            className="h-8 w-16 text-right"
+            value={minute}
+            onChange={(e) =>
+              set({ primeTime: joinPrimeTime(hour, e.target.value) })
+            }
+          />
+        </SettingRow>
+        <SettingRow title="Дни недели" changed={vk.changed((v) => v.primeDays)}>
+          <div role="group" aria-label="Дни прайма" className="flex gap-1">
+            {weekDays.map(({ label, value }) => {
+              const on = settings.primeDays.includes(value);
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() =>
+                    set({
+                      primeDays: on
+                        ? settings.primeDays.filter((d) => d !== value)
+                        : [...settings.primeDays, value].sort((a, b) => a - b),
+                    })
+                  }
+                  className={cn(
+                    "h-8 w-9 cursor-pointer rounded-md border text-xs font-medium transition-colors",
+                    on
+                      ? "border-foreground bg-foreground text-background"
+                      : "bg-background text-muted-foreground hover:bg-muted",
+                  )}
+                >
+                  {label}
+                </button>
+              );
+            })}
           </div>
-          <div className="flex items-center gap-2">
-            <Label className="font-normal">Дни недели</Label>
-            <div className="flex flex-1 justify-between">
-              {weekDays.map(({ label, value }) => (
-                <div key={value} className="flex flex-col items-center gap-1">
-                  <Checkbox
-                    id={`vk-prime-day-${value}`}
-                    className="cursor-pointer"
-                    checked={settings.primeDays.includes(value)}
-                    onCheckedChange={(checked) =>
-                      togglePrimeDay(value, checked === true)
-                    }
-                  />
-                  <Label
-                    htmlFor={`vk-prime-day-${value}`}
-                    className="font-normal text-xs cursor-pointer"
-                  >
-                    {label}
-                  </Label>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+        </SettingRow>
+      </SettingsCard>
 
-      <div className="space-y-2">
-        <Label>Расписание</Label>
-        <div className="space-y-2 border rounded-lg p-3">
-          {fixedScheduleEvents.map((name) => (
-            <EventRow
-              key={name}
-              name={name}
-              settings={settings}
-              onToggle={(checked) => toggleEvent(name, checked)}
-              onMinutesChange={(minutes) => setEventMinutes(name, minutes)}
-            />
-          ))}
-        </div>
-      </div>
+      <SettingsCard
+        title="Плавающие боссы"
+        hint="без фиксированного времени · за сколько минут напомнить"
+      >
+        {bosses.map((boss) => (
+          <EventRow key={boss} name={boss} vk={vk} />
+        ))}
+      </SettingsCard>
 
-      <div className="space-y-3 border rounded-lg p-3">
-        <div className="flex items-center justify-between gap-4">
-          <Label>Тихие часы (бот тегает @online вместо @all)</Label>
+      <SettingsCard title="Расписание" hint="за сколько минут напомнить">
+        {fixedScheduleEvents.map((name) => (
+          <EventRow key={name} name={name} vk={vk} />
+        ))}
+      </SettingsCard>
+
+      <SettingsCard title="Тихие часы">
+        <SettingRow
+          title="Ночью тегать @online вместо @all"
+          hint="Чтобы не будить всю гильдию"
+          changed={vk.changed((v) => v.quietHoursEnabled)}
+        >
           <Switch
+            aria-label="Тихие часы"
             checked={settings.quietHoursEnabled}
-            onCheckedChange={(v) =>
-              setSettings({ ...settings, quietHoursEnabled: v })
-            }
+            onCheckedChange={(v) => set({ quietHoursEnabled: v })}
           />
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Label className="flex-1 font-normal text-muted-foreground">
-            С
-          </Label>
+        </SettingRow>
+        <SettingRow
+          title="Время"
+          hint="МСК"
+          changed={vk.changed((v) => [v.quietHoursStart, v.quietHoursEnd])}
+        >
+          <Unit>с</Unit>
           <Input
             type="number"
             min={0}
             max={23}
-            className="w-20"
+            aria-label="Тихие часы с"
+            className="h-8 w-16 text-right"
             disabled={!settings.quietHoursEnabled}
             value={settings.quietHoursStart}
-            onChange={(e) =>
-              setSettings({
-                ...settings,
-                quietHoursStart: Number(e.target.value),
-              })
-            }
+            onChange={(e) => set({ quietHoursStart: Number(e.target.value) })}
           />
-          <Label className="flex-1 text-right font-normal text-muted-foreground">
-            до
-          </Label>
+          <Unit>до</Unit>
           <Input
             type="number"
             min={0}
             max={23}
-            className="w-20"
+            aria-label="Тихие часы до"
+            className="h-8 w-16 text-right"
             disabled={!settings.quietHoursEnabled}
             value={settings.quietHoursEnd}
-            onChange={(e) =>
-              setSettings({
-                ...settings,
-                quietHoursEnd: Number(e.target.value),
-              })
-            }
+            onChange={(e) => set({ quietHoursEnd: Number(e.target.value) })}
           />
-          <span className="text-sm text-muted-foreground">ч (МСК)</span>
-        </div>
-      </div>
-
-      <Button onClick={handleSave} disabled={saving} className="cursor-pointer">
-        {saving ? "Сохранение..." : "Сохранить"}
-      </Button>
-    </div>
+          <Unit>ч</Unit>
+        </SettingRow>
+      </SettingsCard>
+    </>
   );
 }

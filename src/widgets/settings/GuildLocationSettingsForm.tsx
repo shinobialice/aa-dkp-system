@@ -1,9 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Image from "next/image";
-import { toast } from "sonner";
-import { Button, Label } from "@/shared/ui";
 import {
   Select,
   SelectContent,
@@ -19,157 +16,104 @@ import {
   type GuildMode,
 } from "@/actions/guildStatusSettings";
 import { GUILD_SERVERS, type GuildServer } from "@/utils/guildServers";
+import { useSettingsDraft } from "./settingsDraft";
+import { Loading, Segmented, SettingRow, SettingsCard } from "./settingsUi";
 
-const FACTION_LABEL: Record<GuildFaction, string> = {
+export const FACTION_LABEL: Record<GuildFaction, string> = {
   nuian: "Запад (Нуиан)",
   hariharan: "Восток (Харихаран)",
 };
 
-const FACTION_ICON: Record<GuildFaction, string> = {
+export const FACTION_ICON: Record<GuildFaction, string> = {
   nuian: "/images/server/west.png",
   hariharan: "/images/server/east.png",
 };
 
-const MODE_LABEL: Record<GuildMode, string> = {
+export const MODE_LABEL: Record<GuildMode, string> = {
   freeshard: "Фришка",
   pvp: "ПВП",
 };
 
+export type GuildDraft = {
+  server: GuildServer;
+  faction: GuildFaction;
+  mode: GuildMode;
+};
+
+export const GUILD_DRAFT_ID = "guild";
+
 export function GuildLocationSettingsForm() {
-  const [server, setServer] = useState<GuildServer | null>(null);
-  const [faction, setFaction] = useState<GuildFaction | null>(null);
-  const [mode, setMode] = useState<GuildMode | null>(null);
-  const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    getGuildStatus().then((s) => {
-      setServer(s.server);
-      setFaction(s.faction);
-      setMode(s.mode);
-    });
-  }, []);
-
-  async function handleSave() {
-    if (!server || !faction || !mode) return;
-    setSaving(true);
-    try {
+  const guild = useSettingsDraft<GuildDraft>({
+    id: GUILD_DRAFT_ID,
+    section: "guild",
+    label: "Статус гильдии",
+    load: async () => {
+      const s = await getGuildStatus();
+      return { server: s.server, faction: s.faction, mode: s.mode };
+    },
+    save: async (value) => {
       await Promise.all([
-        updateGuildLocation(server, faction),
-        updateGuildStatus(mode),
+        updateGuildLocation(value.server, value.faction),
+        updateGuildStatus(value.mode),
       ]);
-      toast.success("Статус гильдии сохранён");
-    } catch {
-      toast.error("Не удалось сохранить статус гильдии");
-    } finally {
-      setSaving(false);
-    }
-  }
+    },
+  });
 
-  if (!server || !faction || !mode) {
-    return <p className="text-sm text-muted-foreground">Загрузка...</p>;
-  }
+  const value = guild.value;
+  if (!value) return <Loading />;
+  const set = (patch: Partial<GuildDraft>) =>
+    guild.setValue((v) => ({ ...v, ...patch }));
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-bold">Текущий статус гильдии</h2>
-      <p className="text-sm text-muted-foreground">
-        Сервер и фракция отображаются на всех страницах сайта в шапке и
-        боковом меню. Режим влияет на очки боссов и статистику войны.
-      </p>
-
-      <div className="flex flex-wrap items-center gap-6">
-        <div className="flex items-center gap-2">
-          <Label>Сервер</Label>
-          <Select
-            value={server}
-            onValueChange={(v) => setServer(v as GuildServer)}
-            disabled={saving}
-          >
-            <SelectTrigger className="w-40 cursor-pointer">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {GUILD_SERVERS.map((s) => (
-                <SelectItem className="cursor-pointer" key={s} value={s}>
-                  {s}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Label>Фракция</Label>
-          <Select
-            value={faction}
-            onValueChange={(v) => setFaction(v as GuildFaction)}
-            disabled={saving}
-          >
-            <SelectTrigger className="w-48 cursor-pointer">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {(Object.keys(FACTION_LABEL) as GuildFaction[]).map((f) => (
-                <SelectItem className="cursor-pointer" key={f} value={f}>
-                  <span className="flex items-center gap-2">
-                    <Image
-                      src={FACTION_ICON[f]}
-                      alt=""
-                      width={16}
-                      height={16}
-                    />
-                    {FACTION_LABEL[f]}
-                  </span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Label>Режим</Label>
-          <Select
-            value={mode}
-            onValueChange={(v) => setMode(v as GuildMode)}
-            disabled={saving}
-          >
-            <SelectTrigger className="w-40 cursor-pointer">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {(Object.keys(MODE_LABEL) as GuildMode[]).map((m) => (
-                <SelectItem className="cursor-pointer" key={m} value={m}>
-                  {MODE_LABEL[m]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="flex items-center gap-2 rounded-lg border px-3 py-2">
-          <Image
-            src={FACTION_ICON[faction]}
-            alt={FACTION_LABEL[faction]}
-            width={24}
-            height={24}
-          />
-          <span className="font-semibold">{server}</span>
-          <span className="text-sm text-muted-foreground">
-            {FACTION_LABEL[faction]}
-          </span>
-          <span className="text-sm text-muted-foreground">
-            · {MODE_LABEL[mode]}
-          </span>
-        </div>
-      </div>
-
-      <Button
-        onClick={handleSave}
-        disabled={saving}
-        className="cursor-pointer"
+    <SettingsCard>
+      <SettingRow title="Сервер" changed={guild.changed((v) => v.server)}>
+        <Select
+          value={value.server}
+          onValueChange={(v) => set({ server: v as GuildServer })}
+        >
+          <SelectTrigger className="w-44 cursor-pointer" aria-label="Сервер">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {GUILD_SERVERS.map((s) => (
+              <SelectItem className="cursor-pointer" key={s} value={s}>
+                {s}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </SettingRow>
+      <SettingRow title="Фракция" changed={guild.changed((v) => v.faction)}>
+        <Segmented
+          label="Фракция"
+          value={value.faction}
+          onChange={(faction) => set({ faction })}
+          options={(Object.keys(FACTION_LABEL) as GuildFaction[]).map((f) => ({
+            value: f,
+            label: (
+              <>
+                <Image src={FACTION_ICON[f]} alt="" width={16} height={16} />
+                {FACTION_LABEL[f]}
+              </>
+            ),
+          }))}
+        />
+      </SettingRow>
+      <SettingRow
+        title="Режим"
+        hint="Смена режима закрывает текущий период в историю и начинает новый: при переключении на ПВП начинается новый вар"
+        changed={guild.changed((v) => v.mode)}
       >
-        {saving ? "Сохранение..." : "Сохранить"}
-      </Button>
-    </div>
+        <Segmented
+          label="Режим"
+          value={value.mode}
+          onChange={(mode) => set({ mode })}
+          options={(Object.keys(MODE_LABEL) as GuildMode[]).map((m) => ({
+            value: m,
+            label: MODE_LABEL[m],
+          }))}
+        />
+      </SettingRow>
+    </SettingsCard>
   );
 }

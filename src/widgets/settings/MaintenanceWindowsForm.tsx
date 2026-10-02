@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Button, Label } from "@/shared/ui";
+import { Button } from "@/shared/ui";
 import { X, Clock } from "lucide-react";
 import useCurrentUser from "@/hooks/useCurrentUser";
 import {
@@ -17,6 +17,7 @@ import {
   type MaintenanceWindowRow,
 } from "@/actions/maintenanceWindows";
 import { DateTimePopover } from "@/widgets/MainPageCards/DateTimePopover";
+import { SettingRow, SettingsCard } from "./settingsUi";
 
 function formatMoscowDateTime(iso: string): string {
   return new Date(iso).toLocaleString("ru-RU", {
@@ -48,20 +49,18 @@ function formatMoscowWeekdayDate(date: Date): string {
   });
 }
 
-function ExtendButton({
-  onPick,
-}: {
-  onPick: (date: Date) => void;
-}) {
+function ExtendButton({ onPick }: { onPick: (date: Date) => void }) {
   return (
     <DateTimePopover value={null} onChange={(date) => date && onPick(date)}>
-      <button
-        className="cursor-pointer text-muted-foreground hover:text-foreground"
-        aria-label="Продлить"
-        title="Продлить"
+      <Button
+        variant="outline"
+        size="sm"
+        className="cursor-pointer"
+        title="Продлить до выбранного времени"
       >
         <Clock className="size-4" />
-      </button>
+        Продлить
+      </Button>
     </DateTimePopover>
   );
 }
@@ -77,7 +76,9 @@ export function MaintenanceWindowsForm() {
   const nextRegularWindow = getNextRecurringMaintenanceWindow();
 
   function reload() {
-    getMaintenanceWindows().then(setWindows);
+    getMaintenanceWindows()
+      .then(setWindows)
+      .catch(() => toast.error("Не удалось загрузить окна проф. работ"));
   }
 
   useEffect(() => {
@@ -134,101 +135,100 @@ export function MaintenanceWindowsForm() {
       toast.success("Плановые работы продлены");
       reload();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Не удалось продлить работы");
+      toast.error(
+        e instanceof Error ? e.message : "Не удалось продлить работы",
+      );
     }
   }
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-xl font-bold">Проф. работы</h2>
-        <p className="text-sm text-muted-foreground">
-          Пока идут проф. работы (регулярные &laquo;четверг 05:00-11:00
-          МСК&raquo; или внеплановые ниже) статус всех боссов —
-          &laquo;Проф. работы&raquo;, уведомления ВК и сайта не отправляются.
-        </p>
-      </div>
-
+    <SettingsCard
+      title="Проф. работы"
+      hint="пока идут, у боссов статус «Проф. работы» и уведомления не отправляются"
+    >
       {nextRegularWindow && (
-        <div className="flex items-center justify-between gap-2 border rounded-lg p-3 text-sm">
-          <span>
-            {regularWindow ? (
-              <>
-                Плановые работы сегодня:{" "}
-                {formatMoscowTime(nextRegularWindow.start)}–
-                {formatMoscowTime(nextRegularWindow.end)} (МСК)
-              </>
-            ) : (
-              <>
-                Ближайшие плановые работы:{" "}
-                {formatMoscowWeekdayDate(nextRegularWindow.start)},{" "}
-                {formatMoscowTime(nextRegularWindow.start)}–
-                {formatMoscowTime(nextRegularWindow.end)} (МСК)
-              </>
-            )}
-          </span>
+        <SettingRow
+          title={
+            regularWindow
+              ? "Плановые работы сегодня"
+              : "Ближайшие плановые работы"
+          }
+          hint={
+            <>
+              {!regularWindow &&
+                `${formatMoscowWeekdayDate(nextRegularWindow.start)}, `}
+              {formatMoscowTime(nextRegularWindow.start)}–
+              {formatMoscowTime(nextRegularWindow.end)} МСК · каждый четверг
+            </>
+          }
+        >
           <ExtendButton onPick={handleExtendRegular} />
-        </div>
+        </SettingRow>
       )}
 
-      <div className="space-y-2 border rounded-lg p-3">
-        <Label className="text-muted-foreground">Внеплановые окна</Label>
+      <div className="px-4 py-3">
+        <p className="mb-1.5 font-medium">Внеплановые окна</p>
         {windows === null && (
-          <p className="text-sm text-muted-foreground">Загрузка...</p>
+          <p className="text-sm text-muted-foreground">Загрузка…</p>
         )}
         {windows?.length === 0 && (
           <p className="text-sm text-muted-foreground">
             Активных или будущих окон нет
           </p>
         )}
-        {windows?.map((w) => (
-          <div
-            key={w.id}
-            className="flex items-center justify-between gap-2 text-sm"
-          >
-            <span>
-              {formatMoscowDateTime(w.startAt)} — {formatMoscowDateTime(w.endAt)}
-            </span>
-            <div className="flex items-center gap-2">
-              <ExtendButton onPick={(date) => handleExtend(w.id, date)} />
-              <button
-                onClick={() => handleDelete(w.id)}
-                className="cursor-pointer text-muted-foreground hover:text-foreground"
-                aria-label="Удалить"
-                title="Удалить"
-              >
-                <X className="size-4" />
-              </button>
+        <div className="flex flex-col gap-1.5">
+          {windows?.map((w) => (
+            <div
+              key={w.id}
+              className="flex items-center justify-between gap-2 rounded-lg border px-3 py-1.5 text-sm tabular-nums"
+            >
+              <span>
+                {formatMoscowDateTime(w.startAt)} —{" "}
+                {formatMoscowDateTime(w.endAt)}
+              </span>
+              <div className="flex items-center gap-1">
+                <ExtendButton onPick={(date) => handleExtend(w.id, date)} />
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => handleDelete(w.id)}
+                  className="cursor-pointer text-muted-foreground"
+                  aria-label="Удалить окно"
+                  title="Удалить"
+                >
+                  <X className="size-4" />
+                </Button>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
-      <div className="flex flex-col gap-2 border rounded-lg p-3">
-        <div className="flex items-center gap-2">
-          <Label className="w-10 font-normal text-muted-foreground">С</Label>
-          <DateTimePopover value={start} onChange={setStart}>
-            <Button variant="outline" className="cursor-pointer">
-              {start ? formatMoscowDateTime(start.toISOString()) : "Выбрать"}
-            </Button>
-          </DateTimePopover>
-        </div>
-        <div className="flex items-center gap-2">
-          <Label className="w-10 font-normal text-muted-foreground">До</Label>
-          <DateTimePopover value={end} onChange={setEnd}>
-            <Button variant="outline" className="cursor-pointer">
-              {end ? formatMoscowDateTime(end.toISOString()) : "Выбрать"}
-            </Button>
-          </DateTimePopover>
-        </div>
+      <SettingRow
+        title="Новое окно"
+        hint="Добавляется сразу, отдельно от общей кнопки «Сохранить»"
+      >
+        <span className="text-[12.5px] text-muted-foreground">с</span>
+        <DateTimePopover value={start} onChange={setStart}>
+          <Button variant="outline" size="sm" className="cursor-pointer">
+            {start ? formatMoscowDateTime(start.toISOString()) : "Выбрать"}
+          </Button>
+        </DateTimePopover>
+        <span className="text-[12.5px] text-muted-foreground">до</span>
+        <DateTimePopover value={end} onChange={setEnd}>
+          <Button variant="outline" size="sm" className="cursor-pointer">
+            {end ? formatMoscowDateTime(end.toISOString()) : "Выбрать"}
+          </Button>
+        </DateTimePopover>
         <Button
+          size="sm"
           onClick={handleAdd}
           disabled={saving || !start || !end}
-          className="cursor-pointer w-fit"
+          className="cursor-pointer"
         >
-          {saving ? "Сохранение..." : "Добавить окно"}
+          {saving ? "Добавление…" : "Добавить окно"}
         </Button>
-      </div>
-    </div>
+      </SettingRow>
+    </SettingsCard>
   );
 }
