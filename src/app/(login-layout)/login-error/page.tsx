@@ -8,15 +8,20 @@ import { useSearchParams } from "next/navigation";
 function LoginErrorMessage() {
   const reason = useSearchParams().get("reason");
   const message =
-    reason === "inactive"
-      ? "Этот аккаунт помечен как неактивный. Обратитесь к главе гильдии."
-      : "Этот аккаунт не связан с приглашённым пользователем.";
+    {
+      inactive:
+        "Этот аккаунт помечен как неактивный. Обратитесь к главе гильдии.",
+      "link-expired":
+        "Ссылка для привязки истекла или уже использована. Попросите у администратора новую.",
+      "already-linked":
+        "Этот аккаунт уже привязан к другому игроку. Войдите через другой или обратитесь к администратору.",
+      provider:
+        "Не удалось получить данные от сервиса входа. Попробуйте ещё раз.",
+    }[reason ?? ""] ?? "Этот аккаунт не связан с приглашённым пользователем.";
 
   return (
     <>
-      <h1 className="text-2xl font-bold text-red-600 mb-4">
-        Доступ запрещён
-      </h1>
+      <h1 className="text-2xl font-bold text-red-600 mb-4">Доступ запрещён</h1>
       <p className="text-muted-foreground mb-6">{message}</p>
       <Link href="/login" className="text-primary underline">
         Вернуться к входу
