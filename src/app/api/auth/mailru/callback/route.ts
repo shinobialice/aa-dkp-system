@@ -62,5 +62,10 @@ export async function GET(req: NextRequest) {
     return loginErrorRedirect("provider");
   }
 
-  return completeSocialAuth("mail_id", String(profile.id), linkToken);
+  return completeSocialAuth(
+    "mail_id",
+    String(profile.id),
+    linkToken,
+    req.headers.get("user-agent"),
+  );
 }

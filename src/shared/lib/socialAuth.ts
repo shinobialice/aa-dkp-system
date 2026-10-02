@@ -1,7 +1,7 @@
-import crypto from "crypto";
 import { NextResponse } from "next/server";
 import sql from "@/shared/lib/db";
 import { getBaseUrl } from "./getBaseUrl";
+import { createSession, SESSION_MAX_AGE_SECONDS } from "./session";
 
 type SocialIdColumn = "vk_id" | "google_id" | "mail_id";
 
@@ -19,7 +19,7 @@ function withSession(response: NextResponse, sessionToken: string) {
     httpOnly: true,
     secure: true,
     sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 7,
+    maxAge: SESSION_MAX_AGE_SECONDS,
   });
   return response;
 }
@@ -30,9 +30,8 @@ export async function completeSocialAuth(
   column: SocialIdColumn,
   socialId: string,
   linkToken: string | undefined,
+  userAgent: string | null,
 ) {
-  const sessionToken = crypto.randomBytes(32).toString("hex");
-
   if (linkToken) {
     const [linkRow] = await sql<any[]>`
       SELECT "userId" FROM link_token
@@ -67,9 +66,11 @@ export async function completeSocialAuth(
 
     await sql`
       UPDATE "user"
-      SET ${sql(column)} = ${socialId}, session_token = ${sessionToken}
+      SET ${sql(column)} = ${socialId}
       WHERE id = ${consumed.userId}
     `;
+
+    const sessionToken = await createSession(consumed.userId, userAgent);
 
     return withSession(
       clearLinkToken(
@@ -91,9 +92,7 @@ export async function completeSocialAuth(
     return loginErrorRedirect("inactive");
   }
 
-  await sql`
-    UPDATE "user" SET session_token = ${sessionToken} WHERE id = ${existingUser.id}
-  `;
+  const sessionToken = await createSession(existingUser.id, userAgent);
 
   return withSession(
     NextResponse.redirect(new URL("/", baseUrl)),
