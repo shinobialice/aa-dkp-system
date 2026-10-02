@@ -343,7 +343,7 @@ export function KillcountDay({
             {rows.length === 0 ? "Пока никого нет" : "Никого не найдено"}
           </p>
         ) : (
-          <div className="max-h-[calc(100dvh-10rem)] overflow-auto overscroll-contain">
+          <div className="max-h-[min(30rem,calc(100dvh-14rem))] overflow-auto overscroll-contain">
             <table className="hidden w-full border-collapse tabular-nums @[44rem]/kills:table">
               <thead className="sticky top-0 z-10 bg-muted text-[11px] font-semibold tracking-wide text-muted-foreground uppercase shadow-[0_1px_0_var(--color-border)]">
                 <tr>
