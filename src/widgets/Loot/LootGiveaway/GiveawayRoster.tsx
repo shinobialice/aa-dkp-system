@@ -86,9 +86,10 @@ export default function GiveawayRoster({
       aria-label="Игроки"
       className="@container/roster min-w-0 overflow-hidden rounded-xl border bg-card"
     >
-      <div className="hidden overflow-x-auto @[44rem]/roster:block">
+      {/* Шапка с иконками прилипает, игроки прокручиваются внутри. */}
+      <div className="hidden max-h-[calc(100dvh-var(--give-bar,0px)-2rem)] overflow-auto overscroll-contain @[44rem]/roster:block">
         <table className="w-full border-collapse tabular-nums">
-          <thead className="bg-muted/60 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
+          <thead className="sticky top-0 z-10 bg-muted text-[11px] shadow-[0_1px_0_var(--color-border)] font-semibold tracking-wide text-muted-foreground uppercase">
             <tr>
               <th />
               <th colSpan={lootCount} className="border-l px-2 pt-2 text-left">
