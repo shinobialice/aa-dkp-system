@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-import { ChevronLeft, ChevronRight, Plus, TriangleAlert, X } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Flag,
+  Plus,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Button, Input } from "@/shared/ui";
 import { cn } from "@/shared/lib";
@@ -55,9 +62,6 @@ function getMoscowNow() {
   return { year: msk.getFullYear(), month: msk.getMonth() + 1 };
 }
 
-// Постоянная карточка статуса в боковой панели — раньше это был
-// раскрывающийся на всю ширину алерт, который при открытии сдвигал
-// календарь вниз. Теперь она всегда видна и не двигает соседей.
 export default function MissingActivitiesBanner({
   canEdit = false,
 }: {
@@ -75,6 +79,7 @@ export default function MissingActivitiesBanner({
   const [newBoss, setNewBoss] = useState("");
   const [pendingKey, setPendingKey] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   const isAtCurrentMonth =
     selected.year === currentYear && selected.month === currentMonth;
@@ -152,91 +157,103 @@ export default function MissingActivitiesBanner({
   }
 
   const hasDeficit = !!data?.hasDeficit;
+  const count = data?.missingSlots.length ?? 0;
+  const summary = Array.from(byDate.entries())
+    .map(([date, slots]) => `${date} — ${slots.length}`)
+    .join(", ");
 
   return (
-    <div className="rounded-lg border bg-card p-3">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5">
-          <TriangleAlert
-            className={cn(
-              "size-3.5",
-              hasDeficit ? "text-destructive" : "text-muted-foreground",
-            )}
-          />
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Не заполнены
-          </p>
-        </div>
-        <div className="flex items-center gap-1.5">
-          {hasDeficit && (
-            <span className="rounded-full bg-destructive px-1.5 text-xs font-semibold text-white">
-              {data?.missingSlots.length}
-            </span>
+    <section
+      aria-label="Не заполнены"
+      className={cn(
+        "flex flex-col gap-2 rounded-xl border px-3.5 py-3",
+        hasDeficit
+          ? "border-amber-300 bg-amber-50 dark:border-amber-500/40 dark:bg-amber-500/10"
+          : "bg-card",
+      )}
+    >
+      <div className="flex flex-wrap items-center gap-2">
+        <Flag
+          className={cn(
+            "size-4 shrink-0",
+            hasDeficit
+              ? "text-amber-700 dark:text-amber-400"
+              : "text-muted-foreground",
           )}
-          {canEdit && (
-            <Button
-              variant="outline"
-              size="icon-sm"
-              className="cursor-pointer"
-              onClick={() => setShowAddForm((s) => !s)}
-              title="Добавить пункт"
-            >
-              <Plus className="size-3.5" />
-            </Button>
+        />
+        <span
+          className={cn(
+            "font-bold whitespace-nowrap",
+            hasDeficit && "text-amber-800 dark:text-amber-300",
           )}
-        </div>
-      </div>
-
-      <div className="mt-2 flex items-center justify-center gap-1">
-        <Button
-          variant="outline"
-          size="icon-sm"
-          className="cursor-pointer"
-          onClick={goPrev}
         >
-          <ChevronLeft className="size-3.5" />
-        </Button>
-        <span className="flex-1 text-center text-sm font-medium tabular-nums">
-          {MONTH_NAMES[selected.month - 1]} {selected.year}
+          Не заполнены
         </span>
-        <Button
-          variant="outline"
-          size="icon-sm"
-          className="cursor-pointer"
-          onClick={goNext}
-          disabled={isAtCurrentMonth}
-        >
-          <ChevronRight className="size-3.5" />
-        </Button>
+        {hasDeficit && (
+          <span className="rounded-full bg-amber-500 px-1.5 text-xs font-bold text-white">
+            {count}
+          </span>
+        )}
+        <div className="ml-auto flex items-center gap-0.5">
+          <button
+            type="button"
+            onClick={goPrev}
+            aria-label="Предыдущий месяц"
+            className="flex size-7 cursor-pointer items-center justify-center rounded-md text-muted-foreground hover:bg-background/70 hover:text-foreground"
+          >
+            <ChevronLeft className="size-3.5" />
+          </button>
+          <span className="min-w-[88px] text-center text-[12.5px] font-medium tabular-nums">
+            {MONTH_NAMES[selected.month - 1]} {selected.year}
+          </span>
+          <button
+            type="button"
+            onClick={goNext}
+            disabled={isAtCurrentMonth}
+            aria-label="Следующий месяц"
+            className="flex size-7 cursor-pointer items-center justify-center rounded-md text-muted-foreground hover:bg-background/70 hover:text-foreground disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent"
+          >
+            <ChevronRight className="size-3.5" />
+          </button>
+          {canEdit && (
+            <button
+              type="button"
+              onClick={() => setShowAddForm((value) => !value)}
+              aria-label="Добавить пункт"
+              title="Добавить пункт"
+              className="flex size-7 cursor-pointer items-center justify-center rounded-md text-muted-foreground hover:bg-background/70 hover:text-foreground"
+            >
+              <Plus className="size-4" />
+            </button>
+          )}
+        </div>
       </div>
 
       {canEdit && showAddForm && (
         <form
           onSubmit={handleAdd}
-          className="mt-2 flex flex-col gap-1.5 rounded-md border p-2"
+          className="flex flex-wrap items-center gap-1.5 rounded-lg border bg-background p-2"
         >
-          <div className="flex gap-1.5">
-            <Input
-              type="date"
-              value={newDate}
-              onChange={(e) => setNewDate(e.target.value)}
-              className="h-7 text-xs"
-              required
-            />
-            <Input
-              type="time"
-              value={newTime}
-              onChange={(e) => setNewTime(e.target.value)}
-              className="h-7 w-24 text-xs"
-              required
-            />
-          </div>
+          <Input
+            type="date"
+            value={newDate}
+            onChange={(e) => setNewDate(e.target.value)}
+            className="h-8 w-36 text-xs"
+            required
+          />
+          <Input
+            type="time"
+            value={newTime}
+            onChange={(e) => setNewTime(e.target.value)}
+            className="h-8 w-24 text-xs"
+            required
+          />
           <Input
             list="missing-activity-boss-names"
             placeholder="Босс"
             value={newBoss}
             onChange={(e) => setNewBoss(e.target.value)}
-            className="h-7 text-xs"
+            className="h-8 min-w-24 flex-1 text-xs"
             required
           />
           <datalist id="missing-activity-boss-names">
@@ -247,7 +264,7 @@ export default function MissingActivitiesBanner({
           <Button
             type="submit"
             size="sm"
-            className="h-7 cursor-pointer text-xs"
+            className="h-8 cursor-pointer text-xs"
             disabled={adding}
           >
             Добавить
@@ -255,52 +272,79 @@ export default function MissingActivitiesBanner({
         </form>
       )}
 
-      <div className="mt-2 text-sm">
-        {!data ? (
-          <p className="text-muted-foreground">Загрузка…</p>
-        ) : !hasDeficit ? (
-          <p className="text-muted-foreground">
-            Всё заполнено за месяц.
-          </p>
-        ) : (
-          <div className="max-h-40 space-y-1.5 overflow-y-auto pr-1">
-            {Array.from(byDate.entries()).map(([date, slots]) => (
-              <div key={date} className="leading-snug">
-                <span className="font-medium">{date}:</span>
-                <div className="mt-0.5 flex flex-col gap-0.5">
+      {!data ? (
+        <p className="text-[12.5px] text-muted-foreground">Загрузка…</p>
+      ) : !hasDeficit ? (
+        <p className="text-[12.5px] text-muted-foreground">
+          Всё заполнено за месяц
+        </p>
+      ) : (
+        <>
+          <button
+            type="button"
+            aria-expanded={expanded}
+            onClick={() => setExpanded((value) => !value)}
+            className="flex cursor-pointer items-center justify-between gap-2 text-left text-[12.5px] text-amber-900 dark:text-amber-200"
+          >
+            <span className="min-w-0">
+              {expanded
+                ? "По расписанию были, но посещение не добавлено"
+                : summary}
+            </span>
+            <span className="flex shrink-0 items-center gap-0.5 font-semibold">
+              {expanded ? "Свернуть" : "Показать"}
+              <ChevronDown
+                className={cn(
+                  "size-3.5 transition-transform",
+                  expanded && "rotate-180",
+                )}
+              />
+            </span>
+          </button>
+          {expanded && (
+            <div className="flex max-h-56 flex-col gap-1.5 overflow-y-auto">
+              {Array.from(byDate.entries()).map(([date, slots]) => (
+                <div key={date} className="flex flex-wrap items-center gap-1">
+                  <span className="w-11 shrink-0 text-xs font-bold text-amber-800 dark:text-amber-300">
+                    {date}
+                  </span>
                   {slots.map((s) => {
                     const key = `${s.rawDate}|${s.time}|${s.bossName}`;
                     return (
-                      <div
+                      <span
                         key={key}
-                        className="flex items-center justify-between gap-1 text-muted-foreground"
+                        className="inline-flex h-[26px] items-center gap-0.5 rounded-full bg-background pr-1 pl-2.5 text-xs text-foreground/80"
                       >
-                        <span>
-                          {s.time} {s.bossName}
-                          {s.isManual && (
-                            <span className="text-xs"> (вручную)</span>
-                          )}
-                        </span>
-                        {canEdit && (
+                        {s.time} {s.bossName}
+                        {s.isManual && (
+                          <span className="text-muted-foreground">
+                            {" "}
+                            (вручную)
+                          </span>
+                        )}
+                        {canEdit ? (
                           <button
                             type="button"
                             onClick={() => handleRemove(s)}
                             disabled={pendingKey === key}
-                            className="cursor-pointer text-muted-foreground hover:text-destructive disabled:opacity-50"
+                            aria-label="Убрать из списка"
                             title="Убрать из списка"
+                            className="flex size-5 cursor-pointer items-center justify-center rounded-full text-muted-foreground hover:text-destructive disabled:opacity-50"
                           >
                             <X className="size-3" />
                           </button>
+                        ) : (
+                          <span className="w-1.5" />
                         )}
-                      </div>
+                      </span>
                     );
                   })}
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+    </section>
   );
 }

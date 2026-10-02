@@ -16,14 +16,21 @@ import {
   getTakenAglTimesForDate,
 } from "@/actions/getBossSchedule";
 import { LOCKED_SINGLE_TIME_PRIME_BOSSES } from "@/utils/lockedBosses";
-import { getMoscowISOString, parseMoscowISOString } from "@/utils/getMoscowISOString";
+import {
+  getMoscowISOString,
+  parseMoscowISOString,
+} from "@/utils/getMoscowISOString";
 import { getMoscowWeekday } from "@/utils/weekday";
 import DatetimePicker from "./DateTimePicker";
 
 type Mode = "free" | "locked-single" | "agl-slots" | "cat-toggle";
 
 function getMode(category: string | null, selectedBoss: string | null): Mode {
-  if (category === "Прайм" && selectedBoss && LOCKED_SINGLE_TIME_PRIME_BOSSES.includes(selectedBoss)) {
+  if (
+    category === "Прайм" &&
+    selectedBoss &&
+    LOCKED_SINGLE_TIME_PRIME_BOSSES.includes(selectedBoss)
+  ) {
     return "locked-single";
   }
   if (category === "АГЛ" && selectedBoss === "АГЛ") return "agl-slots";
@@ -58,7 +65,10 @@ export function ScheduledDateTimePicker({
   value: Date | null;
   onChange: (date: Date | null) => void;
 }) {
-  const mode = useMemo(() => getMode(category, selectedBoss), [category, selectedBoss]);
+  const mode = useMemo(
+    () => getMode(category, selectedBoss),
+    [category, selectedBoss],
+  );
 
   const [dateOnly, setDateOnly] = useState<Date | null>(value);
   const [times, setTimes] = useState<string[]>([]);
@@ -158,7 +168,7 @@ export function ScheduledDateTimePicker({
         timezone="Europe/Moscow"
         value={dateOnly ?? undefined}
         onChange={handleDateOnlyChange}
-        classNames={{ trigger: "w-[270px]" }}
+        classNames={{ trigger: "w-full" }}
       />
 
       {(loading || isPendingKey) && dateOnly && (
@@ -171,8 +181,12 @@ export function ScheduledDateTimePicker({
         </p>
       )}
 
-      {!loading && !isPendingKey && !loadError && mode === "locked-single" && dateOnly && (
-        times.length > 0 ? (
+      {!loading &&
+        !isPendingKey &&
+        !loadError &&
+        mode === "locked-single" &&
+        dateOnly &&
+        (times.length > 0 ? (
           <p className="text-sm text-muted-foreground">
             Время зафиксировано: <strong>{times[0]}</strong> (по расписанию)
           </p>
@@ -180,13 +194,19 @@ export function ScheduledDateTimePicker({
           <p className="text-sm text-red-500">
             {selectedBoss} не рейдится в этот день недели — выберите другую дату
           </p>
-        )
-      )}
+        ))}
 
-      {!loading && !isPendingKey && !loadError && mode === "agl-slots" && dateOnly && (
-        availableTimes.length > 0 ? (
-          <Select value={selectedTime ?? undefined} onValueChange={handleTimeSelect}>
-            <SelectTrigger className="w-[270px]">
+      {!loading &&
+        !isPendingKey &&
+        !loadError &&
+        mode === "agl-slots" &&
+        dateOnly &&
+        (availableTimes.length > 0 ? (
+          <Select
+            value={selectedTime ?? undefined}
+            onValueChange={handleTimeSelect}
+          >
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="Выберите время" />
             </SelectTrigger>
             <SelectContent>
@@ -201,11 +221,14 @@ export function ScheduledDateTimePicker({
           <p className="text-sm text-red-500">
             Все слоты АГЛ на эту дату уже заняты
           </p>
-        )
-      )}
+        ))}
 
-      {!loading && !isPendingKey && !loadError && mode === "cat-toggle" && dateOnly && (
-        times.length > 0 ? (
+      {!loading &&
+        !isPendingKey &&
+        !loadError &&
+        mode === "cat-toggle" &&
+        dateOnly &&
+        (times.length > 0 ? (
           <div className="flex gap-2">
             {times.map((t, idx) => (
               <Button
@@ -223,8 +246,7 @@ export function ScheduledDateTimePicker({
           <p className="text-sm text-red-500">
             Кошка не рейдится в этот день недели — выберите другую дату
           </p>
-        )
-      )}
+        ))}
     </div>
   );
 }

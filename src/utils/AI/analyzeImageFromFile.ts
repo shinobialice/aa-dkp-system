@@ -1,5 +1,12 @@
+export type OcrBox = { x: number; y: number; width: number; height: number };
+
+export type OcrWord = { name: string; box: OcrBox | null };
+
+export type OcrImage = { words: OcrWord[]; width: number; height: number };
+
 type OCRLine = {
   text: string;
+  box?: OcrBox | null;
 };
 
 type OCRPage = {
@@ -12,7 +19,9 @@ type OCRResult = {
 
 const UPSCALE_FACTOR = 2;
 
-function upscaleImage(file: File): Promise<Blob> {
+function upscaleImage(
+  file: File,
+): Promise<{ blob: Blob; width: number; height: number }> {
   return new Promise((resolve, reject) => {
     const img = new Image();
 
@@ -33,7 +42,7 @@ function upscaleImage(file: File): Promise<Blob> {
 
       canvas.toBlob((blob) => {
         if (blob) {
-          resolve(blob);
+          resolve({ blob, width: img.width, height: img.height });
         } else {
           reject(new Error("Failed to upscale image"));
         }
@@ -45,27 +54,28 @@ function upscaleImage(file: File): Promise<Blob> {
   });
 }
 
-async function analyzeImageFromFile(
-  file: File,
-): Promise<{ name: string; className?: string }[]> {
-  const upscaled = await upscaleImage(file);
+async function analyzeImageFromFile(file: File): Promise<OcrImage> {
+  const { blob, width, height } = await upscaleImage(file);
 
   const formData = new FormData();
-  formData.append("image", upscaled, "upscaled.png");
+  formData.append("image", blob, "upscaled.png");
 
   const res = await fetch("/api/analyze", {
     method: "POST",
     body: formData,
   });
 
-  const data: { raw: OCRResult } = await res.json();
+  const data: { raw?: OCRResult; error?: string } = await res.json();
+  if (!res.ok || !data.raw) {
+    throw new Error(data.error ?? "Не удалось распознать скриншот");
+  }
 
-  const results =
+  const words =
     data.raw.readResults?.flatMap((page) =>
       page.lines
         .filter((line) => {
           const text = line.text.replace(/[.]/g, "").trim();
-          if (/^\d+$/.test(text)) {
+          if (!text || /^\d+$/.test(text)) {
             return false;
           }
 
@@ -73,13 +83,20 @@ async function analyzeImageFromFile(
             text.replace(/[a-zA-Zа-яА-ЯёЁ0-9]/g, "").length / text.length;
           return nonWordRatio <= 0.5;
         })
-        .map((line) => {
-          const name = line.text.replace(/[.]/g, "").trim();
-          return { name };
-        }),
+        .map((line) => ({
+          name: line.text.replace(/[.]/g, "").trim(),
+          box: line.box
+            ? {
+                x: line.box.x / UPSCALE_FACTOR,
+                y: line.box.y / UPSCALE_FACTOR,
+                width: line.box.width / UPSCALE_FACTOR,
+                height: line.box.height / UPSCALE_FACTOR,
+              }
+            : null,
+        })),
     ) ?? [];
 
-  return results;
+  return { words, width, height };
 }
 
 export default analyzeImageFromFile;

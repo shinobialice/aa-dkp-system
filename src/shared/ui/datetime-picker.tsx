@@ -36,6 +36,7 @@ import {
   startOfDay,
   endOfDay,
 } from "date-fns";
+import { ru } from "date-fns/locale";
 import {
   CalendarIcon,
   CheckIcon,
@@ -231,12 +232,13 @@ export function DateTimePicker({
   }, [date, value, open]);
 
   const dislayFormat = useMemo(() => {
-    if (!displayValue) return "Pick a date";
+    if (!displayValue) return "Выберите дату";
     return format(
       displayValue,
-      `${!hideTime ? "MMM" : "MMMM"} d, yyyy${
-        !hideTime ? (use12HourFormat ? " hh:mm:ss a" : " HH:mm:ss") : ""
+      `d MMMM yyyy${
+        !hideTime ? (use12HourFormat ? ", hh:mm a" : ", HH:mm") : ""
       }`,
+      { locale: ru },
     );
   }, [displayValue, hideTime, use12HourFormat]);
 
@@ -299,7 +301,7 @@ export function DateTimePicker({
                   )
                 }
               >
-                {format(month, "MMMM")}
+                {format(month, "LLLL", { locale: ru })}
               </span>
               <span
                 className="ms-1"
@@ -336,6 +338,8 @@ export function DateTimePicker({
         <div className="relative overflow-hidden">
           <DayPicker
             timeZone={timezone}
+            locale={ru}
+            weekStartsOn={1}
             mode="single"
             // Навигация уже полностью своя (кнопки выше + MonthYearPicker) —
             // встроенный Nav только визуально скрыт через classNames, но всё
@@ -467,7 +471,11 @@ function MonthYearPicker({
       const endM = endOfMonth(setMonthFns(value, i));
       if (minDate && endM < minDate) disabled = true;
       if (maxDate && startM > maxDate) disabled = true;
-      months.push({ value: i, label: format(new Date(0, i), "MMM"), disabled });
+      months.push({
+        value: i,
+        label: format(new Date(0, i), "LLL", { locale: ru }),
+        disabled,
+      });
     }
     return months;
   }, [value]);
