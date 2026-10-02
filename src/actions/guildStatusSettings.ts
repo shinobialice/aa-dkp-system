@@ -399,78 +399,59 @@ export async function updateGuildLocation(
   revalidatePath("/", "layout");
 }
 
-const TOP_LIMIT = 20;
+export type PvpPlayerStats = {
+  userId: number;
+  userName: string;
+  kills: number;
+  honor: number;
+};
 
 export interface GuildPvpStats {
   totalHonor: number;
   totalKills: number;
-  topByHonor: {
-    userName: string;
-    userId: number;
-    totalHonor: number;
-  }[];
-  topByKills: {
-    userName: string;
-    userId: number;
-    totalKills: number;
-  }[];
+  players: PvpPlayerStats[];
 }
 
 export async function getStatsForPeriod(
   startDate: string,
+  endDate: string | null = null,
 ): Promise<GuildPvpStats> {
+  const rangeEnd = endDate ?? "infinity";
   try {
-    const [totalStats, topKills, topHonor] = await Promise.all([
-      // Суммарное количество килов за период
-      sql`
-      SELECT 
-        SUM(end_kills - start_kills) AS "totalKills",
-        SUM(end_honor - start_honor) AS "totalHonor"
-      FROM killcount_stats
-      WHERE recorded_at >= ${startDate}
-    `,
-
-      // Топ игроков по килам
-      sql<GuildPvpStats["topByKills"]>`
-      SELECT 
-        u.id AS "userId",
-        u.username AS "userName",
-        SUM(s.end_kills - s.start_kills) AS "totalKills"
-      FROM killcount_stats s
-      JOIN "user" u ON s.user_id = u.id
-      WHERE s.recorded_at >= ${startDate}
-      GROUP BY u.id, u.username
-      ORDER BY "totalKills" DESC, SUM(s.end_honor - s.start_honor) DESC, u.id
-      LIMIT ${TOP_LIMIT}
-    `,
-
-      // Топ игроков по хонору
-      sql<GuildPvpStats["topByHonor"]>`
-      SELECT 
-        u.id AS "userId",
-        u.username AS "userName",
-        SUM(s.end_honor - s.start_honor) AS "totalHonor"
-      FROM killcount_stats s
-      JOIN "user" u ON s.user_id = u.id
-      WHERE s.recorded_at >= ${startDate}
-      GROUP BY u.id, u.username
-      ORDER BY "totalHonor" DESC
-      LIMIT ${TOP_LIMIT}
-    `,
+    const [totalStats, players] = await Promise.all([
+      sql<any[]>`
+        SELECT
+          COALESCE(SUM(end_kills - start_kills), 0) AS "totalKills",
+          COALESCE(SUM(end_honor - start_honor), 0) AS "totalHonor"
+        FROM killcount_stats
+        WHERE recorded_at >= ${startDate} AND recorded_at < ${rangeEnd}
+      `,
+      sql<any[]>`
+        SELECT
+          u.id AS "userId",
+          u.username AS "userName",
+          SUM(s.end_kills - s.start_kills) AS kills,
+          SUM(s.end_honor - s.start_honor) AS honor
+        FROM killcount_stats s
+        JOIN "user" u ON s.user_id = u.id
+        WHERE s.recorded_at >= ${startDate} AND s.recorded_at < ${rangeEnd}
+        GROUP BY u.id, u.username
+        ORDER BY kills DESC, honor DESC, u.id
+      `,
     ]);
 
     return {
-      totalHonor: totalStats?.at(0)?.totalHonor || 0,
-      totalKills: totalStats?.at(0)?.totalKills || 0,
-      topByKills: topKills,
-      topByHonor: topHonor,
+      totalKills: Number(totalStats[0]?.totalKills ?? 0),
+      totalHonor: Number(totalStats[0]?.totalHonor ?? 0),
+      players: players.map((row) => ({
+        userId: row.userId,
+        userName: row.userName,
+        kills: Number(row.kills),
+        honor: Number(row.honor),
+      })),
     };
   } catch (error) {
-    return {
-      totalHonor: 0,
-      totalKills: 0,
-      topByKills: [],
-      topByHonor: [],
-    };
+    console.error("Ошибка при получении статистики киллкаунта за период:", error);
+    return { totalHonor: 0, totalKills: 0, players: [] };
   }
 }

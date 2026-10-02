@@ -1,56 +1,76 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
-import { ChevronLeft, Loader2, Users, Coins, ShoppingCart } from "lucide-react";
-import { Button, Card } from "@/shared/ui";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { Button } from "@/shared/ui";
 import {
-  MODE_LABEL,
-  MODE_ICON,
-  FACTION_LABEL,
-} from "@/shared/config/guildStatus";
+  getStatsForPeriod,
+  type GuildPvpStats,
+  type WarPeriodHistoryRow,
+} from "@/actions/guildStatusSettings";
 import {
   getPeriodAttendanceTop,
   getPeriodFinanceSummary,
-  getPeriodTopSales,
-  getPeriodTopBuyers,
-  getPeriodTopIncomeSources,
-  getPeriodTopDrops,
   getPeriodMembershipChanges,
+  getPeriodTopBuyers,
+  getPeriodTopDrops,
+  getPeriodTopIncomeSources,
+  getPeriodTopSales,
   type PeriodAttendanceResult,
   type PeriodMembershipChanges,
   type WarEconomySnapshot,
 } from "@/actions/warActions";
-import type { WarPeriodHistoryRow } from "@/actions/guildStatusSettings";
-import { formatDuration } from "./WarLiveDuration";
-import WarLeaderboardCard, { type LeaderboardRow } from "./WarLeaderboardCard";
-import WarDropsCard from "./WarDropsCard";
-import WarTopSalesCard from "./WarTopSalesCard";
-import WarMembershipCard from "./WarMembershipCard";
+import WarHeader from "./WarHeader";
+import WarDashboard from "./WarDashboard";
+import { WarOpponentsCard, type OpponentView } from "./WarOpponentsCard";
 
-function formatDT(iso: string) {
-  return new Date(iso).toLocaleString("ru-RU", {
-    hour12: false,
-    timeZone: "Europe/Moscow",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+type DetailData = {
+  attendance: PeriodAttendanceResult;
+  membership: PeriodMembershipChanges;
+  economy: WarEconomySnapshot | null;
+  pvpStats: GuildPvpStats | null;
+};
+
+async function loadEconomy(
+  start: string,
+  end: string,
+): Promise<WarEconomySnapshot> {
+  const [finance, topSales, topBuyers, incomeSources, drops] =
+    await Promise.all([
+      getPeriodFinanceSummary(start, end),
+      getPeriodTopSales(start, end),
+      getPeriodTopBuyers(start, end),
+      getPeriodTopIncomeSources(start, end),
+      getPeriodTopDrops(start, end),
+    ]);
+  return { finance, topSales, topBuyers, incomeSources, drops };
 }
 
-function formatNum(n: number): string {
-  return n.toLocaleString("ru-RU");
+function periodOpponents(period: WarPeriodHistoryRow): OpponentView[] {
+  return [
+    ...(period.opponentGuild
+      ? [
+          {
+            key: "primary",
+            name: period.opponentGuild,
+            startedAt: period.startedAt,
+            endedAt: period.opponentEndedAt ?? period.endedAt,
+            status: period.opponentEndedAt
+              ? ("ended" as const)
+              : ("periodEnd" as const),
+          },
+        ]
+      : []),
+    ...period.extraOpponents.map((opponent, index) => ({
+      key: `extra-${index}`,
+      name: opponent.name,
+      startedAt: opponent.startedAt,
+      endedAt: opponent.endedAt ?? period.endedAt,
+      status: opponent.endedAt ? ("ended" as const) : ("periodEnd" as const),
+    })),
+  ];
 }
 
-// Разбор одного периода из истории. Показываем ТОЛЬКО реальные данные.
-// Посещаемость — всегда (var/фришка, из raid/raid_attendance за сохранённый
-// диапазон дат). Для закрытых периодов фришки — ещё и реальная экономика
-// (доход/покупатели/источники/дроп, см. warActions.ts). Для вара килов/
-// хонора/доп. ЗП здесь нет и не будет, пока по ним нет реального источника:
-// замокать их тут означало бы выдать выдуманные цифры за постоянную запись
-// истории, а не за "скоро появится" на живой странице — это хуже.
 export default function WarHistoryDetail({
   period,
   onBack,
@@ -58,209 +78,72 @@ export default function WarHistoryDetail({
   period: WarPeriodHistoryRow;
   onBack: () => void;
 }) {
-  const [attendance, setAttendance] = useState<PeriodAttendanceResult | null>(
-    null,
-  );
-  const [economy, setEconomy] = useState<WarEconomySnapshot | null>(null);
-  const [membership, setMembership] = useState<PeriodMembershipChanges | null>(
-    null,
-  );
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<DetailData | null>(null);
+  const { mode, startedAt, endedAt } = period;
 
   useEffect(() => {
-    let isMounted = true;
-    setLoading(true);
-    setAttendance(null);
-    setEconomy(null);
-    setMembership(null);
-
-    const economyPromise: Promise<WarEconomySnapshot | null> =
-      period.mode === "freeshard"
-        ? Promise.all([
-            getPeriodFinanceSummary(period.startedAt, period.endedAt),
-            getPeriodTopSales(period.startedAt, period.endedAt),
-            getPeriodTopBuyers(period.startedAt, period.endedAt),
-            getPeriodTopIncomeSources(period.startedAt, period.endedAt),
-            getPeriodTopDrops(period.startedAt, period.endedAt),
-          ]).then(([finance, topSales, topBuyers, incomeSources, drops]) => ({
-            finance,
-            topSales,
-            topBuyers,
-            incomeSources,
-            drops,
-          }))
-        : Promise.resolve(null);
-
+    let cancelled = false;
     Promise.all([
-      getPeriodAttendanceTop(period.startedAt, period.endedAt, period.mode),
-      getPeriodMembershipChanges(period.startedAt, period.endedAt),
-      economyPromise,
-    ]).then(([attendanceResult, membershipResult, economyResult]) => {
-      if (!isMounted) return;
-      setAttendance(attendanceResult);
-      setMembership(membershipResult);
-      setEconomy(economyResult);
-      setLoading(false);
+      getPeriodAttendanceTop(startedAt, endedAt, mode),
+      getPeriodMembershipChanges(startedAt, endedAt),
+      mode === "freeshard"
+        ? loadEconomy(startedAt, endedAt)
+        : Promise.resolve(null),
+      mode === "pvp"
+        ? getStatsForPeriod(startedAt, endedAt)
+        : Promise.resolve(null),
+    ]).then(([attendance, membership, economy, pvpStats]) => {
+      if (!cancelled) setData({ attendance, membership, economy, pvpStats });
     });
-
     return () => {
-      isMounted = false;
+      cancelled = true;
     };
-  }, [period.id, period.mode, period.startedAt, period.endedAt]);
-
-  const attendanceRows: LeaderboardRow[] = (attendance?.top ?? []).map(
-    (e, i) => ({
-      rank: i + 1,
-      name: e.username,
-      userId: e.userId,
-      value: `${e.raidsAttended}/${attendance?.totalRaidsInPeriod ?? "?"}`,
-    }),
-  );
-
-  const incomeSourceRows: LeaderboardRow[] =
-    economy?.incomeSources.map((s, i) => ({
-      rank: i + 1,
-      name: s.source,
-      value: formatNum(s.income),
-    })) ?? [];
-
-  const buyerRows: LeaderboardRow[] =
-    economy?.topBuyers.map((b, i) => ({
-      rank: i + 1,
-      name: b.buyerUsername,
-      userId: b.buyerUserId,
-      value: formatNum(b.totalSpent),
-    })) ?? [];
-
-  const startedAtMs = new Date(period.startedAt).getTime();
-  const endedAtMs = new Date(period.endedAt).getTime();
-
-  const opponents = [
-    ...(period.opponentGuild
-      ? [
-          {
-            name: period.opponentGuild,
-            startedAt: period.startedAt,
-            endedAt: period.opponentEndedAt,
-            isPrimary: true,
-          },
-        ]
-      : []),
-    ...period.extraOpponents.map((o) => ({ ...o, isPrimary: false })),
-  ];
+  }, [mode, startedAt, endedAt]);
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-4">
       <Button
         variant="ghost"
         size="sm"
         onClick={onBack}
-        className="cursor-pointer"
+        className="-ml-2 cursor-pointer self-start"
       >
-        <ChevronLeft className="size-4" />
-        Назад к истории
+        <ArrowLeft />
+        История
       </Button>
 
-      <Card className="flex flex-col items-center gap-2 p-6">
-        <Image
-          src={MODE_ICON[period.mode]}
-          alt={MODE_LABEL[period.mode]}
-          width={90}
-          height={90}
+      <div className="rounded-xl border bg-muted/30 p-4">
+        <WarHeader
+          compact
+          mode={mode}
+          server={period.server}
+          faction={period.faction}
+          startedAt={startedAt}
+          endedAt={endedAt}
         />
-        <h2 className="text-xl font-bold">{MODE_LABEL[period.mode]}</h2>
-        {opponents.map((opponent) => (
-          <p key={`${opponent.name}-${opponent.startedAt}`}>
-            против{" "}
-            <strong
-              className={
-                opponent.endedAt ? "text-muted-foreground" : "text-destructive"
-              }
-            >
-              {opponent.name}
-            </strong>
-            {(opponent.endedAt || !opponent.isPrimary) && (
-              <span className="text-sm text-muted-foreground">
-                {" "}
-                {opponent.endedAt
-                  ? `слились · с ${formatDT(opponent.startedAt)} по ${formatDT(opponent.endedAt)}`
-                  : `с ${formatDT(opponent.startedAt)}`}{" "}
-                ·{" "}
-                {formatDuration(
-                  new Date(opponent.startedAt).getTime(),
-                  opponent.endedAt
-                    ? new Date(opponent.endedAt).getTime()
-                    : endedAtMs,
-                )}
-              </span>
-            )}
-          </p>
-        ))}
-        <p className="text-sm text-muted-foreground">
-          {period.server} · {FACTION_LABEL[period.faction]}
-        </p>
-        <p className="text-sm text-muted-foreground">
-          {formatDT(period.startedAt)} — {formatDT(period.endedAt)}
-        </p>
-        <p className="text-lg font-semibold tabular-nums">
-          {formatDuration(startedAtMs, endedAtMs)}
-        </p>
-      </Card>
+      </div>
 
-      {loading ? (
+      {mode === "pvp" && (
+        <WarOpponentsCard
+          opponents={periodOpponents(period)}
+          emptyText="Противник не был указан"
+        />
+      )}
+
+      {data ? (
+        <WarDashboard
+          mode={mode}
+          startedAt={startedAt}
+          asOf={endedAt}
+          attendance={data.attendance}
+          membership={data.membership}
+          pvpStats={data.pvpStats}
+          economy={data.economy}
+        />
+      ) : (
         <div className="flex items-center justify-center py-16">
           <Loader2 className="size-8 animate-spin text-muted-foreground" />
         </div>
-      ) : (
-        <>
-          {period.mode === "freeshard" && (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <Card className="flex flex-col justify-center gap-1 p-4">
-                <p className="text-2xl font-bold tabular-nums">
-                  {formatNum(economy?.finance.totalEarned ?? 0)}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Заработано за период
-                </p>
-              </Card>
-              <Card className="flex flex-col justify-center gap-1 p-4">
-                <p className="text-2xl font-bold tabular-nums">
-                  {economy?.finance.itemsSoldCount ?? 0}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Куплено предметов
-                </p>
-              </Card>
-            </div>
-          )}
-
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <WarLeaderboardCard
-              icon={Users}
-              title="Посещаемость"
-              rows={attendanceRows}
-            />
-            <WarMembershipCard
-              changes={membership ?? { joined: [], left: [], afk: [] }}
-            />
-            {period.mode === "freeshard" && (
-              <>
-                <WarLeaderboardCard
-                  icon={Coins}
-                  title="Топ источников дохода"
-                  rows={incomeSourceRows}
-                />
-                <WarLeaderboardCard
-                  icon={ShoppingCart}
-                  title="Топ покупателей"
-                  rows={buyerRows}
-                />
-                <WarTopSalesCard rows={economy?.topSales ?? []} />
-                <WarDropsCard rows={economy?.drops ?? []} />
-              </>
-            )}
-          </div>
-        </>
       )}
     </div>
   );

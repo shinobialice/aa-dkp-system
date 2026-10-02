@@ -1,68 +1,35 @@
 "use client";
-import {
-  Collapsible,
-  CollapsibleTrigger,
-  CollapsibleContent,
-} from "@radix-ui/react-collapsible";
-import {
-  Moon,
-  Sun,
-  ChevronUp,
-  ChevronDown,
-  Info,
-  Users,
-  CalendarDays,
-  Trophy,
-  Calendar,
-  LineChart,
-  Settings,
-  PiggyBank,
-  Gift,
-  BadgeDollarSign,
-  HandCoins,
-  Swords,
-  UserX,
-  Newspaper,
-  Package,
-  Eye,
-  EyeOff,
-  Megaphone,
-  History,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
 
-import { useTheme } from "next-themes";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/shared/ui";
+import type { FC, ReactNode } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarFooter,
-  Separator,
-  Switch,
+  SidebarRail,
+  SidebarTrigger,
 } from "@/shared/ui";
-import Image from "next/image";
 import { NavUser } from "./NavUser";
 import { OnlineUsersWidget } from "./OnlineUsersWidget";
 import DimonishMenuItem from "./DimonishMenuItem";
-import { FC, useState, useTransition } from "react";
-import { setViewAsRegular } from "@/actions/viewAsRegular";
+import { ThemeSidebarItem, ViewAsPlayerSidebarItem } from "./SidebarControls";
+import { ALL_NAV_URLS, NAV_SECTIONS, findActiveUrl } from "./navConfig";
 
 type Props = {
   isAdmin: boolean;
   isRealAdmin?: boolean;
   viewingAsRegular?: boolean;
-  locationBadge?: React.ReactNode;
+  locationBadge?: ReactNode;
+  locationIcon?: ReactNode;
 };
 
 const AppSidebar: FC<Props> = ({
@@ -70,231 +37,87 @@ const AppSidebar: FC<Props> = ({
   isRealAdmin,
   viewingAsRegular,
   locationBadge,
+  locationIcon,
 }) => {
-  const { setTheme } = useTheme();
-  const router = useRouter();
-  const [checked, setChecked] = useState(!!viewingAsRegular);
-  const [isPending, startTransition] = useTransition();
-
-  const handleToggleView = (next: boolean) => {
-    setChecked(next);
-    startTransition(async () => {
-      await setViewAsRegular(next);
-      router.refresh();
-    });
-  };
-
-  const menuItems = [
-    { title: "Основная информация", url: "/news", icon: Info },
-    { title: "Новости", url: "/game-news", icon: Newspaper },
-    { title: "Доска объявлений", url: "/marketplace", icon: Megaphone },
-    { title: "Участники", url: "/members", icon: Users },
-    { title: "Посещаемость", url: "/activities", icon: CalendarDays },
-    { title: "Расписание", url: "/schedule", icon: Calendar },
-    {
-      title: "Добыча",
-      icon: Trophy,
-      items: [
-        { title: "Казна", url: "/loot", icon: PiggyBank },
-        { title: "Финансы", url: "/loot/finance", icon: HandCoins },
-        { title: "Раздача лута", url: "/loot/giveaway", icon: Gift },
-        { title: "Покупка лута", url: "/loot/buy", icon: BadgeDollarSign },
-      ],
-    },
-    { title: "Статистика", url: "/stats", icon: LineChart },
-    {
-      title: "Киллкаунт α",
-      icon: Swords,
-      items: [
-        { title: "Сегодня", url: "/kill-counter/current", icon: Swords },
-        { title: "История", url: "/kill-counter/history", icon: Swords },
-      ],
-    },
-  ];
-
-  const managementItems = [
-    { title: "Настройки", url: "/settings", icon: Settings },
-    { title: "Предметы", url: "/items", icon: Package },
-    { title: "АФК", url: "/afk", icon: UserX },
-    { title: "Список изменений", url: "/changelog", icon: History },
-  ];
+  const pathname = usePathname();
+  const activeUrl = findActiveUrl(pathname, ALL_NAV_URLS);
+  const sections = NAV_SECTIONS.filter((section) => !section.adminOnly || isAdmin);
 
   return (
-    <Sidebar>
-      <SidebarContent>
-        <div className="mb-4 border-b border-border pb-3 pt-4 space-y-2.5">
-          <button
-            type="button"
-            onClick={() => router.push("/")}
-            className="flex w-full items-center justify-center gap-3 cursor-pointer"
+    <Sidebar collapsible="icon">
+      <SidebarHeader className="gap-3 pt-4">
+        <div className="flex items-center gap-2 group-data-[collapsible=icon]:flex-col">
+          <Link
+            href="/"
+            className="flex min-w-0 flex-1 items-center gap-2.5 rounded-md px-1"
           >
             <Image
               src="/images/logo.png"
               alt="No Fear"
-              width={64}
-              height={64}
-              className="mb-0"
+              width={40}
+              height={40}
+              className="size-9 shrink-0 object-contain group-data-[collapsible=icon]:size-8"
             />
-            <h2 className="text-2xl font-bold text-primary">No Fear</h2>
-          </button>
-          {locationBadge && (
-            <>
-              <Separator />
-              <div className="px-4">{locationBadge}</div>
-            </>
-          )}
+            <span className="truncate text-xl font-bold text-primary group-data-[collapsible=icon]:hidden">
+              No Fear
+            </span>
+          </Link>
+          <SidebarTrigger
+            className="cursor-pointer text-muted-foreground"
+            title="Свернуть или развернуть меню (Ctrl+B)"
+            aria-label="Свернуть или развернуть меню"
+          />
         </div>
+        {locationBadge && (
+          <div className="group-data-[collapsible=icon]:hidden">{locationBadge}</div>
+        )}
+        {locationIcon && (
+          <div className="hidden justify-center group-data-[collapsible=icon]:flex">
+            {locationIcon}
+          </div>
+        )}
+      </SidebarHeader>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Меню</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {menuItems.map((item) => {
-                if (item.items) {
+      <SidebarContent className="gap-0">
+        {sections.map((section) => (
+          <SidebarGroup key={section.title ?? "main"} className="py-1">
+            {section.title && <SidebarGroupLabel>{section.title}</SidebarGroupLabel>}
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {section.items.map((item) => {
+                  const active = item.url === activeUrl;
                   return (
-                    <SidebarMenuItem key={item.title}>
-                      <Collapsible
-                        defaultOpen
-                        className="group/collapsible w-full"
+                    <SidebarMenuItem key={item.url}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={active}
+                        tooltip={item.title}
+                        className="data-[active=true]:font-semibold data-[active=true]:[&>svg]:text-green-600 dark:data-[active=true]:[&>svg]:text-green-400"
                       >
-                        <SidebarMenuButton asChild>
-                          <CollapsibleTrigger className="flex items-center w-full gap-2 rounded-md p-2 text-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition cursor-pointer">
-                            <item.icon className="h-5 w-5" />
-                            <span className="truncate">{item.title}</span>
-                            <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
-                          </CollapsibleTrigger>
-                        </SidebarMenuButton>
-                        <CollapsibleContent className="pl-7 ">
-                          <SidebarMenu>
-                            {item.items.map((subItem) => (
-                              <SidebarMenuItem key={subItem.title}>
-                                <SidebarMenuButton
-                                  className="cursor-pointer"
-                                  onClick={() => router.push(subItem.url)}
-                                >
-                                  <subItem.icon className="h-4 w-4" />
-                                  <span>{subItem.title}</span>
-                                </SidebarMenuButton>
-                              </SidebarMenuItem>
-                            ))}
-                          </SidebarMenu>
-                        </CollapsibleContent>
-                      </Collapsible>
+                        <Link href={item.url} aria-current={active ? "page" : undefined}>
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
                     </SidebarMenuItem>
                   );
-                }
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      className="cursor-pointer"
-                      onClick={() => router.push(item.url)}
-                    >
-                      <item.icon className="h-5 w-5" />
-                      <span>{item.title}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-              <DimonishMenuItem />
-
-              {isAdmin && (
-                <SidebarMenuItem>
-                  <Collapsible defaultOpen className="group/collapsible w-full">
-                    <SidebarMenuButton asChild>
-                      <CollapsibleTrigger className="flex items-center w-full gap-2 rounded-md p-2 text-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition cursor-pointer">
-                        <Settings className="h-5 w-5" />
-                        <span className="truncate">Управление сайтом</span>
-                        <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
-                      </CollapsibleTrigger>
-                    </SidebarMenuButton>
-                    <CollapsibleContent className="pl-7 ">
-                      <SidebarMenu>
-                        {managementItems.map((subItem) => (
-                          <SidebarMenuItem key={subItem.title}>
-                            <SidebarMenuButton
-                              className="cursor-pointer"
-                              onClick={() => router.push(subItem.url)}
-                            >
-                              <subItem.icon className="h-4 w-4" />
-                              <span>{subItem.title}</span>
-                            </SidebarMenuButton>
-                          </SidebarMenuItem>
-                        ))}
-                      </SidebarMenu>
-                    </CollapsibleContent>
-                  </Collapsible>
-                </SidebarMenuItem>
-              )}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+                })}
+                {section.withDimonish && <DimonishMenuItem />}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
 
-      <SidebarFooter>
+      <SidebarFooter className="border-t">
         <SidebarMenu>
           <OnlineUsersWidget />
-
-          {isRealAdmin && (
-            <SidebarMenuItem>
-              <div
-                className={`flex items-center gap-2 rounded-md p-2 text-sm ${
-                  checked
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                    : ""
-                }`}
-              >
-                {checked ? (
-                  <EyeOff className="h-5 w-5 shrink-0" />
-                ) : (
-                  <Eye className="h-5 w-5 shrink-0" />
-                )}
-                <span className="flex-1 truncate">Глазами игрока</span>
-                <Switch
-                  className="cursor-pointer"
-                  checked={checked}
-                  disabled={isPending}
-                  onCheckedChange={handleToggleView}
-                />
-              </div>
-            </SidebarMenuItem>
-          )}
-
-          <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton className="cursor-pointer">
-                  <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                  <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                  <span>Тема</span>
-                  <ChevronUp className="ml-auto" />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent side="top" className="w-[250px]">
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  onClick={() => setTheme("light")}
-                >
-                  Светлая
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  onClick={() => setTheme("dark")}
-                >
-                  Тёмная
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  onClick={() => setTheme("system")}
-                >
-                  Системная
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SidebarMenuItem>
-
-          <NavUser />
+          {isRealAdmin && <ViewAsPlayerSidebarItem initial={!!viewingAsRegular} />}
+          <ThemeSidebarItem />
         </SidebarMenu>
+        <NavUser />
       </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   );
 };

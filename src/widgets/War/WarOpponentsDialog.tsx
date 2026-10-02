@@ -19,7 +19,7 @@ import type {
   WarOpponentDraft,
   WarOpponentsState,
 } from "@/actions/guildStatusSettings";
-import { formatDateRange, formatStartDate } from "./WarPeriodTimer";
+import { formatDateRange, formatStartDate } from "./warModel";
 
 type DraftRow = {
   key: string;

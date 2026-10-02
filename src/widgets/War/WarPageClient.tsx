@@ -1,17 +1,7 @@
 "use client";
 
-import Image from "next/image";
-import { Swords, Trophy, Users, Gift, Coins, ShoppingCart } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/shared/ui";
-import { MODE_LABEL, MODE_ICON } from "@/shared/config/guildStatus";
-import { getKillcountRank } from "@/shared/config/killcountRanks";
+import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui";
 import type {
   GuildPvpStats,
   GuildStatus,
@@ -22,70 +12,14 @@ import type {
   PeriodMembershipChanges,
   WarEconomySnapshot,
 } from "@/actions/warActions";
-import WarOpponents from "./WarOpponents";
-import WarPeriodTimer from "./WarPeriodTimer";
-import WarLeaderboardCard, { type LeaderboardRow } from "./WarLeaderboardCard";
-import WarDropsCard from "./WarDropsCard";
-import WarTopSalesCard from "./WarTopSalesCard";
-import WarMembershipCard from "./WarMembershipCard";
+import WarHeader from "./WarHeader";
+import WarDashboard from "./WarDashboard";
 import WarHistoryTab from "./WarHistoryTab";
-
-// ───────────────────────────────────────────────────────────────────────
-// МОК-ДАННЫЕ — только то, для чего в базе реально нет источника: килы и
-// хонор — чисто варная механика (в ArcheAge их нет во время фришки, взять
-// неоткуда даже в теории), показываются только при mode === "pvp". Всё
-// остальное на фришке (доход, покупатели, источники дохода, дроп с боссов)
-// теперь реальные данные — см. src/actions/warActions.ts. Имена в моках —
-// не настоящие ники ("Игрок N"), чтобы не приписывать реальным людям
-// выдуманные цифры.
-// ───────────────────────────────────────────────────────────────────────
-const MOCK_KILLS_LEADERBOARD: LeaderboardRow[] = [
-  { rank: 1, name: "Игрок 1", value: "42" },
-  { rank: 2, name: "Игрок 2", value: "37" },
-  { rank: 3, name: "Игрок 3", value: "25" },
-];
-const MOCK_HONOR_LEADERBOARD: LeaderboardRow[] = [
-  { rank: 1, name: "Игрок 1", value: "1 200" },
-  { rank: 2, name: "Игрок 2", value: "980" },
-  { rank: 3, name: "Игрок 3", value: "860" },
-];
-const MOCK_TOTAL_KILLS = "214";
-const MOCK_TOTAL_HONOR = "15 300";
-// ───────────────────────────────────────────────────────────────────────
-// Конец мок-данных.
-// ───────────────────────────────────────────────────────────────────────
-
-function formatNum(n: number): string {
-  return n.toLocaleString("ru-RU");
-}
-
-function MockTile({ value, label }: { value: string; label: string }) {
-  return (
-    <Card className="p-4">
-      <CardContent className="space-y-1 p-0">
-        <div className="flex items-center gap-2">
-          <p className="text-2xl font-bold tabular-nums">{value}</p>
-          <span className="text-[11px] text-muted-foreground">скоро</span>
-        </div>
-        <p className="text-xs text-muted-foreground">{label}</p>
-      </CardContent>
-    </Card>
-  );
-}
-
-function RealTile({ value, label }: { value: string | number; label: string }) {
-  return (
-    <Card className="p-4">
-      <CardContent className="space-y-1 p-0">
-        <p className="text-2xl font-bold tabular-nums">{value}</p>
-        <p className="text-xs text-muted-foreground">{label}</p>
-      </CardContent>
-    </Card>
-  );
-}
+import { WarOpponentsLive } from "./WarOpponentsCard";
 
 export default function WarPageClient({
   isAdmin,
+  asOf,
   initialStatus,
   initialWarOpponents,
   initialAttendance,
@@ -94,173 +28,74 @@ export default function WarPageClient({
   guildPvpStats,
 }: {
   isAdmin: boolean;
+  asOf: string;
   initialStatus: GuildStatus;
   initialWarOpponents: WarOpponentsState;
   initialAttendance: PeriodAttendanceResult;
   initialMembership: PeriodMembershipChanges;
   initialEconomy: WarEconomySnapshot | null;
-  guildPvpStats: GuildPvpStats;
+  guildPvpStats: GuildPvpStats | null;
 }) {
-  const { mode, startedAt } = initialStatus;
-  const isWar = mode === "pvp";
-
-  const topByKillsRows: LeaderboardRow[] = guildPvpStats.topByKills.map(
-    (item, index) => {
-      const { current } = getKillcountRank(Number(item.totalKills), index + 1);
-
-      return {
-        name: item.userName,
-        userId: item.userId,
-        rank: index + 1,
-        value: item.totalKills.toString(),
-        icon: current.icon,
-        iconTitle: current.name,
-      };
-    },
-  );
-  const topByHonorRows: LeaderboardRow[] = guildPvpStats.topByHonor.map(
-    (item, index) => ({
-      name: item.userName,
-      userId: item.userId,
-      rank: index + 1,
-      value: item.totalHonor.toString(),
-    }),
-  );
-
-  const attendanceRows: LeaderboardRow[] = initialAttendance.top.map(
-    (e, i) => ({
-      rank: i + 1,
-      name: e.username,
-      userId: e.userId,
-      value: `${e.raidsAttended}/${initialAttendance.totalRaidsInPeriod}`,
-    }),
-  );
-
-  const incomeSourceRows: LeaderboardRow[] =
-    initialEconomy?.incomeSources.map((s, i) => ({
-      rank: i + 1,
-      name: s.source,
-      value: formatNum(s.income),
-    })) ?? [];
-
-  const buyerRows: LeaderboardRow[] =
-    initialEconomy?.topBuyers.map((b, i) => ({
-      rank: i + 1,
-      name: b.buyerUsername,
-      userId: b.buyerUserId,
-      value: formatNum(b.totalSpent),
-    })) ?? [];
+  const [tab, setTab] = useState("now");
+  const { mode, server, faction, startedAt } = initialStatus;
+  const currentOpponents = [
+    initialWarOpponents.primary.endedAt
+      ? null
+      : initialWarOpponents.primary.name,
+    ...initialWarOpponents.opponents
+      .filter((opponent) => !opponent.endedAt)
+      .map((opponent) => opponent.name),
+  ].filter((name): name is string => !!name);
 
   return (
-    <div className="space-y-6">
-      <Card className="flex flex-col items-center gap-3 p-6 text-center">
-        <Image
-          src={MODE_ICON[mode]}
-          alt={MODE_LABEL[mode]}
-          width={110}
-          height={110}
-        />
-        {isWar ? (
-          <WarOpponents
-            title={MODE_LABEL[mode]}
+    <Tabs
+      value={tab}
+      onValueChange={setTab}
+      className="mx-auto w-full max-w-6xl min-w-0 gap-5"
+    >
+      <WarHeader
+        mode={mode}
+        server={server}
+        faction={faction}
+        startedAt={startedAt}
+        aside={
+          <TabsList className="h-10 w-full sm:w-auto">
+            <TabsTrigger value="now" className="cursor-pointer px-4">
+              Сейчас
+            </TabsTrigger>
+            <TabsTrigger value="history" className="cursor-pointer px-4">
+              История
+            </TabsTrigger>
+          </TabsList>
+        }
+      />
+
+      <TabsContent value="now" className="flex flex-col gap-4">
+        {mode === "pvp" && (
+          <WarOpponentsLive
             initialState={initialWarOpponents}
             warStartedAt={startedAt}
             isAdmin={isAdmin}
           />
-        ) : (
-          <>
-            <h1 className="text-2xl font-bold">{MODE_LABEL[mode]}</h1>
-            {startedAt && (
-              <WarPeriodTimer label="Фришка идёт" startedAt={startedAt} />
-            )}
-          </>
         )}
-      </Card>
+        <WarDashboard
+          mode={mode}
+          startedAt={startedAt}
+          asOf={asOf}
+          attendance={initialAttendance}
+          membership={initialMembership}
+          pvpStats={guildPvpStats}
+          economy={initialEconomy}
+        />
+      </TabsContent>
 
-      <Tabs defaultValue="now">
-        <TabsList>
-          <TabsTrigger className="cursor-pointer" value="now">
-            Сейчас
-          </TabsTrigger>
-          <TabsTrigger className="cursor-pointer" value="history">
-            История
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="now" className="space-y-6">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <RealTile
-              value={initialAttendance.totalRaidsInPeriod}
-              label="Рейдов за период"
-            />
-            {isWar ? (
-              <>
-                <RealTile
-                  value={guildPvpStats.totalKills}
-                  label="Киллы гильдии"
-                />
-                <RealTile
-                  value={guildPvpStats.totalHonor}
-                  label="Хонор гильдии"
-                />
-              </>
-            ) : (
-              <>
-                <RealTile
-                  value={formatNum(initialEconomy?.finance.totalEarned ?? 0)}
-                  label="Заработано за период"
-                />
-                <RealTile
-                  value={initialEconomy?.finance.itemsSoldCount ?? 0}
-                  label="Куплено предметов"
-                />
-              </>
-            )}
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <WarLeaderboardCard
-              icon={Users}
-              title="Посещаемость ПВП-рейдов"
-              rows={attendanceRows}
-            />
-            <WarMembershipCard changes={initialMembership} />
-            {isWar ? (
-              <>
-                <WarLeaderboardCard
-                  icon={Swords}
-                  title="Киллы"
-                  rows={topByKillsRows}
-                />
-                <WarLeaderboardCard
-                  icon={Trophy}
-                  title="Хонор"
-                  rows={topByHonorRows}
-                />
-              </>
-            ) : (
-              <>
-                <WarLeaderboardCard
-                  icon={Coins}
-                  title="Топ источников дохода"
-                  rows={incomeSourceRows}
-                />
-                <WarLeaderboardCard
-                  icon={ShoppingCart}
-                  title="Топ покупателей"
-                  rows={buyerRows}
-                />
-                <WarTopSalesCard rows={initialEconomy?.topSales ?? []} />
-                <WarDropsCard rows={initialEconomy?.drops ?? []} />
-              </>
-            )}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="history">
-          <WarHistoryTab />
-        </TabsContent>
-      </Tabs>
-    </div>
+      <TabsContent value="history">
+        <WarHistoryTab
+          current={initialStatus}
+          currentOpponents={currentOpponents}
+          onOpenCurrent={() => setTab("now")}
+        />
+      </TabsContent>
+    </Tabs>
   );
 }

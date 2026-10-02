@@ -4,11 +4,11 @@ import { useRef, useState } from "react";
 import { Ghost } from "lucide-react";
 import { SidebarMenuButton, SidebarMenuItem } from "@/shared/ui";
 
-const DimonishMenuItem = () => {
+function useDimonish() {
   const [open, setOpen] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const handleOpen = () => {
+  const show = () => {
     setOpen(true);
     const audio = audioRef.current;
     if (audio) {
@@ -17,7 +17,7 @@ const DimonishMenuItem = () => {
     }
   };
 
-  const handleClose = () => {
+  const hide = () => {
     setOpen(false);
     const audio = audioRef.current;
     if (audio) {
@@ -26,19 +26,13 @@ const DimonishMenuItem = () => {
     }
   };
 
-  return (
-    <SidebarMenuItem>
-      <SidebarMenuButton className="cursor-pointer" onClick={handleOpen}>
-        <Ghost className="h-5 w-5" />
-        <span>Димониш</span>
-      </SidebarMenuButton>
-
-      <audio ref={audioRef} src="/audio/dimonish.mp3" onEnded={handleClose} />
-
+  const overlay = (
+    <>
+      <audio ref={audioRef} src="/audio/dimonish.mp3" onEnded={hide} />
       {open && (
         <div
-          className="fixed inset-0 z-50 flex cursor-pointer items-center justify-center bg-black/70"
-          onClick={handleClose}
+          className="fixed inset-0 z-[100] flex cursor-pointer items-center justify-center bg-black/70"
+          onClick={hide}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -48,8 +42,38 @@ const DimonishMenuItem = () => {
           />
         </div>
       )}
+    </>
+  );
+
+  return { show, overlay };
+}
+
+const DimonishMenuItem = () => {
+  const { show, overlay } = useDimonish();
+
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton className="cursor-pointer" tooltip="Димониш" onClick={show}>
+        <Ghost />
+        <span>Димониш</span>
+      </SidebarMenuButton>
+      {overlay}
     </SidebarMenuItem>
   );
 };
+
+export function DimonishTile({ className }: { className: string }) {
+  const { show, overlay } = useDimonish();
+
+  return (
+    <>
+      <button type="button" className={className} onClick={show}>
+        <Ghost className="size-[22px] text-muted-foreground" />
+        Димониш
+      </button>
+      {overlay}
+    </>
+  );
+}
 
 export default DimonishMenuItem;

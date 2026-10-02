@@ -341,7 +341,7 @@ export function StockTab({
       </div>
 
       <div className="space-y-3 xl:hidden">
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(320px,100%),1fr))] gap-3">
           {groups.map((group) => {
             const open = expanded === group.itemTypeId;
             const meta = [

@@ -12,7 +12,7 @@ export async function GuildLocationBadge({
   variant = "card",
   className,
 }: {
-  variant?: "card" | "compact";
+  variant?: "card" | "compact" | "icon";
   className?: string;
 }) {
   const { server, faction, mode } = await getGuildStatus();
@@ -24,6 +24,19 @@ export async function GuildLocationBadge({
   // Ведёт на "/war" — карточка со статусом сервера дублирует пункт меню
   // "Вар" (см. sidebar/index.tsx), чтобы не занимать место в меню лишним
   // пунктом.
+  if (variant === "icon") {
+    return (
+      <Link
+        href="/war"
+        className={`flex size-9 items-center justify-center rounded-lg border border-border bg-muted/50 transition hover:bg-muted ${className ?? ""}`}
+        title={`${server} · ${factionLabel} · ${modeLabel}`}
+        aria-label={`${server} · ${factionLabel} · ${modeLabel}`}
+      >
+        <Image src={icon} alt="" width={24} height={24} />
+      </Link>
+    );
+  }
+
   if (variant === "compact") {
     return (
       <Link
