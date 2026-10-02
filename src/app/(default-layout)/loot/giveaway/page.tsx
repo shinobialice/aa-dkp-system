@@ -1,23 +1,36 @@
 "use server";
 import sql from "@/shared/lib/db";
 import { hasTag } from "@/actions/hasTag";
+import { getSessionUserId } from "@/actions/getSessionUserId";
 import LootGiveaway from "@/widgets/Loot/LootGiveaway";
 import { lootColumns } from "@/widgets/Loot/LootGiveaway/lootColumns";
 import { gliderTypes } from "@/widgets/Loot/LootGiveaway/gliderTypes";
 import { treasuryNameByGiveawayName } from "@/widgets/Loot/LootGiveaway/treasuryGiveawaySync";
+import type {
+  GiveawayStatus,
+  Player,
+  TrackedItem,
+} from "@/widgets/Loot/LootGiveaway/giveawayModel";
 import { cookies } from "next/headers";
 
 export default async function Page() {
   const sessionToken = (await cookies()).get("session_token")?.value ?? "";
-  const isAdmin = await hasTag(sessionToken, ["Администратор"]);
+  const [isAdmin, currentUserId] = await Promise.all([
+    hasTag(sessionToken, ["Администратор"]),
+    getSessionUserId(),
+  ]);
 
   let users, giveawayRows, miscGrantRows, wishlistRows, itemTypeRows;
   try {
     [users, giveawayRows, miscGrantRows, wishlistRows, itemTypeRows] =
       await Promise.all([
-        sql<any[]>`SELECT id, username, active, avatar_url FROM "user" ORDER BY id ASC`,
+        sql<
+          any[]
+        >`SELECT id, username, active, avatar_url FROM "user" ORDER BY id ASC`,
         sql<any[]>`SELECT user_id, name, date, status FROM givenawayloot`,
-        sql<any[]>`SELECT user_id, id, comment, amount, date FROM misc_loot_grants`,
+        sql<
+          any[]
+        >`SELECT user_id, id, comment, amount, date FROM misc_loot_grants`,
         sql<any[]>`SELECT user_id, id, item_name, comment FROM loot_wishlist`,
         sql<any[]>`SELECT name, icon_url, grade FROM item_type`,
       ]);
@@ -31,8 +44,26 @@ export default async function Page() {
   // такой предмет там есть (у части названий тут его нет, тогда просто без
   // иконки, как и раньше).
   const itemTypeByName = new Map(
-    itemTypeRows.map((it) => [it.name, { iconUrl: it.icon_url, grade: it.grade }]),
+    itemTypeRows.map((it) => [
+      it.name,
+      { iconUrl: it.icon_url, grade: it.grade },
+    ]),
   );
+
+  const items: TrackedItem[] = [
+    ...lootColumns.map((name) => ({ name, kind: "loot" as const })),
+    ...gliderTypes.map((name) => ({ name, kind: "glider" as const })),
+  ].map(({ name, kind }) => {
+    const itemType =
+      itemTypeByName.get(name) ??
+      itemTypeByName.get(treasuryNameByGiveawayName.get(name) ?? "");
+    return {
+      name,
+      kind,
+      iconUrl: itemType?.iconUrl ?? null,
+      grade: itemType?.grade ?? null,
+    };
+  });
 
   const giveawayByUser = new Map<number, any[]>();
   for (const g of giveawayRows) {
@@ -50,35 +81,19 @@ export default async function Page() {
     wishlistByUser.get(w.user_id)!.push(w);
   }
 
-  const initialPlayers = users.map((user) => {
+  const initialPlayers: Player[] = users.map((user) => {
     const givenawayloot = giveawayByUser.get(user.id) ?? [];
     return {
       id: user.id,
       username: user.username,
       active: user.active,
       avatarUrl: user.avatar_url,
-      loot: lootColumns.map((name) => {
+      items: items.map(({ name }) => {
         const record = givenawayloot.find((i) => i.name === name);
-        const itemType = itemTypeByName.get(name);
         return {
           name,
           date: record?.date?.split("T")[0] || "",
-          status: record?.status || "",
-          iconUrl: itemType?.iconUrl ?? null,
-          grade: itemType?.grade ?? null,
-        };
-      }),
-      gliders: gliderTypes.map((type) => {
-        const record = givenawayloot.find((i) => i.name === type);
-        const itemType =
-          itemTypeByName.get(type) ??
-          itemTypeByName.get(treasuryNameByGiveawayName.get(type) ?? "");
-        return {
-          type,
-          date: record?.date?.split("T")[0] || "",
-          status: record?.status || "",
-          iconUrl: itemType?.iconUrl ?? null,
-          grade: itemType?.grade ?? null,
+          status: (record?.status || "") as GiveawayStatus,
         };
       }),
       miscGrants: (miscGrantsByUser.get(user.id) ?? [])
@@ -97,5 +112,12 @@ export default async function Page() {
     };
   });
 
-  return <LootGiveaway isAdmin={isAdmin} initialPlayers={initialPlayers} />;
+  return (
+    <LootGiveaway
+      items={items}
+      initialPlayers={initialPlayers}
+      isAdmin={isAdmin}
+      currentUserId={currentUserId ?? null}
+    />
+  );
 }

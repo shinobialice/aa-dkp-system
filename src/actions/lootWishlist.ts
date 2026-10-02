@@ -1,6 +1,7 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import ensurePrivilieges from "./ensurePrivilieges";
 import { revalidatePath } from "next/cache";
 
 export type WishlistItem = {
@@ -13,6 +14,7 @@ export async function addWishlistItem(
   userId: number,
   item: { itemName: string; comment: string },
 ): Promise<WishlistItem> {
+  await ensurePrivilieges(["Администратор"]);
   let data;
   try {
     [data] = await sql<any[]>`
@@ -36,6 +38,7 @@ export async function addWishlistItem(
 }
 
 export async function deleteWishlistItem(id: number) {
+  await ensurePrivilieges(["Администратор"]);
   try {
     await sql<any[]>`DELETE FROM loot_wishlist WHERE id = ${id}`;
   } catch (error) {

@@ -1,11 +1,13 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import ensurePrivilieges from "./ensurePrivilieges";
 
 export const saveGivenAwayLoot = async (
   userId: number,
   item: { name: string; date: string; comment?: string; status: string },
 ) => {
+  await ensurePrivilieges(["Администратор"]);
   const dateObj = new Date(item.date).toISOString();
 
   let existing;
