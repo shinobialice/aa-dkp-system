@@ -5,8 +5,6 @@ import BossSelector from "./BossSelector";
 import DatetimePicker from "./DateTimePicker";
 import { ScheduledDateTimePicker } from "./ScheduledDateTimePicker";
 import { Checkbox } from "@/shared/ui";
-import { Label } from "@/shared/ui";
-import { Input } from "@/shared/ui";
 import { getActiveUsers } from "@/actions/getActiveUsers";
 import { getAttendanceBonusTypesForRaid } from "@/actions/attendanceBonusSettings";
 import type { ResolvedAttendanceBonus } from "@/utils/attendanceBonusDefaults";
@@ -14,6 +12,8 @@ import computeRaidDkp from "@/utils/eventDkpCalculator";
 import { LootIcon } from "@/widgets/Loot/LootBuy/icons/LootIconComponent";
 import { getUnlinkedLootCandidates } from "@/actions/getUnlinkedLootCandidates";
 import { isPrimeLinkableSource } from "@/widgets/Loot/GuildLoot/LootTypes";
+import { bossColorStyle } from "@/widgets/Attendance/attendanceModel";
+import { cn } from "@/shared/lib/tw-merge";
 
 export function RaidDetailsForm({
   setUsers,
@@ -53,15 +53,17 @@ export function RaidDetailsForm({
   setErrors: React.Dispatch<React.SetStateAction<any>>;
   bosses: any[];
   activeBonusIds: Record<number, boolean>;
-  setActiveBonusIds: React.Dispatch<React.SetStateAction<Record<number, boolean>>>;
+  setActiveBonusIds: React.Dispatch<
+    React.SetStateAction<Record<number, boolean>>
+  >;
   loot?: any[];
   lootLinkIds: Record<number, boolean>;
   setLootLinkIds: React.Dispatch<React.SetStateAction<Record<number, boolean>>>;
   mode?: "create" | "edit";
 }) {
-  const [bonuses, setBonuses] = React.useState<ResolvedAttendanceBonus[] | null>(
-    null,
-  );
+  const [bonuses, setBonuses] = React.useState<
+    ResolvedAttendanceBonus[] | null
+  >(null);
 
   React.useEffect(() => {
     async function fetchUsers() {
@@ -105,7 +107,10 @@ export function RaidDetailsForm({
         if (!checked) continue;
         const id = Number(idStr);
         const bonus = bonuses.find((b) => b.id === id);
-        if (bonus && selectedBosses.some((boss) => bonus.bossIds.includes(boss.id))) {
+        if (
+          bonus &&
+          selectedBosses.some((boss) => bonus.bossIds.includes(boss.id))
+        ) {
           next[id] = true;
         }
       }
@@ -123,9 +128,7 @@ export function RaidDetailsForm({
     (item: any) => item.status !== "Распродано",
   );
 
-  const [unlinkedCandidates, setUnlinkedCandidates] = React.useState<any[]>(
-    [],
-  );
+  const [unlinkedCandidates, setUnlinkedCandidates] = React.useState<any[]>([]);
   const canLinkLoot =
     !!selectedBoss && !!selectedDate && isPrimeLinkableSource(selectedBoss);
 
@@ -143,8 +146,17 @@ export function RaidDetailsForm({
     setLootLinkIds((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const visibleBonuses =
+    bonuses?.filter((b) =>
+      selectedBosses.some((boss) => b.bossIds.includes(boss.id)),
+    ) ?? [];
+  const bossNames = selectedBosses.map((boss) => boss.boss_name).join(", ");
+  const activeBonusLabels = visibleBonuses
+    .filter((b) => activeBonusIds[b.id])
+    .map((b) => b.label);
+
   return (
-    <div className="flex flex-col h-full space-y-4">
+    <div className="flex flex-col gap-4">
       <CategorySelector
         category={category}
         setCategory={setCategory}
@@ -162,30 +174,41 @@ export function RaidDetailsForm({
         errors={errors}
       />
 
-      {bonuses
-        ?.filter((b) =>
-          selectedBosses.some((boss) => b.bossIds.includes(boss.id)),
-        )
-        .map((b) => (
-          <div key={b.id} className="flex items-center space-x-2">
-            <Checkbox
-              className="cursor-pointer"
-              id={`bonus_${b.id}`}
-              checked={!!activeBonusIds[b.id]}
-              onCheckedChange={(checked) =>
-                setActiveBonusIds((prev) => ({
-                  ...prev,
-                  [b.id]: checked === true,
-                }))
-              }
-            />
-            <label htmlFor={`bonus_${b.id}`} className="text-sm">
-              {b.label}
-            </label>
+      {visibleBonuses.length > 0 && (
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[12.5px] font-semibold text-muted-foreground">
+            Бонусы
+          </span>
+          <div className="flex flex-wrap gap-1.5">
+            {visibleBonuses.map((b) => {
+              const active = !!activeBonusIds[b.id];
+              return (
+                <button
+                  key={b.id}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() =>
+                    setActiveBonusIds((prev) => ({ ...prev, [b.id]: !active }))
+                  }
+                  className={cn(
+                    "h-8 cursor-pointer rounded-full border px-3 text-[13px] font-semibold transition-colors",
+                    active
+                      ? "border-foreground bg-foreground text-background"
+                      : "bg-background hover:bg-muted",
+                  )}
+                >
+                  {b.label}
+                </button>
+              );
+            })}
           </div>
-        ))}
-      <div className="space-y-2">
-        <Label>Дата и время (МСК)</Label>
+        </div>
+      )}
+
+      <div className="flex flex-col gap-1.5">
+        <span className="text-[12.5px] font-semibold text-muted-foreground">
+          Дата и время, МСК
+        </span>
         {mode === "edit" ? (
           <DatetimePicker
             value={selectedDate}
@@ -207,22 +230,21 @@ export function RaidDetailsForm({
           />
         )}
         {errors.selectedDate && (
-          <p className="text-sm text-red-500">Обязательное поле</p>
+          <p className="text-xs text-destructive">Укажите дату и время</p>
         )}
       </div>
 
       {loot && category !== "АГЛ" && (
-        <div className="space-y-2">
-          <Label>
-            Лут
-            {visibleLoot.length > 0 ? ` (${visibleLoot.length})` : ""}
-          </Label>
-          <div className="rounded-md border max-h-48 overflow-y-auto divide-y">
-            {visibleLoot.length > 0 ? (
-              visibleLoot.map((item: any) => (
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[12.5px] font-semibold text-muted-foreground">
+            Лут{visibleLoot.length > 0 ? ` · ${visibleLoot.length}` : ""}
+          </span>
+          {visibleLoot.length > 0 ? (
+            <div className="max-h-48 divide-y overflow-y-auto rounded-lg border">
+              {visibleLoot.map((item: any) => (
                 <div
                   key={item.id}
-                  className="flex items-center gap-2 px-2 py-1.5 text-sm"
+                  className="flex items-center gap-2 px-2.5 py-1.5 text-sm"
                 >
                   <LootIcon
                     itemName={item.itemType?.name}
@@ -233,29 +255,31 @@ export function RaidDetailsForm({
                   <span className="flex-1 truncate">
                     {item.itemType?.name ?? "—"}
                   </span>
-                  <span className="text-muted-foreground shrink-0">
-                    x{item.quantity}
+                  <span className="shrink-0 text-muted-foreground">
+                    × {item.quantity}
                   </span>
                 </div>
-              ))
-            ) : (
-              <div className="px-2 py-3 text-sm text-muted-foreground text-center">
-                Лут не привязан к этому рейду
-              </div>
-            )}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="rounded-lg border border-dashed px-3 py-3 text-center text-[13px] text-muted-foreground">
+              Лут не привязан к этому рейду
+            </p>
+          )}
         </div>
       )}
 
       {canLinkLoot && unlinkedCandidates.length > 0 && (
-        <div className="space-y-2">
-          <Label>Непривязанный лут за этот день</Label>
-          <div className="rounded-md border max-h-48 overflow-y-auto divide-y">
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[12.5px] font-semibold text-muted-foreground">
+            Непривязанный лут за этот день
+          </span>
+          <div className="max-h-48 divide-y overflow-y-auto rounded-lg border">
             {unlinkedCandidates.map((item: any) => (
               <label
                 key={item.id}
                 htmlFor={`link-loot-${item.id}`}
-                className="flex items-center gap-2 px-2 py-1.5 text-sm cursor-pointer hover:bg-accent"
+                className="flex cursor-pointer items-center gap-2 px-2.5 py-1.5 text-sm hover:bg-muted/60"
               >
                 <Checkbox
                   className="cursor-pointer"
@@ -272,8 +296,8 @@ export function RaidDetailsForm({
                 <span className="flex-1 truncate">
                   {item.itemType?.name ?? "—"}
                 </span>
-                <span className="text-muted-foreground shrink-0">
-                  x{item.quantity}
+                <span className="shrink-0 text-muted-foreground">
+                  × {item.quantity}
                 </span>
               </label>
             ))}
@@ -281,9 +305,27 @@ export function RaidDetailsForm({
         </div>
       )}
 
-      <div className="mt-auto space-y-2">
-        <Label>Ценность посещения</Label>
-        <Input className="w-[270px]" disabled value={dkpPoints ?? 0} />
+      <div
+        style={
+          selectedBoss && category
+            ? bossColorStyle(selectedBoss, category)
+            : undefined
+        }
+        className="flex items-center justify-between gap-3 rounded-xl bg-[color-mix(in_srgb,var(--raid-color,#71717a)_8%,transparent)] px-3.5 py-3"
+      >
+        <span className="flex min-w-0 flex-col">
+          <span className="text-[12.5px] text-foreground/70">
+            Ценность посещения
+          </span>
+          <span className="truncate text-xs text-muted-foreground">
+            {bossNames
+              ? [bossNames, ...activeBonusLabels].join(" · ")
+              : "Выберите босса"}
+          </span>
+        </span>
+        <span className="text-[26px] leading-none font-extrabold text-[var(--raid-color,currentColor)] tabular-nums dark:text-[var(--raid-color-dark,currentColor)]">
+          {dkpPoints ?? 0}
+        </span>
       </div>
     </div>
   );

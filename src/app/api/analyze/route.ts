@@ -42,13 +42,30 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const words: { description: string }[] =
-      annotation?.textAnnotations?.slice(1) ?? [];
+    const words: {
+      description: string;
+      boundingPoly?: { vertices?: { x?: number; y?: number }[] };
+    }[] = annotation?.textAnnotations?.slice(1) ?? [];
 
     const resultData = {
       readResults: [
         {
-          lines: words.map((w) => ({ text: w.description })),
+          lines: words.map((w) => {
+            const vertices = w.boundingPoly?.vertices ?? [];
+            const xs = vertices.map((v) => v.x ?? 0);
+            const ys = vertices.map((v) => v.y ?? 0);
+            return {
+              text: w.description,
+              box: vertices.length
+                ? {
+                    x: Math.min(...xs),
+                    y: Math.min(...ys),
+                    width: Math.max(...xs) - Math.min(...xs),
+                    height: Math.max(...ys) - Math.min(...ys),
+                  }
+                : null,
+            };
+          }),
         },
       ],
     };
