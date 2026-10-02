@@ -1,8 +1,10 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import ensurePrivilieges from "./ensurePrivilieges";
 
 export const addToLootQueue = async (username: string, itemName: string) => {
+  await ensurePrivilieges(["Администратор"]);
   const [user] = await sql<any[]>`
     SELECT id FROM "user" WHERE username = ${username}
   `;

@@ -1,5 +1,6 @@
 "use server";
 import sql from "@/shared/lib/db";
+import ensurePrivilieges from "./ensurePrivilieges";
 
 export const updateLootQueueEntry = async ({
   id,
@@ -16,6 +17,7 @@ export const updateLootQueueEntry = async ({
   required?: number;
   roll?: number | null;
 }) => {
+  await ensurePrivilieges(["Администратор"]);
   const updateData: Record<string, unknown> = {};
 
   if (status !== undefined) updateData.status = status;

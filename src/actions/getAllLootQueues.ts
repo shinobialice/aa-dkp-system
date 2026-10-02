@@ -4,12 +4,10 @@ import sql from "@/shared/lib/db";
 import {
   mapQueueRow,
   sortQueue,
-  type QueueEntry,
+  type QueueMap,
 } from "@/widgets/Loot/LootBuy/lootBuyModel";
 
-export const getLootQueueByItemName = async (
-  itemName: string,
-): Promise<QueueEntry[]> => {
+export const getAllLootQueues = async (): Promise<QueueMap> => {
   let rows;
   try {
     rows = await sql<any[]>`
@@ -23,18 +21,25 @@ export const getLootQueueByItemName = async (
         lq.created_at,
         lq.roll,
         lq.position,
+        it.name AS item_name,
         u.username,
         u.avatar_url,
         u.class
       FROM loot_queue lq
       JOIN item_type it ON it.id = lq.item_type_id
       LEFT JOIN "user" u ON u.id = lq.user_id
-      WHERE it.name = ${itemName}
     `;
   } catch (error) {
-    console.error(error);
-    return [];
+    console.error("Ошибка при получении очередей на лут:", error);
+    return {};
   }
 
-  return sortQueue(itemName, rows.map(mapQueueRow));
+  const grouped: QueueMap = {};
+  for (const row of rows) {
+    (grouped[row.item_name] ??= []).push(mapQueueRow(row));
+  }
+  for (const name of Object.keys(grouped)) {
+    grouped[name] = sortQueue(name, grouped[name]);
+  }
+  return grouped;
 };
