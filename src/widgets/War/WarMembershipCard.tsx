@@ -1,7 +1,15 @@
 "use client";
 
 import { Users } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/shared/ui";
 import { cn } from "@/shared/lib/tw-merge";
 import type { PeriodMembershipChanges } from "@/actions/warActions";
 import WarUserLink from "./WarUserLink";
@@ -14,6 +22,7 @@ type MemberRow = {
   key: string;
   userId: number;
   name: string;
+  avatarUrl: string | null;
   when: string;
   tone: Tone;
 };
@@ -33,9 +42,18 @@ function MemberList({ rows, empty }: { rows: MemberRow[]; empty: string }) {
           key={row.key}
           className="flex h-11 items-center gap-2.5 px-2 sm:h-10"
         >
-          <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-[10.5px] font-semibold text-muted-foreground sm:size-[26px]">
-            {row.name.slice(0, 2)}
-          </span>
+          <Avatar className="size-7 shrink-0 sm:size-[26px]">
+            <AvatarImage
+              src={
+                row.avatarUrl ??
+                `https://api.dicebear.com/6.x/initials/svg?seed=${row.name}`
+              }
+              alt=""
+            />
+            <AvatarFallback className="text-[10.5px] font-semibold text-muted-foreground">
+              {row.name.slice(0, 2)}
+            </AvatarFallback>
+          </Avatar>
           <WarUserLink
             userId={row.userId}
             name={row.name}
@@ -69,6 +87,7 @@ export default function WarMembershipCard({
         key: `joined-${member.userId}`,
         userId: member.userId,
         name: member.username,
+        avatarUrl: member.avatarUrl,
         when: formatShortDate(member.at),
         tone: "green" as const,
       })),
@@ -81,6 +100,7 @@ export default function WarMembershipCard({
         key: `left-${member.userId}`,
         userId: member.userId,
         name: member.username,
+        avatarUrl: member.avatarUrl,
         when: formatShortDate(member.at),
         tone: "muted" as const,
       })),
@@ -93,6 +113,7 @@ export default function WarMembershipCard({
         key: `afk-${member.userId}-${index}`,
         userId: member.userId,
         name: member.username,
+        avatarUrl: member.avatarUrl,
         when: member.to
           ? `${formatShortDate(member.from)} — ${formatShortDate(member.to)}`
           : `с ${formatShortDate(member.from)}`,

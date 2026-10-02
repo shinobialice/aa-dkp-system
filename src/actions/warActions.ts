@@ -454,12 +454,14 @@ export async function getPeriodTopDrops(
 export type PeriodMembershipEntry = {
   userId: number;
   username: string;
+  avatarUrl: string | null;
   at: string; // когда вступил ("user".joined_at) или ушёл ("user".inactive_since)
 };
 
 export type PeriodAfkEntry = {
   userId: number;
   username: string;
+  avatarUrl: string | null;
   from: string; // user_tags.created_at — с какой даты ушёл в АФК
   to: string | null; // user_tags.removed_at — с какой вернулся, null = всё ещё АФК
 };
@@ -488,13 +490,13 @@ export async function getPeriodMembershipChanges(
   try {
     const [joinedRows, leftRows, afkRows] = await Promise.all([
       sql<any[]>`
-        SELECT id, username, joined_at
+        SELECT id, username, avatar_url, joined_at
         FROM "user"
         WHERE joined_at >= ${startedAt} AND joined_at < ${rangeEnd}
         ORDER BY joined_at
       `,
       sql<any[]>`
-        SELECT id, username, inactive_since
+        SELECT id, username, avatar_url, inactive_since
         FROM "user" u
         WHERE active = false
           AND inactive_since >= ${startedAt} AND inactive_since < ${rangeEnd}
@@ -505,7 +507,7 @@ export async function getPeriodMembershipChanges(
         ORDER BY inactive_since
       `,
       sql<any[]>`
-        SELECT ut.user_id, u.username, ut.created_at, ut.removed_at
+        SELECT ut.user_id, u.username, u.avatar_url, ut.created_at, ut.removed_at
         FROM user_tags ut
         JOIN "user" u ON u.id = ut.user_id
         WHERE ut.tag = 'АФК'
@@ -518,16 +520,19 @@ export async function getPeriodMembershipChanges(
       joined: joinedRows.map((r) => ({
         userId: r.id,
         username: r.username,
+        avatarUrl: r.avatar_url ?? null,
         at: r.joined_at,
       })),
       left: leftRows.map((r) => ({
         userId: r.id,
         username: r.username,
+        avatarUrl: r.avatar_url ?? null,
         at: r.inactive_since,
       })),
       afk: afkRows.map((r) => ({
         userId: r.user_id,
         username: r.username,
+        avatarUrl: r.avatar_url ?? null,
         from: r.created_at,
         to: r.removed_at,
       })),
