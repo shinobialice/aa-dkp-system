@@ -1,13 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
-import { Heart } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
 import Cookies from "js-cookie";
-import VkLoginButton from "@/widgets/login/vkbutton";
-import MailLoginButton from "@/widgets/login/mailbutton";
-import GoogleLoginButton from "@/widgets/login/googlebutton";
+import AuthShell from "@/widgets/login/AuthShell";
 
 export default function LoginPage() {
   useEffect(() => {
@@ -15,38 +10,16 @@ export default function LoginPage() {
   }, []);
 
   return (
-    <div className="grid min-h-svh lg:grid-cols-2">
-      <div className="flex flex-col gap-4 p-6 md:p-10">
-        <div className="flex justify-center gap-2 md:justify-start">
-          <Link href="/" className="flex items-center gap-2 font-medium">
-            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <Heart className="size-4" />
-            </div>
-            No Fear
-          </Link>
-        </div>
-        <div className="flex flex-1 items-center justify-center">
-          <div className="w-full max-w-xs space-y-6">
-            <h1 className="text-2xl font-bold text-center pb-3">
-              Вход в систему
-            </h1>
-
-            <GoogleLoginButton />
-            <VkLoginButton />
-            <MailLoginButton />
-          </div>
-        </div>
-      </div>
-      <div className="relative hidden bg-muted lg:block">
-        <Image
-          fill
-          priority
-          src="/images/login_banner.png"
-          alt="Login Image"
-          sizes="(min-width: 1024px) 50vw, 100vw"
-          className="object-cover dark:brightness-[0.2] dark:grayscale"
-        />
-      </div>
-    </div>
+    <AuthShell
+      title="Вход в систему"
+      subtitle="Войдите через аккаунт, привязанный к вашему профилю"
+      footer={
+        <>
+          Впервые здесь или сменили аккаунт?
+          <br />
+          Попросите у администратора ссылку для привязки.
+        </>
+      }
+    />
   );
 }
