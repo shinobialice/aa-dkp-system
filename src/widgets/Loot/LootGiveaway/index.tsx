@@ -17,15 +17,11 @@ import {
   deleteMiscLootGrant,
 } from "@/actions/miscLootGrants";
 import { addWishlistItem, deleteWishlistItem } from "@/actions/lootWishlist";
-import { GiveawayStatusIcon } from "./GiveawayStatusIcon";
-import GiveawayItemTiles from "./GiveawayItemTiles";
 import GiveawayRoster from "./GiveawayRoster";
 import GiveawayPlayerPanel, {
   type PlayerPanelActions,
 } from "./GiveawayPlayerPanel";
 import {
-  countStatuses,
-  formatDate,
   matchesFilter,
   sortForItem,
   todayIso,
@@ -145,13 +141,6 @@ export default function LootGiveaway({
       ),
     [searched, filter, itemName],
   );
-  const counts = useMemo(
-    () =>
-      Object.fromEntries(
-        items.map((item) => [item.name, countStatuses(roster, item.name)]),
-      ),
-    [items, roster],
-  );
   const filterCounts = useMemo(
     () =>
       Object.fromEntries(
@@ -164,11 +153,6 @@ export default function LootGiveaway({
   );
 
   const me = players.find((p) => p.id === currentUserId) ?? null;
-  const myItems = me
-    ? me.items
-        .map((entry, index) => ({ entry, item: items[index] }))
-        .filter(({ entry }) => entry.status)
-    : [];
 
   const activeId = selectedId ?? me?.id ?? displayed[0]?.id ?? null;
   const selected = players.find((p) => p.id === activeId) ?? null;
@@ -300,58 +284,10 @@ export default function LootGiveaway({
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Что гильдия уже выдала, у кого предмет есть и так, и кто его хочет.
-          Выберите предмет, чтобы увидеть, кто его хочет, или игрока — чтобы
-          увидеть его выдачи.
+          Нажмите на иконку предмета в шапке таблицы, чтобы увидеть, кто его
+          хочет, или на игрока — чтобы увидеть его выдачи.
         </p>
       </div>
-
-      {me && myItems.length > 0 && (
-        <section
-          aria-label="Мой лут"
-          className="flex flex-col gap-2 rounded-xl border border-green-200 bg-green-50 p-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3 sm:px-4 dark:border-green-500/25 dark:bg-green-500/5"
-        >
-          <span className="text-[13px] font-semibold text-green-700 dark:text-green-400">
-            Мой лут
-          </span>
-          {myItems.map(({ entry, item }) => {
-            const waiting =
-              entry.status === "Хочет" ? (counts[item.name]?.want ?? 0) : 0;
-            return (
-              <button
-                key={item.name}
-                type="button"
-                onClick={() => selectItem(item.name)}
-                className="flex min-h-12 cursor-pointer items-center gap-2.5 rounded-lg border border-green-200 bg-background py-1.5 pr-3 pl-1.5 text-left hover:bg-green-50/50 dark:border-green-500/25"
-              >
-                <GiveawayStatusIcon
-                  item={item}
-                  status={entry.status}
-                  date={entry.date}
-                  size={30}
-                  tooltip={false}
-                />
-                <span className="flex flex-col leading-tight">
-                  <span className="text-[13px] font-semibold">{item.name}</span>
-                  <span className="text-xs text-green-800 dark:text-green-300">
-                    {entry.status === "Выдано"
-                      ? `выдано ${formatDate(entry.date)}`
-                      : entry.status === "В наличии"
-                        ? "уже есть, гильдия не выдавала"
-                        : `вы в списке «хотят» · всего ${waiting}`}
-                  </span>
-                </span>
-              </button>
-            );
-          })}
-        </section>
-      )}
-
-      <GiveawayItemTiles
-        items={items}
-        counts={counts}
-        selectedName={itemName}
-        onSelect={selectItem}
-      />
 
       <div ref={sentinelRef} aria-hidden className="-mb-4 h-0" />
       <div
@@ -422,6 +358,7 @@ export default function LootGiveaway({
           players={displayed}
           selectedId={activeId}
           highlightedName={itemName}
+          onSelectItem={selectItem}
           onSelect={selectPlayer}
         />
         {panelProps && (

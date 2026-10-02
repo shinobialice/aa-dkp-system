@@ -41,8 +41,6 @@ export type Player = {
 
 export type RosterFilter = "all" | "want" | "stock";
 
-export type StatusCounts = { given: number; stock: number; want: number };
-
 export function todayIso() {
   return new Date().toISOString().split("T")[0];
 }
@@ -57,17 +55,6 @@ export function formatDate(date: string, pattern = "dd.MM.yyyy") {
 
 export function statusOf(player: Player, itemName: string): GiveawayStatus {
   return player.items.find((i) => i.name === itemName)?.status ?? "";
-}
-
-export function countStatuses(players: Player[], itemName: string) {
-  const counts: StatusCounts = { given: 0, stock: 0, want: 0 };
-  for (const player of players) {
-    const status = statusOf(player, itemName);
-    if (status === "Выдано") counts.given++;
-    else if (status === "В наличии") counts.stock++;
-    else if (status === "Хочет") counts.want++;
-  }
-  return counts;
 }
 
 /** Подходит ли игрок под фильтр; если выбран предмет — фильтр по нему. */

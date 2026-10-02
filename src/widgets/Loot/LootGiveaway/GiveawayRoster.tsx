@@ -61,12 +61,14 @@ export default function GiveawayRoster({
   players,
   selectedId,
   highlightedName,
+  onSelectItem,
   onSelect,
 }: {
   items: TrackedItem[];
   players: Player[];
   selectedId: number | null;
   highlightedName: string | null;
+  onSelectItem: (name: string | null) => void;
   onSelect: (id: number) => void;
 }) {
   const firstGlider = items.findIndex((item) => item.kind === "glider");
@@ -117,14 +119,24 @@ export default function GiveawayRoster({
                     highlightedName === item.name && "bg-foreground/5",
                   )}
                 >
-                  <span className="flex justify-center">
+                  <button
+                    type="button"
+                    aria-pressed={highlightedName === item.name}
+                    aria-label={`Показать, кто хочет: ${item.name}`}
+                    onClick={() =>
+                      onSelectItem(
+                        highlightedName === item.name ? null : item.name,
+                      )
+                    }
+                    className="mx-auto flex cursor-pointer rounded p-0.5 hover:bg-foreground/10 aria-pressed:ring-2 aria-pressed:ring-foreground"
+                  >
                     <LootIcon
                       itemName={item.name}
                       iconUrl={item.iconUrl}
                       grade={item.grade}
                       size={22}
                     />
-                  </span>
+                  </button>
                 </th>
               ))}
               <th className="border-l px-3 py-2 text-left">Прочее и хотелки</th>
