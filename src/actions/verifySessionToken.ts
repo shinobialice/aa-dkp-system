@@ -1,4 +1,4 @@
-import sql from "@/shared/lib/db";
+import { getSessionUser } from "@/shared/lib/session";
 
 export async function verifySessionToken(
   token: string,
@@ -7,9 +7,7 @@ export async function verifySessionToken(
 
   let user;
   try {
-    [user] = await sql<any[]>`
-      SELECT id, active FROM "user" WHERE session_token = ${token}
-    `;
+    user = await getSessionUser(token);
   } catch (error) {
     console.error("Error verifying session token:", error);
     return { valid: false };

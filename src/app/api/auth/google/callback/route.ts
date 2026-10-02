@@ -1,13 +1,12 @@
-import crypto from "crypto";
-import sql from "@/shared/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { getBaseUrl } from "@/shared/lib";
+import {
+  completeSocialAuth,
+  loginErrorRedirect,
+} from "@/shared/lib/socialAuth";
 
 const baseUrl = getBaseUrl();
-function generateSessionToken() {
-  return crypto.randomBytes(32).toString("hex");
-}
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -43,10 +42,8 @@ export async function GET(req: NextRequest) {
   const tokenData = await tokenRes.json();
 
   if (!tokenData.access_token) {
-    return NextResponse.json(
-      { error: "Token exchange failed", data: tokenData },
-      { status: 400 },
-    );
+    console.error("Token exchange failed:", tokenData);
+    return loginErrorRedirect("provider");
   }
 
   const userInfoRes = await fetch(
@@ -61,77 +58,13 @@ export async function GET(req: NextRequest) {
   const profile = await userInfoRes.json();
 
   if (!profile.id) {
-    return NextResponse.json("Failed to fetch user profile", { status: 400 });
+    return loginErrorRedirect("provider");
   }
 
-  if (linkToken) {
-    const [linkRow] = await sql<any[]>`
-      SELECT "userId" FROM link_token
-      WHERE token = ${linkToken} AND used = false AND "expiresAt" > now()
-    `;
-
-    if (!linkRow) {
-      return NextResponse.json("Link token expired or invalid", {
-        status: 400,
-      });
-    }
-
-    const sessionToken = generateSessionToken();
-
-    await sql<any[]>`
-      UPDATE "user" SET google_id = ${profile.id}, session_token = ${sessionToken}
-      WHERE id = ${linkRow.userId}
-    `;
-
-    await sql<any[]>`
-      UPDATE link_token SET used = true WHERE token = ${linkToken}
-    `;
-
-    const response = NextResponse.redirect(
-      new URL("/link-account/complete", baseUrl),
-    );
-
-    response.cookies.set("link-token", "", { path: "/", maxAge: -1 });
-    response.cookies.set("session_token", sessionToken, {
-      path: "/",
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7,
-    });
-
-    return response;
-  }
-
-  const sessionToken = generateSessionToken();
-
-  const [existingUser] = await sql<any[]>`
-    SELECT * FROM "user" WHERE google_id = ${profile.id}
-  `;
-
-  if (!existingUser) {
-    return NextResponse.redirect(new URL("/login-error", baseUrl));
-  }
-
-  if (!existingUser.active) {
-    return NextResponse.redirect(
-      new URL("/login-error?reason=inactive", baseUrl),
-    );
-  }
-
-  await sql<any[]>`
-    UPDATE "user" SET session_token = ${sessionToken} WHERE id = ${existingUser.id}
-  `;
-
-  const response = NextResponse.redirect(new URL("/", baseUrl));
-
-  response.cookies.set("session_token", sessionToken, {
-    path: "/",
-    httpOnly: true,
-    secure: true,
-    sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 7,
-  });
-
-  return response;
+  return completeSocialAuth(
+    "google_id",
+    String(profile.id),
+    linkToken,
+    req.headers.get("user-agent"),
+  );
 }

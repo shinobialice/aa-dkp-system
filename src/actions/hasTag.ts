@@ -1,4 +1,5 @@
 import sql from "@/shared/lib/db";
+import { getSessionUser } from "@/shared/lib/session";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 
@@ -9,12 +10,10 @@ export const hasTag = async (
   tags: string[],
   opts?: { ignorePreview?: boolean },
 ) => {
-  const [user] = await sql<any[]>`
-    SELECT id FROM "user" WHERE session_token = ${sessionToken}
-  `;
+  const user = await getSessionUser(sessionToken);
 
   if (!user) {
-    redirect("login");
+    redirect("/login");
   }
 
   const [tagRow] = await sql<any[]>`

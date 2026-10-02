@@ -1,4 +1,5 @@
 import sql from "@/shared/lib/db";
+import { getSessionUser } from "@/shared/lib/session";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
@@ -10,13 +11,15 @@ export async function GET() {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const [user] = await sql<any[]>`
-    SELECT id, username, avatar_url, active FROM "user" WHERE session_token = ${token}
-  `;
+  const sessionUser = await getSessionUser(token);
 
-  if (!user || !user.active) {
+  if (!sessionUser || !sessionUser.active) {
     return NextResponse.json({ error: "Invalid token" }, { status: 401 });
   }
+
+  const [user] = await sql<any[]>`
+    SELECT id, username, avatar_url FROM "user" WHERE id = ${sessionUser.id}
+  `;
 
   return NextResponse.json(
     {

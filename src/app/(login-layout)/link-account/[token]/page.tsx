@@ -1,14 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Heart } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
+import { Clock, Link2, Loader } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import VkLoginButton from "@/widgets/login/vkbutton";
 import Cookies from "js-cookie";
-import MailLoginButton from "@/widgets/login/mailbutton";
-import GoogleLoginButton from "@/widgets/login/googlebutton";
+import AuthShell from "@/widgets/login/AuthShell";
 
 export default function LinkAccountPage() {
   const params = useParams();
@@ -44,51 +40,39 @@ export default function LinkAccountPage() {
   }, [token, router]);
 
   if (loading || !userInfo) {
-    return <p className="p-4 text-center">Загрузка...</p>;
+    return (
+      <div className="flex min-h-svh items-center justify-center">
+        <Loader className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
   }
 
   return (
-    <div className="grid min-h-svh lg:grid-cols-2">
-      <div className="flex flex-col gap-4 p-6 md:p-10">
-        <div className="flex justify-center gap-2 md:justify-start">
-          <Link href="/" className="flex items-center gap-2 font-medium">
-            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <Heart className="size-4" />
-            </div>
-            No Fear
-          </Link>
-        </div>
-        <div className="flex flex-1 items-center justify-center">
-          <div className="w-full max-w-xs space-y-3">
-            <h1 className="text-2xl font-bold text-center">
-              Привязка аккаунта к <br />
-              <span className="text-primary">{userInfo?.username}</span>
-            </h1>
-
-            <p className="text-sm text-muted-foreground text-center">
-              Ссылка действительна до:{" "}
-              <span className="font-medium">
-                {new Date(userInfo?.expiresAt || "").toLocaleString("ru-RU")}
-              </span>
+    <AuthShell
+      title="Привязка аккаунта"
+      subtitle="Выберите, через что будете входить на сайт"
+      footer="Ссылка одноразовая — не пересылайте её другим."
+    >
+      <div className="mb-6 rounded-xl border border-primary/30 bg-primary/10 p-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary">
+            <Link2 className="size-5" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-xs text-muted-foreground">Профиль</p>
+            <p className="truncate text-lg font-semibold">
+              {userInfo.username}
             </p>
-
-            <GoogleLoginButton />
-            <VkLoginButton />
-            <MailLoginButton />
           </div>
         </div>
+        <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+          <Clock className="size-3.5" />
+          Действует до{" "}
+          <span className="font-medium text-foreground">
+            {new Date(userInfo.expiresAt).toLocaleString("ru-RU")}
+          </span>
+        </p>
       </div>
-
-      <div className="relative hidden bg-muted lg:block">
-        <Image
-          src="/images/login_banner.png"
-          alt="Login Image"
-          fill
-          priority
-          sizes="(min-width: 1024px) 50vw, 100vw"
-          className="object-cover dark:brightness-[0.2] dark:grayscale"
-        />
-      </div>
-    </div>
+    </AuthShell>
   );
 }
