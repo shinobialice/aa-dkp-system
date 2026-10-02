@@ -8,6 +8,8 @@ import type { GuildMode } from "./guildStatusSettings";
 export type PeriodAttendanceEntry = {
   userId: number;
   username: string;
+  avatarUrl: string | null;
+  userClass: string | null;
   raidsAttended: number; 
 };
 
@@ -41,7 +43,7 @@ export async function getPeriodAttendanceTop(
   try {
     rows = endedAt
       ? await sql<any[]>`
-          SELECT r.id, ra.user_id, ra.is_late, u.username
+          SELECT r.id, ra.user_id, ra.is_late, u.username, u.avatar_url, u.class
           FROM raid r
           LEFT JOIN raid_attendance ra ON ra.raid_id = r.id
           LEFT JOIN "user" u ON u.id = ra.user_id
@@ -49,7 +51,7 @@ export async function getPeriodAttendanceTop(
             AND ${raidFilter}
         `
       : await sql<any[]>`
-          SELECT r.id, ra.user_id, ra.is_late, u.username
+          SELECT r.id, ra.user_id, ra.is_late, u.username, u.avatar_url, u.class
           FROM raid r
           LEFT JOIN raid_attendance ra ON ra.raid_id = r.id
           LEFT JOIN "user" u ON u.id = ra.user_id
@@ -62,7 +64,10 @@ export async function getPeriodAttendanceTop(
   }
 
   const raidIds = new Set<number>();
-  const byUser = new Map<number, { username: string; weight: number }>();
+  const byUser = new Map<
+    number,
+    { username: string; avatarUrl: string | null; userClass: string | null; weight: number }
+  >();
 
   for (const row of rows) {
     raidIds.add(row.id);
@@ -70,6 +75,8 @@ export async function getPeriodAttendanceTop(
     const weight = row.is_late ? 0.5 : 1;
     const entry = byUser.get(row.user_id) ?? {
       username: row.username ?? "?",
+      avatarUrl: row.avatar_url ?? null,
+      userClass: row.class ?? null,
       weight: 0,
     };
     entry.weight += weight;
@@ -80,6 +87,8 @@ export async function getPeriodAttendanceTop(
     .map(([userId, v]) => ({
       userId,
       username: v.username,
+      avatarUrl: v.avatarUrl,
+      userClass: v.userClass,
       raidsAttended: v.weight,
     }))
     .sort((a, b) => b.raidsAttended - a.raidsAttended);

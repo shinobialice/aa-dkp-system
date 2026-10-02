@@ -1519,13 +1519,13 @@ export default function EquipmentTab({
   };
 
   return (
-    <Card className="min-h-[750px] gap-3 py-4">
+    <Card className="@container min-h-[750px] gap-3 py-4">
       <CardHeader className="border-b">
         <CardTitle>
           <CharacterTabsSwitcher />
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4 pt-4 lg:flex-row">
+      <CardContent className="flex flex-col gap-4 pt-4 @[48rem]:grid @[48rem]:grid-cols-2 @[76rem]:flex @[76rem]:flex-row">
         <div className="flex flex-col">
           <div className="mb-2 text-sm font-semibold">
             Характеристики персонажа
@@ -1541,7 +1541,7 @@ export default function EquipmentTab({
           />
         </div>
 
-        <div className="flex flex-1 flex-col justify-center">
+        <div className="flex flex-1 flex-col justify-center @[48rem]:order-first @[48rem]:col-span-2 @[76rem]:order-none">
           <div className="mb-3 flex justify-center">
             <EquipmentSlotButton
               slot={TOP}

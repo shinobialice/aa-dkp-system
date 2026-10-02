@@ -1,6 +1,6 @@
 "use client";
 import inventoryItems from "./InventoryItems";
-import InventoryItemCard from "./InventoryItemCard";
+import InventoryItemCard, { findUserItem } from "./InventoryItemCard";
 import { AddCustomInventoryItemDialog } from "./AddCustomInventoryItemDialog";
 import { ProfileItemTypeRow } from "@/actions/profileItemTypeAdmin";
 import { OtherInventoryCatalogItem } from "@/actions/getInventoryCatalog";
@@ -19,6 +19,7 @@ export default function InventoryCategoryGrid({
   extraItemTypes = [],
   catalog = [],
   onExtraItemTypesChange,
+  ownedOnly = false,
 }: {
   type: string;
   inventory: any[];
@@ -29,6 +30,7 @@ export default function InventoryCategoryGrid({
   extraItemTypes?: ProfileItemTypeRow[];
   catalog?: OtherInventoryCatalogItem[];
   onExtraItemTypesChange?: () => void;
+  ownedOnly?: boolean;
 }) {
   const hasCatalog = catalogCategories.includes(type);
 
@@ -41,12 +43,16 @@ export default function InventoryCategoryGrid({
   // InventoryItems.tsx плюс то, что завели под неё в profile_item_type,
   // показываем всё как обычно, есть/нет.
   const fixedNames = new Set(
-    inventoryItems.filter((item) => item.type === type).map((item) => item.name),
+    inventoryItems
+      .filter((item) => item.type === type)
+      .map((item) => item.name),
   );
   const dynamicItems = hasCatalog
     ? catalog
         .filter((t) => !fixedNames.has(t.name))
-        .filter((t) => inventory.find((inv) => inv.name === t.name && inv.type === type))
+        .filter((t) =>
+          inventory.find((inv) => inv.name === t.name && inv.type === type),
+        )
         .map((t) => ({ type, name: t.name, iconUrl: t.icon_url }))
     : extraItemTypes
         .filter((t) => t.category === type)
@@ -101,32 +107,57 @@ export default function InventoryCategoryGrid({
       return true;
     });
 
+  const ownedCount = filteredItems.filter((item) =>
+    findUserItem(item, inventory),
+  ).length;
+  const visibleItems = ownedOnly
+    ? filteredItems.filter((item) => findUserItem(item, inventory))
+    : filteredItems;
+
   return (
-    <div className="grid grid-cols-[repeat(auto-fill,minmax(110px,1fr))] gap-3">
-      {filteredItems.map((item) => (
-        <InventoryItemCard
-          canEdit={canEdit}
-          key={item.name}
-          item={item}
-          inventory={inventory}
-          userId={userId}
-          onChange={onChange}
-        />
-      ))}
-      {hasCatalog && canEdit && (
-        <AddCustomInventoryItemDialog
-          userId={userId}
-          type={type}
-          catalog={catalog.filter(
-            (t) =>
-              !fixedNames.has(t.name) &&
-              !inventory.find((inv) => inv.name === t.name && inv.type === type),
+    <div className="space-y-2">
+      <div className="flex items-baseline gap-2">
+        <h3 className="text-sm font-semibold">{type}</h3>
+        {filteredItems.length > 0 && (
+          <span className="text-xs text-muted-foreground tabular-nums">
+            {ownedCount} из {filteredItems.length}
+          </span>
+        )}
+      </div>
+      {visibleItems.length === 0 && !(hasCatalog && canEdit) ? (
+        <p className="text-sm text-muted-foreground">
+          {ownedOnly ? "Ничего нет" : "Пусто"}
+        </p>
+      ) : (
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(196px,100%),1fr))] gap-2">
+          {visibleItems.map((item) => (
+            <InventoryItemCard
+              canEdit={canEdit}
+              key={item.name}
+              item={item}
+              inventory={inventory}
+              userId={userId}
+              onChange={onChange}
+            />
+          ))}
+          {hasCatalog && canEdit && (
+            <AddCustomInventoryItemDialog
+              userId={userId}
+              type={type}
+              catalog={catalog.filter(
+                (t) =>
+                  !fixedNames.has(t.name) &&
+                  !inventory.find(
+                    (inv) => inv.name === t.name && inv.type === type,
+                  ),
+              )}
+              onAdded={() => {
+                onChange();
+                onExtraItemTypesChange?.();
+              }}
+            />
           )}
-          onAdded={() => {
-            onChange();
-            onExtraItemTypesChange?.();
-          }}
-        />
+        </div>
       )}
     </div>
   );

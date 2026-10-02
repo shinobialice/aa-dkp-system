@@ -1,154 +1,172 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
-import { Badge } from "@/shared/ui";
+import { CircleCheck, CircleX } from "lucide-react";
 import type { SalaryEligibilitySettings } from "@/actions/salaryEligibilitySettings";
 import type { getBosses } from "@/actions/getBosses";
 import type { GuildMode } from "@/actions/guildStatusSettings";
+import { cn } from "@/shared/lib/tw-merge";
+import GuildRules from "./GuildRules";
 
-const BOSS_CATEGORY_ORDER = ["Прайм", "АГЛ"];
-const GUILD_MODE_LABEL: Record<GuildMode, string> = {
-  freeshard: "Фришка",
-  pvp: "ПВП",
+type Boss = Awaited<ReturnType<typeof getBosses>>[number];
+
+const MODE_CHIP: Record<
+  GuildMode,
+  { label: string; className: string; dot: string }
+> = {
+  pvp: {
+    label: "Сейчас ПВП",
+    className:
+      "border-red-200 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400",
+    dot: "bg-red-600",
+  },
+  freeshard: {
+    label: "Сейчас фришка",
+    className:
+      "border-green-200 bg-green-50 text-green-700 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-400",
+    dot: "bg-green-600",
+  },
 };
 
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <h2 className="text-xl font-bold text-primary mt-8 mb-3">{children}</h2>;
-}
+function CriteriaCard({ settings }: { settings: SalaryEligibilitySettings }) {
+  const rows = [
+    {
+      label: "Посещение праймов",
+      hint: `больше ${settings.primeThresholdPercent}%`,
+      enabled: settings.primeEnabled,
+    },
+    {
+      label: "Процент баллов",
+      hint: `больше ${settings.pointsThresholdPercent}%`,
+      enabled: settings.pointsEnabled,
+    },
+    {
+      label: "Тег ДВ",
+      hint: "обходит оба порога выше",
+      enabled: settings.dvBypassEnabled,
+    },
+    {
+      label: "Проходной ГС",
+      hint: "по формуле из п. 1.2",
+      enabled: settings.gsEnabled,
+    },
+  ];
 
-function SubTitle({ children }: { children: React.ReactNode }) {
-  return <h3 className="font-semibold mt-4 mb-2">{children}</h3>;
-}
-
-function P({ children }: { children: React.ReactNode }) {
-  return <p className="text-sm leading-relaxed">{children}</p>;
-}
-
-function List({ children }: { children: React.ReactNode }) {
-  return <ul className="space-y-1.5 pl-1">{children}</ul>;
-}
-
-function Item({ children }: { children: React.ReactNode }) {
-  return <li className="text-sm leading-relaxed">{children}</li>;
-}
-
-function CriteriaRow({
-  label,
-  value,
-  enabled,
-}: {
-  label: string;
-  value?: string;
-  enabled: boolean;
-}) {
   return (
-    <tr>
-      <td className="p-2 border">{label}</td>
-      <td className="p-2 border text-center whitespace-nowrap">
-        {value ?? "—"}
-      </td>
-      <td className="p-2 border text-center">
-        <Badge variant={enabled ? "default" : "secondary"}>
-          {enabled ? "Включено" : "Выключено"}
-        </Badge>
-      </td>
-    </tr>
+    <section
+      id="criteria"
+      aria-label="Допуск к зарплате"
+      className="flex scroll-mt-6 flex-col rounded-xl border bg-card"
+    >
+      <div className="px-4 pt-4 pb-2.5 sm:px-[18px]">
+        <h2 className="text-[15px] font-semibold">Допуск к зарплате</h2>
+        <p className="mt-0.5 text-xs text-muted-foreground">
+          Действует сейчас · критерии меняет глава гильдии
+        </p>
+      </div>
+      <ul className="flex-1 px-1 sm:px-2">
+        {rows.map((row) => (
+          <li
+            key={row.label}
+            className="grid min-h-14 grid-cols-[22px_minmax(0,1fr)_auto] items-center gap-3 border-t border-border/60 px-2.5 py-1.5"
+          >
+            {row.enabled ? (
+              <CircleCheck className="size-5 text-green-600 dark:text-green-500" />
+            ) : (
+              <CircleX className="size-5 text-muted-foreground/60" />
+            )}
+            <div className="min-w-0">
+              <div
+                className={cn(
+                  "font-semibold",
+                  !row.enabled && "text-muted-foreground",
+                )}
+              >
+                {row.label}
+              </div>
+              <div className="text-xs text-muted-foreground">{row.hint}</div>
+            </div>
+            <span
+              className={cn(
+                "inline-flex h-6 items-center rounded-full px-2.5 text-xs font-semibold",
+                row.enabled
+                  ? "bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400"
+                  : "bg-muted text-muted-foreground",
+              )}
+            >
+              {row.enabled ? "Включено" : "Выключено"}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <p className="border-t border-border/60 px-4 pt-2.5 pb-3.5 text-xs text-muted-foreground sm:px-[18px]">
+        Тег ДВ обходит пороги посещения и баллов, но не проверку ГС
+      </p>
+    </section>
   );
 }
 
-function EligibilityCriteriaTable({
-  settings,
-}: {
-  settings: SalaryEligibilitySettings;
-}) {
+function BossList({ title, bosses }: { title: string; bosses: Boss[] }) {
   return (
-    <Card className="lg:sticky lg:top-4 h-fit">
-      <CardHeader>
-        <CardTitle className="text-base">Действующие критерии допуска</CardTitle>
-      </CardHeader>
-      <CardContent className="overflow-x-auto">
-        <table className="w-full text-sm border">
-          <thead>
-            <tr className="bg-muted">
-              <th className="p-2 border text-left">Критерий</th>
-              <th className="p-2 border">Порог</th>
-              <th className="p-2 border">Статус</th>
-            </tr>
-          </thead>
-          <tbody>
-            <CriteriaRow
-              label="Посещение праймов"
-              value={`> ${settings.primeThresholdPercent}%`}
-              enabled={settings.primeEnabled}
-            />
-            <CriteriaRow
-              label="Учёт баллов"
-              value={`> ${settings.pointsThresholdPercent}%`}
-              enabled={settings.pointsEnabled}
-            />
-            <CriteriaRow
-              label="Тег ДВ (обход порогов выше)"
-              enabled={settings.dvBypassEnabled}
-            />
-            <CriteriaRow
-              label="Проходной ГС"
-              value="по формуле, см. п. 1.2"
-              enabled={settings.gsEnabled}
-            />
-          </tbody>
-        </table>
-        <p className="text-xs text-muted-foreground mt-3">
-          Критерии может менять глава гильдии в любой момент (см. п. 1.3.3).
-        </p>
-      </CardContent>
-    </Card>
+    <div className="min-w-0">
+      <div className="pb-1.5 text-xs font-semibold text-muted-foreground">
+        {title}
+      </div>
+      <ul>
+        {bosses.map((boss) => (
+          <li
+            key={boss.id}
+            className="flex h-[30px] items-center justify-between gap-2 border-t border-border/60"
+          >
+            <span className="truncate">{boss.boss_name}</span>
+            <span className="min-w-[26px] rounded-full bg-muted px-1.5 text-center text-sm font-bold tabular-nums">
+              {boss.dkp_points}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
-function BossPointsTable({
-  bosses,
-  mode,
-}: {
-  bosses: Awaited<ReturnType<typeof getBosses>>;
-  mode: GuildMode;
-}) {
-  return (
-    <Card className="lg:sticky lg:top-4 h-fit">
-      <CardHeader>
-        <CardTitle className="text-base">Баллы за боссов</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4 overflow-x-auto">
-        <p className="text-xs text-muted-foreground">
-          Текущий режим гильдии:{" "}
-          <span className="font-semibold">{GUILD_MODE_LABEL[mode]}</span>
-        </p>
-        {BOSS_CATEGORY_ORDER.map((category) => {
-          const rows = bosses.filter((b) => b.category === category);
-          if (rows.length === 0) return null;
+function BossPointsCard({ bosses, mode }: { bosses: Boss[]; mode: GuildMode }) {
+  const byPoints = (a: Boss, b: Boss) =>
+    b.dkp_points - a.dkp_points || a.boss_name.localeCompare(b.boss_name, "ru");
+  const primes = bosses
+    .filter((boss) => boss.category === "Прайм")
+    .sort(byPoints);
+  const agl = bosses.filter((boss) => boss.category === "АГЛ").sort(byPoints);
+  const chip = MODE_CHIP[mode];
 
-          return (
-            <table key={category} className="w-full text-sm border">
-              <thead>
-                <tr className="bg-muted">
-                  <th className="p-2 border text-left">{category}</th>
-                  <th className="p-2 border text-center whitespace-nowrap">
-                    Баллы
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((b) => (
-                  <tr key={b.id}>
-                    <td className="p-2 border">{b.boss_name}</td>
-                    <td className="p-2 border text-center">
-                      {b.dkp_points}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          );
-        })}
-      </CardContent>
-    </Card>
+  return (
+    <section
+      id="points"
+      aria-label="Баллы за боссов"
+      className="flex scroll-mt-6 flex-col rounded-xl border bg-card"
+    >
+      <div className="flex items-start justify-between gap-3 px-4 pt-4 pb-2.5 sm:px-[18px]">
+        <div>
+          <h2 className="text-[15px] font-semibold">Баллы за боссов</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Зависят от режима гильдии
+          </p>
+        </div>
+        <span
+          className={cn(
+            "inline-flex h-6 shrink-0 items-center gap-1.5 rounded-full border px-2.5 text-xs font-semibold",
+            chip.className,
+          )}
+        >
+          <span className={cn("size-1.5 rounded-full", chip.dot)} />
+          {chip.label}
+        </span>
+      </div>
+      <div className="grid flex-1 grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] gap-4 px-4 pt-1 pb-3.5 sm:gap-5 sm:px-[18px]">
+        <BossList title="Праймы" bosses={primes} />
+        <BossList title="АГЛ" bosses={agl} />
+      </div>
+      <p className="border-t border-border/60 px-4 pt-2.5 pb-3.5 text-xs text-muted-foreground sm:px-[18px]">
+        ПВП на прайме — баллы ×2 (п. 2.4). На АГЛ +1 балл за пвп, прок и двойной
+        прок (п. 2.5)
+      </p>
+    </section>
   );
 }
 
@@ -156,213 +174,30 @@ export default function GuildInfoContent({
   settings,
   bosses,
   guildMode,
+  averageGuildGS,
 }: {
   settings: SalaryEligibilitySettings;
-  bosses: Awaited<ReturnType<typeof getBosses>>;
+  bosses: Boss[];
   guildMode: GuildMode;
+  averageGuildGS: number;
 }) {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div className="lg:col-span-2">
-        <SectionTitle>1. Условия получения зарплаты</SectionTitle>
-
-        <SubTitle>1.1 Испытательный срок</SubTitle>
-        <List>
-          <Item>
-            1.1.1 Испытательный срок заканчивается 1-го числа следующего
-            месяца после вступления, при вступлении до 20-го числа включительно.
-          </Item>
-          <Item>
-            1.1.2 Испытательный срок продлевается на месяц при вступлении
-            после 20-го числа.
-          </Item>
-          <Item>
-            1.1.3 Испытательный срок может быть снят заранее или продлён по
-            усмотрению главы гильдии.
-          </Item>
-        </List>
-
-        <SubTitle>1.2 Прохождение по ГС</SubTitle>
-        <P>
-          Проходной ГС рассчитывается на основании среднего ГС гильдии,
-          округлённого вниз до пятисот:
-        </P>
-        <List>
-          <Item>тактики/барды/танцоры = средний ГС −2000</Item>
-          <Item>хилы (дуалы/щит) = средний ГС</Item>
-          <Item>лучники/милики/маги (дуалы/щит) = средний ГС +500</Item>
-          <Item>хилы/лучники/милики/маги (двурук) = средний ГС −500</Item>
-        </List>
-
-        <SubTitle>1.3 Критерии выдачи зарплаты</SubTitle>
-        <List>
-          <Item>
-            1.3.1 К критериям выдачи зарплаты относятся: процент посещения
-            праймов; процент набранных баллов; имеющиеся персоналки.
-          </Item>
-          <Item>
-            1.3.2 Таблица с действующими критериями находится на этой
-            странице справа.
-          </Item>
-          <Item>
-            1.3.3 Действующие критерии могут быть изменены в любой момент по
-            усмотрению главы гильдии.
-          </Item>
-        </List>
-
-        <SectionTitle>
-          2. Зарплата рассчитывается на основании процента набранных баллов
-          от максимально возможных и заработка гильдии за месяц
-        </SectionTitle>
-        <List>
-          <Item>
-            2.1 Баллы набираются за рб и АГЛ, помеченные как обязательные в
-            таблице ниже.
-          </Item>
-          <Item>
-            2.2 Количество баллов, выдаваемых за праймовые рб, указано в той
-            же таблице в соответствующей колонке.
-          </Item>
-          <Item>2.3 За обязательные АГЛ всегда выдаётся по 1 баллу.</Item>
-          <Item>
-            2.4 За ПВП на праймовых рб количество выдаваемых баллов
-            удваивается.
-          </Item>
-          <Item>
-            2.5 За обязательные АГЛ выдаётся по дополнительному баллу за:
-            пвп; прок; двойной прок.
-          </Item>
-        </List>
-
-        <SectionTitle>3. Расчёт выдаваемой зарплаты</SectionTitle>
-        <List>
-          <Item>
-            3.1 Зарплаты рассчитываются на основании 70% общего заработка
-            гильдии за месяц, остальные 30% уходят в казну гильдии на
-            различные необходимые расходы.
-          </Item>
-          <Item>
-            3.2 При расчёте зарплаты учитываются бонус за время нахождения в
-            гильдии, дополнительный индивидуальный бонус и количество
-            полученных штрафов.
-          </Item>
-          <Item>
-            3.3 Бонус за срок нахождения в гильдии рассчитывается как 10% за
-            первое полугодие и по 5% за каждое последующее.
-          </Item>
-          <Item>
-            3.4 Дополнительные индивидуальные бонусы присваиваются по
-            усмотрению главы гильдии.
-          </Item>
-          <Item>
-            3.5 Штрафы выставляются индивидуально по усмотрению главы
-            гильдии и фиксированно по 3 штрафа за непрохождение по вкладу
-            гильдии. Количество необходимого вклада озвучивается главой
-            гильдии в начале месяца или при трансфере на новый сервер.
-          </Item>
-          <Item>
-            3.6 Штрафы действуют по формуле — x^(e^(1.25)/2)/2, где x — число
-            штрафов.
-          </Item>
-          <Item>
-            3.7 Все бонусы и процент штрафа учитываются последовательно и
-            влияют друг на друга.
-          </Item>
-        </List>
-
-        <SectionTitle>
-          4. Все предметы, получаемые за праймовых рб и АГЛ
-        </SectionTitle>
-        <P>
-          Продаются внутри гильдии в соответствии с очередью на их покупку,
-          если очередь на какой-либо предмет отсутствует, то он выставляется
-          на аукцион.
-        </P>
-        <List>
-          <Item>
-            4.1 Глава гильдии распоряжается лутом на своё усмотрение. Весь
-            лут праймовых рб, АГЛ, кошка, морф, марли скидывается главе
-            гильдии.
-          </Item>
-          <Item>
-            4.2 Определённые предметы не продаются ни внутри гильдии, ни на
-            аукционе, а выдаются бесплатно по усмотрению главы гильдии, при
-            условии что в этих предметах нуждаются или впредь будут
-            нуждаться члены гильдии. Список точных таких предметов и
-            очередь на их получение находятся на странице «Таблица раздачи
-            лута».
-          </Item>
-          <Item>
-            4.3 Внутри гильдии все предметы, получаемые за праймовые рб и
-            АГЛ, продаются со скидкой ~30%.
-          </Item>
-          <Item>
-            4.4 Все точные цены и очереди на покупку находятся на странице
-            «Покупка лута».
-          </Item>
-          <Item>
-            4.5 Встать в очередь на покупку может любой член гильдии, даже
-            если не прошёл испытательный срок, обратившись к главе гильдии.
-          </Item>
-          <Item>
-            4.6 Запрещается покупать что-либо у гильдии для перепродажи, в
-            случае выяснения подобного могут последовать штрафы или
-            исключение из гильдии.
-          </Item>
-        </List>
-
-        <SectionTitle>
-          5. Помощь от гильдии по сбору коллекций и вторых спеков
-        </SectionTitle>
-        <List>
-          <Item>
-            5.1 Гильдия бесплатно предоставляет двух последних питомцев для
-            коллекции боевых питомцев.
-          </Item>
-          <Item>
-            5.2 Гильдия бесплатно выдаёт глайдер с Кракена, если он остался
-            последним для коллекции глайдеров, либо добавляет 50 000 голды
-            на покупку одного из дорогих глайдеров, если один из них остался
-            последним для коллекции. Также гильдия предоставляет помощь для
-            т2-коллекций глайдеров/питомцев — можно выбрать только одну из
-            коллекций, гильдия купит последние 2 глайдера/питомца для
-            данной коллекции.
-          </Item>
-          <Item>
-            5.3 Гильдия единожды добавляет от 50 000 до 100 000 голды на
-            сборку спека тактика/барда/танцора.
-          </Item>
-        </List>
-
-        <SectionTitle>6. Система авансов</SectionTitle>
-        <List>
-          <Item>
-            6.1 Любой член гильдии при покупке предметов у гильдии может
-            частично или полностью оплатить покупку за счёт своей зарплаты
-            за текущий месяц.
-          </Item>
-          <Item>
-            6.2 Глава гильдии может отказаться от выдачи аванса по своему
-            усмотрению без объяснения причины отказа.
-          </Item>
-          <Item>
-            6.3 Члены гильдии могут получить аванс голдой на руки, указав:
-            <span className="block pl-4 mt-1">
-              а) для чего хотите снять аванс;
-              <br />
-              б) сумму снятия аванса.
-            </span>
-            <span className="block mt-1">
-              Далее всё как решит глава гильдии.
-            </span>
-          </Item>
-        </List>
+    <div className="mx-auto flex w-full max-w-6xl min-w-0 flex-col gap-5">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight sm:text-[26px]">
+          Основная информация
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Правила гильдии: зарплата, баллы, лут, помощь с коллекциями и авансы
+        </p>
       </div>
 
-      <div className="space-y-6">
-        <EligibilityCriteriaTable settings={settings} />
-        <BossPointsTable bosses={bosses} mode={guildMode} />
+      <div className="grid gap-4 md:grid-cols-2">
+        <CriteriaCard settings={settings} />
+        <BossPointsCard bosses={bosses} mode={guildMode} />
       </div>
+
+      <GuildRules averageGuildGS={averageGuildGS} />
     </div>
   );
 }

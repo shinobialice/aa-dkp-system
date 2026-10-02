@@ -1,30 +1,25 @@
 "use client";
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import type { PrimeStreak } from "@/actions/getUserPrimeStreak";
 import type { KillcountStats } from "@/actions/getUserKillcountStats";
 import type { UserArchetype } from "@/actions/getUserArchetype";
-import SealIcon from "@/widgets/profile/seals/SealIcon";
-import {
-  getSealGradeLabel,
-  getSealGradeForLevel,
-} from "@/widgets/profile/seals/sealsData";
-import ProfileAdditionalInfo from "./ProfileAdditionalInfo";
-import ProfileClasses from "./ProfileClasses";
+import type { SocialProvider } from "@/shared/lib/socialProviders";
+import calculateGuildTenureBonus from "@/utils/calculateGuildTenureBonus";
 import ProfileEditDialog from "./ProfileEditDialog";
 import ProfileHeader from "./ProfileHeader";
-import { Card, CardContent } from "@/shared/ui";
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/shared/ui";
+import ProfileStats from "./ProfileStats";
 
-const formatPoints = (n: number) => Number(n.toFixed(2)).toString();
-const currentMonthLabel = new Date().toLocaleDateString("ru-RU", {
-  month: "long",
-});
+type UsernameHistory = {
+  id: number;
+  old_username: string;
+  new_username: string;
+  changed_at: string;
+}[];
 
 export default function ProfileInfoClient({
   user,
   setUser,
-  tags: initialTags,
+  tags,
   seals,
   archetype,
   setArchetype,
@@ -41,10 +36,12 @@ export default function ProfileInfoClient({
   canEditArchetype,
   canEditInventory,
   isOwnProfile,
+  isAdmin,
   activity,
   salary,
   primeStreak,
   killcountStats,
+  onOpenSalary,
 }: {
   user: any;
   setUser: (user: any) => void;
@@ -54,20 +51,8 @@ export default function ProfileInfoClient({
   setArchetype: (archetype: UserArchetype) => void;
   inventory: any[];
   onInventoryChange: () => void;
-  usernameHistory: {
-    id: number;
-    old_username: string;
-    new_username: string;
-    changed_at: string;
-  }[];
-  setUsernameHistory: (
-    history: {
-      id: number;
-      old_username: string;
-      new_username: string;
-      changed_at: string;
-    }[],
-  ) => void;
+  usernameHistory: UsernameHistory;
+  setUsernameHistory: (history: UsernameHistory) => void;
   canEditProfile: boolean;
   canEditNickname: boolean;
   canEditGs: boolean;
@@ -77,6 +62,7 @@ export default function ProfileInfoClient({
   canEditArchetype: boolean;
   canEditInventory: boolean;
   isOwnProfile: boolean;
+  isAdmin: boolean;
   activity: {
     aglPercent: number;
     primePercent: number;
@@ -87,37 +73,43 @@ export default function ProfileInfoClient({
   salary: number | null;
   primeStreak: PrimeStreak;
   killcountStats: KillcountStats | null;
+  onOpenSalary: () => void;
 }) {
-  const [tags, setTags] = useState(initialTags);
   const [editOpen, setEditOpen] = useState(false);
   const [editSession, setEditSession] = useState(0);
-  const [vkRealName, setVkRealName] = useState("");
+  const [vkName, setVkName] = useState<{ lookup: string; name: string } | null>(
+    null,
+  );
+  const vkLookup: string = user.vk_name || user.vk_id || "";
 
   useEffect(() => {
-    setTags(initialTags);
-  }, [initialTags]);
-
-  useEffect(() => {
-    const fetchVkName = async () => {
-      const lookup = user.vk_name || user.vk_id;
-      if (!lookup) {
-        setVkRealName("");
-        return;
-      }
-
-      const res = await fetch(
-        `/api/vk-name?username=${encodeURIComponent(lookup)}`,
-      );
-      const data = await res.json();
-
-      setVkRealName(data.name ?? "");
+    if (!vkLookup) return;
+    let cancelled = false;
+    fetch(`/api/vk-name?username=${encodeURIComponent(vkLookup)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!cancelled) setVkName({ lookup: vkLookup, name: data.name ?? "" });
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
     };
+  }, [vkLookup]);
 
-    fetchVkName();
-  }, [user.vk_name, user.vk_id]);
+  const vkRealName = vkName?.lookup === vkLookup ? vkName.name : "";
+
+  const handleSocialUnlinked = (provider: SocialProvider) => {
+    const patch =
+      provider === "vk"
+        ? { vk_id: null, vk_name: null }
+        : provider === "google"
+          ? { google_id: null }
+          : { mail_id: null };
+    setUser({ ...user, ...patch });
+  };
 
   return (
-    <Card className="gap-0 overflow-hidden py-0">
+    <>
       <ProfileHeader
         canEditProfile={canEditProfile}
         onEdit={() => {
@@ -125,11 +117,15 @@ export default function ProfileInfoClient({
           setEditOpen(true);
         }}
         isOwnProfile={isOwnProfile}
+        isAdmin={isAdmin}
         user={user}
         tags={tags}
         usernameHistory={usernameHistory}
         primeStreak={primeStreak}
-        killcountStats={killcountStats}
+        archetype={archetype}
+        seals={seals}
+        vkRealName={vkRealName}
+        onSocialUnlinked={handleSocialUnlinked}
       />
       {canEditProfile && (
         <ProfileEditDialog
@@ -154,70 +150,13 @@ export default function ProfileInfoClient({
           canEditInventory={canEditInventory}
         />
       )}
-      <CardContent className="flex flex-wrap gap-x-8 gap-y-4 border-t py-5">
-        <ProfileClasses user={user} archetype={archetype} />
-        <div className="min-w-[140px] space-y-1.5">
-          <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Печати
-          </div>
-          {seals?.length > 0 ? (
-            <div className="flex items-center gap-1.5">
-              {seals.map((seal) => (
-                <Tooltip key={seal.id}>
-                  <TooltipTrigger asChild>
-                    <div>
-                      <SealIcon
-                        grade={getSealGradeForLevel(seal.level)}
-                        size={28}
-                      />
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {seal.seal_name} · уровень {seal.level} (
-                    {getSealGradeLabel(getSealGradeForLevel(seal.level))})
-                  </TooltipContent>
-                </Tooltip>
-              ))}
-            </div>
-          ) : (
-            <div className="text-sm font-semibold text-muted-foreground">
-              Не выбраны
-            </div>
-          )}
-        </div>
-        <ProfileAdditionalInfo user={user} vkRealName={vkRealName} />
-        <div className="min-w-[140px] space-y-1.5">
-          <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Баллы · {currentMonthLabel}
-          </div>
-          <div className="text-sm font-semibold">
-            {formatPoints(activity.dkp)} /{" "}
-            {formatPoints(activity.totalPointsAvailable)}
-          </div>
-        </div>
-        <div className="min-w-[140px] space-y-1.5">
-          <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Посещаемость
-          </div>
-          <div className="text-sm font-semibold">
-            {activity.totalPercent.toFixed(2)}%
-          </div>
-        </div>
-        <div className="min-w-[140px] space-y-1.5">
-          <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Зарплата · {currentMonthLabel}
-          </div>
-          <div className="flex items-center gap-1.5 text-sm font-semibold">
-            <Image
-              src="https://archeagecodex.com/items/gold.png"
-              alt=""
-              width={16}
-              height={16}
-            />
-            {salary != null ? salary.toLocaleString("ru-RU") : "—"}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+      <ProfileStats
+        activity={activity}
+        salary={salary}
+        killcountStats={killcountStats}
+        tenureBonus={calculateGuildTenureBonus(user.joined_at ?? null)}
+        onOpenSalary={onOpenSalary}
+      />
+    </>
   );
 }

@@ -402,6 +402,8 @@ export async function updateGuildLocation(
 export type PvpPlayerStats = {
   userId: number;
   userName: string;
+  avatarUrl: string | null;
+  userClass: string | null;
   kills: number;
   honor: number;
 };
@@ -430,12 +432,14 @@ export async function getStatsForPeriod(
         SELECT
           u.id AS "userId",
           u.username AS "userName",
+          u.avatar_url AS "avatarUrl",
+          u.class AS "userClass",
           SUM(s.end_kills - s.start_kills) AS kills,
           SUM(s.end_honor - s.start_honor) AS honor
         FROM killcount_stats s
         JOIN "user" u ON s.user_id = u.id
         WHERE s.recorded_at >= ${startDate} AND s.recorded_at < ${rangeEnd}
-        GROUP BY u.id, u.username
+        GROUP BY u.id, u.username, u.avatar_url, u.class
         ORDER BY kills DESC, honor DESC, u.id
       `,
     ]);
@@ -446,6 +450,8 @@ export async function getStatsForPeriod(
       players: players.map((row) => ({
         userId: row.userId,
         userName: row.userName,
+        avatarUrl: row.avatarUrl ?? null,
+        userClass: row.userClass ?? null,
         kills: Number(row.kills),
         honor: Number(row.honor),
       })),

@@ -145,6 +145,8 @@ export type FighterSort = "kills" | "honor" | "raids";
 export type Fighter = {
   userId: number;
   name: string;
+  avatarUrl: string | null;
+  userClass: string | null;
   kills: number | null;
   honor: number | null;
   raids: number | null;
@@ -160,6 +162,8 @@ export function buildFighters(
     byId.set(player.userId, {
       userId: player.userId,
       name: player.userName,
+      avatarUrl: player.avatarUrl,
+      userClass: player.userClass,
       kills: player.kills,
       honor: player.honor,
       raids: null,
@@ -175,6 +179,8 @@ export function buildFighters(
     byId.set(entry.userId, {
       userId: entry.userId,
       name: entry.username,
+      avatarUrl: entry.avatarUrl,
+      userClass: entry.userClass,
       kills: null,
       honor: null,
       raids: entry.raidsAttended,

@@ -3,6 +3,8 @@
 import { useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/shared/lib/tw-merge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui";
+import { classColors, classIcons } from "@/widgets/MembersTable/classStyles";
 import WarUserLink from "./WarUserLink";
 import {
   MeterBar,
@@ -36,22 +38,44 @@ const METRIC_LABEL: Record<FighterSort, string> = {
   raids: "рейды",
 };
 
-function RankBadge({ fighter }: { fighter: Fighter }) {
-  if (fighter.rank) {
-    return (
-      <Image
-        src={fighter.rank.icon}
-        alt={fighter.rank.name}
-        title={fighter.rank.name}
-        width={32}
-        height={32}
-        className="size-8 shrink-0 object-contain"
-      />
-    );
-  }
+function FighterAvatar({ fighter }: { fighter: Fighter }) {
   return (
-    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-semibold text-muted-foreground">
-      {fighter.name.slice(0, 2)}
+    <span className="relative size-9 shrink-0">
+      <Avatar className="size-9">
+        <AvatarImage
+          src={
+            fighter.avatarUrl ??
+            `https://api.dicebear.com/6.x/initials/svg?seed=${fighter.name}`
+          }
+          alt=""
+        />
+        <AvatarFallback className="text-[11px] font-semibold">
+          {fighter.name.slice(0, 2)}
+        </AvatarFallback>
+      </Avatar>
+      {fighter.rank && (
+        <Image
+          src={fighter.rank.icon}
+          alt={fighter.rank.name}
+          title={fighter.rank.name}
+          width={22}
+          height={22}
+          className="absolute -right-1.5 -bottom-1.5 size-[22px] object-contain drop-shadow"
+        />
+      )}
+    </span>
+  );
+}
+
+function ClassTag({ userClass }: { userClass: string | null }) {
+  if (!userClass) return null;
+  return (
+    <span
+      className="inline-flex shrink-0 items-center gap-1 [&_svg]:size-3.5"
+      style={{ color: classColors[userClass] }}
+    >
+      {classIcons[userClass]}
+      <span className="text-foreground/70">{userClass}</span>
     </span>
   );
 }
@@ -164,17 +188,23 @@ export default function WarFightersCard({
                   )}
                 >
                   <PlaceNumber place={index + 1} />
-                  <div className="flex min-w-0 items-center gap-2.5">
-                    <RankBadge fighter={fighter} />
+                  <div className="flex min-w-0 items-center gap-3">
+                    <FighterAvatar fighter={fighter} />
                     <div className="min-w-0">
                       <WarUserLink
                         userId={fighter.userId}
                         name={fighter.name}
                         className="block font-semibold"
                       />
-                      {fighter.rank && (
-                        <span className="block truncate text-xs text-muted-foreground">
-                          {fighter.rank.name}
+                      {(fighter.userClass || fighter.rank) && (
+                        <span className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
+                          <ClassTag userClass={fighter.userClass} />
+                          {fighter.userClass && fighter.rank && <span>·</span>}
+                          {fighter.rank && (
+                            <span className="truncate">
+                              {fighter.rank.name}
+                            </span>
+                          )}
                         </span>
                       )}
                     </div>
@@ -210,15 +240,26 @@ export default function WarFightersCard({
                   })}
                 </div>
 
-                <div className="grid min-h-14 grid-cols-[22px_32px_minmax(0,1fr)_auto] items-center gap-2.5 sm:hidden">
+                <div className="grid min-h-14 grid-cols-[22px_36px_minmax(0,1fr)_auto] items-center gap-2.5 sm:hidden">
                   <PlaceNumber place={index + 1} />
-                  <RankBadge fighter={fighter} />
+                  <FighterAvatar fighter={fighter} />
                   <div className="min-w-0">
-                    <WarUserLink
-                      userId={fighter.userId}
-                      name={fighter.name}
-                      className="block font-semibold"
-                    />
+                    <span className="flex min-w-0 items-center gap-1.5">
+                      <WarUserLink
+                        userId={fighter.userId}
+                        name={fighter.name}
+                        className="min-w-0 font-semibold"
+                      />
+                      {fighter.userClass && (
+                        <span
+                          className="shrink-0 [&_svg]:size-3.5"
+                          style={{ color: classColors[fighter.userClass] }}
+                          title={fighter.userClass}
+                        >
+                          {classIcons[fighter.userClass]}
+                        </span>
+                      )}
+                    </span>
                     <span className="block truncate text-xs text-muted-foreground">
                       {SORT_OPTIONS.filter((option) => option.value !== sort)
                         .map(

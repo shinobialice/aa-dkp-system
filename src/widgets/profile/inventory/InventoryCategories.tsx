@@ -21,12 +21,14 @@ export default function InventoryCategories({
   onChange,
   canEdit,
   isAdmin,
+  ownedOnly = false,
 }: {
   inventory: any[];
   userId: number;
   onChange: () => void;
   canEdit: boolean;
   isAdmin?: boolean;
+  ownedOnly?: boolean;
 }) {
   const [extraItemTypes, setExtraItemTypes] = useState<ProfileItemTypeRow[]>(
     [],
@@ -53,16 +55,11 @@ export default function InventoryCategories({
   }, [reloadExtraItemTypes]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {categories.map((type) => (
-        <div
-          key={type}
-          className="space-y-2 border-t pt-4 first:border-t-0 first:pt-0"
-        >
-          <h3 className="text-sm font-semibold text-muted-foreground">
-            {type}
-          </h3>
+        <div key={type}>
           <InventoryCategoryGrid
+            ownedOnly={ownedOnly}
             canEdit={canEdit}
             isAdmin={isAdmin}
             type={type}

@@ -1,6 +1,7 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import ensurePrivilieges from "./ensurePrivilieges";
 import { triggerFinanceRecalcForCurrentMonth } from "./recalculateFinanceForMonth";
 
 export const getUserPenaltyPoints = async (userId: number) => {
@@ -52,6 +53,7 @@ export async function addUserPenaltyPoints({
   amount: number;
   reason: string;
 }) {
+  await ensurePrivilieges(["Администратор"]);
   if (amount <= 0) {
     throw new Error("Штраф должен быть больше 0");
   }
@@ -73,6 +75,7 @@ export async function addUserPenaltyPoints({
 }
 
 export async function deleteUserPenaltyPoints(id: number) {
+  await ensurePrivilieges(["Администратор"]);
   try {
     await sql<any[]>`
       DELETE FROM user_penalty_points WHERE id = ${id}

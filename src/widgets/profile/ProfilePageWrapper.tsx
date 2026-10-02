@@ -84,13 +84,14 @@ export default function ProfilePageWrapper({
     initialUsernameHistory,
   );
   const [inventory, setInventory] = useState(initialInventory);
+  const [tab, setTab] = useState("inventory");
 
   const reloadInventory = async () => {
     setInventory(await getUserInventory(user.id));
   };
 
   return (
-    <div className="-mt-4 space-y-6 px-4 pb-4">
+    <div className="mx-auto flex w-full max-w-6xl min-w-0 flex-col gap-4">
       <ProfileInfoClient
         canEditProfile={canEditProfile}
         canEditNickname={canEditNickname}
@@ -101,6 +102,8 @@ export default function ProfilePageWrapper({
         canEditArchetype={canEditArchetype}
         canEditInventory={canEditInventory}
         isOwnProfile={isOwnProfile}
+        isAdmin={isAdmin}
+        onOpenSalary={() => setTab("salary")}
         user={user}
         setUser={setUser}
         tags={tags}
@@ -117,6 +120,8 @@ export default function ProfilePageWrapper({
         killcountStats={killcountStats}
       />
       <ProfileTabs
+        tab={tab}
+        onTabChange={setTab}
         user={user}
         setUser={setUser}
         inventory={inventory}
@@ -130,6 +135,7 @@ export default function ProfilePageWrapper({
         setEquipment={setEquipment}
         tags={tags}
         setTags={setTags}
+        salary={salary}
         averageGuildGS={averageGuildGS}
         isAdmin={isAdmin}
         canEditSeals={canEditSeals}

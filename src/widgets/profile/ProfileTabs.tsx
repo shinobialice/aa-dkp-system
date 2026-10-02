@@ -2,19 +2,27 @@
 import type { UserArchetype } from "@/actions/getUserArchetype";
 import type { UserSkillBuild } from "@/actions/getUserSkillBuild";
 import type { UserEquipment } from "@/actions/getUserEquipment";
-import { UserActivityChart } from "@/widgets/profile/activity/UserActivityChart";
-import { UserMonthActivity } from "@/widgets/profile/activity/UserMonthActivity";
+import ProfileAttendanceTab from "./activity/ProfileAttendanceTab";
 import InventoryTabsClient from "./inventory/InventoryTabsClient";
 import PurchasesAndGiveaways from "./inventory/PurchasesAndGiveaways";
-import UserNotes from "./notes/UserNotes";
+import ProfileSalaryTab from "./notes/ProfileSalaryTab";
 import SealsTab from "./seals/SealsTab";
 import ClassArchetypeTab from "./archetype/ClassArchetypeTab";
 import EquipmentTab from "./equipment/EquipmentTab";
 import EpheSealsTab from "./ephe/EpheSealsTab";
-import UserMonthlyRaidsTab from "./raids/UserMonthlyRaidsTab";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/ui";
 
+const TABS = [
+  { value: "inventory", label: "Инвентарь" },
+  { value: "attendance", label: "Посещаемость" },
+  { value: "salary", label: "Зарплата" },
+  { value: "purchases", label: "Покупки" },
+  { value: "character", label: "Персонаж" },
+];
+
 export default function ProfileTabs({
+  tab,
+  onTabChange,
   user,
   inventory,
   seals,
@@ -28,12 +36,15 @@ export default function ProfileTabs({
   tags,
   setTags,
   setUser,
+  salary,
   averageGuildGS,
   isAdmin,
   canEditSeals,
   canEditArchetype,
   canEditEquipment,
 }: {
+  tab: string;
+  onTabChange: (tab: string) => void;
   user: any;
   inventory: any[];
   seals: any[];
@@ -47,6 +58,7 @@ export default function ProfileTabs({
   tags: any[];
   setTags: (tags: any[]) => void;
   setUser: (user: any) => void;
+  salary: number | null;
   averageGuildGS: number;
   isAdmin: boolean;
   canEditSeals: boolean;
@@ -54,49 +66,36 @@ export default function ProfileTabs({
   canEditEquipment: boolean;
 }) {
   return (
-    <Tabs defaultValue="inventory">
-      <TabsList className="mb-4">
-        <TabsTrigger className="cursor-pointer" value="inventory">
-          Инвентарь
-        </TabsTrigger>
-        <TabsTrigger className="cursor-pointer" value="activity">
-          Посещения
-        </TabsTrigger>
-        <TabsTrigger className="cursor-pointer" value="raids">
-          Рейды
-        </TabsTrigger>
-        <TabsTrigger className="cursor-pointer" value="notes">
-          Заметки
-        </TabsTrigger>
-        <TabsTrigger className="cursor-pointer" value="purchases">
-          Куплено/Выдано
-        </TabsTrigger>
-        <TabsTrigger className="cursor-pointer" value="character">
-          Персонаж
-        </TabsTrigger>
-      </TabsList>
+    <Tabs value={tab} onValueChange={onTabChange} className="min-w-0 gap-3">
+      <div className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:px-0">
+        <TabsList className="h-10">
+          {TABS.map((item) => (
+            <TabsTrigger
+              key={item.value}
+              className="cursor-pointer px-3.5"
+              value={item.value}
+            >
+              {item.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </div>
+
       <TabsContent value="inventory">
-        <InventoryTabsClient
-          inventory={inventory}
-          userId={user.id}
-        />
+        <InventoryTabsClient inventory={inventory} userId={user.id} />
       </TabsContent>
 
-      <TabsContent value="activity" className="space-y-6">
-        <UserMonthActivity userId={user.id} />
-        <UserActivityChart userId={user.id} />
+      <TabsContent value="attendance">
+        <ProfileAttendanceTab userId={user.id} />
       </TabsContent>
 
-      <TabsContent value="raids">
-        <UserMonthlyRaidsTab userId={user.id} />
-      </TabsContent>
-
-      <TabsContent value="notes">
-        <UserNotes
+      <TabsContent value="salary">
+        <ProfileSalaryTab
           isAdmin={isAdmin}
           user={user}
-          initialTags={tags}
-          updateTags={setTags}
+          salary={salary}
+          tags={tags}
+          setTags={setTags}
           setUser={setUser}
           averageGuildGS={averageGuildGS}
         />
@@ -106,7 +105,7 @@ export default function ProfileTabs({
         <PurchasesAndGiveaways userId={user.id} username={user.username} />
       </TabsContent>
 
-      <TabsContent value="character">
+      <TabsContent value="character" className="min-w-0">
         <Tabs defaultValue="equipment">
           <TabsContent value="equipment">
             <EquipmentTab
