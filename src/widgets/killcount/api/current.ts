@@ -3,6 +3,7 @@
 import sql from "@/shared/lib/db";
 import { getBaseUrl } from "@/shared/lib";
 import { sendVkMessage } from "@/shared/lib/vkBot";
+import ensurePrivilieges from "@/actions/ensurePrivilieges";
 import { KillCount } from "../types";
 
 export const getKillCountCurrent = async () => {
@@ -12,6 +13,7 @@ export const getKillCountCurrent = async () => {
 			u.username AS "userName",
 			u.id AS "userId",
 			u.class AS "role",
+			u.avatar_url AS "avatarUrl",
 			s.id AS "id",
 			s.start_honor AS "startHonor", 
 			s.end_honor AS "endHonor", 
@@ -36,6 +38,7 @@ export const getKillCountCurrent = async () => {
 };
 
 export const setKillCountCurrent = async (dto: KillCount[]) => {
+  await ensurePrivilieges(["Администратор"]);
   try {
     const userNames = dto.map((item) => item.userName);
 

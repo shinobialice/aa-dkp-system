@@ -1,14 +1,13 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import ensurePrivilieges from "@/actions/ensurePrivilieges";
 import {
   DB_GetKillCountDto,
   DB_UpdateKillCountDto,
-} from "@/widgets/killcount/types";
-import {
   KillCountHistoryData,
   KillCountWar,
-} from "@/widgets/killcount/ui/history-table/history-table";
+} from "@/widgets/killcount/types";
 
 export const getKillCountWars = async () => {
   try {
@@ -79,12 +78,14 @@ export const getKillCountHistory = async () => {
         days.*,
         top.user_id AS "topUserId",
         top.username AS "topUserName",
-        top.kills AS "topKills"
+        top.kills AS "topKills",
+        top.avatar_url AS "topAvatarUrl"
       FROM days
       LEFT JOIN LATERAL (
         SELECT
           s.user_id,
           u.username,
+          u.avatar_url,
           (s.end_kills - s.start_kills) AS kills
         FROM killcount_stats s
         JOIN "user" u ON u.id = s.user_id
@@ -110,6 +111,7 @@ export const getKillCountByDate = async (date: string) => {
       u.username AS "userName",
 			u.id AS "userId",
 			u.class AS "role",
+			u.avatar_url AS "avatarUrl",
 			s.id,
       s.start_honor AS "startHonor",
       s.end_honor AS "endHonor",
@@ -143,6 +145,7 @@ export const updateKillCountById = async ({
   endKills,
   comment,
 }: DB_UpdateKillCountDto) => {
+  await ensurePrivilieges(["Администратор"]);
   try {
     const result = await sql`
     UPDATE killcount_stats

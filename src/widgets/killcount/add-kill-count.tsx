@@ -1,8 +1,8 @@
 "use client";
 
-import { Typography, Button, Separator } from "@/shared/ui";
-import { PlusIcon } from "lucide-react";
 import { FC, useState } from "react";
+import { PlusIcon, Swords } from "lucide-react";
+import { Button } from "@/shared/ui";
 import { AddManualKillCount } from "./ui/add-manual";
 
 interface AddKillCountProps {
@@ -10,36 +10,31 @@ interface AddKillCountProps {
 }
 
 export const AddKillCount: FC<AddKillCountProps> = ({ isCanEdit }) => {
-  const [chooseState, setChooseState] = useState<"manual" | undefined>();
+  const [manual, setManual] = useState(false);
 
-  const onBack = () => {
-    setChooseState(undefined);
-  };
+  if (manual) {
+    return (
+      <AddManualKillCount
+        isCanEdit={isCanEdit}
+        onBack={() => setManual(false)}
+      />
+    );
+  }
 
   return (
-    <>
-      <div className="content-center">
-        {!chooseState && (
-          <Typography className="text-center mb-4" variant="large">
-            За сегодняшний день киллкаунт еще не добавлен
-          </Typography>
-        )}
-        {!chooseState && isCanEdit && (
-          <div className="flex gap-4">
-            <Button
-              size="lg"
-              variant="default"
-              onClick={() => setChooseState("manual")}
-            >
-              <PlusIcon /> Добавить вручную
-            </Button>
-            <Separator orientation="vertical" />
-          </div>
-        )}
-        {chooseState === "manual" && (
-          <AddManualKillCount isCanEdit={isCanEdit} onBack={onBack} />
-        )}
-      </div>
-    </>
+    <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed bg-card px-4 py-14 text-center">
+      <Swords className="size-8 text-muted-foreground" />
+      <p className="text-base font-semibold">
+        Киллкаунт за сегодня ещё не добавлен
+      </p>
+      <p className="max-w-sm text-sm text-muted-foreground">
+        Он появится здесь после прайма. Прошлые дни — во вкладке «История».
+      </p>
+      {isCanEdit && (
+        <Button className="mt-2 cursor-pointer" onClick={() => setManual(true)}>
+          <PlusIcon /> Добавить вручную
+        </Button>
+      )}
+    </div>
   );
 };

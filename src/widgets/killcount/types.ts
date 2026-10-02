@@ -20,6 +20,7 @@ export interface KillCount {
   userName: string;
   userId?: Id;
   role?: string | null;
+  avatarUrl?: string | null;
   startHonor: number;
   endHonor: number;
   startKills: number;
@@ -31,6 +32,7 @@ export interface KillCount {
 export interface DB_GetKillCountDto {
   userName: string;
   role?: string | null;
+  avatarUrl?: string | null;
   id: Id;
   userId?: string;
   eventId: number;
@@ -52,4 +54,23 @@ export interface DB_UpdateKillCountDto {
   endKills: number;
   playerClass: string;
   comment?: string;
+}
+
+export interface KillCountHistoryData {
+  date: string;
+  /** SUM(...) в Postgres — bigint, приходит строкой. */
+  totalKills: string;
+  playersCount: number;
+  warId: string | null;
+  topUserId: number | null;
+  topUserName: string | null;
+  topKills: number | null;
+  topAvatarUrl: string | null;
+}
+
+export interface KillCountWar {
+  id: string;
+  opponentGuild: string | null;
+  startedAt: string;
+  endedAt: string | null;
 }
