@@ -42,7 +42,6 @@ const FILTERS: { key: RosterFilter; label: string }[] = [
   { key: "all", label: "Все" },
   { key: "want", label: "Хотят" },
   { key: "stock", label: "В наличии" },
-  { key: "nothing", label: "Ещё ничего не получили" },
 ];
 
 function FilterChip({
@@ -300,8 +299,9 @@ export default function LootGiveaway({
           Раздача лута
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Кто что получил из гильдейского лута и кто ждёт. Выберите предмет,
-          чтобы увидеть, кто его хочет, или игрока — чтобы увидеть его выдачи.
+          Что гильдия уже выдала, у кого предмет есть и так, и кто его хочет.
+          Выберите предмет, чтобы увидеть, кто его хочет, или игрока — чтобы
+          увидеть его выдачи.
         </p>
       </div>
 
@@ -336,7 +336,7 @@ export default function LootGiveaway({
                     {entry.status === "Выдано"
                       ? `выдано ${formatDate(entry.date)}`
                       : entry.status === "В наличии"
-                        ? "в наличии, ждёт выдачи"
+                        ? "уже есть, гильдия не выдавала"
                         : `вы в списке «хотят» · всего ${waiting}`}
                   </span>
                 </span>

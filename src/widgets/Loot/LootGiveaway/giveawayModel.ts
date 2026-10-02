@@ -39,7 +39,7 @@ export type Player = {
   wishlist: WishlistItem[];
 };
 
-export type RosterFilter = "all" | "want" | "stock" | "nothing";
+export type RosterFilter = "all" | "want" | "stock";
 
 export type StatusCounts = { given: number; stock: number; want: number };
 
@@ -86,21 +86,21 @@ export function matchesFilter(
       );
     case "stock":
       return statuses.includes("В наличии");
-    case "nothing":
-      return !player.items.some((i) => i.status === "Выдано");
     default:
       return true;
   }
 }
 
+// "Выдано" — выдала гильдия, "В наличии" — у игрока уже есть, гильдия не
+// выдавала: в обоих случаях предмет у игрока есть, поэтому они внизу.
 const STATUS_RANK: Record<GiveawayStatus, number> = {
   Хочет: 0,
-  "В наличии": 1,
-  "": 2,
-  Выдано: 3,
+  "": 1,
+  Выдано: 2,
+  "В наличии": 3,
 };
 
-/** При выбранном предмете сверху те, кто его ждёт, внизу — уже получившие. */
+/** При выбранном предмете сверху те, кто его хочет, внизу — у кого он уже есть. */
 export function sortForItem(players: Player[], itemName: string | null) {
   if (!itemName) return players;
   return [...players].sort(

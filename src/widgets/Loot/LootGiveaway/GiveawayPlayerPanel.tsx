@@ -391,8 +391,8 @@ export default function GiveawayPlayerPanel({
             {player.username}
           </h2>
           <p className="text-xs text-muted-foreground">
-            {player.active ? "Активен" : "Неактивен"} · получил {givenCount} из{" "}
-            {items.length}
+            {player.active ? "Активен" : "Неактивен"} · гильдия выдала{" "}
+            {givenCount} из {items.length}
           </p>
         </div>
         {isAdmin && (

@@ -87,14 +87,14 @@ export default function GiveawayItemTiles({
               <span className="flex flex-wrap gap-1">
                 <Count
                   value={c.given}
-                  title="выдано"
+                  title="выдано гильдией"
                   className={STATUS_STYLES["Выдано"].badge}
                 >
                   <Check className="size-3" strokeWidth={3} />
                 </Count>
                 <Count
                   value={c.stock}
-                  title="в наличии"
+                  title="в наличии — уже есть, гильдия не выдавала"
                   className={STATUS_STYLES["В наличии"].badge}
                 >
                   <Circle className="size-2 fill-current" />
