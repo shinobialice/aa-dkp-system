@@ -1,6 +1,7 @@
 "use server";
 import { cookies } from "next/headers";
 import sql from "@/shared/lib/db";
+import { deleteUserSessions } from "@/shared/lib/session";
 import { hasTag } from "./hasTag";
 import type { SocialProvider } from "@/shared/lib/socialProviders";
 
@@ -31,6 +32,6 @@ export async function unlinkSocialAccount(
   }
 
   if (endSession) {
-    await sql`UPDATE "user" SET session_token = NULL WHERE id = ${userId}`;
+    await deleteUserSessions(userId);
   }
 }

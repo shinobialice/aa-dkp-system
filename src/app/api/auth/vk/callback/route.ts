@@ -68,5 +68,10 @@ export async function GET(req: NextRequest) {
     return loginErrorRedirect("provider");
   }
 
-  return completeSocialAuth("vk_id", String(user.user_id), linkToken);
+  return completeSocialAuth(
+    "vk_id",
+    String(user.user_id),
+    linkToken,
+    req.headers.get("user-agent"),
+  );
 }

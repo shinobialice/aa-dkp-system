@@ -2,18 +2,16 @@
 
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import sql from "@/shared/lib/db";
+import { deleteSession } from "@/shared/lib/session";
 
 export async function logout() {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get("session_token")?.value;
 
-  // Гасим токен и в базе — иначе украденная кука продолжала бы работать
-  // после выхода.
+  // Гасим сессию и в базе — иначе украденная кука продолжала бы работать
+  // после выхода. Остальные устройства игрока не трогаем.
   if (sessionToken) {
-    await sql`
-      UPDATE "user" SET session_token = NULL WHERE session_token = ${sessionToken}
-    `;
+    await deleteSession(sessionToken);
   }
 
   cookieStore.delete("session_token").delete("link-token");

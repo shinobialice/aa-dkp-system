@@ -1,7 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
-import sql from "@/shared/lib/db";
+import { getSessionUser } from "@/shared/lib/session";
 import { hasTag } from "./hasTag";
 import { getUserSelfEditSettings } from "./userSelfEditSettings";
 
@@ -23,9 +23,7 @@ const ensureCanEditUserData = async (
 
   if (await hasTag(sessionToken, ["Администратор", "Секретутка"])) return;
 
-  const [sessionUser] = await sql<any[]>`
-    SELECT id, active FROM "user" WHERE session_token = ${sessionToken}
-  `;
+  const sessionUser = await getSessionUser(sessionToken);
 
   if (!sessionUser || sessionUser.id !== userId || !sessionUser.active) {
     throw new Error("Access denied: insufficient privileges");
