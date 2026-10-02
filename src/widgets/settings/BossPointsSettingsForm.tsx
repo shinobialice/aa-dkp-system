@@ -1,115 +1,100 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import { Button, Input } from "@/shared/ui";
+import { Input } from "@/shared/ui";
+import { cn } from "@/shared/lib/tw-merge";
 import {
   getBossPointsForSettings,
   updateBossPoints,
   type BossPointsRow,
 } from "@/actions/bossPointsSettings";
+import { useSettingsDraft } from "./settingsDraft";
+import { Loading, SettingsCard } from "./settingsUi";
 
 const CATEGORY_ORDER = ["Прайм", "АГЛ"];
 
 export function BossPointsSettingsForm() {
-  const [bosses, setBosses] = useState<BossPointsRow[] | null>(null);
-  const [savingPoints, setSavingPoints] = useState(false);
-
-  useEffect(() => {
-    getBossPointsForSettings().then(setBosses);
-  }, []);
-
-  function handlePointChange(
-    id: number,
-    field: "dkp_points_freeshard" | "dkp_points_pvp",
-    value: string,
-  ) {
-    setBosses(
-      (prev) =>
-        prev?.map((b) =>
-          b.id === id ? { ...b, [field]: Number(value) } : b,
-        ) ?? null,
-    );
-  }
-
-  async function handleSavePoints() {
-    if (!bosses) return;
-    setSavingPoints(true);
-    try {
-      await updateBossPoints(
-        bosses.map((b) => ({
+  const points = useSettingsDraft<BossPointsRow[]>({
+    id: "bossPoints",
+    section: "points",
+    label: "Очки боссов",
+    load: getBossPointsForSettings,
+    save: (rows) =>
+      updateBossPoints(
+        rows.map((b) => ({
           id: b.id,
           freeshard: b.dkp_points_freeshard,
           pvp: b.dkp_points_pvp,
         })),
-      );
-      toast.success("Очки боссов сохранены");
-    } catch {
-      toast.error("Не удалось сохранить очки боссов");
-    } finally {
-      setSavingPoints(false);
-    }
-  }
+      ),
+  });
 
-  if (!bosses) {
-    return <p className="text-sm text-muted-foreground">Загрузка...</p>;
-  }
+  const bosses = points.value;
+  if (!bosses) return <Loading />;
+
+  const setPoint = (
+    id: number,
+    field: "dkp_points_freeshard" | "dkp_points_pvp",
+    value: string,
+  ) =>
+    points.setValue((rows) =>
+      rows.map((b) => (b.id === id ? { ...b, [field]: Number(value) } : b)),
+    );
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-bold">Очки боссов</h2>
-
+    <SettingsCard title="Очки боссов" hint="сколько баллов даёт босс">
       {CATEGORY_ORDER.map((category) => {
         const rows = bosses.filter((b) => b.category === category);
         if (rows.length === 0) return null;
-
         return (
-          <div key={category} className="space-y-2 border rounded-lg p-3">
-            <p className="font-semibold">{category}</p>
-            <div className="grid grid-cols-[1fr_80px_80px] items-center gap-2 text-sm text-muted-foreground">
-              <span></span>
-              <span>Фришка</span>
-              <span>ПВП</span>
+          <div key={category} className="px-4 py-3">
+            <div className="grid grid-cols-[minmax(0,1fr)_5rem_5rem] items-center gap-x-3 gap-y-1.5">
+              <span className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
+                {category}
+              </span>
+              <span className="text-right text-xs text-muted-foreground">
+                Фришка
+              </span>
+              <span className="text-right text-xs text-muted-foreground">
+                ПВП
+              </span>
+              {rows.map((b) => {
+                const changed = points.changed((all) =>
+                  all.find((x) => x.id === b.id),
+                );
+                return (
+                  <div
+                    key={b.id}
+                    className={cn(
+                      "col-span-3 -mx-2 grid grid-cols-subgrid items-center rounded-md px-2 py-0.5",
+                      changed && "bg-amber-50 dark:bg-amber-500/10",
+                    )}
+                  >
+                    <span className="truncate">{b.boss_name}</span>
+                    <Input
+                      type="number"
+                      aria-label={`${b.boss_name}, фришка`}
+                      className="h-8 text-right"
+                      value={b.dkp_points_freeshard}
+                      onChange={(e) =>
+                        setPoint(b.id, "dkp_points_freeshard", e.target.value)
+                      }
+                    />
+                    <Input
+                      type="number"
+                      aria-label={`${b.boss_name}, ПВП`}
+                      className="h-8 text-right"
+                      value={b.dkp_points_pvp}
+                      onChange={(e) =>
+                        setPoint(b.id, "dkp_points_pvp", e.target.value)
+                      }
+                    />
+                  </div>
+                );
+              })}
             </div>
-            {rows.map((b) => (
-              <div
-                key={b.id}
-                className="grid grid-cols-[1fr_80px_80px] items-center gap-2"
-              >
-                <span className="text-sm">{b.boss_name}</span>
-                <Input
-                  type="number"
-                  className="w-20"
-                  value={b.dkp_points_freeshard}
-                  onChange={(e) =>
-                    handlePointChange(
-                      b.id,
-                      "dkp_points_freeshard",
-                      e.target.value,
-                    )
-                  }
-                />
-                <Input
-                  type="number"
-                  className="w-20"
-                  value={b.dkp_points_pvp}
-                  onChange={(e) =>
-                    handlePointChange(b.id, "dkp_points_pvp", e.target.value)
-                  }
-                />
-              </div>
-            ))}
           </div>
         );
       })}
-
-      <Button
-        onClick={handleSavePoints}
-        disabled={savingPoints}
-        className="cursor-pointer"
-      >
-        {savingPoints ? "Сохранение..." : "Сохранить очки"}
-      </Button>
-    </div>
+    </SettingsCard>
   );
 }

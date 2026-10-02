@@ -1,118 +1,106 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import { Button, Input, Label, Switch } from "@/shared/ui";
+import { Input, Switch } from "@/shared/ui";
 import {
   getSalaryEligibilitySettings,
   updateSalaryEligibilitySettings,
   type SalaryEligibilitySettings,
 } from "@/actions/salaryEligibilitySettings";
+import { useSettingsDraft } from "./settingsDraft";
+import { Loading, SettingRow, SettingsCard, Unit } from "./settingsUi";
+
+export const SALARY_DRAFT_ID = "salary";
 
 export function SalaryEligibilitySettingsForm() {
-  const [settings, setSettings] = useState<SalaryEligibilitySettings | null>(
-    null,
-  );
-  const [saving, setSaving] = useState(false);
+  const salary = useSettingsDraft<SalaryEligibilitySettings>({
+    id: SALARY_DRAFT_ID,
+    section: "salary",
+    label: "Зарплата",
+    load: getSalaryEligibilitySettings,
+    save: updateSalaryEligibilitySettings,
+  });
 
-  useEffect(() => {
-    getSalaryEligibilitySettings().then(setSettings);
-  }, []);
-
-  if (!settings) {
-    return <p className="text-sm text-muted-foreground">Загрузка...</p>;
-  }
-
-  async function handleSave() {
-    if (!settings) return;
-    setSaving(true);
-    try {
-      await updateSalaryEligibilitySettings(settings);
-      toast.success("Критерии допуска сохранены");
-    } catch {
-      toast.error("Не удалось сохранить критерии");
-    } finally {
-      setSaving(false);
-    }
-  }
+  const s = salary.value;
+  if (!s) return <Loading />;
+  const set = (patch: Partial<SalaryEligibilitySettings>) =>
+    salary.setValue((v) => ({ ...v, ...patch }));
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-bold">Критерии выдачи зарплаты</h2>
-
-      <div className="flex items-center justify-between gap-4 border rounded-lg p-3">
-        <div className="flex items-center gap-2">
-          <Label>По посещаемости праймов &gt;</Label>
-          <Input
-            type="number"
-            className="w-20"
-            value={settings.primeThresholdPercent}
-            onChange={(e) =>
-              setSettings({
-                ...settings,
-                primeThresholdPercent: Number(e.target.value),
-              })
-            }
-          />
-          <span>%</span>
-        </div>
-        <Switch
-          checked={settings.primeEnabled}
-          onCheckedChange={(v) => setSettings({ ...settings, primeEnabled: v })}
-        />
-      </div>
-
-      <div className="flex items-center justify-between gap-4 border rounded-lg p-3">
-        <div className="flex items-center gap-2">
-          <Label>По учёту баллов &gt;</Label>
-          <Input
-            type="number"
-            className="w-20"
-            value={settings.pointsThresholdPercent}
-            onChange={(e) =>
-              setSettings({
-                ...settings,
-                pointsThresholdPercent: Number(e.target.value),
-              })
-            }
-          />
-          <span>%</span>
-        </div>
-        <Switch
-          checked={settings.pointsEnabled}
-          onCheckedChange={(v) =>
-            setSettings({ ...settings, pointsEnabled: v })
-          }
-        />
-      </div>
-
-      <div className="flex items-center justify-between gap-4 border rounded-lg p-3">
-        <Label>ДВ — тег обходит пороги выше</Label>
-        <Switch
-          checked={settings.dvBypassEnabled}
-          onCheckedChange={(v) =>
-            setSettings({ ...settings, dvBypassEnabled: v })
-          }
-        />
-      </div>
-
-      <div className="flex items-center justify-between gap-4 border rounded-lg p-3">
-        <Label>
-          Гс — проходной порог по формуле гильдии (тег ДВ не обходит)
-        </Label>
-        <Switch
-          checked={settings.gsEnabled}
-          onCheckedChange={(v) => setSettings({ ...settings, gsEnabled: v })}
-        />
-      </div>
-
-      <Button
-        onClick={handleSave}
-        disabled={saving}
-        className="cursor-pointer"
+    <SettingsCard title="Критерии выдачи зарплаты">
+      <SettingRow
+        title="По посещаемости праймов"
+        hint="Получают те, у кого посещаемость праймов выше порога"
+        changed={salary.changed((v) => [
+          v.primeEnabled,
+          v.primeThresholdPercent,
+        ])}
       >
-        {saving ? "Сохранение..." : "Сохранить"}
-      </Button>
-    </div>
+        <Unit>&gt;</Unit>
+        <Input
+          type="number"
+          aria-label="Порог посещаемости праймов, %"
+          className="w-20 text-right"
+          disabled={!s.primeEnabled}
+          value={s.primeThresholdPercent}
+          onChange={(e) =>
+            set({ primeThresholdPercent: Number(e.target.value) })
+          }
+        />
+        <Unit>%</Unit>
+        <Switch
+          aria-label="Учитывать посещаемость праймов"
+          checked={s.primeEnabled}
+          onCheckedChange={(v) => set({ primeEnabled: v })}
+        />
+      </SettingRow>
+      <SettingRow
+        title="По учёту баллов"
+        hint="Получают те, у кого доля баллов выше порога"
+        changed={salary.changed((v) => [
+          v.pointsEnabled,
+          v.pointsThresholdPercent,
+        ])}
+      >
+        <Unit>&gt;</Unit>
+        <Input
+          type="number"
+          aria-label="Порог баллов, %"
+          className="w-20 text-right"
+          disabled={!s.pointsEnabled}
+          value={s.pointsThresholdPercent}
+          onChange={(e) =>
+            set({ pointsThresholdPercent: Number(e.target.value) })
+          }
+        />
+        <Unit>%</Unit>
+        <Switch
+          aria-label="Учитывать баллы"
+          checked={s.pointsEnabled}
+          onCheckedChange={(v) => set({ pointsEnabled: v })}
+        />
+      </SettingRow>
+      <SettingRow
+        title="Тег ДВ обходит пороги"
+        hint="Игроки с тегом ДВ получают зарплату без порогов посещаемости и баллов"
+        changed={salary.changed((v) => v.dvBypassEnabled)}
+      >
+        <Switch
+          aria-label="Тег ДВ обходит пороги"
+          checked={s.dvBypassEnabled}
+          onCheckedChange={(v) => set({ dvBypassEnabled: v })}
+        />
+      </SettingRow>
+      <SettingRow
+        title="Порог ГС"
+        hint="Проходной ГС по формуле гильдии. Тег ДВ его не обходит"
+        changed={salary.changed((v) => v.gsEnabled)}
+      >
+        <Switch
+          aria-label="Учитывать порог ГС"
+          checked={s.gsEnabled}
+          onCheckedChange={(v) => set({ gsEnabled: v })}
+        />
+      </SettingRow>
+    </SettingsCard>
   );
 }

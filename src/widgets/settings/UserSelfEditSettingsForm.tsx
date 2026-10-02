@@ -1,138 +1,65 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import { Button, Label, Switch } from "@/shared/ui";
+import { Switch } from "@/shared/ui";
 import {
   getUserSelfEditSettings,
   updateUserSelfEditSettings,
   type UserSelfEditSettings,
 } from "@/actions/userSelfEditSettings";
+import { useSettingsDraft } from "./settingsDraft";
+import { Loading, SettingRow, SettingsCard } from "./settingsUi";
+
+export const SELF_EDIT_DRAFT_ID = "selfEdit";
+
+export const SELF_EDIT_FIELDS: {
+  key: keyof UserSelfEditSettings;
+  title: string;
+  hint?: string;
+}[] = [
+  { key: "nicknameEditEnabled", title: "Ник" },
+  { key: "gsEditEnabled", title: "ГС" },
+  { key: "vkEditEnabled", title: "VK" },
+  { key: "inventoryEditEnabled", title: "Инвентарь" },
+  { key: "sealsEditEnabled", title: "Печати" },
+  { key: "archetypeEditEnabled", title: "Класс (специализации)" },
+  { key: "equipmentEditEnabled", title: "Экипировка" },
+  {
+    key: "extraRoleEditEnabled",
+    title: "Доп. роли (добавление)",
+    hint: "Добавить себе 2-ю/3-ю роль, если её ещё нет. ГС уже существующих ролей регулируется переключателем «ГС»",
+  },
+];
 
 export function UserSelfEditSettingsForm() {
-  const [settings, setSettings] = useState<UserSelfEditSettings | null>(null);
-  const [saving, setSaving] = useState(false);
+  const selfEdit = useSettingsDraft<UserSelfEditSettings>({
+    id: SELF_EDIT_DRAFT_ID,
+    section: "self",
+    label: "Что игроки меняют сами",
+    load: getUserSelfEditSettings,
+    save: updateUserSelfEditSettings,
+  });
 
-  useEffect(() => {
-    getUserSelfEditSettings().then(setSettings);
-  }, []);
-
-  if (!settings) {
-    return <p className="text-sm text-muted-foreground">Загрузка...</p>;
-  }
-
-  async function handleSave() {
-    if (!settings) return;
-    setSaving(true);
-    try {
-      await updateUserSelfEditSettings(settings);
-      toast.success("Настройки сохранены");
-    } catch {
-      toast.error("Не удалось сохранить настройки");
-    } finally {
-      setSaving(false);
-    }
-  }
+  const s = selfEdit.value;
+  if (!s) return <Loading />;
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-bold">
-        Самостоятельное редактирование профиля
-      </h2>
-      <p className="text-sm text-muted-foreground">
-        Разрешить активным пользователям менять эти поля в своём профиле без
-        участия Администратора/Секретутки.
-      </p>
-
-      <div className="flex items-center justify-between gap-4 border rounded-lg p-3">
-        <Label>Ник</Label>
-        <Switch
-          checked={settings.nicknameEditEnabled}
-          onCheckedChange={(v) =>
-            setSettings({ ...settings, nicknameEditEnabled: v })
-          }
-        />
-      </div>
-
-      <div className="flex items-center justify-between gap-4 border rounded-lg p-3">
-        <Label>ГС</Label>
-        <Switch
-          checked={settings.gsEditEnabled}
-          onCheckedChange={(v) =>
-            setSettings({ ...settings, gsEditEnabled: v })
-          }
-        />
-      </div>
-
-      <div className="flex items-center justify-between gap-4 border rounded-lg p-3">
-        <Label>VK</Label>
-        <Switch
-          checked={settings.vkEditEnabled}
-          onCheckedChange={(v) =>
-            setSettings({ ...settings, vkEditEnabled: v })
-          }
-        />
-      </div>
-
-      <div className="flex items-center justify-between gap-4 border rounded-lg p-3">
-        <Label>Инвентарь</Label>
-        <Switch
-          checked={settings.inventoryEditEnabled}
-          onCheckedChange={(v) =>
-            setSettings({ ...settings, inventoryEditEnabled: v })
-          }
-        />
-      </div>
-
-      <div className="flex items-center justify-between gap-4 border rounded-lg p-3">
-        <Label>Печати</Label>
-        <Switch
-          checked={settings.sealsEditEnabled}
-          onCheckedChange={(v) =>
-            setSettings({ ...settings, sealsEditEnabled: v })
-          }
-        />
-      </div>
-
-      <div className="flex items-center justify-between gap-4 border rounded-lg p-3">
-        <Label>Класс (специализации)</Label>
-        <Switch
-          checked={settings.archetypeEditEnabled}
-          onCheckedChange={(v) =>
-            setSettings({ ...settings, archetypeEditEnabled: v })
-          }
-        />
-      </div>
-
-      <div className="flex items-center justify-between gap-4 border rounded-lg p-3">
-        <Label>Экипировка</Label>
-        <Switch
-          checked={settings.equipmentEditEnabled}
-          onCheckedChange={(v) =>
-            setSettings({ ...settings, equipmentEditEnabled: v })
-          }
-        />
-      </div>
-
-      <div className="flex items-center justify-between gap-4 border rounded-lg p-3">
-        <div>
-          <Label>Доп. роли (добавление)</Label>
-          <p className="text-xs text-muted-foreground">
-            Разрешает добавить себе 2-ю/3-ю роль, если её ещё нет. Изменение ГС
-            уже существующих ролей отдельно регулируется тумблером «ГС».
-          </p>
-        </div>
-        <Switch
-          checked={settings.extraRoleEditEnabled}
-          onCheckedChange={(v) =>
-            setSettings({ ...settings, extraRoleEditEnabled: v })
-          }
-        />
-      </div>
-
-      <Button onClick={handleSave} disabled={saving} className="cursor-pointer">
-        {saving ? "Сохранение..." : "Сохранить"}
-      </Button>
-    </div>
+    <SettingsCard>
+      {SELF_EDIT_FIELDS.map((field) => (
+        <SettingRow
+          key={field.key}
+          title={field.title}
+          hint={field.hint}
+          changed={selfEdit.changed((v) => v[field.key])}
+        >
+          <Switch
+            aria-label={field.title}
+            checked={Boolean(s[field.key])}
+            onCheckedChange={(checked) =>
+              selfEdit.setValue((v) => ({ ...v, [field.key]: checked }))
+            }
+          />
+        </SettingRow>
+      ))}
+    </SettingsCard>
   );
 }

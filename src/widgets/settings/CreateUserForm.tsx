@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Input } from "@/shared/ui";
-import { Button } from "@/shared/ui";
+import Link from "next/link";
+import { toast } from "sonner";
+import { Button, Input } from "@/shared/ui";
 import { createUser } from "@/actions/createUser";
 import type { Database } from "@/types/supabase";
-import Link from "next/link";
+import { SettingRow } from "./settingsUi";
+
 type User = Database["public"]["Tables"]["user"]["Row"];
-import { toast } from "sonner";
 
 export function CreateUserForm({
   onUserCreated,
@@ -21,7 +22,7 @@ export function CreateUserForm({
   const handleCreateUser = () => {
     setError(null);
     if (!newUsername.trim()) {
-      setError("Введите имя");
+      setError("Введите ник");
       return;
     }
     startTransition(() => {
@@ -29,12 +30,11 @@ export function CreateUserForm({
         .then((newUser) => {
           onUserCreated(newUser);
           setNewUsername("");
-
           toast.success("Пользователь создан", {
             description: (
               <Link
                 href={`/profile/${newUser.id}`}
-                className="underline underline-offset-2 text-blue-600 hover:text-blue-800"
+                className="text-blue-600 underline underline-offset-2 hover:text-blue-800"
               >
                 Перейти к профилю
               </Link>
@@ -47,22 +47,35 @@ export function CreateUserForm({
   };
 
   return (
-    <div className="mt-6 space-y-2">
-      <h3 className="font-semibold">Или создать нового пользователя</h3>
-      <Input
-        className="w-full"
-        placeholder="Имя нового пользователя"
-        value={newUsername}
-        onChange={(e) => setNewUsername(e.target.value)}
-      />
-      {error && <p className="text-red-500 text-sm">{error}</p>}
-      <Button
-        className="cursor-pointer"
-        onClick={handleCreateUser}
-        disabled={isPending}
+    <SettingRow
+      title="Ник на сайте"
+      hint={
+        error ? (
+          <span className="text-red-600 dark:text-red-400">{error}</span>
+        ) : (
+          "Должен совпадать с ником в игре: по нему ищутся киллкаунт и казна. После создания сразу выбран для ссылки выше"
+        )
+      }
+      htmlFor="new-user-name"
+    >
+      <form
+        className="flex w-full flex-wrap gap-2 sm:w-auto"
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleCreateUser();
+        }}
       >
-        {isPending ? "Создание..." : "Создать пользователя"}
-      </Button>
-    </div>
+        <Input
+          id="new-user-name"
+          className="min-w-0 flex-1 sm:w-56"
+          placeholder="Ник"
+          value={newUsername}
+          onChange={(e) => setNewUsername(e.target.value)}
+        />
+        <Button type="submit" className="cursor-pointer" disabled={isPending}>
+          {isPending ? "Создание…" : "Создать"}
+        </Button>
+      </form>
+    </SettingRow>
   );
 }
