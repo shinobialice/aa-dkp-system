@@ -1,14 +1,12 @@
-import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import sql from "@/shared/lib/db";
 import { getBaseUrl } from "@/shared/lib";
+import {
+  completeSocialAuth,
+  loginErrorRedirect,
+} from "@/shared/lib/socialAuth";
 
 const baseUrl = getBaseUrl();
-
-function generateSessionToken() {
-  return crypto.randomBytes(32).toString("hex");
-}
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -51,10 +49,8 @@ export async function GET(req: NextRequest) {
   const tokenData = await tokenRes.json();
 
   if (!tokenData.access_token) {
-    return NextResponse.json(
-      { error: "Token exchange failed", data: tokenData },
-      { status: 400 },
-    );
+    console.error("Token exchange failed:", tokenData);
+    return loginErrorRedirect("provider");
   }
 
   const userInfoRes = await fetch("https://id.vk.ru/oauth2/user_info", {
@@ -68,82 +64,9 @@ export async function GET(req: NextRequest) {
 
   const { user } = await userInfoRes.json();
 
-  if (linkToken) {
-    const [linkRow] = await sql<any[]>`
-      SELECT "userId" FROM link_token
-      WHERE token = ${linkToken} AND used = false AND "expiresAt" > now()
-    `;
-
-    if (!linkRow) {
-      return NextResponse.json("Link token expired or invalid", {
-        status: 400,
-      });
-    }
-
-    const sessionToken = generateSessionToken();
-
-    // 🔗 Привязываем VK к существующему пользователю и сохраняем session_token
-    try {
-      await sql<any[]>`
-        UPDATE "user" SET vk_id = ${user.user_id}, session_token = ${sessionToken}
-        WHERE id = ${linkRow.userId}
-      `;
-    } catch (userUpdateError) {
-      console.error("Ошибка при обновлении пользователя:", userUpdateError);
-      return NextResponse.json("Failed to link VK account", { status: 500 });
-    }
-
-    await sql<any[]>`
-      UPDATE link_token SET used = true WHERE token = ${linkToken}
-    `;
-
-    const response = NextResponse.redirect(
-      new URL("/link-account/complete", baseUrl),
-    );
-
-    response.cookies.set("link-token", "", { path: "/", maxAge: -1 });
-    response.cookies.set("session_token", sessionToken, {
-      path: "/",
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7,
-    });
-
-    return response;
+  if (!user?.user_id) {
+    return loginErrorRedirect("provider");
   }
 
-  const sessionToken = generateSessionToken();
-
-  const [existingUser] = await sql<any[]>`
-    SELECT * FROM "user" WHERE vk_id = ${user.user_id}
-  `;
-
-  let userId: number;
-
-  if (!existingUser) {
-    return NextResponse.redirect(new URL("/login-error", baseUrl));
-  } else if (!existingUser.active) {
-    return NextResponse.redirect(
-      new URL("/login-error?reason=inactive", baseUrl),
-    );
-  } else {
-    await sql<any[]>`
-      UPDATE "user" SET session_token = ${sessionToken} WHERE id = ${existingUser.id}
-    `;
-
-    userId = existingUser.id;
-  }
-
-  const response = NextResponse.redirect(new URL("/", baseUrl));
-
-  response.cookies.set("session_token", sessionToken, {
-    path: "/",
-    httpOnly: true,
-    secure: true,
-    sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 7,
-  });
-
-  return response;
+  return completeSocialAuth("vk_id", String(user.user_id), linkToken);
 }

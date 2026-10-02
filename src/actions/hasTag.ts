@@ -14,7 +14,7 @@ export const hasTag = async (
   `;
 
   if (!user) {
-    redirect("login");
+    redirect("/login");
   }
 
   const [tagRow] = await sql<any[]>`
