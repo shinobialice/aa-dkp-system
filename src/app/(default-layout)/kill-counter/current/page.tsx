@@ -29,6 +29,7 @@ export default async function KillCounterPage() {
         <KillcountDay
           data={currentKillCount}
           mode="saved"
+          canAddToday
           isCanEdit={isAdmin}
         />
       ) : (

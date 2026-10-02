@@ -2,6 +2,7 @@
 
 import { cloneElement, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Pencil, Plus, Search } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/shared/lib/tw-merge";
@@ -9,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage, Button } from "@/shared/ui";
 import { classColors, classIcons } from "@/widgets/MembersTable/classStyles";
 import type { KillCount } from "../types";
 import { updateKillCountById } from "../api/history";
+import { addKillCountRowToday } from "../api/current";
 import { KillCountEditModal } from "./killcount-edit-modal";
 import { StatSuffix, StatTile } from "./KillcountHeader";
 import {
@@ -169,12 +171,16 @@ export function KillcountDay({
   mode,
   isCanEdit,
   onDraftChange,
+  canAddToday = false,
 }: {
   data: KillRow[];
   mode: "saved" | "draft";
   isCanEdit: boolean;
   onDraftChange?: (rows: KillCount[]) => void;
+  /** Сегодняшний сохранённый день: «Добавить» сразу пишет игрока в базу. */
+  canAddToday?: boolean;
 }) {
+  const router = useRouter();
   const [rows, setRows] = useState<KillRow[]>(data);
   const [sortKey, setSortKey] = useState<SortKey>("kills");
   const [search, setSearch] = useState("");
@@ -213,6 +219,18 @@ export function KillcountDay({
             )
           : [...rows, value],
       );
+      return;
+    }
+    if (!rowToEdit) {
+      try {
+        await addKillCountRowToday(value);
+        toast.success(`${value.userName} добавлен`);
+        router.refresh();
+      } catch {
+        toast.error("Не удалось добавить", {
+          description: "Проверьте, что ник совпадает с ником на сайте",
+        });
+      }
       return;
     }
     try {
@@ -308,7 +326,7 @@ export function KillcountDay({
                 </button>
               ))}
             </div>
-            {mode === "draft" && isCanEdit && (
+            {(mode === "draft" || canAddToday) && isCanEdit && (
               <Button
                 size="sm"
                 className="cursor-pointer"
