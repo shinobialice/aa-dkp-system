@@ -1,6 +1,6 @@
 import Image from "next/image";
 import type { GearItem } from "./itemsData";
-import { getItemGradeIconUrl } from "./itemsData/paths";
+import { getItemGradeIconUrl, getItemOverlayUrl } from "./itemsData/paths";
 
 // size задан — фиксированные пиксели (списки/попапы). size не задан —
 // иконка растягивается на весь родитель через fill (кнопка слота, где
@@ -17,6 +17,7 @@ export function GearItemIcon({
   size?: number;
   className?: string;
 }) {
+  const overlayUrl = getItemOverlayUrl(item.sealIconUrl);
   if (size == null) {
     return (
       <div className={`absolute inset-0 ${className}`}>
@@ -27,9 +28,9 @@ export function GearItemIcon({
           sizes="44px"
           className="object-contain"
         />
-        {item.sealIconUrl && (
+        {overlayUrl && (
           <Image
-            src={item.sealIconUrl}
+            src={overlayUrl}
             alt=""
             fill
             sizes="44px"
@@ -59,9 +60,9 @@ export function GearItemIcon({
         height={size}
         className="absolute inset-0"
       />
-      {item.sealIconUrl && (
+      {overlayUrl && (
         <Image
-          src={item.sealIconUrl}
+          src={overlayUrl}
           alt=""
           width={size}
           height={size}

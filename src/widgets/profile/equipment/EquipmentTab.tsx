@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
@@ -74,6 +74,8 @@ import { Badge } from "@/shared/ui";
 import { Button } from "@/shared/ui";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
 import CharacterTabsSwitcher from "@/widgets/profile/CharacterTabsSwitcher";
+import { classColors } from "@/widgets/MembersTable/classStyles";
+import { cn } from "@/shared/lib/tw-merge";
 import { Input } from "@/shared/ui";
 import {
   Dialog,
@@ -153,6 +155,54 @@ function slotsFor(keys: string[]): EquipmentSlot[] {
 const TOP = EQUIPMENT_SLOTS.find((s) => s.key === TOP_SLOT)!;
 const LEFT = slotsFor(LEFT_SLOTS);
 const RIGHT = slotsFor(RIGHT_SLOTS);
+
+const LIST_GROUPS = [
+  {
+    title: "Доспехи",
+    slots: slotsFor([
+      "head",
+      "chest",
+      "belt",
+      "bracers",
+      "hands",
+      "legs",
+      "feet",
+    ]),
+  },
+  {
+    title: "Плащ, костюм и бельё",
+    slots: slotsFor(["cloak", "costume", "underwear"]),
+  },
+  {
+    title: "Украшения",
+    slots: slotsFor(["necklace", "earring1", "earring2", "ring1", "ring2"]),
+  },
+  {
+    title: "Оружие и инструмент",
+    slots: slotsFor([
+      "weapon_main",
+      "weapon_off",
+      "weapon_ranged",
+      "instrument",
+    ]),
+  },
+];
+
+const NARROW_QUERY = "(max-width: 639px)";
+
+function subscribeNarrow(onChange: () => void) {
+  const query = window.matchMedia(NARROW_QUERY);
+  query.addEventListener("change", onChange);
+  return () => query.removeEventListener("change", onChange);
+}
+
+function useNarrowScreen() {
+  return useSyncExternalStore(
+    subscribeNarrow,
+    () => window.matchMedia(NARROW_QUERY).matches,
+    () => false,
+  );
+}
 
 function EngravingDisplay({
   count,
@@ -293,13 +343,11 @@ function EngravingSlots({
   engravings,
   selectedEngravingId,
   onToggle,
-  onClearAll,
 }: {
   count: number;
   engravings: number[];
   selectedEngravingId: number;
   onToggle: (index: number) => void;
-  onClearAll: () => void;
 }) {
   return (
     <div className="flex flex-wrap items-center gap-1.5">
@@ -329,15 +377,6 @@ function EngravingSlots({
           <span key={i}>{square}</span>
         );
       })}
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        className="cursor-pointer text-destructive hover:text-destructive"
-        onClick={onClearAll}
-      >
-        <Trash2 className="size-4" />
-      </Button>
     </div>
   );
 }
@@ -453,6 +492,218 @@ function SetProgress({
   );
 }
 
+function ItemCard({
+  slot,
+  item,
+  selectedGearItem,
+  equipment,
+}: {
+  slot: EquipmentSlot;
+  item: UserEquipment | undefined;
+  selectedGearItem: NonNullable<ReturnType<typeof findGearItem>>;
+  equipment: UserEquipment[];
+}) {
+  const tooltipGradeColor = getSealGradeColor(item?.grade ?? DEFAULT_GRADE);
+  const equippedRune = item?.rune_id ? findRune(item.rune_id) : undefined;
+  const equippedSynthesisEffects =
+    slot.key === "costume"
+      ? (item?.costume_synthesis_effects ?? [])
+      : slot.key === "underwear"
+        ? (item?.underwear_synthesis_effects ?? [])
+        : [];
+  const equippedCursedSynthesisEffects = item?.cursed_synthesis_effects ?? [];
+  const equippedRingSynthesisEffects = item?.ring_synthesis_effects ?? [];
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-start gap-2">
+        <GearItemIcon
+          item={selectedGearItem}
+          grade={item?.grade ?? DEFAULT_GRADE}
+          size={40}
+        />
+        <div className="min-w-0">
+          <div
+            className="text-xs"
+            style={{ color: tooltipGradeColor ?? undefined }}
+          >
+            {getSealGradeLabel(item?.grade ?? DEFAULT_GRADE)} предмет
+          </div>
+          <div
+            className="text-sm font-semibold"
+            style={{ color: tooltipGradeColor ?? undefined }}
+          >
+            {(item?.enchant ?? 0) > 0 && `+${item?.enchant} `}
+            {selectedGearItem.name}
+          </div>
+        </div>
+      </div>
+
+      {CUBE_ELIGIBLE_SLOTS.has(slot.key) && (
+        <div className="text-xs text-muted-foreground/70">
+          Защита от доп. урона оружия Lv.
+          {item?.extra_protection ?? DEFAULT_EXTRA_PROTECTION}
+        </div>
+      )}
+
+      <div className="border-t border-border" />
+
+      <ItemStats
+        itemId={selectedGearItem.id}
+        grade={item?.grade ?? DEFAULT_GRADE}
+        enchant={item?.enchant ?? DEFAULT_ENCHANT}
+        bare
+      />
+
+      {equippedRune && (
+        <>
+          <div className="border-t border-border" />
+          <div className="flex items-start gap-1.5">
+            <RuneIcon rune={equippedRune} size={20} />
+            {equippedRune.effect && (
+              <div className="min-w-0 flex-1 space-y-0.5 text-xs text-green-500">
+                <EffectText text={equippedRune.effect} />
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
+      {getEngravingSlotCount(slot.key, item?.grade ?? DEFAULT_GRADE) > 0 && (
+        <>
+          <div className="border-t border-border" />
+          <EngravingDisplay
+            count={getEngravingSlotCount(
+              slot.key,
+              item?.grade ?? DEFAULT_GRADE,
+            )}
+            engravings={item?.engravings ?? []}
+          />
+        </>
+      )}
+
+      {(equippedSynthesisEffects.length ?? 0) > 0 && (
+        <>
+          <div className="border-t border-border" />
+          <SynthesisEffectsDisplay
+            slotKey={slot.key}
+            effectIds={equippedSynthesisEffects}
+          />
+        </>
+      )}
+
+      {equippedCursedSynthesisEffects.length > 0 && (
+        <>
+          <div className="border-t border-border" />
+          <CursedArmorSynthesisDisplay
+            effectIds={equippedCursedSynthesisEffects}
+          />
+        </>
+      )}
+
+      {equippedRingSynthesisEffects.length > 0 && (
+        <>
+          <div className="border-t border-border" />
+          <RingSynthesisDisplay effectIds={equippedRingSynthesisEffects} />
+        </>
+      )}
+
+      {item && hasEphenSynthesisSelection(item) && (
+        <>
+          <div className="border-t border-border" />
+          <EphenSynthesisDisplay item={item} />
+        </>
+      )}
+
+      <SetProgress
+        itemId={selectedGearItem.id}
+        runeId={item?.rune_id}
+        equipment={equipment}
+      />
+    </div>
+  );
+}
+
+function FieldLabel({
+  children,
+  hint,
+}: {
+  children: React.ReactNode;
+  hint?: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-baseline justify-between gap-2 text-[12.5px] font-semibold text-muted-foreground">
+      <span>{children}</span>
+      {hint && <span className="font-normal">{hint}</span>}
+    </div>
+  );
+}
+
+function Stepper({
+  label,
+  hint,
+  value,
+  max,
+  format,
+  onChange,
+  showMax,
+}: {
+  label: string;
+  hint: string;
+  value: number;
+  max: number;
+  format: (value: number) => string;
+  onChange: (value: number) => void;
+  showMax?: boolean;
+}) {
+  const set = (next: number) => onChange(Math.max(0, Math.min(max, next)));
+  return (
+    <div className="flex flex-col gap-1.5">
+      <FieldLabel hint={hint}>{label}</FieldLabel>
+      <div className="flex h-10 items-center overflow-hidden rounded-lg border bg-input/30">
+        <button
+          type="button"
+          aria-label={`${label}: меньше`}
+          onClick={() => set(value - 1)}
+          disabled={value <= 0}
+          className="flex h-full w-10 cursor-pointer items-center justify-center text-lg hover:bg-muted disabled:cursor-default disabled:opacity-40"
+        >
+          −
+        </button>
+        <span className="flex-1 text-center text-base font-extrabold tabular-nums">
+          {format(value)}
+        </span>
+        <button
+          type="button"
+          aria-label={`${label}: больше`}
+          onClick={() => set(value + 1)}
+          disabled={value >= max}
+          className="flex h-full w-10 cursor-pointer items-center justify-center text-lg hover:bg-muted disabled:cursor-default disabled:opacity-40"
+        >
+          +
+        </button>
+      </div>
+      {showMax && (
+        <div className="flex items-center gap-2">
+          <span className="block h-1 flex-1 overflow-hidden rounded-full bg-muted">
+            <span
+              className="block h-full rounded-full bg-green-500"
+              style={{ width: `${max ? (value / max) * 100 : 0}%` }}
+            />
+          </span>
+          <button
+            type="button"
+            onClick={() => set(max)}
+            className="cursor-pointer text-xs font-semibold text-green-500 hover:underline"
+          >
+            Макс
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function EquipmentSlotButton({
   slot,
   item,
@@ -460,6 +711,7 @@ function EquipmentSlotButton({
   canEdit,
   onSave,
   tooltipSide = "left",
+  showRune = true,
 }: {
   slot: EquipmentSlot;
   item: UserEquipment | undefined;
@@ -481,6 +733,7 @@ function EquipmentSlotButton({
     ephenSynthesisTertiary: string[],
   ) => Promise<void>;
   tooltipSide?: "left" | "right";
+  showRune?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [itemName, setItemName] = useState(item?.item_name ?? "");
@@ -522,6 +775,7 @@ function EquipmentSlotButton({
     string[]
   >(item?.ephen_synthesis_tertiary ?? []);
   const [saving, setSaving] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const filled = !!item?.item_name;
   const knownItems = ITEMS_BY_SLOT[slot.key];
@@ -563,6 +817,33 @@ function EquipmentSlotButton({
   const ephenSynthesisEligible =
     !!ephenSynthesisCategory && grade >= ephenSynthesisCategory.minGrade;
 
+  const draftRune = runeId ? findRune(runeId) : undefined;
+  const draftItem = {
+    ...(item ?? {}),
+    slot: slot.key,
+    item_name: itemName,
+    grade,
+    enchant,
+    extra_protection: extraProtection,
+    engravings: engravings.slice(0, maxEngravingSlots),
+    rune_id: runeId,
+    costume_synthesis_effects: slot.key === "costume" ? synthesisEffects : [],
+    underwear_synthesis_effects:
+      slot.key === "underwear" ? synthesisEffects : [],
+    cursed_synthesis_effects: cursedSynthesisEffects.filter((id) => id >= 0),
+    ring_synthesis_effects: isRingSynthDraft ? ringSynthesisEffects : [],
+    ephen_synthesis_percent: ephenSynthesisEligible ? ephenSynthesisPercent : 0,
+    ephen_synthesis_primary: ephenSynthesisEligible
+      ? ephenSynthesisPrimary
+      : "",
+    ephen_synthesis_secondary: ephenSynthesisEligible
+      ? ephenSynthesisSecondary
+      : "",
+    ephen_synthesis_tertiary: ephenSynthesisEligible
+      ? ephenSynthesisTertiary
+      : [],
+  } as UserEquipment;
+
   const handleOpenChange = (next: boolean) => {
     if (next) {
       setItemName(item?.item_name ?? "");
@@ -574,7 +855,8 @@ function EquipmentSlotButton({
       setEnchant(item?.enchant ?? DEFAULT_ENCHANT);
       setExtraProtection(item?.extra_protection ?? DEFAULT_EXTRA_PROTECTION);
       setEngravings(item?.engravings ?? []);
-      setSelectedEngravingId(0);
+      setSelectedEngravingId(item?.engravings?.find(Boolean) ?? 0);
+      setPreviewOpen(false);
       setRuneId(item?.rune_id ?? 0);
       setSynthesisEffects(initialSynthesisEffects);
       setCursedSynthesisEffects(item?.cursed_synthesis_effects ?? []);
@@ -673,6 +955,11 @@ function EquipmentSlotButton({
           className="object-contain transition-transform duration-200 ease-out group-hover:scale-110"
         />
       )}
+      {selectedGearItem && (item?.enchant ?? 0) > 0 && (
+        <span className="pointer-events-none absolute -bottom-1.5 -left-1 z-10 rounded bg-green-600 px-1 text-[10px] leading-[15px] font-extrabold text-white shadow-sm">
+          +{item?.enchant}
+        </span>
+      )}
     </button>
   );
 
@@ -700,115 +987,12 @@ function EquipmentSlotButton({
               side={tooltipSide}
               className="dark pointer-events-none w-64 border-border bg-background p-3 text-foreground"
             >
-              <div className="space-y-2">
-                <div className="flex items-start gap-2">
-                  <GearItemIcon
-                    item={selectedGearItem}
-                    grade={item?.grade ?? DEFAULT_GRADE}
-                    size={40}
-                  />
-                  <div className="min-w-0">
-                    <div
-                      className="text-xs"
-                      style={{ color: tooltipGradeColor ?? undefined }}
-                    >
-                      {getSealGradeLabel(item?.grade ?? DEFAULT_GRADE)} предмет
-                    </div>
-                    <div
-                      className="text-sm font-semibold"
-                      style={{ color: tooltipGradeColor ?? undefined }}
-                    >
-                      {(item?.enchant ?? 0) > 0 && `+${item?.enchant} `}
-                      {selectedGearItem.name}
-                    </div>
-                  </div>
-                </div>
-
-                {CUBE_ELIGIBLE_SLOTS.has(slot.key) && (
-                  <div className="text-xs text-muted-foreground/70">
-                    Защита от доп. урона оружия Lv.
-                    {item?.extra_protection ?? DEFAULT_EXTRA_PROTECTION}
-                  </div>
-                )}
-
-                <div className="border-t border-border" />
-
-                <ItemStats
-                  itemId={selectedGearItem.id}
-                  grade={item?.grade ?? DEFAULT_GRADE}
-                  enchant={item?.enchant ?? DEFAULT_ENCHANT}
-                  bare
-                />
-
-                {equippedRune && (
-                  <>
-                    <div className="border-t border-border" />
-                    <div className="flex items-start gap-1.5">
-                      <RuneIcon rune={equippedRune} size={20} />
-                      {equippedRune.effect && (
-                        <div className="min-w-0 flex-1 space-y-0.5 text-xs text-green-500">
-                          <EffectText text={equippedRune.effect} />
-                        </div>
-                      )}
-                    </div>
-                  </>
-                )}
-
-                {getEngravingSlotCount(slot.key, item?.grade ?? DEFAULT_GRADE) >
-                  0 && (
-                  <>
-                    <div className="border-t border-border" />
-                    <EngravingDisplay
-                      count={getEngravingSlotCount(
-                        slot.key,
-                        item?.grade ?? DEFAULT_GRADE,
-                      )}
-                      engravings={item?.engravings ?? []}
-                    />
-                  </>
-                )}
-
-                {(equippedSynthesisEffects.length ?? 0) > 0 && (
-                  <>
-                    <div className="border-t border-border" />
-                    <SynthesisEffectsDisplay
-                      slotKey={slot.key}
-                      effectIds={equippedSynthesisEffects}
-                    />
-                  </>
-                )}
-
-                {equippedCursedSynthesisEffects.length > 0 && (
-                  <>
-                    <div className="border-t border-border" />
-                    <CursedArmorSynthesisDisplay
-                      effectIds={equippedCursedSynthesisEffects}
-                    />
-                  </>
-                )}
-
-                {equippedRingSynthesisEffects.length > 0 && (
-                  <>
-                    <div className="border-t border-border" />
-                    <RingSynthesisDisplay
-                      effectIds={equippedRingSynthesisEffects}
-                    />
-                  </>
-                )}
-
-                {item && hasEphenSynthesisSelection(item) && (
-                  <>
-                    <div className="border-t border-border" />
-                    <EphenSynthesisDisplay item={item} />
-                  </>
-                )}
-
-                <SetProgress
-                  itemId={selectedGearItem.id}
-                  runeId={item?.rune_id}
-                  equipment={equipment}
-                />
-              </div>
+              <ItemCard
+                slot={slot}
+                item={item}
+                selectedGearItem={selectedGearItem}
+                equipment={equipment}
+              />
             </TooltipContent>
           </Tooltip>
         ) : (
@@ -816,513 +1000,591 @@ function EquipmentSlotButton({
         )}
         <DialogContent
           aria-describedby={undefined}
-          className="dark w-full max-w-2xl border-border bg-background text-foreground"
+          className={cn(
+            "dark flex flex-col gap-0 overflow-hidden border-border bg-background p-0 text-foreground",
+            canEdit
+              ? "h-[100dvh] max-h-[100dvh] w-full max-w-none rounded-none sm:h-auto sm:max-h-[90dvh] sm:max-w-4xl sm:rounded-xl"
+              : "w-full max-w-2xl",
+          )}
         >
-          <DialogHeader>
+          <DialogHeader className="shrink-0 gap-0.5 border-b px-5 py-4 pr-12 text-left">
             <DialogTitle>{slot.label}</DialogTitle>
+            {canEdit && (
+              <p className="text-[13px] text-muted-foreground">
+                Изменения видны в карточке сразу, сохраняются кнопкой внизу
+              </p>
+            )}
           </DialogHeader>
 
           {canEdit ? (
-            <div className="space-y-4">
-              <div className="space-y-1.5">
-                <div className="text-xs text-muted-foreground">Предмет:</div>
-                {knownItems ? (
-                  <GearItemPicker
-                    items={knownItems}
-                    value={itemName}
-                    onSelect={(gearItem) => {
-                      setItemName(gearItem.name);
-                      setGrade(gearItem.grade);
-                    }}
-                  />
-                ) : (
-                  <Input
-                    value={itemName}
-                    onChange={(e) => setItemName(e.target.value)}
-                    placeholder="Название предмета"
-                  />
-                )}
-              </div>
-
-              {itemName.trim() !== "" && (
-                <div className="space-y-1.5">
-                  <div className="text-xs text-muted-foreground">
-                    Качество предмета:
-                  </div>
-                  <Select
-                    value={String(grade)}
-                    onValueChange={(v) => setGrade(Number(v))}
-                  >
-                    <SelectTrigger className="w-full cursor-pointer">
-                      <SelectValue placeholder="Грейд" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(isFixedGradeItem
-                        ? SEAL_GRADES.filter((g) => g.grade === fixedGrade)
-                        : SEAL_GRADES
-                      ).map((g) => {
-                        const optionColor = getSealGradeColor(g.grade);
-                        return (
-                          <SelectItem key={g.grade} value={String(g.grade)}>
-                            <span
-                              style={
-                                optionColor ? { color: optionColor } : undefined
-                              }
-                            >
-                              {g.label}
-                            </span>
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              {itemName.trim() !== "" && CUBE_ELIGIBLE_SLOTS.has(slot.key) && (
-                <div className="space-y-1.5">
-                  <div className="text-xs text-muted-foreground">Куб:</div>
-                  <Input
-                    type="number"
-                    min={0}
-                    max={MAX_ENCHANT}
-                    step={1}
-                    value={enchant}
-                    onChange={(e) => {
-                      const next = Math.round(Number(e.target.value));
-                      if (isValidEnchantLevel(next)) setEnchant(next);
-                      else if (e.target.value === "")
-                        setEnchant(DEFAULT_ENCHANT);
-                    }}
-                    className="w-24"
-                  />
-                </div>
-              )}
-
-              {itemName.trim() !== "" && CUBE_ELIGIBLE_SLOTS.has(slot.key) && (
-                <div className="space-y-1.5">
-                  <div className="text-xs text-muted-foreground">Доп.:</div>
-                  <Input
-                    type="number"
-                    min={0}
-                    max={getMaxExtraProtectionLevel(slot.key)}
-                    step={1}
-                    value={extraProtection}
-                    onChange={(e) => {
-                      const next = Math.round(Number(e.target.value));
-                      if (isValidExtraProtectionLevel(next, slot.key))
-                        setExtraProtection(next);
-                      else if (e.target.value === "")
-                        setExtraProtection(DEFAULT_EXTRA_PROTECTION);
-                    }}
-                    className="w-24"
-                  />
-                </div>
-              )}
-
-              {itemName.trim() !== "" && maxEngravingSlots > 0 && (
-                <div className="space-y-1.5">
-                  <div className="text-xs text-muted-foreground">
-                    Гравировки:
-                  </div>
-                  <EngravingPicker
-                    slot={slot.key}
-                    handedness={draftHandedness}
-                    itemId={draftGearItem?.id}
-                    value={selectedEngravingId}
-                    onSelect={setSelectedEngravingId}
-                  />
-                  <EngravingSlots
-                    count={maxEngravingSlots}
-                    engravings={engravings}
-                    selectedEngravingId={selectedEngravingId}
-                    onToggle={(i) => {
-                      setEngravings((prev) => {
-                        const next = [...prev];
-                        while (next.length <= i) next.push(0);
-                        next[i] = next[i] ? 0 : selectedEngravingId;
-                        return next;
-                      });
-                    }}
-                    onClearAll={() => setEngravings([])}
-                  />
-                </div>
-              )}
-
-              {itemName.trim() !== "" && (
-                <div className="space-y-1.5">
-                  <div className="text-xs text-muted-foreground">
-                    Лунный камень / руна:
-                  </div>
-                  <RunePicker
-                    slot={slot.key}
-                    handedness={draftHandedness}
-                    itemId={draftGearItem?.id}
-                    value={runeId}
-                    onSelect={setRuneId}
-                    equipment={equipment}
-                  />
-                </div>
-              )}
-
-              {draftSynthesisRole && (
-                <div className="space-y-1.5">
-                  <div className="text-xs text-muted-foreground">
-                    Эффекты синтеза:
-                  </div>
-                  {maxSynthesisSlots > 0 ? (
-                    <SynthesisEffectPicker
-                      effects={synthesisEffectOptions}
-                      slotCount={maxSynthesisSlots}
-                      value={synthesisEffects}
-                      onChange={setSynthesisEffects}
-                    />
-                  ) : (
-                    <div className="text-xs text-muted-foreground">
-                      Доступны начиная с качества «Необычный» — выберите
-                      качество выше.
+            <>
+              <div className="flex min-h-0 flex-1 flex-col overflow-y-auto md:grid md:grid-cols-[minmax(0,1fr)_320px] md:overflow-hidden">
+                {draftGearItem && (
+                  <div className="border-b px-5 py-3 md:order-2 md:min-h-0 md:overflow-y-auto md:border-b-0 md:border-l md:py-4">
+                    <button
+                      type="button"
+                      aria-expanded={previewOpen}
+                      onClick={() => setPreviewOpen((value) => !value)}
+                      className="flex w-full cursor-pointer items-center justify-between text-[12.5px] font-semibold text-muted-foreground md:pointer-events-none md:mb-2 md:cursor-default"
+                    >
+                      Как будет выглядеть
+                      <span className="text-xs font-normal md:hidden">
+                        {previewOpen ? "Скрыть" : "Показать"}
+                      </span>
+                    </button>
+                    <div
+                      className={cn(
+                        "mt-2 rounded-xl border bg-card/40 p-3 md:mt-0 md:block",
+                        !previewOpen && "hidden",
+                      )}
+                    >
+                      <ItemCard
+                        slot={slot}
+                        item={draftItem}
+                        selectedGearItem={draftGearItem}
+                        equipment={equipment}
+                      />
                     </div>
-                  )}
-                </div>
-              )}
-
-              {cursedSynthesisPools.length > 0 && (
-                <div className="space-y-1.5">
-                  <div className="text-xs text-muted-foreground">
-                    Эффекты синтеза:
                   </div>
+                )}
+                <div className="space-y-4 px-5 py-4 md:order-1 md:min-h-0 md:overflow-y-auto">
                   <div className="space-y-1.5">
-                    {cursedSynthesisPools.map((pool, i) => (
-                      <Select
-                        key={i}
-                        value={String(cursedSynthesisEffects[i] ?? -1)}
-                        onValueChange={(v) => {
-                          const next = [...cursedSynthesisEffects];
-                          next[i] = Number(v);
-                          setCursedSynthesisEffects(next);
+                    <FieldLabel>Предмет</FieldLabel>
+                    {knownItems ? (
+                      <GearItemPicker
+                        items={knownItems}
+                        value={itemName}
+                        onSelect={(gearItem) => {
+                          setItemName(gearItem.name);
+                          setGrade(gearItem.grade);
                         }}
+                      />
+                    ) : (
+                      <Input
+                        value={itemName}
+                        onChange={(e) => setItemName(e.target.value)}
+                        placeholder="Название предмета"
+                      />
+                    )}
+                  </div>
+
+                  {itemName.trim() !== "" && (
+                    <div className="space-y-1.5">
+                      <FieldLabel>Качество</FieldLabel>
+                      <Select
+                        value={String(grade)}
+                        onValueChange={(v) => setGrade(Number(v))}
                       >
                         <SelectTrigger className="w-full cursor-pointer">
-                          <SelectValue placeholder="Выберите" />
+                          <SelectValue placeholder="Грейд" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="-1">Выберите</SelectItem>
-                          {pool.map((effect) => (
-                            <SelectItem
-                              key={effect.id}
-                              value={String(effect.id)}
-                            >
-                              {effect.label}:{" "}
-                              {effect.isPercent
-                                ? `${effect.value}%`
-                                : `${effect.value} ед.`}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {isRingSynthDraft && (
-                <div className="space-y-1.5">
-                  <div className="text-xs text-muted-foreground">
-                    Эффекты синтеза:
-                  </div>
-                  <SynthesisEffectPicker
-                    effects={RING_SYNTHESIS_EFFECTS}
-                    slotCount={RING_SYNTHESIS_SLOT_COUNT}
-                    value={ringSynthesisEffects}
-                    onChange={setRingSynthesisEffects}
-                  />
-                </div>
-              )}
-
-              {ephenSynthesisCategory && (
-                <div className="space-y-1.5">
-                  <div className="text-xs text-muted-foreground">
-                    Эффект синтеза:
-                  </div>
-                  {!ephenSynthesisEligible ? (
-                    <div className="text-xs text-muted-foreground">
-                      Доступен начиная с качества «
-                      {getSealGradeLabel(ephenSynthesisCategory.minGrade)}» —
-                      выберите качество выше.
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between text-xs text-muted-foreground">
-                          <span>Опыт синтеза</span>
-                          <span>{ephenSynthesisPercent}%</span>
-                        </div>
-                        <input
-                          type="range"
-                          min={0}
-                          max={100}
-                          step={1}
-                          value={ephenSynthesisPercent}
-                          onChange={(e) =>
-                            setEphenSynthesisPercent(Number(e.target.value))
-                          }
-                          className="w-full cursor-pointer"
-                        />
-                      </div>
-                      {ephenSynthesisCategory.groups.length === 2 ? (
-                        <>
-                          <div className="text-xs text-muted-foreground">
-                            Первый пул (выбрано {ephenSynthesisTertiary.length}/
-                            {ephenSynthesisCategory.groups[0].pickCount})
-                          </div>
-                          <div className="max-h-48 space-y-0.5 overflow-y-auto rounded-md border p-1">
-                            {ephenSynthesisCategory.groups[0].options.map(
-                              (option) => {
-                                const checked = ephenSynthesisTertiary.includes(
-                                  option.key,
-                                );
-                                const pickCount =
-                                  ephenSynthesisCategory.groups[0].pickCount;
-                                const disabled =
-                                  !checked &&
-                                  ephenSynthesisTertiary.length >= pickCount;
-                                const range = getEphenSynthesisOptionRange(
-                                  option,
-                                  grade,
-                                  ephenSynthesisCategory.minGrade,
-                                );
-                                return (
-                                  <label
-                                    key={option.key}
-                                    className={`flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-sm hover:bg-accent ${
-                                      disabled
-                                        ? "cursor-not-allowed opacity-40 hover:bg-transparent"
-                                        : ""
-                                    }`}
-                                  >
-                                    <input
-                                      type="checkbox"
-                                      checked={checked}
-                                      disabled={disabled}
-                                      onChange={() => {
-                                        if (checked) {
-                                          setEphenSynthesisTertiary(
-                                            ephenSynthesisTertiary.filter(
-                                              (k) => k !== option.key,
-                                            ),
-                                          );
-                                        } else {
-                                          setEphenSynthesisTertiary([
-                                            ...ephenSynthesisTertiary,
-                                            option.key,
-                                          ]);
-                                        }
-                                      }}
-                                      className="cursor-pointer"
-                                    />
-                                    <span className="min-w-0 flex-1 truncate">
-                                      {option.label}
-                                      {range
-                                        ? `: +${range[0]}..+${range[1]}${option.isPercent ? "%" : ""}`
-                                        : ""}
-                                    </span>
-                                  </label>
-                                );
-                              },
-                            )}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            Второй пул (выбрано{" "}
-                            {ephenSynthesisSecondary ? 1 : 0}/1)
-                          </div>
-                          <div className="max-h-48 space-y-0.5 overflow-y-auto rounded-md border p-1">
-                            {ephenSynthesisCategory.groups[1].options.map(
-                              (option) => {
-                                const checked =
-                                  ephenSynthesisSecondary === option.key;
-                                const range = getEphenSynthesisOptionRange(
-                                  option,
-                                  grade,
-                                  ephenSynthesisCategory.minGrade,
-                                );
-                                return (
-                                  <label
-                                    key={option.key}
-                                    className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-sm hover:bg-accent"
-                                  >
-                                    <input
-                                      type="checkbox"
-                                      checked={checked}
-                                      onChange={() =>
-                                        setEphenSynthesisSecondary(
-                                          checked ? "" : option.key,
-                                        )
-                                      }
-                                      className="cursor-pointer"
-                                    />
-                                    <span className="min-w-0 flex-1 truncate">
-                                      {option.label}
-                                      {range
-                                        ? `: +${range[0]}..+${range[1]}${option.isPercent ? "%" : ""}`
-                                        : ""}
-                                    </span>
-                                  </label>
-                                );
-                              },
-                            )}
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          {ephenSynthesisCategory.groups
-                            .slice(0, 2)
-                            .map((group, gi) => {
-                              const value =
-                                gi === 0
-                                  ? ephenSynthesisPrimary
-                                  : ephenSynthesisSecondary;
-                              const setValue =
-                                gi === 0
-                                  ? setEphenSynthesisPrimary
-                                  : setEphenSynthesisSecondary;
-                              const otherValue =
-                                gi === 0
-                                  ? ephenSynthesisSecondary
-                                  : ephenSynthesisPrimary;
-                              return (
-                                <Select
-                                  key={gi}
-                                  value={value || "none"}
-                                  onValueChange={(v) =>
-                                    setValue(v === "none" ? "" : v)
+                          {(isFixedGradeItem
+                            ? SEAL_GRADES.filter((g) => g.grade === fixedGrade)
+                            : SEAL_GRADES
+                          ).map((g) => {
+                            const optionColor = getSealGradeColor(g.grade);
+                            return (
+                              <SelectItem key={g.grade} value={String(g.grade)}>
+                                <span
+                                  style={
+                                    optionColor
+                                      ? { color: optionColor }
+                                      : undefined
                                   }
                                 >
-                                  <SelectTrigger className="w-full cursor-pointer">
-                                    <SelectValue
-                                      placeholder={
-                                        gi === 0
-                                          ? "Первая характеристика"
-                                          : "Вторая характеристика"
+                                  {g.label}
+                                </span>
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  {itemName.trim() !== "" &&
+                    CUBE_ELIGIBLE_SLOTS.has(slot.key) && (
+                      <div className="grid grid-cols-2 gap-3">
+                        <Stepper
+                          label="Куб"
+                          hint={`макс. ${MAX_ENCHANT}`}
+                          value={enchant}
+                          max={MAX_ENCHANT}
+                          format={(value) => `+${value}`}
+                          onChange={(value) => {
+                            if (isValidEnchantLevel(value)) setEnchant(value);
+                          }}
+                          showMax
+                        />
+                        <Stepper
+                          label="Защита от доп. урона"
+                          hint={`ур. 0–${getMaxExtraProtectionLevel(slot.key)}`}
+                          value={extraProtection}
+                          max={getMaxExtraProtectionLevel(slot.key)}
+                          format={(value) => `Lv. ${value}`}
+                          onChange={(value) => {
+                            if (isValidExtraProtectionLevel(value, slot.key))
+                              setExtraProtection(value);
+                          }}
+                        />
+                      </div>
+                    )}
+                  {itemName.trim() !== "" && maxEngravingSlots > 0 && (
+                    <div className="space-y-2">
+                      <FieldLabel
+                        hint={
+                          <span className="flex gap-3">
+                            <button
+                              type="button"
+                              disabled={!selectedEngravingId}
+                              onClick={() =>
+                                setEngravings(
+                                  Array.from(
+                                    { length: maxEngravingSlots },
+                                    () => selectedEngravingId,
+                                  ),
+                                )
+                              }
+                              className="cursor-pointer text-xs font-semibold text-green-500 hover:underline disabled:cursor-default disabled:opacity-40 disabled:hover:no-underline"
+                            >
+                              Заполнить все
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setEngravings([])}
+                              className="cursor-pointer text-xs font-semibold text-red-400 hover:underline"
+                            >
+                              Снять все
+                            </button>
+                          </span>
+                        }
+                      >
+                        Гравировки ·{" "}
+                        {
+                          engravings.slice(0, maxEngravingSlots).filter(Boolean)
+                            .length
+                        }{" "}
+                        / {maxEngravingSlots}
+                      </FieldLabel>
+                      <EngravingPicker
+                        slot={slot.key}
+                        handedness={draftHandedness}
+                        itemId={draftGearItem?.id}
+                        value={selectedEngravingId}
+                        onSelect={setSelectedEngravingId}
+                      />
+                      <EngravingSlots
+                        count={maxEngravingSlots}
+                        engravings={engravings}
+                        selectedEngravingId={selectedEngravingId}
+                        onToggle={(i) => {
+                          setEngravings((prev) => {
+                            const next = [...prev];
+                            while (next.length <= i) next.push(0);
+                            next[i] = next[i] ? 0 : selectedEngravingId;
+                            return next;
+                          });
+                        }}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Клик по пустой ячейке ставит выбранную гравировку, по
+                        заполненной — снимает её
+                      </p>
+                    </div>
+                  )}
+                  {itemName.trim() !== "" && (
+                    <div className="space-y-1.5">
+                      <FieldLabel>Лунный камень / руна</FieldLabel>
+                      <RunePicker
+                        slot={slot.key}
+                        handedness={draftHandedness}
+                        itemId={draftGearItem?.id}
+                        value={runeId}
+                        onSelect={setRuneId}
+                        equipment={equipment}
+                      />
+                      {draftRune?.effect && (
+                        <div className="space-y-0.5 text-xs text-green-500">
+                          <EffectText text={draftRune.effect} />
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {draftSynthesisRole && (
+                    <div className="space-y-1.5">
+                      <FieldLabel>Эффекты синтеза</FieldLabel>
+                      {maxSynthesisSlots > 0 ? (
+                        <SynthesisEffectPicker
+                          effects={synthesisEffectOptions}
+                          slotCount={maxSynthesisSlots}
+                          value={synthesisEffects}
+                          onChange={setSynthesisEffects}
+                        />
+                      ) : (
+                        <div className="text-xs text-muted-foreground">
+                          Доступны начиная с качества «Необычный» — выберите
+                          качество выше.
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {cursedSynthesisPools.length > 0 && (
+                    <div className="space-y-1.5">
+                      <FieldLabel>Эффекты синтеза</FieldLabel>
+                      <div className="space-y-1.5">
+                        {cursedSynthesisPools.map((pool, i) => (
+                          <Select
+                            key={i}
+                            value={String(cursedSynthesisEffects[i] ?? -1)}
+                            onValueChange={(v) => {
+                              const next = [...cursedSynthesisEffects];
+                              next[i] = Number(v);
+                              setCursedSynthesisEffects(next);
+                            }}
+                          >
+                            <SelectTrigger className="w-full cursor-pointer">
+                              <SelectValue placeholder="Выберите" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="-1">Выберите</SelectItem>
+                              {pool.map((effect) => (
+                                <SelectItem
+                                  key={effect.id}
+                                  value={String(effect.id)}
+                                >
+                                  {effect.label}:{" "}
+                                  {effect.isPercent
+                                    ? `${effect.value}%`
+                                    : `${effect.value} ед.`}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {isRingSynthDraft && (
+                    <div className="space-y-1.5">
+                      <FieldLabel>Эффекты синтеза</FieldLabel>
+                      <SynthesisEffectPicker
+                        effects={RING_SYNTHESIS_EFFECTS}
+                        slotCount={RING_SYNTHESIS_SLOT_COUNT}
+                        value={ringSynthesisEffects}
+                        onChange={setRingSynthesisEffects}
+                      />
+                    </div>
+                  )}
+
+                  {ephenSynthesisCategory && (
+                    <div className="space-y-1.5">
+                      <div className="text-xs text-muted-foreground">
+                        Эффект синтеза:
+                      </div>
+                      {!ephenSynthesisEligible ? (
+                        <div className="text-xs text-muted-foreground">
+                          Доступен начиная с качества «
+                          {getSealGradeLabel(ephenSynthesisCategory.minGrade)}»
+                          — выберите качество выше.
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <div className="space-y-1">
+                            <div className="flex items-center justify-between text-xs text-muted-foreground">
+                              <span>Опыт синтеза</span>
+                              <span>{ephenSynthesisPercent}%</span>
+                            </div>
+                            <input
+                              type="range"
+                              min={0}
+                              max={100}
+                              step={1}
+                              value={ephenSynthesisPercent}
+                              onChange={(e) =>
+                                setEphenSynthesisPercent(Number(e.target.value))
+                              }
+                              className="w-full cursor-pointer"
+                            />
+                          </div>
+                          {ephenSynthesisCategory.groups.length === 2 ? (
+                            <>
+                              <div className="text-xs text-muted-foreground">
+                                Первый пул (выбрано{" "}
+                                {ephenSynthesisTertiary.length}/
+                                {ephenSynthesisCategory.groups[0].pickCount})
+                              </div>
+                              <div className="max-h-48 space-y-0.5 overflow-y-auto rounded-md border p-1">
+                                {ephenSynthesisCategory.groups[0].options.map(
+                                  (option) => {
+                                    const checked =
+                                      ephenSynthesisTertiary.includes(
+                                        option.key,
+                                      );
+                                    const pickCount =
+                                      ephenSynthesisCategory.groups[0]
+                                        .pickCount;
+                                    const disabled =
+                                      !checked &&
+                                      ephenSynthesisTertiary.length >=
+                                        pickCount;
+                                    const range = getEphenSynthesisOptionRange(
+                                      option,
+                                      grade,
+                                      ephenSynthesisCategory.minGrade,
+                                    );
+                                    return (
+                                      <label
+                                        key={option.key}
+                                        className={`flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-sm hover:bg-accent ${
+                                          disabled
+                                            ? "cursor-not-allowed opacity-40 hover:bg-transparent"
+                                            : ""
+                                        }`}
+                                      >
+                                        <input
+                                          type="checkbox"
+                                          checked={checked}
+                                          disabled={disabled}
+                                          onChange={() => {
+                                            if (checked) {
+                                              setEphenSynthesisTertiary(
+                                                ephenSynthesisTertiary.filter(
+                                                  (k) => k !== option.key,
+                                                ),
+                                              );
+                                            } else {
+                                              setEphenSynthesisTertiary([
+                                                ...ephenSynthesisTertiary,
+                                                option.key,
+                                              ]);
+                                            }
+                                          }}
+                                          className="cursor-pointer"
+                                        />
+                                        <span className="min-w-0 flex-1 truncate">
+                                          {option.label}
+                                          {range
+                                            ? `: +${range[0]}..+${range[1]}${option.isPercent ? "%" : ""}`
+                                            : ""}
+                                        </span>
+                                      </label>
+                                    );
+                                  },
+                                )}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                Второй пул (выбрано{" "}
+                                {ephenSynthesisSecondary ? 1 : 0}/1)
+                              </div>
+                              <div className="max-h-48 space-y-0.5 overflow-y-auto rounded-md border p-1">
+                                {ephenSynthesisCategory.groups[1].options.map(
+                                  (option) => {
+                                    const checked =
+                                      ephenSynthesisSecondary === option.key;
+                                    const range = getEphenSynthesisOptionRange(
+                                      option,
+                                      grade,
+                                      ephenSynthesisCategory.minGrade,
+                                    );
+                                    return (
+                                      <label
+                                        key={option.key}
+                                        className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-sm hover:bg-accent"
+                                      >
+                                        <input
+                                          type="checkbox"
+                                          checked={checked}
+                                          onChange={() =>
+                                            setEphenSynthesisSecondary(
+                                              checked ? "" : option.key,
+                                            )
+                                          }
+                                          className="cursor-pointer"
+                                        />
+                                        <span className="min-w-0 flex-1 truncate">
+                                          {option.label}
+                                          {range
+                                            ? `: +${range[0]}..+${range[1]}${option.isPercent ? "%" : ""}`
+                                            : ""}
+                                        </span>
+                                      </label>
+                                    );
+                                  },
+                                )}
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              {ephenSynthesisCategory.groups
+                                .slice(0, 2)
+                                .map((group, gi) => {
+                                  const value =
+                                    gi === 0
+                                      ? ephenSynthesisPrimary
+                                      : ephenSynthesisSecondary;
+                                  const setValue =
+                                    gi === 0
+                                      ? setEphenSynthesisPrimary
+                                      : setEphenSynthesisSecondary;
+                                  const otherValue =
+                                    gi === 0
+                                      ? ephenSynthesisSecondary
+                                      : ephenSynthesisPrimary;
+                                  return (
+                                    <Select
+                                      key={gi}
+                                      value={value || "none"}
+                                      onValueChange={(v) =>
+                                        setValue(v === "none" ? "" : v)
                                       }
-                                    />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="none">
-                                      Выберите
-                                    </SelectItem>
-                                    {group.options
-                                      .filter(
-                                        (option) => option.key !== otherValue,
-                                      )
-                                      .map((option) => {
-                                        const range =
-                                          getEphenSynthesisOptionRange(
-                                            option,
-                                            grade,
-                                            ephenSynthesisCategory.minGrade,
-                                          );
-                                        return (
-                                          <SelectItem
-                                            key={option.key}
-                                            value={option.key}
-                                          >
+                                    >
+                                      <SelectTrigger className="w-full cursor-pointer">
+                                        <SelectValue
+                                          placeholder={
+                                            gi === 0
+                                              ? "Первая характеристика"
+                                              : "Вторая характеристика"
+                                          }
+                                        />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="none">
+                                          Выберите
+                                        </SelectItem>
+                                        {group.options
+                                          .filter(
+                                            (option) =>
+                                              option.key !== otherValue,
+                                          )
+                                          .map((option) => {
+                                            const range =
+                                              getEphenSynthesisOptionRange(
+                                                option,
+                                                grade,
+                                                ephenSynthesisCategory.minGrade,
+                                              );
+                                            return (
+                                              <SelectItem
+                                                key={option.key}
+                                                value={option.key}
+                                              >
+                                                {option.label}
+                                                {range
+                                                  ? `: +${range[0]}..+${range[1]}${option.isPercent ? "%" : ""}`
+                                                  : ""}
+                                              </SelectItem>
+                                            );
+                                          })}
+                                      </SelectContent>
+                                    </Select>
+                                  );
+                                })}
+                              {ephenSynthesisCategory.groups[2] && (
+                                <div className="max-h-48 space-y-0.5 overflow-y-auto rounded-md border p-1">
+                                  {ephenSynthesisCategory.groups[2].options.map(
+                                    (option) => {
+                                      const checked =
+                                        ephenSynthesisTertiary.includes(
+                                          option.key,
+                                        );
+                                      const pickCount =
+                                        ephenSynthesisCategory.groups[2]
+                                          .pickCount;
+                                      const disabled =
+                                        !checked &&
+                                        ephenSynthesisTertiary.length >=
+                                          pickCount;
+                                      const range =
+                                        getEphenSynthesisOptionRange(
+                                          option,
+                                          grade,
+                                          ephenSynthesisCategory.minGrade,
+                                        );
+                                      return (
+                                        <label
+                                          key={option.key}
+                                          className={`flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-sm hover:bg-accent ${
+                                            disabled
+                                              ? "cursor-not-allowed opacity-40 hover:bg-transparent"
+                                              : ""
+                                          }`}
+                                        >
+                                          <input
+                                            type="checkbox"
+                                            checked={checked}
+                                            disabled={disabled}
+                                            onChange={() => {
+                                              if (checked) {
+                                                setEphenSynthesisTertiary(
+                                                  ephenSynthesisTertiary.filter(
+                                                    (k) => k !== option.key,
+                                                  ),
+                                                );
+                                              } else {
+                                                setEphenSynthesisTertiary([
+                                                  ...ephenSynthesisTertiary,
+                                                  option.key,
+                                                ]);
+                                              }
+                                            }}
+                                            className="cursor-pointer"
+                                          />
+                                          <span className="min-w-0 flex-1 truncate">
                                             {option.label}
                                             {range
                                               ? `: +${range[0]}..+${range[1]}${option.isPercent ? "%" : ""}`
                                               : ""}
-                                          </SelectItem>
-                                        );
-                                      })}
-                                  </SelectContent>
-                                </Select>
-                              );
-                            })}
-                          {ephenSynthesisCategory.groups[2] && (
-                            <div className="max-h-48 space-y-0.5 overflow-y-auto rounded-md border p-1">
-                              {ephenSynthesisCategory.groups[2].options.map(
-                                (option) => {
-                                  const checked =
-                                    ephenSynthesisTertiary.includes(option.key);
-                                  const pickCount =
-                                    ephenSynthesisCategory.groups[2].pickCount;
-                                  const disabled =
-                                    !checked &&
-                                    ephenSynthesisTertiary.length >= pickCount;
-                                  const range = getEphenSynthesisOptionRange(
-                                    option,
-                                    grade,
-                                    ephenSynthesisCategory.minGrade,
-                                  );
-                                  return (
-                                    <label
-                                      key={option.key}
-                                      className={`flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-sm hover:bg-accent ${
-                                        disabled
-                                          ? "cursor-not-allowed opacity-40 hover:bg-transparent"
-                                          : ""
-                                      }`}
-                                    >
-                                      <input
-                                        type="checkbox"
-                                        checked={checked}
-                                        disabled={disabled}
-                                        onChange={() => {
-                                          if (checked) {
-                                            setEphenSynthesisTertiary(
-                                              ephenSynthesisTertiary.filter(
-                                                (k) => k !== option.key,
-                                              ),
-                                            );
-                                          } else {
-                                            setEphenSynthesisTertiary([
-                                              ...ephenSynthesisTertiary,
-                                              option.key,
-                                            ]);
-                                          }
-                                        }}
-                                        className="cursor-pointer"
-                                      />
-                                      <span className="min-w-0 flex-1 truncate">
-                                        {option.label}
-                                        {range
-                                          ? `: +${range[0]}..+${range[1]}${option.isPercent ? "%" : ""}`
-                                          : ""}
-                                      </span>
-                                    </label>
-                                  );
-                                },
+                                          </span>
+                                        </label>
+                                      );
+                                    },
+                                  )}
+                                </div>
                               )}
-                            </div>
+                            </>
                           )}
-                        </>
+                        </div>
                       )}
                     </div>
                   )}
                 </div>
-              )}
-
-              <div className="flex justify-end gap-2">
+              </div>
+              <div className="flex shrink-0 items-center gap-2 border-t px-5 py-3">
                 {filled && (
                   <Button
                     variant="ghost"
-                    className="cursor-pointer"
+                    aria-label="Снять предмет"
+                    className="h-11 cursor-pointer text-destructive hover:bg-destructive/10 hover:text-destructive sm:h-9"
                     onClick={handleClear}
                     disabled={saving}
                   >
-                    Очистить
+                    <Trash2 />
+                    <span className="hidden sm:inline">Снять предмет</span>
                   </Button>
                 )}
                 <Button
-                  className="cursor-pointer"
+                  variant="outline"
+                  className="ml-auto hidden cursor-pointer sm:inline-flex"
+                  onClick={() => handleOpenChange(false)}
+                  disabled={saving}
+                >
+                  Отмена
+                </Button>
+                <Button
+                  className="h-11 flex-1 cursor-pointer sm:h-9 sm:flex-none"
                   onClick={handleSave}
                   disabled={saving}
                 >
                   {saving ? "Сохранение..." : "Сохранить"}
                 </Button>
               </div>
-            </div>
+            </>
           ) : filled ? (
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 overflow-y-auto px-5 py-4">
               {selectedGearItem && (
                 <div className="flex items-center gap-2">
                   <GearItemIcon
@@ -1398,11 +1660,11 @@ function EquipmentSlotButton({
               )}
             </div>
           ) : (
-            <div className="text-sm text-muted-foreground">Пусто</div>
+            <div className="px-5 py-4 text-sm text-muted-foreground">Пусто</div>
           )}
         </DialogContent>
       </Dialog>
-      {equippedRune && (
+      {showRune && equippedRune && (
         <RuneTooltip
           rune={equippedRune}
           side={tooltipSide}
@@ -1444,6 +1706,11 @@ export default function EquipmentTab({
   const [portraitUrl, setPortraitUrl] = useState<string | null>(
     user?.character_portrait_url ?? null,
   );
+  const narrow = useNarrowScreen();
+  const [viewOverride, setViewOverride] = useState<"doll" | "list" | null>(
+    null,
+  );
+  const view = viewOverride ?? (narrow ? "list" : "doll");
 
   const handleSaveSlot = async (
     slotKey: string,
@@ -1518,18 +1785,87 @@ export default function EquipmentTab({
     }
   };
 
+  const renderSlot = (
+    slot: EquipmentSlot,
+    side: "left" | "right" = "left",
+    showRune = true,
+  ) => (
+    <EquipmentSlotButton
+      key={slot.key}
+      slot={slot}
+      item={equipmentBySlot[slot.key]}
+      equipment={equipment}
+      canEdit={canEdit}
+      tooltipSide={side}
+      showRune={showRune}
+      onSave={(
+        itemName,
+        grade,
+        enchant,
+        extraProtection,
+        engravings,
+        runeId,
+        synthesisEffects,
+        cursedSynthesisEffects,
+        ringSynthesisEffects,
+        ephenSynthesisPercent,
+        ephenSynthesisPrimary,
+        ephenSynthesisSecondary,
+        ephenSynthesisTertiary,
+      ) =>
+        handleSaveSlot(
+          slot.key,
+          itemName,
+          grade,
+          enchant,
+          extraProtection,
+          engravings,
+          runeId,
+          synthesisEffects,
+          cursedSynthesisEffects,
+          ringSynthesisEffects,
+          ephenSynthesisPercent,
+          ephenSynthesisPrimary,
+          ephenSynthesisSecondary,
+          ephenSynthesisTertiary,
+        )
+      }
+    />
+  );
+
+  const filledCount = EQUIPMENT_SLOTS.filter(
+    (slot) => equipmentBySlot[slot.key]?.item_name,
+  ).length;
+
   return (
-    <Card className="@container min-h-[750px] gap-3 py-4">
-      <CardHeader className="border-b">
-        <CardTitle>
+    <Card className="@container gap-0 py-0">
+      <CardHeader className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b px-3 py-3 sm:px-4 [.border-b]:pb-3">
+        <CardTitle className="min-w-0">
           <CharacterTabsSwitcher />
         </CardTitle>
+        <div className="ml-auto flex items-center gap-2 text-[13px] text-muted-foreground">
+          {user?.class && (
+            <span
+              className="rounded-full px-2.5 py-0.5 font-semibold"
+              style={{
+                color: classColors[user.class],
+                backgroundColor: `color-mix(in srgb, ${classColors[user.class] ?? "#71717a"} 12%, transparent)`,
+              }}
+            >
+              {user.class}
+            </span>
+          )}
+          <span>
+            ур. <b className="text-foreground">{level}</b>
+          </span>
+          <span>·</span>
+          <span>
+            {filledCount} из {EQUIPMENT_SLOTS.length} ячеек
+          </span>
+        </div>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4 pt-4 @[48rem]:grid @[48rem]:grid-cols-2 @[76rem]:flex @[76rem]:flex-row">
-        <div className="flex flex-col">
-          <div className="mb-2 text-sm font-semibold">
-            Характеристики персонажа
-          </div>
+      <CardContent className="grid gap-4 p-3 sm:p-4 @[48rem]:grid-cols-2 @[60rem]:grid-cols-[280px_minmax(0,1fr)_300px] @[60rem]:items-start">
+        <div className="flex min-w-0 flex-col">
           <CharacterStatsPanel
             userId={userId}
             equipment={equipment}
@@ -1541,188 +1877,155 @@ export default function EquipmentTab({
           />
         </div>
 
-        <div className="flex flex-1 flex-col justify-center @[48rem]:order-first @[48rem]:col-span-2 @[76rem]:order-none">
-          <div className="mb-3 flex justify-center">
-            <EquipmentSlotButton
-              slot={TOP}
-              item={equipmentBySlot[TOP.key]}
-              equipment={equipment}
-              canEdit={canEdit}
-              onSave={(
-                itemName,
-                grade,
-                enchant,
-                extraProtection,
-                engravings,
-                runeId,
-                synthesisEffects,
-                cursedSynthesisEffects,
-                ringSynthesisEffects,
-                ephenSynthesisPercent,
-                ephenSynthesisPrimary,
-                ephenSynthesisSecondary,
-                ephenSynthesisTertiary,
-              ) =>
-                handleSaveSlot(
-                  TOP.key,
-                  itemName,
-                  grade,
-                  enchant,
-                  extraProtection,
-                  engravings,
-                  runeId,
-                  synthesisEffects,
-                  cursedSynthesisEffects,
-                  ringSynthesisEffects,
-                  ephenSynthesisPercent,
-                  ephenSynthesisPrimary,
-                  ephenSynthesisSecondary,
-                  ephenSynthesisTertiary,
-                )
-              }
-            />
-          </div>
-
-          <div className="flex items-stretch justify-center gap-2 sm:gap-6">
-            <div className="flex flex-col gap-4">
-              {LEFT.map((slot) => (
-                <EquipmentSlotButton
-                  key={slot.key}
-                  slot={slot}
-                  item={equipmentBySlot[slot.key]}
-                  equipment={equipment}
-                  canEdit={canEdit}
-                  onSave={(
-                    itemName,
-                    grade,
-                    enchant,
-                    extraProtection,
-                    engravings,
-                    runeId,
-                    synthesisEffects,
-                    cursedSynthesisEffects,
-                    ringSynthesisEffects,
-                    ephenSynthesisPercent,
-                    ephenSynthesisPrimary,
-                    ephenSynthesisSecondary,
-                    ephenSynthesisTertiary,
-                  ) =>
-                    handleSaveSlot(
-                      slot.key,
-                      itemName,
-                      grade,
-                      enchant,
-                      extraProtection,
-                      engravings,
-                      runeId,
-                      synthesisEffects,
-                      cursedSynthesisEffects,
-                      ringSynthesisEffects,
-                      ephenSynthesisPercent,
-                      ephenSynthesisPrimary,
-                      ephenSynthesisSecondary,
-                      ephenSynthesisTertiary,
-                    )
-                  }
-                />
-              ))}
-            </div>
-
-            {portraitUrl ? (
-              <div className="relative flex w-40 flex-col rounded-xl border bg-muted/40 p-3 sm:w-[300px]">
-                <div className="relative h-full w-full overflow-hidden rounded-lg">
-                  <Image
-                    src={portraitUrl}
-                    alt={user?.username ?? ""}
-                    fill
-                    unoptimized
-                    className="object-cover object-center"
-                  />
-                </div>
-                {canEdit && (
-                  <CharacterPortraitUpload
-                    userId={userId}
-                    onUploaded={setPortraitUrl}
-                  />
-                )}
-              </div>
-            ) : (
-              <div className="relative flex w-32 flex-col items-center justify-center gap-2 rounded-xl border bg-muted/40 p-3 sm:w-56">
-                <Avatar className="size-16 border-4 border-card shadow-sm sm:size-24">
-                  <AvatarImage
-                    src={
-                      user?.avatar_url ??
-                      `https://api.dicebear.com/6.x/initials/svg?seed=${user?.username ?? "?"}`
-                    }
-                    alt={user?.username ?? ""}
-                  />
-                  <AvatarFallback className="text-xl">
-                    {user?.username?.slice(0, 2) ?? "?"}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="max-w-full truncate text-center text-sm font-medium">
-                  {user?.username}
-                </div>
-                {canEdit && (
-                  <CharacterPortraitUpload
-                    userId={userId}
-                    onUploaded={setPortraitUrl}
-                  />
-                )}
-              </div>
-            )}
-
-            <div className="flex flex-col gap-4">
-              {RIGHT.map((slot) => (
-                <EquipmentSlotButton
-                  key={slot.key}
-                  slot={slot}
-                  item={equipmentBySlot[slot.key]}
-                  equipment={equipment}
-                  canEdit={canEdit}
-                  tooltipSide="right"
-                  onSave={(
-                    itemName,
-                    grade,
-                    enchant,
-                    extraProtection,
-                    engravings,
-                    runeId,
-                    synthesisEffects,
-                    cursedSynthesisEffects,
-                    ringSynthesisEffects,
-                    ephenSynthesisPercent,
-                    ephenSynthesisPrimary,
-                    ephenSynthesisSecondary,
-                    ephenSynthesisTertiary,
-                  ) =>
-                    handleSaveSlot(
-                      slot.key,
-                      itemName,
-                      grade,
-                      enchant,
-                      extraProtection,
-                      engravings,
-                      runeId,
-                      synthesisEffects,
-                      cursedSynthesisEffects,
-                      ringSynthesisEffects,
-                      ephenSynthesisPercent,
-                      ephenSynthesisPrimary,
-                      ephenSynthesisSecondary,
-                      ephenSynthesisTertiary,
-                    )
-                  }
-                />
+        <div className="flex min-w-0 flex-col gap-3 @[48rem]:order-first @[48rem]:col-span-2 @[60rem]:order-none @[60rem]:col-span-1">
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-semibold">Экипировка</span>
+            <div
+              role="tablist"
+              aria-label="Вид экипировки"
+              className="inline-flex gap-0.5 rounded-lg bg-muted p-[3px]"
+            >
+              {(
+                [
+                  ["doll", "Кукла"],
+                  ["list", "Списком"],
+                ] as const
+              ).map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  role="tab"
+                  aria-selected={view === key}
+                  onClick={() => setViewOverride(key)}
+                  className={cn(
+                    "h-8 cursor-pointer rounded-md px-3 text-[12.5px] font-semibold transition-colors sm:h-7",
+                    view === key
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground",
+                  )}
+                >
+                  {label}
+                </button>
               ))}
             </div>
           </div>
+
+          {view === "list" ? (
+            <div className="flex flex-col gap-3">
+              {LIST_GROUPS.map((group) => (
+                <div key={group.title} className="flex flex-col gap-1.5">
+                  <span className="text-xs font-semibold text-muted-foreground">
+                    {group.title}
+                  </span>
+                  <div className="flex flex-col divide-y overflow-hidden rounded-xl border">
+                    {group.slots.map((slot) => {
+                      const item = equipmentBySlot[slot.key];
+                      const gear = findGearItem(slot.key, item?.item_name);
+                      const rune = item?.rune_id
+                        ? findRune(item.rune_id)
+                        : undefined;
+                      const color = item?.item_name
+                        ? getSealGradeColor(item.grade)
+                        : null;
+                      return (
+                        <div
+                          key={slot.key}
+                          className="flex items-center gap-3 px-2.5 py-2"
+                        >
+                          {renderSlot(slot, "right", false)}
+                          <span className="flex min-w-0 flex-1 flex-col leading-tight">
+                            <span className="text-[11.5px] text-muted-foreground">
+                              {slot.label}
+                            </span>
+                            {item?.item_name ? (
+                              <>
+                                <span
+                                  className="text-[13.5px] font-semibold"
+                                  style={{ color: color ?? undefined }}
+                                >
+                                  {item.enchant > 0 && `+${item.enchant} `}
+                                  {gear?.name ?? item.item_name}
+                                </span>
+                                <span className="text-[11.5px] text-muted-foreground">
+                                  {getSealGradeLabel(item.grade)}
+                                  {rune && ` · ${rune.name}`}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="text-[13px] text-muted-foreground">
+                                Пусто
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center">
+              <div className="mb-3 flex justify-center">{renderSlot(TOP)}</div>
+
+              <div className="flex w-full items-stretch justify-center gap-2 sm:gap-3">
+                <div className="flex flex-col gap-4 pl-8">
+                  {LEFT.map((slot) => renderSlot(slot, "left"))}
+                </div>
+
+                {portraitUrl ? (
+                  <div className="relative flex w-40 flex-col rounded-xl border bg-muted/40 p-2 sm:w-[240px] @[60rem]:w-[190px]">
+                    <div className="relative h-full w-full overflow-hidden rounded-lg">
+                      <Image
+                        src={portraitUrl}
+                        alt={user?.username ?? ""}
+                        fill
+                        unoptimized
+                        className="object-cover object-center"
+                      />
+                    </div>
+                    {canEdit && (
+                      <CharacterPortraitUpload
+                        userId={userId}
+                        onUploaded={setPortraitUrl}
+                      />
+                    )}
+                  </div>
+                ) : (
+                  <div className="relative flex w-32 flex-col items-center justify-center gap-2 rounded-xl border bg-muted/40 p-3 sm:w-52">
+                    <Avatar className="size-16 border-4 border-card shadow-sm sm:size-24">
+                      <AvatarImage
+                        src={
+                          user?.avatar_url ??
+                          `https://api.dicebear.com/6.x/initials/svg?seed=${user?.username ?? "?"}`
+                        }
+                        alt={user?.username ?? ""}
+                      />
+                      <AvatarFallback className="text-xl">
+                        {user?.username?.slice(0, 2) ?? "?"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="max-w-full truncate text-center text-sm font-medium">
+                      {user?.username}
+                    </div>
+                    {canEdit && (
+                      <CharacterPortraitUpload
+                        userId={userId}
+                        onUploaded={setPortraitUrl}
+                      />
+                    )}
+                  </div>
+                )}
+
+                <div className="flex flex-col gap-4 pr-8">
+                  {RIGHT.map((slot) => renderSlot(slot, "right"))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
-        <div>
-          <div className="mb-2 text-sm font-semibold">
-            Подробные характеристики
-          </div>
+        <div className="min-w-0">
           <DetailedStatsPanel equipment={equipment} level={level} />
         </div>
       </CardContent>

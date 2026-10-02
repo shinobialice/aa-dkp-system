@@ -24,7 +24,7 @@ export default function SealLevelList({
   const editable = !!onSelectLevel;
 
   return (
-    <div className="max-h-[420px] overflow-y-auto rounded-md border">
+    <div className="max-h-[420px] w-full min-w-0 overflow-y-auto rounded-md border">
       {rows.map((row) => {
         const grade = getSealGradeForLevel(row.level);
         const gradeColor = getSealGradeColor(grade);
