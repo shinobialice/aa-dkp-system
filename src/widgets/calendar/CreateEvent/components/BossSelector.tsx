@@ -1,13 +1,8 @@
 import React from "react";
-import { Button } from "@/shared/ui";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuCheckboxItem,
-} from "@/shared/ui";
-import { Label } from "@/shared/ui";
-import { ChevronDown } from "lucide-react";
+import { cn } from "@/shared/lib/tw-merge";
+import { bossColorStyle } from "@/widgets/Attendance/attendanceModel";
+
+const AGL_BOSS_ORDER = ["АГЛ", "Морф", "Марли Прок", "Кошка"];
 
 export default function BossSelector({
   category,
@@ -22,84 +17,53 @@ export default function BossSelector({
   onSelectBoss: (boss: any) => void;
   errors: { selectedBoss: boolean };
 }) {
-  const aglBossOrder = ["АГЛ", "Морф", "Марли Прок", "Кошка"];
+  if (category !== "Прайм" && category !== "АГЛ") return null;
 
-  if (category === "Прайм") {
-    return (
-      <>
-        <Label>Босс</Label>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              className="w-[270px] justify-between cursor-pointer"
+  const options =
+    category === "Прайм"
+      ? bosses.filter((boss) => boss.category === "Прайм")
+      : AGL_BOSS_ORDER.map((name) =>
+          bosses.find(
+            (boss) =>
+              boss.boss_name.trim().toLowerCase() === name.toLowerCase(),
+          ),
+        ).filter(Boolean);
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className="text-[12.5px] font-semibold text-muted-foreground">
+        Босс
+      </span>
+      <div
+        role="radiogroup"
+        aria-label="Босс"
+        className="flex flex-wrap gap-1.5"
+      >
+        {options.map((boss: any) => {
+          const selected = selectedBoss === boss.boss_name;
+          return (
+            <button
+              key={boss.id}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              onClick={() => onSelectBoss(boss)}
+              style={bossColorStyle(boss.boss_name, category)}
+              className={cn(
+                "h-[34px] cursor-pointer rounded-full border px-3 text-[13px] font-bold transition-colors",
+                selected
+                  ? "border-transparent bg-[var(--raid-color)] text-white dark:bg-[var(--raid-color-dark)] dark:text-zinc-950"
+                  : "bg-background text-[var(--raid-color)] hover:bg-muted dark:text-[var(--raid-color-dark)]",
+              )}
             >
-              {selectedBoss || "Выберите босса"}
-              <ChevronDown className="ml-2" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-[270px] max-h-80 overflow-y-auto">
-            {bosses
-              .filter((boss) => boss.category === "Прайм")
-              .map((boss) => (
-                <DropdownMenuCheckboxItem
-                  key={boss.id}
-                  checked={selectedBoss === boss.boss_name}
-                  onCheckedChange={() => onSelectBoss(boss)}
-                >
-                  {boss.boss_name}
-                </DropdownMenuCheckboxItem>
-              ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-        {errors.selectedBoss && (
-          <p className="text-sm text-red-500">Обязательное поле</p>
-        )}
-      </>
-    );
-  }
-
-  if (category === "АГЛ") {
-    return (
-      <>
-        <Label>Босс</Label>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              className="w-[270px] justify-between cursor-pointer"
-            >
-              {selectedBoss || "Выберите босса"}
-              <ChevronDown className="ml-2" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-[270px] max-h-80 overflow-y-auto">
-            {aglBossOrder.map((name) => {
-              const boss = bosses.find(
-                (b) =>
-                  b.boss_name.trim().toLowerCase() === name.trim().toLowerCase(),
-              );
-              if (!boss) return null;
-
-              return (
-                <DropdownMenuCheckboxItem
-                  className="cursor-pointer"
-                  key={name}
-                  checked={selectedBoss === boss.boss_name}
-                  onCheckedChange={() => onSelectBoss(boss)}
-                >
-                  {boss.boss_name}
-                </DropdownMenuCheckboxItem>
-              );
-            })}
-          </DropdownMenuContent>
-        </DropdownMenu>
-        {errors.selectedBoss && (
-          <p className="text-sm text-red-500">Обязательное поле</p>
-        )}
-      </>
-    );
-  }
-
-  return null;
+              {boss.boss_name}
+            </button>
+          );
+        })}
+      </div>
+      {errors.selectedBoss && (
+        <p className="text-xs text-destructive">Выберите босса</p>
+      )}
+    </div>
+  );
 }

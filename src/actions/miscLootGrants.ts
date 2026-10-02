@@ -1,6 +1,7 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import ensurePrivilieges from "./ensurePrivilieges";
 import { revalidatePath } from "next/cache";
 
 export type MiscLootGrant = {
@@ -14,6 +15,7 @@ export async function addMiscLootGrant(
   userId: number,
   grant: { comment: string; amount: number | null; date: string },
 ): Promise<MiscLootGrant> {
+  await ensurePrivilieges(["Администратор"]);
   let data;
   try {
     [data] = await sql<any[]>`
@@ -42,6 +44,7 @@ export async function addMiscLootGrant(
 }
 
 export async function deleteMiscLootGrant(id: number) {
+  await ensurePrivilieges(["Администратор"]);
   try {
     await sql<any[]>`DELETE FROM misc_loot_grants WHERE id = ${id}`;
   } catch (error) {

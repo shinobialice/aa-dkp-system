@@ -7,6 +7,19 @@ import addItemToUserInventory from "@/actions/addItemToUserInventory";
 import deleteItemFromUserInventory from "@/actions/deleteItemFromUserInventory";
 import setItemQuality from "@/actions/setItemQuality";
 
+const DRAGONS = ["Красный Дракон", "Черный Дракон", "Зеленый Дракон"];
+
+export function findUserItem(item: any, inventory: any[]) {
+  if (item.name === "Дракон") {
+    return inventory.find(
+      (inv) => inv.type === item.type && DRAGONS.includes(inv.name),
+    );
+  }
+  return inventory.find(
+    (inv) => inv.name === item.name && inv.type === item.type,
+  );
+}
+
 export default function InventoryItemCard({
   item,
   inventory,
@@ -22,15 +35,7 @@ export default function InventoryItemCard({
 }) {
   const isDragon = item.name === "Дракон";
 
-  const userItem = isDragon
-    ? inventory.find(
-        (inv) =>
-          inv.type === item.type &&
-          ["Красный Дракон", "Черный Дракон", "Зеленый Дракон"].includes(
-            inv.name,
-          ),
-      )
-    : inventory.find((inv) => inv.name === item.name && inv.type === item.type);
+  const userItem = findUserItem(item, inventory);
 
   const displayIconName = isDragon && userItem ? userItem.name : item.name;
   // item.iconUrl — предметы, заведённые админом на /items (см.
@@ -97,46 +102,48 @@ export default function InventoryItemCard({
 
   return (
     <div
-      className={`flex flex-col items-center gap-2 rounded-lg border p-3 text-center transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md ${
+      className={`flex min-h-[52px] items-center gap-2.5 rounded-lg border px-2.5 py-1.5 transition-colors ${
         isPresent
-          ? "border-primary/30 bg-primary/5"
-          : "border-dashed opacity-70"
+          ? "border-green-200 bg-green-50/70 dark:border-green-500/25 dark:bg-green-500/5"
+          : "border-border/60"
       }`}
     >
       <div
-        className={`flex items-center justify-center rounded-md border bg-card p-1 ${
-          isPresent ? "border-primary/40" : "border-border"
-        }`}
+        className={`relative shrink-0 ${isPresent ? "" : "opacity-55 grayscale"}`}
       >
-        <div className="relative">
-          <ItemIcon
-            itemName={displayIconName}
-            itemIconUrl={itemIconUrl}
-            quality={userItem?.quality || null}
+        <ItemIcon
+          itemName={displayIconName}
+          itemIconUrl={itemIconUrl}
+          quality={userItem?.quality || null}
+        />
+        {isDragon && userItem && (
+          <Image
+            width={40}
+            height={40}
+            src="/api/uploads/grade-icons/grade6.png"
+            alt="legendary"
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              pointerEvents: "none",
+            }}
           />
-          {isDragon && userItem && (
-            <Image
-              width={40}
-              height={40}
-              src="/api/uploads/grade-icons/grade6.png"
-              alt="legendary"
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                pointerEvents: "none",
-              }}
-            />
-          )}
-        </div>
+        )}
       </div>
-      <span className="text-xs leading-tight">{item.label ?? item.name}</span>
-      <ItemSelector
-        item={item}
-        userItem={userItem}
-        onChange={handleChange}
-        canEdit={canEdit}
-      />
+      <span
+        className={`min-w-0 flex-1 text-[13px] leading-snug ${isPresent ? "" : "text-muted-foreground"}`}
+      >
+        {isDragon && userItem ? userItem.name : (item.label ?? item.name)}
+      </span>
+      <div className="shrink-0">
+        <ItemSelector
+          item={item}
+          userItem={userItem}
+          onChange={handleChange}
+          canEdit={canEdit}
+        />
+      </div>
     </div>
   );
 }

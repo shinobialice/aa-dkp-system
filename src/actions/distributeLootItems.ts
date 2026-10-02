@@ -1,44 +1,27 @@
 "use server";
 
+import type { TransactionSql } from "postgres";
 import sql from "@/shared/lib/db";
 import { triggerFinanceRecalc } from "./recalculateFinanceForMonth";
 import { getUtcYearMonth } from "@/utils/getUtcYearMonth";
 import { syncTreasuryGiveaway } from "./syncTreasuryGiveaway";
+import ensurePrivilieges from "./ensurePrivilieges";
 
-export async function distributeLootItem({
-  lootId,
-  quantity,
-  soldTo,
-  soldToId,
-  isFree,
-  comment,
-  price,
-  soldAt: soldAtInput,
-}: {
-  lootId: number;
+type LotDistribution = {
   quantity: number;
   soldTo: string;
   soldToId?: number;
   isFree: boolean;
   comment?: string;
-  price?: number;
-  // Позволяет продать/выдать предмет задним числом (например, продажа
-  // в августе оформляется в сентябре) — тогда доход считается за месяц
-  // этой даты, а не за месяц фактического нажатия кнопки.
-  soldAt?: string;
-}) {
-  // 1. Load loot with item type
-  const [loot] = await sql<any[]>`
-    SELECT l.*, it.name AS item_type_name, it.price AS item_type_price
-    FROM loot l
-    JOIN item_type it ON it.id = l.item_type_id
-    WHERE l.id = ${lootId}
-  `;
+  price: number;
+  soldAt: string;
+};
 
-  if (!loot || !loot.quantity || loot.quantity < quantity) {
-    throw new Error("Недостаточно предметов для выдачи");
-  }
-
+async function distributeLot(
+  sql: TransactionSql,
+  loot: any,
+  { quantity, soldTo, soldToId, isFree, comment, price, soldAt }: LotDistribution,
+) {
   const remainingQuantity = loot.quantity - quantity;
 
   // 2. Update remaining loot quantity and status
@@ -50,6 +33,93 @@ export async function distributeLootItem({
     }
   }
 
+  await sql<any[]>`
+    UPDATE loot SET quantity = ${remainingQuantity}, status = ${newStatus} WHERE id = ${loot.id}
+  `;
+
+  // 3. Insert new loot record for the distributed portion
+  const [created] = await sql<any[]>`
+    INSERT INTO loot
+      (item_type_id, source, acquired_at, quantity, sold_to, sold_to_user_id, sold_at, comment, status, price, created_at)
+    VALUES (
+      ${loot.item_type_id}, ${loot.source}, ${loot.acquired_at ?? soldAt}, ${quantity},
+      ${soldTo}, ${soldToId ?? null}, ${soldAt}, ${comment ?? null},
+      ${isFree ? "Выдано" : "Продано"}, ${price}, now()
+    )
+    RETURNING *
+  `;
+
+  if (!created) {
+    throw new Error("Ошибка при создании новой записи лута");
+  }
+
+  // 5. Add to user inventory if applicable
+  if (soldToId) {
+    let skipInsert = false;
+
+    if (isFree) {
+      const existingInventory = await sql<any[]>`
+        SELECT id FROM user_inventory
+        WHERE user_id = ${soldToId} AND name = ${loot.item_type_name}
+        LIMIT 1
+      `;
+
+      skipInsert = (existingInventory?.length ?? 0) > 0;
+    }
+
+    if (!skipInsert) {
+      await sql<any[]>`
+        INSERT INTO user_inventory (user_id, name, type, created_at, quantity, loot_id)
+        VALUES (${soldToId}, ${loot.item_type_name}, ${isFree ? "Выдано" : "Куплено"}, now(), ${quantity}, ${created.id})
+      `;
+    }
+
+    if (isFree) {
+      await syncTreasuryGiveaway(sql, {
+        treasuryName: loot.item_type_name,
+        userId: soldToId,
+        givenAt: soldAt,
+      });
+    }
+  }
+}
+
+export async function distributeLootStock({
+  itemTypeId,
+  quantity,
+  soldTo,
+  soldToId,
+  isFree,
+  comment,
+  price,
+  soldAt: soldAtInput,
+}: {
+  itemTypeId: number;
+  quantity: number;
+  soldTo: string;
+  soldToId?: number;
+  isFree: boolean;
+  comment?: string;
+  price: number;
+  // Позволяет продать/выдать предмет задним числом (например, продажа
+  // в августе оформляется в сентябре) — тогда доход считается за месяц
+  // этой даты, а не за месяц фактического нажатия кнопки.
+  soldAt?: string;
+}) {
+  await ensurePrivilieges(["Администратор"]);
+
+  if (!Number.isInteger(quantity) || quantity < 1) {
+    throw new Error("Количество должно быть больше нуля");
+  }
+  if (!soldTo.trim()) {
+    throw new Error("Укажите, кому продать или выдать");
+  }
+
+  const total = isFree ? 0 : Math.max(0, Math.round(price));
+  const soldAt = soldAtInput
+    ? new Date(soldAtInput).toISOString()
+    : new Date().toISOString();
+
   // Шаги 2-3-5 оборачиваем в одну транзакцию: раньше это были отдельные
   // запросы, и если INSERT записи о продаже падал (например, из-за
   // рассинхрона serial-последовательности после миграции с Supabase — см.
@@ -57,65 +127,47 @@ export async function distributeLootItem({
   // остатка уже успевал закоммититься — предмет тихо исчезал из наличия
   // без единой записи о том, что он вообще продан. Теперь при ошибке на
   // любом шаге откатывается всё целиком.
-  const soldAt = soldAtInput
-    ? new Date(soldAtInput).toISOString()
-    : new Date().toISOString();
-  let created: any;
   try {
     await sql.begin(async (sql) => {
-      await sql<any[]>`
-        UPDATE loot SET quantity = ${remainingQuantity}, status = ${newStatus} WHERE id = ${lootId}
+      const lots = await sql<any[]>`
+        SELECT l.*, it.name AS item_type_name
+        FROM loot l
+        JOIN item_type it ON it.id = l.item_type_id
+        WHERE l.item_type_id = ${itemTypeId} AND l.status = 'В наличии' AND l.quantity > 0
+        ORDER BY l.acquired_at ASC NULLS LAST, l.id ASC
+        FOR UPDATE OF l
       `;
 
-      // 3. Insert new loot record for the distributed portion
-      [created] = await sql<any[]>`
-        INSERT INTO loot
-          (item_type_id, source, acquired_at, quantity, sold_to, sold_to_user_id, sold_at, comment, status, price, created_at)
-        VALUES (
-          ${loot.item_type_id}, ${loot.source}, ${loot.acquired_at ?? soldAt}, ${quantity},
-          ${soldTo}, ${soldToId ?? null}, ${soldAt}, ${comment ?? null},
-          ${isFree ? "Выдано" : "Продано"}, ${isFree ? 0 : (price ?? loot.item_type_price ?? 0)}, now()
-        )
-        RETURNING *
-      `;
-
-      if (!created) {
-        throw new Error("Ошибка при создании новой записи лута");
+      const available = lots.reduce((sum, lot) => sum + lot.quantity, 0);
+      if (available < quantity) {
+        throw new Error("Недостаточно предметов на складе");
       }
 
-      // 5. Add to user inventory if applicable
-      if (soldToId) {
-        let skipInsert = false;
-
-        if (isFree) {
-          const existingInventory = await sql<any[]>`
-            SELECT id FROM user_inventory
-            WHERE user_id = ${soldToId} AND name = ${loot.item_type_name}
-            LIMIT 1
-          `;
-
-          skipInsert = (existingInventory?.length ?? 0) > 0;
-        }
-
-        if (!skipInsert) {
-          await sql<any[]>`
-            INSERT INTO user_inventory (user_id, name, type, created_at, quantity, loot_id)
-            VALUES (${soldToId}, ${loot.item_type_name}, ${isFree ? "Выдано" : "Куплено"}, now(), ${quantity}, ${created.id})
-          `;
-        }
-
-        if (isFree) {
-          await syncTreasuryGiveaway(sql, {
-            treasuryName: loot.item_type_name,
-            userId: soldToId,
-            givenAt: soldAt,
-          });
-        }
+      let left = quantity;
+      let priceLeft = total;
+      for (const lot of lots) {
+        if (left === 0) break;
+        const take = Math.min(lot.quantity, left);
+        const lotPrice =
+          take === left ? priceLeft : Math.round((total * take) / quantity);
+        await distributeLot(sql, lot, {
+          quantity: take,
+          soldTo,
+          soldToId,
+          isFree,
+          comment,
+          price: lotPrice,
+          soldAt,
+        });
+        left -= take;
+        priceLeft -= lotPrice;
       }
     });
   } catch (txError) {
     console.error(txError);
-    throw new Error("Ошибка при создании новой записи лута");
+    throw new Error(
+      isFree ? "Не удалось выдать предметы" : "Не удалось продать предметы",
+    );
   }
 
   if (!isFree) {
@@ -125,7 +177,7 @@ export async function distributeLootItem({
 }
 
 // Редактирование уже существующей продажи/выдачи. В отличие от
-// distributeLootItem — это правит запись на месте, а не создаёт новую,
+// distributeLootStock — это правит запись на месте, а не создаёт новую,
 // чтобы не задваивать доход казны (generateGuildFunds считает по
 // status = "Продано" без учёта quantity) и не плодить дубликаты в
 // инвентаре покупателя. acquired_at не трогаем; sold_at можно передать
@@ -167,7 +219,7 @@ export async function updateLootSale({
     ? new Date(soldAtInput).toISOString()
     : loot.sold_at;
 
-  // Как и в distributeLootItem — правка записи и синхронизация инвентаря
+  // Как и в distributeLootStock — правка записи и синхронизация инвентаря
   // раньше были отдельными запросами; при падении любого из них загруженная
   // цена/покупатель на loot могли разойтись с user_inventory. Оборачиваем в
   // транзакцию, чтобы падение любого шага откатывало всё целиком.

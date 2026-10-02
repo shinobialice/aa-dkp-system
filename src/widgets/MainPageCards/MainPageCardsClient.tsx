@@ -1,81 +1,16 @@
 "use client";
 
-import { useEffect, useState, FC, ReactNode } from "react";
-import useCurrentUser from "@/hooks/useCurrentUser";
-import { Loader, Swords, Users } from "lucide-react";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/shared/ui";
-import { cn } from "@/shared/lib/tw-merge";
+import { useEffect, useState, FC } from "react";
+import { Loader } from "lucide-react";
 import getStats from "@/actions/getStats";
 import { getEventSettings, type EventSettings } from "@/actions/eventSettings";
-import { classColors, classIcons } from "@/widgets/MembersTable/classStyles";
-import MainPageClock from "./MainPageClock";
+import MainPageHeader from "./MainPageHeader";
 import UpcomingEvents from "./UpcomingEvents";
 import RespawnTracker from "./RespawnTracker";
 import BossRespawnHistory from "./BossRespawnHistory";
-import SoundNotificationToggle from "./SoundNotificationToggle";
+import GuildComposition from "./GuildComposition";
 
 type Stats = Awaited<ReturnType<typeof getStats>>;
-
-const statIcons: Record<string, React.ReactNode> = {
-  Общее: <Users className="size-4" />,
-  ДД: <Swords className="size-4" />,
-  Хилы: classIcons["Хил"],
-  Тактики: classIcons["Тактик"],
-  Барды: classIcons["Бард"],
-  Танцоры: classIcons["Танцор"],
-};
-
-const statColors: Record<string, string> = {
-  Общее: "#6366f1",
-  ДД: "#f97316",
-  Хилы: classColors["Хил"],
-  Тактики: classColors["Тактик"],
-  Барды: classColors["Бард"],
-  Танцоры: classColors["Танцор"],
-};
-
-const StatCard: FC<{ title: string; value: number }> = ({ title, value }) => {
-  const color = statColors[title];
-
-  return (
-    <Card
-      className="flex-row items-center justify-between gap-2 border-t-4 py-2.5 px-3"
-      style={{ borderTopColor: color, backgroundColor: `${color}0d` }}
-    >
-      <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-        <span style={{ color }}>{statIcons[title]}</span>
-        {title}
-      </div>
-      <p className="text-lg font-bold" style={{ color }}>
-        {value}
-      </p>
-    </Card>
-  );
-};
-
-const InfoCard: FC<{
-  title: string;
-  action?: ReactNode;
-  content: ReactNode;
-  compactHeader?: boolean;
-  heightClassName?: string;
-}> = ({ title, action, content, compactHeader, heightClassName = "h-[650px]" }) => (
-  <Card className={cn(heightClassName, "min-w-0", compactHeader && "gap-3 py-3")}>
-    <CardHeader>
-      <CardTitle className="text-base">{title}</CardTitle>
-      {action && <CardAction>{action}</CardAction>}
-    </CardHeader>
-    <CardContent className="flex min-h-0 min-w-0 flex-1 flex-col">
-      <div className="min-h-0 min-w-0 flex-1 overflow-y-auto">{content}</div>
-    </CardContent>
-  </Card>
-);
 
 const MainPageCardsClient: FC = () => {
   const [stats, setStats] = useState<Stats | null>(null);
@@ -116,78 +51,47 @@ const MainPageCardsClient: FC = () => {
     new Date(event.startsAt) <= new Date() &&
     new Date(event.endsAt) > new Date();
 
-  const statItems = [
-    { title: "Общее", value: stats.activePlayers },
-    { title: "ДД", value: stats.dds },
-    { title: "Хилы", value: stats.healers },
-    { title: "Тактики", value: stats.tacticians },
-    { title: "Барды", value: stats.bards },
-    { title: "Танцоры", value: stats.dancers },
-  ];
-
-  const infoItems = [
-    {
-      title: "Трекер респауна боссов",
-      compactHeader: true,
-      content: (
-        <>
-          <RespawnTracker />
-          <BossRespawnHistory />
-        </>
-      ),
-    },
-    {
-      title: "Предстоящие мероприятия",
-      action: <SoundNotificationToggle />,
-      content: (
-        <div className="flex h-full min-h-0 flex-col">
-          <MainPageClock />
-          <div className="w-full min-h-0 flex-1 p-4">
-            <UpcomingEvents />
-          </div>
-        </div>
-      ),
-    },
-  ];
-
   const EventBanner = event.link ? "a" : "div";
 
   return (
-    <div className="max-w-[1600px] mx-auto space-y-8 p-4">
+    <div className="mx-auto flex w-full max-w-6xl min-w-0 flex-col gap-5">
+      <MainPageHeader />
+
       {eventActive && (
         <EventBanner
           {...(event.link
             ? { href: event.link, target: "_blank", rel: "noopener noreferrer" }
             : {})}
-          className="group relative block w-full overflow-hidden rounded-xl bg-gradient-to-r from-orange-500 to-pink-600 text-white shadow-md transition-transform hover:scale-[1.01] hover:shadow-lg"
+          className="block overflow-hidden rounded-xl border bg-card shadow-sm transition-shadow hover:shadow-md"
         >
-          {event.imageUrl && (
+          {event.imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={event.imageUrl} alt="" className="block w-full" />
+            <img
+              src={event.imageUrl}
+              alt={event.title ?? ""}
+              className="block h-16 w-full object-cover object-left sm:h-auto"
+            />
+          ) : (
+            <p className="px-5 py-4 text-lg font-semibold">{event.title}</p>
           )}
-          <div className="absolute inset-0 flex items-center justify-between gap-4 px-6">
-            <div className="flex items-center gap-3">
-            </div>
-          </div>
         </EventBanner>
       )}
-      <div className="grid w-full grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
-        {statItems.map((item) => (
-          <StatCard key={item.title} title={item.title} value={item.value} />
-        ))}
+
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.75fr)_minmax(0,1fr)]">
+        <div className="flex min-w-0 flex-col gap-5">
+          <section className="space-y-3">
+            <div className="flex items-baseline justify-between gap-2">
+              <h2 className="text-[17px] font-semibold">Респаун боссов</h2>
+              <span className="text-xs text-muted-foreground">обновляется само</span>
+            </div>
+            <RespawnTracker />
+          </section>
+          <BossRespawnHistory />
+        </div>
+        <UpcomingEvents className="order-first xl:order-none" />
       </div>
-      <div className="grid w-full items-start grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-[1080px_auto]">
-        <InfoCard
-          title={infoItems[0].title}
-          content={infoItems[0].content}
-          compactHeader={infoItems[0].compactHeader}
-        />
-        <InfoCard
-          title={infoItems[1].title}
-          action={infoItems[1].action}
-          content={infoItems[1].content}
-        />
-      </div>
+
+      <GuildComposition stats={stats} />
     </div>
   );
 };

@@ -11,6 +11,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/shared/ui";
+import { Trash2 } from "lucide-react";
 import { Button } from "@/shared/ui";
 import deleteEvent from "@/actions/deleteEvent";
 
@@ -24,15 +25,20 @@ export function DeleteEventButton({
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button className="cursor-pointer" variant="destructive">
-          Удалить
+        <Button
+          variant="ghost"
+          aria-label="Удалить рейд"
+          className="h-11 cursor-pointer text-destructive hover:bg-destructive/10 hover:text-destructive sm:h-9"
+        >
+          <Trash2 />
+          <span className="hidden sm:inline">Удалить рейд</span>
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Вы уверены?</AlertDialogTitle>
           <AlertDialogDescription>
-            Это действие удалит событие безвозвратно.
+            Рейд и отметки участников удалятся безвозвратно.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

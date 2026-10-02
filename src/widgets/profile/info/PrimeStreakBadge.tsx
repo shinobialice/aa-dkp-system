@@ -10,14 +10,13 @@ function pluralizeDays(days: number) {
   return "дней";
 }
 
-// Каждые ~30 дней серии (месяц) — новый цвет огня, от базового оранжевого
-// до фиолетового на 4+ месяцах подряд.
 function getStreakTierClass(streak: number) {
-  if (streak >= 120) return "bg-purple-500/15 text-purple-500";
-  if (streak >= 90) return "bg-pink-500/15 text-pink-500";
-  if (streak >= 60) return "bg-blue-500/15 text-blue-500";
-  if (streak >= 30) return "bg-red-500/15 text-red-500";
-  return "bg-orange-500/15 text-orange-500";
+  if (streak >= 120)
+    return "bg-purple-500/15 text-purple-600 dark:text-purple-400";
+  if (streak >= 90) return "bg-pink-500/15 text-pink-600 dark:text-pink-400";
+  if (streak >= 60) return "bg-blue-500/15 text-blue-600 dark:text-blue-400";
+  if (streak >= 30) return "bg-red-500/15 text-red-600 dark:text-red-400";
+  return "bg-orange-500/15 text-orange-600 dark:text-orange-400";
 }
 
 export default function PrimeStreakBadge({
@@ -35,15 +34,16 @@ export default function PrimeStreakBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-sm font-semibold",
+        "inline-flex h-6 items-center gap-1 rounded-full px-2 text-xs font-semibold whitespace-nowrap",
         isOnSkip
           ? "bg-muted text-muted-foreground"
           : getStreakTierClass(streak),
       )}
       title={title}
     >
-      <Flame className="size-4" />
-      {streak}
+      <Flame className="size-3.5" />
+      {streak} {pluralizeDays(streak)}
+      <span className="hidden sm:inline">на праймах подряд</span>
     </span>
   );
 }

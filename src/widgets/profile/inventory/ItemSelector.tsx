@@ -65,20 +65,23 @@ export default function ItemSelector({
   };
 
   if (!canEdit) {
-    const isPresent = getDisplayValue() !== "Нет";
+    const value = isDragon && userItem ? "Есть" : getDisplayValue();
+    const isPresent = value !== "Нет";
+    const isTier2 = value === "T2";
     return (
       <span
-        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
-          isPresent
-            ? "bg-primary/15 text-primary"
-            : "text-muted-foreground"
+        className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold whitespace-nowrap ${
+          isTier2
+            ? "bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300"
+            : isPresent
+              ? "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-400"
+              : "bg-muted text-muted-foreground"
         }`}
       >
-        {getDisplayValue()}
+        {value}
       </span>
     );
   }
-
   if (isBafalka) {
     return (
       <Select

@@ -29,7 +29,8 @@ export const getSalariesForMonth = async (month: number, year: number) => {
   let data;
   try {
     data = await sql<any[]>`
-      SELECT s.*, u.username AS user_username, u.class AS user_class
+      SELECT s.*, u.username AS user_username, u.class AS user_class,
+        u.avatar_url AS user_avatar_url, u.joined_at AS user_joined_at
       FROM "Salary" s
       LEFT JOIN "user" u ON u.id = s."userId"
       WHERE s.month = ${month} AND s.year = ${year}
@@ -46,6 +47,8 @@ export const getSalariesForMonth = async (month: number, year: number) => {
       userId: s.userId,
       username: username ?? "Неизвестно",
       class: s.user_class ?? null,
+      avatarUrl: s.user_avatar_url ?? null,
+      joinedAt: s.user_joined_at ? String(s.user_joined_at) : null,
       amount: s.amount,
       bonus: s.bonus,
       total: s.total,

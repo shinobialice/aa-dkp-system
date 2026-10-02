@@ -5,6 +5,7 @@ import saveUserSeals from "@/actions/saveUserSeals";
 import type { UserSeal } from "@/actions/getUserSeals";
 import SealIcon from "./SealIcon";
 import SealLevelList from "./SealLevelList";
+import SealCard from "./SealCard";
 import SealBonusSummaryButton from "./SealBonusSummaryButton";
 import {
   SEAL_NAMES,
@@ -126,7 +127,7 @@ export default function SealsTab({ userId, seals, onChange, canEdit }: Props) {
   return (
     <Card className="min-h-[750px] gap-3 py-4">
       <CardHeader className="border-b">
-        <CardTitle className="flex items-center justify-between gap-2">
+        <CardTitle className="flex flex-wrap items-center justify-between gap-2">
           <CharacterTabsSwitcher />
           <div className="flex gap-2">
             <SealBonusSummaryButton picks={currentPicks} />
@@ -260,7 +261,7 @@ export default function SealsTab({ userId, seals, onChange, canEdit }: Props) {
           }
 
           return (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-1 items-start gap-3 md:grid-cols-3">
               {Array.from({ length: MAX_USER_SEALS }).map((_, i) => {
                 const seal = seals[i];
                 if (!seal) {
@@ -273,39 +274,12 @@ export default function SealsTab({ userId, seals, onChange, canEdit }: Props) {
                     </div>
                   );
                 }
-                const grade = getSealGradeForLevel(seal.level);
-                const info =
-                  SEAL_INFO[seal.seal_name as keyof typeof SEAL_INFO];
                 return (
-                  <div
+                  <SealCard
                     key={seal.id}
-                    className="flex flex-col items-center gap-2 rounded-lg border p-3"
-                  >
-                    <SealIcon grade={grade} size={44} />
-                    <div className="text-center">
-                      <div className="text-sm font-semibold">
-                        {seal.seal_name}
-                      </div>
-                      {info && (
-                        <div className="text-xs text-muted-foreground">
-                          {info.playstyle}
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex flex-wrap items-center justify-center gap-1">
-                      <Badge variant="outline">
-                        {getSealGradeLabel(grade)}
-                      </Badge>
-                      <Badge variant="secondary">Ур. {seal.level}</Badge>
-                    </div>
-                    <div className="w-full space-y-1 text-center text-xs font-medium text-muted-foreground">
-                      Бонусы по уровням
-                    </div>
-                    <SealLevelList
-                      sealName={seal.seal_name}
-                      level={seal.level}
-                    />
-                  </div>
+                    name={seal.seal_name}
+                    level={seal.level}
+                  />
                 );
               })}
             </div>

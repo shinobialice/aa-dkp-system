@@ -227,7 +227,7 @@ export function CharacterStatsPanel({
   };
 
   return (
-    <div className="w-full flex-1 space-y-3 rounded-xl border bg-muted/40 p-3 text-xs lg:w-96">
+    <div className="w-full flex-1 space-y-3 rounded-xl border bg-muted/40 p-3 text-xs">
       <div>
         <div className="flex items-center gap-1.5 pl-10">
           {canEdit && levelEditing ? (

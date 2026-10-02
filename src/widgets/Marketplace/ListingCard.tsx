@@ -1,56 +1,109 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
-import { Trash2, Pencil, RussianRuble, ShoppingCart, Tag } from "lucide-react";
+import { Pencil, ShoppingCart, Tag, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { deleteMarketplaceListing } from "@/actions/marketplaceActions";
-import { MarketplaceListing } from "@/actions/marketplaceActions";
-import { MarketplaceItemTypeRow } from "@/actions/marketplaceItemTypeAdmin";
+import {
+  deleteMarketplaceListing,
+  type MarketplaceListing,
+} from "@/actions/marketplaceActions";
+import type { MarketplaceItemTypeRow } from "@/actions/marketplaceItemTypeAdmin";
+import { cn } from "@/shared/lib/tw-merge";
 import { LootIcon } from "@/widgets/Loot/LootBuy/icons/LootIconComponent";
 import { ListingFormDialog } from "./ListingFormDialog";
-import { Card, CardContent } from "@/shared/ui";
-import { Avatar, AvatarImage, AvatarFallback } from "@/shared/ui";
-import { Badge } from "@/shared/ui";
-import { Button } from "@/shared/ui";
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/shared/ui";
 import {
   AlertDialog,
-  AlertDialogTrigger,
+  AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
   AlertDialogDescription,
   AlertDialogFooter,
-  AlertDialogCancel,
-  AlertDialogAction,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Button,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
 } from "@/shared/ui";
+import { formatListingDate } from "./marketplaceModel";
 
-// Заглушка вместо картинки, когда её вообще нет ни у объявления (свой
-// предмет без фото), ни у выбранного предмета каталога (marketplace_item_type
-// без иконки) — показывает суть объявления (куплю/продам) вместо пустого
-// места.
-function ListingTypeIcon({
-  listingType,
-  size,
-}: {
-  listingType: MarketplaceListing["listing_type"];
-  size: number;
-}) {
-  const isBuy = listingType === "buy";
+const GOLD_ICON = "https://archeagecodex.com/items/gold.png";
+
+function ListingPicture({ listing }: { listing: MarketplaceListing }) {
+  if (listing.catalog_item_id) {
+    return (
+      <LootIcon
+        itemName={listing.item_name}
+        iconUrl={listing.catalog_icon_url}
+        grade={listing.catalog_grade}
+        size={48}
+      />
+    );
+  }
+  if (listing.image_url) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={listing.image_url}
+            alt={listing.item_name}
+            className="size-12 shrink-0 rounded-md bg-muted object-cover"
+          />
+        </TooltipTrigger>
+        <TooltipContent side="right" className="p-1">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={listing.image_url}
+            alt={listing.item_name}
+            className="max-h-80 max-w-80 rounded object-contain"
+          />
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
+  const isBuy = listing.listing_type === "buy";
   const Icon = isBuy ? ShoppingCart : Tag;
   return (
-    <div
-      className={`flex shrink-0 items-center justify-center rounded ${
+    <span
+      className={cn(
+        "flex size-12 shrink-0 items-center justify-center rounded-md",
         isBuy
-          ? "bg-blue-500/15 text-blue-600 dark:text-blue-400"
-          : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
-      }`}
-      style={{ width: size, height: size }}
+          ? "bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300"
+          : "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300",
+      )}
     >
-      <Icon style={{ width: size * 0.5, height: size * 0.5 }} />
-    </div>
+      <Icon className="size-5" />
+    </span>
+  );
+}
+
+function ListingPrice({ listing }: { listing: MarketplaceListing }) {
+  if (listing.price === null) {
+    return (
+      <span className="text-[15px] font-semibold text-muted-foreground">
+        Договорная
+        {listing.currency === "rub" && (
+          <span className="text-xs font-medium"> · в рублях</span>
+        )}
+      </span>
+    );
+  }
+  const amount = listing.price.toLocaleString("ru-RU");
+  if (listing.currency === "rub") {
+    return <span className="text-lg font-bold tabular-nums">{amount} ₽</span>;
+  }
+  return (
+    <span className="flex items-center gap-1.5 text-lg font-bold tabular-nums">
+      <Image src={GOLD_ICON} alt="" width={16} height={16} />
+      {amount}
+    </span>
   );
 }
 
@@ -67,7 +120,6 @@ export function ListingCard({
   canDelete: boolean;
   onChanged: () => void;
 }) {
-  const router = useRouter();
   const [deleting, setDeleting] = useState(false);
 
   const vkHref = listing.seller_vk_name
@@ -84,7 +136,9 @@ export function ListingCard({
       onChanged();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Не удалось удалить объявление",
+        error instanceof Error
+          ? error.message
+          : "Не удалось удалить объявление",
       );
     } finally {
       setDeleting(false);
@@ -92,109 +146,24 @@ export function ListingCard({
   };
 
   return (
-    <Card className="relative">
-      <CardContent className="flex flex-col gap-3">
-        <div className="flex items-start gap-3">
-          {listing.catalog_item_id ? (
-            <LootIcon
-              itemName={listing.item_name}
-              iconUrl={listing.catalog_icon_url}
-              grade={listing.catalog_grade}
-              size={48}
-            />
-          ) : listing.image_url ? (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={listing.image_url}
-                  alt={listing.item_name}
-                  className="rounded object-cover shrink-0"
-                  style={{ width: 48, height: 48 }}
-                />
-              </TooltipTrigger>
-              <TooltipContent side="right" className="p-1">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={listing.image_url}
-                  alt={listing.item_name}
-                  className="rounded object-contain"
-                  style={{ maxWidth: 320, maxHeight: 320 }}
-                />
-              </TooltipContent>
-            </Tooltip>
-          ) : (
-            <ListingTypeIcon listingType={listing.listing_type} size={48} />
-          )}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <Badge variant={listing.listing_type === "buy" ? "default" : "secondary"}>
-                {listing.listing_type === "buy" ? "Куплю" : "Продам"}
-              </Badge>
-              <span className="font-semibold truncate">{listing.item_name}</span>
-              {listing.quantity > 1 && (
-                <Badge variant="secondary">x{listing.quantity}</Badge>
-              )}
-            </div>
-            <div className="flex items-center gap-1.5 text-lg font-bold text-primary">
-              {listing.price !== null ? (
-                <>
-                  {listing.currency === "gold" ? (
-                    <Image
-                      src="https://archeagecodex.com/items/gold.png"
-                      alt=""
-                      width={18}
-                      height={18}
-                    />
-                  ) : (
-                    <RussianRuble className="h-4 w-4" />
-                  )}
-                  {listing.price.toLocaleString("ru-RU")}
-                </>
-              ) : (
-                "Договорная"
-              )}
-            </div>
-          </div>
-        </div>
-
-        {listing.description && (
-          <p className="text-sm text-muted-foreground whitespace-pre-wrap break-words">
-            {listing.description}
-          </p>
-        )}
-
-        <div className="flex items-center justify-between pt-2 border-t gap-2">
-          <div className="flex items-center gap-2 min-w-0">
-            <button
-              type="button"
-              onClick={() => router.push(`/profile/${listing.user_id}`)}
-              className="flex items-center gap-2 cursor-pointer min-w-0"
-            >
-              <Avatar className="h-6 w-6 shrink-0">
-                <AvatarImage src={listing.seller_avatar_url ?? undefined} />
-                <AvatarFallback>{listing.seller_username[0]}</AvatarFallback>
-              </Avatar>
-              <span className="text-sm truncate">{listing.seller_username}</span>
-            </button>
-            {vkHref && (
-              <a
-                href={vkHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-primary hover:underline shrink-0"
-              >
-                VK
-              </a>
+    <article className="flex flex-col gap-2.5 rounded-xl border bg-card px-3.5 py-3">
+      <div className="flex gap-3">
+        <ListingPicture listing={listing} />
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <div className="flex min-w-0 flex-wrap items-baseline gap-x-1.5">
+            <h3 className="text-[15px] leading-snug font-semibold break-words">
+              {listing.item_name}
+            </h3>
+            {listing.quantity > 1 && (
+              <span className="text-[12.5px] font-semibold text-muted-foreground tabular-nums">
+                × {listing.quantity.toLocaleString("ru-RU")}
+              </span>
             )}
           </div>
-          <span className="text-xs text-muted-foreground shrink-0">
-            {new Date(listing.created_at).toLocaleDateString("ru-RU")}
-          </span>
+          <ListingPrice listing={listing} />
         </div>
-
         {(canEdit || canDelete) && (
-          <div className="absolute top-2 right-2 flex gap-1">
+          <div className="-mt-1 -mr-1.5 flex shrink-0 items-start">
             {canEdit && (
               <ListingFormDialog
                 catalogItems={catalogItems}
@@ -204,9 +173,10 @@ export function ListingCard({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="text-muted-foreground cursor-pointer"
+                    aria-label="Изменить объявление"
+                    className="size-8 cursor-pointer text-muted-foreground"
                   >
-                    <Pencil className="h-4 w-4" />
+                    <Pencil />
                   </Button>
                 }
               />
@@ -217,10 +187,11 @@ export function ListingCard({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="text-muted-foreground cursor-pointer"
+                    aria-label="Удалить объявление"
+                    className="size-8 cursor-pointer text-muted-foreground hover:text-destructive"
                     disabled={deleting}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 />
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
@@ -241,7 +212,49 @@ export function ListingCard({
             )}
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+
+      {listing.description && (
+        <p className="text-[13px] break-words whitespace-pre-wrap text-muted-foreground">
+          {listing.description}
+        </p>
+      )}
+
+      <div className="flex items-center gap-2 border-t pt-2.5">
+        <Link
+          href={`/profile/${listing.user_id}`}
+          className="flex min-w-0 items-center gap-1.5 hover:underline"
+        >
+          <Avatar className="size-6 shrink-0">
+            <AvatarImage
+              src={
+                listing.seller_avatar_url ??
+                `https://api.dicebear.com/6.x/initials/svg?seed=${listing.seller_username}`
+              }
+              alt=""
+            />
+            <AvatarFallback className="text-[10px]">
+              {listing.seller_username.slice(0, 1)}
+            </AvatarFallback>
+          </Avatar>
+          <span className="truncate text-[13px] font-medium">
+            {listing.seller_username}
+          </span>
+        </Link>
+        <span className="shrink-0 text-xs text-muted-foreground">
+          · {formatListingDate(listing.created_at)}
+        </span>
+        {vkHref && (
+          <a
+            href={vkHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-auto inline-flex h-8 shrink-0 items-center rounded-lg bg-blue-50 px-2.5 text-[12.5px] font-semibold text-blue-700 transition-colors hover:bg-blue-100 dark:bg-blue-500/15 dark:text-blue-300 dark:hover:bg-blue-500/25"
+          >
+            Написать в VK
+          </a>
+        )}
+      </div>
+    </article>
   );
 }

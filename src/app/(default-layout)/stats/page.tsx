@@ -14,7 +14,8 @@ import {
   mergeDailyAttendance,
   mergeMonthlyAttendance,
 } from "@/utils/mergeAttendanceSeries";
-import StatsPageClient from "./StatsPageClient";
+import StatsClient from "@/widgets/Stats/StatsClient";
+import { shiftPeriod } from "@/widgets/Stats/statsModel";
 
 function getMoscowTodayISO(): string {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -30,28 +31,34 @@ function getMoscowTodayISO(): string {
 }
 
 export default async function StatsPage() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
   const today = getMoscowTodayISO();
+  const [year, month] = today.split("-").map(Number);
+  const period = { year, month: month - 1 };
+  const previous = shiftPeriod(period, -1);
 
   const [
     dailyPrime,
     dailyAgl,
+    previousPrime,
+    previousAgl,
     monthlyPrime,
     monthlyAgl,
-    bossIncome,
+    income,
+    previousIncome,
     raids,
     rosterComposition,
     inventoryStock,
     sealGradeStats,
     classArchetypeStats,
   ] = await Promise.all([
-    getGuildAttendancePrime({ year, month }),
-    getGuildAttendanceAgl({ year, month }),
+    getGuildAttendancePrime(period),
+    getGuildAttendanceAgl(period),
+    getGuildAttendancePrime(previous),
+    getGuildAttendanceAgl(previous),
     getGuildPrimeStatsByYear(year),
     getGuildAglStatsByYear(year),
-    getBossIncomeByMonth(month + 1, year),
+    getBossIncomeByMonth(period.month + 1, year),
+    getBossIncomeByMonth(previous.month + 1, previous.year),
     getRaidsByDay(today),
     getRosterComposition(),
     getInventoryStock(),
@@ -60,18 +67,21 @@ export default async function StatsPage() {
   ]);
 
   return (
-    <StatsPageClient
-      initialYear={year}
-      initialMonth={month}
-      initialDailyData={mergeDailyAttendance(dailyPrime, dailyAgl)}
-      initialMonthlyData={mergeMonthlyAttendance(monthlyPrime, monthlyAgl)}
-      initialBossIncomeData={bossIncome}
-      initialRaidsDate={today}
-      initialRaidsData={raids}
-      initialRosterComposition={rosterComposition}
-      initialInventoryStock={inventoryStock}
-      initialSealGradeStats={sealGradeStats}
-      initialClassArchetypeStats={classArchetypeStats}
+    <StatsClient
+      today={today}
+      initialPeriod={period}
+      initialMonth={{
+        daily: mergeDailyAttendance(dailyPrime, dailyAgl),
+        previousDaily: mergeDailyAttendance(previousPrime, previousAgl),
+        income,
+        previousIncome,
+      }}
+      initialMonthly={mergeMonthlyAttendance(monthlyPrime, monthlyAgl)}
+      initialRaids={raids}
+      rosterComposition={rosterComposition}
+      classArchetypeStats={classArchetypeStats}
+      sealGradeStats={sealGradeStats}
+      inventoryStock={inventoryStock}
     />
   );
 }

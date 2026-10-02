@@ -8,12 +8,7 @@ const MembersPage = async () => {
     return <div>Ошибка загрузки списка игроков</div>;
   }
 
-  return (
-    <div className="flex min-h-screen flex-col bg-background text-onBackground p-8">
-      <h1 className="text-3xl font-bold mb-6 text-primary">Список игроков</h1>
-      <MembersTable data={tableData} />
-    </div>
-  );
+  return <MembersTable data={tableData} />;
 };
 
 export default MembersPage;

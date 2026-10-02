@@ -14,7 +14,7 @@ const DatetimePicker: React.FC<Props> = ({ value, onChange }) => (
     value={value ?? undefined}
     onChange={(date: Date | undefined) => onChange(date ?? null)}
     timePicker={{ hour: true, minute: true, second: false }}
-    className="w-[270px]"
+    className="w-full"
   />
 );
 

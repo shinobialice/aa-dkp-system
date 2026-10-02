@@ -1,8 +1,10 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import ensurePrivilieges from "./ensurePrivilieges";
 
 export const removeFromLootQueue = async (lootQueueId: number) => {
+  await ensurePrivilieges(["Администратор"]);
   try {
     await sql<any[]>`
       DELETE FROM loot_queue WHERE id = ${lootQueueId}

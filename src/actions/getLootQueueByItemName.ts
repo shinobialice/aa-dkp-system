@@ -1,8 +1,15 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import {
+  mapQueueRow,
+  sortQueue,
+  type QueueEntry,
+} from "@/widgets/Loot/LootBuy/lootBuyModel";
 
-export const getLootQueueByItemName = async (itemName: string) => {
+export const getLootQueueByItemName = async (
+  itemName: string,
+): Promise<QueueEntry[]> => {
   let rows;
   try {
     rows = await sql<any[]>`
@@ -16,7 +23,9 @@ export const getLootQueueByItemName = async (itemName: string) => {
         lq.created_at,
         lq.roll,
         lq.position,
-        u.username
+        u.username,
+        u.avatar_url,
+        u.class
       FROM loot_queue lq
       JOIN item_type it ON it.id = lq.item_type_id
       LEFT JOIN "user" u ON u.id = lq.user_id
@@ -27,27 +36,5 @@ export const getLootQueueByItemName = async (itemName: string) => {
     return [];
   }
 
-  return rows
-    .map((entry) => ({
-      id: entry.id,
-      userId: entry.user_id,
-      username: entry.username || "Unknown",
-      status: entry.status,
-      synth_target: entry.synth_target,
-      required: entry.required ?? 0,
-      delivered: entry.delivered ?? 0,
-      createdAt: entry.created_at,
-      roll: entry.roll,
-      position: entry.position,
-    }))
-    .sort((a, b) => {
-      if (a.position !== null && b.position !== null) {
-        return a.position - b.position;
-      }
-      if (a.position !== null) return -1;
-      if (b.position !== null) return 1;
-      return (
-        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-      );
-    });
+  return sortQueue(itemName, rows.map(mapQueueRow));
 };

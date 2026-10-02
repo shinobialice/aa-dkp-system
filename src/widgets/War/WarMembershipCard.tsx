@@ -1,118 +1,153 @@
+"use client";
+
 import { Users } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, ScrollArea } from "@/shared/ui";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/shared/ui";
+import { cn } from "@/shared/lib/tw-merge";
 import type { PeriodMembershipChanges } from "@/actions/warActions";
 import WarUserLink from "./WarUserLink";
+import { SCROLL_LIST, SectionEmpty, WarSection } from "./WarParts";
+import { formatShortDate } from "./warModel";
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("ru-RU", {
-    timeZone: "Europe/Moscow",
-    day: "2-digit",
-    month: "2-digit",
-  });
+type Tone = "green" | "amber" | "muted";
+
+type MemberRow = {
+  key: string;
+  userId: number;
+  name: string;
+  avatarUrl: string | null;
+  when: string;
+  tone: Tone;
+};
+
+const TONE_CLASS: Record<Tone, string> = {
+  green: "bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400",
+  amber: "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400",
+  muted: "bg-muted text-muted-foreground",
+};
+
+function MemberList({ rows, empty }: { rows: MemberRow[]; empty: string }) {
+  if (rows.length === 0) return <SectionEmpty>{empty}</SectionEmpty>;
+  return (
+    <ul className={cn(SCROLL_LIST, "max-h-[420px] px-2 pb-2.5")}>
+      {rows.map((row) => (
+        <li
+          key={row.key}
+          className="flex h-11 items-center gap-2.5 px-2 sm:h-10"
+        >
+          <Avatar className="size-7 shrink-0 sm:size-[26px]">
+            <AvatarImage
+              src={
+                row.avatarUrl ??
+                `https://api.dicebear.com/6.x/initials/svg?seed=${row.name}`
+              }
+              alt=""
+            />
+            <AvatarFallback className="text-[10.5px] font-semibold text-muted-foreground">
+              {row.name.slice(0, 2)}
+            </AvatarFallback>
+          </Avatar>
+          <WarUserLink
+            userId={row.userId}
+            name={row.name}
+            className="min-w-0 flex-1"
+          />
+          <span
+            className={cn(
+              "shrink-0 rounded-full px-2 py-0.5 text-xs font-medium tabular-nums",
+              TONE_CLASS[row.tone],
+            )}
+          >
+            {row.when}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
 }
 
-function formatAfkRange(from: string, to: string | null) {
-  return to ? `${formatDate(from)} — ${formatDate(to)}` : `с ${formatDate(from)}`;
-}
-
-// Кто пришёл в гильдию и кто ушёл за период — реальные joined_at/inactive_since
-// с "user", не привязано к режиму (вар/фришка).
 export default function WarMembershipCard({
   changes,
 }: {
   changes: PeriodMembershipChanges;
 }) {
-  const { joined, left, afk } = changes;
-  const isEmpty = joined.length === 0 && left.length === 0 && afk.length === 0;
+  const tabs = [
+    {
+      value: "joined",
+      label: "Пришли",
+      empty: "Никто не пришёл за период",
+      rows: changes.joined.map((member) => ({
+        key: `joined-${member.userId}`,
+        userId: member.userId,
+        name: member.username,
+        avatarUrl: member.avatarUrl,
+        when: formatShortDate(member.at),
+        tone: "green" as const,
+      })),
+    },
+    {
+      value: "left",
+      label: "Ушли",
+      empty: "Никто не ушёл за период",
+      rows: changes.left.map((member) => ({
+        key: `left-${member.userId}`,
+        userId: member.userId,
+        name: member.username,
+        avatarUrl: member.avatarUrl,
+        when: formatShortDate(member.at),
+        tone: "muted" as const,
+      })),
+    },
+    {
+      value: "afk",
+      label: "АФК",
+      empty: "Никто не уходил в АФК",
+      rows: changes.afk.map((member, index) => ({
+        key: `afk-${member.userId}-${index}`,
+        userId: member.userId,
+        name: member.username,
+        avatarUrl: member.avatarUrl,
+        when: member.to
+          ? `${formatShortDate(member.from)} — ${formatShortDate(member.to)}`
+          : `с ${formatShortDate(member.from)}`,
+        tone: member.to ? ("muted" as const) : ("amber" as const),
+      })),
+    },
+  ];
+  const defaultTab = tabs.find((tab) => tab.rows.length > 0)?.value ?? "joined";
 
   return (
-    <Card className="gap-3 py-4">
-      <CardHeader className="flex flex-row items-center gap-2 px-4">
-        <Users className="size-4 text-muted-foreground" />
-        <CardTitle className="text-sm font-semibold">Состав гильдии</CardTitle>
-      </CardHeader>
-      <CardContent className="px-4">
-        {isEmpty ? (
-          <p className="text-sm text-muted-foreground">Без изменений</p>
-        ) : (
-          <ScrollArea className="h-64 pr-3">
-            <div className="space-y-3">
-              {joined.length > 0 && (
-                <div>
-                  <p className="mb-1 text-xs font-medium text-primary">
-                    Пришли ({joined.length})
-                  </p>
-                  <div className="space-y-1">
-                    {joined.map((m) => (
-                      <div
-                        key={m.userId}
-                        className="flex items-center justify-between gap-2 text-sm"
-                      >
-                        <WarUserLink
-                          userId={m.userId}
-                          name={m.username}
-                          className="min-w-0"
-                        />
-                        <span className="shrink-0 text-xs text-muted-foreground">
-                          {formatDate(m.at)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {left.length > 0 && (
-                <div>
-                  <p className="mb-1 text-xs font-medium text-destructive">
-                    Ушли ({left.length})
-                  </p>
-                  <div className="space-y-1">
-                    {left.map((m) => (
-                      <div
-                        key={m.userId}
-                        className="flex items-center justify-between gap-2 text-sm"
-                      >
-                        <WarUserLink
-                          userId={m.userId}
-                          name={m.username}
-                          className="min-w-0"
-                        />
-                        <span className="shrink-0 text-xs text-muted-foreground">
-                          {formatDate(m.at)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {afk.length > 0 && (
-                <div>
-                  <p className="mb-1 text-xs font-medium text-muted-foreground">
-                    АФК ({afk.length})
-                  </p>
-                  <div className="space-y-1">
-                    {afk.map((m, i) => (
-                      <div
-                        key={`${m.userId}-${i}`}
-                        className="flex items-center justify-between gap-2 text-sm"
-                      >
-                        <WarUserLink
-                          userId={m.userId}
-                          name={m.username}
-                          className="min-w-0"
-                        />
-                        <span className="shrink-0 text-xs text-muted-foreground">
-                          {formatAfkRange(m.from, m.to)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </ScrollArea>
-        )}
-      </CardContent>
-    </Card>
+    <WarSection title="Состав за период" icon={Users}>
+      <Tabs defaultValue={defaultTab} className="gap-2.5">
+        <div className="px-4">
+          <TabsList className="grid h-9 w-full grid-cols-3">
+            {tabs.map((tab) => (
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                className="cursor-pointer"
+              >
+                {tab.label}
+                <span className="text-muted-foreground tabular-nums">
+                  {tab.rows.length}
+                </span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
+        {tabs.map((tab) => (
+          <TabsContent key={tab.value} value={tab.value}>
+            <MemberList rows={tab.rows} empty={tab.empty} />
+          </TabsContent>
+        ))}
+      </Tabs>
+    </WarSection>
   );
 }

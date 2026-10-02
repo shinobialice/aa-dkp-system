@@ -1,8 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
+import { ChevronRight } from "lucide-react";
 import { getBossRespawnHistoryPage } from "@/actions/getBossRespawnHistoryPage";
 import { getUsernamesByIds } from "@/actions/getUsernamesByIds";
+import { bossImages } from "@/hooks/useUpcomingEvents";
+import {
+  Button,
+  Card,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  Skeleton,
+} from "@/shared/ui";
 import {
   Pagination,
   PaginationContent,
@@ -12,6 +24,7 @@ import {
   PaginationNext,
   PaginationEllipsis,
 } from "@/shared/ui/pagination";
+import { formatMoscowShort } from "./mainPageTime";
 
 interface HistoryRow {
   id: number;
@@ -25,161 +38,46 @@ interface HistoryRow {
   username: string;
 }
 
-const PAGE_SIZE = 4;
+const RECENT_SIZE = 4;
+const PAGE_SIZE = 10;
 
-export default function BossRespawnHistory() {
+function useHistoryPage(page: number, pageSize: number, enabled: boolean) {
   const [rows, setRows] = useState<HistoryRow[]>([]);
-  const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!enabled) return;
     let isMounted = true;
-    async function fetchHistory(isInitial: boolean) {
-      if (isInitial) setLoading(true);
+    async function fetchHistory() {
       const { rows: data, total: count } = await getBossRespawnHistoryPage(
         page,
-        PAGE_SIZE,
+        pageSize,
       );
-      if (isMounted) setTotal(count);
       let userMap: Record<number, string> = {};
       if (data && data.length > 0) {
-        const userIds = Array.from(
-          new Set(data.map((row: any) => row.user_id)),
-        );
+        const userIds = Array.from(new Set(data.map((row: any) => row.user_id)));
         userMap = await getUsernamesByIds(userIds);
       }
-      if (isMounted && data) {
-        setRows(
-          data.map((row: any) => ({
-            ...row,
-            username: userMap[row.user_id] || "?",
-          })),
-        );
-      }
-      if (isInitial) setLoading(false);
+      if (!isMounted) return;
+      setTotal(count);
+      setRows(
+        (data ?? []).map((row: any) => ({
+          ...row,
+          username: userMap[row.user_id] || "?",
+        })),
+      );
+      setLoading(false);
     }
-    fetchHistory(true);
-    // Поллинг вместо realtime-подписки (self-hosted Postgres без Supabase
-    // Realtime) — обновляем список раз в 20 секунд. Фоновые обновления не
-    // дёргают loading — иначе таблица каждые 20с на миг подменялась на
-    // "Загрузка..." и это выглядело как бесконечная перезагрузка.
-    const interval = setInterval(() => fetchHistory(false), 20_000);
+    fetchHistory();
+    const interval = setInterval(fetchHistory, 20_000);
     return () => {
       isMounted = false;
       clearInterval(interval);
     };
-  }, [page]);
+  }, [page, pageSize, enabled]);
 
-  return (
-    <div className="mt-15 pb-3">
-      <div className="mb-2 flex items-baseline gap-2">
-        <h2 className="text-base leading-none font-semibold">
-          История убийств боссов
-        </h2>
-        <span className="text-xs text-muted-foreground">{total} записей</span>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="min-w-full text-sm border">
-          <thead>
-            <tr className="bg-muted">
-              <th className="p-2 border">Босс</th>
-              <th className="p-2 border">Действие</th>
-              <th className="p-2 border">Время убийства</th>
-              <th className="p-2 border">Предыдущее время</th>
-              <th className="p-2 border">Следующий респаун</th>
-              <th className="p-2 border">Кто установил</th>
-              <th className="p-2 border">Когда установлено</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan={7} className="text-center p-4">
-                  Загрузка...
-                </td>
-              </tr>
-            ) : rows.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="text-center p-4">
-                  Нет записей
-                </td>
-              </tr>
-            ) : (
-              rows.map((row) => (
-                <tr key={row.id}>
-                  <td className="p-2 border font-bold">{row.boss_name}</td>
-                  <td className="p-2 border">{row.action}</td>
-                  <td className="p-2 border">{formatDT(row.kill_time)}</td>
-                  <td className="p-2 border">
-                    {row.prev_kill_time ? formatDT(row.prev_kill_time) : "-"}
-                  </td>
-                  <td className="p-2 border">
-                    {row.next_respawn ? formatDT(row.next_respawn) : "-"}
-                  </td>
-                  <td className="p-2 border">{row.username}</td>
-                  <td className="p-2 border">{formatDT(row.created_at)}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-      {/* Advanced pagination using shadcn primitives */}
-      <Pagination className="mt-3">
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                setPage((p) => Math.max(1, p - 1));
-              }}
-              aria-disabled={page === 1}
-              className={page === 1 ? "pointer-events-none opacity-50" : ""}
-            />
-          </PaginationItem>
-          {getPaginationItems(
-            page,
-            Math.max(1, Math.ceil(total / PAGE_SIZE)),
-          ).map((item, idx) => (
-            <PaginationItem key={idx}>
-              {item.type === "ellipsis" ? (
-                <PaginationEllipsis />
-              ) : (
-                <PaginationLink
-                  href="#"
-                  isActive={item.page === page}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setPage(item.page);
-                  }}
-                >
-                  {item.page}
-                </PaginationLink>
-              )}
-            </PaginationItem>
-          ))}
-          <PaginationItem>
-            <PaginationNext
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                const maxPage = Math.max(1, Math.ceil(total / PAGE_SIZE));
-                setPage((p) => Math.min(maxPage, p + 1));
-              }}
-              aria-disabled={page * PAGE_SIZE >= total}
-              className={
-                page * PAGE_SIZE >= total
-                  ? "pointer-events-none opacity-50"
-                  : ""
-              }
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
-    </div>
-  );
+  return { rows, total, loading };
 }
 
 function formatDT(dt: string) {
@@ -192,6 +90,13 @@ function formatDT(dt: string) {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+function actionText(row: HistoryRow, now: Date) {
+  const kill = formatMoscowShort(new Date(row.kill_time), now);
+  return row.action === "Убит сейчас"
+    ? `убит в ${kill}`
+    : `${row.action.toLowerCase()}: ${kill}`;
 }
 
 type PageItem = { type: "page"; page: number } | { type: "ellipsis" };
@@ -215,4 +120,198 @@ function getPaginationItems(current: number, total: number): PageItem[] {
     addPage(last);
   }
   return pages;
+}
+
+function RespawnHistoryDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const [page, setPage] = useState(1);
+  const { rows, total, loading } = useHistoryPage(page, PAGE_SIZE, open);
+  const maxPage = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        aria-describedby={undefined}
+        className="max-h-[90vh] overflow-y-auto sm:max-w-4xl"
+      >
+        <DialogHeader>
+          <DialogTitle>История убийств боссов · {total}</DialogTitle>
+        </DialogHeader>
+        <div className="overflow-x-auto">
+          <table className="min-w-full border text-sm">
+            <thead>
+              <tr className="bg-muted">
+                <th className="border p-2">Босс</th>
+                <th className="border p-2">Действие</th>
+                <th className="border p-2">Время убийства</th>
+                <th className="border p-2">Предыдущее время</th>
+                <th className="border p-2">Следующий респаун</th>
+                <th className="border p-2">Кто установил</th>
+                <th className="border p-2">Когда установлено</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="p-4 text-center">
+                    Загрузка...
+                  </td>
+                </tr>
+              ) : rows.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="p-4 text-center">
+                    Нет записей
+                  </td>
+                </tr>
+              ) : (
+                rows.map((row) => (
+                  <tr key={row.id}>
+                    <td className="border p-2 font-bold">{row.boss_name}</td>
+                    <td className="border p-2">{row.action}</td>
+                    <td className="border p-2">{formatDT(row.kill_time)}</td>
+                    <td className="border p-2">
+                      {row.prev_kill_time ? formatDT(row.prev_kill_time) : "-"}
+                    </td>
+                    <td className="border p-2">
+                      {row.next_respawn ? formatDT(row.next_respawn) : "-"}
+                    </td>
+                    <td className="border p-2">{row.username}</td>
+                    <td className="border p-2">{formatDT(row.created_at)}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setPage((p) => Math.max(1, p - 1));
+                }}
+                aria-disabled={page === 1}
+                className={page === 1 ? "pointer-events-none opacity-50" : ""}
+              />
+            </PaginationItem>
+            {getPaginationItems(page, maxPage).map((item, idx) => (
+              <PaginationItem key={idx}>
+                {item.type === "ellipsis" ? (
+                  <PaginationEllipsis />
+                ) : (
+                  <PaginationLink
+                    href="#"
+                    isActive={item.page === page}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setPage(item.page);
+                    }}
+                  >
+                    {item.page}
+                  </PaginationLink>
+                )}
+              </PaginationItem>
+            ))}
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setPage((p) => Math.min(maxPage, p + 1));
+                }}
+                aria-disabled={page >= maxPage}
+                className={page >= maxPage ? "pointer-events-none opacity-50" : ""}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export default function BossRespawnHistory() {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const { rows, total, loading } = useHistoryPage(1, RECENT_SIZE, true);
+  const now = new Date();
+
+  return (
+    <Card className="min-w-0 gap-0 py-0">
+      <div className="flex items-center justify-between gap-2 border-b px-4 py-3.5">
+        <h2 className="font-semibold">Последние отметки</h2>
+        <Button
+          variant="link"
+          className="h-auto p-0 text-green-700 dark:text-green-400"
+          onClick={() => setDialogOpen(true)}
+        >
+          Вся история · {total}
+          <ChevronRight />
+        </Button>
+      </div>
+
+      {loading ? (
+        <div className="space-y-3 p-4">
+          {Array.from({ length: RECENT_SIZE }, (_, index) => (
+            <Skeleton key={index} className="h-10 w-full" />
+          ))}
+        </div>
+      ) : rows.length === 0 ? (
+        <p className="px-4 py-8 text-center text-sm text-muted-foreground">
+          Отметок пока нет
+        </p>
+      ) : (
+        <ul>
+          {rows.map((row) => (
+            <li
+              key={row.id}
+              className="flex items-center gap-3 border-b px-4 py-2.5 last:border-b-0"
+            >
+              {bossImages[row.boss_name] ? (
+                <Image
+                  src={bossImages[row.boss_name]}
+                  alt=""
+                  width={36}
+                  height={36}
+                  className="size-9 shrink-0 rounded-lg object-cover"
+                />
+              ) : (
+                <span className="size-9 shrink-0 rounded-lg bg-muted" />
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="truncate">
+                  <span className="font-semibold">{row.boss_name}</span>{" "}
+                  <span className="text-muted-foreground">— {actionText(row, now)}</span>
+                </p>
+                <p className="truncate text-xs text-muted-foreground sm:hidden">
+                  {row.username} · {formatMoscowShort(new Date(row.created_at), now)}
+                </p>
+                <p className="hidden truncate text-xs text-muted-foreground sm:block">
+                  {row.next_respawn &&
+                    `Следующий респаун ${formatMoscowShort(new Date(row.next_respawn), now)}`}
+                  {row.next_respawn && row.prev_kill_time && " · "}
+                  {row.prev_kill_time &&
+                    `до этого ${formatMoscowShort(new Date(row.prev_kill_time), now)}`}
+                </p>
+              </div>
+              <div className="hidden shrink-0 text-right sm:block">
+                <p className="text-sm font-medium">{row.username}</p>
+                <p className="text-xs text-muted-foreground tabular-nums">
+                  {formatMoscowShort(new Date(row.created_at), now)}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <RespawnHistoryDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+    </Card>
+  );
 }

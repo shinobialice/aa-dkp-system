@@ -1,20 +1,36 @@
 "use client";
 import { useRef, useState } from "react";
-import { Pencil, Camera, ChevronDown } from "lucide-react";
+import { Camera, ChevronDown, Link2, Pencil } from "lucide-react";
 import { toast } from "sonner";
-import { Avatar, AvatarImage, AvatarFallback } from "@/shared/ui";
-import { Badge } from "@/shared/ui";
-import { Button } from "@/shared/ui";
-import { Popover, PopoverTrigger, PopoverContent } from "@/shared/ui";
+import { differenceInMonths } from "date-fns";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  Button,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/shared/ui";
 import { uploadAvatar } from "@/actions/uploadAvatar";
 import type { PrimeStreak } from "@/actions/getUserPrimeStreak";
-import type { KillcountStats } from "@/actions/getUserKillcountStats";
-import RankProgress from "./RankProgress";
+import type { UserArchetype } from "@/actions/getUserArchetype";
+import type { SocialProvider } from "@/shared/lib/socialProviders";
+import SealIcon from "@/widgets/profile/seals/SealIcon";
+import {
+  getSealGradeForLevel,
+  getSealGradeLabel,
+} from "@/widgets/profile/seals/sealsData";
 import AnniversaryCelebration from "./AnniversaryCelebration";
 import DragonFlyby from "./DragonFlyby";
 import PrimeStreakBadge from "./PrimeStreakBadge";
+import ProfileClasses from "./ProfileClasses";
+import SocialAccountsAdminPanel from "./SocialAccountsAdminPanel";
 
-const badgeColors: { [key: string]: string } = {
+const TAG_COLORS: Record<string, string> = {
   Активен: "rgb(47, 158, 98)",
   "Получает зарплату": "rgb(23, 133, 115)",
   Администратор: "rgb(215, 100, 168)",
@@ -27,6 +43,38 @@ const badgeColors: { [key: string]: string } = {
   Деф: "rgb(40, 111, 180)",
   Модератор: "rgb(58, 76, 92)",
 };
+const DEFAULT_TAG_COLOR = "rgb(59, 130, 246)";
+
+function TagChip({ label }: { label: string }) {
+  const color = TAG_COLORS[label] ?? DEFAULT_TAG_COLOR;
+  return (
+    <span
+      className="inline-flex h-6 items-center rounded-full px-2 text-xs font-semibold whitespace-nowrap"
+      style={{
+        color,
+        backgroundColor: color.replace("rgb(", "rgba(").replace(")", ", 0.12)"),
+      }}
+    >
+      {label}
+    </span>
+  );
+}
+
+function formatTenure(joinedAt: string | null): string | null {
+  if (!joinedAt) return null;
+  const months = differenceInMonths(new Date(), new Date(joinedAt));
+  const years = Math.floor(months / 12);
+  const rest = months % 12;
+  if (years === 0 && rest === 0) return "меньше месяца";
+  return [years ? `${years} г.` : null, rest ? `${rest} мес.` : null]
+    .filter(Boolean)
+    .join(" ");
+}
+
+function formatJoinedDate(joinedAt: string): string {
+  const [year, month, day] = joinedAt.slice(0, 10).split("-");
+  return `${day}.${month}.${year}`;
+}
 
 export default function ProfileHeader({
   user,
@@ -35,8 +83,12 @@ export default function ProfileHeader({
   canEditProfile,
   onEdit,
   isOwnProfile,
+  isAdmin,
   primeStreak,
-  killcountStats,
+  archetype,
+  seals,
+  vkRealName,
+  onSocialUnlinked,
 }: {
   user: any;
   tags: { id: number; tag: string }[];
@@ -49,8 +101,12 @@ export default function ProfileHeader({
   canEditProfile: boolean;
   onEdit: () => void;
   isOwnProfile: boolean;
+  isAdmin: boolean;
   primeStreak: PrimeStreak;
-  killcountStats: KillcountStats | null;
+  archetype: UserArchetype;
+  seals: any[];
+  vkRealName: string;
+  onSocialUnlinked: (provider: SocialProvider) => void;
 }) {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(
     user.avatar_url ?? null,
@@ -79,147 +135,215 @@ export default function ProfileHeader({
     }
   };
 
+  const tenure = formatTenure(user.joined_at ?? null);
+  const vkHref = user.vk_name
+    ? `https://vk.ru/${user.vk_name}`
+    : user.vk_id
+      ? `https://vk.com/id${user.vk_id}`
+      : null;
+  const tagLabels = [
+    ...(user.active ? ["Активен"] : []),
+    ...(user.is_eligible_for_salary ? ["Получает зарплату"] : []),
+    ...(tags ?? []).map((tag) => tag.tag),
+  ];
+
   return (
-    <div className="relative">
+    <section
+      aria-label="Игрок"
+      className="relative overflow-hidden rounded-xl border bg-card p-4 sm:p-5"
+    >
       {user.active && !tags?.some((t) => t.tag === "АФК") && (
         <AnniversaryCelebration joinedAt={user.joined_at ?? null} />
       )}
       <DragonFlyby username={user.username} />
-      <div className="h-16 w-full bg-gradient-to-br from-primary/25 via-chart-1/15 to-transparent md:h-20" />
 
-      <div className="px-6 pb-4">
-        <div className="flex flex-wrap items-start gap-4 lg:flex-nowrap">
-          <div className="min-w-0">
-            <div className="flex items-end justify-between gap-4 -mt-12 md:-mt-14">
-              <div className="relative h-24 w-24 shrink-0 md:h-28 md:w-28">
-                <Avatar className="h-24 w-24 border-4 border-card shadow-sm md:h-28 md:w-28">
-                  <AvatarImage
-                    src={
-                      avatarUrl ??
-                      `https://api.dicebear.com/6.x/initials/svg?seed=${user.username}`
-                    }
-                    alt={user.username}
-                  />
-                  <AvatarFallback className="text-2xl">
-                    {user.username.slice(0, 2)}
-                  </AvatarFallback>
-                </Avatar>
+      <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-4 gap-y-3 sm:gap-x-5 sm:gap-y-2">
+        <div className="relative size-[68px] shrink-0 sm:row-span-2 sm:size-24">
+          <Avatar className="size-[68px] sm:size-24">
+            <AvatarImage
+              src={
+                avatarUrl ??
+                `https://api.dicebear.com/6.x/initials/svg?seed=${user.username}`
+              }
+              alt={user.username}
+            />
+            <AvatarFallback className="text-2xl">
+              {user.username.slice(0, 2)}
+            </AvatarFallback>
+          </Avatar>
+          {isOwnProfile && (
+            <>
+              <button
+                type="button"
+                disabled={uploading}
+                onClick={() => fileInputRef.current?.click()}
+                aria-label="Сменить аватар"
+                className="absolute inset-0 flex cursor-pointer items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity hover:opacity-100 focus-visible:opacity-100 disabled:opacity-100"
+              >
+                <Camera className="size-6" />
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/gif"
+                className="hidden"
+                onChange={handleAvatarChange}
+              />
+            </>
+          )}
+        </div>
 
-                {isOwnProfile && (
-                  <>
+        <div className="flex min-w-0 flex-col gap-2">
+          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
+            <div className="flex min-w-0 items-center gap-1">
+              <h1 className="truncate text-xl leading-tight font-bold tracking-tight sm:text-[26px]">
+                {user.username}
+              </h1>
+              {usernameHistory.length > 0 && (
+                <Popover>
+                  <PopoverTrigger asChild>
                     <button
                       type="button"
-                      disabled={uploading}
-                      onClick={() => fileInputRef.current?.click()}
-                      className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity hover:opacity-100 disabled:opacity-100 cursor-pointer"
+                      aria-label="История ников"
+                      className="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                     >
-                      <Camera className="size-6" />
+                      <ChevronDown className="size-4" />
                     </button>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/png,image/jpeg,image/webp,image/gif"
-                      className="hidden"
-                      onChange={handleAvatarChange}
-                    />
-                  </>
-                )}
-              </div>
+                  </PopoverTrigger>
+                  <PopoverContent align="start" className="w-72 p-3">
+                    <div className="mb-2 text-xs font-medium text-muted-foreground">
+                      Этот пользователь также использовал ники:
+                    </div>
+                    <div className="flex flex-col divide-y">
+                      {usernameHistory.map((h) => (
+                        <div
+                          key={h.id}
+                          className="flex items-center justify-between gap-3 py-2"
+                        >
+                          <span className="truncate text-sm font-medium">
+                            {h.old_username}
+                          </span>
+                          <span className="shrink-0 text-xs text-muted-foreground">
+                            {new Date(h.changed_at).toLocaleDateString("ru-RU")}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              )}
             </div>
-
-            <div className="mt-3 space-y-2">
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-xl font-bold md:text-2xl">
-                  {user.username}
-                </h1>
-                {usernameHistory.length > 0 && (
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <button
-                        type="button"
-                        aria-label="История ников"
-                        className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-                      >
-                        <ChevronDown className="size-4" />
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent align="start" className="w-72 p-3">
-                      <div className="mb-2 text-xs font-medium text-muted-foreground">
-                        Этот пользователь также использовал ники:
-                      </div>
-                      <div className="flex flex-col divide-y">
-                        {usernameHistory.map((h) => (
-                          <div
-                            key={h.id}
-                            className="flex items-center justify-between gap-3 py-2"
-                          >
-                            <span className="truncate text-sm font-medium">
-                              {h.old_username}
-                            </span>
-                            <span className="shrink-0 text-xs text-muted-foreground">
-                              {new Date(h.changed_at).toLocaleDateString(
-                                "ru-RU",
-                              )}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                )}
-                <PrimeStreakBadge {...primeStreak} />
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                {user.active && (
-                  <Badge
-                    className="text-background"
-                    style={{ backgroundColor: badgeColors["Активен"] }}
-                  >
-                    Активен
-                  </Badge>
-                )}
-                {user.is_eligible_for_salary && (
-                  <Badge
-                    className="text-background"
-                    style={{
-                      backgroundColor: badgeColors["Получает зарплату"],
-                    }}
-                  >
-                    Получает зарплату
-                  </Badge>
-                )}
-                {tags?.map((tag) => (
-                  <Badge
-                    key={tag.id}
-                    className="text-background"
-                    style={{
-                      backgroundColor:
-                        badgeColors[tag.tag] || "rgb(59, 130, 246)",
-                    }}
-                  >
-                    {tag.tag}
-                  </Badge>
-                ))}
-              </div>
+            <div className="flex flex-wrap gap-1.5">
+              <PrimeStreakBadge {...primeStreak} />
+              {tagLabels.map((label) => (
+                <TagChip key={label} label={label} />
+              ))}
             </div>
           </div>
+        </div>
 
-          <RankProgress className="shrink-0 lg:-mt-10" stats={killcountStats} />
-
+        <div className="flex flex-col items-end gap-2 self-start sm:row-span-2 sm:flex-row sm:items-center">
+          {isAdmin && (
+            <div className="max-sm:hidden">
+              <SocialAccountsAdminPanel
+                user={user}
+                onUnlinked={onSocialUnlinked}
+              />
+            </div>
+          )}
           {canEditProfile && (
             <Button
               variant="outline"
               size="sm"
-              className="ml-auto shrink-0 self-end cursor-pointer"
+              className="cursor-pointer max-sm:size-11 max-sm:p-0"
               onClick={onEdit}
+              aria-label="Редактировать профиль"
             >
               <Pencil />
-              Редактировать
+              <span className="max-sm:hidden">Редактировать</span>
             </Button>
           )}
         </div>
+
+        <div className="col-span-3 flex flex-col gap-2 sm:col-span-1 sm:col-start-2 sm:row-start-2">
+          <ProfileClasses user={user} archetype={archetype} />
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[13px] text-muted-foreground">
+            <ProfileMeta
+              tenure={tenure}
+              joinedAt={user.joined_at ?? null}
+              vkHref={vkHref}
+              vkRealName={vkRealName}
+              seals={seals}
+            />
+          </div>
+          {isAdmin && (
+            <div className="sm:hidden">
+              <SocialAccountsAdminPanel
+                user={user}
+                onUnlinked={onSocialUnlinked}
+              />
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </section>
+  );
+}
+
+function ProfileMeta({
+  tenure,
+  joinedAt,
+  vkHref,
+  vkRealName,
+  seals,
+}: {
+  tenure: string | null;
+  joinedAt: string | null;
+  vkHref: string | null;
+  vkRealName: string;
+  seals: any[];
+}) {
+  return (
+    <>
+      {joinedAt && (
+        <span>
+          В гильдии{" "}
+          <span className="font-semibold text-foreground">{tenure}</span> · с{" "}
+          {formatJoinedDate(joinedAt)}
+        </span>
+      )}
+      {vkHref && (
+        <a
+          href={vkHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 font-medium text-green-700 hover:underline dark:text-green-400"
+        >
+          <Link2 className="size-3.5" />
+          {vkRealName || "ВКонтакте"}
+        </a>
+      )}
+      {seals?.length > 0 && (
+        <span className="inline-flex items-center gap-1.5">
+          Печати
+          {seals.map((seal) => (
+            <Tooltip key={seal.id}>
+              <TooltipTrigger asChild>
+                <span className="inline-flex">
+                  <SealIcon
+                    grade={getSealGradeForLevel(seal.level)}
+                    size={22}
+                  />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>
+                {seal.seal_name} · уровень {seal.level} (
+                {getSealGradeLabel(getSealGradeForLevel(seal.level))})
+              </TooltipContent>
+            </Tooltip>
+          ))}
+        </span>
+      )}
+    </>
   );
 }

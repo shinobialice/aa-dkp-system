@@ -1,393 +1,247 @@
 "use client";
 
-import React from "react";
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import { ArrowUpDown, Loader2, RefreshCw } from "lucide-react";
-import { Badge, Button } from "@/shared/ui";
-import {
-  Table,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableCell,
-  TableBody,
-  Select,
-  SelectItem,
-  SelectContent,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/ui";
-import { Input, Checkbox } from "@/shared/ui";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, Loader2, RefreshCw } from "lucide-react";
+import { Button } from "@/shared/ui";
 import {
   getGuildFunds,
   getSalariesForMonth,
   updateSalaryAdvance,
 } from "@/actions/financeActions";
 import { recalculateFinanceForMonthAsAdmin } from "@/actions/recalculateFinanceForMonth";
-import { classColors, classIcons } from "@/widgets/MembersTable/classStyles";
-import { getYearOptions } from "@/utils/getYearOptions";
+import { getUnpaidSalaryReasons } from "@/actions/getUnpaidSalaryReasons";
+import FinanceSummary, { MySalaryCard } from "./FinanceSummary";
+import SalaryTable from "./SalaryTable";
+import { MONTHS, shiftMonth, type Fund, type SalaryRow } from "./financeModel";
 
-// Раньше здесь пересчитывался весь фонд/зарплаты (с записью в БД) на каждое
-// открытие страницы и каждые 60 сек для каждого зрителя. Теперь пересчёт
-// точечно триггерится из мест, которые реально меняют цифры (продажа лута,
-// рейды/посещаемость — см. recalculateFinanceForMonth.ts), а страница просто
-// читает уже посчитанное. Лёгкий поллинг здесь нужен только на случай правок,
-// которые пока не триггерят пересчёт сами (штрафы, тэги, доп. бонусы,
-// расходы, критерии допуска) — можно держать короче, т.к. это просто чтение.
 const AUTO_REFRESH_MS = 30 * 1000;
 
-type Fund = {
-  totalIncome: number;
-  totalExpenses: number;
-  profit: number;
-  salaryBudget: number;
-  treasuryBudget: number;
-  inTreasury: number;
-  advanceSent: number;
-  carryOver: number;
-};
-
-type SalaryRow = {
-  id: number;
-  userId: number;
-  username: string;
-  class: string | null;
-  amount: number;
-  bonus: number | null;
-  total: number;
-  sentAmount: number;
-  sent: boolean;
-  tenurePercent: number;
-  customBonusPercent: number;
-  penaltyPercent: number;
-  weightPercent: number;
-  aglPercent: number;
-  primePercent: number;
-  totalPercent: number;
+type Loaded = {
+  key: string;
+  fund: Fund | null;
+  salaries: SalaryRow[];
+  updatedAt: Date;
 };
 
 export default function FinanceClient({
   currentMonth,
   currentYear,
+  currentUserId,
   isAdmin,
 }: {
   currentMonth: number;
   currentYear: number;
+  currentUserId: number | null;
   isAdmin: boolean;
 }) {
   const [month, setMonth] = useState(currentMonth);
   const [year, setYear] = useState(currentYear);
-  const [initialLoading, setInitialLoading] = useState(true);
+  const [loaded, setLoaded] = useState<Loaded | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-
-  const [fund, setFund] = useState<Fund | null>(null);
-  const [salaries, setSalaries] = useState<SalaryRow[]>([]);
-
-  const [sortKey, setSortKey] = useState<keyof SalaryRow>("total");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
-
-  const toggleSort = (key: keyof SalaryRow) => {
-    if (sortKey === key) {
-      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-    } else {
-      setSortKey(key);
-      setSortDir("asc");
-    }
-  };
-
-  const sortHeader = (label: string, field: keyof SalaryRow) => (
-    <Button
-      className="cursor-pointer"
-      variant="ghost"
-      size="sm"
-      onClick={() => toggleSort(field)}
-    >
-      {label}
-      <ArrowUpDown className="ml-1 h-4 w-4" />
-    </Button>
-  );
-
-  const sortedSalaries = useMemo(() => {
-    return [...salaries].sort((a, b) => {
-      const aVal = a[sortKey];
-      const bVal = b[sortKey];
-      if (typeof aVal === "string" || typeof bVal === "string") {
-        const cmp = String(aVal ?? "").localeCompare(String(bVal ?? ""));
-        return sortDir === "asc" ? cmp : -cmp;
-      }
-      const an = Number(aVal ?? 0);
-      const bn = Number(bVal ?? 0);
-      return sortDir === "asc" ? an - bn : bn - an;
-    });
-  }, [salaries, sortKey, sortDir]);
-
-  // Отслеживаем, редактирует ли админ поле аванса прямо сейчас, чтобы
-  // фоновое авто-обновление не перетирало недописанное значение.
+  const [reasons, setReasons] = useState<{
+    key: string;
+    map: Record<number, string>;
+  } | null>(null);
   const editingSalaryId = useRef<number | null>(null);
 
-  // Только чтение — сам пересчёт (запись в БД) теперь триггерится точечно
-  // из продажи лута и создания/правки рейдов (см. recalculateFinanceForMonth.ts),
-  // а не гоняется здесь при каждом открытии страницы/тике таймера.
-  const refresh = useCallback(
-    async (m: number, y: number, opts?: { silent?: boolean }) => {
-      if (opts?.silent) setRefreshing(true);
-      try {
-        const [fundResult, salariesResult] = await Promise.all([
-          getGuildFunds(m, y),
-          getSalariesForMonth(m, y),
-        ]);
-        setFund(fundResult);
-        if (editingSalaryId.current === null) {
-          setSalaries(salariesResult);
-        }
-        setLastUpdated(new Date());
-      } finally {
-        setRefreshing(false);
-        setInitialLoading(false);
-      }
-    },
-    [],
+  const requestKey = `${year}-${month}`;
+  const isCurrentLoaded = loaded?.key === requestKey;
+  const fund = isCurrentLoaded ? loaded.fund : null;
+  const salaries = useMemo(
+    () => (isCurrentLoaded ? loaded.salaries : []),
+    [isCurrentLoaded, loaded],
   );
 
-  // Полный пересчёт по кнопке — для правок, которые пока не триггерят его
-  // сами (штрафы, тэги, доп. бонусы, расходы, критерии допуска в Настройках).
-  const recalculate = useCallback(
-    async (m: number, y: number) => {
-      setRefreshing(true);
-      try {
-        await recalculateFinanceForMonthAsAdmin(m, y);
-      } finally {
-        await refresh(m, y);
-      }
-    },
-    [refresh],
-  );
+  const refresh = useCallback(async (m: number, y: number) => {
+    const [fundResult, salariesResult] = await Promise.all([
+      getGuildFunds(m, y),
+      getSalariesForMonth(m, y),
+    ]);
+    setLoaded((previous) => ({
+      key: `${y}-${m}`,
+      fund: fundResult,
+      salaries:
+        editingSalaryId.current !== null && previous?.key === `${y}-${m}`
+          ? previous.salaries
+          : (salariesResult as SalaryRow[]),
+      updatedAt: new Date(),
+    }));
+  }, []);
 
   useEffect(() => {
-    setInitialLoading(true);
     refresh(month, year);
-    const interval = setInterval(() => {
-      if (document.hidden) return;
-      refresh(month, year, { silent: true });
-    }, AUTO_REFRESH_MS);
-    const onVisible = () => {
-      if (document.visibilityState === "visible") {
-        refresh(month, year, { silent: true });
-      }
+    const tick = () => {
+      if (document.visibilityState === "visible") refresh(month, year);
     };
-    document.addEventListener("visibilitychange", onVisible);
-    window.addEventListener("focus", onVisible);
+    const interval = setInterval(tick, AUTO_REFRESH_MS);
+    document.addEventListener("visibilitychange", tick);
+    window.addEventListener("focus", tick);
     return () => {
       clearInterval(interval);
-      document.removeEventListener("visibilitychange", onVisible);
-      window.removeEventListener("focus", onVisible);
+      document.removeEventListener("visibilitychange", tick);
+      window.removeEventListener("focus", tick);
     };
   }, [month, year, refresh]);
+
+  const unpaidIds = useMemo(
+    () => salaries.filter((row) => row.total <= 0).map((row) => row.userId),
+    [salaries],
+  );
+  const unpaidKey = `${requestKey}:${unpaidIds.join(",")}`;
+
+  useEffect(() => {
+    if (unpaidIds.length === 0) return;
+    let cancelled = false;
+    getUnpaidSalaryReasons(month, year, unpaidIds).then((map) => {
+      if (!cancelled) setReasons({ key: unpaidKey, map });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [month, year, unpaidIds, unpaidKey]);
+
+  const recalculate = async () => {
+    setRefreshing(true);
+    try {
+      await recalculateFinanceForMonthAsAdmin(month, year);
+      await refresh(month, year);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const handleAdvanceChange = async (
     salaryId: number,
     sentAmount: number,
     sent: boolean,
   ) => {
-    setSalaries((prev) =>
-      prev.map((s) => (s.id === salaryId ? { ...s, sentAmount, sent } : s)),
+    setLoaded((previous) =>
+      previous
+        ? {
+            ...previous,
+            salaries: previous.salaries.map((row) =>
+              row.id === salaryId ? { ...row, sentAmount, sent } : row,
+            ),
+          }
+        : previous,
     );
     await updateSalaryAdvance(salaryId, sentAmount, sent);
   };
 
-  const totalSalaries = salaries.length
-    ? salaries.reduce((sum, s) => sum + s.total, 0)
-    : (fund?.salaryBudget ?? 0);
-  const liveAdvanceSent = fund?.advanceSent ?? 0;
-  const effectiveInTreasury = fund?.inTreasury ?? 0;
-  const remainingSalaries = totalSalaries - liveAdvanceSent;
-  const freeGold = effectiveInTreasury - remainingSalaries;
+  const goToMonth = (delta: number) => {
+    const next = shiftMonth(month, year, delta);
+    setMonth(next.month);
+    setYear(next.year);
+  };
+
+  const isLatestMonth = year * 12 + month >= currentYear * 12 + currentMonth;
+  const myRow = salaries.find(
+    (row) => row.userId === currentUserId && row.total > 0,
+  );
+  const myPlace = myRow
+    ? [...salaries]
+        .sort((a, b) => b.total - a.total)
+        .findIndex((row) => row.id === myRow.id) + 1
+    : null;
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <h1 className="text-2xl font-bold">
-          Финансы гильдии — {month}/{year}
-        </h1>
-        <span className="text-xs text-muted-foreground flex items-center gap-1">
-          {refreshing ? (
-            <>
-              <Loader2 className="animate-spin w-3 h-3" /> обновление…
-            </>
-          ) : lastUpdated ? (
-            `обновлено в ${lastUpdated.toLocaleTimeString("ru-RU")}`
-          ) : null}
-        </span>
+    <div className="mx-auto flex w-full max-w-6xl min-w-0 flex-col gap-4">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight sm:text-[26px]">
+            Финансы
+          </h1>
+          <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+            Доход гильдии, казна и зарплаты
+            {refreshing ? (
+              <>
+                · <Loader2 className="size-3.5 animate-spin" /> пересчёт…
+              </>
+            ) : (
+              loaded &&
+              ` · обновлено в ${loaded.updatedAt.toLocaleTimeString("ru-RU", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}`
+            )}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {isAdmin ? (
+            <div className="inline-flex h-10 items-center rounded-lg border bg-background">
+              <button
+                type="button"
+                onClick={() => goToMonth(-1)}
+                aria-label="Предыдущий месяц"
+                className="flex size-10 cursor-pointer items-center justify-center rounded-l-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              >
+                <ChevronLeft className="size-4" />
+              </button>
+              <span className="min-w-[128px] text-center text-sm font-semibold">
+                {MONTHS[month - 1]} {year}
+              </span>
+              <button
+                type="button"
+                onClick={() => goToMonth(1)}
+                disabled={isLatestMonth}
+                aria-label="Следующий месяц"
+                className="flex size-10 cursor-pointer items-center justify-center rounded-r-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent"
+              >
+                <ChevronRight className="size-4" />
+              </button>
+            </div>
+          ) : (
+            <span className="inline-flex h-10 items-center rounded-lg border px-3 text-sm font-semibold">
+              {MONTHS[month - 1]} {year}
+            </span>
+          )}
+          {isAdmin && (
+            <Button
+              variant="outline"
+              onClick={recalculate}
+              disabled={refreshing}
+              className="h-10 cursor-pointer"
+            >
+              <RefreshCw className={refreshing ? "animate-spin" : undefined} />
+              Пересчитать
+            </Button>
+          )}
+        </div>
       </div>
-      {isAdmin && (
-        <div className="flex items-center gap-4">
-          <Select
-            value={month.toString()}
-            onValueChange={(value) => setMonth(+value)}
-          >
-            <SelectTrigger className="border rounded px-2 py-1 w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-                <SelectItem key={m} value={m.toString()}>
-                  {new Date(0, m - 1).toLocaleString("ru-RU", {
-                    month: "long",
-                  })}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select
-            value={year.toString()}
-            onValueChange={(value) => setYear(+value)}
-          >
-            <SelectTrigger className="border rounded px-2 py-1 w-20">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {getYearOptions().map((y) => (
-                <SelectItem key={y} value={y.toString()}>
-                  {y}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button
-            onClick={() => recalculate(month, year)}
-            variant="outline"
-            className="cursor-pointer"
-            disabled={refreshing}
-            title="Пересчитать сейчас"
-          >
-            <RefreshCw className={refreshing ? "animate-spin w-4 h-4" : "w-4 h-4"} />
-          </Button>
-        </div>
-      )}
 
-      {initialLoading && (
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Loader2 className="animate-spin w-4 h-4" /> Загрузка…
+      {!isCurrentLoaded ? (
+        <div className="flex items-center justify-center gap-2 py-16 text-sm text-muted-foreground">
+          <Loader2 className="size-4 animate-spin" /> Загрузка…
         </div>
-      )}
-
-      {fund && (
-        <div className="grid grid-cols-2 gap-x-6 gap-y-2 border rounded-md p-3 bg-muted/30 text-sm">
-          <div>
-            💰 Доходы (Продано): <strong>{fund.totalIncome}</strong>
-          </div>
-          <div>
-            📤 Расходы: <strong>{fund.totalExpenses}</strong>
-          </div>
-          <div>
-            🔁 Перенесено с прошлого месяца:{" "}
-            <strong>{fund.carryOver ?? 0}</strong>
-          </div>
-          <div>
-            👥 Зарплатный фонд (70%): <strong>{fund.salaryBudget}</strong>
-          </div>
-          <div>
-            🏦 Доход казны (30%): <strong>{fund.treasuryBudget}</strong>
-          </div>
-          <div>
-            💰 Сейчас в казне: <strong>{effectiveInTreasury}</strong>
-          </div>
-          <div>
-            📈 "Свободная" голда в казне: <strong>{freeGold}</strong>
-          </div>
-          <div>
-            🧾 Суммарные З/П за месяц: <strong>{totalSalaries}</strong>
-          </div>
-          <div>
-            📨 Выслано авансом: <strong>{liveAdvanceSent}</strong>
-          </div>
-          <div>
-            ⏳ Оставшиеся З/П на месяц: <strong>{remainingSalaries}</strong>
-          </div>
-        </div>
-      )}
-
-      {salaries.length > 0 && (
-        <div className="border rounded-md overflow-auto max-h-[70vh] [&_th]:sticky [&_th]:top-0 [&_th]:z-10 [&_th]:h-8 [&_th]:bg-background [&_td]:py-1.5">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{sortHeader("Игрок", "username")}</TableHead>
-                <TableHead>{sortHeader("Класс", "class")}</TableHead>
-                <TableHead>{sortHeader("АГЛ", "aglPercent")}</TableHead>
-                <TableHead>{sortHeader("Прайм", "primePercent")}</TableHead>
-                <TableHead>{sortHeader("Общий", "totalPercent")}</TableHead>
-                <TableHead>{sortHeader("%t (гильдия)", "tenurePercent")}</TableHead>
-                <TableHead>{sortHeader("Доп (бонус)", "customBonusPercent")}</TableHead>
-                <TableHead>{sortHeader("Штр (штраф)", "penaltyPercent")}</TableHead>
-                <TableHead>{sortHeader("%Итог", "weightPercent")}</TableHead>
-                <TableHead>{sortHeader("Итого", "total")}</TableHead>
-                <TableHead>{sortHeader("Выслано", "sent")}</TableHead>
-                <TableHead>{sortHeader("Сумма аванса", "sentAmount")}</TableHead>
-                <TableHead>Остаток</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sortedSalaries.map((s) => (
-                <TableRow key={s.userId}>
-                  <TableCell>{s.username}</TableCell>
-                  <TableCell>
-                    {s.class ? (
-                      <Badge
-                        className="text-background gap-1"
-                        style={{
-                          backgroundColor:
-                            classColors[s.class] ?? "rgb(120,120,120)",
-                        }}
-                      >
-                        {classIcons[s.class]}
-                        {s.class}
-                      </Badge>
-                    ) : (
-                      "—"
-                    )}
-                  </TableCell>
-                  <TableCell>{s.aglPercent.toFixed(2)}%</TableCell>
-                  <TableCell>{s.primePercent.toFixed(2)}%</TableCell>
-                  <TableCell>{s.totalPercent.toFixed(2)}%</TableCell>
-                  <TableCell>{Math.round(s.tenurePercent)}%</TableCell>
-                  <TableCell>{s.customBonusPercent.toFixed(2)}%</TableCell>
-                  <TableCell>{s.penaltyPercent.toFixed(2)}%</TableCell>
-                  <TableCell>{s.weightPercent.toFixed(2)}%</TableCell>
-                  <TableCell>{s.total}</TableCell>
-                  <TableCell>
-                    <Checkbox
-                      checked={s.sent}
-                      disabled={!isAdmin}
-                      onCheckedChange={(checked) =>
-                        handleAdvanceChange(
-                          s.id,
-                          s.sentAmount,
-                          checked === true,
-                        )
-                      }
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Input
-                      type="number"
-                      value={s.sentAmount}
-                      disabled={!isAdmin}
-                      onFocus={() => (editingSalaryId.current = s.id)}
-                      onBlur={() => (editingSalaryId.current = null)}
-                      onChange={(e) =>
-                        handleAdvanceChange(s.id, +e.target.value, s.sent)
-                      }
-                      className="h-8 w-28"
-                    />
-                  </TableCell>
-                  <TableCell>{s.total - s.sentAmount}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+      ) : (
+        <>
+          {myRow && <MySalaryCard row={myRow} place={myPlace} month={month} />}
+          {fund ? (
+            <FinanceSummary fund={fund} salaries={salaries} month={month} />
+          ) : (
+            <p className="rounded-xl border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
+              Фонд за этот месяц ещё не рассчитан
+            </p>
+          )}
+          {salaries.length > 0 && (
+            <SalaryTable
+              rows={salaries}
+              month={month}
+              currentUserId={currentUserId}
+              unpaidReasons={reasons?.key === unpaidKey ? reasons.map : {}}
+              handlers={{
+                isAdmin,
+                onAdvanceChange: handleAdvanceChange,
+                onEditStart: (id) => {
+                  editingSalaryId.current = id;
+                },
+                onEditEnd: () => {
+                  editingSalaryId.current = null;
+                },
+              }}
+            />
+          )}
+        </>
       )}
     </div>
   );

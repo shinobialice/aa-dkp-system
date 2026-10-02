@@ -15,19 +15,11 @@ export default async function MarketplacePage() {
   ]);
 
   return (
-    <div className="flex min-h-screen flex-col bg-background text-onBackground p-8">
-      <h1 className="text-3xl font-bold mb-2 text-primary">
-        Доска объявлений
-      </h1>
-      <p className="text-sm text-muted-foreground mb-6">
-        Продажа предметов между участниками гильдии.
-      </p>
-      <MarketplaceBoard
-        initialListings={listings}
-        catalogItems={catalogItems}
-        currentUserId={currentUserId}
-        isAdmin={isAdmin}
-      />
-    </div>
+    <MarketplaceBoard
+      initialListings={listings}
+      catalogItems={catalogItems}
+      currentUserId={currentUserId}
+      isAdmin={isAdmin}
+    />
   );
 }

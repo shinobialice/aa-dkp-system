@@ -3,6 +3,7 @@
 import sql from "@/shared/lib/db";
 import { getBaseUrl } from "@/shared/lib";
 import { sendVkMessage } from "@/shared/lib/vkBot";
+import ensurePrivilieges from "@/actions/ensurePrivilieges";
 import { KillCount } from "../types";
 
 export const getKillCountCurrent = async () => {
@@ -12,6 +13,7 @@ export const getKillCountCurrent = async () => {
 			u.username AS "userName",
 			u.id AS "userId",
 			u.class AS "role",
+			u.avatar_url AS "avatarUrl",
 			s.id AS "id",
 			s.start_honor AS "startHonor", 
 			s.end_honor AS "endHonor", 
@@ -36,6 +38,18 @@ export const getKillCountCurrent = async () => {
 };
 
 export const setKillCountCurrent = async (dto: KillCount[]) => {
+  await ensurePrivilieges(["Администратор"]);
+  await insertKillCountRows(dto);
+  await notifyKillCountAdded();
+};
+
+/** Дописать одного игрока в уже сохранённый сегодняшний киллкаунт (без повторного уведомления в ВК). */
+export const addKillCountRowToday = async (row: KillCount) => {
+  await ensurePrivilieges(["Администратор"]);
+  await insertKillCountRows([row]);
+};
+
+const insertKillCountRows = async (dto: KillCount[]) => {
   try {
     const userNames = dto.map((item) => item.userName);
 
@@ -43,7 +57,7 @@ export const setKillCountCurrent = async (dto: KillCount[]) => {
       await sql`SELECT id, username FROM "user" WHERE username IN ${sql(userNames)}`;
 
     if (!users?.length) {
-      return;
+      throw new Error(`Не найдены пользователи: ${userNames}`);
     }
 
     const mapUserNameToId = new Map<string, number>();
@@ -81,8 +95,6 @@ export const setKillCountCurrent = async (dto: KillCount[]) => {
       cause: error,
     });
   }
-
-  await notifyKillCountAdded();
 };
 
 const notifyKillCountAdded = async () => {

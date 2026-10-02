@@ -1,8 +1,51 @@
-import LootBuyComponent from "@/widgets/Loot/LootBuy/LootBuyComponent";
+import { cookies } from "next/headers";
+import { getLootGrouped } from "@/actions/getLootGrouped";
+import { getLootStock } from "@/actions/getLootStock";
+import { getAllLootQueues } from "@/actions/getAllLootQueues";
+import { getActiveUsers } from "@/actions/getActiveUsers";
+import { getSessionUserId } from "@/actions/getSessionUserId";
+import { hasTag } from "@/actions/hasTag";
+import LootBuyClient from "@/widgets/Loot/LootBuy/LootBuyClient";
+import { MISC_SOURCE, type BuyItem } from "@/widgets/Loot/LootBuy/lootBuyModel";
 
-const LootPage = async () => (
-  <>
-    <LootBuyComponent />
-  </>
-);
-export default LootPage;
+export default async function LootBuyPage() {
+  const sessionToken = (await cookies()).get("session_token")?.value ?? "";
+  const [lootBySource, stock, queues, activeUsers, isAdmin, currentUserId] =
+    await Promise.all([
+      getLootGrouped(),
+      getLootStock(),
+      getAllLootQueues(),
+      getActiveUsers(),
+      hasTag(sessionToken, ["Администратор"]),
+      getSessionUserId(),
+    ]);
+
+  const sources = [
+    ...Object.keys(lootBySource).filter((source) => source !== MISC_SOURCE),
+    ...(lootBySource[MISC_SOURCE] ? [MISC_SOURCE] : []),
+  ];
+  const items: BuyItem[] = sources.flatMap((source) =>
+    lootBySource[source].map((item) => ({
+      name: item.name,
+      source,
+      price: item.price === null ? null : Number(item.price),
+      icon: item.icon,
+      grade: item.grade,
+      stock: stock[item.name] ?? 0,
+    })),
+  );
+
+  return (
+    <LootBuyClient
+      initialItems={items}
+      sources={sources}
+      initialQueues={queues}
+      players={activeUsers.map((user) => ({
+        id: user.id as number,
+        username: user.username as string,
+      }))}
+      isAdmin={isAdmin}
+      currentUserId={currentUserId ?? null}
+    />
+  );
+}

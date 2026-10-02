@@ -1,5 +1,4 @@
 "use client";
-import { Swords, Shield, HeartPulse, Gem } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/ui";
 import type { UserEquipment } from "@/actions/getUserEquipment";
 import { computeEngravingBonuses, ENGRAVING_STAT } from "./engravingBonuses";
@@ -11,7 +10,12 @@ import {
 } from "./characterStats";
 import { BONUS_COLOR } from "./CharacterStatsPanel";
 
-type StaticRow = { kind: "static"; label: string; value: string; indent?: boolean };
+type StaticRow = {
+  kind: "static";
+  label: string;
+  value: string;
+  indent?: boolean;
+};
 type EngravingRow = {
   kind: "engraving";
   label: string;
@@ -45,7 +49,15 @@ function engravingRow(
   engravingKey: string,
   indent?: boolean,
 ): EngravingRow {
-  return { kind: "engraving", label, base, unit, decimals, engravingKey, indent };
+  return {
+    kind: "engraving",
+    label,
+    base,
+    unit,
+    decimals,
+    engravingKey,
+    indent,
+  };
 }
 
 function computedRow(
@@ -205,9 +217,27 @@ function buildDefenseGroups(
   return [
     {
       rows: [
-        computedRow("Парирование", stats.parry, "%", 2, bonus.str !== 0 || bonus.parry !== 0),
-        computedRow("Блокирование", stats.block, "%", 2, bonus.sta !== 0 || bonus.block !== 0),
-        computedRow("Уклонение", stats.dodge, "%", 2, bonus.dex !== 0 || bonus.dodge !== 0),
+        computedRow(
+          "Парирование",
+          stats.parry,
+          "%",
+          2,
+          bonus.str !== 0 || bonus.parry !== 0,
+        ),
+        computedRow(
+          "Блокирование",
+          stats.block,
+          "%",
+          2,
+          bonus.sta !== 0 || bonus.block !== 0,
+        ),
+        computedRow(
+          "Уклонение",
+          stats.dodge,
+          "%",
+          2,
+          bonus.dex !== 0 || bonus.dodge !== 0,
+        ),
         engravingRow(
           "Устойчивость к крит. урону",
           20,
@@ -270,7 +300,10 @@ function buildDefenseGroups(
   ];
 }
 
-function buildHealGroups(stats: DerivedStats, bonus: EquippedBonuses): RowGroup[] {
+function buildHealGroups(
+  stats: DerivedStats,
+  bonus: EquippedBonuses,
+): RowGroup[] {
   return [
     {
       title: "Исцеление",
@@ -305,9 +338,21 @@ function buildHealGroups(stats: DerivedStats, bonus: EquippedBonuses): RowGroup[
     {
       title: "Восстановление",
       rows: [
-        computedRow("Восстановление здоровья", stats.healthRegen, "", 0, bonus.sta !== 0),
+        computedRow(
+          "Восстановление здоровья",
+          stats.healthRegen,
+          "",
+          0,
+          bonus.sta !== 0,
+        ),
         staticRow("Восстановление здоровья в бою", "0"),
-        computedRow("Восстановление маны", stats.manaRegen, "", 0, bonus.spi !== 0),
+        computedRow(
+          "Восстановление маны",
+          stats.manaRegen,
+          "",
+          0,
+          bonus.spi !== 0,
+        ),
         staticRow("Восстановление маны в бою", "0"),
       ],
     },
@@ -376,7 +421,9 @@ function RowLine({
   return (
     <div className="flex items-center justify-between gap-3 text-xs">
       <span
-        className={row.indent ? "pl-3 text-muted-foreground/70" : "text-muted-foreground"}
+        className={
+          row.indent ? "pl-3 text-muted-foreground/70" : "text-muted-foreground"
+        }
       >
         {row.indent ? `- ${row.label}` : row.label}
       </span>
@@ -411,7 +458,11 @@ function GroupedRows({
           )}
           <div className="space-y-1.5">
             {group.rows.map((row) => (
-              <RowLine key={row.label} row={row} engravingBonuses={engravingBonuses} />
+              <RowLine
+                key={row.label}
+                row={row}
+                engravingBonuses={engravingBonuses}
+              />
             ))}
           </div>
         </div>
@@ -436,20 +487,32 @@ export function DetailedStatsPanel({
   const healGroups = buildHealGroups(stats, bonus);
 
   return (
-    <div className="w-full shrink-0 rounded-xl border bg-muted/40 p-3 lg:w-96">
+    <div className="w-full shrink-0 rounded-xl border bg-muted/40 p-3">
       <Tabs defaultValue="offense">
         <TabsList className="mb-3 grid w-full grid-cols-4">
-          <TabsTrigger value="offense" className="cursor-pointer" title="Атака">
-            <Swords className="size-4" />
+          <TabsTrigger
+            value="offense"
+            className="min-w-0 cursor-pointer px-0.5 text-[11.5px]"
+          >
+            Атака
           </TabsTrigger>
-          <TabsTrigger value="defense" className="cursor-pointer" title="Защита">
-            <Shield className="size-4" />
+          <TabsTrigger
+            value="defense"
+            className="min-w-0 cursor-pointer px-0.5 text-[11.5px]"
+          >
+            Защита
           </TabsTrigger>
-          <TabsTrigger value="heal" className="cursor-pointer" title="Исцеление">
-            <HeartPulse className="size-4" />
+          <TabsTrigger
+            value="heal"
+            className="min-w-0 cursor-pointer px-0.5 text-[11.5px]"
+          >
+            Исцеление
           </TabsTrigger>
-          <TabsTrigger value="gear" className="cursor-pointer" title="Снаряжение">
-            <Gem className="size-4" />
+          <TabsTrigger
+            value="gear"
+            className="min-w-0 cursor-pointer px-0.5 text-[11.5px]"
+          >
+            Прочее
           </TabsTrigger>
         </TabsList>
 

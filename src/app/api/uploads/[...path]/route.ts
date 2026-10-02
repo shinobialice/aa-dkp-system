@@ -3,6 +3,10 @@ import { promises as fs } from "fs";
 import path from "path";
 
 const UPLOADS_DIR = process.env.UPLOADS_DIR || "/data/uploads";
+const DEV_FALLBACK_URL =
+  process.env.NODE_ENV === "development"
+    ? process.env.UPLOADS_FALLBACK_URL?.replace(/\/+$/, "")
+    : undefined;
 
 const CONTENT_TYPES: Record<string, string> = {
   ".png": "image/png",
@@ -11,6 +15,21 @@ const CONTENT_TYPES: Record<string, string> = {
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
 };
+
+async function fetchFromFallback(segments: string[]) {
+  if (!DEV_FALLBACK_URL) return null;
+  const url = `${DEV_FALLBACK_URL}/api/uploads/${segments.map(encodeURIComponent).join("/")}`;
+  try {
+    const response = await fetch(url, { cache: "no-store" });
+    if (!response.ok) return null;
+    return {
+      data: new Uint8Array(await response.arrayBuffer()),
+      contentType: response.headers.get("content-type"),
+    };
+  } catch {
+    return null;
+  }
+}
 
 export async function GET(
   _req: NextRequest,
@@ -37,6 +56,15 @@ export async function GET(
       },
     });
   } catch {
+    const remote = await fetchFromFallback(segments);
+    if (remote) {
+      return new NextResponse(remote.data, {
+        headers: {
+          "Content-Type": remote.contentType ?? "application/octet-stream",
+          "Cache-Control": "public, max-age=3600",
+        },
+      });
+    }
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 }

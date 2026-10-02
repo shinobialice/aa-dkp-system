@@ -2,7 +2,8 @@ import {
   getKillCountHistory,
   getKillCountWars,
 } from "@/widgets/killcount/api/history";
-import { KillCountHistoryTable } from "@/widgets/killcount/ui/history-table/history-table";
+import { KillcountHeader } from "@/widgets/killcount/ui/KillcountHeader";
+import { KillcountHistory } from "@/widgets/killcount/ui/KillcountHistory";
 
 export default async function HistoryKillCounterPage() {
   const [data, wars] = await Promise.all([
@@ -11,9 +12,9 @@ export default async function HistoryKillCounterPage() {
   ]);
 
   return (
-    <div className="flex min-h-screen flex-col bg-background text-onBackground p-8">
-      <h1 className="text-3xl font-bold mb-6 text-primary">История убийств</h1>
-      <KillCountHistoryTable history={data} wars={wars} />
+    <div className="mx-auto flex w-full max-w-6xl min-w-0 flex-col gap-4 text-sm">
+      <KillcountHeader subtitle="История по дням, сгруппированная по варам" />
+      <KillcountHistory history={data ?? []} wars={wars} />
     </div>
   );
 }

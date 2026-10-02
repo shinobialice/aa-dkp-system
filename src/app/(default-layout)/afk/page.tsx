@@ -10,6 +10,8 @@ const AfkPage = async () => {
   type AfkUser = {
     id: number;
     username: string;
+    avatar_url: string | null;
+    vk_name: string | null;
     class: string | null;
     class_gear_score: number | null;
     joined_at: string | null;
@@ -22,13 +24,15 @@ const AfkPage = async () => {
   try {
     [inactiveRows, afkTagRows] = await Promise.all([
       sql<any[]>`
-        SELECT id, username, class, class_gear_score, joined_at, active,
-               is_eligible_for_salary, probation_bypass, inactive_since
+        SELECT id, username, avatar_url, vk_name, class, class_gear_score,
+               joined_at, active, is_eligible_for_salary, probation_bypass,
+               inactive_since
         FROM "user" WHERE active = false
       `,
       sql<any[]>`
-        SELECT ut.created_at, u.id, u.username, u.class, u.class_gear_score,
-               u.joined_at, u.active, u.is_eligible_for_salary, u.probation_bypass
+        SELECT ut.created_at, ut.id AS tag_id, u.id, u.username, u.avatar_url,
+               u.vk_name, u.class, u.class_gear_score, u.joined_at, u.active,
+               u.is_eligible_for_salary, u.probation_bypass
         FROM user_tags ut
         JOIN "user" u ON u.id = ut.user_id
         WHERE ut.tag = 'АФК' AND ut.removed_at IS NULL
@@ -46,6 +50,9 @@ const AfkPage = async () => {
   // человек тут оказался (может быть сразу по обеим причинам).
   type MergedAfkUser = AfkUser & {
     afk_since: string | null;
+    inactiveSince: string | null;
+    tagSince: string | null;
+    afkTagId: number | null;
     isInactive: boolean;
     isAfkTagged: boolean;
   };
@@ -57,13 +64,16 @@ const AfkPage = async () => {
     merged.set(user.id, {
       ...user,
       afk_since: inactive_since,
+      inactiveSince: inactive_since,
+      tagSince: null,
+      afkTagId: null,
       isInactive: true,
       isAfkTagged: false,
     });
   }
 
   for (const row of afkTagRows) {
-    const { created_at, ...user } = row;
+    const { created_at, tag_id, ...user } = row;
     const existing = merged.get(user.id);
     if (existing) {
       const existingTime = existing.afk_since
@@ -73,10 +83,15 @@ const AfkPage = async () => {
       existing.afk_since =
         tagTime < existingTime ? created_at : existing.afk_since;
       existing.isAfkTagged = true;
+      existing.tagSince = created_at;
+      existing.afkTagId = tag_id;
     } else {
       merged.set(user.id, {
         ...user,
         afk_since: created_at,
+        inactiveSince: null,
+        tagSince: created_at,
+        afkTagId: tag_id,
         isInactive: false,
         isAfkTagged: true,
       });
@@ -86,9 +101,7 @@ const AfkPage = async () => {
   const users = Array.from(merged.values()).sort((a, b) => {
     if (!a.afk_since) return -1;
     if (!b.afk_since) return 1;
-    return (
-      new Date(a.afk_since).getTime() - new Date(b.afk_since).getTime()
-    );
+    return new Date(a.afk_since).getTime() - new Date(b.afk_since).getTime();
   });
 
   const now = new Date();
@@ -119,12 +132,7 @@ const AfkPage = async () => {
     };
   });
 
-  return (
-    <div className="flex min-h-screen flex-col bg-background text-onBackground p-8">
-      <h1 className="text-3xl font-bold mb-6 text-primary">АФК участники</h1>
-      <AfkMembersTable data={tableData} />
-    </div>
-  );
+  return <AfkMembersTable data={tableData} />;
 };
 
 export default AfkPage;

@@ -21,43 +21,43 @@ export default async function WarPage() {
   const isAdmin = await hasTag(sessionToken, ["Администратор"]);
   const status = await getGuildStatus();
   const periodStart = status.startedAt ?? new Date(0).toISOString();
+  const isWar = status.mode === "pvp";
 
-  const [initialAttendance, initialMembership, initialWarOpponents] =
+  const [initialAttendance, initialMembership, initialWarOpponents, pvpStats] =
     await Promise.all([
       getPeriodAttendanceTop(periodStart, null, status.mode),
       getPeriodMembershipChanges(periodStart, null),
       getCurrentWarOpponents(),
+      isWar ? getStatsForPeriod(periodStart) : Promise.resolve(null),
     ]);
-
-  const stats = await getStatsForPeriod(periodStart);
 
   // Экономика (доход, продажи, источники дохода, дроп) имеет смысл только
   // на фришке — на варе этого либо нет, либо ещё не считается (килы/хонор).
   // Состав гильдии (пришли/ушли) — не зависит от режима, считается всегда.
-  const initialEconomy =
-    status.mode === "freeshard"
-      ? await (async () => {
-          const [finance, topSales, topBuyers, incomeSources, drops] =
-            await Promise.all([
-              getPeriodFinanceSummary(periodStart, null),
-              getPeriodTopSales(periodStart, null),
-              getPeriodTopBuyers(periodStart, null),
-              getPeriodTopIncomeSources(periodStart, null),
-              getPeriodTopDrops(periodStart, null),
-            ]);
-          return { finance, topSales, topBuyers, incomeSources, drops };
-        })()
-      : null;
+  const initialEconomy = isWar
+    ? null
+    : await (async () => {
+        const [finance, topSales, topBuyers, incomeSources, drops] =
+          await Promise.all([
+            getPeriodFinanceSummary(periodStart, null),
+            getPeriodTopSales(periodStart, null),
+            getPeriodTopBuyers(periodStart, null),
+            getPeriodTopIncomeSources(periodStart, null),
+            getPeriodTopDrops(periodStart, null),
+          ]);
+        return { finance, topSales, topBuyers, incomeSources, drops };
+      })();
 
   return (
     <WarPageClient
       isAdmin={isAdmin}
+      asOf={new Date().toISOString()}
       initialStatus={status}
       initialWarOpponents={initialWarOpponents}
       initialAttendance={initialAttendance}
       initialMembership={initialMembership}
       initialEconomy={initialEconomy}
-      guildPvpStats={stats}
+      guildPvpStats={pvpStats}
     />
   );
 }
