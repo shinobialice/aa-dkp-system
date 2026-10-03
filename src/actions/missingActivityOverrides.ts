@@ -21,7 +21,7 @@ export async function dismissMissingSlot(
 ) {
   await ensurePrivilieges(MISSING_ACTIVITY_MANAGER_TAGS);
 
-  await sql<any[]>`
+  await sql`
     INSERT INTO missing_activity_overrides (activity_date, time, boss_name, kind)
     VALUES (${date}, ${time}, ${bossName}, 'dismiss')
     ON CONFLICT (activity_date, time, boss_name, kind) DO NOTHING
@@ -42,7 +42,7 @@ export async function addManualMissingSlot(
     throw new Error("Укажите босса");
   }
 
-  await sql<any[]>`
+  await sql`
     INSERT INTO missing_activity_overrides (activity_date, time, boss_name, kind)
     VALUES (${date}, ${time}, ${trimmedBoss}, 'manual')
     ON CONFLICT (activity_date, time, boss_name, kind) DO NOTHING
@@ -54,7 +54,7 @@ export async function addManualMissingSlot(
 export async function removeManualMissingSlot(id: number) {
   await ensurePrivilieges(MISSING_ACTIVITY_MANAGER_TAGS);
 
-  await sql<any[]>`
+  await sql`
     DELETE FROM missing_activity_overrides WHERE id = ${id} AND kind = 'manual'
   `;
   revalidatePath("/activities");

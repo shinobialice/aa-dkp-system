@@ -1,13 +1,20 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import type { RaidRow } from "@/shared/lib/dbTypes";
+import {
+  getMoscowISOString,
+  getMoscowYearMonth,
+  parseMoscowISOString,
+} from "@/utils/getMoscowISOString";
 import ensurePrivilieges from "./ensurePrivilieges";
-import { triggerFinanceRecalc } from "./recalculateFinanceForMonth";
-import { getMoscowISOString, getMoscowYearMonth } from "@/utils/getMoscowISOString";
+import {
+  deleteRaidLinks,
+  insertRaidLinks,
+  RAID_EDITOR_TAGS,
+} from "@/server/raidLinks";
+import { triggerFinanceRecalc } from "@/server/finance/recalc";
 
-/**
- * Обновляет существующее событие по ID
- */
 const updateEvent = async (
   id: number,
   type: string,
@@ -18,79 +25,34 @@ const updateEvent = async (
   bonusTypeIds: number[],
   lateUserIds: number[] = [],
 ) => {
-  await ensurePrivilieges([
-    "Администратор",
-    "Raid Manager",
-    "Модератор",
-    "Секретутка",
-  ]);
+  await ensurePrivilieges(RAID_EDITOR_TAGS);
 
   // Запоминаем старую дату — если рейд переносят в другой месяц, пересчитать
   // нужно оба месяца (у старого пропадает посещаемость/dkp, у нового — появляется).
-  const [previousRaid] = await sql<any[]>`
+  const [previousRaid] = await sql<Pick<RaidRow, "start_date">[]>`
     SELECT start_date FROM raid WHERE id = ${id}
   `;
 
   try {
-    await sql<any[]>`
-      UPDATE raid SET
-        type = ${type},
-        dkp_summary = ${dkp_summary},
-        start_date = ${getMoscowISOString(start_date)}
-      WHERE id = ${id}
-    `;
-  } catch (updateError) {
-    console.error("Ошибка при обновлении события:", updateError);
+    await sql.begin(async (tx) => {
+      await tx`
+        UPDATE raid SET
+          type = ${type},
+          dkp_summary = ${dkp_summary},
+          start_date = ${getMoscowISOString(start_date)}
+        WHERE id = ${id}
+      `;
+      await deleteRaidLinks(tx, id);
+      await insertRaidLinks(tx, id, {
+        userIds,
+        lateUserIds,
+        bossIds,
+        bonusTypeIds,
+      });
+    });
+  } catch (error) {
+    console.error("Ошибка при обновлении события:", error);
     throw new Error("Не удалось обновить событие");
-  }
-
-  try {
-    await sql<any[]>`DELETE FROM raid_attendance WHERE raid_id = ${id}`;
-    await sql<any[]>`DELETE FROM raid_boss WHERE raid_id = ${id}`;
-    await sql<any[]>`DELETE FROM raid_bonus WHERE raid_id = ${id}`;
-  } catch {
-    throw new Error("Не удалось очистить старые связи рейда");
-  }
-
-  if (userIds.length > 0) {
-    const attendanceInsert = userIds.map((user_id) => ({
-      raid_id: id,
-      user_id,
-      created_at: new Date().toISOString(),
-      is_late: lateUserIds.includes(user_id),
-    }));
-
-    try {
-      await sql<any[]>`INSERT INTO raid_attendance ${sql(attendanceInsert)}`;
-    } catch {
-      throw new Error("Не удалось добавить участников рейда");
-    }
-  }
-
-  if (bossIds.length > 0) {
-    const raidBossInsert = bossIds.map((boss_id) => ({
-      raid_id: id,
-      boss_id,
-    }));
-
-    try {
-      await sql<any[]>`INSERT INTO raid_boss ${sql(raidBossInsert)}`;
-    } catch {
-      throw new Error("Не удалось добавить боссов к рейду");
-    }
-  }
-
-  if (bonusTypeIds.length > 0) {
-    const raidBonusInsert = bonusTypeIds.map((bonus_type_id) => ({
-      raid_id: id,
-      bonus_type_id,
-    }));
-
-    try {
-      await sql<any[]>`INSERT INTO raid_bonus ${sql(raidBonusInsert)}`;
-    } catch {
-      throw new Error("Не удалось добавить бонусы к рейду");
-    }
   }
 
   // Посещаемость/dkp влияют на веса зарплат за месяц рейда — пересчитываем
@@ -98,8 +60,10 @@ const updateEvent = async (
   const { year: newYear, month: newMonth } = getMoscowYearMonth(start_date);
   const monthsToRecalc = new Set([`${newYear}-${newMonth}`]);
   if (previousRaid?.start_date) {
-    const prevDate = new Date(previousRaid.start_date);
-    monthsToRecalc.add(`${prevDate.getFullYear()}-${prevDate.getMonth() + 1}`);
+    const previous = getMoscowYearMonth(
+      parseMoscowISOString(previousRaid.start_date),
+    );
+    monthsToRecalc.add(`${previous.year}-${previous.month}`);
   }
 
   for (const key of monthsToRecalc) {

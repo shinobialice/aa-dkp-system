@@ -37,7 +37,8 @@ const ITEM_ICONS: Record<string, string> = {
   "Красный Дракон": inventoryIcons["Красный Дракон"],
   "Черный Дракон": inventoryIcons["Черный Дракон"],
   "Зеленый Дракон": inventoryIcons["Зеленый Дракон"],
-  "Ро'кана, Безумие морей": "/api/uploads/item-icons/05acae8a-8535-40b2-a4a3-37456c6f2434.png",
+  "Ро'кана, Безумие морей":
+    "/api/uploads/item-icons/05acae8a-8535-40b2-a4a3-37456c6f2434.png",
   "Анд'хакар, Чернильная тьма":
     "/api/uploads/item-icons/6661372a-84b3-48ba-906d-104130988af2.png",
   "Коллекционный фамильяр (Т2)": inventoryIcons["Коллекционный фамильяр т2"],
@@ -126,16 +127,17 @@ function AvailableItemsColumns({ data }: { data: InventoryStockStat[] }) {
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
                       {item.count}
-                      {item.missingPlayers && item.missingPlayers.length > 0 && (
-                        <Tooltip>
-                          <TooltipTrigger className="cursor-default text-xs text-red-500 underline decoration-dotted underline-offset-2">
-                            −{item.missingPlayers.length}
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <PlayerNameList players={item.missingPlayers} />
-                          </TooltipContent>
-                        </Tooltip>
-                      )}
+                      {item.missingPlayers &&
+                        item.missingPlayers.length > 0 && (
+                          <Tooltip>
+                            <TooltipTrigger className="cursor-default text-xs text-red-500 underline decoration-dotted underline-offset-2">
+                              −{item.missingPlayers.length}
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <PlayerNameList players={item.missingPlayers} />
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
                     </div>
                   </TableCell>
                 </TableRow>

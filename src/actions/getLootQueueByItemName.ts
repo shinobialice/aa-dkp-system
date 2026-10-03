@@ -2,6 +2,7 @@
 
 import sql from "@/shared/lib/db";
 import {
+  type QueueQueryRow,
   mapQueueRow,
   sortQueue,
   type QueueEntry,
@@ -10,9 +11,9 @@ import {
 export const getLootQueueByItemName = async (
   itemName: string,
 ): Promise<QueueEntry[]> => {
-  let rows;
+  let rows: QueueQueryRow[];
   try {
-    rows = await sql<any[]>`
+    rows = await sql<QueueQueryRow[]>`
       SELECT
         lq.id,
         lq.user_id,
@@ -23,6 +24,7 @@ export const getLootQueueByItemName = async (
         lq.created_at,
         lq.roll,
         lq.position,
+        it.name AS item_name,
         u.username,
         u.avatar_url,
         u.class
@@ -32,7 +34,7 @@ export const getLootQueueByItemName = async (
       WHERE it.name = ${itemName}
     `;
   } catch (error) {
-    console.error(error);
+    console.error("Ошибка при получении очереди на предмет:", error);
     return [];
   }
 

@@ -31,6 +31,12 @@ export function ItemStats({
   );
   if (entries.length === 0) return null;
 
+  const statValue = (key: string) => {
+    if (bonusStats && key in bonusStats) return bonusStats[key];
+    const baseValue = base?.[key] ?? 0;
+    return gradeStats ? baseValue : scaleStat(baseValue, grade, enchant, key);
+  };
+
   return (
     <div
       className={
@@ -38,12 +44,7 @@ export function ItemStats({
       }
     >
       {entries.map((key) => {
-        const value =
-          bonusStats && key in bonusStats
-            ? bonusStats[key]
-            : gradeStats
-              ? base![key]
-              : scaleStat(base![key], grade, enchant, key);
+        const value = statValue(key);
         const sign = value > 0 ? "+" : "";
         return (
           <div key={key} className="flex items-center justify-between">

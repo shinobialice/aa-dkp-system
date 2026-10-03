@@ -1,11 +1,8 @@
 const MSK_OFFSET_MS = 3 * 60 * 60 * 1000;
 
-// raid.start_date хранится как naive-строка без таймзоны (см. getEvents.ts).
-// Нельзя читать date.getHours()/getMonth() и т.п. — они отражают локальную
-// таймзону браузера/сервера, а не МСК, из-за чего сохранённое время
-// "плывёт" в зависимости от того, где открыт сайт. date.getTime() — это
-// абсолютный момент времени (не зависит от таймзоны), поэтому переводим его
-// в МСК вручную через фиксированный сдвиг +3 часа и читаем UTC-геттеры.
+// raid.start_date и похожие поля хранятся как naive-строки в МСК. Локальные
+// геттеры Date зависят от таймзоны браузера/сервера, поэтому момент времени
+// сдвигается на фиксированные +3 часа и читается UTC-геттерами.
 export function getMoscowISOString(date: Date): string {
   const msk = new Date(date.getTime() + MSK_OFFSET_MS);
   const year = msk.getUTCFullYear();
@@ -18,19 +15,29 @@ export function getMoscowISOString(date: Date): string {
   return `${year}-${month}-${day}T${hour}:${minute}:${second}`;
 }
 
-export function getMoscowYearMonth(date: Date): { year: number; month: number } {
+export function getMoscowYearMonth(date: Date): {
+  year: number;
+  month: number;
+} {
   const msk = new Date(date.getTime() + MSK_OFFSET_MS);
   return { year: msk.getUTCFullYear(), month: msk.getUTCMonth() + 1 };
 }
 
-// Обратная операция: превращает naive МСК-строку ("2026-08-01T16:00:00")
-// в Date с корректным абсолютным моментом времени, не полагаясь на
-// имплицитный локальный парсинг new Date(string) (который тоже зависит от
-// таймзоны браузера/сервера).
 export function parseMoscowISOString(value: string): Date {
   const [datePart, timePart] = value.split("T");
   const [year, month, day] = datePart.split("-").map(Number);
   const [hh, mm, ss] = (timePart ?? "00:00:00").split(":").map(Number);
 
-  return new Date(Date.UTC(year, month - 1, day, hh, mm, ss || 0) - MSK_OFFSET_MS);
+  return new Date(
+    Date.UTC(year, month - 1, day, hh, mm, ss || 0) - MSK_OFFSET_MS,
+  );
+}
+
+// Без явного смещения new Date(naive) на клиенте разберёт строку в таймзоне
+// браузера. У Москвы нет перехода на летнее время с 2014, так что +03:00 точен.
+export function toMoscowIso(naive: string): string;
+export function toMoscowIso(naive: string | null): string | null;
+export function toMoscowIso(naive: string | null): string | null {
+  if (!naive) return null;
+  return /[+-]\d{2}:?\d{2}$|Z$/.test(naive) ? naive : `${naive}+03:00`;
 }

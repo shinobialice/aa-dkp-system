@@ -40,7 +40,9 @@ function ClassArchetypeContent({ data }: { data: ClassArchetypeStat[] }) {
         {data.map((row) => (
           <TableRow
             key={row.className}
-            className={row.className === "Не выбран" ? "text-muted-foreground" : ""}
+            className={
+              row.className === "Не выбран" ? "text-muted-foreground" : ""
+            }
           >
             <TableCell>
               {row.players.length > 0 ? (

@@ -1,129 +1,20 @@
 "use client";
+import type { ProfileUser } from "@/actions/getUser";
 import { useState } from "react";
 import { toast } from "sonner";
 import saveUserArchetype from "@/actions/saveUserArchetype";
 import saveUserSkillBuild from "@/actions/saveUserSkillBuild";
-import type {
-  ArchetypeSlot,
-  RoleSlot,
-  UserArchetype,
-} from "@/actions/getUserArchetype";
-import type { RoleSkillBuild, UserSkillBuild } from "@/actions/getUserSkillBuild";
-import { SpecializationIcon } from "./SpecializationIcon";
-import { getSpecialization } from "./specializationsData";
-import ArchetypeSpecPicker, { type SpecKey } from "./ArchetypeSpecPicker";
+import type { RoleSlot, UserArchetype } from "@/actions/getUserArchetype";
+import type { UserSkillBuild } from "@/actions/getUserSkillBuild";
+import { type SpecKey } from "./ArchetypeSpecPicker";
 import SkillBuildEditor from "./SkillBuildEditor";
-import { Badge } from "@/shared/ui";
 import { Button } from "@/shared/ui";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
 import CharacterTabsSwitcher from "@/widgets/profile/CharacterTabsSwitcher";
-
-const ROLE_LABELS: Record<RoleSlot, string> = {
-  1: "Роль 1",
-  2: "Роль 2",
-  3: "Роль 3",
-};
-
-// Роль 1 есть у всех, 2/3 — только если игрок их себе завёл (см. ProfileClasses).
-function hasRole(user: any, slot: RoleSlot): boolean {
-  if (slot === 1) return true;
-  if (slot === 2) {
-    return !!user.secondary_class || user.secondary_class_gear_score != null;
-  }
-  return !!user.tertiary_class || user.tertiary_class_gear_score != null;
-}
-
-function BuildEditor({
-  slot,
-  showLabel,
-  draft,
-  onSpecChange,
-}: {
-  slot: RoleSlot;
-  showLabel: boolean;
-  draft: ArchetypeSlot;
-  onSpecChange: (key: SpecKey, value: string | null) => void;
-}) {
-  return (
-    <div className="space-y-3">
-      {showLabel && (
-        <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          {ROLE_LABELS[slot]}
-        </div>
-      )}
-      <ArchetypeSpecPicker value={draft} onChange={onSpecChange} />
-    </div>
-  );
-}
-
-function BuildView({
-  slot,
-  showLabel,
-  archetype,
-}: {
-  slot: RoleSlot;
-  showLabel: boolean;
-  archetype: ArchetypeSlot;
-}) {
-  const specs = [
-    archetype.specialization1,
-    archetype.specialization2,
-    archetype.specialization3,
-  ];
-
-  return (
-    <div className="space-y-3">
-      {showLabel && (
-        <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          {ROLE_LABELS[slot]}
-        </div>
-      )}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        {specs.map((id, i) => {
-          const spec = getSpecialization(id);
-          if (!spec) {
-            return (
-              <div
-                key={i}
-                className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed p-3 text-sm text-muted-foreground"
-              >
-                Не выбрано
-              </div>
-            );
-          }
-          return (
-            <div
-              key={i}
-              className="flex flex-col items-center gap-2 rounded-lg border p-3"
-            >
-              <div className="flex size-10 items-center justify-center rounded-md bg-muted">
-                <SpecializationIcon id={spec.id} size={22} />
-              </div>
-              <div className="text-sm font-semibold">{spec.name}</div>
-            </div>
-          );
-        })}
-      </div>
-
-      {archetype.className && (
-        <div className="flex items-center justify-center">
-          <Badge className="text-sm">{archetype.className}</Badge>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function specIdsOf(slot: ArchetypeSlot): string[] {
-  return [slot.specialization1, slot.specialization2, slot.specialization3].filter(
-    (s): s is string => !!s,
-  );
-}
-
-function hasAnySkillSelected(roleBuild: RoleSkillBuild | undefined): boolean {
-  if (!roleBuild) return false;
-  return Object.values(roleBuild).some((spec) => (spec?.selected?.length ?? 0) > 0);
-}
+import { errorMessage } from "@/shared/lib/errorMessage";
+import { hasRole, specIdsOf, hasAnySkillSelected } from "./archetypeRoles";
+import BuildEditor from "./BuildEditor";
+import BuildView from "./BuildView";
 
 export default function ClassArchetypeTab({
   userId,
@@ -135,7 +26,7 @@ export default function ClassArchetypeTab({
   canEdit,
 }: {
   userId: number;
-  user: any;
+  user: ProfileUser;
   archetype: UserArchetype;
   onChange: (archetype: UserArchetype) => void;
   skillBuild: UserSkillBuild;
@@ -145,7 +36,8 @@ export default function ClassArchetypeTab({
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [draft, setDraft] = useState<UserArchetype>(archetype);
-  const [skillBuildDraft, setSkillBuildDraft] = useState<UserSkillBuild>(skillBuild);
+  const [skillBuildDraft, setSkillBuildDraft] =
+    useState<UserSkillBuild>(skillBuild);
 
   const activeSlots = ([1, 2, 3] as RoleSlot[]).filter((slot) =>
     hasRole(user, slot),
@@ -190,23 +82,25 @@ export default function ClassArchetypeTab({
             slotSpecs.includes(specId),
           ),
         );
-        updatedSkillBuild = await saveUserSkillBuild(userId, slot, slotBuildDraft);
+        updatedSkillBuild = await saveUserSkillBuild(
+          userId,
+          slot,
+          slotBuildDraft,
+        );
       }
       onChange(updatedArchetype);
       onSkillBuildChange(updatedSkillBuild);
       setEditing(false);
       toast.success("Класс сохранён");
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Не удалось сохранить класс",
-      );
+      toast.error(errorMessage(error, "Не удалось сохранить класс"));
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <Card className="min-h-[750px] gap-3 py-4">
+    <Card className="min-h-187.5 gap-3 py-4">
       <CardHeader className="border-b">
         <CardTitle className="flex items-center justify-between">
           <CharacterTabsSwitcher />

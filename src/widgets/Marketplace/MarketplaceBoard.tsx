@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 import { Plus, Search, ShoppingCart, Tag } from "lucide-react";
 import {
   getMarketplaceListings,
@@ -11,14 +11,9 @@ import type { MarketplaceItemTypeRow } from "@/actions/marketplaceItemTypeAdmin"
 import { cn } from "@/shared/lib/tw-merge";
 import { Button } from "@/shared/ui";
 import { ListingFormDialog } from "./ListingFormDialog";
-import { ListingCard } from "./ListingCard";
+import ListingColumn, { type BoardColumn } from "./ListingColumn";
 
-const COLUMNS: {
-  type: MarketplaceListingType;
-  title: string;
-  icon: ReactNode;
-  iconClass: string;
-}[] = [
+const COLUMNS: BoardColumn[] = [
   {
     type: "sell",
     title: "Продам",
@@ -80,53 +75,11 @@ export function MarketplaceBoard({
     />
   );
 
-  const renderColumn = (column: (typeof COLUMNS)[number]) => {
-    const items = byType(column.type);
-    return (
-      <section
-        key={column.type}
-        aria-label={column.title}
-        className="flex min-w-0 flex-col gap-2.5"
-      >
-        <h2 className="hidden items-center gap-2 text-base font-bold @[48rem]/board:flex">
-          <span
-            className={cn(
-              "flex size-[26px] items-center justify-center rounded-lg",
-              column.iconClass,
-            )}
-          >
-            {column.icon}
-          </span>
-          {column.title}
-          <span className="text-[13px] font-medium text-muted-foreground">
-            {items.length}
-          </span>
-        </h2>
-        {items.length === 0 ? (
-          <p className="rounded-xl border border-dashed px-4 py-6 text-center text-sm text-muted-foreground">
-            {term || mineOnly ? "Ничего не найдено" : "Пока нет объявлений"}
-          </p>
-        ) : (
-          items.map((listing) => (
-            <ListingCard
-              key={listing.id}
-              listing={listing}
-              catalogItems={catalogItems}
-              canEdit={listing.user_id === currentUserId}
-              canDelete={isAdmin || listing.user_id === currentUserId}
-              onChanged={refresh}
-            />
-          ))
-        )}
-      </section>
-    );
-  };
-
   return (
     <div className="@container/board mx-auto flex w-full max-w-6xl min-w-0 flex-col gap-4 text-sm">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight sm:text-[26px]">
+          <h1 className="text-2xl font-bold tracking-tight">
             Доска объявлений
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -154,7 +107,7 @@ export function MarketplaceBoard({
             aria-pressed={mineOnly}
             onClick={() => setMineOnly((value) => !value)}
             className={cn(
-              "h-11 shrink-0 cursor-pointer rounded-xl border px-3 text-[13px] font-medium transition-colors sm:h-10 sm:rounded-full",
+              "h-11 shrink-0 cursor-pointer rounded-xl border px-3 text-sm font-medium transition-colors sm:h-10 sm:rounded-full",
               mineOnly
                 ? "border-foreground bg-foreground text-background"
                 : "bg-background hover:bg-muted",
@@ -202,14 +155,22 @@ export function MarketplaceBoard({
               tab !== column.type && "hidden @[48rem]/board:block",
             )}
           >
-            {renderColumn(column)}
+            <ListingColumn
+              column={column}
+              listings={byType(column.type)}
+              catalogItems={catalogItems}
+              currentUserId={currentUserId}
+              isAdmin={isAdmin}
+              filtered={!!term || mineOnly}
+              onChanged={refresh}
+            />
           </div>
         ))}
       </div>
 
       <div className="sticky bottom-24 z-10 -mt-2 flex justify-end sm:hidden">
         {createButton(
-          "h-12 rounded-full px-5 text-[15px] shadow-lg shadow-primary/30",
+          "h-12 rounded-full px-5 text-base shadow-lg shadow-primary/30",
           "Объявление",
         )}
       </div>

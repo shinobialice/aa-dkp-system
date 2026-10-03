@@ -23,7 +23,10 @@ export function mergeDailyAttendance(prime: DailySeries, agl: DailySeries) {
 
 type MonthlySeries = { month: string; percent: number }[];
 
-export function mergeMonthlyAttendance(prime: MonthlySeries, agl: MonthlySeries) {
+export function mergeMonthlyAttendance(
+  prime: MonthlySeries,
+  agl: MonthlySeries,
+) {
   return prime.map((p, i) => ({
     month: p.month,
     prime: p.percent ?? 0,

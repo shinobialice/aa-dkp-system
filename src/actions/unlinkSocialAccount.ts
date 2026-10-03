@@ -16,7 +16,7 @@ export async function unlinkSocialAccount(
     throw new Error("Доступ запрещён: нужны права администратора");
   }
 
-  const [existing] = await sql<any[]>`
+  const [existing] = await sql<{ id: number }[]>`
     SELECT id FROM "user" WHERE id = ${userId}
   `;
   if (!existing) {

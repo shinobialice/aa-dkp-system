@@ -1,34 +1,20 @@
-import { useSyncExternalStore } from "react";
-import type { GuildPvpStats } from "@/actions/guildStatusSettings";
-import type { PeriodAttendanceResult } from "@/actions/warActions";
+import type { GuildPvpStats } from "@/actions/guildPvpStats";
+import type { PeriodAttendanceResult } from "@/actions/warAttendance";
 import {
   getKillcountRank,
   type KillcountRank,
 } from "@/shared/config/killcountRanks";
+import { formatNumber } from "@/shared/lib/format";
 
 const DAY_MS = 86_400_000;
-const MINUTE_MS = 60_000;
-const MOSCOW = "Europe/Moscow";
+export const MINUTE_MS = 60_000;
+export const MINUTE_POLL_MS = 10_000;
 
-export function formatNum(value: number): string {
-  return value.toLocaleString("ru-RU");
-}
+export const SCROLL_LIST = "overflow-y-auto [scrollbar-width:thin]";
+const MOSCOW = "Europe/Moscow";
 
 export function formatDecimal(value: number): string {
   return value.toLocaleString("ru-RU", { maximumFractionDigits: 1 });
-}
-
-export function plural(
-  n: number,
-  one: string,
-  few: string,
-  many: string,
-): string {
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-  if (mod10 === 1 && mod100 !== 11) return one;
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return few;
-  return many;
 }
 
 export function formatShare(part: number, total: number): string {
@@ -59,8 +45,9 @@ export function formatSpan(fromIso: string, toMs: number): string {
   const minutes = Math.floor(ms / MINUTE_MS);
   if (minutes < 60) return `${minutes} мин`;
   const hours = Math.floor(minutes / 60);
-  if (hours < 24)
+  if (hours < 24) {
     return `${hours} ч ${String(minutes % 60).padStart(2, "0")} мин`;
+  }
 
   const { months, restMs } = diffMonthsDays(fromMs, toMs);
   if (months === 0) {
@@ -125,19 +112,7 @@ export function perDayHint(
   const days = (endMs - new Date(startIso).getTime()) / DAY_MS;
   if (days < 1) return null;
   const perDay = value / days;
-  return `≈ ${perDay < 10 ? formatDecimal(perDay) : formatNum(Math.round(perDay))} в день`;
-}
-
-function subscribeMinute(onChange: () => void) {
-  const id = setInterval(onChange, 10_000);
-  return () => clearInterval(id);
-}
-
-const minuteSnapshot = () => Math.floor(Date.now() / MINUTE_MS) * MINUTE_MS;
-const serverSnapshot = () => null;
-
-export function useMinuteNow(): number | null {
-  return useSyncExternalStore(subscribeMinute, minuteSnapshot, serverSnapshot);
+  return `≈ ${perDay < 10 ? formatDecimal(perDay) : formatNumber(perDay, 0)} в день`;
 }
 
 export type FighterSort = "kills" | "honor" | "raids";
@@ -223,7 +198,7 @@ export function buildTurnout(attendance: PeriodAttendanceResult) {
   attendance.top.forEach((entry) => {
     sum += entry.raidsAttended;
     const share = total ? entry.raidsAttended / total : 0;
-    buckets[share >= 0.8 ? 0 : share >= 0.5 ? 1 : 2].count += 1;
+    buckets[turnoutBucketIndex(share)].count += 1;
   });
   const average = attendance.top.length ? sum / attendance.top.length : 0;
   return {
@@ -231,4 +206,10 @@ export function buildTurnout(attendance: PeriodAttendanceResult) {
     average,
     averagePercent: total ? Math.round((average / total) * 100) : 0,
   };
+}
+
+function turnoutBucketIndex(share: number) {
+  if (share >= 0.8) return 0;
+  if (share >= 0.5) return 1;
+  return 2;
 }

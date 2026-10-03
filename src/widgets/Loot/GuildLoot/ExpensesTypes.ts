@@ -1,8 +1,6 @@
-export type ExpenseItem = {
+import type { ExpenseRow } from "@/shared/lib/dbTypes";
+
+export type ExpenseItem = Omit<ExpenseRow, "id" | "comment"> & {
   id?: number;
-  date: string | Date;
-  amount: number;
-  target: string;
-  source: string;
   comment?: string | null;
 };

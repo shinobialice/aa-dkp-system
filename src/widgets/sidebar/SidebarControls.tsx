@@ -1,6 +1,11 @@
 "use client";
 
-import { useState, useSyncExternalStore, useTransition, type ReactNode } from "react";
+import {
+  useState,
+  useSyncExternalStore,
+  useTransition,
+  type ReactNode,
+} from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { Eye, EyeOff, Moon, Sun } from "lucide-react";
@@ -17,7 +22,10 @@ function useDarkTheme() {
     () => false,
   );
   const isDark = mounted && resolvedTheme === "dark";
-  return { isDark, setDark: (dark: boolean) => setTheme(dark ? "dark" : "light") };
+  return {
+    isDark,
+    setDark: (dark: boolean) => setTheme(dark ? "dark" : "light"),
+  };
 }
 
 function useViewAsPlayer(initial: boolean) {
@@ -93,10 +101,14 @@ function SheetSwitchRow({
   onChange: (checked: boolean) => void;
 }) {
   return (
-    <label className="flex min-h-12 cursor-pointer items-center gap-3 px-4 text-sm [&_svg]:size-[18px] [&_svg]:text-muted-foreground">
+    <label className="flex min-h-12 cursor-pointer items-center gap-3 px-4 text-sm [&_svg]:size-4.5 [&_svg]:text-muted-foreground">
       {icon}
       <span className="flex-1">{label}</span>
-      <Switch checked={checked} disabled={disabled} onCheckedChange={onChange} />
+      <Switch
+        checked={checked}
+        disabled={disabled}
+        onCheckedChange={onChange}
+      />
     </label>
   );
 }

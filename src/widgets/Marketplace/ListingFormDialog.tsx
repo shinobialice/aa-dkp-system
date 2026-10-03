@@ -4,19 +4,13 @@ import { useState } from "react";
 import Image from "next/image";
 import { RussianRuble, ShoppingCart, Tag } from "lucide-react";
 import { toast } from "sonner";
-import { MarketplaceItemSelector } from "./MarketplaceItemSelector";
-import { IconField } from "@/widgets/items/IconField";
-import { LootIcon } from "@/widgets/Loot/LootBuy/icons/LootIconComponent";
-import { MarketplaceItemTypeRow } from "@/actions/marketplaceItemTypeAdmin";
+import { type MarketplaceItemTypeRow } from "@/actions/marketplaceItemTypeAdmin";
 import {
   createMarketplaceListing,
   updateMarketplaceListing,
-  uploadMarketplaceListingImage,
-  MarketplaceCurrency,
-  MarketplaceListing,
-  MarketplaceListingType,
+  type MarketplaceListing,
 } from "@/actions/marketplaceActions";
-import { Button } from "@/shared/ui";
+import { Button, GOLD_ICON_URL } from "@/shared/ui";
 import {
   Dialog,
   DialogContent,
@@ -25,43 +19,27 @@ import {
   DialogFooter,
   DialogTrigger,
 } from "@/shared/ui";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/ui";
 import { Input } from "@/shared/ui";
 import { Label } from "@/shared/ui";
 import { Textarea } from "@/shared/ui";
+import { errorMessage } from "@/shared/lib/errorMessage";
+import { type FormState, buildInitialForm } from "./listingForm";
+import ChoiceToggle, { type Choice } from "./ChoiceToggle";
+import ItemSourceTabs, { type ListingMode } from "./ItemSourceTabs";
 
-type FormState = {
-  listingType: MarketplaceListingType;
-  itemName: string;
-  quantity: number;
-  price: string;
-  currency: MarketplaceCurrency;
-  description: string;
-  imageUrl: string;
-};
+const LISTING_TYPES: Choice<FormState["listingType"]>[] = [
+  { value: "sell", label: "Продам", icon: <Tag className="h-4 w-4" /> },
+  { value: "buy", label: "Куплю", icon: <ShoppingCart className="h-4 w-4" /> },
+];
 
-function buildInitialForm(listing?: MarketplaceListing): FormState {
-  if (!listing) {
-    return {
-      listingType: "sell",
-      itemName: "",
-      quantity: 1,
-      price: "",
-      currency: "gold",
-      description: "",
-      imageUrl: "",
-    };
-  }
-  return {
-    listingType: listing.listing_type,
-    itemName: listing.item_name,
-    quantity: listing.quantity,
-    price: listing.price != null ? String(listing.price) : "",
-    currency: listing.currency,
-    description: listing.description ?? "",
-    imageUrl: listing.image_url ?? "",
-  };
-}
+const CURRENCIES: Choice<FormState["currency"]>[] = [
+  {
+    value: "gold",
+    label: "Голда",
+    icon: <Image src={GOLD_ICON_URL} alt="" width={16} height={16} />,
+  },
+  { value: "rub", label: "Рубли", icon: <RussianRuble className="h-4 w-4" /> },
+];
 
 export function ListingFormDialog({
   catalogItems,
@@ -76,11 +54,13 @@ export function ListingFormDialog({
 }) {
   const isEdit = !!listing;
   const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState<"catalog" | "custom">(
+  const [mode, setMode] = useState<ListingMode>(
     !listing || listing.catalog_item_id ? "catalog" : "custom",
   );
   const [form, setForm] = useState<FormState>(() => buildInitialForm(listing));
   const [submitting, setSubmitting] = useState(false);
+  const update = (patch: Partial<FormState>) =>
+    setForm((current) => ({ ...current, ...patch }));
 
   const selectedCatalogItem = catalogItems.find(
     (item) => item.name === form.itemName,
@@ -102,7 +82,8 @@ export function ListingFormDialog({
     try {
       const input = {
         listingType: form.listingType,
-        catalogItemId: mode === "catalog" ? (selectedCatalogItem?.id ?? null) : null,
+        catalogItemId:
+          mode === "catalog" ? (selectedCatalogItem?.id ?? null) : null,
         itemName: form.itemName,
         quantity: form.quantity,
         price,
@@ -120,9 +101,7 @@ export function ListingFormDialog({
       setOpen(false);
       onSaved();
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Не удалось сохранить объявление",
-      );
+      toast.error(errorMessage(error, "Не удалось сохранить объявление"));
     } finally {
       setSubmitting(false);
     }
@@ -144,79 +123,23 @@ export function ListingFormDialog({
           </DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-3">
-          <div className="flex rounded-md border p-1 gap-1">
-            <Button
-              type="button"
-              variant={form.listingType === "sell" ? "default" : "ghost"}
-              className="flex-1 cursor-pointer gap-1.5"
-              onClick={() => setForm((prev) => ({ ...prev, listingType: "sell" }))}
-            >
-              <Tag className="h-4 w-4" />
-              Продам
-            </Button>
-            <Button
-              type="button"
-              variant={form.listingType === "buy" ? "default" : "ghost"}
-              className="flex-1 cursor-pointer gap-1.5"
-              onClick={() => setForm((prev) => ({ ...prev, listingType: "buy" }))}
-            >
-              <ShoppingCart className="h-4 w-4" />
-              Куплю
-            </Button>
-          </div>
+          <ChoiceToggle
+            value={form.listingType}
+            choices={LISTING_TYPES}
+            onChange={(listingType) => update({ listingType })}
+          />
 
-          <Tabs
-            value={mode}
-            onValueChange={(v) => {
-              setMode(v as "catalog" | "custom");
-              setForm((prev) => ({ ...prev, itemName: "", imageUrl: "" }));
+          <ItemSourceTabs
+            mode={mode}
+            form={form}
+            catalogItems={catalogItems}
+            selectedCatalogItem={selectedCatalogItem}
+            onModeChange={(next) => {
+              setMode(next);
+              update({ itemName: "", imageUrl: "" });
             }}
-          >
-            <TabsList className="w-full">
-              <TabsTrigger value="catalog">Предмет из базы</TabsTrigger>
-              <TabsTrigger value="custom">Свой предмет</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="catalog" className="flex flex-col gap-2 pt-2">
-              <Label>Предмет</Label>
-              {form.itemName && (
-                <div className="flex items-center gap-2">
-                  <LootIcon
-                    itemName={form.itemName}
-                    iconUrl={selectedCatalogItem?.icon_url}
-                    grade={selectedCatalogItem?.grade}
-                    size={32}
-                  />
-                  <span className="font-medium">{form.itemName}</span>
-                </div>
-              )}
-              <MarketplaceItemSelector
-                value={form.itemName}
-                onSelect={(name) => setForm((prev) => ({ ...prev, itemName: name }))}
-                catalogItems={catalogItems}
-              />
-            </TabsContent>
-
-            <TabsContent value="custom" className="flex flex-col gap-2 pt-2">
-              <Label>Название предмета</Label>
-              <Input
-                value={form.itemName}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, itemName: e.target.value }))
-                }
-                placeholder="Например: Голду"
-              />
-              <IconField
-                value={form.imageUrl}
-                onChange={(url) =>
-                  setForm((prev) => ({ ...prev, imageUrl: url }))
-                }
-                uploadAction={uploadMarketplaceListingImage}
-                label="Фото предмета (необязательно)"
-                size={64}
-              />
-            </TabsContent>
-          </Tabs>
+            onChange={update}
+          />
 
           <Label className="pt-2">Количество</Label>
           <Input
@@ -224,10 +147,7 @@ export function ListingFormDialog({
             min={1}
             value={form.quantity}
             onChange={(e) =>
-              setForm((prev) => ({
-                ...prev,
-                quantity: Math.max(1, Number(e.target.value) || 1),
-              }))
+              update({ quantity: Math.max(1, Number(e.target.value) || 1) })
             }
           />
 
@@ -237,46 +157,21 @@ export function ListingFormDialog({
               type="number"
               min={0}
               value={form.price}
-              onChange={(e) =>
-                setForm((prev) => ({ ...prev, price: e.target.value }))
-              }
+              onChange={(e) => update({ price: e.target.value })}
               placeholder="Оставьте пустым, если цена договорная"
             />
-            <div className="flex rounded-md border p-1 gap-1 shrink-0">
-              <Button
-                type="button"
-                size="sm"
-                variant={form.currency === "gold" ? "default" : "ghost"}
-                className="cursor-pointer gap-1.5 px-2"
-                onClick={() => setForm((prev) => ({ ...prev, currency: "gold" }))}
-              >
-                <Image
-                  src="https://archeagecodex.com/items/gold.png"
-                  alt=""
-                  width={16}
-                  height={16}
-                />
-                Голда
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant={form.currency === "rub" ? "default" : "ghost"}
-                className="cursor-pointer gap-1.5 px-2"
-                onClick={() => setForm((prev) => ({ ...prev, currency: "rub" }))}
-              >
-                <RussianRuble className="h-4 w-4" />
-                Рубли
-              </Button>
-            </div>
+            <ChoiceToggle
+              value={form.currency}
+              choices={CURRENCIES}
+              onChange={(currency) => update({ currency })}
+              compact
+            />
           </div>
 
           <Label>Комментарий</Label>
           <Textarea
             value={form.description}
-            onChange={(e) =>
-              setForm((prev) => ({ ...prev, description: e.target.value }))
-            }
+            onChange={(e) => update({ description: e.target.value })}
             placeholder="Доп. информация"
           />
         </div>

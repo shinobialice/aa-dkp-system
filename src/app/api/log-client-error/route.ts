@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 // Браузерная консоль недоступна в логах Vercel — этот роут просто
 // console.error'ит присланную ошибку на сервере, чтобы её было видно

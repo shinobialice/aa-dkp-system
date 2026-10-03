@@ -8,8 +8,12 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/shared/ui";
-import { cn } from "@/shared/lib/tw-merge";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  Segmented,
+} from "@/shared/ui";
 import {
   AGL_COLOR,
   dayLabel,
@@ -25,48 +29,13 @@ const chartConfig = {
   agl: { label: "АГЛ", color: AGL_COLOR },
 };
 
-export function Segmented<T extends string>({
-  value,
-  options,
-  onChange,
-  label,
-}: {
-  value: T;
-  options: { value: T; label: string }[];
-  onChange: (value: T) => void;
-  label: string;
-}) {
-  return (
-    <div
-      role="group"
-      aria-label={label}
-      className="inline-flex max-w-full gap-0.5 overflow-x-auto rounded-lg bg-muted p-[3px] [scrollbar-width:none]"
-    >
-      {options.map((option) => (
-        <button
-          key={option.value}
-          type="button"
-          aria-pressed={value === option.value}
-          onClick={() => onChange(option.value)}
-          className={cn(
-            "cursor-pointer rounded-md px-3 py-1 text-[12.5px] font-medium whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground",
-            value === option.value && "bg-background text-foreground shadow-sm",
-          )}
-        >
-          {option.label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
 function percentTooltip(value: unknown, name: unknown) {
   const config = chartConfig[name as keyof typeof chartConfig];
   return (
     <div className="flex flex-1 items-center justify-between gap-4 leading-none">
       <span className="flex items-center gap-1.5 text-muted-foreground">
         <span
-          className="size-2.5 rounded-[2px]"
+          className="size-2.5 rounded-xs"
           style={{ backgroundColor: config?.color }}
         />
         {config?.label}
@@ -107,7 +76,7 @@ export default function AttendanceCard({
   return (
     <section className="flex min-w-0 flex-col gap-3 rounded-xl border bg-card p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-[15px] font-semibold">
+        <h2 className="text-base font-semibold">
           Посещаемость{!byDay && ` за ${year}`}
         </h2>
         <Segmented
@@ -124,7 +93,7 @@ export default function AttendanceCard({
         {(["prime", "agl"] as const).map((key) => (
           <span key={key} className="flex items-center gap-1.5">
             <span
-              className="size-2.5 rounded-[3px]"
+              className="size-2.5 rounded-sm"
               style={{ backgroundColor: chartConfig[key].color }}
             />
             {chartConfig[key].label}
@@ -136,7 +105,7 @@ export default function AttendanceCard({
             : "· нажмите на месяц, чтобы открыть его по дням"}
         </span>
       </div>
-      <ChartContainer className="h-[230px] w-full" config={chartConfig}>
+      <ChartContainer className="h-57.5 w-full" config={chartConfig}>
         <BarChart
           accessibilityLayer
           data={data}

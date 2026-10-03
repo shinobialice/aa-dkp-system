@@ -1,3 +1,4 @@
+import type { ProfileUser } from "@/actions/getUser";
 import { ArchetypeSummary } from "@/widgets/profile/archetype/ArchetypeSummary";
 import type { ArchetypeSlot, UserArchetype } from "@/actions/getUserArchetype";
 import { classIcons } from "./roleClasses";
@@ -38,7 +39,7 @@ export default function ProfileClasses({
   user,
   archetype,
 }: {
-  user: any;
+  user: ProfileUser;
   archetype: UserArchetype;
 }) {
   const hasSecondary =

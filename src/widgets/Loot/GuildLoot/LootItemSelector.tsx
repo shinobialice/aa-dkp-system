@@ -1,21 +1,37 @@
 "use client";
-import { useRef, useState } from "react";
-import { LootIcon } from "../LootBuy/icons/LootIconComponent";
-import { ItemType } from "./LootTypes";
-import { Command, CommandInput, CommandItem, CommandList } from "@/shared/ui";
-import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui";
 
-export function LootItemSelector({
-  value,
-  onSelect,
-  itemTypes,
-}: {
+import { useRef, useState } from "react";
+import {
+  Command,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/shared/ui";
+import { LootIcon } from "../LootBuy/icons/LootIconComponent";
+import type { ItemType } from "./LootTypes";
+
+type Props = {
   value: string;
-  onSelect: (name: string) => void;
   itemTypes: ItemType[];
-}) {
+  onSelect: (name: string) => void;
+};
+
+export default function LootItemSelector({
+  value,
+  itemTypes,
+  onSelect,
+}: Props) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+
+  const handleSelect = (name: string) => {
+    onSelect(name);
+    setIsOpen(false);
+    inputRef.current?.blur();
+  };
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -26,11 +42,11 @@ export function LootItemSelector({
           placeholder="Поиск предмета..."
           value={value}
           readOnly
-          className="border rounded px-2 py-1 cursor-pointer"
+          className="cursor-pointer rounded border px-2 py-1"
           onClick={() => setIsOpen(true)}
         />
       </PopoverTrigger>
-      <PopoverContent className="p-0 w-[378px]">
+      <PopoverContent className="w-94.5 p-0">
         <Command>
           <CommandInput placeholder="Поиск..." />
           <CommandList className="cursor-pointer">
@@ -38,12 +54,8 @@ export function LootItemSelector({
               <CommandItem
                 key={item.id}
                 value={item.name}
-                onSelect={() => {
-                  onSelect(item.name);
-                  setIsOpen(false);
-                  inputRef.current?.blur();
-                }}
-                className="flex items-center gap-2 cursor-pointer"
+                onSelect={() => handleSelect(item.name)}
+                className="flex cursor-pointer items-center gap-2"
               >
                 <LootIcon
                   itemName={item.name}

@@ -5,7 +5,7 @@ import ensurePrivilieges from "./ensurePrivilieges";
 export async function updateItemTypePrice(name: string, price: number | null) {
   await ensurePrivilieges(["Администратор"]);
   try {
-    await sql<any[]>`
+    await sql`
       UPDATE item_type SET price = ${price} WHERE name = ${name}
     `;
   } catch (error) {

@@ -133,19 +133,20 @@ const vkNotificationExcludedEvents = new Set(["Великий луг", "Обор
 
 export const fixedScheduleEvents = Array.from(
   new Set(
-    dayNames
-      .flatMap((day) => schedule[day] ?? [])
-      .map(([, boss]) => boss),
+    dayNames.flatMap((day) => schedule[day] ?? []).map(([, boss]) => boss),
   ),
 ).filter((name) => !vkNotificationExcludedEvents.has(name));
 
-export function getMoscowTime(): Date {
-  const now = new Date();
+export function getMoscowTime(now: Date = new Date()): Date {
   const utc = now.getTime() + now.getTimezoneOffset() * 60000;
   return new Date(utc + 3 * 60 * 60 * 1000);
 }
 
-export function getDateWithTime(now: Date, timeStr: string, dayOffset = 0): Date {
+export function getDateWithTime(
+  now: Date,
+  timeStr: string,
+  dayOffset = 0,
+): Date {
   const [h, m] = timeStr.split(":").map(Number);
   const d = new Date(now);
   d.setDate(d.getDate() + dayOffset);

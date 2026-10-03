@@ -18,10 +18,10 @@ export async function updateUser(
     payload.inactive_since = data.active ? null : new Date().toISOString();
   }
 
-  let updatedUser;
+  let updatedUser: { id: number } | undefined;
   try {
-    [updatedUser] = await sql<any[]>`
-      UPDATE "user" SET ${sql(payload)} WHERE id = ${id} RETURNING *
+    [updatedUser] = await sql<{ id: number }[]>`
+      UPDATE "user" SET ${sql(payload)} WHERE id = ${id} RETURNING id
     `;
   } catch (error) {
     console.error("Ошибка при обновлении пользователя:", error);
@@ -32,6 +32,4 @@ export async function updateUser(
     console.error("Ошибка при обновлении пользователя: not found");
     throw new Error("Не удалось обновить пользователя");
   }
-
-  return updatedUser;
 }

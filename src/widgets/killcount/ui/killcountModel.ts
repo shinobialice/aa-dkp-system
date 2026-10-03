@@ -38,26 +38,13 @@ export function sortRows(rows: KillRow[], key: SortKey) {
   );
 }
 
-export function formatNumber(value: number) {
-  return value.toLocaleString("ru-RU");
-}
-
-export function avatarSrc(userName: string, avatarUrl?: string | null) {
-  return (
-    avatarUrl ?? `https://api.dicebear.com/6.x/initials/svg?seed=${userName}`
-  );
-}
-
-/** "2026-09-14..." → "YYYY-MM-DD" (ключ дня и slug страницы дня). */
 export const dayKey = (iso: string) => iso.slice(0, 10);
 
-/** "YYYY-MM-DD" → "14.09" */
 export function shortDate(iso: string) {
   const [, month, day] = dayKey(iso).split("-");
   return `${day}.${month}`;
 }
 
-/** "YYYY-MM-DD" → "14 сентября" */
 export function longDate(iso: string) {
   const [, month, day] = dayKey(iso).split("-").map(Number);
   return `${day} ${MONTHS_GENITIVE[month - 1]}`;

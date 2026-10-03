@@ -1,4 +1,8 @@
 "use client";
+import type { ProfileUser } from "@/actions/getUser";
+import type { InventoryItem } from "@/actions/getUserInventory";
+import type { UserSeal } from "@/actions/getUserSeals";
+import type { ProfileTag } from "@/widgets/profile/profileTypes";
 import type { UserArchetype } from "@/actions/getUserArchetype";
 import type { UserSkillBuild } from "@/actions/getUserSkillBuild";
 import type { UserEquipment } from "@/actions/getUserEquipment";
@@ -45,19 +49,19 @@ export default function ProfileTabs({
 }: {
   tab: string;
   onTabChange: (tab: string) => void;
-  user: any;
-  inventory: any[];
-  seals: any[];
-  setSeals: (seals: any[]) => void;
+  user: ProfileUser;
+  inventory: InventoryItem[];
+  seals: UserSeal[];
+  setSeals: (seals: UserSeal[]) => void;
   archetype: UserArchetype;
   setArchetype: (archetype: UserArchetype) => void;
   skillBuild: UserSkillBuild;
   setSkillBuild: (skillBuild: UserSkillBuild) => void;
   equipment: UserEquipment[];
   setEquipment: (equipment: UserEquipment[]) => void;
-  tags: any[];
-  setTags: (tags: any[]) => void;
-  setUser: (user: any) => void;
+  tags: ProfileTag[];
+  setTags: (tags: ProfileTag[]) => void;
+  setUser: (user: ProfileUser) => void;
   salary: number | null;
   averageGuildGS: number;
   isAdmin: boolean;

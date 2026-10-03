@@ -149,9 +149,3 @@ export function classCounts(members: Member[]) {
     .map(([name, count]) => ({ name, count }))
     .sort((a, b) => b.count - a.count || classRank(a.name) - classRank(b.name));
 }
-
-export function vkHref(member: Member) {
-  if (member.vk_name) return `https://vk.ru/${member.vk_name}`;
-  if (member.vk_id) return `https://vk.com/id${member.vk_id}`;
-  return null;
-}

@@ -1,9 +1,10 @@
 import "server-only";
+import { requireEnv } from "./env";
 
 export async function sendVkMessage(text: string) {
   const params = new URLSearchParams({
-    access_token: process.env.VK_BOT_TOKEN!,
-    peer_id: process.env.VK_BOT_PEER_ID!,
+    access_token: requireEnv(process.env.VK_BOT_TOKEN, "VK_BOT_TOKEN"),
+    peer_id: requireEnv(process.env.VK_BOT_PEER_ID, "VK_BOT_PEER_ID"),
     message: text,
     random_id: String(Math.floor(Math.random() * 1e9)),
     v: "5.131",

@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button, Label } from "@/shared/ui";
+import { errorMessage } from "@/shared/lib/errorMessage";
 
 export function IconField({
   value,
@@ -33,9 +34,7 @@ export function IconField({
       onChange(url);
       toast.success("Иконка загружена");
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Не удалось загрузить иконку",
-      );
+      toast.error(errorMessage(error, "Не удалось загрузить иконку"));
     } finally {
       setUploading(false);
     }
@@ -58,7 +57,7 @@ export function IconField({
               style={{ width: size, height: size }}
             />
           ) : (
-            <span className="text-[10px] text-muted-foreground">нет</span>
+            <span className="text-2xs text-muted-foreground">нет</span>
           )}
         </div>
         <div className="flex-1">

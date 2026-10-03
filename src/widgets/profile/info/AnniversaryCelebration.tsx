@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { plural } from "@/shared/lib/format";
 import { PartyPopper } from "lucide-react";
-import { pluralizeYears } from "@/utils/pluralizeYears";
 
 function getAnniversaryYears(joinedAt: string | null): number | null {
   if (!joinedAt) return null;
@@ -73,7 +73,7 @@ export default function AnniversaryCelebration({
         <div className="flex items-center gap-2 text-base font-bold md:text-lg">
           <PartyPopper className="size-5 shrink-0 animate-bounce" />
           <span>
-            {years} {pluralizeYears(years)} в гильдии!
+            {years} {plural(years, "год", "года", "лет")} в гильдии!
           </span>
           <PartyPopper className="size-5 -scale-x-100 shrink-0 animate-bounce" />
         </div>

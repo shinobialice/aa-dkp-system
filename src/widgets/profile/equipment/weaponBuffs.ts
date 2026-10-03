@@ -30,7 +30,9 @@ const WEAPON_BUFFS: Record<WeaponBuff["key"], Omit<WeaponBuff, "key">> = {
   },
 };
 
-export function getActiveWeaponBuff(equipment: UserEquipment[]): WeaponBuff | null {
+export function getActiveWeaponBuff(
+  equipment: UserEquipment[],
+): WeaponBuff | null {
   const mainEq = equipment.find((e) => e.slot === "weapon_main");
   const offEq = equipment.find((e) => e.slot === "weapon_off");
 

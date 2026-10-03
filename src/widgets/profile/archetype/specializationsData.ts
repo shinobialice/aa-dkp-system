@@ -5,8 +5,16 @@ export type Specialization = {
 };
 
 export const SPECIALIZATIONS: Specialization[] = [
-  { id: "napadenie", name: "Нападение", iconUrl: "/images/classes/napadenie.png" },
-  { id: "volshebstvo", name: "Волшебство", iconUrl: "/images/classes/volshebstvo.png" },
+  {
+    id: "napadenie",
+    name: "Нападение",
+    iconUrl: "/images/classes/napadenie.png",
+  },
+  {
+    id: "volshebstvo",
+    name: "Волшебство",
+    iconUrl: "/images/classes/volshebstvo.png",
+  },
   {
     id: "presledovanie",
     name: "Преследование",
@@ -22,7 +30,11 @@ export const SPECIALIZATIONS: Specialization[] = [
     name: "Мистицизм",
     iconUrl: "/images/classes/misticizm.png",
   },
-  { id: "skritnost", name: "Скрытность", iconUrl: "/images/classes/skritnost.png" },
+  {
+    id: "skritnost",
+    name: "Скрытность",
+    iconUrl: "/images/classes/skritnost.png",
+  },
   { id: "oborona", name: "Оборона", iconUrl: "/images/classes/oborona.png" },
   {
     id: "soprotivlenie",
@@ -36,7 +48,11 @@ export const SPECIALIZATIONS: Specialization[] = [
     iconUrl: "/images/classes/voodush.png",
   },
   { id: "gnev", name: "Гнев", iconUrl: "/images/classes/gnev.png" },
-  { id: "kovarstvo", name: "Коварство", iconUrl: "/images/classes/kovarstvo.png" },
+  {
+    id: "kovarstvo",
+    name: "Коварство",
+    iconUrl: "/images/classes/kovarstvo.png",
+  },
   { id: "strelba", name: "Стрельба", iconUrl: "/images/classes/strelba.png" },
   { id: "tanec", name: "Танец", iconUrl: "/images/classes/tanec.png" },
 ];

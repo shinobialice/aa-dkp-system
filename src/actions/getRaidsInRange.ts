@@ -17,9 +17,8 @@ export async function getRaidsInRange(
   to: string,
 ): Promise<RangeRaid[]> {
   const userId = (await getSessionUserId()) ?? -1;
-  let rows;
   try {
-    rows = await sql<any[]>`
+    return await sql<RangeRaid[]>`
       SELECT
         r.id,
         to_char(r.start_date, 'YYYY-MM-DD"T"HH24:MI') AS start,
@@ -48,13 +47,4 @@ export async function getRaidsInRange(
     console.error("Ошибка при получении рейдов за период:", error);
     throw new Error("Не удалось загрузить рейды");
   }
-
-  return rows.map((row) => ({
-    id: row.id,
-    start: row.start,
-    type: row.type,
-    bosses: row.bosses,
-    people: row.people,
-    attended: row.attended,
-  }));
 }

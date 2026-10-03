@@ -1,51 +1,33 @@
 "use client";
 
 import { useState } from "react";
+import type { GuildStatus } from "@/actions/guildStatusSettings";
+import type { WarOpponentsState } from "@/actions/warOpponents";
+import type { WarPeriodSnapshot } from "@/actions/warPeriodSnapshot";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui";
-import type {
-  GuildPvpStats,
-  GuildStatus,
-  WarOpponentsState,
-} from "@/actions/guildStatusSettings";
-import type {
-  PeriodAttendanceResult,
-  PeriodMembershipChanges,
-  WarEconomySnapshot,
-} from "@/actions/warActions";
-import WarHeader from "./WarHeader";
+import { activeOpponentNames } from "./opponentsModel";
 import WarDashboard from "./WarDashboard";
+import WarHeader from "./WarHeader";
 import WarHistoryTab from "./WarHistoryTab";
-import { WarOpponentsLive } from "./WarOpponentsCard";
+import WarOpponentsLive from "./WarOpponentsLive";
+
+type Props = {
+  isAdmin: boolean;
+  asOf: string;
+  initialStatus: GuildStatus;
+  initialWarOpponents: WarOpponentsState;
+  snapshot: WarPeriodSnapshot;
+};
 
 export default function WarPageClient({
   isAdmin,
   asOf,
   initialStatus,
   initialWarOpponents,
-  initialAttendance,
-  initialMembership,
-  initialEconomy,
-  guildPvpStats,
-}: {
-  isAdmin: boolean;
-  asOf: string;
-  initialStatus: GuildStatus;
-  initialWarOpponents: WarOpponentsState;
-  initialAttendance: PeriodAttendanceResult;
-  initialMembership: PeriodMembershipChanges;
-  initialEconomy: WarEconomySnapshot | null;
-  guildPvpStats: GuildPvpStats | null;
-}) {
+  snapshot,
+}: Props) {
   const [tab, setTab] = useState("now");
   const { mode, server, faction, startedAt } = initialStatus;
-  const currentOpponents = [
-    initialWarOpponents.primary.endedAt
-      ? null
-      : initialWarOpponents.primary.name,
-    ...initialWarOpponents.opponents
-      .filter((opponent) => !opponent.endedAt)
-      .map((opponent) => opponent.name),
-  ].filter((name): name is string => !!name);
 
   return (
     <Tabs
@@ -82,17 +64,14 @@ export default function WarPageClient({
           mode={mode}
           startedAt={startedAt}
           asOf={asOf}
-          attendance={initialAttendance}
-          membership={initialMembership}
-          pvpStats={guildPvpStats}
-          economy={initialEconomy}
+          snapshot={snapshot}
         />
       </TabsContent>
 
       <TabsContent value="history">
         <WarHistoryTab
           current={initialStatus}
-          currentOpponents={currentOpponents}
+          currentOpponents={activeOpponentNames(initialWarOpponents)}
           onOpenCurrent={() => setTab("now")}
         />
       </TabsContent>

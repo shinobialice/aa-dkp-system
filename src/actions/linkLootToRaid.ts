@@ -1,12 +1,15 @@
 "use server";
 
+import { RAID_EDITOR_TAGS } from "@/server/raidLinks";
 import sql from "@/shared/lib/db";
+import ensurePrivilieges from "./ensurePrivilieges";
 
 export const linkLootToRaid = async (lootIds: number[], raidId: number) => {
   if (lootIds.length === 0) return;
+  await ensurePrivilieges(RAID_EDITOR_TAGS);
 
   try {
-    await sql<any[]>`
+    await sql`
       UPDATE loot SET raid_id = ${raidId} WHERE id = ANY(${lootIds})
     `;
   } catch (error) {

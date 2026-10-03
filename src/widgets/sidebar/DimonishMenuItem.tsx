@@ -48,19 +48,23 @@ function useDimonish() {
   return { show, overlay };
 }
 
-const DimonishMenuItem = () => {
+function DimonishMenuItem() {
   const { show, overlay } = useDimonish();
 
   return (
     <SidebarMenuItem>
-      <SidebarMenuButton className="cursor-pointer" tooltip="Димониш" onClick={show}>
+      <SidebarMenuButton
+        className="cursor-pointer"
+        tooltip="Димониш"
+        onClick={show}
+      >
         <Ghost />
         <span>Димониш</span>
       </SidebarMenuButton>
       {overlay}
     </SidebarMenuItem>
   );
-};
+}
 
 export function DimonishTile({ className }: { className: string }) {
   const { show, overlay } = useDimonish();
@@ -68,7 +72,7 @@ export function DimonishTile({ className }: { className: string }) {
   return (
     <>
       <button type="button" className={className} onClick={show}>
-        <Ghost className="size-[22px] text-muted-foreground" />
+        <Ghost className="size-5.5 text-muted-foreground" />
         Димониш
       </button>
       {overlay}

@@ -1,0 +1,16 @@
+export const bossImages: Record<string, string> = {
+  АГЛ: "/images/bosses/ashyara.png",
+  Калидис: "/images/bosses/kalidis.png",
+  Кракен: "/images/bosses/kraken.png",
+  "Великий луг": "/images/bosses/velikii_lug.png",
+  Анталлон: "/images/bosses/antallon.png",
+  Ксанатос: "/images/bosses/ksanatos.png",
+  Левиафан: "/images/bosses/leviathan.png",
+  "Оборона Ифнира": "/images/bosses/ifnir.png",
+  "Осада замка": "/images/bosses/osada.png",
+  Кошка: "/images/bosses/koshka.png",
+  Марли: "/images/bosses/marli.png",
+  Морф: "/images/bosses/morpheos.png",
+  "Пепельные равнины": "/images/bosses/pepelki.png",
+  "Проф. работы": "/images/bosses/prof.png",
+};

@@ -1,4 +1,5 @@
 import { ROLL_BASED_QUEUE_ITEMS } from "@/utils/rollBasedQueueItems";
+import { plural } from "@/shared/lib/format";
 
 export const AMOUNT_QUEUE_ITEMS = [
   "Эссенция ярости",
@@ -43,7 +44,7 @@ export function queueKind(itemName: string): QueueKind {
   return "plain";
 }
 
-export function mapQueueRow(row: {
+export type QueueQueryRow = {
   id: number;
   user_id: number;
   username: string | null;
@@ -53,10 +54,13 @@ export function mapQueueRow(row: {
   synth_target: string | null;
   required: number | null;
   delivered: number | null;
-  created_at: Date | string;
+  created_at: string | null;
   roll: number | null;
   position: number | null;
-}): QueueEntry {
+  item_name: string;
+};
+
+export function mapQueueRow(row: QueueQueryRow): QueueEntry {
   return {
     id: row.id,
     userId: row.user_id,
@@ -67,7 +71,7 @@ export function mapQueueRow(row: {
     synthTarget: row.synth_target ?? "",
     required: row.required ?? 0,
     delivered: row.delivered ?? 0,
-    createdAt: new Date(row.created_at).toISOString(),
+    createdAt: new Date(row.created_at ?? 0).toISOString(),
     roll: row.roll,
     position: row.position,
   };
@@ -94,21 +98,9 @@ export function formatPrice(price: number) {
   return price.toLocaleString("ru-RU", { maximumFractionDigits: 2 });
 }
 
-export function formatAmount(value: number) {
-  return Math.round(value).toLocaleString("ru-RU");
-}
-
 export function priceLabel(item: BuyItem) {
   if (item.price !== null) return formatPrice(item.price);
   return isBundled(item) ? "в комплекте" : "не указана";
-}
-
-export function plural(n: number, one: string, few: string, many: string) {
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-  if (mod10 === 1 && mod100 !== 11) return one;
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few;
-  return many;
 }
 
 export function playersCount(n: number) {
@@ -142,13 +134,3 @@ export const STATUS_BADGES: Record<
       "bg-green-100 text-green-800 dark:bg-green-500/15 dark:text-green-300",
   },
 };
-
-export function avatarSrc(entry: {
-  avatarUrl: string | null;
-  username: string;
-}) {
-  return (
-    entry.avatarUrl ??
-    `https://api.dicebear.com/6.x/initials/svg?seed=${entry.username}`
-  );
-}

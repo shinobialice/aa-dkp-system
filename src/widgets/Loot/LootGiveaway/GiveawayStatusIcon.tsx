@@ -31,15 +31,13 @@ function tooltipText(name: string, status: GiveawayStatus, date: string) {
     const shown = formatDate(date);
     return `${name} — выдано гильдией${shown ? ` ${shown}` : ""}`;
   }
-  if (status === "В наличии")
+  if (status === "В наличии") {
     return `${name} — в наличии (уже есть, гильдия не выдавала)`;
+  }
   if (status === "Хочет") return `${name} — хочет`;
   return `${name} — не выдано`;
 }
 
-/** Иконка предмета со статусом: серая, если не выдано, и цветная точка
- * (зелёная с галочкой — выдала гильдия, синяя — в наличии, то есть уже есть
- * у игрока без выдачи, розовая — хочет). */
 export function GiveawayStatusIcon({
   item,
   status,

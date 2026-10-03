@@ -1,10 +1,11 @@
 "use server";
 import sql from "@/shared/lib/db";
 import ensureCanEditUserData from "./ensureCanEditUserData";
-import getUserArchetype, { RoleSlot } from "./getUserArchetype";
+import getUserArchetype, { type RoleSlot } from "./getUserArchetype";
 import getUserSkillBuild, {
-  RoleSkillBuild,
-  UserSkillBuild,
+  type RoleSkillBuild,
+  type SpecializationBuild,
+  type UserSkillBuild,
 } from "./getUserSkillBuild";
 import {
   SKILL_POINTS_BUDGET,
@@ -35,53 +36,21 @@ const saveUserSkillBuild = async (
     ),
   );
 
-  let totalActiveSelected = 0;
   const cleaned: RoleSkillBuild = {};
-
   for (const [specializationId, data] of Object.entries(build)) {
     if (!allowedSpecs.has(specializationId)) {
       throw new Error("Эта специализация не выбрана для данной роли");
     }
-
-    const skills = getSkillsForSpecialization(specializationId);
-    const bySkillId = new Map(skills.map((s) => [s.id, s]));
-
-    const rawSelected = Array.from(new Set(data.selected ?? []));
-    for (const skillId of rawSelected) {
-      if (!bySkillId.has(skillId)) {
-        throw new Error(`Неизвестный навык: ${skillId}`);
-      }
-    }
-    // Пассивки не хранятся — если что-то пассивное всё же прислали, тихо
-    // отбрасываем, а не роняем сохранение.
-    const activeSelected = rawSelected.filter(
-      (id) => bySkillId.get(id)!.kind === "active",
+    cleaned[specializationId] = cleanSpecializationBuild(
+      specializationId,
+      data,
     );
-
-    for (const skillId of activeSelected) {
-      const skill = bySkillId.get(skillId)!;
-      const threshold = skill.unlockThreshold ?? 0;
-      if (activeSelected.length - 1 < threshold) {
-        throw new Error(
-          `«${skill.name}» требует ещё ${threshold} активных навыков в этой ветке`,
-        );
-      }
-    }
-
-    const eferund: Record<string, string> = {};
-    for (const [skillId, variantId] of Object.entries(data.eferund ?? {})) {
-      if (!activeSelected.includes(skillId)) continue;
-      const skill = bySkillId.get(skillId);
-      if (!skill?.eferund?.some((v) => v.id === variantId)) {
-        throw new Error(`Неизвестный вариант эфе'рунда: ${variantId}`);
-      }
-      eferund[skillId] = variantId;
-    }
-
-    totalActiveSelected += activeSelected.length;
-    cleaned[specializationId] = { selected: activeSelected, eferund };
   }
 
+  const totalActiveSelected = Object.values(cleaned).reduce(
+    (sum, spec) => sum + spec.selected.length,
+    0,
+  );
   if (totalActiveSelected > SKILL_POINTS_BUDGET) {
     throw new Error(
       `Максимум ${SKILL_POINTS_BUDGET} очков активных навыков на роль`,
@@ -105,3 +74,47 @@ const saveUserSkillBuild = async (
 };
 
 export default saveUserSkillBuild;
+
+// Пассивки не хранятся: если их всё же прислали, они тихо отбрасываются.
+function cleanSpecializationBuild(
+  specializationId: string,
+  data: SpecializationBuild,
+): SpecializationBuild {
+  const bySkillId = new Map(
+    getSkillsForSpecialization(specializationId).map((skill) => [
+      skill.id,
+      skill,
+    ]),
+  );
+
+  const selectedSkills = Array.from(new Set(data.selected ?? []), (skillId) => {
+    const skill = bySkillId.get(skillId);
+    if (!skill) throw new Error(`Неизвестный навык: ${skillId}`);
+    return skill;
+  });
+  const activeSkills = selectedSkills.filter(
+    (skill) => skill.kind === "active",
+  );
+
+  for (const skill of activeSkills) {
+    const threshold = skill.unlockThreshold ?? 0;
+    if (activeSkills.length - 1 < threshold) {
+      throw new Error(
+        `«${skill.name}» требует ещё ${threshold} активных навыков в этой ветке`,
+      );
+    }
+  }
+
+  const activeIds = activeSkills.map((skill) => skill.id);
+  const eferund: Record<string, string> = {};
+  for (const [skillId, variantId] of Object.entries(data.eferund ?? {})) {
+    if (!activeIds.includes(skillId)) continue;
+    const skill = bySkillId.get(skillId);
+    if (!skill?.eferund?.some((variant) => variant.id === variantId)) {
+      throw new Error(`Неизвестный вариант эфе'рунда: ${variantId}`);
+    }
+    eferund[skillId] = variantId;
+  }
+
+  return { selected: activeIds, eferund };
+}

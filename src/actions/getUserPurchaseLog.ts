@@ -1,6 +1,11 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import type {
+  GivenawaylootRow,
+  ItemTypeRow,
+  LootRow,
+} from "@/shared/lib/dbTypes";
 import { treasuryGiveawaySyncItems } from "@/widgets/Loot/LootGiveaway/treasuryGiveawaySync";
 
 export type InventoryLogEntry = {
@@ -15,11 +20,25 @@ export type InventoryLogEntry = {
   grade: number | null;
 };
 
+type CatalogFields = {
+  item_type_icon_url: ItemTypeRow["icon_url"];
+  item_type_grade: ItemTypeRow["grade"] | null;
+};
+
+type TreasuryRow = Pick<
+  LootRow,
+  "id" | "quantity" | "comment" | "status" | "sold_at"
+> &
+  CatalogFields & { item_type_name: string };
+
+type GiveawayRow = Pick<GivenawaylootRow, "id" | "name" | "date" | "comment"> &
+  CatalogFields;
+
 export const getUserPurchaseLog = async (
   userId: number,
 ): Promise<InventoryLogEntry[]> => {
   const [lootRows, giveawayRows] = await Promise.all([
-    sql<any[]>`
+    sql<TreasuryRow[]>`
       SELECT
         l.id, l.quantity, l.comment, l.status, l.sold_at,
         it.name AS item_type_name, it.icon_url AS item_type_icon_url, it.grade AS item_type_grade
@@ -30,13 +49,10 @@ export const getUserPurchaseLog = async (
       console.error("Ошибка при получении покупок/выдач из казны:", error);
       throw new Error("Не удалось получить покупки/выдачи из казны");
     }),
-    // У раздачи лута нет своей ссылки на item_type (только текстовое имя) —
-    // подтягиваем иконку/грейд по совпадению имени с каталогом казны, если
-    // такой предмет там есть; для остальных иконка просто не покажется, как
-    // и раньше.
-    sql<any[]>`
+    // У раздачи лута нет ссылки на item_type, иконка ищется по имени.
+    sql<GiveawayRow[]>`
       SELECT
-        g.id, g.name, g.date, g.comment, g.status,
+        g.id, g.name, g.date, g.comment,
         it.icon_url AS item_type_icon_url, it.grade AS item_type_grade
       FROM givenawayloot g
       LEFT JOIN item_type it ON it.name = g.name
@@ -49,45 +65,45 @@ export const getUserPurchaseLog = async (
 
   const fromTreasury: InventoryLogEntry[] = lootRows.map((row) => ({
     id: `loot-${row.id}`,
-    name: row.item_type_name ?? "Неизвестный предмет",
+    name: row.item_type_name,
     type: row.status === "Выдано" ? "Выдано" : "Куплено",
     source: "Казна",
     date: row.sold_at,
-    quantity: row.quantity ?? 1,
+    quantity: row.quantity,
     comment: row.comment,
-    iconUrl: row.item_type_icon_url ?? null,
-    grade: row.item_type_grade ?? null,
+    iconUrl: row.item_type_icon_url,
+    grade: row.item_type_grade,
   }));
 
   const giveawayNamesGivenFromTreasury = new Set(
     lootRows
       .filter((row) => row.status === "Выдано")
-      .map(
-        (row) =>
-          treasuryGiveawaySyncItems.find(
-            (i) => i.treasuryName === row.item_type_name,
-          )?.giveawayName,
-      )
-      .filter(Boolean),
+      .flatMap((row) =>
+        treasuryGiveawaySyncItems
+          .filter((item) => item.treasuryName === row.item_type_name)
+          .map((item) => item.giveawayName),
+      ),
   );
 
   const fromGiveaway: InventoryLogEntry[] = giveawayRows
     .filter((row) => !giveawayNamesGivenFromTreasury.has(row.name))
     .map((row) => ({
-    id: `giveaway-${row.id}`,
-    name: row.name,
-    type: "Выдано",
-    source: "Раздача лута",
-    date: row.date,
-    quantity: 1,
-    comment: row.comment,
-    iconUrl: row.item_type_icon_url ?? null,
-    grade: row.item_type_grade ?? null,
-  }));
+      id: `giveaway-${row.id}`,
+      name: row.name,
+      type: "Выдано",
+      source: "Раздача лута",
+      date: row.date,
+      quantity: 1,
+      comment: row.comment,
+      iconUrl: row.item_type_icon_url,
+      grade: row.item_type_grade,
+    }));
 
-  return [...fromTreasury, ...fromGiveaway].sort((a, b) => {
-    const at = a.date ? new Date(a.date).getTime() : 0;
-    const bt = b.date ? new Date(b.date).getTime() : 0;
-    return bt - at;
-  });
+  return [...fromTreasury, ...fromGiveaway].sort(
+    (a, b) => timeOf(b.date) - timeOf(a.date),
+  );
 };
+
+function timeOf(date: string | null) {
+  return date ? new Date(date).getTime() : 0;
+}

@@ -7,17 +7,17 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Segmented,
 } from "@/shared/ui";
 import {
   getGuildStatus,
   updateGuildLocation,
   updateGuildStatus,
-  type GuildFaction,
-  type GuildMode,
 } from "@/actions/guildStatusSettings";
+import type { GuildFaction, GuildMode } from "@/shared/config/guildStatus";
 import { GUILD_SERVERS, type GuildServer } from "@/utils/guildServers";
 import { useSettingsDraft } from "./settingsDraft";
-import { Loading, Segmented, SettingRow, SettingsCard } from "./settingsUi";
+import { Loading, SettingRow, SettingsCard } from "./settingsUi";
 
 export const FACTION_LABEL: Record<GuildFaction, string> = {
   nuian: "Запад (Нуиан)",

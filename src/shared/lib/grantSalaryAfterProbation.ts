@@ -24,6 +24,9 @@ export async function grantSalaryAfterProbation() {
       WHERE id IN ${sql(ids)}
     `;
   } catch (error) {
-    console.error("Ошибка автоначисления зарплаты после испытательного срока:", error);
+    console.error(
+      "Ошибка автоначисления зарплаты после испытательного срока:",
+      error,
+    );
   }
 }

@@ -18,6 +18,7 @@ import {
   SOCIAL_PROVIDER_LABELS,
   type SocialProvider,
 } from "@/shared/lib/socialProviders";
+import { errorMessage } from "@/shared/lib/errorMessage";
 
 const PROVIDERS: SocialProvider[] = ["vk", "google", "mail"];
 
@@ -25,7 +26,12 @@ export default function SocialAccountsAdminPanel({
   user,
   onUnlinked,
 }: {
-  user: { id: number; vk_id?: string | null; google_id?: string | null; mail_id?: string | null };
+  user: {
+    id: number;
+    vk_id?: string | null;
+    google_id?: string | null;
+    mail_id?: string | null;
+  };
   onUnlinked: (provider: SocialProvider) => void;
 }) {
   const linkedProvider = PROVIDERS.find((provider) => {
@@ -39,7 +45,9 @@ export default function SocialAccountsAdminPanel({
 
   if (!linkedProvider) {
     return (
-      <div className="text-sm text-muted-foreground">Нет привязанного аккаунта</div>
+      <div className="text-sm text-muted-foreground">
+        Нет привязанного аккаунта
+      </div>
     );
   }
 
@@ -52,9 +60,7 @@ export default function SocialAccountsAdminPanel({
       onUnlinked(linkedProvider);
       toast.success(`${label} отвязан`);
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Не удалось отвязать аккаунт",
-      );
+      toast.error(errorMessage(error, "Не удалось отвязать аккаунт"));
     } finally {
       setPending(false);
       setEndSession(false);
@@ -81,8 +87,8 @@ export default function SocialAccountsAdminPanel({
         <AlertDialogHeader>
           <AlertDialogTitle>Отвязать {label}?</AlertDialogTitle>
           <AlertDialogDescription>
-            Это единственный привязанный способ входа игрока — после отвязки
-            он не сможет войти в аккаунт, пока не привяжет соцсеть заново.
+            Это единственный привязанный способ входа игрока — после отвязки он
+            не сможет войти в аккаунт, пока не привяжет соцсеть заново.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="flex items-center gap-2 px-1 text-sm">

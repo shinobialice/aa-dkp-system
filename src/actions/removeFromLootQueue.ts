@@ -6,7 +6,7 @@ import ensurePrivilieges from "./ensurePrivilieges";
 export const removeFromLootQueue = async (lootQueueId: number) => {
   await ensurePrivilieges(["Администратор"]);
   try {
-    await sql<any[]>`
+    await sql`
       DELETE FROM loot_queue WHERE id = ${lootQueueId}
     `;
   } catch (error) {

@@ -2,7 +2,6 @@ import "server-only";
 import postgres from "postgres";
 
 declare global {
-  // eslint-disable-next-line no-var
   var __sql: ReturnType<typeof postgres> | undefined;
 }
 
@@ -52,15 +51,18 @@ const NUMERIC_AS_NUMBER = {
   parse: (x: string) => Number(x),
 };
 
+const OPTIONS = {
+  max: 10,
+  types: {
+    date: KEEP_AS_STRING,
+    numeric: NUMERIC_AS_NUMBER,
+  },
+};
+
+const databaseUrl = process.env.DATABASE_URL;
 const sql =
   global.__sql ??
-  postgres(process.env.DATABASE_URL!, {
-    max: 10,
-    types: {
-      date: KEEP_AS_STRING,
-      numeric: NUMERIC_AS_NUMBER,
-    },
-  });
+  (databaseUrl ? postgres(databaseUrl, OPTIONS) : postgres(OPTIONS));
 
 if (process.env.NODE_ENV !== "production") {
   global.__sql = sql;

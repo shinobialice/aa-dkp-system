@@ -1,5 +1,6 @@
 "use client";
 
+import { requireEnv } from "@/shared/lib/env";
 import Cookies from "js-cookie";
 import { MailIcon } from "./authIcons"; // если есть
 import { Button } from "@/shared/ui";
@@ -17,7 +18,10 @@ export default function MailLoginButton() {
 
     const params = new URLSearchParams({
       response_type: "code",
-      client_id: process.env.NEXT_PUBLIC_MAILRU_CLIENT_ID!,
+      client_id: requireEnv(
+        process.env.NEXT_PUBLIC_MAILRU_CLIENT_ID,
+        "NEXT_PUBLIC_MAILRU_CLIENT_ID",
+      ),
       redirect_uri: `${getBaseUrl()}/api/auth/mailru/callback`,
       state,
       scope: "userinfo",

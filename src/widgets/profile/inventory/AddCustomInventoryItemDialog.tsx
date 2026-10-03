@@ -5,7 +5,7 @@ import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { LootIcon } from "@/widgets/Loot/LootBuy/icons/LootIconComponent";
 import addItemToUserInventory from "@/actions/addItemToUserInventory";
-import { OtherInventoryCatalogItem } from "@/actions/getInventoryCatalog";
+import { type OtherInventoryCatalogItem } from "@/actions/getInventoryCatalog";
 import {
   Command,
   CommandEmpty,
@@ -16,6 +16,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/shared/ui";
+import { errorMessage } from "@/shared/lib/errorMessage";
 
 // Поиск + выбор уже существующего в каталоге предмета для категорий с
 // каталогом (см. catalogCategories в InventoryCategoryGrid) — заводить новые
@@ -42,9 +43,7 @@ export function AddCustomInventoryItemDialog({
       toast.success("Предмет добавлен");
       onAdded();
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Не удалось добавить предмет",
-      );
+      toast.error(errorMessage(error, "Не удалось добавить предмет"));
     }
   };
 
@@ -61,13 +60,13 @@ export function AddCustomInventoryItemDialog({
           <span className="text-xs leading-tight">Добавить предмет</span>
         </button>
       </PopoverTrigger>
-      <PopoverContent className="p-0 w-[300px]">
+      <PopoverContent className="p-0 w-75">
         <Command>
           <CommandInput placeholder="Поиск предмета..." />
           <CommandList>
             <CommandEmpty className="px-3 py-4 text-sm text-muted-foreground">
-              Ничего не найдено. Новые предметы каталога добавляются на
-              странице «Предметы».
+              Ничего не найдено. Новые предметы каталога добавляются на странице
+              «Предметы».
             </CommandEmpty>
             {catalog.map((item) => (
               <CommandItem
@@ -76,7 +75,11 @@ export function AddCustomInventoryItemDialog({
                 onSelect={() => handleSelect(item)}
                 className="flex items-center gap-2 cursor-pointer"
               >
-                <LootIcon itemName={item.name} iconUrl={item.icon_url} size={24} />
+                <LootIcon
+                  itemName={item.name}
+                  iconUrl={item.icon_url}
+                  size={24}
+                />
                 <span>{item.name}</span>
               </CommandItem>
             ))}

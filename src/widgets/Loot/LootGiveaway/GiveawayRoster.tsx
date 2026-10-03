@@ -1,60 +1,11 @@
 "use client";
 
-import { Heart } from "lucide-react";
 import { cn } from "@/shared/lib/tw-merge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui";
 import { LootIcon } from "../LootBuy/icons/LootIconComponent";
 import { GiveawayStatusIcon } from "./GiveawayStatusIcon";
-import {
-  avatarSrc,
-  formatDate,
-  formatMiscGrant,
-  formatWishlistItem,
-  type Player,
-  type TrackedItem,
-} from "./giveawayModel";
-
-function PlayerName({ player }: { player: Player }) {
-  return (
-    <span className="flex min-w-0 items-center gap-2">
-      <Avatar className="size-7 shrink-0">
-        <AvatarImage src={avatarSrc(player)} alt="" />
-        <AvatarFallback className="text-[10px]">
-          {player.username.slice(0, 2)}
-        </AvatarFallback>
-      </Avatar>
-      <span className="truncate font-semibold">{player.username}</span>
-      {!player.active && (
-        <span className="shrink-0 rounded-full border px-1.5 text-[10.5px] text-muted-foreground">
-          неактивен
-        </span>
-      )}
-    </span>
-  );
-}
-
-function Extras({ player }: { player: Player }) {
-  if (player.miscGrants.length === 0 && player.wishlist.length === 0)
-    return null;
-  return (
-    <span className="flex flex-wrap gap-1 text-xs">
-      {player.miscGrants.map((grant) => (
-        <span key={grant.id} className="rounded-full border px-2 py-px">
-          {formatMiscGrant(grant)}
-        </span>
-      ))}
-      {player.wishlist.map((wish) => (
-        <span
-          key={wish.id}
-          className="inline-flex items-center gap-1 rounded-full border border-pink-200 bg-pink-50 px-2 py-px text-pink-800 dark:border-pink-500/30 dark:bg-pink-500/10 dark:text-pink-300"
-        >
-          <Heart className="size-3 fill-current" />
-          {formatWishlistItem(wish)}
-        </span>
-      ))}
-    </span>
-  );
-}
+import { formatDate, type Player, type TrackedItem } from "./giveawayModel";
+import PlayerName from "./RosterPlayerName";
+import Extras from "./RosterExtras";
 
 export default function GiveawayRoster({
   items,
@@ -88,10 +39,9 @@ export default function GiveawayRoster({
       aria-label="Игроки"
       className="@container/roster min-w-0 overflow-hidden rounded-xl border bg-card"
     >
-      {/* Шапка с иконками прилипает, игроки прокручиваются внутри. */}
       <div className="hidden max-h-[calc(100dvh-var(--give-bar,0px)-2rem)] overflow-auto overscroll-contain @[44rem]/roster:block">
         <table className="w-full border-collapse tabular-nums">
-          <thead className="sticky top-0 z-10 bg-muted text-[11px] shadow-[0_1px_0_var(--color-border)] font-semibold tracking-wide text-muted-foreground uppercase">
+          <thead className="sticky top-0 z-10 bg-muted text-2xs shadow-[0_1px_0_var(--color-border)] font-semibold tracking-wide text-muted-foreground uppercase">
             <tr>
               <th />
               <th colSpan={lootCount} className="border-l px-2 pt-2 text-left">
@@ -177,7 +127,7 @@ export default function GiveawayRoster({
                           date={entry.date}
                         />
                         {entry.status === "Выдано" && entry.date && (
-                          <span className="font-mono text-[10px] text-muted-foreground">
+                          <span className="font-mono text-2xs text-muted-foreground">
                             {formatDate(entry.date, "dd.MM.yy")}
                           </span>
                         )}

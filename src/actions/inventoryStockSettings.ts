@@ -1,6 +1,7 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import type { InventoryStockSettingsRow } from "@/shared/lib/dbTypes";
 import ensurePrivilieges from "./ensurePrivilieges";
 import { revalidatePath } from "next/cache";
 
@@ -12,18 +13,17 @@ const DEFAULT_SETTINGS: InventoryStockSettings = { hiddenLabels: [] };
 
 export async function getInventoryStockSettings(): Promise<InventoryStockSettings> {
   try {
-    const [data] = await sql<any[]>`
+    const [data] = await sql<
+      Pick<InventoryStockSettingsRow, "hidden_labels">[]
+    >`
       SELECT hidden_labels FROM inventory_stock_settings WHERE id = 1
     `;
 
     if (!data) return DEFAULT_SETTINGS;
 
-    return { hiddenLabels: (data.hidden_labels ?? []) as string[] };
+    return { hiddenLabels: data.hidden_labels };
   } catch (error) {
-    console.error(
-      "Ошибка при получении настроек 'Имеющиеся предметы':",
-      error,
-    );
+    console.error("Ошибка при получении настроек 'Имеющиеся предметы':", error);
     throw new Error("Не удалось загрузить настройки 'Имеющиеся предметы'");
   }
 }
@@ -34,7 +34,7 @@ export async function updateInventoryStockSettings(
   await ensurePrivilieges(["Администратор"]);
 
   try {
-    await sql<any[]>`
+    await sql`
       INSERT INTO inventory_stock_settings (id, hidden_labels, updated_at)
       VALUES (1, ${settings.hiddenLabels}, now())
       ON CONFLICT (id) DO UPDATE SET

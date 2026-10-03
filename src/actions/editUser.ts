@@ -1,9 +1,32 @@
 "use server";
 import { cookies } from "next/headers";
 import sql from "@/shared/lib/db";
+import type { UserRow } from "@/shared/lib/dbTypes";
 import { hasTag } from "./hasTag";
 import { getSessionUserId } from "./getSessionUserId";
-import { getUserSelfEditSettings } from "./userSelfEditSettings";
+import {
+  getUserSelfEditSettings,
+  type UserSelfEditSettings,
+} from "./userSelfEditSettings";
+
+type EditableUser = Pick<
+  UserRow,
+  | "username"
+  | "class"
+  | "class_gear_score"
+  | "secondary_class"
+  | "secondary_class_gear_score"
+  | "tertiary_class"
+  | "tertiary_class_gear_score"
+  | "vk_name"
+  | "joined_at"
+  | "active"
+>;
+
+type RoleInput = {
+  className: string | null;
+  gearScore: number | null;
+};
 
 const editUser = async (
   userId: number,
@@ -17,7 +40,7 @@ const editUser = async (
   vkName: string | null,
   joined_at: Date | string | null,
 ) => {
-  const [existing] = await sql<any[]>`
+  const [existing] = await sql<EditableUser[]>`
     SELECT username, class, class_gear_score, secondary_class,
            secondary_class_gear_score, tertiary_class,
            tertiary_class_gear_score, vk_name, joined_at, active
@@ -35,14 +58,6 @@ const editUser = async (
     "Секретутка",
   ]);
 
-  // joined_at самоправщик физически не видит в форме. vkName видит и может
-  // менять только если включён vkEditEnabled — иначе тоже сохраняем то, что
-  // уже есть в БД. Раньше сервер сравнивал присланное значение с текущим в
-  // БД и отклонял правку при расхождении — но эти два снимка могут
-  // разъехаться по любой причине, не связанной с действием пользователя
-  // (админ поправил дату, вкладка провисела открытой и т.п.), и тогда
-  // обычная смена ника/ГС ложно блокировалась. Проще и надёжнее не
-  // доверять клиенту эти поля напрямую, а решать по серверным настройкам.
   let finalVkName = vkName;
   let finalJoinedAt = joined_at ? new Date(joined_at).toISOString() : null;
 
@@ -55,59 +70,22 @@ const editUser = async (
       throw new Error("Access denied: profile not active");
     }
 
-    const selfEditSettings = await getUserSelfEditSettings();
+    const settings = await getUserSelfEditSettings();
+    assertSelfEditAllowed(existing, settings, username, [
+      { className, gearScore: classGearScore },
+      { className: secondaryClassName, gearScore: secondaryClassGearScore },
+      { className: tertiaryClassName, gearScore: tertiaryClassGearScore },
+    ]);
 
-    finalVkName = selfEditSettings.vkEditEnabled ? vkName : existing.vk_name;
+    // Для самоправки эти поля берутся из БД, а не от клиента: присланный
+    // снимок мог устареть и ложно блокировать смену ника/ГС.
+    finalVkName = settings.vkEditEnabled ? vkName : existing.vk_name;
     finalJoinedAt = existing.joined_at;
-
-    const toGs = (v: unknown) => (v == null || v === "" ? null : Number(v));
-    const toStr = (v: unknown) => (v == null || v === "" ? null : String(v));
-
-    const nicknameChanged = username !== existing.username;
-    const primaryChanged =
-      toStr(className) !== toStr(existing.class) ||
-      toGs(classGearScore) !== toGs(existing.class_gear_score);
-
-    // Добавление 2-й/3-й роли с нуля — отдельное разрешение
-    // (extraRoleEditEnabled) от правки ГС уже существующей роли
-    // (gsEditEnabled): админ может, например, разрешить добавлять доп. роль,
-    // но не разрешать менять ГС того, что уже выставлено.
-    const secondaryWasEmpty =
-      !existing.secondary_class && existing.secondary_class_gear_score == null;
-    const secondaryChanged =
-      toStr(secondaryClassName) !== toStr(existing.secondary_class) ||
-      toGs(secondaryClassGearScore) !== toGs(existing.secondary_class_gear_score);
-    const secondaryIsNewAddition =
-      secondaryChanged && secondaryWasEmpty && !!secondaryClassName;
-
-    const tertiaryWasEmpty =
-      !existing.tertiary_class && existing.tertiary_class_gear_score == null;
-    const tertiaryChanged =
-      toStr(tertiaryClassName) !== toStr(existing.tertiary_class) ||
-      toGs(tertiaryClassGearScore) !== toGs(existing.tertiary_class_gear_score);
-    const tertiaryIsNewAddition =
-      tertiaryChanged && tertiaryWasEmpty && !!tertiaryClassName;
-
-    const gsChanged =
-      primaryChanged ||
-      (secondaryChanged && !secondaryIsNewAddition) ||
-      (tertiaryChanged && !tertiaryIsNewAddition);
-    const addingExtraRole = secondaryIsNewAddition || tertiaryIsNewAddition;
-
-    if (nicknameChanged && !selfEditSettings.nicknameEditEnabled) {
-      throw new Error("Access denied: nickname edit disabled");
-    }
-    if (gsChanged && !selfEditSettings.gsEditEnabled) {
-      throw new Error("Access denied: gs edit disabled");
-    }
-    if (addingExtraRole && !selfEditSettings.extraRoleEditEnabled) {
-      throw new Error("Access denied: extra role edit disabled");
-    }
   }
 
-  let user;
+  let user: { id: number } | undefined;
   try {
-    [user] = await sql<any[]>`
+    [user] = await sql<{ id: number }[]>`
       UPDATE "user" SET
         username = ${username},
         class = ${className},
@@ -123,7 +101,7 @@ const editUser = async (
           ELSE probation_salary_granted
         END
       WHERE id = ${userId}
-      RETURNING *
+      RETURNING id
     `;
   } catch (error) {
     console.error("Failed to update user:", error);
@@ -135,9 +113,9 @@ const editUser = async (
     throw new Error("Ошибка при обновлении игрока");
   }
 
-  if (existing?.username && existing.username !== username) {
+  if (existing.username !== username) {
     try {
-      await sql<any[]>`
+      await sql`
         INSERT INTO user_username_history (user_id, old_username, new_username)
         VALUES (${userId}, ${existing.username}, ${username})
       `;
@@ -145,8 +123,58 @@ const editUser = async (
       console.error("Failed to log username change:", historyError);
     }
   }
-
-  return user;
 };
 
 export default editUser;
+
+function assertSelfEditAllowed(
+  existing: EditableUser,
+  settings: UserSelfEditSettings,
+  username: string,
+  [primary, secondary, tertiary]: RoleInput[],
+) {
+  const primaryChange = diffRole(primary, {
+    className: existing.class,
+    gearScore: existing.class_gear_score,
+  });
+  const secondaryChange = diffRole(secondary, {
+    className: existing.secondary_class,
+    gearScore: existing.secondary_class_gear_score,
+  });
+  const tertiaryChange = diffRole(tertiary, {
+    className: existing.tertiary_class,
+    gearScore: existing.tertiary_class_gear_score,
+  });
+  const extraChanges = [secondaryChange, tertiaryChange];
+
+  const gsChanged =
+    primaryChange.changed ||
+    extraChanges.some((change) => change.changed && !change.isNewAddition);
+  const addingExtraRole = extraChanges.some((change) => change.isNewAddition);
+
+  if (username !== existing.username && !settings.nicknameEditEnabled) {
+    throw new Error("Access denied: nickname edit disabled");
+  }
+  if (gsChanged && !settings.gsEditEnabled) {
+    throw new Error("Access denied: gs edit disabled");
+  }
+  if (addingExtraRole && !settings.extraRoleEditEnabled) {
+    throw new Error("Access denied: extra role edit disabled");
+  }
+}
+
+function diffRole(next: RoleInput, previous: RoleInput) {
+  const changed =
+    toText(next.className) !== toText(previous.className) ||
+    toGearScore(next.gearScore) !== toGearScore(previous.gearScore);
+  const wasEmpty = !previous.className && previous.gearScore == null;
+  return { changed, isNewAddition: changed && wasEmpty && !!next.className };
+}
+
+function toGearScore(value: unknown) {
+  return value == null || value === "" ? null : Number(value);
+}
+
+function toText(value: unknown) {
+  return value == null || value === "" ? null : String(value);
+}

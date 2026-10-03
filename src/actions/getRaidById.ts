@@ -1,12 +1,51 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import type {
+  BossRow,
+  ItemTypeRow,
+  LootRow,
+  RaidRow,
+  UserRow,
+} from "@/shared/lib/dbTypes";
+
+type RaidBossQueryRow = Pick<
+  BossRow,
+  "id" | "boss_name" | "dkp_points" | "category"
+>;
+
+type AttendanceQueryRow = Pick<
+  UserRow,
+  "id" | "username" | "active" | "class" | "joined_at"
+> & { is_late: boolean };
+
+type LootQueryRow = Pick<
+  LootRow,
+  | "id"
+  | "status"
+  | "source"
+  | "quantity"
+  | "price"
+  | "sold_to"
+  | "acquired_at"
+  | "sold_at"
+> & {
+  item_type_id: ItemTypeRow["id"];
+  item_type_name: ItemTypeRow["name"];
+  item_type_price: ItemTypeRow["price"];
+  item_type_icon_url: ItemTypeRow["icon_url"];
+  item_type_grade: ItemTypeRow["grade"];
+};
+
+export type RaidDetails = Awaited<ReturnType<typeof getRaidById>>;
+export type RaidDetailsLoot = RaidDetails["loot"][number];
+export type RaidDetailsAttendee = RaidDetails["raid_attendance"][number];
 
 export const getRaidById = async (id: string) => {
   const raidId = parseInt(id);
 
   try {
-    const [raid] = await sql<any[]>`
+    const [raid] = await sql<RaidRow[]>`
       SELECT * FROM raid WHERE id = ${raidId}
     `;
 
@@ -14,21 +53,26 @@ export const getRaidById = async (id: string) => {
       throw new Error("Raid not found");
     }
 
-    const [raidBossRows, attendanceRows, lootRows, [activeMembersRow], bonusRows] =
-      await Promise.all([
-        sql<any[]>`
+    const [
+      raidBossRows,
+      attendanceRows,
+      lootRows,
+      [activeMembersRow],
+      bonusRows,
+    ] = await Promise.all([
+      sql<RaidBossQueryRow[]>`
         SELECT b.id, b.boss_name, b.dkp_points, b.category
         FROM raid_boss rb
         JOIN boss b ON b.id = rb.boss_id
         WHERE rb.raid_id = ${raidId}
       `,
-        sql<any[]>`
+      sql<AttendanceQueryRow[]>`
         SELECT ra.is_late, u.id, u.username, u.active, u.class, u.joined_at
         FROM raid_attendance ra
         JOIN "user" u ON u.id = ra.user_id
         WHERE ra.raid_id = ${raidId}
       `,
-        sql<any[]>`
+      sql<LootQueryRow[]>`
         SELECT
           l.id, l.status, l.source, l.quantity, l.price, l.sold_to,
           l.acquired_at, l.sold_at,
@@ -38,22 +82,23 @@ export const getRaidById = async (id: string) => {
         JOIN item_type it ON it.id = l.item_type_id
         WHERE l.raid_id = ${raidId}
       `,
-        // Фолбэк для рейдов, созданных до появления active_user_count.
-        sql<any[]>`
+      // Фолбэк для рейдов, созданных до появления active_user_count.
+      sql<{ count: number }[]>`
         SELECT COUNT(*)::int AS count
         FROM "user"
         WHERE active = true
           AND (joined_at IS NULL OR joined_at <= ${raid.start_date})
           AND id NOT IN (SELECT user_id FROM user_tags WHERE tag = 'АФК' AND removed_at IS NULL)
       `,
-        sql<any[]>`
+      sql<{ bonus_type_id: number }[]>`
         SELECT bonus_type_id FROM raid_bonus WHERE raid_id = ${raidId}
       `,
-      ]);
+    ]);
 
     return {
       ...raid,
-      guildActiveMembersAtTime: raid.active_user_count ?? activeMembersRow?.count ?? 0,
+      guildActiveMembersAtTime:
+        raid.active_user_count ?? activeMembersRow?.count ?? 0,
       bonusTypeIds: bonusRows.map((b) => b.bonus_type_id),
       raid_boss: raidBossRows.map((b) => ({
         boss: {

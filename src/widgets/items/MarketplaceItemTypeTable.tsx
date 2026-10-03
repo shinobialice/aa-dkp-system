@@ -8,7 +8,7 @@ import { LootIcon } from "@/widgets/Loot/LootBuy/icons/LootIconComponent";
 import {
   getMarketplaceItemTypes,
   deleteMarketplaceItemType,
-  MarketplaceItemTypeRow,
+  type MarketplaceItemTypeRow,
 } from "@/actions/marketplaceItemTypeAdmin";
 import {
   Button,
@@ -20,6 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/shared/ui";
+import { errorMessage } from "@/shared/lib/errorMessage";
 
 export function MarketplaceItemTypeTable() {
   const [items, setItems] = useState<MarketplaceItemTypeRow[]>([]);
@@ -45,9 +46,7 @@ export function MarketplaceItemTypeTable() {
       toast.success("Предмет удалён");
       reload();
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Не удалось удалить предмет",
-      );
+      toast.error(errorMessage(error, "Не удалось удалить предмет"));
     }
   };
 
@@ -61,8 +60,8 @@ export function MarketplaceItemTypeTable() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground max-w-md">
-          Каталог предметов для вкладки «Предмет из базы» на доске
-          объявлений — отдельный от казны и лута.
+          Каталог предметов для вкладки «Предмет из базы» на доске объявлений —
+          отдельный от казны и лута.
         </p>
         <Button
           className="cursor-pointer shrink-0"
@@ -91,7 +90,7 @@ export function MarketplaceItemTypeTable() {
           <TableRow>
             <TableHead>Иконка</TableHead>
             <TableHead>Название</TableHead>
-            <TableHead className="w-[140px]">Действия</TableHead>
+            <TableHead className="w-35">Действия</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -133,7 +132,10 @@ export function MarketplaceItemTypeTable() {
           ))}
           {!loading && visibleItems.length === 0 && (
             <TableRow>
-              <TableCell colSpan={3} className="text-center text-muted-foreground">
+              <TableCell
+                colSpan={3}
+                className="text-center text-muted-foreground"
+              >
                 {items.length === 0
                   ? "Пока нет ни одного предмета"
                   : "Ничего не найдено"}

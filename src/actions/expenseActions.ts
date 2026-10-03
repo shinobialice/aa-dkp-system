@@ -1,13 +1,23 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { triggerFinanceRecalc } from "@/server/finance/recalc";
 import sql from "@/shared/lib/db";
-import { triggerFinanceRecalc } from "./recalculateFinanceForMonth";
+import type { ExpenseRow } from "@/shared/lib/dbTypes";
 import { getUtcYearMonth } from "@/utils/getUtcYearMonth";
+import ensurePrivilieges from "./ensurePrivilieges";
+
+type ExpenseInput = {
+  date: string;
+  amount: number;
+  target: string;
+  source: string;
+  comment?: string;
+};
 
 export const getExpenses = async () => {
   try {
-    return await sql<any[]>`SELECT * FROM "Expense" ORDER BY date DESC`;
+    return await sql<ExpenseRow[]>`SELECT * FROM "Expense" ORDER BY date DESC`;
   } catch (error) {
     console.error("Ошибка при получении расходов:", error);
     throw new Error("Не удалось получить расходы");
@@ -16,7 +26,7 @@ export const getExpenses = async () => {
 
 export const getExpensesBySource = async (source: string) => {
   try {
-    return await sql<any[]>`
+    return await sql<ExpenseRow[]>`
       SELECT * FROM "Expense" WHERE source = ${source} ORDER BY date DESC
     `;
   } catch (error) {
@@ -25,36 +35,17 @@ export const getExpensesBySource = async (source: string) => {
   }
 };
 
-export const addExpense = async ({
-  date,
-  amount,
-  target,
-  source,
-  comment,
-}: {
-  date: string;
-  amount: number;
-  target: string;
-  source: string;
-  comment?: string;
-}) => {
-  if (amount <= 0) {
-    throw new Error("Сумма расхода должна быть больше 0");
-  }
-  if (!date) {
-    throw new Error("Дата обязательна");
-  }
-  if (!target.trim()) {
-    throw new Error("Получатель обязателен");
-  }
-  if (!source.trim()) {
-    throw new Error("Источник обязателен");
-  }
+export const addExpense = async (input: ExpenseInput) => {
+  await ensurePrivilieges(["Администратор"]);
+  validateExpense(input);
 
   try {
-    await sql<any[]>`
+    await sql`
       INSERT INTO "Expense" (date, amount, target, source, comment)
-      VALUES (${new Date(date).toISOString()}, ${amount}, ${target}, ${source}, ${comment ?? null})
+      VALUES (
+        ${new Date(input.date).toISOString()}, ${input.amount}, ${input.target},
+        ${input.source}, ${input.comment ?? null}
+      )
     `;
   } catch (error) {
     console.error("Ошибка при добавлении расхода:", error);
@@ -62,51 +53,28 @@ export const addExpense = async ({
   }
 
   revalidatePath("/loot");
-
-  const { year, month } = getUtcYearMonth(new Date(date));
-  await triggerFinanceRecalc(month, year);
+  await recalcMonths([input.date]);
 };
 
 export const updateExpense = async ({
   id,
-  date,
-  amount,
-  target,
-  source,
-  comment,
-}: {
-  id: number;
-  date: string;
-  amount: number;
-  target: string;
-  source: string;
-  comment?: string;
-}) => {
-  if (amount <= 0) {
-    throw new Error("Сумма расхода должна быть больше 0");
-  }
-  if (!date) {
-    throw new Error("Дата обязательна");
-  }
-  if (!target.trim()) {
-    throw new Error("Получатель обязателен");
-  }
-  if (!source.trim()) {
-    throw new Error("Источник обязателен");
-  }
+  ...input
+}: ExpenseInput & { id: number }) => {
+  await ensurePrivilieges(["Администратор"]);
+  validateExpense(input);
 
-  const [previousExpense] = await sql<any[]>`
+  const [previous] = await sql<Pick<ExpenseRow, "date">[]>`
     SELECT date FROM "Expense" WHERE id = ${id}
   `;
 
   try {
-    await sql<any[]>`
+    await sql`
       UPDATE "Expense" SET
-        date = ${new Date(date).toISOString()},
-        amount = ${amount},
-        target = ${target},
-        source = ${source},
-        comment = ${comment ?? null}
+        date = ${new Date(input.date).toISOString()},
+        amount = ${input.amount},
+        target = ${input.target},
+        source = ${input.source},
+        comment = ${input.comment ?? null}
       WHERE id = ${id}
     `;
   } catch (error) {
@@ -115,31 +83,39 @@ export const updateExpense = async ({
   }
 
   revalidatePath("/loot");
-
-  const monthsToRecalc = new Set<string>();
-  const { year: newYear, month: newMonth } = getUtcYearMonth(new Date(date));
-  monthsToRecalc.add(`${newYear}-${newMonth}`);
-  if (previousExpense?.date) {
-    const prevDate = new Date(previousExpense.date);
-    monthsToRecalc.add(`${prevDate.getFullYear()}-${prevDate.getMonth() + 1}`);
-  }
-
-  for (const key of monthsToRecalc) {
-    const [year, month] = key.split("-").map(Number);
-    await triggerFinanceRecalc(month, year);
-  }
+  await recalcMonths(previous ? [input.date, previous.date] : [input.date]);
 };
 
 export const deleteExpense = async (id: number, date: string) => {
+  await ensurePrivilieges(["Администратор"]);
+
   try {
-    await sql<any[]>`DELETE FROM "Expense" WHERE id = ${id}`;
+    await sql`DELETE FROM "Expense" WHERE id = ${id}`;
   } catch (error) {
     console.error("Ошибка при удалении расхода:", error);
     throw new Error("Не удалось удалить расход");
   }
 
   revalidatePath("/loot");
-
-  const expenseDate = new Date(date);
-  await triggerFinanceRecalc(expenseDate.getMonth() + 1, expenseDate.getFullYear());
+  await recalcMonths([date]);
 };
+
+function validateExpense({ date, amount, target, source }: ExpenseInput) {
+  if (amount <= 0) throw new Error("Сумма расхода должна быть больше 0");
+  if (!date) throw new Error("Дата обязательна");
+  if (!target.trim()) throw new Error("Получатель обязателен");
+  if (!source.trim()) throw new Error("Источник обязателен");
+}
+
+async function recalcMonths(dates: string[]) {
+  const months = new Set(
+    dates.map((date) => {
+      const { year, month } = getUtcYearMonth(new Date(date));
+      return `${year}-${month}`;
+    }),
+  );
+  for (const key of months) {
+    const [year, month] = key.split("-").map(Number);
+    await triggerFinanceRecalc(month, year);
+  }
+}

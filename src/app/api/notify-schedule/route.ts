@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
-import { Receiver } from "@upstash/qstash";
+import { type NextRequest, NextResponse } from "next/server";
+import { readVerifiedQstashBody } from "@/server/qstashSignature";
 import sql from "@/shared/lib/db";
 import { getBaseUrl } from "@/shared/lib";
 import { sendVkMessage } from "@/shared/lib/vkBot";
@@ -21,29 +21,11 @@ import {
 
 export const runtime = "nodejs";
 
-const receiver = new Receiver({
-  currentSigningKey: process.env.QSTASH_CURRENT_SIGNING_KEY!,
-  nextSigningKey: process.env.QSTASH_NEXT_SIGNING_KEY!,
-});
-
 const DEDUP_RETENTION_DAYS = 3;
 
 export async function POST(req: NextRequest) {
-  const body = await req.text();
-  const signature = req.headers.get("upstash-signature") ?? "";
-
-  let isValid = false;
-  try {
-    isValid = await receiver.verify({
-      body,
-      signature,
-      url: `${getBaseUrl()}/api/notify-schedule`,
-    });
-  } catch {
-    isValid = false;
-  }
-
-  if (!isValid) {
+  const body = await readVerifiedQstashBody(req, "/api/notify-schedule");
+  if (body === null) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
@@ -80,15 +62,19 @@ export async function POST(req: NextRequest) {
     if (!isDue) continue;
 
     const eventKey = `${boss}__${start.getTime()}`;
+    let isFirstSend: boolean;
     try {
-      await sql<any[]>`
+      const inserted = await sql`
         INSERT INTO vk_schedule_notify_log (event_key) VALUES (${eventKey})
+        ON CONFLICT DO NOTHING
+        RETURNING event_key
       `;
-    } catch (logError: any) {
-      if (logError?.code === "23505") continue; // уже отправляли (упёрлись в PK)
+      isFirstSend = inserted.length > 0;
+    } catch (logError) {
       console.error("Ошибка при записи лога уведомлений расписания:", logError);
       continue;
     }
+    if (!isFirstSend) continue;
 
     const emoji = eventEmoji[boss] ?? "⚠️";
     await sendVkMessage(
@@ -100,7 +86,7 @@ export async function POST(req: NextRequest) {
   const cleanupThreshold = new Date(
     Date.now() - DEDUP_RETENTION_DAYS * 24 * 60 * 60 * 1000,
   ).toISOString();
-  await sql<any[]>`
+  await sql`
     DELETE FROM vk_schedule_notify_log WHERE notified_at < ${cleanupThreshold}
   `;
 

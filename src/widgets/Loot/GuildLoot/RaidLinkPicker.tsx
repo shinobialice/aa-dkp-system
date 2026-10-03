@@ -1,87 +1,56 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import {
+  getRaidCandidatesForLoot,
+  type RaidCandidate,
+} from "@/actions/getRaidCandidatesForLoot";
+import { useAsyncData } from "@/hooks/useAsyncData";
+import { cn } from "@/shared/lib/tw-merge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui";
-import { getRaidCandidatesForLoot } from "@/actions/getRaidCandidatesForLoot";
 import { parseMoscowISOString } from "@/utils/getMoscowISOString";
 
-type RaidCandidate = {
-  id: number;
-  type: string;
-  start_date: string;
-  bossNames: string[];
-  matchesBoss: boolean;
-};
-
-export function formatRaidLabel(raid: {
-  type: string;
-  start_date: string;
-  bossNames?: string[];
-}) {
-  const dateStr = parseMoscowISOString(raid.start_date).toLocaleString(
-    "ru-RU",
-    {
-      day: "2-digit",
-      month: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      timeZone: "Europe/Moscow",
-    },
-  );
-  const bosses = raid.bossNames?.filter(Boolean).join(", ") ?? "";
-  return [dateStr, raid.type, bosses].filter(Boolean).join(" · ");
-}
-
-export function RaidLinkPicker({
-  source,
-  acquiredAt,
-  value,
-  initialLabel,
-  onChange,
-}: {
+type Props = {
   source: string;
   acquiredAt: string | null;
   value: number | null;
-  initialLabel?: string | null;
   onChange: (raidId: number | null) => void;
-}) {
+};
+
+export default function RaidLinkPicker({
+  source,
+  acquiredAt,
+  value,
+  onChange,
+}: Props) {
   const [isOpen, setIsOpen] = useState(false);
-  const [candidates, setCandidates] = useState<RaidCandidate[]>([]);
+  const { data: candidates = [] } = useAsyncData(
+    isOpen ? `${source}|${acquiredAt}` : null,
+    () => getRaidCandidatesForLoot({ source, acquiredAt }),
+  );
 
-  useEffect(() => {
-    if (!isOpen) return;
-    getRaidCandidatesForLoot({ source, acquiredAt }).then(setCandidates);
-  }, [isOpen, source, acquiredAt]);
-
-  const handleSelect = (candidate: RaidCandidate | null) => {
-    onChange(candidate ? candidate.id : null);
+  const handleSelect = (raidId: number | null) => {
+    onChange(raidId);
     setIsOpen(false);
   };
-
-  const selectedCandidate = candidates.find((c) => c.id === value);
-  const label = value
-    ? selectedCandidate
-      ? formatRaidLabel(selectedCandidate)
-      : (initialLabel ?? `Рейд #${value}`)
-    : "Без привязки";
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <button
           type="button"
-          className="border rounded px-2 py-1 text-left cursor-pointer w-full truncate"
+          className="w-full cursor-pointer truncate rounded border px-2 py-1 text-left"
         >
-          {label}
+          {pickerLabel(value, candidates)}
         </button>
       </PopoverTrigger>
       <PopoverContent
-        className="p-1 w-[340px] max-h-72 overflow-y-auto"
+        className="max-h-72 w-85 overflow-y-auto p-1"
         align="start"
       >
         <button
           type="button"
-          className="w-full text-left px-2 py-1.5 text-sm rounded hover:bg-accent cursor-pointer text-muted-foreground"
+          className="w-full cursor-pointer rounded px-2 py-1.5 text-left text-sm text-muted-foreground hover:bg-accent"
           onClick={() => handleSelect(null)}
         >
           Без привязки
@@ -91,18 +60,19 @@ export function RaidLinkPicker({
             Рейды в этот день не найдены
           </div>
         )}
-        {candidates.map((c) => (
+        {candidates.map((candidate) => (
           <button
-            key={c.id}
+            key={candidate.id}
             type="button"
-            onClick={() => handleSelect(c)}
-            className={`w-full text-left px-2 py-1.5 text-sm rounded hover:bg-accent cursor-pointer flex items-center justify-between gap-2 ${
-              value === c.id ? "bg-accent" : ""
-            }`}
+            onClick={() => handleSelect(candidate.id)}
+            className={cn(
+              "flex w-full cursor-pointer items-center justify-between gap-2 rounded px-2 py-1.5 text-left text-sm hover:bg-accent",
+              value === candidate.id && "bg-accent",
+            )}
           >
-            <span>{formatRaidLabel(c)}</span>
-            {c.matchesBoss && (
-              <span className="text-xs text-muted-foreground shrink-0">
+            <span>{raidLabel(candidate)}</span>
+            {candidate.matchesBoss && (
+              <span className="shrink-0 text-xs text-muted-foreground">
                 по боссу
               </span>
             )}
@@ -111,4 +81,25 @@ export function RaidLinkPicker({
       </PopoverContent>
     </Popover>
   );
+}
+
+function pickerLabel(value: number | null, candidates: RaidCandidate[]) {
+  if (!value) return "Без привязки";
+  const selected = candidates.find((candidate) => candidate.id === value);
+  return selected ? raidLabel(selected) : `Рейд #${value}`;
+}
+
+function raidLabel(raid: RaidCandidate) {
+  const date = raid.start_date
+    ? parseMoscowISOString(raid.start_date).toLocaleString("ru-RU", {
+        day: "2-digit",
+        month: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: "Europe/Moscow",
+      })
+    : "";
+  return [date, raid.type, raid.bossNames.join(", ")]
+    .filter(Boolean)
+    .join(" · ");
 }

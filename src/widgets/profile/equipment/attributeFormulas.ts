@@ -96,6 +96,9 @@ export function getCritChanceRate(heroicLevel: number): number {
   return rate;
 }
 
-export function computeCritChance(attrTotal: number, heroicLevel: number): number {
+export function computeCritChance(
+  attrTotal: number,
+  heroicLevel: number,
+): number {
   return attrTotal * getCritChanceRate(heroicLevel) * 0.01;
 }

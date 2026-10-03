@@ -1,10 +1,10 @@
-/**
- * NEXT_PUBLIC_BASE_URL иногда задаётся со слэшем на конце (в Vercel),
- * из-за чего склейка `${baseUrl}/api/...` даёт двойной слэш и ломает
- * сверку redirect_uri у OAuth-провайдеров (Google/VK/Mail.ru).
- * Всегда используйте этот хелпер вместо process.env.NEXT_PUBLIC_BASE_URL
- * напрямую при склейке путей.
- */
+import { requireEnv } from "./env";
+
+// NEXT_PUBLIC_BASE_URL бывает со слэшем на конце, а двойной слэш ломает
+// сверку redirect_uri у OAuth-провайдеров.
 export function getBaseUrl() {
-  return process.env.NEXT_PUBLIC_BASE_URL!.replace(/\/+$/, "");
+  return requireEnv(
+    process.env.NEXT_PUBLIC_BASE_URL,
+    "NEXT_PUBLIC_BASE_URL",
+  ).replace(/\/+$/, "");
 }

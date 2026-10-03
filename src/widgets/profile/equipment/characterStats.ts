@@ -1,20 +1,6 @@
 import type { UserEquipment } from "@/actions/getUserEquipment";
 import type { UserSeal } from "@/actions/getUserSeals";
-import { computeSealBonusSummary } from "@/widgets/profile/seals/sealBonusSummary";
-import { ITEM_STATS, findGearItem } from "./itemsData";
-import { getItemGradeStats } from "./itemsData/itemGradeStats";
-import { scaleStat } from "./itemsData/statsFormula";
-import { computeEngravingBonuses, ENGRAVING_STAT } from "./engravingBonuses";
-import { computeCostumeSynthesisBonuses } from "./costumeSynthesisBonuses";
-import { computeUnderwearSynthesisBonuses } from "./underwearSynthesisBonuses";
-import { computeCursedArmorSynthesisBonuses } from "./cursedArmorSynthesisBonuses";
-import { computeRingSynthesisBonuses } from "./ringSynthesisBonuses";
-import { computeEphenRuneSetBonuses } from "./ephenRuneSetBonus";
 import { computeEphenSynthesisBonuses } from "./ephenSynthesisBonus";
-import {
-  computeEpheSealsFlatBonus,
-  getEpheArmorMultiplier,
-} from "../ephe/epheSealsBonus";
 import {
   computeParry,
   computeDodge,
@@ -25,6 +11,13 @@ import {
   computeHealthRegen,
   computeCritChance,
 } from "./attributeFormulas";
+import {
+  EMPTY_BONUSES,
+  ATTRIBUTES,
+  FLAT_STAT_TARGETS,
+  addGearStats,
+  collectFlatBonuses,
+} from "./equippedBonusParts";
 
 export const BASE_CHARACTER_STATS = {
   health: 10246,
@@ -69,129 +62,24 @@ export function computeEquippedBonuses(
   equipment: UserEquipment[],
   seals: UserSeal[] = [],
 ): EquippedBonuses {
-  const totals: EquippedBonuses = {
-    defense: 0,
-    resist: 0,
-    str: 0,
-    int: 0,
-    dex: 0,
-    spi: 0,
-    sta: 0,
-    health: 0,
-    mana: 0,
-    meleeAttack: 0,
-    rangedAttack: 0,
-    spellPower: 0,
-    healPower: 0,
-    moveSpeed: 0,
-    skillSpeed: 0,
-    proficiency: 0,
-    tacticalReadiness: 0,
-    parry: 0,
-    dodge: 0,
-    block: 0,
-    pvpResist: 0,
-    critDamageResist: 0,
-  };
+  const totals = { ...EMPTY_BONUSES };
+  for (const eq of equipment) addGearStats(totals, eq);
 
-  for (const eq of equipment) {
-    const gearItem = findGearItem(eq.slot, eq.item_name);
-    if (!gearItem) continue;
-    const gradeStats = getItemGradeStats(gearItem.id, eq.grade);
-    const base = gradeStats ?? ITEM_STATS[gearItem.id];
-    if (!base) continue;
-
-    const enchant = eq.enchant ?? 0;
-    // Предметы из ITEM_GRADE_STATS (серьги ифнирского героя и т.п.) хранят
-    // уже финальное значение на конкретный грейд — scaleStat к ним не
-    // применяется, в отличие от обычной ITEM_STATS-брони.
-    const stat = (key: string): number => {
-      const value = base[key];
-      if (value === undefined) return 0;
-      return gradeStats ? value : scaleStat(value, eq.grade, enchant, key);
-    };
-
-    const epheArmorMultiplier = getEpheArmorMultiplier(eq);
-    totals.defense += stat("wearable_armor") * epheArmorMultiplier;
-    totals.resist += stat("wearable_magic_resistance") * epheArmorMultiplier;
-    totals.str += stat("str");
-    totals.int += stat("int");
-    totals.dex += stat("dex");
-    totals.spi += stat("spi");
-    totals.sta += stat("sta");
-    if (base.flat_sta) totals.sta += base.flat_sta;
-    if (base.flat_spi) totals.spi += base.flat_spi;
-    if (base.skill_speed) totals.skillSpeed += base.skill_speed;
-    if (base.tactical_readiness)
-      totals.tacticalReadiness += base.tactical_readiness;
+  const ephenSynthesis = computeEphenSynthesisBonuses(equipment);
+  for (const attribute of ATTRIBUTES) {
+    totals[attribute] += ephenSynthesis.attributes[attribute];
   }
 
-  const engravingBonus = computeEngravingBonuses(equipment);
-  const costumeSynthesisBonus = computeCostumeSynthesisBonuses(equipment);
-  const underwearSynthesisBonus = computeUnderwearSynthesisBonuses(equipment);
-  const cursedArmorSynthesisBonus =
-    computeCursedArmorSynthesisBonuses(equipment);
-  const ringSynthesisBonus = computeRingSynthesisBonuses(equipment);
-  const ephenRuneSetBonus = computeEphenRuneSetBonuses(equipment);
-  const ephenSynthesisBonus = computeEphenSynthesisBonuses(equipment);
-  totals.str += ephenSynthesisBonus.attributes.str;
-  totals.dex += ephenSynthesisBonus.attributes.dex;
-  totals.int += ephenSynthesisBonus.attributes.int;
-  totals.spi += ephenSynthesisBonus.attributes.spi;
-  totals.sta += ephenSynthesisBonus.attributes.sta;
-  for (const [label, value] of costumeSynthesisBonus) {
-    engravingBonus.set(label, (engravingBonus.get(label) ?? 0) + value);
+  const flat = collectFlatBonuses(equipment, seals, ephenSynthesis.stats);
+  for (const [key, stat] of FLAT_STAT_TARGETS) {
+    totals[key] += flat.get(stat) ?? 0;
   }
-  for (const [label, value] of underwearSynthesisBonus) {
-    engravingBonus.set(label, (engravingBonus.get(label) ?? 0) + value);
-  }
-  for (const [label, value] of cursedArmorSynthesisBonus) {
-    engravingBonus.set(label, (engravingBonus.get(label) ?? 0) + value);
-  }
-  for (const [label, value] of ringSynthesisBonus) {
-    engravingBonus.set(label, (engravingBonus.get(label) ?? 0) + value);
-  }
-  for (const [label, value] of ephenRuneSetBonus) {
-    engravingBonus.set(label, (engravingBonus.get(label) ?? 0) + value);
-  }
-  for (const [label, value] of ephenSynthesisBonus.stats) {
-    engravingBonus.set(label, (engravingBonus.get(label) ?? 0) + value);
-  }
-  const sealPicks = seals.map((s) => ({
-    sealName: s.seal_name,
-    level: s.level,
-  }));
-  for (const { stat, value } of computeSealBonusSummary(sealPicks)) {
-    engravingBonus.set(stat, (engravingBonus.get(stat) ?? 0) + value);
-  }
-  for (const [label, value] of computeEpheSealsFlatBonus(equipment)) {
-    engravingBonus.set(label, (engravingBonus.get(label) ?? 0) + value);
-  }
-  totals.defense += engravingBonus.get(ENGRAVING_STAT.DEFENSE) ?? 0;
-  totals.resist += engravingBonus.get(ENGRAVING_STAT.RESIST) ?? 0;
-  totals.health += engravingBonus.get(ENGRAVING_STAT.HEALTH) ?? 0;
-  totals.mana += engravingBonus.get(ENGRAVING_STAT.MANA) ?? 0;
-  totals.meleeAttack += engravingBonus.get(ENGRAVING_STAT.MELEE_ATTACK) ?? 0;
-  totals.rangedAttack += engravingBonus.get(ENGRAVING_STAT.RANGED_ATTACK) ?? 0;
-  totals.spellPower += engravingBonus.get(ENGRAVING_STAT.SPELL_POWER) ?? 0;
-  totals.healPower += engravingBonus.get(ENGRAVING_STAT.HEAL_POWER) ?? 0;
-  totals.moveSpeed += engravingBonus.get(ENGRAVING_STAT.MOVE_SPEED) ?? 0;
-  totals.skillSpeed += engravingBonus.get(ENGRAVING_STAT.SKILL_SPEED) ?? 0;
-  totals.proficiency += engravingBonus.get(ENGRAVING_STAT.PROFICIENCY) ?? 0;
-  totals.tacticalReadiness +=
-    engravingBonus.get(ENGRAVING_STAT.TACTICAL_READINESS) ?? 0;
-  totals.parry += engravingBonus.get(ENGRAVING_STAT.PARRY) ?? 0;
-  totals.dodge += engravingBonus.get(ENGRAVING_STAT.DODGE) ?? 0;
-  totals.block += engravingBonus.get(ENGRAVING_STAT.BLOCK) ?? 0;
-  totals.pvpResist += engravingBonus.get(ENGRAVING_STAT.PVP_RESIST) ?? 0;
-  totals.critDamageResist +=
-    engravingBonus.get(ENGRAVING_STAT.CRIT_DAMAGE_RESIST) ?? 0;
-
   return totals;
 }
 
 const FLAT_HEALTH_POOL =
   BASE_CHARACTER_STATS.health - BASE_CHARACTER_STATS.sta * 12;
+
 const FLAT_MANA_POOL =
   BASE_CHARACTER_STATS.mana - BASE_CHARACTER_STATS.int * 10;
 

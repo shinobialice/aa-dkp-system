@@ -50,7 +50,9 @@ export function GearItemPicker({
         {selected ? (
           <span className="flex min-w-0 flex-1 items-center gap-2">
             <GearItemIcon item={selected} grade={selected.grade} size={20} />
-            <span className="min-w-0 flex-1 truncate text-left">{selected.name}</span>
+            <span className="min-w-0 flex-1 truncate text-left">
+              {selected.name}
+            </span>
           </span>
         ) : (
           <span className="text-muted-foreground">Выберите предмет</span>

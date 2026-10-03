@@ -3,32 +3,14 @@ import { useState } from "react";
 import { toast } from "sonner";
 import saveUserSeals from "@/actions/saveUserSeals";
 import type { UserSeal } from "@/actions/getUserSeals";
-import SealIcon from "./SealIcon";
-import SealLevelList from "./SealLevelList";
-import SealCard from "./SealCard";
 import SealBonusSummaryButton from "./SealBonusSummaryButton";
-import {
-  SEAL_NAMES,
-  SEAL_INFO,
-  SEAL_ROLE_COLORS,
-  MAX_USER_SEALS,
-  MAX_SEAL_LEVEL,
-  DEFAULT_SEAL_LEVEL,
-  getSealGradeForLevel,
-  getSealGradeLabel,
-} from "./sealsData";
-import { Badge } from "@/shared/ui";
+import { MAX_USER_SEALS, DEFAULT_SEAL_LEVEL } from "./sealsData";
 import { Button } from "@/shared/ui";
-import { Input } from "@/shared/ui";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
 import CharacterTabsSwitcher from "@/widgets/profile/CharacterTabsSwitcher";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/shared/ui";
+import { errorMessage } from "@/shared/lib/errorMessage";
+import SealSlotEditor, { NO_SEAL, type SealSlot } from "./SealSlotEditor";
+import SealsGrid from "./SealsGrid";
 
 type Props = {
   userId: number;
@@ -37,32 +19,9 @@ type Props = {
   canEdit: boolean;
 };
 
-const NONE = "Нет";
-
-type SealSlot = { name: string | null; level: number };
-
-function SealOptionLabel({ name }: { name: string }) {
-  const info = SEAL_INFO[name as keyof typeof SEAL_INFO];
-  if (!info) return <>{name}</>;
-  return (
-    <>
-      {name} — {info.playstyle} (
-      {info.roles.map((role, i) => (
-        <span key={role}>
-          {i > 0 && ", "}
-          <span style={{ color: SEAL_ROLE_COLORS[role] }}>{role}</span>
-        </span>
-      ))}
-      )
-    </>
-  );
-}
-
 export default function SealsTab({ userId, seals, onChange, canEdit }: Props) {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  // Черновик на время редактирования: MAX_USER_SEALS слотов, как в
-  // "Класс персонажа" (селект на слот вместо чекбоксов на все печати сразу).
   const [draft, setDraft] = useState<SealSlot[]>([]);
 
   const startEditing = () => {
@@ -84,7 +43,7 @@ export default function SealsTab({ userId, seals, onChange, canEdit }: Props) {
     setDraft((prev) => {
       const next = [...prev];
       next[index] =
-        value === NONE
+        value === NO_SEAL
           ? { name: null, level: DEFAULT_SEAL_LEVEL }
           : { name: value, level: next[index]?.level ?? DEFAULT_SEAL_LEVEL };
       return next;
@@ -116,16 +75,14 @@ export default function SealsTab({ userId, seals, onChange, canEdit }: Props) {
       setEditing(false);
       toast.success("Печати сохранены");
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Не удалось сохранить печати",
-      );
+      toast.error(errorMessage(error, "Не удалось сохранить печати"));
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <Card className="min-h-[750px] gap-3 py-4">
+    <Card className="min-h-187.5 gap-3 py-4">
       <CardHeader className="border-b">
         <CardTitle className="flex flex-wrap items-center justify-between gap-2">
           <CharacterTabsSwitcher />
@@ -163,128 +120,29 @@ export default function SealsTab({ userId, seals, onChange, canEdit }: Props) {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 pt-3">
-        {(() => {
-          if (editing) {
-            return (
-              <div className="text-sm text-muted-foreground">
-                Выбрано веток: {draft.filter((s) => s.name).length} /{" "}
-                {MAX_USER_SEALS}
-              </div>
-            );
-          }
-          return null;
-        })()}
-        {(() => {
-          if (editing) {
-            return (
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                {draft.map((slot, i) => {
-                  const otherChosen = draft
-                    .filter((_, j) => j !== i)
-                    .map((s) => s.name)
-                    .filter((name): name is string => !!name);
-                  const grade = getSealGradeForLevel(slot.level);
-                  return (
-                    <div key={i} className="space-y-1.5">
-                      <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                        Печать {i + 1}
-                      </div>
-                      <Select
-                        value={slot.name ?? NONE}
-                        onValueChange={(v) => setSealName(i, v)}
-                      >
-                        <SelectTrigger className="w-full cursor-pointer">
-                          <SelectValue placeholder="Не выбрано" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value={NONE}>Нет</SelectItem>
-                          {SEAL_NAMES.filter(
-                            (name) => !otherChosen.includes(name),
-                          ).map((name) => (
-                            <SelectItem key={name} value={name}>
-                              <SealOptionLabel name={name} />
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {slot.name && (
-                        <div className="space-y-1.5 rounded-lg border p-2">
-                          <div className="flex items-center justify-between gap-2 text-sm">
-                            <span>
-                              Уровень{" "}
-                              <span className="font-semibold">
-                                {slot.level}
-                              </span>{" "}
-                              — {getSealGradeLabel(grade)}
-                            </span>
-                            <Input
-                              type="number"
-                              min={0}
-                              max={MAX_SEAL_LEVEL}
-                              value={slot.level}
-                              onChange={(e) => {
-                                const v = Math.max(
-                                  0,
-                                  Math.min(
-                                    MAX_SEAL_LEVEL,
-                                    Number(e.target.value) || 0,
-                                  ),
-                                );
-                                setLevel(i, v);
-                              }}
-                              className="h-8 w-16 text-right"
-                            />
-                          </div>
-                          <div className="space-y-1 text-xs font-medium text-muted-foreground">
-                            Выбрать по списку уровней
-                          </div>
-                          <SealLevelList
-                            sealName={slot.name}
-                            level={slot.level}
-                            onSelectLevel={(level) => setLevel(i, level)}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          }
-
-          if (seals.length === 0) {
-            return (
-              <div className="py-6 text-center text-sm text-muted-foreground">
-                Печати не выбраны
-              </div>
-            );
-          }
-
-          return (
-            <div className="grid grid-cols-1 items-start gap-3 md:grid-cols-3">
-              {Array.from({ length: MAX_USER_SEALS }).map((_, i) => {
-                const seal = seals[i];
-                if (!seal) {
-                  return (
-                    <div
-                      key={`empty-${i}`}
-                      className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed p-3 text-sm text-muted-foreground"
-                    >
-                      Не выбрано
-                    </div>
-                  );
-                }
-                return (
-                  <SealCard
-                    key={seal.id}
-                    name={seal.seal_name}
-                    level={seal.level}
-                  />
-                );
-              })}
+        {editing && (
+          <>
+            <div className="text-sm text-muted-foreground">
+              Выбрано веток: {draft.filter((slot) => slot.name).length} /{" "}
+              {MAX_USER_SEALS}
             </div>
-          );
-        })()}
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              {draft.map((slot, index) => (
+                <SealSlotEditor
+                  key={index}
+                  index={index}
+                  slot={slot}
+                  takenNames={draft
+                    .filter((_, other) => other !== index)
+                    .flatMap((other) => (other.name ? [other.name] : []))}
+                  onNameChange={(value) => setSealName(index, value)}
+                  onLevelChange={(level) => setLevel(index, level)}
+                />
+              ))}
+            </div>
+          </>
+        )}
+        {!editing && <SealsGrid seals={seals} />}
       </CardContent>
     </Card>
   );

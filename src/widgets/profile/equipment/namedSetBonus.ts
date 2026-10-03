@@ -1,6 +1,10 @@
 import type { UserEquipment } from "@/actions/getUserEquipment";
 import { findGearItem, findGearItemById, ITEMS_BY_SLOT } from "./itemsData";
-import { NAMED_SETS, type NamedSet, type NamedSetTier } from "./itemsData/namedSets";
+import {
+  NAMED_SETS,
+  type NamedSet,
+  type NamedSetTier,
+} from "./itemsData/namedSets";
 import { BASE_CHARACTER_STATS, computeEquippedBonuses } from "./characterStats";
 
 const ARMOR_SLOT_ORDER = [
@@ -71,10 +75,14 @@ function groupIntoRows(pieces: NamedSetPiece[]): NamedSetPiece[][] {
   return rows;
 }
 
-function resolveTierText(tier: NamedSetTier, equipment: UserEquipment[]): string {
+function resolveTierText(
+  tier: NamedSetTier,
+  equipment: UserEquipment[],
+): string {
   if (!tier.dynamic) return tier.text;
   const bonus = computeEquippedBonuses(equipment);
-  const total = BASE_CHARACTER_STATS[tier.dynamic.stat] + bonus[tier.dynamic.stat];
+  const total =
+    BASE_CHARACTER_STATS[tier.dynamic.stat] + bonus[tier.dynamic.stat];
   const value = Math.round(total * tier.dynamic.coefficient);
   return tier.text.replace("{{value}}", String(value));
 }

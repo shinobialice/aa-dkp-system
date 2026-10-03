@@ -1,7 +1,7 @@
 // @todo: rewrite
 type Id = number | string;
 
-export interface KillCounterDto {
+export type KillCounterDto = {
   playerClass: string;
   userName: string;
   userId: string;
@@ -13,9 +13,9 @@ export interface KillCounterDto {
   totalKills: number;
   totalHonor: number;
   id: Id;
-}
+};
 
-export interface KillCount {
+export type KillCount = {
   playerClass: string;
   userName: string;
   userId?: Id;
@@ -27,9 +27,9 @@ export interface KillCount {
   endKills: number;
   comment?: string;
   id: Id;
-}
+};
 
-export interface DB_GetKillCountDto {
+export type DB_GetKillCountDto = {
   userName: string;
   role?: string | null;
   avatarUrl?: string | null;
@@ -44,9 +44,9 @@ export interface DB_GetKillCountDto {
   comment?: string;
   totalKills: number;
   totalHonor: number;
-}
+};
 
-export interface DB_UpdateKillCountDto {
+export type DB_UpdateKillCountDto = {
   id: Id;
   startHonor: number;
   endHonor: number;
@@ -54,11 +54,10 @@ export interface DB_UpdateKillCountDto {
   endKills: number;
   playerClass: string;
   comment?: string;
-}
+};
 
-export interface KillCountHistoryData {
+export type KillCountHistoryData = {
   date: string;
-  /** SUM(...) в Postgres — bigint, приходит строкой. */
   totalKills: string;
   playersCount: number;
   warId: string | null;
@@ -66,11 +65,11 @@ export interface KillCountHistoryData {
   topUserName: string | null;
   topKills: number | null;
   topAvatarUrl: string | null;
-}
+};
 
-export interface KillCountWar {
+export type KillCountWar = {
   id: string;
   opponentGuild: string | null;
   startedAt: string;
   endedAt: string | null;
-}
+};

@@ -2,8 +2,6 @@ import { format } from "date-fns";
 import type { MiscLootGrant } from "@/actions/miscLootGrants";
 import type { WishlistItem } from "@/actions/lootWishlist";
 
-export { avatarSrc } from "../LootBuy/lootBuyModel";
-
 export type GiveawayStatus = "" | "Выдано" | "В наличии" | "Хочет";
 
 export const STATUS_OPTIONS: Exclude<GiveawayStatus, "">[] = [
@@ -14,7 +12,6 @@ export const STATUS_OPTIONS: Exclude<GiveawayStatus, "">[] = [
 
 export type ItemKind = "loot" | "glider";
 
-/** Один из отслеживаемых предметов (lootColumns + gliderTypes). */
 export type TrackedItem = {
   name: string;
   kind: ItemKind;
@@ -33,7 +30,6 @@ export type Player = {
   username: string;
   active: boolean;
   avatarUrl: string | null;
-  /** По одному на каждый TrackedItem, в том же порядке. */
   items: PlayerItem[];
   miscGrants: MiscLootGrant[];
   wishlist: WishlistItem[];
@@ -57,7 +53,6 @@ export function statusOf(player: Player, itemName: string): GiveawayStatus {
   return player.items.find((i) => i.name === itemName)?.status ?? "";
 }
 
-/** Подходит ли игрок под фильтр; если выбран предмет — фильтр по нему. */
 export function matchesFilter(
   player: Player,
   filter: RosterFilter,
@@ -78,8 +73,6 @@ export function matchesFilter(
   }
 }
 
-// "Выдано" — выдала гильдия, "В наличии" — у игрока уже есть, гильдия не
-// выдавала: в обоих случаях предмет у игрока есть, поэтому они внизу.
 const STATUS_RANK: Record<GiveawayStatus, number> = {
   Хочет: 0,
   "": 1,
@@ -87,7 +80,6 @@ const STATUS_RANK: Record<GiveawayStatus, number> = {
   "В наличии": 3,
 };
 
-/** При выбранном предмете сверху те, кто его хочет, внизу — у кого он уже есть. */
 export function sortForItem(players: Player[], itemName: string | null) {
   if (!itemName) return players;
   return [...players].sort(
@@ -102,7 +94,6 @@ export function formatMiscGrant(grant: MiscLootGrant) {
     : grant.comment;
 }
 
-/** Хотелки — свободный текст, не привязаны к списку предметов. */
 export function formatWishlistItem(item: WishlistItem) {
   return item.comment ? `${item.itemName} (${item.comment})` : item.itemName;
 }

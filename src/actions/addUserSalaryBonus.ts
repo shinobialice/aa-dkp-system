@@ -2,7 +2,7 @@
 
 import sql from "@/shared/lib/db";
 import ensurePrivilieges from "./ensurePrivilieges";
-import { triggerFinanceRecalcForCurrentMonth } from "./recalculateFinanceForMonth";
+import { triggerFinanceRecalcForCurrentMonth } from "@/server/finance/recalc";
 
 export async function addUserSalaryBonus({
   userId,
@@ -23,7 +23,7 @@ export async function addUserSalaryBonus({
   }
 
   try {
-    await sql<any[]>`
+    await sql`
       INSERT INTO user_salary_bonus (user_id, amount, reason, created_at)
       VALUES (${userId}, ${amount}, ${reason}, now())
     `;
@@ -39,7 +39,7 @@ export async function deleteUserSalaryBonus(id: number) {
   await ensurePrivilieges(["Администратор"]);
 
   try {
-    await sql<any[]>`DELETE FROM user_salary_bonus WHERE id = ${id}`;
+    await sql`DELETE FROM user_salary_bonus WHERE id = ${id}`;
   } catch (error) {
     console.error("Error deleting salary bonus:", error);
     throw new Error("Ошибка при удалении бонуса");

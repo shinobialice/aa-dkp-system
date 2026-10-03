@@ -2,13 +2,12 @@ import { NextResponse } from "next/server";
 import sql from "@/shared/lib/db";
 import { getBaseUrl } from "./getBaseUrl";
 import { createSession, SESSION_MAX_AGE_SECONDS } from "./session";
+import type { LinkTokenRow, UserRow } from "./dbTypes";
 
 type SocialIdColumn = "vk_id" | "google_id" | "mail_id";
 
-const baseUrl = getBaseUrl();
-
 export function loginErrorRedirect(reason?: string) {
-  const url = new URL("/login-error", baseUrl);
+  const url = new URL("/login-error", getBaseUrl());
   if (reason) url.searchParams.set("reason", reason);
   return NextResponse.redirect(url);
 }
@@ -33,7 +32,7 @@ export async function completeSocialAuth(
   userAgent: string | null,
 ) {
   if (linkToken) {
-    const [linkRow] = await sql<any[]>`
+    const [linkRow] = await sql<Pick<LinkTokenRow, "userId">[]>`
       SELECT "userId" FROM link_token
       WHERE token = ${linkToken} AND used = false AND "expiresAt" > now()
     `;
@@ -43,7 +42,7 @@ export async function completeSocialAuth(
     }
 
     // Одна соцсеть — один профиль: иначе вход по ней попадал бы в случайный.
-    const [owner] = await sql<any[]>`
+    const [owner] = await sql<Pick<UserRow, "id">[]>`
       SELECT id FROM "user"
       WHERE ${sql(column)} = ${socialId} AND id <> ${linkRow.userId}
     `;
@@ -54,7 +53,7 @@ export async function completeSocialAuth(
 
     // Пометка used и проверка срока одним запросом — ссылку нельзя
     // использовать дважды, даже если два входа пришли одновременно.
-    const [consumed] = await sql<any[]>`
+    const [consumed] = await sql<Pick<LinkTokenRow, "userId">[]>`
       UPDATE link_token SET used = true
       WHERE token = ${linkToken} AND used = false AND "expiresAt" > now()
       RETURNING "userId"
@@ -74,13 +73,13 @@ export async function completeSocialAuth(
 
     return withSession(
       clearLinkToken(
-        NextResponse.redirect(new URL("/link-account/complete", baseUrl)),
+        NextResponse.redirect(new URL("/link-account/complete", getBaseUrl())),
       ),
       sessionToken,
     );
   }
 
-  const [existingUser] = await sql<any[]>`
+  const [existingUser] = await sql<Pick<UserRow, "id" | "active">[]>`
     SELECT id, active FROM "user" WHERE ${sql(column)} = ${socialId}
   `;
 
@@ -95,7 +94,7 @@ export async function completeSocialAuth(
   const sessionToken = await createSession(existingUser.id, userAgent);
 
   return withSession(
-    NextResponse.redirect(new URL("/", baseUrl)),
+    NextResponse.redirect(new URL("/", getBaseUrl())),
     sessionToken,
   );
 }

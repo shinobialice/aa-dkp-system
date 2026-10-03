@@ -1,18 +1,20 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import type { UserRow, UserTagsRow } from "@/shared/lib/dbTypes";
 
-const ONLINE_THRESHOLD_MS = 2 * 60 * 1000; // 2 минуты без heartbeat = не в сети
+type OnlineRow = Pick<UserRow, "id" | "username" | "avatar_url">;
 
-// Порядок приоритета тэгов для сортировки/иконки в списке онлайна.
+const ONLINE_THRESHOLD_MS = 2 * 60 * 1000;
+
 const rolePriority = ["Администратор", "Модератор", "Секретутка"];
 
 export async function getOnlineUsers() {
   const cutoff = new Date(Date.now() - ONLINE_THRESHOLD_MS).toISOString();
 
-  let data: { id: number; username: string; avatar_url: string | null }[];
+  let data: OnlineRow[];
   try {
-    data = await sql<any[]>`
+    data = await sql<OnlineRow[]>`
       SELECT id, username, avatar_url FROM "user"
       WHERE last_seen_at >= ${cutoff}
       ORDER BY username ASC
@@ -25,9 +27,9 @@ export async function getOnlineUsers() {
   if (data.length === 0) return [];
 
   const userIds = data.map((u) => u.id);
-  let tagRows: { user_id: number; tag: string }[] = [];
+  let tagRows: Pick<UserTagsRow, "user_id" | "tag">[] = [];
   try {
-    tagRows = await sql<any[]>`
+    tagRows = await sql<Pick<UserTagsRow, "user_id" | "tag">[]>`
       SELECT user_id, tag FROM user_tags
       WHERE user_id = ANY(${userIds})
         AND tag = ANY(${rolePriority})
@@ -38,7 +40,7 @@ export async function getOnlineUsers() {
   }
 
   const roleByUserId = new Map<number, string>();
-  for (const row of tagRows ?? []) {
+  for (const row of tagRows) {
     const current = roleByUserId.get(row.user_id);
     if (
       !current ||
@@ -54,8 +56,12 @@ export async function getOnlineUsers() {
   }));
 
   users.sort((a, b) => {
-    const aPriority = a.role ? rolePriority.indexOf(a.role) : rolePriority.length;
-    const bPriority = b.role ? rolePriority.indexOf(b.role) : rolePriority.length;
+    const aPriority = a.role
+      ? rolePriority.indexOf(a.role)
+      : rolePriority.length;
+    const bPriority = b.role
+      ? rolePriority.indexOf(b.role)
+      : rolePriority.length;
     if (aPriority !== bPriority) return aPriority - bPriority;
     return a.username.localeCompare(b.username);
   });

@@ -1,36 +1,10 @@
-import { CLASS_ORDER } from "@/widgets/MembersTable/membersModel";
+import type { MonthSalary } from "@/actions/financeActions";
+import { CLASS_ORDER, classGroupTitle } from "@/shared/config/classes";
+import { MONTH_NAMES } from "@/shared/config/months";
+import type { GuildFundsRow } from "@/shared/lib/dbTypes";
 
-export type Fund = {
-  totalIncome: number;
-  totalExpenses: number;
-  profit: number;
-  salaryBudget: number;
-  treasuryBudget: number;
-  inTreasury: number;
-  advanceSent: number;
-  carryOver: number;
-};
-
-export type SalaryRow = {
-  id: number;
-  userId: number;
-  username: string;
-  class: string | null;
-  avatarUrl: string | null;
-  joinedAt: string | null;
-  amount: number;
-  bonus: number | null;
-  total: number;
-  sentAmount: number;
-  sent: boolean;
-  tenurePercent: number;
-  customBonusPercent: number;
-  penaltyPercent: number;
-  weightPercent: number;
-  aglPercent: number;
-  primePercent: number;
-  totalPercent: number;
-};
+export type Fund = GuildFundsRow;
+export type SalaryEntry = MonthSalary;
 
 export type SalarySortKey =
   | "class"
@@ -42,81 +16,93 @@ export type SalarySortKey =
 
 export type SalarySort = { key: SalarySortKey; desc: boolean };
 
-export const DESC_FIRST: SalarySortKey[] = [
-  "attendance",
-  "weight",
-  "total",
-  "rest",
-];
-
 export type SalaryGroup = {
   key: string;
   title: string;
   className: string | null;
-  rows: SalaryRow[];
+  rows: SalaryEntry[];
 };
 
-const CLASS_PLURAL: Record<string, string> = {
-  Бард: "Барды",
-  Лук: "Луки",
-  Стрелок: "Стрелки",
-  Маг: "Маги",
-  Милик: "Милики",
-  Тактик: "Тактики",
-  Танцор: "Танцоры",
-  Хил: "Хилы",
+export type SalaryModifier = {
+  kind: "tenure" | "bonus" | "penalty";
+  text: string;
 };
 
-export const MONTHS = [
-  "Январь",
-  "Февраль",
-  "Март",
-  "Апрель",
-  "Май",
-  "Июнь",
-  "Июль",
-  "Август",
-  "Сентябрь",
-  "Октябрь",
-  "Ноябрь",
-  "Декабрь",
-];
+export const DEFAULT_SORT: SalarySort = { key: "class", desc: false };
 
-export const MONTHS_GENITIVE = [
-  "январь",
-  "февраль",
-  "март",
-  "апрель",
-  "май",
-  "июнь",
-  "июль",
-  "август",
-  "сентябрь",
-  "октябрь",
-  "ноябрь",
-  "декабрь",
-];
+const DESC_FIRST: SalarySortKey[] = ["attendance", "weight", "total", "rest"];
 
-export function formatGold(value: number): string {
-  return Math.round(value).toLocaleString("ru-RU");
+export function monthLabel(month: number) {
+  return MONTH_NAMES[month - 1].toLowerCase();
 }
 
-export function formatPercent(value: number): string {
-  return `${Math.round(value)}%`;
+export function nextSort(current: SalarySort, key: SalarySortKey): SalarySort {
+  if (current.key === key) return { key, desc: !current.desc };
+  return { key, desc: DESC_FIRST.includes(key) };
 }
 
-function classRank(cls: string | null): number {
-  const index = cls ? CLASS_ORDER.indexOf(cls) : -1;
-  return index === -1 ? CLASS_ORDER.length : index;
+export function remaining(row: SalaryEntry) {
+  return row.total - row.sentAmount;
 }
 
-function joinedTime(row: SalaryRow): number {
-  return row.joinedAt
-    ? new Date(row.joinedAt).getTime()
-    : Number.MAX_SAFE_INTEGER;
+export function salaryModifiers(row: SalaryEntry): SalaryModifier[] {
+  const modifiers: SalaryModifier[] = [];
+  if (row.tenurePercent) {
+    modifiers.push({
+      kind: "tenure",
+      text: `стаж +${Math.round(row.tenurePercent)}%`,
+    });
+  }
+  if (row.customBonusPercent) {
+    modifiers.push({
+      kind: "bonus",
+      text: `бонус +${Math.round(row.customBonusPercent)}%`,
+    });
+  }
+  if (row.penaltyPercent) {
+    modifiers.push({
+      kind: "penalty",
+      text: `штраф −${Math.round(row.penaltyPercent)}%`,
+    });
+  }
+  return modifiers;
 }
 
-function sortValue(row: SalaryRow, key: SalarySortKey): number | string {
+export function sortSalaries(rows: SalaryEntry[], sort: SalarySort) {
+  const direction = sort.desc ? -1 : 1;
+  return [...rows].sort((a, b) => {
+    const left = sortValue(a, sort.key);
+    const right = sortValue(b, sort.key);
+    if (left === right) return joinedTime(a) - joinedTime(b);
+    if (typeof left === "string" && typeof right === "string") {
+      return left.localeCompare(right, "ru") * direction;
+    }
+    return (left < right ? -1 : 1) * direction;
+  });
+}
+
+export function groupSalariesByClass(rows: SalaryEntry[]): SalaryGroup[] {
+  const groups = new Map<string, SalaryGroup>();
+  for (const row of rows) {
+    const key = row.class ?? "none";
+    const group = groups.get(key) ?? {
+      key,
+      title: classGroupTitle(row.class),
+      className: row.class,
+      rows: [],
+    };
+    group.rows.push(row);
+    groups.set(key, group);
+  }
+  return [...groups.values()];
+}
+
+export function salaryPlace(rows: SalaryEntry[], row: SalaryEntry) {
+  const ranked = [...rows].sort((a, b) => b.total - a.total);
+  return ranked.findIndex((item) => item.id === row.id) + 1;
+}
+
+function sortValue(row: SalaryEntry, key: SalarySortKey): number | string {
   switch (key) {
     case "username":
       return row.username.toLowerCase();
@@ -127,52 +113,19 @@ function sortValue(row: SalaryRow, key: SalarySortKey): number | string {
     case "total":
       return row.total;
     case "rest":
-      return row.total - row.sentAmount;
+      return remaining(row);
     default:
       return classRank(row.class);
   }
 }
 
-export function sortSalaries(rows: SalaryRow[], sort: SalarySort): SalaryRow[] {
-  const direction = sort.desc ? -1 : 1;
-  return [...rows].sort((a, b) => {
-    const left = sortValue(a, sort.key);
-    const right = sortValue(b, sort.key);
-    if (left !== right) {
-      if (typeof left === "string" && typeof right === "string") {
-        return left.localeCompare(right, "ru") * direction;
-      }
-      return (left < right ? -1 : 1) * direction;
-    }
-    return joinedTime(a) - joinedTime(b);
-  });
+function classRank(cls: string | null) {
+  const index = cls ? CLASS_ORDER.indexOf(cls) : -1;
+  return index === -1 ? CLASS_ORDER.length : index;
 }
 
-export function groupSalariesByClass(rows: SalaryRow[]): SalaryGroup[] {
-  const groups = new Map<string, SalaryGroup>();
-  for (const row of rows) {
-    const key = row.class ?? "none";
-    const group = groups.get(key) ?? {
-      key,
-      title: row.class ? (CLASS_PLURAL[row.class] ?? row.class) : "Без класса",
-      className: row.class,
-      rows: [],
-    };
-    group.rows.push(row);
-    groups.set(key, group);
-  }
-  return Array.from(groups.values());
-}
-
-export function attendanceTone(percent: number) {
-  if (percent >= 80)
-    return { text: "text-green-700 dark:text-green-400", bar: "bg-green-600" };
-  if (percent >= 50)
-    return { text: "text-amber-700 dark:text-amber-400", bar: "bg-amber-500" };
-  return { text: "text-red-700 dark:text-red-400", bar: "bg-red-500" };
-}
-
-export function shiftMonth(month: number, year: number, delta: number) {
-  const index = year * 12 + (month - 1) + delta;
-  return { month: (index % 12) + 1, year: Math.floor(index / 12) };
+function joinedTime(row: SalaryEntry) {
+  return row.joinedAt
+    ? new Date(row.joinedAt).getTime()
+    : Number.MAX_SAFE_INTEGER;
 }

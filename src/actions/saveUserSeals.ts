@@ -1,7 +1,7 @@
 "use server";
 import sql from "@/shared/lib/db";
 import ensureCanEditUserData from "./ensureCanEditUserData";
-import getUserSeals, { UserSeal } from "./getUserSeals";
+import getUserSeals, { type UserSeal } from "./getUserSeals";
 import {
   MAX_USER_SEALS,
   isValidSealLevel,

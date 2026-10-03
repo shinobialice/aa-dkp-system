@@ -1,90 +1,12 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import { ChevronDown } from "lucide-react";
-import { getEngravingsForSlot, type Engraving } from "./itemsData/engravings";
+import { getEngravingsForSlot } from "./itemsData/engravings";
 import { getEngravingCategory } from "./itemsData/engravingSlots";
 import type { WeaponHandedness } from "./itemsData/weaponHandedness";
-import { getItemGradeIconUrl } from "./itemsData/paths";
-import {
-  getSealGradeColor,
-  getSealGradeLabel,
-} from "@/widgets/profile/seals/sealsData";
-import { Input, Tooltip, TooltipTrigger, TooltipContent } from "@/shared/ui";
-import { EffectText } from "./highlightNumbers";
-
-export function EngravingIcon({
-  engraving,
-  size,
-}: {
-  engraving: Engraving;
-  size: number;
-}) {
-  return (
-    <div className="relative shrink-0" style={{ width: size, height: size }}>
-      <Image
-        src={engraving.iconUrl}
-        alt={engraving.name}
-        width={size}
-        height={size}
-        className="absolute inset-0"
-      />
-      <Image
-        src={getItemGradeIconUrl(engraving.grade)}
-        alt=""
-        width={size}
-        height={size}
-        className="absolute inset-0"
-      />
-    </div>
-  );
-}
-
-export function EngravingTooltip({
-  engraving,
-  side = "left",
-  children,
-}: {
-  engraving: Engraving;
-  side?: "left" | "right" | "top" | "bottom";
-  children: React.ReactNode;
-}) {
-  const color = getSealGradeColor(engraving.grade);
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>{children}</TooltipTrigger>
-      <TooltipContent
-        side={side}
-        className="dark w-56 border-border bg-background p-3 text-foreground"
-      >
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <EngravingIcon engraving={engraving} size={32} />
-            <div className="min-w-0">
-              <div className="text-xs" style={{ color: color ?? undefined }}>
-                {getSealGradeLabel(engraving.grade)} предмет
-              </div>
-              <div
-                className="truncate text-sm font-semibold"
-                style={{ color: color ?? undefined }}
-              >
-                {engraving.name}
-              </div>
-            </div>
-          </div>
-          {engraving.effect && (
-            <>
-              <div className="border-t border-border" />
-              <div className="space-y-0.5 text-xs text-muted-foreground">
-                <EffectText text={engraving.effect} />
-              </div>
-            </>
-          )}
-        </div>
-      </TooltipContent>
-    </Tooltip>
-  );
-}
+import { Input } from "@/shared/ui";
+import { EngravingIcon } from "./EngravingIcon";
+import { EngravingTooltip } from "./EngravingTooltip";
 
 function pickerPriority(name: string): number {
   if (name.startsWith("Зачарованная")) return 0;
@@ -98,7 +20,10 @@ const JEWELRY_TIER_PREFIXES: [string, number][] = [
   ["Искусная ", 2],
 ];
 
-function getJewelryTierAndFamily(name: string): { tier: number; family: string } {
+function getJewelryTierAndFamily(name: string): {
+  tier: number;
+  family: string;
+} {
   for (const [prefix, tier] of JEWELRY_TIER_PREFIXES) {
     if (name.startsWith(prefix)) {
       return { tier, family: name.slice(prefix.length).toLowerCase() };
@@ -131,9 +56,7 @@ export function EngravingPicker({
       if (isJewelry) {
         const fa = getJewelryTierAndFamily(a.name);
         const fb = getJewelryTierAndFamily(b.name);
-        return (
-          fa.family.localeCompare(fb.family, "ru") || fb.tier - fa.tier
-        );
+        return fa.family.localeCompare(fb.family, "ru") || fb.tier - fa.tier;
       }
       return pickerPriority(a.name) - pickerPriority(b.name);
     });
@@ -175,7 +98,9 @@ export function EngravingPicker({
             </span>
           </span>
         ) : (
-          <span className="text-muted-foreground">Начните вводить название...</span>
+          <span className="text-muted-foreground">
+            Начните вводить название...
+          </span>
         )}
         <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
       </button>
@@ -214,7 +139,11 @@ export function EngravingPicker({
               </div>
             )}
             {filtered.map((engraving) => (
-              <EngravingTooltip key={engraving.id} engraving={engraving} side="right">
+              <EngravingTooltip
+                key={engraving.id}
+                engraving={engraving}
+                side="right"
+              >
                 <button
                   type="button"
                   onClick={() => {
@@ -227,7 +156,9 @@ export function EngravingPicker({
                   }`}
                 >
                   <EngravingIcon engraving={engraving} size={28} />
-                  <span className="min-w-0 flex-1 truncate">{engraving.name}</span>
+                  <span className="min-w-0 flex-1 truncate">
+                    {engraving.name}
+                  </span>
                 </button>
               </EngravingTooltip>
             ))}

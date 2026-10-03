@@ -1,51 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useAsyncData } from "@/hooks/useAsyncData";
 import InventoryLogTable from "./InventoryLogTable";
 import UserExpensesTable from "./UserExpensesTable";
 import LootQueueTable from "./LootQueueTable";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/ui";
-import {
-  getUserPurchaseLog,
-  type InventoryLogEntry,
-} from "@/actions/getUserPurchaseLog";
+import { getUserPurchaseLog } from "@/actions/getUserPurchaseLog";
 import { getExpensesBySource } from "@/actions/expenseActions";
-import type { ExpenseItem } from "@/widgets/Loot/GuildLoot/ExpensesTypes";
-import {
-  getUserLootQueue,
-  type UserLootQueueEntry,
-} from "@/actions/getUserLootQueue";
+import { getUserLootQueue } from "@/actions/getUserLootQueue";
 
-export default function PurchasesAndGiveaways({
-  userId,
-  username,
-}: {
+type Props = {
   userId: number;
   username?: string | null;
-}) {
-  const [items, setItems] = useState<InventoryLogEntry[]>([]);
-  const [expenses, setExpenses] = useState<ExpenseItem[]>([]);
-  const [queue, setQueue] = useState<UserLootQueueEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+};
 
-  useEffect(() => {
-    setLoading(true);
-    Promise.all([
-      getUserPurchaseLog(userId),
-      username ? getExpensesBySource(username) : Promise.resolve([]),
-      getUserLootQueue(userId),
-    ])
-      .then(([log, exp, lootQueue]) => {
-        setItems(log);
-        setExpenses(exp);
-        setQueue(lootQueue);
-      })
-      .finally(() => setLoading(false));
-  }, [userId, username]);
-
-  const purchased = items.filter((item) => item.type === "Куплено");
-  const given = items.filter((item) => item.type === "Выдано");
+export default function PurchasesAndGiveaways({ userId, username }: Props) {
+  const { data: loaded, isLoading } = useAsyncData(
+    `${userId}:${username ?? ""}`,
+    () => loadPurchases(userId, username),
+  );
+  const data = isLoading ? undefined : loaded;
 
   return (
     <Card>
@@ -53,11 +28,12 @@ export default function PurchasesAndGiveaways({
         <CardTitle>Куплено / Выдано</CardTitle>
       </CardHeader>
       <CardContent>
-        {loading ? (
-          <div className="flex items-center justify-center h-24 text-muted-foreground">
+        {!data && (
+          <div className="flex h-24 items-center justify-center text-muted-foreground">
             Загрузка...
           </div>
-        ) : (
+        )}
+        {data && (
           <Tabs defaultValue="purchased">
             <TabsList className="mb-4">
               <TabsTrigger className="cursor-pointer" value="purchased">
@@ -75,23 +51,40 @@ export default function PurchasesAndGiveaways({
             </TabsList>
 
             <TabsContent value="purchased">
-              <InventoryLogTable dateLabel="Дата покупки" items={purchased} />
+              <InventoryLogTable
+                dateLabel="Дата покупки"
+                items={data.purchased}
+              />
             </TabsContent>
 
             <TabsContent value="given">
-              <InventoryLogTable dateLabel="Дата выдачи" items={given} />
+              <InventoryLogTable dateLabel="Дата выдачи" items={data.given} />
             </TabsContent>
 
             <TabsContent value="expenses">
-              <UserExpensesTable expenses={expenses} />
+              <UserExpensesTable expenses={data.expenses} />
             </TabsContent>
 
             <TabsContent value="queue">
-              <LootQueueTable items={queue} />
+              <LootQueueTable items={data.queue} />
             </TabsContent>
           </Tabs>
         )}
       </CardContent>
     </Card>
   );
+}
+
+async function loadPurchases(userId: number, username?: string | null) {
+  const [log, expenses, queue] = await Promise.all([
+    getUserPurchaseLog(userId),
+    username ? getExpensesBySource(username) : [],
+    getUserLootQueue(userId),
+  ]);
+  return {
+    purchased: log.filter((item) => item.type === "Куплено"),
+    given: log.filter((item) => item.type === "Выдано"),
+    expenses,
+    queue,
+  };
 }

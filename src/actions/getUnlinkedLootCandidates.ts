@@ -1,7 +1,23 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import type { ItemTypeRow, LootRow } from "@/shared/lib/dbTypes";
 import { getMoscowISOString } from "@/utils/getMoscowISOString";
+
+type CandidateQueryRow = Pick<
+  LootRow,
+  "id" | "source" | "acquired_at" | "quantity" | "status"
+> & {
+  item_type_pk: ItemTypeRow["id"];
+  item_type_name: ItemTypeRow["name"];
+  item_type_price: ItemTypeRow["price"];
+  item_type_icon_url: ItemTypeRow["icon_url"];
+  item_type_grade: ItemTypeRow["grade"];
+};
+
+export type UnlinkedLootCandidate = Awaited<
+  ReturnType<typeof getUnlinkedLootCandidates>
+>[number];
 
 export const getUnlinkedLootCandidates = async ({
   bossName,
@@ -16,10 +32,12 @@ export const getUnlinkedLootCandidates = async ({
   // ровно тот календарный день рейда по МСК, без окна в несколько дней.
   const mskDay = getMoscowISOString(new Date(date)).slice(0, 10);
   const [y, m, d] = mskDay.split("-").map(Number);
-  const nextDay = new Date(Date.UTC(y, m - 1, d + 1)).toISOString().slice(0, 10);
+  const nextDay = new Date(Date.UTC(y, m - 1, d + 1))
+    .toISOString()
+    .slice(0, 10);
 
   try {
-    const rows = await sql<any[]>`
+    const rows = await sql<CandidateQueryRow[]>`
       SELECT
         l.id, l.source, l.acquired_at, l.quantity, l.status,
         it.id AS item_type_pk, it.name AS item_type_name, it.price AS item_type_price,

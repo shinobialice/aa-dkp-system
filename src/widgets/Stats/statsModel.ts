@@ -3,7 +3,6 @@ import type { mergeDailyAttendance } from "@/utils/mergeAttendanceSeries";
 export type DailyAttendance = ReturnType<typeof mergeDailyAttendance>;
 export type MonthlyAttendance = { month: string; prime: number; agl: number }[];
 
-/** Месяц в state — 0-based, как в getGuildAttendance* и Date#getMonth. */
 export type Period = { year: number; month: number };
 
 export const FIRST_YEAR = 2025;
@@ -38,8 +37,6 @@ const MONTH_GENITIVE = [
   "декабря",
 ];
 
-// Цвета серий — те же, что у точек «выдано»/«в наличии» на раздаче лута
-// (green-600 / blue-500), одинаково читаются в светлой и тёмной теме.
 export const PRIME_COLOR = "oklch(0.627 0.194 149.214)";
 export const AGL_COLOR = "oklch(0.623 0.214 259.815)";
 
@@ -69,7 +66,6 @@ export function daysInMonth({ year, month }: Period) {
   return new Date(year, month + 1, 0).getDate();
 }
 
-/** Все дни месяца по порядку, дни без рейдов — нулями. */
 export function fillMonth(period: Period, data: DailyAttendance) {
   const byDate = new Map(data.map((d) => [d.date, d]));
   return Array.from({ length: daysInMonth(period) }, (_, i) => {
@@ -83,7 +79,6 @@ export function isRaidDay(row: { prime: number; agl: number }) {
   return row.prime > 0 || row.agl > 0;
 }
 
-/** Средняя посещаемость за дни, когда был рейд этого типа. */
 export function averagePercent(
   data: DailyAttendance,
   key: "prime" | "agl",
@@ -91,8 +86,4 @@ export function averagePercent(
   const values = data.map((d) => d[key]).filter((v) => v > 0);
   if (values.length === 0) return null;
   return values.reduce((sum, v) => sum + v, 0) / values.length;
-}
-
-export function formatNumber(value: number) {
-  return Math.round(value).toLocaleString("ru-RU");
 }

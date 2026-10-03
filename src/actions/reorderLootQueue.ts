@@ -5,9 +5,9 @@ import ensurePrivilieges from "./ensurePrivilieges";
 
 export const reorderLootQueue = async (orderedIds: number[]) => {
   await ensurePrivilieges(["Администратор"]);
-  await Promise.all(
-    orderedIds.map((id, index) =>
-      sql<any[]>`UPDATE loot_queue SET position = ${index} WHERE id = ${id}`,
-    ),
-  );
+  await sql.begin(async (tx) => {
+    for (const [index, id] of orderedIds.entries()) {
+      await tx`UPDATE loot_queue SET position = ${index} WHERE id = ${id}`;
+    }
+  });
 };

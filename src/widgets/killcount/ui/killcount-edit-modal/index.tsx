@@ -12,8 +12,11 @@ import {
 } from "@/shared/ui";
 import { useForm } from "react-hook-form";
 import { valibotResolver } from "@hookform/resolvers/valibot";
-import { Dispatch, FC, SetStateAction, useEffect } from "react";
-import { DB_GetKillCountDto, KillCount } from "@/widgets/killcount/types";
+import { type Dispatch, type SetStateAction, useEffect } from "react";
+import {
+  type DB_GetKillCountDto,
+  type KillCount,
+} from "@/widgets/killcount/types";
 import { v } from "@/shared/lib";
 
 const schema = v.object({
@@ -28,13 +31,13 @@ const schema = v.object({
 
 type FormSchema = v.InferInput<typeof schema>;
 
-interface KillCountEditModalProps {
+type KillCountEditModalProps = {
   rowToEdit?: KillCount | DB_GetKillCountDto;
   isVisible: boolean;
   setIsVisible: Dispatch<SetStateAction<boolean>>;
   resetEditValue: () => void;
   onSubmit: (value: KillCount) => void;
-}
+};
 
 const DEFAULT_VALUES: FormSchema = {
   userName: "",
@@ -46,32 +49,28 @@ const DEFAULT_VALUES: FormSchema = {
   comment: "",
 };
 
-export const KillCountEditModal: FC<KillCountEditModalProps> = ({
+export function KillCountEditModal({
   rowToEdit,
   isVisible,
   setIsVisible,
   resetEditValue,
   onSubmit,
-}) => {
+}: KillCountEditModalProps) {
   const form = useForm<FormSchema>({
     resolver: valibotResolver(schema),
     defaultValues: DEFAULT_VALUES,
   });
 
-  useEffect(() => {
-    if (isVisible && rowToEdit) {
-      form.reset({ ...DEFAULT_VALUES, ...rowToEdit });
-    }
-    if (isVisible && !rowToEdit) {
-      form.reset(DEFAULT_VALUES);
-    }
-  }, [isVisible, rowToEdit]);
+  const { reset, setFocus } = form;
+  const { isSubmitSuccessful } = form.formState;
 
   useEffect(() => {
-    if (form.formState.isSubmitSuccessful) {
-      form.setFocus("userName");
-    }
-  }, [form.formState.isSubmitSuccessful, form.setFocus]);
+    if (isVisible) reset({ ...DEFAULT_VALUES, ...rowToEdit });
+  }, [isVisible, rowToEdit, reset]);
+
+  useEffect(() => {
+    if (isSubmitSuccessful) setFocus("userName");
+  }, [isSubmitSuccessful, setFocus]);
 
   const handleSubmit = async (values: FormSchema) => {
     onSubmit({
@@ -180,4 +179,4 @@ export const KillCountEditModal: FC<KillCountEditModalProps> = ({
       </DialogContent>
     </Dialog>
   );
-};
+}

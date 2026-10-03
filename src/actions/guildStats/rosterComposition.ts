@@ -1,7 +1,10 @@
 "use server";
 
 import sql from "@/shared/lib/db";
-import { computeMonthlyAttendanceForUsers } from "@/actions/getAllUsersActivityWithPercent";
+import type { SalaryRow, UserRow } from "@/shared/lib/dbTypes";
+import { shiftYearMonth } from "@/shared/config/months";
+import { getMoscowYearMonth } from "@/utils/getMoscowISOString";
+import { computeMonthlyAttendanceForUsers } from "@/server/attendance";
 
 export type RosterClassStat = {
   className: string;
@@ -33,26 +36,21 @@ const CLASS_LABELS: Record<string, string> = {
   Стрелок: "Стрелки",
 };
 
-// Посещаемость и зарплата считаются за последний завершённый календарный
-// месяц: текущий месяц в начале почти всегда пустой (нет рейдов/начислений).
-function getPreviousMonth(): { month: number; year: number } {
-  const now = new Date();
-  const month = now.getMonth(); // 0-based текущий -> предыдущий как 1-based
-  const year = month === 0 ? now.getFullYear() - 1 : now.getFullYear();
-  return { month: month === 0 ? 12 : month, year };
+// Посещаемость и зарплата берутся за прошлый месяц: текущий в начале почти
+// всегда пустой.
+function getPreviousMonth() {
+  return shiftYearMonth(getMoscowYearMonth(new Date()), -1);
 }
 
-type RosterUser = {
-  id: number;
-  class: string | null;
-  class_gear_score: number | null;
-  joined_at: string | null;
-};
+type RosterUser = Pick<
+  UserRow,
+  "id" | "class" | "class_gear_score" | "joined_at"
+>;
 
 export async function getRosterComposition(): Promise<RosterClassStat[]> {
-  let users;
+  let users: RosterUser[];
   try {
-    users = await sql<any[]>`
+    users = await sql<RosterUser[]>`
       SELECT id, class, class_gear_score, joined_at FROM "user"
       WHERE active = true
         AND id NOT IN (SELECT user_id FROM user_tags WHERE tag = 'АФК' AND removed_at IS NULL)
@@ -65,11 +63,13 @@ export async function getRosterComposition(): Promise<RosterClassStat[]> {
   const { month, year } = getPreviousMonth();
 
   let attendance: Awaited<ReturnType<typeof computeMonthlyAttendanceForUsers>>;
-  let salaryRows;
+  let salaryRows: Pick<SalaryRow, "userId" | "total">[];
   try {
     [attendance, salaryRows] = await Promise.all([
       computeMonthlyAttendanceForUsers(users, month, year),
-      sql<any[]>`SELECT "userId", total FROM "Salary" WHERE month = ${month} AND year = ${year}`,
+      sql<
+        Pick<SalaryRow, "userId" | "total">[]
+      >`SELECT "userId", total FROM "Salary" WHERE month = ${month} AND year = ${year}`,
     ]);
   } catch (error) {
     console.error("Ошибка при получении зарплат:", error);
@@ -77,12 +77,15 @@ export async function getRosterComposition(): Promise<RosterClassStat[]> {
   }
 
   const paidUserIds = new Set(
-    (salaryRows ?? [])
-      .filter((s) => (s.total ?? 0) > 0)
-      .map((s) => s.userId),
+    salaryRows
+      .filter((salary) => salary.total > 0)
+      .map((salary) => salary.userId),
   );
 
-  function buildStat(className: string, members: RosterUser[]): RosterClassStat {
+  function buildStat(
+    className: string,
+    members: RosterUser[],
+  ): RosterClassStat {
     const gearScores = members
       .map((m) => m.class_gear_score)
       .filter((gs): gs is number => gs != null);

@@ -1,5 +1,11 @@
-"use server";
 import sql from "@/shared/lib/db";
+import type {
+  GivenawaylootRow,
+  ItemTypeRow,
+  LootWishlistRow,
+  MiscLootGrantsRow,
+  UserRow,
+} from "@/shared/lib/dbTypes";
 import { hasTag } from "@/actions/hasTag";
 import { getSessionUserId } from "@/actions/getSessionUserId";
 import LootGiveaway from "@/widgets/Loot/LootGiveaway";
@@ -20,29 +26,43 @@ export default async function Page() {
     getSessionUserId(),
   ]);
 
-  let users, giveawayRows, miscGrantRows, wishlistRows, itemTypeRows;
+  let users: Pick<UserRow, "id" | "username" | "active" | "avatar_url">[];
+  let giveawayRows: Pick<
+    GivenawaylootRow,
+    "user_id" | "name" | "date" | "status"
+  >[];
+  let miscGrantRows: Pick<
+    MiscLootGrantsRow,
+    "user_id" | "id" | "comment" | "amount" | "date"
+  >[];
+  let wishlistRows: Pick<
+    LootWishlistRow,
+    "user_id" | "id" | "item_name" | "comment"
+  >[];
+  let itemTypeRows: Pick<ItemTypeRow, "name" | "icon_url" | "grade">[];
   try {
     [users, giveawayRows, miscGrantRows, wishlistRows, itemTypeRows] =
       await Promise.all([
-        sql<
-          any[]
-        >`SELECT id, username, active, avatar_url FROM "user" ORDER BY id ASC`,
-        sql<any[]>`SELECT user_id, name, date, status FROM givenawayloot`,
-        sql<
-          any[]
-        >`SELECT user_id, id, comment, amount, date FROM misc_loot_grants`,
-        sql<any[]>`SELECT user_id, id, item_name, comment FROM loot_wishlist`,
-        sql<any[]>`SELECT name, icon_url, grade FROM item_type`,
+        sql<typeof users>`
+          SELECT id, username, active, avatar_url FROM "user" ORDER BY id ASC
+        `,
+        sql<typeof giveawayRows>`
+          SELECT user_id, name, date, status FROM givenawayloot
+        `,
+        sql<typeof miscGrantRows>`
+          SELECT user_id, id, comment, amount, date FROM misc_loot_grants
+        `,
+        sql<typeof wishlistRows>`
+          SELECT user_id, id, item_name, comment FROM loot_wishlist
+        `,
+        sql<typeof itemTypeRows>`SELECT name, icon_url, grade FROM item_type`,
       ]);
   } catch (error) {
     console.error("Failed to load users:", error);
     return <div>Error loading loot data.</div>;
   }
 
-  // lootColumns/gliderTypes — фиксированные названия, без своей ссылки на
-  // item_type — подтягиваем иконку/грейд по совпадению имени с казной, если
-  // такой предмет там есть (у части названий тут его нет, тогда просто без
-  // иконки, как и раньше).
+  // У фиксированных колонок раздачи нет ссылки на item_type, иконка ищется по имени.
   const itemTypeByName = new Map(
     itemTypeRows.map((it) => [
       it.name,
@@ -65,21 +85,9 @@ export default async function Page() {
     };
   });
 
-  const giveawayByUser = new Map<number, any[]>();
-  for (const g of giveawayRows) {
-    if (!giveawayByUser.has(g.user_id)) giveawayByUser.set(g.user_id, []);
-    giveawayByUser.get(g.user_id)!.push(g);
-  }
-  const miscGrantsByUser = new Map<number, any[]>();
-  for (const g of miscGrantRows) {
-    if (!miscGrantsByUser.has(g.user_id)) miscGrantsByUser.set(g.user_id, []);
-    miscGrantsByUser.get(g.user_id)!.push(g);
-  }
-  const wishlistByUser = new Map<number, any[]>();
-  for (const w of wishlistRows) {
-    if (!wishlistByUser.has(w.user_id)) wishlistByUser.set(w.user_id, []);
-    wishlistByUser.get(w.user_id)!.push(w);
-  }
+  const giveawayByUser = Map.groupBy(giveawayRows, (row) => row.user_id);
+  const miscGrantsByUser = Map.groupBy(miscGrantRows, (row) => row.user_id);
+  const wishlistByUser = Map.groupBy(wishlistRows, (row) => row.user_id);
 
   const initialPlayers: Player[] = users.map((user) => {
     const givenawayloot = giveawayByUser.get(user.id) ?? [];
@@ -98,14 +106,14 @@ export default async function Page() {
       }),
       miscGrants: (miscGrantsByUser.get(user.id) ?? [])
         .map((g) => ({
-          id: g.id,
+          id: Number(g.id),
           comment: g.comment,
-          amount: g.amount === null ? null : Number(g.amount),
-          date: g.date?.split("T")[0] || "",
+          amount: g.amount,
+          date: g.date.split("T")[0],
         }))
         .sort((a, b) => a.date.localeCompare(b.date)),
       wishlist: (wishlistByUser.get(user.id) ?? []).map((w) => ({
-        id: w.id,
+        id: Number(w.id),
         itemName: w.item_name,
         comment: w.comment,
       })),

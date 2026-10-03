@@ -21,16 +21,15 @@ export type ConfirmRequest = {
   onConfirm: () => Promise<void>;
 };
 
-export function ConfirmDialog({
-  request,
-  onClose,
-}: {
+type Props = {
   request: ConfirmRequest | null;
   onClose: () => void;
-}) {
+};
+
+export default function ConfirmDialog({ request, onClose }: Props) {
   const [busy, setBusy] = useState(false);
 
-  const confirm = async () => {
+  const handleConfirm = async () => {
     if (!request) return;
     setBusy(true);
     try {
@@ -52,7 +51,9 @@ export function ConfirmDialog({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{request?.title}</AlertDialogTitle>
-          <AlertDialogDescription>{request?.description}</AlertDialogDescription>
+          <AlertDialogDescription>
+            {request?.description}
+          </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={busy}>Отмена</AlertDialogCancel>
@@ -61,7 +62,7 @@ export function ConfirmDialog({
             className="bg-destructive text-white hover:bg-destructive/90"
             onClick={(event) => {
               event.preventDefault();
-              confirm();
+              handleConfirm();
             }}
           >
             {request?.confirmLabel}

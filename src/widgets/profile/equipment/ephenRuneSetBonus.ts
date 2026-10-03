@@ -48,15 +48,19 @@ export function computeEphenRuneSetBonuses(
 
     for (const tier of active.tiers) {
       if (!tier.active) continue;
-      for (const line of tier.text.split("\n")) {
-        const m = line.match(/^(.+?):\s*([+-]?\d+(?:\.\d+)?)%?$/);
-        if (!m) continue;
-        const label = m[1].trim();
-        const value = Number(m[2]);
+      for (const [label, value] of parseTierBonuses(tier.text)) {
         totals.set(label, (totals.get(label) ?? 0) + value);
       }
     }
   }
 
   return totals;
+}
+
+function parseTierBonuses(text: string): [string, number][] {
+  return text.split("\n").flatMap((line) => {
+    const match = line.match(/^(.+?):\s*([+-]?\d+(?:\.\d+)?)%?$/);
+    if (!match) return [];
+    return [[match[1].trim(), Number(match[2])] as [string, number]];
+  });
 }

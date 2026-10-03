@@ -11,8 +11,9 @@ function pluralizeDays(days: number) {
 }
 
 function getStreakTierClass(streak: number) {
-  if (streak >= 120)
+  if (streak >= 120) {
     return "bg-purple-500/15 text-purple-600 dark:text-purple-400";
+  }
   if (streak >= 90) return "bg-pink-500/15 text-pink-600 dark:text-pink-400";
   if (streak >= 60) return "bg-blue-500/15 text-blue-600 dark:text-blue-400";
   if (streak >= 30) return "bg-red-500/15 text-red-600 dark:text-red-400";

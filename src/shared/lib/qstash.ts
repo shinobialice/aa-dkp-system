@@ -1,11 +1,17 @@
 import "server-only";
 import { Client } from "@upstash/qstash";
 import { getBaseUrl } from "./getBaseUrl";
+import { requireEnv } from "./env";
 
-const qstash = new Client({
-  baseUrl: process.env.QSTASH_URL!,
-  token: process.env.QSTASH_TOKEN!,
-});
+let client: Client | undefined;
+
+function getClient() {
+  client ??= new Client({
+    baseUrl: process.env.QSTASH_URL || undefined,
+    token: requireEnv(process.env.QSTASH_TOKEN, "QSTASH_TOKEN"),
+  });
+  return client;
+}
 
 async function scheduleQstashNotification(
   url: string,
@@ -15,13 +21,13 @@ async function scheduleQstashNotification(
 ): Promise<string | null> {
   if (previousMessageId) {
     try {
-      await qstash.messages.delete(previousMessageId);
+      await getClient().messages.delete(previousMessageId);
     } catch {}
   }
 
   if (!notifyAt || notifyAt.getTime() <= Date.now()) return null;
 
-  const { messageId } = await qstash.publishJSON({
+  const { messageId } = await getClient().publishJSON({
     url,
     body,
     notBefore: Math.floor(notifyAt.getTime() / 1000),

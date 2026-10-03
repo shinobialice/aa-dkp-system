@@ -1,7 +1,7 @@
 import { CircleCheck, CircleX } from "lucide-react";
 import type { SalaryEligibilitySettings } from "@/actions/salaryEligibilitySettings";
 import type { getBosses } from "@/actions/getBosses";
-import type { GuildMode } from "@/actions/guildStatusSettings";
+import type { GuildMode } from "@/shared/config/guildStatus";
 import { cn } from "@/shared/lib/tw-merge";
 import GuildRules from "./GuildRules";
 
@@ -55,8 +55,8 @@ function CriteriaCard({ settings }: { settings: SalaryEligibilitySettings }) {
       aria-label="Допуск к зарплате"
       className="flex scroll-mt-6 flex-col rounded-xl border bg-card"
     >
-      <div className="px-4 pt-4 pb-2.5 sm:px-[18px]">
-        <h2 className="text-[15px] font-semibold">Допуск к зарплате</h2>
+      <div className="px-4 pt-4 pb-2.5 sm:px-4.5">
+        <h2 className="text-base font-semibold">Допуск к зарплате</h2>
         <p className="mt-0.5 text-xs text-muted-foreground">
           Действует сейчас · критерии меняет глава гильдии
         </p>
@@ -96,7 +96,7 @@ function CriteriaCard({ settings }: { settings: SalaryEligibilitySettings }) {
           </li>
         ))}
       </ul>
-      <p className="border-t border-border/60 px-4 pt-2.5 pb-3.5 text-xs text-muted-foreground sm:px-[18px]">
+      <p className="border-t border-border/60 px-4 pt-2.5 pb-3.5 text-xs text-muted-foreground sm:px-4.5">
         Тег ДВ обходит пороги посещения и баллов, но не проверку ГС
       </p>
     </section>
@@ -113,10 +113,10 @@ function BossList({ title, bosses }: { title: string; bosses: Boss[] }) {
         {bosses.map((boss) => (
           <li
             key={boss.id}
-            className="flex h-[30px] items-center justify-between gap-2 border-t border-border/60"
+            className="flex h-7.5 items-center justify-between gap-2 border-t border-border/60"
           >
             <span className="truncate">{boss.boss_name}</span>
-            <span className="min-w-[26px] rounded-full bg-muted px-1.5 text-center text-sm font-bold tabular-nums">
+            <span className="min-w-6.5 rounded-full bg-muted px-1.5 text-center text-sm font-bold tabular-nums">
               {boss.dkp_points}
             </span>
           </li>
@@ -141,9 +141,9 @@ function BossPointsCard({ bosses, mode }: { bosses: Boss[]; mode: GuildMode }) {
       aria-label="Баллы за боссов"
       className="flex scroll-mt-6 flex-col rounded-xl border bg-card"
     >
-      <div className="flex items-start justify-between gap-3 px-4 pt-4 pb-2.5 sm:px-[18px]">
+      <div className="flex items-start justify-between gap-3 px-4 pt-4 pb-2.5 sm:px-4.5">
         <div>
-          <h2 className="text-[15px] font-semibold">Баллы за боссов</h2>
+          <h2 className="text-base font-semibold">Баллы за боссов</h2>
           <p className="mt-0.5 text-xs text-muted-foreground">
             Зависят от режима гильдии
           </p>
@@ -158,11 +158,11 @@ function BossPointsCard({ bosses, mode }: { bosses: Boss[]; mode: GuildMode }) {
           {chip.label}
         </span>
       </div>
-      <div className="grid flex-1 grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] gap-4 px-4 pt-1 pb-3.5 sm:gap-5 sm:px-[18px]">
+      <div className="grid flex-1 grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] gap-4 px-4 pt-1 pb-3.5 sm:gap-5 sm:px-4.5">
         <BossList title="Праймы" bosses={primes} />
         <BossList title="АГЛ" bosses={agl} />
       </div>
-      <p className="border-t border-border/60 px-4 pt-2.5 pb-3.5 text-xs text-muted-foreground sm:px-[18px]">
+      <p className="border-t border-border/60 px-4 pt-2.5 pb-3.5 text-xs text-muted-foreground sm:px-4.5">
         ПВП на прайме — баллы ×2 (п. 2.4). На АГЛ +1 балл за пвп, прок и двойной
         прок (п. 2.5)
       </p>
@@ -184,7 +184,7 @@ export default function GuildInfoContent({
   return (
     <div className="mx-auto flex w-full max-w-6xl min-w-0 flex-col gap-5">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight sm:text-[26px]">
+        <h1 className="text-2xl font-bold tracking-tight">
           Основная информация
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">

@@ -7,26 +7,55 @@ export type CursedSynthesisEffect = {
 
 export const CURSED_ARMOR_SYNTHESIS_EFFECTS: CursedSynthesisEffect[] = [
   { id: 0, label: "Здоровье", value: 300, isPercent: false },
-  { id: 44, label: "Устойчивость к критическому урону", value: 311, isPercent: false },
-  { id: 51, label: "Уязвимость к атакам ближнего боя", value: 1.8, isPercent: true },
-  { id: 55, label: "Уязвимость к атакам дальнего боя", value: 1.8, isPercent: true },
+  {
+    id: 44,
+    label: "Устойчивость к критическому урону",
+    value: 311,
+    isPercent: false,
+  },
+  {
+    id: 51,
+    label: "Уязвимость к атакам ближнего боя",
+    value: 1.8,
+    isPercent: true,
+  },
+  {
+    id: 55,
+    label: "Уязвимость к атакам дальнего боя",
+    value: 1.8,
+    isPercent: true,
+  },
   { id: 59, label: "Уязвимость к заклинаниям", value: 1.5, isPercent: true },
   { id: 38, label: "Шанс обхода обороны", value: 3.1, isPercent: true },
   { id: 48, label: "Уязвимость к осадному урону", value: 1.6, isPercent: true },
 ];
 
 export const REBORN_ARMOR_BONUS_SYNTHESIS_EFFECTS: CursedSynthesisEffect[] = [
-  { id: 1001, label: "Устойчивость к атакам монстров в ближнем бою", value: 13, isPercent: false },
-  { id: 1002, label: "Устойчивость к атакам монстров в дальнем бою", value: 13, isPercent: false },
-  { id: 1003, label: "Устойчивость к атакам монстров заклинаниями", value: 13, isPercent: false },
+  {
+    id: 1001,
+    label: "Устойчивость к атакам монстров в ближнем бою",
+    value: 13,
+    isPercent: false,
+  },
+  {
+    id: 1002,
+    label: "Устойчивость к атакам монстров в дальнем бою",
+    value: 13,
+    isPercent: false,
+  },
+  {
+    id: 1003,
+    label: "Устойчивость к атакам монстров заклинаниями",
+    value: 13,
+    isPercent: false,
+  },
 ];
 
 const CURSED_ARMOR_ITEM_IDS = new Set([
-  55412, 55413, 55414, 55415, 55416, 55417, 55418,
-  55419, 55420, 55421, 55422, 55423, 55424, 55425,
-  55426, 55427, 55428, 55429, 55430, 55431, 55432,
-  55433, 55434, 55435, 55436, 55437, 55438, 55439,
-  55440, 55441, 55442, 55443, 55444, 55445, 55446,
+  55412, 55413, 55414, 55415, 55416, 55417, 55418, 55419, 55420, 55421, 55422,
+  55423, 55424, 55425, 55426, 55427, 55428, 55429, 55430, 55431, 55432, 55433,
+  55434, 55435, 55436, 55437, 55438, 55439, 55440, 55441, 55442, 55443, 55444,
+  55445, 55446,
 ]);
 
 const REBORN_ARMOR_ITEM_IDS = new Set([
@@ -48,7 +77,10 @@ export function getCursedArmorSynthesisSlotPools(
   itemId: number,
 ): CursedSynthesisEffect[][] {
   if (REBORN_ARMOR_ITEM_IDS.has(itemId)) {
-    return [CURSED_ARMOR_SYNTHESIS_EFFECTS, REBORN_ARMOR_BONUS_SYNTHESIS_EFFECTS];
+    return [
+      CURSED_ARMOR_SYNTHESIS_EFFECTS,
+      REBORN_ARMOR_BONUS_SYNTHESIS_EFFECTS,
+    ];
   }
   if (CURSED_ARMOR_ITEM_IDS.has(itemId)) {
     return [CURSED_ARMOR_SYNTHESIS_EFFECTS];

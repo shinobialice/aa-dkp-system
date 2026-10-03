@@ -1,24 +1,36 @@
 "use server";
 
+import { triggerFinanceRecalc } from "@/server/finance/recalc";
 import sql from "@/shared/lib/db";
-import { triggerFinanceRecalc } from "./recalculateFinanceForMonth";
+import type { ItemTypeRow, LootRow } from "@/shared/lib/dbTypes";
 import { getUtcYearMonth } from "@/utils/getUtcYearMonth";
+import ensurePrivilieges from "./ensurePrivilieges";
 
-// Get list of item types
+type LootQueryRow = LootRow & {
+  item_type_pk: ItemTypeRow["id"];
+  item_type_name: ItemTypeRow["name"];
+  item_type_price: ItemTypeRow["price"];
+  item_type_icon_url: ItemTypeRow["icon_url"];
+  item_type_grade: ItemTypeRow["grade"];
+};
+
+export type TreasuryLoot = Awaited<ReturnType<typeof getLoot>>[number];
+
 export const getItemTypes = async () => {
   try {
-    return await sql<any[]>`SELECT id, name, icon_url, grade FROM item_type`;
+    return await sql<Pick<ItemTypeRow, "id" | "name" | "icon_url" | "grade">[]>`
+      SELECT id, name, icon_url, grade FROM item_type
+    `;
   } catch (error) {
     console.error("Ошибка при получении типов предметов:", error);
     throw new Error("Не удалось загрузить типы предметов");
   }
 };
 
-// Get loot list with itemType
 export async function getLoot() {
-  let rows;
+  let rows: LootQueryRow[];
   try {
-    rows = await sql<any[]>`
+    rows = await sql<LootQueryRow[]>`
       SELECT
         l.*,
         it.id AS item_type_pk, it.name AS item_type_name, it.price AS item_type_price,
@@ -32,16 +44,15 @@ export async function getLoot() {
     return [];
   }
 
-  return rows.map((row) => {
-    const {
+  return rows.map(
+    ({
       item_type_pk,
       item_type_name,
       item_type_price,
       item_type_icon_url,
       item_type_grade,
       ...loot
-    } = row;
-    return {
+    }) => ({
       ...loot,
       itemType: {
         id: item_type_pk,
@@ -50,11 +61,10 @@ export async function getLoot() {
         icon_url: item_type_icon_url,
         grade: item_type_grade,
       },
-    };
-  });
+    }),
+  );
 }
 
-// Add loot item
 export const addLootItem = async ({
   itemTypeId,
   source,
@@ -74,8 +84,10 @@ export const addLootItem = async ({
   raidId?: number | null;
   price?: number;
 }) => {
+  await ensurePrivilieges(["Администратор"]);
+
   try {
-    await sql<any[]>`
+    await sql`
       INSERT INTO loot (item_type_id, status, sold_at, source, acquired_at, quantity, created_at, raid_id, price)
       VALUES (
         ${itemTypeId}, ${status ?? "В наличии"}, ${sold_at ?? null}, ${source ?? null},
@@ -87,20 +99,18 @@ export const addLootItem = async ({
     throw new Error("Не удалось добавить предмет");
   }
 
-  // "В казну"/"Продано" сразу с income (см. AddLootDialog — quick-add в
-  // казну) — пересчитываем фонд месяца продажи, не дожидаясь таймера.
+  // "В казну"/"Продано" сразу с income (quick-add в казну из AddLootDialog) —
+  // пересчитываем фонд месяца продажи сразу.
   if (sold_at && (status === "В казну" || status === "Продано")) {
     const { year, month } = getUtcYearMonth(new Date(sold_at));
     await triggerFinanceRecalc(month, year);
   }
 };
 
-// Правка уже занесённой в казну ручной строки дохода ("В казну" — см.
-// AddLootDialog/lootUtilityItems.ts). В отличие от updateLootSale — это не
-// продажа предмету покупателю, а просто сумма/источник/дата поступления,
-// поэтому отдельная узкая функция вместо переиспользования той. sold_at
-// (месяц, за который считается доход в generateGuildFunds) не трогаем —
-// правка суммы/источника не должна тихо переносить доход в другой месяц.
+// Правка ручной строки дохода "В казну": это не продажа покупателю, а просто
+// сумма/источник/дата поступления. sold_at (месяц, за который считается
+// доход фонда) не трогаем — правка суммы не должна тихо переносить доход в
+// другой месяц.
 export const updateTreasuryIncome = async ({
   lootId,
   source,
@@ -112,9 +122,11 @@ export const updateTreasuryIncome = async ({
   acquired_at: string;
   price: number;
 }) => {
-  let sold_at: Date | null = null;
+  await ensurePrivilieges(["Администратор"]);
+
+  let updated: Pick<LootRow, "sold_at"> | undefined;
   try {
-    const [loot] = await sql<any[]>`
+    [updated] = await sql<Pick<LootRow, "sold_at">[]>`
       UPDATE loot SET
         source = ${source ?? null},
         acquired_at = ${new Date(acquired_at).toISOString()},
@@ -123,17 +135,14 @@ export const updateTreasuryIncome = async ({
       WHERE id = ${lootId} AND status = 'В казну'
       RETURNING sold_at
     `;
-    if (!loot) {
-      throw new Error("Запись не найдена");
-    }
-    sold_at = loot.sold_at;
   } catch (error) {
     console.error("Ошибка при изменении поступления в казну:", error);
     throw new Error("Не удалось изменить поступление в казну");
   }
+  if (!updated) throw new Error("Запись не найдена");
 
-  if (sold_at) {
-    const { year, month } = getUtcYearMonth(new Date(sold_at));
+  if (updated.sold_at) {
+    const { year, month } = getUtcYearMonth(new Date(updated.sold_at));
     await triggerFinanceRecalc(month, year);
   }
 };

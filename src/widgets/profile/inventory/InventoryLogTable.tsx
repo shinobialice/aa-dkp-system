@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { usePagination } from "@/hooks/usePagination";
+import TablePager from "./TablePager";
 import { LootIcon } from "@/widgets/Loot/LootBuy/icons/LootIconComponent";
 import type { InventoryLogEntry } from "@/actions/getUserPurchaseLog";
 import {
@@ -10,7 +11,6 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  Button,
 } from "@/shared/ui";
 
 const PAGE_SIZE = 10;
@@ -22,18 +22,14 @@ export default function InventoryLogTable({
   dateLabel: string;
   items: InventoryLogEntry[];
 }) {
-  const [page, setPage] = useState(0);
-
-  useEffect(() => {
-    setPage(0);
-  }, [items]);
+  const { page, setPage, pageCount, pageItems } = usePagination(
+    items,
+    PAGE_SIZE,
+  );
 
   if (items.length === 0) {
     return <p className="text-sm text-muted-foreground">Пусто</p>;
   }
-
-  const pageCount = Math.ceil(items.length / PAGE_SIZE);
-  const pageItems = items.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
 
   return (
     <div className="space-y-2">
@@ -76,33 +72,7 @@ export default function InventoryLogTable({
         </TableBody>
       </Table>
 
-      {pageCount > 1 && (
-        <div className="flex items-center justify-between pt-1">
-          <span className="text-xs text-muted-foreground">
-            Страница {page + 1} из {pageCount}
-          </span>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="cursor-pointer"
-              disabled={page === 0}
-              onClick={() => setPage((p) => p - 1)}
-            >
-              Назад
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="cursor-pointer"
-              disabled={page >= pageCount - 1}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              Далее
-            </Button>
-          </div>
-        </div>
-      )}
+      <TablePager page={page} pageCount={pageCount} onPageChange={setPage} />
     </div>
   );
 }

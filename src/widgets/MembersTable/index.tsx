@@ -6,7 +6,6 @@ import { Input } from "@/shared/ui";
 import { cn } from "@/shared/lib/tw-merge";
 import { getMembersTableData } from "@/actions/getMembersTableData";
 import { useVisiblePolling } from "@/hooks/useVisiblePolling";
-import { classColors } from "./classStyles";
 import {
   DESC_FIRST,
   classCounts,
@@ -18,7 +17,10 @@ import {
   type Sort,
   type SortKey,
 } from "./membersModel";
-import { MemberCard, MemberRow, ROW_COLUMNS } from "./MemberViews";
+import { MemberRow, ROW_COLUMNS } from "./MemberRow";
+import { MemberCard } from "./MemberCard";
+import GroupHeader from "./GroupHeader";
+import ClassChips, { type ClassChip } from "./ClassChips";
 
 const POLL_MS = 45_000;
 
@@ -32,23 +34,6 @@ const HEADERS: { key: SortKey; label: string; align?: "right" }[] = [
   { key: "total", label: "Итого" },
   { key: "salary", label: "Зарплата", align: "right" },
 ];
-
-function GroupHeader({ group }: { group: MemberGroup }) {
-  return (
-    <div className="flex items-center gap-2 px-1 pt-2 text-sm font-semibold xl:border-b xl:bg-muted/30 xl:px-4 xl:py-2 xl:text-[13px]">
-      {group.className && (
-        <span
-          className="size-2 rounded-full"
-          style={{ backgroundColor: classColors[group.className] }}
-        />
-      )}
-      {group.title}
-      <span className="font-medium text-muted-foreground">
-        {group.members.length}
-      </span>
-    </div>
-  );
-}
 
 export default function MembersTable({ data }: { data: Member[] }) {
   const [rows, setRows] = useState<Member[]>(data);
@@ -90,7 +75,7 @@ export default function MembersTable({ data }: { data: Member[] }) {
     );
   };
 
-  const chips: { name: string | null; label: string; count: number }[] = [
+  const chips: ClassChip[] = [
     { name: null, label: "Все", count: rows.length },
     ...counts.map((item) => ({
       name: item.name,
@@ -127,48 +112,14 @@ export default function MembersTable({ data }: { data: Member[] }) {
         </div>
       </div>
 
-      <div
-        className="flex flex-wrap gap-2"
-        role="group"
-        aria-label="Фильтр по классу"
-      >
-        {chips.map((chip) => {
-          const active = classFilter === chip.name;
-          return (
-            <button
-              key={chip.label}
-              type="button"
-              aria-pressed={active}
-              onClick={() => {
-                setClassFilter(active ? null : chip.name);
-                scrollTableToTop();
-              }}
-              className={cn(
-                "inline-flex h-8 shrink-0 cursor-pointer items-center gap-1.5 rounded-full border px-3 text-sm font-medium transition-colors",
-                active
-                  ? "border-foreground bg-foreground text-background"
-                  : "bg-background hover:bg-accent",
-              )}
-            >
-              {chip.name && (
-                <span
-                  className="size-2 rounded-full"
-                  style={{ backgroundColor: classColors[chip.name] }}
-                />
-              )}
-              {chip.label}
-              <span
-                className={cn(
-                  "tabular-nums",
-                  active ? "text-background/70" : "text-muted-foreground",
-                )}
-              >
-                {chip.count}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+      <ClassChips
+        chips={chips}
+        active={classFilter}
+        onChange={(name) => {
+          setClassFilter(name);
+          scrollTableToTop();
+        }}
+      />
 
       {visible.length === 0 ? (
         <div className="rounded-xl border border-dashed px-4 py-12 text-center text-sm text-muted-foreground">

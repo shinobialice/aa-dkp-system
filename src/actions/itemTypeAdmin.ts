@@ -1,5 +1,10 @@
 "use server";
 import sql from "@/shared/lib/db";
+import {
+  hasPgCode,
+  UNIQUE_VIOLATION,
+  FOREIGN_KEY_VIOLATION,
+} from "@/shared/lib/pgErrors";
 import { saveUploadedFile } from "@/shared/lib/localStorage";
 import ensurePrivilieges from "./ensurePrivilieges";
 import { randomUUID } from "crypto";
@@ -71,13 +76,13 @@ export async function createItemType({
     throw new Error("Название предмета не может быть пустым");
   }
   try {
-    await sql<any[]>`
+    await sql`
       INSERT INTO item_type (name, price, icon_url, grade, source, show_in_buy, category)
       VALUES (${trimmed}, ${price}, ${iconUrl}, ${grade}, ${source}, ${showInBuy}, ${category})
     `;
-  } catch (error: any) {
+  } catch (error) {
     console.error("Ошибка при создании предмета:", error);
-    if (error?.code === "23505") {
+    if (hasPgCode(error, UNIQUE_VIOLATION)) {
       throw new Error("Предмет с таким названием уже существует");
     }
     throw new Error("Не удалось создать предмет");
@@ -93,16 +98,16 @@ export async function updateItemType(id: number, input: ItemTypeInput) {
   }
   await assertNotUtilityItem(id);
   try {
-    await sql<any[]>`
+    await sql`
       UPDATE item_type
       SET name = ${trimmed}, price = ${price}, icon_url = ${iconUrl},
           grade = ${grade}, source = ${source}, show_in_buy = ${showInBuy},
           category = ${category}
       WHERE id = ${id}
     `;
-  } catch (error: any) {
+  } catch (error) {
     console.error("Ошибка при обновлении предмета:", error);
-    if (error?.code === "23505") {
+    if (hasPgCode(error, UNIQUE_VIOLATION)) {
       throw new Error("Предмет с таким названием уже существует");
     }
     throw new Error("Не удалось обновить предмет");
@@ -113,10 +118,10 @@ export async function deleteItemType(id: number) {
   await ensurePrivilieges(["Администратор"]);
   await assertNotUtilityItem(id);
   try {
-    await sql<any[]>`DELETE FROM item_type WHERE id = ${id}`;
-  } catch (error: any) {
+    await sql`DELETE FROM item_type WHERE id = ${id}`;
+  } catch (error) {
     console.error("Ошибка при удалении предмета:", error);
-    if (error?.code === "23503") {
+    if (hasPgCode(error, FOREIGN_KEY_VIOLATION)) {
       throw new Error(
         "Предмет уже использован в луте — удалить нельзя, можно только переименовать/изменить иконку",
       );
@@ -151,4 +156,3 @@ export async function uploadItemTypeIcon(formData: FormData): Promise<string> {
     throw new Error("Не удалось загрузить иконку");
   }
 }
-

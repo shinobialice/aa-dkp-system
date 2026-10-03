@@ -1,8 +1,12 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import type { ScreenshotsLinkSettingsRow } from "@/shared/lib/dbTypes";
+
 import ensurePrivilieges from "./ensurePrivilieges";
 import { revalidatePath } from "next/cache";
+
+type LinkRow = Pick<ScreenshotsLinkSettingsRow, "url" | "month_label">;
 
 export type ScreenshotsLinkSettings = {
   url: string;
@@ -15,9 +19,9 @@ const DEFAULT_SETTINGS: ScreenshotsLinkSettings = {
 };
 
 export async function getScreenshotsLinkSettings(): Promise<ScreenshotsLinkSettings> {
-  let data;
+  let data: LinkRow | undefined;
   try {
-    [data] = await sql<any[]>`
+    [data] = await sql<LinkRow[]>`
       SELECT url, month_label FROM screenshots_link_settings WHERE id = 1
     `;
   } catch (error) {
@@ -33,12 +37,10 @@ export async function getScreenshotsLinkSettings(): Promise<ScreenshotsLinkSetti
 export async function updateScreenshotsLinkSettings(
   settings: ScreenshotsLinkSettings,
 ) {
-  // Ссылку на диск со скринами могут менять админ и секретутка — они же
-  // обычно и заводят папку на новый месяц.
   await ensurePrivilieges(["Администратор", "Секретутка"]);
 
   try {
-    await sql<any[]>`
+    await sql`
       INSERT INTO screenshots_link_settings (id, url, month_label, updated_at)
       VALUES (1, ${settings.url}, ${settings.monthLabel}, now())
       ON CONFLICT (id) DO UPDATE SET

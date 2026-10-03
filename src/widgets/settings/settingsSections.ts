@@ -125,13 +125,15 @@ export const SECTION_GROUPS: { title: string; sections: SettingsSection[] }[] =
 
 export const SECTIONS = SECTION_GROUPS.flatMap((group) => group.sections);
 
-export const sectionById = (id: SectionId) =>
-  SECTIONS.find((section) => section.id === id)!;
+export function sectionById(id: SectionId) {
+  const section = SECTIONS.find((candidate) => candidate.id === id);
+  if (!section) throw new Error(`Неизвестный раздел настроек: ${id}`);
+  return section;
+}
 
 export const isSectionId = (value: string): value is SectionId =>
   SECTIONS.some((section) => section.id === value);
 
-/** Что можно найти поиском «Найти настройку…». */
 export const SEARCH_INDEX: {
   section: SectionId;
   label: string;

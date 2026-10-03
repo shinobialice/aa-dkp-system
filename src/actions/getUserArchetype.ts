@@ -1,7 +1,9 @@
 "use server";
 import sql from "@/shared/lib/db";
+import { isRoleSlot, type RoleSlot } from "@/shared/config/roleSlots";
+import type { UserArchetypeRow } from "@/shared/lib/dbTypes";
 
-export type RoleSlot = 1 | 2 | 3;
+export type { RoleSlot };
 
 export type ArchetypeSlot = {
   specialization1: string | null;
@@ -29,7 +31,7 @@ const EMPTY_ARCHETYPE: UserArchetype = {
 
 const getUserArchetype = async (userId: number): Promise<UserArchetype> => {
   try {
-    const rows = await sql<any[]>`
+    const rows = await sql<Omit<UserArchetypeRow, "user_id" | "updated_at">[]>`
       SELECT role_slot, specialization_1, specialization_2, specialization_3, class_name
       FROM user_archetype
       WHERE user_id = ${userId}
@@ -37,9 +39,8 @@ const getUserArchetype = async (userId: number): Promise<UserArchetype> => {
 
     const result: UserArchetype = { ...EMPTY_ARCHETYPE };
     for (const row of rows) {
-      const slot = row.role_slot as RoleSlot;
-      if (slot !== 1 && slot !== 2 && slot !== 3) continue;
-      result[slot] = {
+      if (!isRoleSlot(row.role_slot)) continue;
+      result[row.role_slot] = {
         specialization1: row.specialization_1,
         specialization2: row.specialization_2,
         specialization3: row.specialization_3,

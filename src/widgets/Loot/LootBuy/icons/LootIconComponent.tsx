@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 
-
 const GRADE_URL = "/api/uploads/grade-icons/grade";
 
 type LootIconProps = {
@@ -24,7 +23,7 @@ export function LootIcon({
 
   return (
     <div
-      className={`relative inline-block rounded bg-muted`}
+      className="relative inline-block rounded bg-muted"
       style={{ width: size, height: size }}
     >
       {iconUrl && (

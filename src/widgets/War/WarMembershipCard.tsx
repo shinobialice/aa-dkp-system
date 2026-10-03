@@ -11,10 +11,12 @@ import {
   TabsTrigger,
 } from "@/shared/ui";
 import { cn } from "@/shared/lib/tw-merge";
-import type { PeriodMembershipChanges } from "@/actions/warActions";
+import type { PeriodMembershipChanges } from "@/actions/warMembership";
 import WarUserLink from "./WarUserLink";
-import { SCROLL_LIST, SectionEmpty, WarSection } from "./WarParts";
-import { formatShortDate } from "./warModel";
+import SectionEmpty from "./SectionEmpty";
+import { formatShortDate, SCROLL_LIST } from "./warModel";
+import WarSection from "./WarSection";
+import { avatarSrc } from "@/shared/lib/format";
 
 type Tone = "green" | "amber" | "muted";
 
@@ -36,21 +38,15 @@ const TONE_CLASS: Record<Tone, string> = {
 function MemberList({ rows, empty }: { rows: MemberRow[]; empty: string }) {
   if (rows.length === 0) return <SectionEmpty>{empty}</SectionEmpty>;
   return (
-    <ul className={cn(SCROLL_LIST, "max-h-[420px] px-2 pb-2.5")}>
+    <ul className={cn(SCROLL_LIST, "max-h-105 px-2 pb-2.5")}>
       {rows.map((row) => (
         <li
           key={row.key}
           className="flex h-11 items-center gap-2.5 px-2 sm:h-10"
         >
-          <Avatar className="size-7 shrink-0 sm:size-[26px]">
-            <AvatarImage
-              src={
-                row.avatarUrl ??
-                `https://api.dicebear.com/6.x/initials/svg?seed=${row.name}`
-              }
-              alt=""
-            />
-            <AvatarFallback className="text-[10.5px] font-semibold text-muted-foreground">
+          <Avatar className="size-7 shrink-0 sm:size-6.5">
+            <AvatarImage src={avatarSrc(row.name, row.avatarUrl)} alt="" />
+            <AvatarFallback className="text-2xs font-semibold text-muted-foreground">
               {row.name.slice(0, 2)}
             </AvatarFallback>
           </Avatar>
@@ -73,11 +69,11 @@ function MemberList({ rows, empty }: { rows: MemberRow[]; empty: string }) {
   );
 }
 
-export default function WarMembershipCard({
-  changes,
-}: {
+type Props = {
   changes: PeriodMembershipChanges;
-}) {
+};
+
+export default function WarMembershipCard({ changes }: Props) {
   const tabs = [
     {
       value: "joined",
@@ -114,9 +110,7 @@ export default function WarMembershipCard({
         userId: member.userId,
         name: member.username,
         avatarUrl: member.avatarUrl,
-        when: member.to
-          ? `${formatShortDate(member.from)} — ${formatShortDate(member.to)}`
-          : `с ${formatShortDate(member.from)}`,
+        when: afkPeriod(member.from, member.to),
         tone: member.to ? ("muted" as const) : ("amber" as const),
       })),
     },
@@ -150,4 +144,9 @@ export default function WarMembershipCard({
       </Tabs>
     </WarSection>
   );
+}
+
+function afkPeriod(from: string, to: string | null) {
+  if (!to) return `с ${formatShortDate(from)}`;
+  return `${formatShortDate(from)} — ${formatShortDate(to)}`;
 }

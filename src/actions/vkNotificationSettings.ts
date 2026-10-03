@@ -1,6 +1,7 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import type { VkNotificationSettingsRow } from "@/shared/lib/dbTypes";
 import ensurePrivilieges from "./ensurePrivilieges";
 import { revalidatePath } from "next/cache";
 import {
@@ -10,9 +11,9 @@ import {
 } from "@/shared/config/vkNotificationDefaults";
 
 export async function getVkNotificationSettings(): Promise<VkNotificationSettings> {
-  let data;
+  let data: VkNotificationSettingsRow | undefined;
   try {
-    [data] = await sql<any[]>`
+    [data] = await sql<VkNotificationSettingsRow[]>`
       SELECT * FROM vk_notification_settings WHERE id = 1
     `;
   } catch (error) {
@@ -23,7 +24,7 @@ export async function getVkNotificationSettings(): Promise<VkNotificationSetting
   if (!data) return DEFAULT_VK_NOTIFICATION_SETTINGS;
 
   return {
-    enabledBosses: (data.enabled_bosses ?? []) as string[],
+    enabledBosses: data.enabled_bosses,
     defaultNotifyBeforeMinutes: data.notify_before_minutes,
     notifyMinutesByEvent: (data.notify_minutes_by_event ?? {}) as Record<
       string,
@@ -32,8 +33,8 @@ export async function getVkNotificationSettings(): Promise<VkNotificationSetting
     quietHoursEnabled: data.quiet_hours_enabled,
     quietHoursStart: data.quiet_hours_start,
     quietHoursEnd: data.quiet_hours_end,
-    primeTime: data.prime_time ?? null,
-    primeDays: (data.prime_days ?? ALL_WEEK_DAYS) as number[],
+    primeTime: data.prime_time,
+    primeDays: data.prime_days ?? ALL_WEEK_DAYS,
   };
 }
 
@@ -43,7 +44,7 @@ export async function updateVkNotificationSettings(
   await ensurePrivilieges(["Администратор"]);
 
   try {
-    await sql<any[]>`
+    await sql`
       INSERT INTO vk_notification_settings
         (id, enabled_bosses, notify_before_minutes, notify_minutes_by_event,
          quiet_hours_enabled, quiet_hours_start, quiet_hours_end, prime_time, prime_days, updated_at)

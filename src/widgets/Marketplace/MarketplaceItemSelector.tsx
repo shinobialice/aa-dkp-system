@@ -1,9 +1,15 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { MarketplaceItemTypeRow } from "@/actions/marketplaceItemTypeAdmin";
+import { type MarketplaceItemTypeRow } from "@/actions/marketplaceItemTypeAdmin";
 import { LootIcon } from "@/widgets/Loot/LootBuy/icons/LootIconComponent";
-import { Command, CommandInput, CommandItem, CommandList, CommandEmpty } from "@/shared/ui";
+import {
+  Command,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandEmpty,
+} from "@/shared/ui";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui";
 
 // Тот же паттерн, что и LootItemSelector (казна/лут).
@@ -32,13 +38,13 @@ export function MarketplaceItemSelector({
           onClick={() => setIsOpen(true)}
         />
       </PopoverTrigger>
-      <PopoverContent className="p-0 w-[378px]">
+      <PopoverContent className="p-0 w-94.5">
         <Command>
           <CommandInput placeholder="Поиск..." />
           <CommandList className="cursor-pointer">
             <CommandEmpty className="px-3 py-4 text-sm text-muted-foreground">
-              Ничего не найдено. Новые предметы каталога добавляются на
-              странице «Предметы» (вкладка «Доска объявлений»).
+              Ничего не найдено. Новые предметы каталога добавляются на странице
+              «Предметы» (вкладка «Доска объявлений»).
             </CommandEmpty>
             {catalogItems.map((item) => (
               <CommandItem

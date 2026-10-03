@@ -1,15 +1,15 @@
 "use client";
 
-import { FC, useState } from "react";
+import { useState } from "react";
 import { PlusIcon, Swords } from "lucide-react";
 import { Button } from "@/shared/ui";
 import { AddManualKillCount } from "./ui/add-manual";
 
-interface AddKillCountProps {
+type AddKillCountProps = {
   isCanEdit: boolean;
-}
+};
 
-export const AddKillCount: FC<AddKillCountProps> = ({ isCanEdit }) => {
+export function AddKillCount({ isCanEdit }: AddKillCountProps) {
   const [manual, setManual] = useState(false);
 
   if (manual) {
@@ -37,4 +37,4 @@ export const AddKillCount: FC<AddKillCountProps> = ({ isCanEdit }) => {
       )}
     </div>
   );
-};
+}

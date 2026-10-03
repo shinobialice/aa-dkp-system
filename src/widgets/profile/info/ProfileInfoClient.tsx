@@ -1,5 +1,9 @@
 "use client";
+import type { ProfileUser } from "@/actions/getUser";
+import type { InventoryItem } from "@/actions/getUserInventory";
+import type { ProfileTag } from "@/widgets/profile/profileTypes";
 import { useEffect, useState } from "react";
+import type { UserSeal } from "@/actions/getUserSeals";
 import type { PrimeStreak } from "@/actions/getUserPrimeStreak";
 import type { KillcountStats } from "@/actions/getUserKillcountStats";
 import type { UserArchetype } from "@/actions/getUserArchetype";
@@ -16,6 +20,11 @@ type UsernameHistory = {
   changed_at: string;
 }[];
 
+const UNLINK_PATCH: Record<SocialProvider, Partial<ProfileUser>> = {
+  vk: { vk_id: null, vk_name: null },
+  google: { google_id: null },
+  mail: { mail_id: null },
+};
 export default function ProfileInfoClient({
   user,
   setUser,
@@ -43,13 +52,13 @@ export default function ProfileInfoClient({
   killcountStats,
   onOpenSalary,
 }: {
-  user: any;
-  setUser: (user: any) => void;
-  tags: any[];
-  seals: any[];
+  user: ProfileUser;
+  setUser: (user: ProfileUser) => void;
+  tags: ProfileTag[];
+  seals: UserSeal[];
   archetype: UserArchetype;
   setArchetype: (archetype: UserArchetype) => void;
-  inventory: any[];
+  inventory: InventoryItem[];
   onInventoryChange: () => void;
   usernameHistory: UsernameHistory;
   setUsernameHistory: (history: UsernameHistory) => void;
@@ -99,13 +108,7 @@ export default function ProfileInfoClient({
   const vkRealName = vkName?.lookup === vkLookup ? vkName.name : "";
 
   const handleSocialUnlinked = (provider: SocialProvider) => {
-    const patch =
-      provider === "vk"
-        ? { vk_id: null, vk_name: null }
-        : provider === "google"
-          ? { google_id: null }
-          : { mail_id: null };
-    setUser({ ...user, ...patch });
+    setUser({ ...user, ...UNLINK_PATCH[provider] });
   };
 
   return (

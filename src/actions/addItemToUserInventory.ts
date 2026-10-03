@@ -1,5 +1,6 @@
 "use server";
 import sql from "@/shared/lib/db";
+import type { UserInventoryRow } from "@/shared/lib/dbTypes";
 import ensureCanEditUserData from "./ensureCanEditUserData";
 
 const addItemToUserInventory = async (
@@ -11,7 +12,7 @@ const addItemToUserInventory = async (
   await ensureCanEditUserData(userId, "inventoryEditEnabled");
 
   try {
-    const [data] = await sql<any[]>`
+    const [data] = await sql<UserInventoryRow[]>`
       INSERT INTO user_inventory (user_id, name, type, quality, created_at)
       VALUES (${userId}, ${name}, ${type}, ${quality}, now())
       RETURNING *

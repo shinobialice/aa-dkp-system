@@ -1,30 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 
 const STORAGE_KEY = "eventSoundNotificationsEnabled";
 const CHANGE_EVENT = "sound-notifications-setting-change";
 
-function readSetting(): boolean {
-  if (typeof window === "undefined") return true;
-  const stored = window.localStorage.getItem(STORAGE_KEY);
-  return stored === null ? true : stored === "true";
-}
-
 export function useSoundNotificationsEnabled() {
-  const [enabled, setEnabled] = useState(true);
-
-  useEffect(() => {
-    setEnabled(readSetting());
-
-    const handleChange = () => setEnabled(readSetting());
-    window.addEventListener(CHANGE_EVENT, handleChange);
-    window.addEventListener("storage", handleChange);
-    return () => {
-      window.removeEventListener(CHANGE_EVENT, handleChange);
-      window.removeEventListener("storage", handleChange);
-    };
-  }, []);
+  const enabled = useSyncExternalStore(subscribe, readSetting, () => true);
 
   const setSoundEnabled = useCallback((value: boolean) => {
     window.localStorage.setItem(STORAGE_KEY, String(value));
@@ -32,4 +14,18 @@ export function useSoundNotificationsEnabled() {
   }, []);
 
   return { enabled, setSoundEnabled };
+}
+
+function subscribe(onChange: () => void) {
+  window.addEventListener(CHANGE_EVENT, onChange);
+  window.addEventListener("storage", onChange);
+  return () => {
+    window.removeEventListener(CHANGE_EVENT, onChange);
+    window.removeEventListener("storage", onChange);
+  };
+}
+
+function readSetting(): boolean {
+  const stored = window.localStorage.getItem(STORAGE_KEY);
+  return stored === null || stored === "true";
 }

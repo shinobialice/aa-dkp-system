@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/ui";
 import { Input } from "@/shared/ui";
 import { Label } from "@/shared/ui";
 import { addUserPenaltyPoints } from "@/actions/penaltyActions";
+import { errorMessage } from "@/shared/lib/errorMessage";
 
 export default function AddPenaltyPointsDialog({
   open,
@@ -27,8 +28,8 @@ export default function AddPenaltyPointsDialog({
       await addUserPenaltyPoints({ userId, amount, reason });
       onAdded();
       onClose();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(errorMessage(err, "Не удалось сохранить"));
     }
   };
 

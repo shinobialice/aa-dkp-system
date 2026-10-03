@@ -1,5 +1,6 @@
 "use server";
 import sql from "@/shared/lib/db";
+import type { LootQueueRow } from "@/shared/lib/dbTypes";
 import ensurePrivilieges from "./ensurePrivilieges";
 
 export const updateLootQueueEntry = async ({
@@ -26,9 +27,9 @@ export const updateLootQueueEntry = async ({
   if (required !== undefined) updateData.required = required;
   if (roll !== undefined) updateData.roll = roll;
 
-  let data;
+  let data: LootQueueRow | undefined;
   try {
-    [data] = await sql<any[]>`
+    [data] = await sql<LootQueueRow[]>`
       UPDATE loot_queue SET ${sql(updateData)} WHERE id = ${id} RETURNING *
     `;
   } catch (error) {

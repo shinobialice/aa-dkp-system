@@ -1,14 +1,16 @@
 "use client";
 import inventoryItems from "./InventoryItems";
-import InventoryItemCard, { findUserItem } from "./InventoryItemCard";
+import InventoryItemCard from "./InventoryItemCard";
+import {
+  CATALOG_CATEGORIES,
+  findUserItem,
+  isShownInGrid,
+  type CatalogItem,
+} from "./inventoryModel";
+import type { InventoryItem } from "@/actions/getUserInventory";
 import { AddCustomInventoryItemDialog } from "./AddCustomInventoryItemDialog";
-import { ProfileItemTypeRow } from "@/actions/profileItemTypeAdmin";
-import { OtherInventoryCatalogItem } from "@/actions/getInventoryCatalog";
-
-// Категории, где добавление предмета идёт через поиск по каталогу (казна +
-// profile_item_type под эту категорию, см. getInventoryCatalog в
-// InventoryTabsClient) — совпадает с catalogCategories там.
-const catalogCategories = ["Глайдеры", "Петы", "Другое"];
+import { type ProfileItemTypeRow } from "@/actions/profileItemTypeAdmin";
+import { type OtherInventoryCatalogItem } from "@/actions/getInventoryCatalog";
 
 export default function InventoryCategoryGrid({
   type,
@@ -22,7 +24,7 @@ export default function InventoryCategoryGrid({
   ownedOnly = false,
 }: {
   type: string;
-  inventory: any[];
+  inventory: InventoryItem[];
   userId: number;
   onChange: () => void;
   canEdit: boolean;
@@ -32,22 +34,16 @@ export default function InventoryCategoryGrid({
   onExtraItemTypesChange?: () => void;
   ownedOnly?: boolean;
 }) {
-  const hasCatalog = catalogCategories.includes(type);
+  const hasCatalog = CATALOG_CATEGORIES.includes(type);
 
-  // Категории с каталогом: карточками показываем только то, что уже
-  // отмечено у игрока (иначе вкладка превратилась бы в простыню из
-  // предметов всей гильдии), добавление — через
-  // AddCustomInventoryItemDialog (поиск и выбор из каталога). Имена, уже
-  // покрытые фиксированным списком (inventoryItems), из каталога убираем,
-  // чтобы не задваивать карточку. "Техника" — фиксированный список из
-  // InventoryItems.tsx плюс то, что завели под неё в profile_item_type,
-  // показываем всё как обычно, есть/нет.
+  // В категориях с каталогом карточки только для того, что уже есть у игрока,
+  // иначе вкладка превратилась бы в список предметов всей гильдии.
   const fixedNames = new Set(
     inventoryItems
       .filter((item) => item.type === type)
       .map((item) => item.name),
   );
-  const dynamicItems = hasCatalog
+  const dynamicItems: CatalogItem[] = hasCatalog
     ? catalog
         .filter((t) => !fixedNames.has(t.name))
         .filter((t) =>
@@ -58,54 +54,9 @@ export default function InventoryCategoryGrid({
         .filter((t) => t.category === type)
         .map((t) => ({ type: t.category, name: t.name, iconUrl: t.icon_url }));
 
-  const filteredItems = [...inventoryItems, ...dynamicItems]
-    .filter((item) => item.type === type)
-    .filter((item) => {
-      if (
-        item.name === "Коллеционный глайдер" &&
-        inventory.find((inv) => inv.name === "Коллеционный глайдер т2")
-      ) {
-        return false;
-      }
-      if (
-        item.name === "Коллеционный глайдер т2" &&
-        !inventory.find((inv) => inv.name === "Коллеционный глайдер т2")
-      ) {
-        return false;
-      }
-      if (
-        item.name === "Коллекционный фамильяр" &&
-        inventory.find((inv) => inv.name === "Коллекционный фамильяр т2")
-      ) {
-        return false;
-      }
-      if (
-        item.name === "Коллекционный фамильяр т2" &&
-        !inventory.find((inv) => inv.name === "Коллекционный фамильяр т2")
-      ) {
-        return false;
-      }
-      if (
-        item.name === "Коллекционный пет" &&
-        inventory.find((inv) => inv.name === "Коллекционный пет т2")
-      ) {
-        return false;
-      }
-      if (
-        item.name === "Коллекционный пет т2" &&
-        !inventory.find((inv) => inv.name === "Коллекционный пет т2")
-      ) {
-        return false;
-      }
-      if (
-        ["Красный Дракон", "Черный Дракон", "Зеленый Дракон"].includes(
-          item.name,
-        )
-      ) {
-        return false;
-      }
-      return true;
-    });
+  const filteredItems = [...inventoryItems, ...dynamicItems].filter(
+    (item) => item.type === type && isShownInGrid(item, inventory),
+  );
 
   const ownedCount = filteredItems.filter((item) =>
     findUserItem(item, inventory),
