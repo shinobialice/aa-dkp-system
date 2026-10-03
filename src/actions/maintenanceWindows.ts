@@ -1,8 +1,12 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import type { BossMaintenanceWindowsRow } from "@/shared/lib/dbTypes";
+
 import ensurePrivilieges from "./ensurePrivilieges";
 import { revalidatePath } from "next/cache";
+
+type WindowRow = Pick<BossMaintenanceWindowsRow, "id" | "start_at" | "end_at">;
 
 export type MaintenanceWindowRow = {
   id: number;
@@ -11,9 +15,9 @@ export type MaintenanceWindowRow = {
 };
 
 export async function getMaintenanceWindows(): Promise<MaintenanceWindowRow[]> {
-  let data;
+  let data: WindowRow[];
   try {
-    data = await sql<any[]>`
+    data = await sql<WindowRow[]>`
       SELECT id, start_at, end_at FROM boss_maintenance_windows
       WHERE end_at > now()
       ORDER BY start_at ASC
@@ -23,8 +27,8 @@ export async function getMaintenanceWindows(): Promise<MaintenanceWindowRow[]> {
     throw new Error("Не удалось загрузить окна профилактики");
   }
 
-  return (data ?? []).map((row) => ({
-    id: row.id,
+  return data.map((row) => ({
+    id: Number(row.id),
     startAt: row.start_at,
     endAt: row.end_at,
   }));
@@ -42,7 +46,7 @@ export async function addMaintenanceWindow(
   }
 
   try {
-    await sql<any[]>`
+    await sql`
       INSERT INTO boss_maintenance_windows (start_at, end_at, created_by)
       VALUES (${startAt}, ${endAt}, ${userId})
     `;
@@ -57,7 +61,7 @@ export async function addMaintenanceWindow(
 export async function extendMaintenanceWindow(id: number, endAt: string) {
   await ensurePrivilieges(["Администратор"]);
 
-  const [existing] = await sql<any[]>`
+  const [existing] = await sql<Pick<WindowRow, "start_at">[]>`
     SELECT start_at FROM boss_maintenance_windows WHERE id = ${id}
   `;
 
@@ -70,7 +74,7 @@ export async function extendMaintenanceWindow(id: number, endAt: string) {
   }
 
   try {
-    await sql<any[]>`
+    await sql`
       UPDATE boss_maintenance_windows SET end_at = ${endAt} WHERE id = ${id}
     `;
   } catch (error) {
@@ -85,7 +89,7 @@ export async function deleteMaintenanceWindow(id: number) {
   await ensurePrivilieges(["Администратор"]);
 
   try {
-    await sql<any[]>`
+    await sql`
       DELETE FROM boss_maintenance_windows WHERE id = ${id}
     `;
   } catch (error) {

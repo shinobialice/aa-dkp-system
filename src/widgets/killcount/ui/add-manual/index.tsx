@@ -1,19 +1,18 @@
 "use client";
 
-import { FC, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button, Input } from "@/shared/ui";
-import { KillCount } from "../../types";
+import { type KillCount } from "../../types";
 import { setKillCountCurrent } from "../../api/current";
 import { KillcountDay } from "../KillcountDay";
 
-interface AddManualKillCountProps {
+type AddManualKillCountProps = {
   onBack: () => void;
   isCanEdit: boolean;
-}
+};
 
-/** JSON от парсера: в userName может быть "Ник (комментарий)". */
 function parseJson(value: string): KillCount[] | null {
   try {
     const parsed: KillCount[] = JSON.parse(value);
@@ -31,10 +30,10 @@ function parseJson(value: string): KillCount[] | null {
   }
 }
 
-export const AddManualKillCount: FC<AddManualKillCountProps> = ({
+export function AddManualKillCount({
   onBack,
   isCanEdit,
-}) => {
+}: AddManualKillCountProps) {
   const router = useRouter();
   const [rows, setRows] = useState<KillCount[]>([]);
   const [jsonInput, setJsonInput] = useState("");
@@ -91,4 +90,4 @@ export const AddManualKillCount: FC<AddManualKillCountProps> = ({
       />
     </div>
   );
-};
+}

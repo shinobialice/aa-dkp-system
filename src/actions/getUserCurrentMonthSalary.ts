@@ -1,13 +1,13 @@
 "use server";
 import sql from "@/shared/lib/db";
+import type { SalaryRow } from "@/shared/lib/dbTypes";
+import { getMoscowYearMonth } from "@/utils/getMoscowISOString";
 
 export async function getUserCurrentMonthSalary(userId: number) {
-  const now = new Date();
-  const month = now.getMonth() + 1;
-  const year = now.getFullYear();
+  const { month, year } = getMoscowYearMonth(new Date());
 
   try {
-    const [data] = await sql<any[]>`
+    const [data] = await sql<Pick<SalaryRow, "total">[]>`
       SELECT total FROM "Salary"
       WHERE "userId" = ${userId} AND month = ${month} AND year = ${year}
     `;

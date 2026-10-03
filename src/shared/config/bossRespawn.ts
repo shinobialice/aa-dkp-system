@@ -4,6 +4,16 @@ export const bosses: BossName[] = ["Марли", "Морф"];
 
 export const respawnWindow = 1;
 
+export const REGISTER_COOLDOWN_SECONDS = 30;
+
+export const KILL_ACTIONS = ["Убит сейчас", "Указано время"] as const;
+
+export type KillAction = (typeof KILL_ACTIONS)[number];
+
+export function isBossName(name: string): name is BossName {
+  return (bosses as string[]).includes(name);
+}
+
 export const respawnHoursByBoss: Record<BossName, number> = {
   Марли: 12,
   Морф: 12,
@@ -71,7 +81,7 @@ function getRecurringWindowBoundsForDay(date: Date): {
     month: "2-digit",
     day: "2-digit",
   }).formatToParts(date);
-  const get = (type: string) => parts.find((p) => p.type === type)!.value;
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
   const dateStr = `${get("year")}-${get("month")}-${get("day")}`;
 
   return {
@@ -106,8 +116,9 @@ export function getTodayRecurringMaintenanceWindow(
 
 export function getRecurringMaintenanceWindowInDays(
   daysFromNow: number,
+  now: Date = new Date(),
 ): { start: Date; end: Date } | null {
-  const date = new Date(Date.now() + daysFromNow * 24 * 60 * 60 * 1000);
+  const date = new Date(now.getTime() + daysFromNow * 24 * 60 * 60 * 1000);
   if (!isThursdayMsk(date)) return null;
   return getRecurringWindowBoundsForDay(date);
 }

@@ -51,7 +51,6 @@ export default async function Page({
     getKillCountHistory(),
   ]);
 
-  // history — от новых к старым: "раньше" — следующий элемент, "позже" — предыдущий.
   const dates = (history ?? []).map((day) => dayKey(day.date));
   const index = dates.indexOf(slug);
   const earlier = index >= 0 ? dates[index + 1] : undefined;

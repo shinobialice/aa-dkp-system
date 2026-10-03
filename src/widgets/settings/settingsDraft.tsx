@@ -13,11 +13,6 @@ import { toast } from "sonner";
 import { Button } from "@/shared/ui";
 import type { SectionId } from "./settingsSections";
 
-/**
- * Общее сохранение настроек: каждая форма держит черновик через
- * useSettingsDraft и регистрируется здесь; внизу одна панель
- * «Сохранить / Отменить» для всех изменённых форм сразу.
- */
 type DraftEntry = {
   section: SectionId;
   label: string;
@@ -129,7 +124,6 @@ export function useSettingsDraft<T>({
 
   useEffect(() => () => unregister(id), [id, unregister]);
 
-  /** Изменение, которое уже записано на сервере (добавили/удалили строку). */
   const applySaved = useCallback((update: (value: T) => T) => {
     setSaved((value) => (value === null ? value : update(value)));
     setDraft((value) => (value === null ? value : update(value)));
@@ -149,7 +143,6 @@ export function useSettingsDraft<T>({
   };
 }
 
-/** Сохранённое значение формы — для сводки и подсказок в меню. */
 export function useSavedSetting<T>(id: string): T | null {
   const { entries } = useRegistry();
   return (entries[id]?.saved as T | undefined) ?? null;
@@ -204,7 +197,7 @@ export function SettingsSaveBar() {
       role="status"
       className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] left-1/2 z-40 flex w-[min(36rem,calc(100%-2rem))] -translate-x-1/2 items-center gap-2 rounded-2xl bg-foreground py-2.5 pr-2.5 pl-4 text-background shadow-xl md:bottom-6"
     >
-      <span className="min-w-0 flex-1 text-[13px]">
+      <span className="min-w-0 flex-1 text-sm">
         Не сохранено:{" "}
         <span className="font-semibold">
           {dirty.map((entry) => entry.label).join(", ")}

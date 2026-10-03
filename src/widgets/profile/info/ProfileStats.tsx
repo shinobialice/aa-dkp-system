@@ -3,6 +3,8 @@ import Image from "next/image";
 import type { KillcountStats } from "@/actions/getUserKillcountStats";
 import { getKillcountRank } from "@/shared/config/killcountRanks";
 import { cn } from "@/shared/lib/tw-merge";
+import { attendanceTone, formatNumber } from "@/shared/lib/format";
+import { GOLD_ICON_URL } from "@/shared/ui";
 
 type Activity = {
   aglPercent: number;
@@ -13,18 +15,6 @@ type Activity = {
 };
 
 const MONTH_SHORT = new Date().toLocaleDateString("ru-RU", { month: "long" });
-
-function formatPoints(value: number): string {
-  return Number(value.toFixed(2)).toLocaleString("ru-RU");
-}
-
-function attendanceTone(percent: number) {
-  if (percent >= 80)
-    return { text: "text-green-700 dark:text-green-400", bar: "bg-green-600" };
-  if (percent >= 50)
-    return { text: "text-amber-700 dark:text-amber-400", bar: "bg-amber-500" };
-  return { text: "text-red-700 dark:text-red-400", bar: "bg-red-500" };
-}
 
 function Bar({ percent, className }: { percent: number; className: string }) {
   return (
@@ -46,7 +36,7 @@ function Tile({
 }) {
   return (
     <div className="flex min-w-0 flex-col gap-1.5 rounded-xl border bg-card px-3.5 py-3 sm:px-4 sm:py-3.5">
-      <span className="truncate text-xs font-medium text-muted-foreground sm:text-[13px]">
+      <span className="truncate text-xs font-medium text-muted-foreground sm:text-sm">
         {label}
       </span>
       {children}
@@ -76,13 +66,7 @@ export default function ProfileStats({
     ? getKillcountRank(killcountStats.kills, killcountStats.place)
     : null;
   const rankPercent =
-    rank && killcountStats
-      ? rank.next
-        ? ((killcountStats.kills - rank.current.minKills) /
-            (rank.next.minKills - rank.current.minKills)) *
-          100
-        : 100
-      : 0;
+    rank && killcountStats ? rankProgress(rank, killcountStats.kills) : 0;
 
   return (
     <div
@@ -94,7 +78,7 @@ export default function ProfileStats({
       <Tile label={`Посещаемость · ${MONTH_SHORT}`}>
         <span
           className={cn(
-            "text-[22px] leading-tight font-bold tabular-nums sm:text-[26px]",
+            "text-2xl leading-tight font-bold tabular-nums",
             tone.text,
           )}
         >
@@ -108,10 +92,10 @@ export default function ProfileStats({
       </Tile>
 
       <Tile label={`Баллы · ${MONTH_SHORT}`}>
-        <span className="text-[22px] leading-tight font-bold tabular-nums sm:text-[26px]">
-          {formatPoints(activity.dkp)}{" "}
+        <span className="text-2xl leading-tight font-bold tabular-nums">
+          {formatNumber(activity.dkp, 2)}{" "}
           <span className="text-sm font-medium text-muted-foreground sm:text-base">
-            / {formatPoints(activity.totalPointsAvailable)}
+            / {formatNumber(activity.totalPointsAvailable, 2)}
           </span>
         </span>
         <Bar percent={pointsPercent} className="bg-muted-foreground/50" />
@@ -121,13 +105,8 @@ export default function ProfileStats({
       </Tile>
 
       <Tile label={`Зарплата · ${MONTH_SHORT}`}>
-        <span className="flex items-center gap-1.5 text-[22px] leading-tight font-bold tabular-nums sm:text-[26px]">
-          <Image
-            src="https://archeagecodex.com/items/gold.png"
-            alt=""
-            width={18}
-            height={18}
-          />
+        <span className="flex items-center gap-1.5 text-2xl leading-tight font-bold tabular-nums">
+          <Image src={GOLD_ICON_URL} alt="" width={18} height={18} />
           {salary != null ? salary.toLocaleString("ru-RU") : "—"}
         </span>
         <span className="text-xs text-muted-foreground">
@@ -161,7 +140,7 @@ export default function ProfileStats({
                 className="size-9 sm:size-11"
               />
               {rank.leaderboardPlace && (
-                <span className="absolute top-[83%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] leading-none font-bold text-white [text-shadow:0_0_3px_black,0_0_2px_black]">
+                <span className="absolute top-[83%] left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xs leading-none font-bold text-white [text-shadow:0_0_3px_black,0_0_2px_black]">
                   {rank.leaderboardPlace}
                 </span>
               )}
@@ -186,4 +165,13 @@ export default function ProfileStats({
       ) : null}
     </div>
   );
+}
+
+function rankProgress(
+  rank: NonNullable<ReturnType<typeof getKillcountRank>>,
+  kills: number,
+) {
+  if (!rank.next) return 100;
+  const span = rank.next.minKills - rank.current.minKills;
+  return ((kills - rank.current.minKills) / span) * 100;
 }

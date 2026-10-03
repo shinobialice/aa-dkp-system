@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { getBosses } from "@/actions/getBosses";
+import { useAsyncData } from "@/hooks/useAsyncData";
 
 // Эти боссы не должны попадать в подсказки источника казны.
 const EXCLUDED_SOURCE_BOSSES = [
@@ -12,14 +13,12 @@ const EXCLUDED_SOURCE_BOSSES = [
   "Кошка",
 ];
 
-export function SourceSelector({
-  value,
-  onChange,
-}: {
+type Props = {
   value: string;
   onChange: (value: string) => void;
-}) {
-  const [bossNames, setBossNames] = useState<string[]>([]);
+};
+
+export default function SourceSelector({ value, onChange }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
   // Браузер и менеджеры паролей всё равно норовят подсунуть свой
@@ -27,25 +26,16 @@ export function SourceSelector({
   // "off") и явные data-атрибуты отключают их сильнее, чем один
   // autoComplete="off".
   const fieldId = useId();
+  const { data: bosses = [] } = useAsyncData("bosses", () => getBosses());
 
-  useEffect(() => {
-    getBosses().then((bosses) =>
-      setBossNames(
-        bosses
-          .map((b) => b.boss_name)
-          .filter((name) => !EXCLUDED_SOURCE_BOSSES.includes(name)),
-      ),
-    );
-  }, []);
-
-  // Свой дропдаун вместо Popover из Radix — тот закрывался сам сразу
-  // после открытия из-за конфликта фокуса между инпутом и его
-  // dismissable-layer'ом. Тут всё под ручным контролем: открывается по
-  // фокусу поля, закрывается только по клику снаружи или выбору варианта.
+  // Свой дропдаун вместо Popover из Radix — тот закрывался сам сразу после
+  // открытия из-за конфликта фокуса между инпутом и его dismissable-layer'ом.
+  // Тут всё под ручным контролем: открывается по фокусу поля, закрывается
+  // только по клику снаружи или выбору варианта.
   useEffect(() => {
     if (!isOpen) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!containerRef.current?.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
@@ -54,9 +44,15 @@ export function SourceSelector({
   }, [isOpen]);
 
   const query = value.trim().toLowerCase();
-  const suggestions = query
-    ? bossNames.filter((name) => name.toLowerCase().includes(query))
-    : bossNames;
+  const suggestions = bosses
+    .map((boss) => boss.boss_name)
+    .filter((name) => !EXCLUDED_SOURCE_BOSSES.includes(name))
+    .filter((name) => !query || name.toLowerCase().includes(query));
+
+  const handlePick = (name: string) => {
+    onChange(name);
+    setIsOpen(false);
+  };
 
   return (
     <div ref={containerRef} className="relative">
@@ -64,10 +60,10 @@ export function SourceSelector({
         type="text"
         name={`source-${fieldId}`}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(event) => onChange(event.target.value)}
         onFocus={() => setIsOpen(true)}
         placeholder="Босс или другой источник..."
-        className="border rounded px-2 py-1 w-full"
+        className="w-full rounded border px-2 py-1"
         autoComplete="off"
         autoCorrect="off"
         spellCheck={false}
@@ -77,29 +73,37 @@ export function SourceSelector({
         data-form-type="other"
       />
       {isOpen && (
-        <div className="absolute z-50 mt-1 w-full min-w-[270px] max-h-60 overflow-y-auto rounded-md border bg-popover text-popover-foreground shadow-md p-1">
-          {suggestions.length > 0 ? (
-            suggestions.map((name) => (
-              <button
-                key={name}
-                type="button"
-                className="w-full text-left px-2 py-1.5 text-sm rounded hover:bg-accent cursor-pointer"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => {
-                  onChange(name);
-                  setIsOpen(false);
-                }}
-              >
-                {name}
-              </button>
-            ))
-          ) : (
-            <div className="px-2 py-1.5 text-sm text-muted-foreground">
-              Нет совпадений среди боссов — можно ввести свой источник
-            </div>
-          )}
+        <div className="absolute z-50 mt-1 max-h-60 w-full min-w-67.5 overflow-y-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md">
+          <SourceSuggestions suggestions={suggestions} onPick={handlePick} />
         </div>
       )}
     </div>
   );
+}
+
+type SourceSuggestionsProps = {
+  suggestions: string[];
+  onPick: (name: string) => void;
+};
+
+function SourceSuggestions({ suggestions, onPick }: SourceSuggestionsProps) {
+  if (suggestions.length === 0) {
+    return (
+      <div className="px-2 py-1.5 text-sm text-muted-foreground">
+        Нет совпадений среди боссов — можно ввести свой источник
+      </div>
+    );
+  }
+
+  return suggestions.map((name) => (
+    <button
+      key={name}
+      type="button"
+      className="w-full cursor-pointer rounded px-2 py-1.5 text-left text-sm hover:bg-accent"
+      onMouseDown={(event) => event.preventDefault()}
+      onClick={() => onPick(name)}
+    >
+      {name}
+    </button>
+  ));
 }

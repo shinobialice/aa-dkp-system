@@ -48,7 +48,7 @@ export function BossPointsSettingsForm() {
         return (
           <div key={category} className="px-4 py-3">
             <div className="grid grid-cols-[minmax(0,1fr)_5rem_5rem] items-center gap-x-3 gap-y-1.5">
-              <span className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
+              <span className="text-2xs font-semibold tracking-wide text-muted-foreground uppercase">
                 {category}
               </span>
               <span className="text-right text-xs text-muted-foreground">

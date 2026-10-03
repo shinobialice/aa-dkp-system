@@ -15,6 +15,7 @@ import { SidebarMenuButton, SidebarMenuItem } from "@/shared/ui";
 import { Avatar, AvatarImage, AvatarFallback } from "@/shared/ui";
 import { getOnlineUsers } from "@/actions/getOnlineUsers";
 import { useVisiblePolling } from "@/hooks/useVisiblePolling";
+import { avatarSrc } from "@/shared/lib/format";
 
 const POLL_INTERVAL_MS = 30 * 1000;
 
@@ -36,13 +37,6 @@ const roleIcons: Record<string, ReactNode> = {
     <Sparkles className="size-3.5 shrink-0" color="rgb(79, 70, 229)" />
   ),
 };
-
-function avatarSrc(user: OnlineUser) {
-  return (
-    user.avatar_url ??
-    `https://api.dicebear.com/6.x/initials/svg?seed=${user.username}`
-  );
-}
 
 function useOnlineUsers() {
   const [users, setUsers] = useState<OnlineUser[]>([]);
@@ -66,8 +60,8 @@ function AvatarStack({ users }: { users: OnlineUser[] }) {
           key={user.id}
           className={`size-6 border-2 border-sidebar ${index > 0 ? "-ml-2" : ""}`}
         >
-          <AvatarImage src={avatarSrc(user)} alt="" />
-          <AvatarFallback className="text-[9px]">
+          <AvatarImage src={avatarSrc(user.username, user.avatar_url)} alt="" />
+          <AvatarFallback className="text-2xs">
             {user.username.slice(0, 2)}
           </AvatarFallback>
         </Avatar>
@@ -89,10 +83,12 @@ function OnlineMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
-      <DropdownMenuContent side={side} className="w-[250px]">
+      <DropdownMenuContent side={side} className="w-62.5">
         <DropdownMenuLabel>Сейчас на сайте: {users.length}</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {users.length === 0 && <DropdownMenuItem disabled>Никого нет</DropdownMenuItem>}
+        {users.length === 0 && (
+          <DropdownMenuItem disabled>Никого нет</DropdownMenuItem>
+        )}
         {users.map((u) => (
           <DropdownMenuItem
             key={u.id}
@@ -101,8 +97,11 @@ function OnlineMenu({
           >
             <span className="relative shrink-0">
               <Avatar className="h-6 w-6">
-                <AvatarImage src={avatarSrc(u)} alt={u.username} />
-                <AvatarFallback className="text-[10px]">
+                <AvatarImage
+                  src={avatarSrc(u.username, u.avatar_url)}
+                  alt={u.username}
+                />
+                <AvatarFallback className="text-2xs">
                   {u.username.slice(0, 2)}
                 </AvatarFallback>
               </Avatar>
@@ -123,7 +122,10 @@ export function OnlineUsersWidget() {
   return (
     <SidebarMenuItem>
       <OnlineMenu users={users} side="top">
-        <SidebarMenuButton className="cursor-pointer" tooltip={`Онлайн: ${users.length}`}>
+        <SidebarMenuButton
+          className="cursor-pointer"
+          tooltip={`Онлайн: ${users.length}`}
+        >
           <Users />
           <span className="flex-1">Онлайн</span>
           <AvatarStack users={users} />

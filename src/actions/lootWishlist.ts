@@ -1,8 +1,12 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import type { LootWishlistRow } from "@/shared/lib/dbTypes";
+
 import ensurePrivilieges from "./ensurePrivilieges";
 import { revalidatePath } from "next/cache";
+
+type WishlistRow = Pick<LootWishlistRow, "id" | "item_name" | "comment">;
 
 export type WishlistItem = {
   id: number;
@@ -15,9 +19,9 @@ export async function addWishlistItem(
   item: { itemName: string; comment: string },
 ): Promise<WishlistItem> {
   await ensurePrivilieges(["Администратор"]);
-  let data;
+  let data: WishlistRow | undefined;
   try {
-    [data] = await sql<any[]>`
+    [data] = await sql<WishlistRow[]>`
       INSERT INTO loot_wishlist (user_id, item_name, comment)
       VALUES (${userId}, ${item.itemName}, ${item.comment || null})
       RETURNING id, item_name, comment
@@ -34,13 +38,17 @@ export async function addWishlistItem(
 
   revalidatePath("/loot/giveaway");
 
-  return { id: data.id, itemName: data.item_name, comment: data.comment };
+  return {
+    id: Number(data.id),
+    itemName: data.item_name,
+    comment: data.comment,
+  };
 }
 
 export async function deleteWishlistItem(id: number) {
   await ensurePrivilieges(["Администратор"]);
   try {
-    await sql<any[]>`DELETE FROM loot_wishlist WHERE id = ${id}`;
+    await sql`DELETE FROM loot_wishlist WHERE id = ${id}`;
   } catch (error) {
     console.error("Ошибка при удалении пожелания:", error);
     throw new Error("Не удалось удалить пожелание");

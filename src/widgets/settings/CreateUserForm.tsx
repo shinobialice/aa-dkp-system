@@ -4,11 +4,10 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Button, Input } from "@/shared/ui";
-import { createUser } from "@/actions/createUser";
-import type { Database } from "@/types/supabase";
+import { createUser, type CreatedUser } from "@/actions/createUser";
 import { SettingRow } from "./settingsUi";
 
-type User = Database["public"]["Tables"]["user"]["Row"];
+type User = CreatedUser;
 
 export function CreateUserForm({
   onUserCreated,

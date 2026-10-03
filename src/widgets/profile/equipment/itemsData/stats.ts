@@ -76,34 +76,124 @@ export const ITEM_STATS: Record<number, Record<string, number>> = {
   45862: { wearable_armor: 909.228, wearable_magic_resistance: 160.452 }, // Проклятые рамианские латные сапоги
   45863: { wearable_armor: 490, wearable_magic_resistance: 44 }, // Проклятые рамианские латные наручи
   45864: { wearable_armor: 490, wearable_magic_resistance: 44 }, // Проклятый рамианский латный пояс
-  45880: { wearable_armor: 356, wearable_magic_resistance: 1069, sta: 33, int: 50 }, // Диадема эрнардского мнемоника
-  45881: { wearable_armor: 594, wearable_magic_resistance: 1782, sta: 56, int: 83 }, // Матерчатый камзол эрнардского мнемоника
-  45882: { wearable_armor: 475, wearable_magic_resistance: 1425, sta: 44, int: 67 }, // Матерчатые поножи эрнардского мнемоника
-  45883: { wearable_armor: 237, wearable_magic_resistance: 712, sta: 22, int: 33 }, // Матерчатые перчатки эрнардского мнемоника
+  45880: {
+    wearable_armor: 356,
+    wearable_magic_resistance: 1069,
+    sta: 33,
+    int: 50,
+  }, // Диадема эрнардского мнемоника
+  45881: {
+    wearable_armor: 594,
+    wearable_magic_resistance: 1782,
+    sta: 56,
+    int: 83,
+  }, // Матерчатый камзол эрнардского мнемоника
+  45882: {
+    wearable_armor: 475,
+    wearable_magic_resistance: 1425,
+    sta: 44,
+    int: 67,
+  }, // Матерчатые поножи эрнардского мнемоника
+  45883: {
+    wearable_armor: 237,
+    wearable_magic_resistance: 712,
+    sta: 22,
+    int: 33,
+  }, // Матерчатые перчатки эрнардского мнемоника
   45884: { wearable_armor: 237, wearable_magic_resistance: 712, sta: 52 }, // Матерчатые сапоги эрнардского мнемоника
   45885: { wearable_armor: 118, wearable_magic_resistance: 356, sta: 26 }, // Матерчатые наручи эрнардского мнемоника
   45886: { wearable_armor: 118, wearable_magic_resistance: 356, sta: 26 }, // Матерчатый пояс эрнардского мнемоника
-  45887: { wearable_armor: 712, wearable_magic_resistance: 712, str: 50, sta: 33 }, // Фибула заклинателя гримуаров
-  45888: { wearable_armor: 1188, wearable_magic_resistance: 1188, str: 83, sta: 56 }, // Кожаная куртка заклинателя гримуаров
-  45889: { wearable_armor: 950, wearable_magic_resistance: 950, str: 67, sta: 44 }, // Кожаные поножи заклинателя гримуаров
-  45890: { wearable_armor: 475, wearable_magic_resistance: 475, str: 33, sta: 22 }, // Кожаные перчатки заклинателя гримуаров
+  45887: {
+    wearable_armor: 712,
+    wearable_magic_resistance: 712,
+    str: 50,
+    sta: 33,
+  }, // Фибула заклинателя гримуаров
+  45888: {
+    wearable_armor: 1188,
+    wearable_magic_resistance: 1188,
+    str: 83,
+    sta: 56,
+  }, // Кожаная куртка заклинателя гримуаров
+  45889: {
+    wearable_armor: 950,
+    wearable_magic_resistance: 950,
+    str: 67,
+    sta: 44,
+  }, // Кожаные поножи заклинателя гримуаров
+  45890: {
+    wearable_armor: 475,
+    wearable_magic_resistance: 475,
+    str: 33,
+    sta: 22,
+  }, // Кожаные перчатки заклинателя гримуаров
   45891: { wearable_armor: 475, wearable_magic_resistance: 475, dex: 52 }, // Кожаные сапоги укротителя гримуаров
   45892: { wearable_armor: 237, wearable_magic_resistance: 237, dex: 26 }, // Кожаные наручи укротителя гримуаров
   45893: { wearable_armor: 237, wearable_magic_resistance: 237, dex: 26 }, // Кожаный пояс укротителя гримуаров
-  45894: { wearable_armor: 1306, wearable_magic_resistance: 118, str: 33, sta: 50 }, // Латный шлем эрнардского архивариуса
-  45895: { wearable_armor: 2178, wearable_magic_resistance: 198, str: 56, sta: 83 }, // Латный нагрудник эрнардского архивариуса
-  45896: { wearable_armor: 1742, wearable_magic_resistance: 158, str: 44, sta: 67 }, // Латные поножи эрнардского архивариуса
-  45897: { wearable_armor: 871, wearable_magic_resistance: 79, str: 22, sta: 33 }, // Латные перчатки эрнардского архивариуса
-  45898: { wearable_armor: 807.942, wearable_magic_resistance: 142.578, str: 22, sta: 33 }, // Латные сапоги эрнардского архивариуса
+  45894: {
+    wearable_armor: 1306,
+    wearable_magic_resistance: 118,
+    str: 33,
+    sta: 50,
+  }, // Латный шлем эрнардского архивариуса
+  45895: {
+    wearable_armor: 2178,
+    wearable_magic_resistance: 198,
+    str: 56,
+    sta: 83,
+  }, // Латный нагрудник эрнардского архивариуса
+  45896: {
+    wearable_armor: 1742,
+    wearable_magic_resistance: 158,
+    str: 44,
+    sta: 67,
+  }, // Латные поножи эрнардского архивариуса
+  45897: {
+    wearable_armor: 871,
+    wearable_magic_resistance: 79,
+    str: 22,
+    sta: 33,
+  }, // Латные перчатки эрнардского архивариуса
+  45898: {
+    wearable_armor: 807.942,
+    wearable_magic_resistance: 142.578,
+    str: 22,
+    sta: 33,
+  }, // Латные сапоги эрнардского архивариуса
   45899: { wearable_armor: 435, wearable_magic_resistance: 39, sta: 26 }, // Латные наручи эрнардского архивариуса
   45900: { wearable_armor: 435, wearable_magic_resistance: 39, sta: 26 }, // Латный пояс эрнардского архивариуса
   45985: { wearable_armor: 118, wearable_magic_resistance: 356, spi: 26 }, // Матерчатый пояс смотрителя тайных архивов
   45986: { wearable_armor: 118, wearable_magic_resistance: 356, spi: 26 }, // Матерчатые наручи смотрителя тайных архивов
-  45987: { wearable_armor: 237, wearable_magic_resistance: 712, sta: 22, spi: 33 }, // Матерчатые сапоги смотрителя тайных архивов
-  45988: { wearable_armor: 237, wearable_magic_resistance: 712, sta: 22, spi: 33 }, // Матерчатые перчатки смотрителя тайных архивов
-  45989: { wearable_armor: 475, wearable_magic_resistance: 1425, sta: 44, spi: 67 }, // Матерчатые поножи смотрителя тайных архивов
-  45990: { wearable_armor: 594, wearable_magic_resistance: 1782, sta: 56, spi: 83 }, // Матерчатый камзол смотрителя тайных архивов
-  45991: { wearable_armor: 356, wearable_magic_resistance: 1069, sta: 33, spi: 50 }, // Диадема смотрителя тайных архивов
+  45987: {
+    wearable_armor: 237,
+    wearable_magic_resistance: 712,
+    sta: 22,
+    spi: 33,
+  }, // Матерчатые сапоги смотрителя тайных архивов
+  45988: {
+    wearable_armor: 237,
+    wearable_magic_resistance: 712,
+    sta: 22,
+    spi: 33,
+  }, // Матерчатые перчатки смотрителя тайных архивов
+  45989: {
+    wearable_armor: 475,
+    wearable_magic_resistance: 1425,
+    sta: 44,
+    spi: 67,
+  }, // Матерчатые поножи смотрителя тайных архивов
+  45990: {
+    wearable_armor: 594,
+    wearable_magic_resistance: 1782,
+    sta: 56,
+    spi: 83,
+  }, // Матерчатый камзол смотрителя тайных архивов
+  45991: {
+    wearable_armor: 356,
+    wearable_magic_resistance: 1069,
+    sta: 33,
+    spi: 50,
+  }, // Диадема смотрителя тайных архивов
   46854: { wearable_armor: 407, wearable_magic_resistance: 1222 }, // Изначальный рамианский налобник
   46855: { wearable_armor: 679, wearable_magic_resistance: 2037 }, // Изначальный рамианский камзол
   46856: { wearable_armor: 543, wearable_magic_resistance: 1630 }, // Изначальные рамианские матерчатые поножи
@@ -125,46 +215,176 @@ export const ITEM_STATS: Record<number, Record<string, number>> = {
   46872: { wearable_armor: 923.712, wearable_magic_resistance: 163.008 }, // Изначальные рамианские латные сапоги
   46873: { wearable_armor: 461, wearable_magic_resistance: 81 }, // Изначальные рамианские латные наручи
   46874: { wearable_armor: 498, wearable_magic_resistance: 45 }, // Изначальный рамианский латный пояс
-  47043: { wearable_armor: 712, wearable_magic_resistance: 712, dex: 50, sta: 33 }, // Фибула укротителя гримуаров
-  47044: { wearable_armor: 1188, wearable_magic_resistance: 1188, dex: 83, sta: 56 }, // Кожаная куртка укротителя гримуаров
-  47045: { wearable_armor: 950, wearable_magic_resistance: 950, dex: 67, sta: 44 }, // Кожаные поножи укротителя гримуаров
-  47046: { wearable_armor: 475, wearable_magic_resistance: 475, dex: 33, sta: 22 }, // Кожаные перчатки укротителя гримуаров
+  47043: {
+    wearable_armor: 712,
+    wearable_magic_resistance: 712,
+    dex: 50,
+    sta: 33,
+  }, // Фибула укротителя гримуаров
+  47044: {
+    wearable_armor: 1188,
+    wearable_magic_resistance: 1188,
+    dex: 83,
+    sta: 56,
+  }, // Кожаная куртка укротителя гримуаров
+  47045: {
+    wearable_armor: 950,
+    wearable_magic_resistance: 950,
+    dex: 67,
+    sta: 44,
+  }, // Кожаные поножи укротителя гримуаров
+  47046: {
+    wearable_armor: 475,
+    wearable_magic_resistance: 475,
+    dex: 33,
+    sta: 22,
+  }, // Кожаные перчатки укротителя гримуаров
   47047: { wearable_armor: 475, wearable_magic_resistance: 475, str: 52 }, // Кожаные сапоги заклинателя гримуаров
   47048: { wearable_armor: 237, wearable_magic_resistance: 237, str: 26 }, // Кожаные наручи заклинателя гримуаров
   47049: { wearable_armor: 237, wearable_magic_resistance: 237, str: 26 }, // Кожаный пояс заклинателя гримуаров
   47271: { wearable_armor: 133, wearable_magic_resistance: 401, spi: 29 }, // Магистерский матерчатый пояс смотрителя тайных архивов
   47272: { wearable_armor: 133, wearable_magic_resistance: 401, spi: 29 }, // Магистерские матерчатые наручи смотрителя тайных архивов
-  47273: { wearable_armor: 267, wearable_magic_resistance: 802, sta: 25, spi: 37 }, // Магистерские матерчатые сапоги смотрителя тайных архивов
-  47274: { wearable_armor: 267, wearable_magic_resistance: 802, sta: 25, spi: 37 }, // Магистерские матерчатые перчатки смотрителя тайных архивов
-  47275: { wearable_armor: 534, wearable_magic_resistance: 1604, sta: 50, spi: 74 }, // Магистерские матерчатые поножи смотрителя тайных архивов
-  47276: { wearable_armor: 668, wearable_magic_resistance: 2005, sta: 62, spi: 93 }, // Магистерский матерчатый камзол смотрителя тайных архивов
-  47277: { wearable_armor: 401, wearable_magic_resistance: 1203, sta: 37, spi: 56 }, // Магистерская диадема смотрителя тайных архивов
-  47278: { wearable_armor: 401, wearable_magic_resistance: 1203, sta: 37, int: 56 }, // Магистерская диадема эрнардского мнемоника
-  47279: { wearable_armor: 668, wearable_magic_resistance: 2005, sta: 62, int: 93 }, // Магистерский матерчатый камзол эрнардского мнемоника
-  47280: { wearable_armor: 534, wearable_magic_resistance: 1604, sta: 50, int: 74 }, // Магистерские матерчатые поножи эрнардского мнемоника
-  47281: { wearable_armor: 267, wearable_magic_resistance: 802, sta: 25, int: 37 }, // Магистерские матерчатые перчатки эрнардского мнемоника
+  47273: {
+    wearable_armor: 267,
+    wearable_magic_resistance: 802,
+    sta: 25,
+    spi: 37,
+  }, // Магистерские матерчатые сапоги смотрителя тайных архивов
+  47274: {
+    wearable_armor: 267,
+    wearable_magic_resistance: 802,
+    sta: 25,
+    spi: 37,
+  }, // Магистерские матерчатые перчатки смотрителя тайных архивов
+  47275: {
+    wearable_armor: 534,
+    wearable_magic_resistance: 1604,
+    sta: 50,
+    spi: 74,
+  }, // Магистерские матерчатые поножи смотрителя тайных архивов
+  47276: {
+    wearable_armor: 668,
+    wearable_magic_resistance: 2005,
+    sta: 62,
+    spi: 93,
+  }, // Магистерский матерчатый камзол смотрителя тайных архивов
+  47277: {
+    wearable_armor: 401,
+    wearable_magic_resistance: 1203,
+    sta: 37,
+    spi: 56,
+  }, // Магистерская диадема смотрителя тайных архивов
+  47278: {
+    wearable_armor: 401,
+    wearable_magic_resistance: 1203,
+    sta: 37,
+    int: 56,
+  }, // Магистерская диадема эрнардского мнемоника
+  47279: {
+    wearable_armor: 668,
+    wearable_magic_resistance: 2005,
+    sta: 62,
+    int: 93,
+  }, // Магистерский матерчатый камзол эрнардского мнемоника
+  47280: {
+    wearable_armor: 534,
+    wearable_magic_resistance: 1604,
+    sta: 50,
+    int: 74,
+  }, // Магистерские матерчатые поножи эрнардского мнемоника
+  47281: {
+    wearable_armor: 267,
+    wearable_magic_resistance: 802,
+    sta: 25,
+    int: 37,
+  }, // Магистерские матерчатые перчатки эрнардского мнемоника
   47282: { wearable_armor: 267, wearable_magic_resistance: 802, sta: 58 }, // Магистерские матерчатые сапоги эрнардского мнемоника
   47283: { wearable_armor: 133, wearable_magic_resistance: 401, sta: 29 }, // Магистерские матерчатые наручи эрнардского мнемоника
   47284: { wearable_armor: 133, wearable_magic_resistance: 401, sta: 29 }, // Магистерский матерчатый пояс эрнардского мнемоника
-  47285: { wearable_armor: 802, wearable_magic_resistance: 802, dex: 56, sta: 37 }, // Магистерская фибула укротителя гримуаров
-  47286: { wearable_armor: 1337, wearable_magic_resistance: 1337, dex: 93, sta: 62 }, // Магистерская кожаная куртка укротителя гримуаров
-  47287: { wearable_armor: 1069, wearable_magic_resistance: 1069, dex: 74, sta: 50 }, // Магистерские кожаные поножи укротителя гримуаров
-  47288: { wearable_armor: 534, wearable_magic_resistance: 534, dex: 37, sta: 25 }, // Магистерские кожаные перчатки укротителя гримуаров
+  47285: {
+    wearable_armor: 802,
+    wearable_magic_resistance: 802,
+    dex: 56,
+    sta: 37,
+  }, // Магистерская фибула укротителя гримуаров
+  47286: {
+    wearable_armor: 1337,
+    wearable_magic_resistance: 1337,
+    dex: 93,
+    sta: 62,
+  }, // Магистерская кожаная куртка укротителя гримуаров
+  47287: {
+    wearable_armor: 1069,
+    wearable_magic_resistance: 1069,
+    dex: 74,
+    sta: 50,
+  }, // Магистерские кожаные поножи укротителя гримуаров
+  47288: {
+    wearable_armor: 534,
+    wearable_magic_resistance: 534,
+    dex: 37,
+    sta: 25,
+  }, // Магистерские кожаные перчатки укротителя гримуаров
   47289: { wearable_armor: 534, wearable_magic_resistance: 534, dex: 58 }, // Магистерские кожаные сапоги укротителя гримуаров
   47290: { wearable_armor: 267, wearable_magic_resistance: 267, dex: 29 }, // Магистерские кожаные наручи укротителя гримуаров
   47291: { wearable_armor: 267, wearable_magic_resistance: 267, dex: 29 }, // Магистерский кожаный пояс укротителя гримуаров
-  47292: { wearable_armor: 802, wearable_magic_resistance: 802, str: 56, sta: 37 }, // Магистерская фибула заклинателя гримуаров
-  47293: { wearable_armor: 1337, wearable_magic_resistance: 1337, str: 93, sta: 62 }, // Магистерская кожаная куртка заклинателя гримуаров
-  47294: { wearable_armor: 1069, wearable_magic_resistance: 1069, str: 74, sta: 50 }, // Магистерские кожаные поножи заклинателя гримуаров
-  47295: { wearable_armor: 534, wearable_magic_resistance: 534, str: 37, sta: 25 }, // Магистерские кожаные перчатки заклинателя гримуаров
+  47292: {
+    wearable_armor: 802,
+    wearable_magic_resistance: 802,
+    str: 56,
+    sta: 37,
+  }, // Магистерская фибула заклинателя гримуаров
+  47293: {
+    wearable_armor: 1337,
+    wearable_magic_resistance: 1337,
+    str: 93,
+    sta: 62,
+  }, // Магистерская кожаная куртка заклинателя гримуаров
+  47294: {
+    wearable_armor: 1069,
+    wearable_magic_resistance: 1069,
+    str: 74,
+    sta: 50,
+  }, // Магистерские кожаные поножи заклинателя гримуаров
+  47295: {
+    wearable_armor: 534,
+    wearable_magic_resistance: 534,
+    str: 37,
+    sta: 25,
+  }, // Магистерские кожаные перчатки заклинателя гримуаров
   47296: { wearable_armor: 534, wearable_magic_resistance: 534, str: 58 }, // Магистерские кожаные сапоги заклинателя гримуаров
   47297: { wearable_armor: 267, wearable_magic_resistance: 267, str: 29 }, // Магистерские кожаные наручи заклинателя гримуаров
   47298: { wearable_armor: 267, wearable_magic_resistance: 267, str: 29 }, // Магистерский кожаный пояс заклинателя гримуаров
-  47299: { wearable_armor: 1470, wearable_magic_resistance: 133, str: 37, sta: 56 }, // Магистерский латный шлем эрнардского архивариуса
-  47300: { wearable_armor: 2451, wearable_magic_resistance: 222, str: 62, sta: 93 }, // Магистерский латный нагрудник эрнардского архивариуса
-  47301: { wearable_armor: 1818.456, wearable_magic_resistance: 320.904, str: 50, sta: 74 }, // Магистерские латные поножи эрнардского архивариуса
-  47302: { wearable_armor: 909.228, wearable_magic_resistance: 160.452, str: 25, sta: 37 }, // Магистерские латные перчатки эрнардского архивариуса
-  47303: { wearable_armor: 909.228, wearable_magic_resistance: 160.452, str: 25, sta: 37 }, // Магистерские латные сапоги эрнардского архивариуса
+  47299: {
+    wearable_armor: 1470,
+    wearable_magic_resistance: 133,
+    str: 37,
+    sta: 56,
+  }, // Магистерский латный шлем эрнардского архивариуса
+  47300: {
+    wearable_armor: 2451,
+    wearable_magic_resistance: 222,
+    str: 62,
+    sta: 93,
+  }, // Магистерский латный нагрудник эрнардского архивариуса
+  47301: {
+    wearable_armor: 1818.456,
+    wearable_magic_resistance: 320.904,
+    str: 50,
+    sta: 74,
+  }, // Магистерские латные поножи эрнардского архивариуса
+  47302: {
+    wearable_armor: 909.228,
+    wearable_magic_resistance: 160.452,
+    str: 25,
+    sta: 37,
+  }, // Магистерские латные перчатки эрнардского архивариуса
+  47303: {
+    wearable_armor: 909.228,
+    wearable_magic_resistance: 160.452,
+    str: 25,
+    sta: 37,
+  }, // Магистерские латные сапоги эрнардского архивариуса
   47304: { wearable_armor: 454, wearable_magic_resistance: 80, sta: 29 }, // Магистерские латные наручи эрнардского архивариуса
   47305: { wearable_armor: 490, wearable_magic_resistance: 44, sta: 29 }, // Магистерский латный пояс эрнардского архивариуса
   48378: { wearable_armor: 413, wearable_magic_resistance: 1241 }, // Обновленный рамианский налобник
@@ -280,38 +500,148 @@ export const ITEM_STATS: Record<number, Record<string, number>> = {
   940035: { weapon_dps: 559.1 }, // Амальгамный эфенский лук
   940036: { wearable_armor: 2659.75 }, // Амальгамный эфенский щит
   940039: { weapon_dps: 559.1 }, // Амальгамная эфенская винтовка
-  49582: { wearable_armor: 413, wearable_magic_resistance: 1241, sta: 38, int: 57 }, // Капюшон эфенского жреца
-  49583: { wearable_armor: 689, wearable_magic_resistance: 2069, sta: 64, int: 96 }, // Одеяние эфенского жреца
-  49584: { wearable_armor: 551, wearable_magic_resistance: 1655, sta: 51, int: 77 }, // Матерчатые поножи эфенского жреца
-  49585: { wearable_armor: 275, wearable_magic_resistance: 827, sta: 26, int: 38 }, // Матерчатые перчатки эфенского жреца
+  49582: {
+    wearable_armor: 413,
+    wearable_magic_resistance: 1241,
+    sta: 38,
+    int: 57,
+  }, // Капюшон эфенского жреца
+  49583: {
+    wearable_armor: 689,
+    wearable_magic_resistance: 2069,
+    sta: 64,
+    int: 96,
+  }, // Одеяние эфенского жреца
+  49584: {
+    wearable_armor: 551,
+    wearable_magic_resistance: 1655,
+    sta: 51,
+    int: 77,
+  }, // Матерчатые поножи эфенского жреца
+  49585: {
+    wearable_armor: 275,
+    wearable_magic_resistance: 827,
+    sta: 26,
+    int: 38,
+  }, // Матерчатые перчатки эфенского жреца
   49586: { wearable_armor: 275, wearable_magic_resistance: 827, sta: 60 }, // Матерчатые сапоги эфенского жреца
   49587: { wearable_armor: 137, wearable_magic_resistance: 413, sta: 30 }, // Матерчатые наручи эфенского жреца
   49588: { wearable_armor: 137, wearable_magic_resistance: 413, sta: 30 }, // Матерчатый пояс эфенского жреца
-  49589: { wearable_armor: 827, wearable_magic_resistance: 827, str: 57, sta: 38 }, // Треуголка эфенского искателя истины
-  49590: { wearable_armor: 1379, wearable_magic_resistance: 1379, str: 96, sta: 64 }, // Кожаный нагрудник эфенского искателя истины
-  49591: { wearable_armor: 1103, wearable_magic_resistance: 1103, str: 77, sta: 51 }, // Кожаные поножи эфенского искателя истины
-  49592: { wearable_armor: 551, wearable_magic_resistance: 551, str: 38, sta: 26 }, // Кожаные перчатки эфенского искателя истины
+  49589: {
+    wearable_armor: 827,
+    wearable_magic_resistance: 827,
+    str: 57,
+    sta: 38,
+  }, // Треуголка эфенского искателя истины
+  49590: {
+    wearable_armor: 1379,
+    wearable_magic_resistance: 1379,
+    str: 96,
+    sta: 64,
+  }, // Кожаный нагрудник эфенского искателя истины
+  49591: {
+    wearable_armor: 1103,
+    wearable_magic_resistance: 1103,
+    str: 77,
+    sta: 51,
+  }, // Кожаные поножи эфенского искателя истины
+  49592: {
+    wearable_armor: 551,
+    wearable_magic_resistance: 551,
+    str: 38,
+    sta: 26,
+  }, // Кожаные перчатки эфенского искателя истины
   49593: { wearable_armor: 551, wearable_magic_resistance: 551, str: 60 }, // Кожаные сапоги эфенского искателя истины
   49594: { wearable_armor: 275, wearable_magic_resistance: 275, str: 30 }, // Кожаные наручи эфенского искателя истины
   49595: { wearable_armor: 275, wearable_magic_resistance: 275, str: 30 }, // Кожаный пояс эфенского искателя истины
-  49596: { wearable_armor: 1517, wearable_magic_resistance: 137, str: 38, sta: 57 }, // Латный шлем эфенского стража святилища
-  49597: { wearable_armor: 2346, wearable_magic_resistance: 414, str: 64, sta: 96 }, // Латный нагрудник эфенского стража святилища
-  49598: { wearable_armor: 1876, wearable_magic_resistance: 331, str: 51, sta: 77 }, // Латные поножи эфенского стража святилища
-  49599: { wearable_armor: 938, wearable_magic_resistance: 165, str: 26, sta: 38 }, // Латные перчатки эфенского стража святилища
-  49600: { wearable_armor: 938.298, wearable_magic_resistance: 165.582, str: 26, sta: 38 }, // Латные сапоги эфенского стража святилища
+  49596: {
+    wearable_armor: 1517,
+    wearable_magic_resistance: 137,
+    str: 38,
+    sta: 57,
+  }, // Латный шлем эфенского стража святилища
+  49597: {
+    wearable_armor: 2346,
+    wearable_magic_resistance: 414,
+    str: 64,
+    sta: 96,
+  }, // Латный нагрудник эфенского стража святилища
+  49598: {
+    wearable_armor: 1876,
+    wearable_magic_resistance: 331,
+    str: 51,
+    sta: 77,
+  }, // Латные поножи эфенского стража святилища
+  49599: {
+    wearable_armor: 938,
+    wearable_magic_resistance: 165,
+    str: 26,
+    sta: 38,
+  }, // Латные перчатки эфенского стража святилища
+  49600: {
+    wearable_armor: 938.298,
+    wearable_magic_resistance: 165.582,
+    str: 26,
+    sta: 38,
+  }, // Латные сапоги эфенского стража святилища
   49601: { wearable_armor: 469, wearable_magic_resistance: 82, sta: 30 }, // Латные наручи эфенского стража святилища
   49602: { wearable_armor: 505, wearable_magic_resistance: 45, sta: 30 }, // Латный пояс эфенского стража святилища
-  49603: { wearable_armor: 413, wearable_magic_resistance: 1241, sta: 38, spi: 57 }, // Капюшон эфенского алтарника
-  49604: { wearable_armor: 689, wearable_magic_resistance: 2069, sta: 64, spi: 96 }, // Одеяние эфенского алтарника
-  49605: { wearable_armor: 551, wearable_magic_resistance: 1655, sta: 51, spi: 77 }, // Матерчатые поножи эфенского алтарника
-  49606: { wearable_armor: 275, wearable_magic_resistance: 827, sta: 26, spi: 38 }, // Матерчатые перчатки эфенского алтарника
-  49607: { wearable_armor: 275, wearable_magic_resistance: 827, sta: 26, spi: 38 }, // Матерчатые сапоги эфенского алтарника
+  49603: {
+    wearable_armor: 413,
+    wearable_magic_resistance: 1241,
+    sta: 38,
+    spi: 57,
+  }, // Капюшон эфенского алтарника
+  49604: {
+    wearable_armor: 689,
+    wearable_magic_resistance: 2069,
+    sta: 64,
+    spi: 96,
+  }, // Одеяние эфенского алтарника
+  49605: {
+    wearable_armor: 551,
+    wearable_magic_resistance: 1655,
+    sta: 51,
+    spi: 77,
+  }, // Матерчатые поножи эфенского алтарника
+  49606: {
+    wearable_armor: 275,
+    wearable_magic_resistance: 827,
+    sta: 26,
+    spi: 38,
+  }, // Матерчатые перчатки эфенского алтарника
+  49607: {
+    wearable_armor: 275,
+    wearable_magic_resistance: 827,
+    sta: 26,
+    spi: 38,
+  }, // Матерчатые сапоги эфенского алтарника
   49608: { wearable_armor: 137, wearable_magic_resistance: 413, spi: 30 }, // Матерчатые наручи эфенского алтарника
   49609: { wearable_armor: 137, wearable_magic_resistance: 413, spi: 30 }, // Матерчатый пояс эфенского алтарника
-  49610: { wearable_armor: 827, wearable_magic_resistance: 827, dex: 57, sta: 38 }, // Треуголка эфенского хранителя тайн
-  49611: { wearable_armor: 1379, wearable_magic_resistance: 1379, dex: 96, sta: 64 }, // Кожаный нагрудник эфенского хранителя тайн
-  49612: { wearable_armor: 1103, wearable_magic_resistance: 1103, dex: 77, sta: 51 }, // Кожаные поножи эфенского хранителя тайн
-  49613: { wearable_armor: 551, wearable_magic_resistance: 551, dex: 38, sta: 26 }, // Кожаные перчатки эфенского хранителя тайн
+  49610: {
+    wearable_armor: 827,
+    wearable_magic_resistance: 827,
+    dex: 57,
+    sta: 38,
+  }, // Треуголка эфенского хранителя тайн
+  49611: {
+    wearable_armor: 1379,
+    wearable_magic_resistance: 1379,
+    dex: 96,
+    sta: 64,
+  }, // Кожаный нагрудник эфенского хранителя тайн
+  49612: {
+    wearable_armor: 1103,
+    wearable_magic_resistance: 1103,
+    dex: 77,
+    sta: 51,
+  }, // Кожаные поножи эфенского хранителя тайн
+  49613: {
+    wearable_armor: 551,
+    wearable_magic_resistance: 551,
+    dex: 38,
+    sta: 26,
+  }, // Кожаные перчатки эфенского хранителя тайн
   49614: { wearable_armor: 551, wearable_magic_resistance: 551, dex: 60 }, // Кожаные сапоги эфенского хранителя тайн
   49615: { wearable_armor: 275, wearable_magic_resistance: 275, dex: 30 }, // Кожаные наручи эфенского хранителя тайн
   49616: { wearable_armor: 275, wearable_magic_resistance: 275, dex: 30 }, // Кожаный пояс эфенского хранителя тайн
@@ -441,76 +771,348 @@ export const ITEM_STATS: Record<number, Record<string, number>> = {
   55098: { wearable_armor: 297, wearable_magic_resistance: 892 }, // Обновленные эфенские матерчатые сапоги
   55099: { wearable_armor: 148, wearable_magic_resistance: 446 }, // Обновленные эфенские матерчатые наручи
   55100: { wearable_armor: 148, wearable_magic_resistance: 446 }, // Обновленный эфенский матерчатый пояс
-  55412: { wearable_armor: 433, wearable_magic_resistance: 1299, sta: 40, int: 60 }, // Капюшон проклятого жреца
-  55413: { wearable_armor: 722, wearable_magic_resistance: 2166, sta: 66, int: 100 }, // Одеяние проклятого жреца
-  55414: { wearable_armor: 577, wearable_magic_resistance: 1733, sta: 53, int: 80 }, // Матерчатые поножи проклятого жреца
-  55415: { wearable_armor: 288, wearable_magic_resistance: 866, sta: 27, int: 40 }, // Матерчатые перчатки проклятого жреца
+  55412: {
+    wearable_armor: 433,
+    wearable_magic_resistance: 1299,
+    sta: 40,
+    int: 60,
+  }, // Капюшон проклятого жреца
+  55413: {
+    wearable_armor: 722,
+    wearable_magic_resistance: 2166,
+    sta: 66,
+    int: 100,
+  }, // Одеяние проклятого жреца
+  55414: {
+    wearable_armor: 577,
+    wearable_magic_resistance: 1733,
+    sta: 53,
+    int: 80,
+  }, // Матерчатые поножи проклятого жреца
+  55415: {
+    wearable_armor: 288,
+    wearable_magic_resistance: 866,
+    sta: 27,
+    int: 40,
+  }, // Матерчатые перчатки проклятого жреца
   55416: { wearable_armor: 288, wearable_magic_resistance: 866, sta: 62 }, // Матерчатые сапоги проклятого жреца
   55417: { wearable_armor: 144, wearable_magic_resistance: 433, sta: 31 }, // Матерчатые наручи проклятого жреца
   55418: { wearable_armor: 144, wearable_magic_resistance: 433, sta: 31 }, // Матерчатый пояс проклятого жреца
-  55419: { wearable_armor: 866, wearable_magic_resistance: 866, str: 60, sta: 40 }, // Треуголка проклятого искателя истины
-  55420: { wearable_armor: 1444, wearable_magic_resistance: 1444, str: 100, sta: 66 }, // Кожаный нагрудник проклятого искателя истины
-  55421: { wearable_armor: 1155, wearable_magic_resistance: 1155, str: 80, sta: 53 }, // Кожаные поножи проклятого искателя истины
-  55422: { wearable_armor: 577, wearable_magic_resistance: 577, str: 40, sta: 27 }, // Кожаные перчатки проклятого искателя истины
+  55419: {
+    wearable_armor: 866,
+    wearable_magic_resistance: 866,
+    str: 60,
+    sta: 40,
+  }, // Треуголка проклятого искателя истины
+  55420: {
+    wearable_armor: 1444,
+    wearable_magic_resistance: 1444,
+    str: 100,
+    sta: 66,
+  }, // Кожаный нагрудник проклятого искателя истины
+  55421: {
+    wearable_armor: 1155,
+    wearable_magic_resistance: 1155,
+    str: 80,
+    sta: 53,
+  }, // Кожаные поножи проклятого искателя истины
+  55422: {
+    wearable_armor: 577,
+    wearable_magic_resistance: 577,
+    str: 40,
+    sta: 27,
+  }, // Кожаные перчатки проклятого искателя истины
   55423: { wearable_armor: 577, wearable_magic_resistance: 577, str: 62 }, // Кожаные сапоги проклятого искателя истины
   55424: { wearable_armor: 288, wearable_magic_resistance: 288, str: 31 }, // Кожаные наручи проклятого искателя истины
   55425: { wearable_armor: 288, wearable_magic_resistance: 288, str: 31 }, // Кожаный пояс проклятого искателя истины
-  55426: { wearable_armor: 1473, wearable_magic_resistance: 260, str: 40, sta: 60 }, // Латный шлем проклятого стража святилища
-  55427: { wearable_armor: 2455, wearable_magic_resistance: 433, str: 66, sta: 100 }, // Латный нагрудник проклятого стража святилища
-  55428: { wearable_armor: 1964, wearable_magic_resistance: 346, str: 53, sta: 80 }, // Латные поножи проклятого стража святилища
-  55429: { wearable_armor: 982, wearable_magic_resistance: 173, str: 27, sta: 40 }, // Латные перчатки проклятого стража святилища
-  55430: { wearable_armor: 982.158, wearable_magic_resistance: 173.322, str: 27, sta: 40 }, // Латные сапоги проклятого стража святилища
+  55426: {
+    wearable_armor: 1473,
+    wearable_magic_resistance: 260,
+    str: 40,
+    sta: 60,
+  }, // Латный шлем проклятого стража святилища
+  55427: {
+    wearable_armor: 2455,
+    wearable_magic_resistance: 433,
+    str: 66,
+    sta: 100,
+  }, // Латный нагрудник проклятого стража святилища
+  55428: {
+    wearable_armor: 1964,
+    wearable_magic_resistance: 346,
+    str: 53,
+    sta: 80,
+  }, // Латные поножи проклятого стража святилища
+  55429: {
+    wearable_armor: 982,
+    wearable_magic_resistance: 173,
+    str: 27,
+    sta: 40,
+  }, // Латные перчатки проклятого стража святилища
+  55430: {
+    wearable_armor: 982.158,
+    wearable_magic_resistance: 173.322,
+    str: 27,
+    sta: 40,
+  }, // Латные сапоги проклятого стража святилища
   55431: { wearable_armor: 491, wearable_magic_resistance: 86, sta: 31 }, // Латные наручи проклятого стража святилища
   55432: { wearable_armor: 491, wearable_magic_resistance: 86, sta: 31 }, // Латный пояс проклятого стража святилища
-  55433: { wearable_armor: 433, wearable_magic_resistance: 1299, sta: 40, spi: 60 }, // Капюшон проклятого алтарника
-  55434: { wearable_armor: 722, wearable_magic_resistance: 2166, sta: 66, spi: 100 }, // Одеяние проклятого алтарника
-  55435: { wearable_armor: 577, wearable_magic_resistance: 1733, sta: 53, spi: 80 }, // Матерчатые поножи проклятого алтарника
-  55436: { wearable_armor: 288, wearable_magic_resistance: 866, sta: 27, spi: 40 }, // Матерчатые перчатки проклятого алтарника
-  55437: { wearable_armor: 288, wearable_magic_resistance: 866, sta: 27, spi: 40 }, // Матерчатые сапоги проклятого алтарника
+  55433: {
+    wearable_armor: 433,
+    wearable_magic_resistance: 1299,
+    sta: 40,
+    spi: 60,
+  }, // Капюшон проклятого алтарника
+  55434: {
+    wearable_armor: 722,
+    wearable_magic_resistance: 2166,
+    sta: 66,
+    spi: 100,
+  }, // Одеяние проклятого алтарника
+  55435: {
+    wearable_armor: 577,
+    wearable_magic_resistance: 1733,
+    sta: 53,
+    spi: 80,
+  }, // Матерчатые поножи проклятого алтарника
+  55436: {
+    wearable_armor: 288,
+    wearable_magic_resistance: 866,
+    sta: 27,
+    spi: 40,
+  }, // Матерчатые перчатки проклятого алтарника
+  55437: {
+    wearable_armor: 288,
+    wearable_magic_resistance: 866,
+    sta: 27,
+    spi: 40,
+  }, // Матерчатые сапоги проклятого алтарника
   55438: { wearable_armor: 144, wearable_magic_resistance: 433, spi: 31 }, // Матерчатые наручи проклятого алтарника
   55439: { wearable_armor: 144, wearable_magic_resistance: 433, spi: 31 }, // Матерчатый пояс проклятого алтарника
-  55440: { wearable_armor: 866, wearable_magic_resistance: 866, dex: 60, sta: 40 }, // Треуголка проклятого хранителя тайн
-  55441: { wearable_armor: 1444, wearable_magic_resistance: 1444, dex: 100, sta: 66 }, // Кожаный нагрудник проклятого хранителя тайн
-  55442: { wearable_armor: 1155, wearable_magic_resistance: 1155, dex: 80, sta: 53 }, // Кожаные поножи проклятого хранителя тайн
-  55443: { wearable_armor: 577, wearable_magic_resistance: 577, dex: 40, sta: 27 }, // Кожаные перчатки проклятого хранителя тайн
+  55440: {
+    wearable_armor: 866,
+    wearable_magic_resistance: 866,
+    dex: 60,
+    sta: 40,
+  }, // Треуголка проклятого хранителя тайн
+  55441: {
+    wearable_armor: 1444,
+    wearable_magic_resistance: 1444,
+    dex: 100,
+    sta: 66,
+  }, // Кожаный нагрудник проклятого хранителя тайн
+  55442: {
+    wearable_armor: 1155,
+    wearable_magic_resistance: 1155,
+    dex: 80,
+    sta: 53,
+  }, // Кожаные поножи проклятого хранителя тайн
+  55443: {
+    wearable_armor: 577,
+    wearable_magic_resistance: 577,
+    dex: 40,
+    sta: 27,
+  }, // Кожаные перчатки проклятого хранителя тайн
   55444: { wearable_armor: 577, wearable_magic_resistance: 577, dex: 62 }, // Кожаные сапоги проклятого хранителя тайн
   55445: { wearable_armor: 288, wearable_magic_resistance: 288, dex: 31 }, // Кожаные наручи проклятого хранителя тайн
   55446: { wearable_armor: 288, wearable_magic_resistance: 288, dex: 31 }, // Кожаный пояс проклятого хранителя тайн
-  900004: { wearable_armor: 452.57, wearable_magic_resistance: 1358.1, sta: 41.43, spi: 62.38 }, // Капюшон возрожденного алтарника
-  900009: { wearable_armor: 754.26, wearable_magic_resistance: 2263.53, sta: 69.05, spi: 103.81 }, // Одеяние возрожденного алтарника
-  900014: { wearable_armor: 150.6, wearable_magic_resistance: 452.57, spi: 32.38 }, // Матерчатый пояс возрожденного алтарника
-  900019: { wearable_armor: 150.83, wearable_magic_resistance: 452.48, spi: 32.38 }, // Матерчатые наручи возрожденного алтарника
-  900024: { wearable_armor: 301.46, wearable_magic_resistance: 905.15, sta: 27.62, spi: 41.43 }, // Матерчатые перчатки возрожденного алтарника
-  900029: { wearable_armor: 603.56, wearable_magic_resistance: 1810.67, sta: 55.24, spi: 82.86 }, // Матерчатые поножи возрожденного алтарника
-  900034: { wearable_armor: 301.78, wearable_magic_resistance: 905.34, sta: 27.62, spi: 41.43 }, // Матерчатые сапоги возрожденного алтарника
-  900005: { wearable_armor: 905.34, wearable_magic_resistance: 905.34, dex: 62.38, sta: 41.43 }, // Треуголка возрожденного хранителя тайн
-  900010: { wearable_armor: 1508.89, wearable_magic_resistance: 1508.89, dex: 103.81, sta: 69.05 }, // Кожаный нагрудник возрожденного хранителя тайн
-  900015: { wearable_armor: 301.59, wearable_magic_resistance: 301.59, dex: 32.38 }, // Кожаный пояс возрожденного хранителя тайн
-  900020: { wearable_armor: 301.65, wearable_magic_resistance: 301.65, dex: 32.38 }, // Кожаные наручи возрожденного хранителя тайн
-  900025: { wearable_armor: 603.3, wearable_magic_resistance: 603.3, dex: 41.43, sta: 27.62 }, // Кожаные перчатки возрожденного хранителя тайн
-  900030: { wearable_armor: 1207.12, wearable_magic_resistance: 1207.12, dex: 82.86, sta: 55.24 }, // Кожаные поножи возрожденного хранителя тайн
-  900035: { wearable_armor: 603.3, wearable_magic_resistance: 603.3, dex: 64.76 }, // Кожаные сапоги возрожденного хранителя тайн
-  900002: { wearable_armor: 905.47, wearable_magic_resistance: 905.47, str: 62.38, sta: 41.43 }, // Треуголка возрожденного искателя истины
-  900007: { wearable_armor: 1508.77, wearable_magic_resistance: 1508.77, str: 103.81, sta: 69.05 }, // Кожаный нагрудник возрожденного искателя истины
-  900012: { wearable_armor: 301.59, wearable_magic_resistance: 301.59, str: 32.38 }, // Кожаный пояс возрожденного искателя истины
-  900017: { wearable_armor: 301.65, wearable_magic_resistance: 301.65, str: 32.38 }, // Кожаные наручи возрожденного искателя истины
-  900022: { wearable_armor: 603.3, wearable_magic_resistance: 603.3, str: 41.43, sta: 27.62 }, // Кожаные перчатки возрожденного искателя истины
-  900027: { wearable_armor: 1207.12, wearable_magic_resistance: 1207.12, str: 82.86, sta: 55.24 }, // Кожаные поножи возрожденного искателя истины
-  900032: { wearable_armor: 603.43, wearable_magic_resistance: 603.43, str: 64.76 }, // Кожаные сапоги возрожденного искателя истины
-  900001: { wearable_armor: 452.67, wearable_magic_resistance: 1358.01, sta: 41.43, int: 62.38 }, // Капюшон возрожденного жреца
-  900006: { wearable_armor: 754.19, wearable_magic_resistance: 2263.35, sta: 69.05, int: 103.81 }, // Одеяние возрожденного жреца
-  900011: { wearable_armor: 150.57, wearable_magic_resistance: 452.74, sta: 32.41 }, // Матерчатый пояс возрожденного жреца
-  900016: { wearable_armor: 150.57, wearable_magic_resistance: 452.74, sta: 32.41 }, // Матерчатые наручи возрожденного жреца
-  900021: { wearable_armor: 301.52, wearable_magic_resistance: 905.34, sta: 27.62, int: 41.43 }, // Матерчатые перчатки возрожденного жреца
-  900026: { wearable_armor: 603.3, wearable_magic_resistance: 1810.68, sta: 55.24, int: 82.86 }, // Матерчатые поножи возрожденного жреца
-  900031: { wearable_armor: 301.13, wearable_magic_resistance: 905.49, sta: 64.83 }, // Матерчатые сапоги возрожденного жреца
-  900003: { wearable_armor: 1540.15, wearable_magic_resistance: 271.86, str: 41.82, sta: 62.74 }, // Латный шлем возрожденного стража святилища
-  900008: { wearable_armor: 2566.95, wearable_magic_resistance: 452.74, str: 69.01, sta: 104.56 }, // Латный нагрудник возрожденного стража святилища
-  900013: { wearable_armor: 513.39, wearable_magic_resistance: 89.92, sta: 32.41 }, // Латный пояс возрожденного стража святилища
-  900018: { wearable_armor: 513.39, wearable_magic_resistance: 89.92, sta: 32.41 }, // Латные наручи возрожденного стража святилища
-  900023: { wearable_armor: 1026.8, wearable_magic_resistance: 180.89, str: 28.23, sta: 41.82 }, // Латные перчатки возрожденного стража святилища
-  900028: { wearable_armor: 2053.58, wearable_magic_resistance: 361.78, str: 55.42, sta: 83.65 }, // Латные поножи возрожденного стража святилища
-  900033: { wearable_armor: 1026.94, wearable_magic_resistance: 181.23, str: 28.23, sta: 41.82 }, // Латные сапоги возрожденного стража святилища
+  900004: {
+    wearable_armor: 452.57,
+    wearable_magic_resistance: 1358.1,
+    sta: 41.43,
+    spi: 62.38,
+  }, // Капюшон возрожденного алтарника
+  900009: {
+    wearable_armor: 754.26,
+    wearable_magic_resistance: 2263.53,
+    sta: 69.05,
+    spi: 103.81,
+  }, // Одеяние возрожденного алтарника
+  900014: {
+    wearable_armor: 150.6,
+    wearable_magic_resistance: 452.57,
+    spi: 32.38,
+  }, // Матерчатый пояс возрожденного алтарника
+  900019: {
+    wearable_armor: 150.83,
+    wearable_magic_resistance: 452.48,
+    spi: 32.38,
+  }, // Матерчатые наручи возрожденного алтарника
+  900024: {
+    wearable_armor: 301.46,
+    wearable_magic_resistance: 905.15,
+    sta: 27.62,
+    spi: 41.43,
+  }, // Матерчатые перчатки возрожденного алтарника
+  900029: {
+    wearable_armor: 603.56,
+    wearable_magic_resistance: 1810.67,
+    sta: 55.24,
+    spi: 82.86,
+  }, // Матерчатые поножи возрожденного алтарника
+  900034: {
+    wearable_armor: 301.78,
+    wearable_magic_resistance: 905.34,
+    sta: 27.62,
+    spi: 41.43,
+  }, // Матерчатые сапоги возрожденного алтарника
+  900005: {
+    wearable_armor: 905.34,
+    wearable_magic_resistance: 905.34,
+    dex: 62.38,
+    sta: 41.43,
+  }, // Треуголка возрожденного хранителя тайн
+  900010: {
+    wearable_armor: 1508.89,
+    wearable_magic_resistance: 1508.89,
+    dex: 103.81,
+    sta: 69.05,
+  }, // Кожаный нагрудник возрожденного хранителя тайн
+  900015: {
+    wearable_armor: 301.59,
+    wearable_magic_resistance: 301.59,
+    dex: 32.38,
+  }, // Кожаный пояс возрожденного хранителя тайн
+  900020: {
+    wearable_armor: 301.65,
+    wearable_magic_resistance: 301.65,
+    dex: 32.38,
+  }, // Кожаные наручи возрожденного хранителя тайн
+  900025: {
+    wearable_armor: 603.3,
+    wearable_magic_resistance: 603.3,
+    dex: 41.43,
+    sta: 27.62,
+  }, // Кожаные перчатки возрожденного хранителя тайн
+  900030: {
+    wearable_armor: 1207.12,
+    wearable_magic_resistance: 1207.12,
+    dex: 82.86,
+    sta: 55.24,
+  }, // Кожаные поножи возрожденного хранителя тайн
+  900035: {
+    wearable_armor: 603.3,
+    wearable_magic_resistance: 603.3,
+    dex: 64.76,
+  }, // Кожаные сапоги возрожденного хранителя тайн
+  900002: {
+    wearable_armor: 905.47,
+    wearable_magic_resistance: 905.47,
+    str: 62.38,
+    sta: 41.43,
+  }, // Треуголка возрожденного искателя истины
+  900007: {
+    wearable_armor: 1508.77,
+    wearable_magic_resistance: 1508.77,
+    str: 103.81,
+    sta: 69.05,
+  }, // Кожаный нагрудник возрожденного искателя истины
+  900012: {
+    wearable_armor: 301.59,
+    wearable_magic_resistance: 301.59,
+    str: 32.38,
+  }, // Кожаный пояс возрожденного искателя истины
+  900017: {
+    wearable_armor: 301.65,
+    wearable_magic_resistance: 301.65,
+    str: 32.38,
+  }, // Кожаные наручи возрожденного искателя истины
+  900022: {
+    wearable_armor: 603.3,
+    wearable_magic_resistance: 603.3,
+    str: 41.43,
+    sta: 27.62,
+  }, // Кожаные перчатки возрожденного искателя истины
+  900027: {
+    wearable_armor: 1207.12,
+    wearable_magic_resistance: 1207.12,
+    str: 82.86,
+    sta: 55.24,
+  }, // Кожаные поножи возрожденного искателя истины
+  900032: {
+    wearable_armor: 603.43,
+    wearable_magic_resistance: 603.43,
+    str: 64.76,
+  }, // Кожаные сапоги возрожденного искателя истины
+  900001: {
+    wearable_armor: 452.67,
+    wearable_magic_resistance: 1358.01,
+    sta: 41.43,
+    int: 62.38,
+  }, // Капюшон возрожденного жреца
+  900006: {
+    wearable_armor: 754.19,
+    wearable_magic_resistance: 2263.35,
+    sta: 69.05,
+    int: 103.81,
+  }, // Одеяние возрожденного жреца
+  900011: {
+    wearable_armor: 150.57,
+    wearable_magic_resistance: 452.74,
+    sta: 32.41,
+  }, // Матерчатый пояс возрожденного жреца
+  900016: {
+    wearable_armor: 150.57,
+    wearable_magic_resistance: 452.74,
+    sta: 32.41,
+  }, // Матерчатые наручи возрожденного жреца
+  900021: {
+    wearable_armor: 301.52,
+    wearable_magic_resistance: 905.34,
+    sta: 27.62,
+    int: 41.43,
+  }, // Матерчатые перчатки возрожденного жреца
+  900026: {
+    wearable_armor: 603.3,
+    wearable_magic_resistance: 1810.68,
+    sta: 55.24,
+    int: 82.86,
+  }, // Матерчатые поножи возрожденного жреца
+  900031: {
+    wearable_armor: 301.13,
+    wearable_magic_resistance: 905.49,
+    sta: 64.83,
+  }, // Матерчатые сапоги возрожденного жреца
+  900003: {
+    wearable_armor: 1540.15,
+    wearable_magic_resistance: 271.86,
+    str: 41.82,
+    sta: 62.74,
+  }, // Латный шлем возрожденного стража святилища
+  900008: {
+    wearable_armor: 2566.95,
+    wearable_magic_resistance: 452.74,
+    str: 69.01,
+    sta: 104.56,
+  }, // Латный нагрудник возрожденного стража святилища
+  900013: {
+    wearable_armor: 513.39,
+    wearable_magic_resistance: 89.92,
+    sta: 32.41,
+  }, // Латный пояс возрожденного стража святилища
+  900018: {
+    wearable_armor: 513.39,
+    wearable_magic_resistance: 89.92,
+    sta: 32.41,
+  }, // Латные наручи возрожденного стража святилища
+  900023: {
+    wearable_armor: 1026.8,
+    wearable_magic_resistance: 180.89,
+    str: 28.23,
+    sta: 41.82,
+  }, // Латные перчатки возрожденного стража святилища
+  900028: {
+    wearable_armor: 2053.58,
+    wearable_magic_resistance: 361.78,
+    str: 55.42,
+    sta: 83.65,
+  }, // Латные поножи возрожденного стража святилища
+  900033: {
+    wearable_armor: 1026.94,
+    wearable_magic_resistance: 181.23,
+    str: 28.23,
+    sta: 41.82,
+  }, // Латные сапоги возрожденного стража святилища
   18661: { weapon_dps: 201.2, str: 27.22, sta: 18.31 }, // Нарвиг, огненный клинок Морфеоса
   25972: { weapon_dps: 249.9, weapon_magic_power: 308.7, int: 52.76 }, // Ро'кана, Безумие морей
   28896: { weapon_dps: 285.4, dex: 56.56 }, // Алый лук из драконьей кости
@@ -521,7 +1123,12 @@ export const ITEM_STATS: Record<number, Record<string, number>> = {
   45300: { wearable_armor: 1465.95, sta: 70.81 }, // Драго'ран, Гнев Гартарейн
   45301: { weapon_dps: 462.9, dex: 70.81 }, // Иг'нис, Пламя возмездия
   45302: { weapon_dps: 762.4, str: 75.39, sta: 37.94 }, // Мор'гур, Смерть драконов
-  45303: { weapon_dps: 626.3, weapon_magic_power: 735.2, sta: 37.94, int: 75.39 }, // Вул'данор, Клеймитель драконов
+  45303: {
+    weapon_dps: 626.3,
+    weapon_magic_power: 735.2,
+    sta: 37.94,
+    int: 75.39,
+  }, // Вул'данор, Клеймитель драконов
   45321: { weapon_dps: 304 }, // Рамианский кинжал
   45322: { weapon_dps: 304 }, // Рамианский меч
   45323: { weapon_dps: 425.6 }, // Рамианский клеймор
@@ -613,7 +1220,12 @@ export const ITEM_STATS: Record<number, Record<string, number>> = {
   49366: { wearable_armor: 1509.15, sta: 72.72 }, // Драго'ран, Пробужденная ярость
   49367: { weapon_dps: 493.1, dex: 72.72 }, // Иг'нис, Пробужденное пламя
   49368: { weapon_dps: 812.2, str: 77.41, sta: 38.96 }, // Мор'гур, Пробужденная смерть
-  49369: { weapon_dps: 667.1, weapon_magic_power: 783.1, sta: 38.96, int: 77.41 }, // Вул'данор, Пробужденная тьма
+  49369: {
+    weapon_dps: 667.1,
+    weapon_magic_power: 783.1,
+    sta: 38.96,
+    int: 77.41,
+  }, // Вул'данор, Пробужденная тьма
   49370: { weapon_dps: 493.1, weapon_heal_power: 609, spi: 72.72 }, // Дра'кордис, Пробужденное безмолвие
   49577: { weapon_dps: 551.5, weapon_heal_power: 647, sta: 32.38, spi: 74.88 }, // Позолоченная палица хранителя священной рощи
   49578: { weapon_dps: 479.6, str: 43, sta: 28.84 }, // Позолоченная алебарда повелителя призраков
@@ -621,12 +1233,22 @@ export const ITEM_STATS: Record<number, Record<string, number>> = {
   50276: { weapon_dps: 762.4, str: 75.39, sta: 37.94 }, // Ишхар, грань измерений
   50277: { weapon_dps: 544.6, str: 25.46, sta: 50.43 }, // Ташш, змеиное жало
   50278: { weapon_dps: 762.4, str: 75.39, sta: 37.94 }, // Гирра, пробивающий брешь
-  50279: { weapon_dps: 462.9, weapon_magic_power: 571.8, sta: 25.46, int: 50.43 }, // Нирах, искушающий
+  50279: {
+    weapon_dps: 462.9,
+    weapon_magic_power: 571.8,
+    sta: 25.46,
+    int: 50.43,
+  }, // Нирах, искушающий
   50280: { wearable_magic_resistance: 1465.54, sta: 70.81 }, // Нерхал, бронзовая чешуя
   50330: { weapon_dps: 812.2, str: 77.41, sta: 38.96 }, // Укрепленный Ишхар, грань измерений
   50331: { weapon_dps: 580.1, str: 26.14, sta: 51.77 }, // Закаленный Ташш, змеиное жало
   50332: { weapon_dps: 812.2, str: 77.41, sta: 38.96 }, // Закаленный Гирра, пробивающий брешь
-  50333: { weapon_dps: 493.1, weapon_magic_power: 609.1, sta: 26.14, int: 51.77 }, // Укрепленный Нирах, искушающий
+  50333: {
+    weapon_dps: 493.1,
+    weapon_magic_power: 609.1,
+    sta: 26.14,
+    int: 51.77,
+  }, // Укрепленный Нирах, искушающий
   50334: { wearable_magic_resistance: 1508.73, sta: 72.72 }, // Укрепленный Нерхал, бронзовая чешуя
   50340: { weapon_dps: 479.6, str: 43, sta: 28.84 }, // Нарвиг, повелевающий пламенем
   50836: { weapon_dps: 258.4 }, // Рамианская винтовка
@@ -775,7 +1397,7 @@ export const ITEM_STATS: Record<number, Record<string, number>> = {
   35410: { int: 11.87, spi: 8.08 }, // Иферийское ожерелье магистра
   40622: { str: 20.66, dex: 13.94, sta: 34.1 }, // Лютня Солнечной Башни
   40624: { sta: 27.38, int: 22.9, spi: 18.42 }, // Кларнет Тростникового Короля
-  // Ожерелья доблести 
+  // Ожерелья доблести
   29731: { damage_taken_reduction: -0.3, flat_sta: 10 }, // Ожерелье доблести I ранга
   29743: { damage_taken_reduction: -0.6, flat_sta: 12 }, // Ожерелье доблести II ранга
   29744: { damage_taken_reduction: -0.9, flat_sta: 14 }, // Ожерелье доблести III ранга
@@ -786,17 +1408,57 @@ export const ITEM_STATS: Record<number, Record<string, number>> = {
   29749: { damage_taken_reduction: -4.4, flat_sta: 40 }, // Ожерелье доблести воина VIII ранга
   29750: { damage_taken_reduction: -4.7, flat_sta: 52 }, // Ожерелье доблести воина IX ранга
   29751: { damage_taken_reduction: -6, flat_sta: 64 }, // Ожерелье доблести воина X ранга
-  37908: { damage_taken_reduction: -6, flat_sta: 76, pvp_resist: 50, tactical_readiness: 60 }, // Ожерелье доблести воина XI ранга
-  37909: { damage_taken_reduction: -6, flat_sta: 88, pvp_resist: 100, tactical_readiness: 120 }, // Ожерелье доблести воина XII ранга
-  40366: { damage_taken_reduction: -6, flat_sta: 100, pvp_resist: 150, tactical_readiness: 180 }, // Ожерелье доблести воина XIII ранга
-  44634: { damage_taken_reduction: -6, flat_sta: 112, pvp_resist: 200, tactical_readiness: 240 }, // Ожерелье доблести воина XIV ранга
+  37908: {
+    damage_taken_reduction: -6,
+    flat_sta: 76,
+    pvp_resist: 50,
+    tactical_readiness: 60,
+  }, // Ожерелье доблести воина XI ранга
+  37909: {
+    damage_taken_reduction: -6,
+    flat_sta: 88,
+    pvp_resist: 100,
+    tactical_readiness: 120,
+  }, // Ожерелье доблести воина XII ранга
+  40366: {
+    damage_taken_reduction: -6,
+    flat_sta: 100,
+    pvp_resist: 150,
+    tactical_readiness: 180,
+  }, // Ожерелье доблести воина XIII ранга
+  44634: {
+    damage_taken_reduction: -6,
+    flat_sta: 112,
+    pvp_resist: 200,
+    tactical_readiness: 240,
+  }, // Ожерелье доблести воина XIV ранга
   40477: { skill_speed: -4.1, flat_spi: 28 }, // Ожерелье доблести целителя VII ранга
   40478: { skill_speed: -4.4, flat_spi: 40 }, // Ожерелье доблести целителя VIII ранга
   40479: { skill_speed: -4.7, flat_spi: 52 }, // Ожерелье доблести целителя IX ранга
   40480: { skill_speed: -6, flat_spi: 64 }, // Ожерелье доблести целителя X ранга
-  40481: { skill_speed: -6, flat_spi: 76, pvp_resist: 50, crit_damage_resist: 60 }, // Ожерелье доблести целителя XI ранга
-  40482: { skill_speed: -6, flat_spi: 88, pvp_resist: 75, crit_damage_resist: 120 }, // Ожерелье доблести целителя XII ранга
-  40483: { skill_speed: -6, flat_spi: 100, pvp_resist: 100, crit_damage_resist: 180 }, // Ожерелье доблести целителя XIII ранга
-  44635: { skill_speed: -6, flat_spi: 112, pvp_resist: 125, crit_damage_resist: 240 }, // Ожерелье доблести целителя XIV ранга
+  40481: {
+    skill_speed: -6,
+    flat_spi: 76,
+    pvp_resist: 50,
+    crit_damage_resist: 60,
+  }, // Ожерелье доблести целителя XI ранга
+  40482: {
+    skill_speed: -6,
+    flat_spi: 88,
+    pvp_resist: 75,
+    crit_damage_resist: 120,
+  }, // Ожерелье доблести целителя XII ранга
+  40483: {
+    skill_speed: -6,
+    flat_spi: 100,
+    pvp_resist: 100,
+    crit_damage_resist: 180,
+  }, // Ожерелье доблести целителя XIII ранга
+  44635: {
+    skill_speed: -6,
+    flat_spi: 112,
+    pvp_resist: 125,
+    crit_damage_resist: 240,
+  }, // Ожерелье доблести целителя XIV ранга
   48628: { flat_sta: 60 }, // Амальгамный перстень говорящего с духами (фикс. характеристика, + 3 из 9 синтезируемых, см. ringSynthesis.ts)
 };

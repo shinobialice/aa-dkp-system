@@ -1,12 +1,36 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import type { UserRow } from "@/shared/lib/dbTypes";
 import { grantSalaryAfterProbation } from "@/shared/lib/grantSalaryAfterProbation";
 
-const getUser = async (userId: number) => {
+export type ProfileUser = Pick<
+  UserRow,
+  | "id"
+  | "username"
+  | "class"
+  | "class_gear_score"
+  | "secondary_class"
+  | "secondary_class_gear_score"
+  | "tertiary_class"
+  | "tertiary_class_gear_score"
+  | "vk_id"
+  | "vk_name"
+  | "google_id"
+  | "mail_id"
+  | "active"
+  | "is_eligible_for_salary"
+  | "probation_bypass"
+  | "joined_at"
+  | "avatar_url"
+  | "character_level"
+  | "character_portrait_url"
+>;
+
+const getUser = async (userId: number): Promise<ProfileUser | null> => {
   await grantSalaryAfterProbation();
   try {
-    const [user] = await sql<any[]>`
+    const [user] = await sql<ProfileUser[]>`
       SELECT
         id,
         username,

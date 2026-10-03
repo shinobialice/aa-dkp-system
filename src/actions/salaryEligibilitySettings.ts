@@ -1,9 +1,10 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import type { SalaryEligibilitySettingsRow } from "@/shared/lib/dbTypes";
 import ensurePrivilieges from "./ensurePrivilieges";
 import { revalidatePath } from "next/cache";
-import { triggerFinanceRecalcForCurrentMonth } from "./recalculateFinanceForMonth";
+import { triggerFinanceRecalcForCurrentMonth } from "@/server/finance/recalc";
 
 export type SalaryEligibilitySettings = {
   primeEnabled: boolean;
@@ -26,9 +27,9 @@ const DEFAULT_SETTINGS: SalaryEligibilitySettings = {
 };
 
 export async function getSalaryEligibilitySettings(): Promise<SalaryEligibilitySettings> {
-  let data;
+  let data: SalaryEligibilitySettingsRow | undefined;
   try {
-    [data] = await sql<any[]>`
+    [data] = await sql<SalaryEligibilitySettingsRow[]>`
       SELECT * FROM salary_eligibility_settings WHERE id = 1
     `;
   } catch (error) {
@@ -54,7 +55,7 @@ export async function updateSalaryEligibilitySettings(
   await ensurePrivilieges(["Администратор"]);
 
   try {
-    await sql<any[]>`
+    await sql`
       INSERT INTO salary_eligibility_settings
         (id, prime_enabled, prime_threshold_percent, points_enabled,
          points_threshold_percent, dv_bypass_enabled, gs_enabled, updated_at)

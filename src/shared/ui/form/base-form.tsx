@@ -1,12 +1,12 @@
 "use client";
 
 import * as React from "react";
-import * as LabelPrimitive from "@radix-ui/react-label";
+import type * as LabelPrimitive from "@radix-ui/react-label";
 import { Slot } from "@radix-ui/react-slot";
 import {
   Controller,
   FormProvider,
-  FormProviderProps,
+  type FormProviderProps,
   useFormContext,
   useFormState,
   type ControllerProps,
@@ -17,7 +17,7 @@ import {
 import { cn } from "@/shared/lib";
 import { Label } from "@/shared/ui";
 
-interface FormProps extends FormProviderProps {}
+type FormProps = {} & FormProviderProps;
 
 const Form = FormProvider;
 

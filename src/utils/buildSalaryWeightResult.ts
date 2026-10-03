@@ -1,7 +1,7 @@
 import calculateGuildTenureBonus from "./calculateGuildTenureBonus";
 import calculateRequiredGearScore from "./calculateRequiredGearScore";
 import calculateSalaryWeight from "./calculateSalaryWeight";
-import type { SalaryEligibilityContext } from "@/actions/financeActions";
+import type { SalaryEligibilityContext } from "@/server/finance/salaryContext";
 
 export type SalaryWeightUser = {
   id: number;
@@ -14,7 +14,11 @@ export type SalaryWeightUser = {
 };
 
 type SalaryWeightUserData = {
-  attendance: { primePercent: number; aglPercent: number; totalPercent: number };
+  attendance: {
+    primePercent: number;
+    aglPercent: number;
+    totalPercent: number;
+  };
   tags: string[];
   penaltyPoints: number;
   individualBonusPercent: number;
@@ -38,7 +42,11 @@ export function buildSalaryWeightResult(
   const { settings } = context;
   const isTwoHanded = tags.includes("Двурук");
   const requiredGearScore = settings.gsEnabled
-    ? calculateRequiredGearScore(user.class, context.averageGuildGS, isTwoHanded)
+    ? calculateRequiredGearScore(
+        user.class,
+        context.averageGuildGS,
+        isTwoHanded,
+      )
     : null;
 
   const weightResult = calculateSalaryWeight({

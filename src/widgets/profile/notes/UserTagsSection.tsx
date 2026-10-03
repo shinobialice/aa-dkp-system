@@ -1,11 +1,11 @@
 "use client";
+import type { ProfileUser } from "@/actions/getUser";
 
 import { useEffect, useState } from "react";
 import { Trash2, CirclePlus } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/shared/ui";
 import { Button } from "@/shared/ui";
-import { Switch } from "@/shared/ui";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -20,56 +20,19 @@ import { updateUser } from "@/actions/updateUser";
 import { deleteUserTag, addUserTag } from "@/actions/userTagsActions";
 import { getSalaryEligibilitySettings } from "@/actions/salaryEligibilitySettings";
 import getSalaryEligibilityErrors from "@/utils/getSalaryEligibilityErrors";
-
-type UserType = {
-  id: number;
-  active: boolean;
-  is_eligible_for_salary: boolean;
-  probation_bypass: boolean;
-  joined_at: string | Date;
-};
-
-const badgeColors: Record<string, string> = {
-  Активен: "rgb(47, 158, 98)",
-  "Получает зарплату": "rgb(23, 133, 115)",
-  "Испыталка не учитывается": "rgb(161, 98, 7)",
-  Администратор: "rgb(215, 100, 168)",
-  Модератор: "rgb(58, 76, 92)",
-  Секретутка: "rgb(79, 70, 229)",
-  Сноровка: "rgb(90, 54, 165)",
-  Крит: "rgb(215, 100, 168)",
-  ДВ: "rgb(232, 157, 53)",
-  Двурук: "rgb(0, 148, 168)",
-  Каст: "rgb(157, 41, 41)",
-  Деф: "rgb(40, 111, 180)",
-  АФК: "rgb(120, 120, 120)",
-};
-
-const allPossibleTags = [
-  "Администратор",
-  "Модератор",
-  "Секретутка",
-  "Сноровка",
-  "Крит",
-  "ДВ",
-  "Двурук",
-  "Каст",
-  "Деф",
-  "АФК",
-];
+import { badgeColors, allPossibleTags } from "./tagStyles";
+import FlagRow from "./FlagRow";
 
 export function UserTagsSection({
   user,
-  onUpdate,
   tags,
   setTags,
   setUser,
   averageGuildGS,
   isAdmin,
 }: {
-  user: UserType;
-  setUser: (user: UserType) => void;
-  onUpdate: () => void;
+  user: ProfileUser;
+  setUser: (user: ProfileUser) => void;
   tags: { id: number; tag: string }[];
   setTags: (tags: { id: number; tag: string }[]) => void;
   averageGuildGS: number;
@@ -83,28 +46,19 @@ export function UserTagsSection({
     getSalaryEligibilitySettings().then((s) => setGsEnabled(s.gsEnabled));
   }, []);
 
-  async function toggleActive(newValue: boolean) {
+  async function updateFlag(
+    field: "active" | "is_eligible_for_salary" | "probation_bypass",
+    value: boolean,
+  ) {
     setUpdating(true);
-    await updateUser(user.id, { active: newValue });
-    setUser({ ...user, active: newValue });
-    setUpdating(false);
-    onUpdate();
-  }
-
-  async function applySalaryToggle(newValue: boolean) {
-    setUpdating(true);
-    await updateUser(user.id, { is_eligible_for_salary: newValue });
-    setUser({ ...user, is_eligible_for_salary: newValue });
-    setUpdating(false);
-    onUpdate();
-  }
-
-  async function toggleProbationBypass(newValue: boolean) {
-    setUpdating(true);
-    await updateUser(user.id, { probation_bypass: newValue });
-    setUser({ ...user, probation_bypass: newValue });
-    setUpdating(false);
-    onUpdate();
+    try {
+      await updateUser(user.id, { [field]: value });
+      setUser({ ...user, [field]: value });
+    } catch {
+      toast.error("Не удалось сохранить");
+    } finally {
+      setUpdating(false);
+    }
   }
 
   async function toggleSalary(newValue: boolean) {
@@ -133,7 +87,7 @@ export function UserTagsSection({
       }
     }
 
-    await applySalaryToggle(newValue);
+    await updateFlag("is_eligible_for_salary", newValue);
   }
 
   async function handleDeleteTag(tagId: number) {
@@ -147,7 +101,7 @@ export function UserTagsSection({
       return;
     }
     const prevTags = tags;
-    setTags([...tags, { id: -Date.now(), tag }]);
+    setTags([...tags, { id: -(tags.length + 1), tag }]);
     try {
       const newTag = await addUserTag(user.id, tag);
       setTags([...prevTags, newTag]);
@@ -163,54 +117,27 @@ export function UserTagsSection({
 
   return (
     <div className="flex flex-col divide-y">
-      <div className="flex justify-between items-center py-4">
-        <Badge
-          className="text-background"
-          style={{ backgroundColor: badgeColors["Активен"] }}
-        >
-          Активен
-        </Badge>
-        {isAdmin && (
-          <Switch
-            className="cursor-pointer"
-            checked={user.active}
-            onCheckedChange={toggleActive}
-            disabled={updating}
-          />
-        )}
-      </div>
-      <div className="flex justify-between items-center py-4">
-        <Badge
-          className="text-background"
-          style={{ backgroundColor: badgeColors["Получает зарплату"] }}
-        >
-          Получает зарплату
-        </Badge>
-        {isAdmin && (
-          <Switch
-            checked={user.is_eligible_for_salary}
-            onCheckedChange={toggleSalary}
-            disabled={updating}
-            className="cursor-pointer"
-          />
-        )}
-      </div>
-      <div className="flex justify-between items-center py-4">
-        <Badge
-          className="text-background"
-          style={{ backgroundColor: badgeColors["Испыталка не учитывается"] }}
-        >
-          Испыталка не учитывается
-        </Badge>
-        {isAdmin && (
-          <Switch
-            checked={user.probation_bypass}
-            onCheckedChange={toggleProbationBypass}
-            disabled={updating}
-            className="cursor-pointer"
-          />
-        )}
-      </div>
+      <FlagRow
+        label="Активен"
+        checked={user.active}
+        editable={isAdmin}
+        disabled={updating}
+        onChange={(value) => updateFlag("active", value)}
+      />
+      <FlagRow
+        label="Получает зарплату"
+        checked={user.is_eligible_for_salary}
+        editable={isAdmin}
+        disabled={updating}
+        onChange={toggleSalary}
+      />
+      <FlagRow
+        label="Испыталка не учитывается"
+        checked={user.probation_bypass}
+        editable={isAdmin}
+        disabled={updating}
+        onChange={(value) => updateFlag("probation_bypass", value)}
+      />
 
       {tags.map((tag) => (
         <div key={tag.id} className="flex justify-between items-center py-2">
@@ -268,7 +195,7 @@ export function UserTagsSection({
             <AlertDialogAction
               onClick={async () => {
                 setGsWarning(null);
-                await applySalaryToggle(true);
+                await updateFlag("is_eligible_for_salary", true);
               }}
             >
               Всё равно выдать

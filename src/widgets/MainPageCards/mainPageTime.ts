@@ -1,15 +1,9 @@
+import { formatMoscowHM } from "@/shared/lib/format";
+
 const MOSCOW = "Europe/Moscow";
 
 function moscowDayKey(date: Date) {
   return date.toLocaleDateString("ru-RU", { timeZone: MOSCOW });
-}
-
-export function formatMoscowHM(date: Date) {
-  return date.toLocaleTimeString("ru-RU", {
-    timeZone: MOSCOW,
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 }
 
 export function formatMoscowShort(date: Date, now: Date = new Date()) {

@@ -1,35 +1,56 @@
 import sql from "@/shared/lib/db";
+import type { UserRow, UserTagsRow } from "@/shared/lib/dbTypes";
+import { getMoscowYearMonth } from "@/utils/getMoscowISOString";
 import ensurePrivilieges from "@/actions/ensurePrivilieges";
 import AfkMembersTable from "@/widgets/AfkMembersTable";
 import { getCurrentMonthSalaries } from "@/actions/getCurrentMonthSalaries";
 import { getSalaryReasons } from "@/actions/getSalaryReasons";
 
-const AfkPage = async () => {
+type AfkUser = Pick<
+  UserRow,
+  | "id"
+  | "username"
+  | "avatar_url"
+  | "vk_name"
+  | "class"
+  | "class_gear_score"
+  | "joined_at"
+  | "active"
+  | "is_eligible_for_salary"
+  | "probation_bypass"
+>;
+
+type InactiveRow = AfkUser & Pick<UserRow, "inactive_since">;
+
+type AfkTagRow = AfkUser & Pick<UserTagsRow, "created_at"> & { tag_id: number };
+
+// В АФК-вкладку попадают и неактивные, и с тэгом "АФК"; afk_since берётся
+// по более ранней из двух причин.
+type MergedAfkUser = AfkUser & {
+  afk_since: string | null;
+  inactiveSince: string | null;
+  tagSince: string | null;
+  afkTagId: number | null;
+  isInactive: boolean;
+  isAfkTagged: boolean;
+};
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+async function AfkPage() {
   await ensurePrivilieges(["Администратор"]);
 
-  type AfkUser = {
-    id: number;
-    username: string;
-    avatar_url: string | null;
-    vk_name: string | null;
-    class: string | null;
-    class_gear_score: number | null;
-    joined_at: string | null;
-    active: boolean;
-    is_eligible_for_salary: boolean;
-    probation_bypass: boolean;
-  };
-
-  let inactiveRows, afkTagRows;
+  let inactiveRows: InactiveRow[];
+  let afkTagRows: AfkTagRow[];
   try {
     [inactiveRows, afkTagRows] = await Promise.all([
-      sql<any[]>`
+      sql<InactiveRow[]>`
         SELECT id, username, avatar_url, vk_name, class, class_gear_score,
                joined_at, active, is_eligible_for_salary, probation_bypass,
                inactive_since
         FROM "user" WHERE active = false
       `,
-      sql<any[]>`
+      sql<AfkTagRow[]>`
         SELECT ut.created_at, ut.id AS tag_id, u.id, u.username, u.avatar_url,
                u.vk_name, u.class, u.class_gear_score, u.joined_at, u.active,
                u.is_eligible_for_salary, u.probation_bypass
@@ -42,20 +63,6 @@ const AfkPage = async () => {
     console.error("Error loading АФК users:", error);
     return <div>Ошибка загрузки списка АФК-игроков</div>;
   }
-
-  // Попадает в АФК-вкладку, если выполнено хотя бы одно: стоит тэг "АФК"
-  // ИЛИ человек неактивен (active=false, т.е. ушёл из гильдии). afk_since —
-  // самая ранняя из двух причин, чтобы "дней в АФК" отражало первое из событий.
-  // isInactive/isAfkTagged — чтобы в таблице показать, из-за чего конкретно
-  // человек тут оказался (может быть сразу по обеим причинам).
-  type MergedAfkUser = AfkUser & {
-    afk_since: string | null;
-    inactiveSince: string | null;
-    tagSince: string | null;
-    afkTagId: number | null;
-    isInactive: boolean;
-    isAfkTagged: boolean;
-  };
 
   const merged = new Map<number, MergedAfkUser>();
 
@@ -105,8 +112,7 @@ const AfkPage = async () => {
   });
 
   const now = new Date();
-  const month = now.getMonth() + 1;
-  const year = now.getFullYear();
+  const { month, year } = getMoscowYearMonth(now);
 
   const [salaries, salaryReasons] = await Promise.all([
     getCurrentMonthSalaries(),
@@ -116,8 +122,7 @@ const AfkPage = async () => {
   const tableData = users.map((user) => {
     const daysInGuild = user.joined_at
       ? Math.floor(
-          (now.getTime() - new Date(user.joined_at).getTime()) /
-            (1000 * 3600 * 24),
+          (now.getTime() - new Date(user.joined_at).getTime()) / DAY_MS,
         )
       : 0;
 
@@ -133,6 +138,6 @@ const AfkPage = async () => {
   });
 
   return <AfkMembersTable data={tableData} />;
-};
+}
 
 export default AfkPage;

@@ -4,7 +4,7 @@ import sql from "@/shared/lib/db";
 import { getBaseUrl } from "@/shared/lib";
 import { sendVkMessage } from "@/shared/lib/vkBot";
 import ensurePrivilieges from "@/actions/ensurePrivilieges";
-import { KillCount } from "../types";
+import { type KillCount } from "../types";
 
 export const getKillCountCurrent = async () => {
   try {
@@ -43,7 +43,6 @@ export const setKillCountCurrent = async (dto: KillCount[]) => {
   await notifyKillCountAdded();
 };
 
-/** Дописать одного игрока в уже сохранённый сегодняшний киллкаунт (без повторного уведомления в ВК). */
 export const addKillCountRowToday = async (row: KillCount) => {
   await ensurePrivilieges(["Администратор"]);
   await insertKillCountRows([row]);
@@ -53,43 +52,37 @@ const insertKillCountRows = async (dto: KillCount[]) => {
   try {
     const userNames = dto.map((item) => item.userName);
 
-    const users =
-      await sql`SELECT id, username FROM "user" WHERE username IN ${sql(userNames)}`;
-
-    if (!users?.length) {
-      throw new Error(`Не найдены пользователи: ${userNames}`);
-    }
-
-    const mapUserNameToId = new Map<string, number>();
-
-    for (const user of users) {
-      mapUserNameToId.set(user?.username ?? "", user?.id);
-    }
+    const users = await sql<{ id: number; username: string }[]>`
+      SELECT id, username FROM "user" WHERE username IN ${sql(userNames)}
+    `;
+    const userIdByName = new Map(users.map((user) => [user.username, user.id]));
 
     const missingUsernames = userNames.filter(
-      (userName) => !mapUserNameToId.has(userName),
+      (name) => !userIdByName.has(name),
     );
-
     if (missingUsernames.length > 0) {
       throw new Error(`Не найдены пользователи: ${missingUsernames}`);
     }
 
-    const dataToInsert = dto
-      .filter((row) => mapUserNameToId.has(row.userName))
-      .map((row) => ({
-        user_id: mapUserNameToId.get(row.userName)!,
+    const recordedAt = new Date().toISOString();
+    const dataToInsert = dto.flatMap((row) => {
+      const userId = userIdByName.get(row.userName);
+      if (userId === undefined) return [];
+      return {
+        user_id: userId,
         event_id: 1,
         start_honor: row.startHonor,
         end_honor: row.endHonor,
         start_kills: row.startKills,
         end_kills: row.endKills,
         class: row.playerClass,
-        recorded_at: new Date().toISOString(),
+        recorded_at: recordedAt,
         comment: row.comment,
-      }));
+      };
+    });
 
     await sql`
-    	INSERT INTO killcount_stats ${sql(dataToInsert, "user_id", "event_id", "class", "start_honor", "end_honor", "start_kills", "end_kills", "recorded_at", "comment")} RETURNING *`;
+    	INSERT INTO killcount_stats ${sql(dataToInsert, "user_id", "event_id", "class", "start_honor", "end_honor", "start_kills", "end_kills", "recorded_at", "comment")}`;
   } catch (error) {
     throw new Error("Не удалось установить актуальный киллкаунт", {
       cause: error,

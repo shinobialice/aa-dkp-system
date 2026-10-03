@@ -1,7 +1,10 @@
 "use server";
 import sql from "@/shared/lib/db";
 import ensureCanEditUserData from "./ensureCanEditUserData";
-import getUserArchetype, { RoleSlot, UserArchetype } from "./getUserArchetype";
+import getUserArchetype, {
+  type RoleSlot,
+  type UserArchetype,
+} from "./getUserArchetype";
 import { isValidSpecializationId } from "@/widgets/profile/archetype/specializationsData";
 import { lookupClassName } from "@/widgets/profile/archetype/classCombinations";
 

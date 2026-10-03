@@ -23,16 +23,11 @@ type SalaryWeightInput = {
   individualBonusPercent: number;
   penaltyPoints: number;
   asOf?: Date;
-  // Критерии допуска — редактируются админом в Настройках, см.
-  // salaryEligibilitySettings.ts.
   primeEnabled: boolean;
   primeThresholdPercent: number;
   pointsEnabled: boolean;
   pointsThresholdPercent: number;
   dvBypassEnabled: boolean;
-  // ГС: включается отдельным тумблером, не обходится тегом ДВ — это
-  // проверка снаряжения, а не посещаемости. requiredGearScore уже посчитан
-  // вызывающей стороной по формуле гильдии (calculateRequiredGearScore).
   gsEnabled: boolean;
   classGearScore: number | null;
   requiredGearScore: number | null;
@@ -45,113 +40,85 @@ type SalaryWeightResult = {
   penaltyPercent: number;
 };
 
+type Rejection = { reason: string; penaltyPercent: number };
+
+const reject = (reason: string, penaltyPercent = 0): Rejection => ({
+  reason,
+  penaltyPercent,
+});
+
 export default function calculateSalaryWeight(
   input: SalaryWeightInput,
 ): SalaryWeightResult {
-  const {
-    active,
-    isEligibleForSalary,
-    joinedAt,
-    probationBypass,
-    tags,
-    primePercent,
-    totalPercent,
-    basePoints,
-    tenureBonusPercent,
-    individualBonusPercent,
-    penaltyPoints,
-    asOf,
-    primeEnabled,
-    primeThresholdPercent,
-    pointsEnabled,
-    pointsThresholdPercent,
-    dvBypassEnabled,
-    gsEnabled,
-    classGearScore,
-    requiredGearScore,
-  } = input;
+  const rejection =
+    statusRejection(input) ??
+    thresholdRejection(input) ??
+    gearScoreRejection(input) ??
+    penaltyRejection(input);
+  if (rejection) return { eligible: false, finalWeight: 0, ...rejection };
 
-  if (!active) {
-    return { eligible: false, reason: "Игрок не активен", finalWeight: 0, penaltyPercent: 0 };
-  }
-
-  if (!isEligibleForSalary) {
-    return {
-      eligible: false,
-      reason: "Лох, ГМ забрал зарплату у тебя",
-      finalWeight: 0,
-      penaltyPercent: 0,
-    };
-  }
-
-  if (!probationBypass && !isProbationOver(joinedAt, asOf)) {
-    return { eligible: false, reason: "Испытательный срок не завершён", finalWeight: 0, penaltyPercent: 0 };
-  }
-
-  if (tags.includes("АФК")) {
-    return { eligible: false, reason: "Пользователь в АФК", finalWeight: 0, penaltyPercent: 0 };
-  }
-
-  // Пороги допуска включаются/выключаются и настраиваются админом (см.
-  // salaryEligibilitySettings.ts). Если оба порога выключены — критериев нет,
-  // проверка проходит автоматически. Включённые пороги проверяются все разом
-  // (И): например, если включены и Праймы, и Баллы, нужно пройти оба.
-  const hasDv = tags.includes("ДВ");
-  const thresholdChecks: boolean[] = [];
-  if (primeEnabled) thresholdChecks.push(primePercent > primeThresholdPercent);
-  if (pointsEnabled) thresholdChecks.push(totalPercent > pointsThresholdPercent);
-  const meetsThresholds = thresholdChecks.every(Boolean);
-  const bypassedByDv = dvBypassEnabled && hasDv;
-
-  if (!bypassedByDv && !meetsThresholds) {
-    const parts: string[] = [];
-    if (primeEnabled) parts.push(`посещаемость праймов > ${primeThresholdPercent}%`);
-    if (pointsEnabled) parts.push(`учёт баллов > ${pointsThresholdPercent}%`);
-    const criteria = parts.join(" и ");
-    return {
-      eligible: false,
-      reason: dvBypassEnabled
-        ? `Не выполнены критерии допуска (${criteria}, либо тег ДВ)`
-        : `Не выполнены критерии допуска (${criteria})`,
-      finalWeight: 0,
-      penaltyPercent: 0,
-    };
-  }
-
-  // ГС — не обходится тегом ДВ, это про снаряжение, а не про посещаемость.
-  if (gsEnabled) {
-    const requiredGS = requiredGearScore ?? 0;
-    const actualGS = classGearScore ?? 0;
-    if (actualGS < requiredGS) {
-      return {
-        eligible: false,
-        reason: `Недостаточный ГС (${actualGS} < ${requiredGS})`,
-        finalWeight: 0,
-        penaltyPercent: 0,
-      };
-    }
-  }
-
-  if (penaltyPoints >= PENALTY_BLOCK_THRESHOLD) {
-    return {
-      eligible: false,
-      reason: `Заблокирован штрафами (${penaltyPoints} >= ${PENALTY_BLOCK_THRESHOLD})`,
-      finalWeight: 0,
-      penaltyPercent: 100,
-    };
-  }
-
-  const penaltyPercent = calculatePenaltyPercent(penaltyPoints);
-
+  const penaltyPercent = calculatePenaltyPercent(input.penaltyPoints);
   const weight =
-    basePoints *
-    (1 + tenureBonusPercent / 100) *
-    (1 + individualBonusPercent / 100) *
+    input.basePoints *
+    (1 + input.tenureBonusPercent / 100) *
+    (1 + input.individualBonusPercent / 100) *
     (1 - penaltyPercent / 100);
 
-  return {
-    eligible: true,
-    finalWeight: Math.max(0, weight),
-    penaltyPercent,
-  };
+  return { eligible: true, finalWeight: Math.max(0, weight), penaltyPercent };
+}
+
+function statusRejection(input: SalaryWeightInput) {
+  if (!input.active) return reject("Игрок не активен");
+  if (!input.isEligibleForSalary) {
+    return reject("Лох, ГМ забрал зарплату у тебя");
+  }
+  if (!input.probationBypass && !isProbationOver(input.joinedAt, input.asOf)) {
+    return reject("Испытательный срок не завершён");
+  }
+  if (input.tags.includes("АФК")) return reject("Пользователь в АФК");
+  return null;
+}
+
+// Включённые пороги проверяются все разом: если включены и праймы, и баллы,
+// нужно пройти оба. Тег ДВ может их обходить.
+function thresholdRejection(input: SalaryWeightInput) {
+  const checks = [
+    {
+      enabled: input.primeEnabled,
+      passed: input.primePercent > input.primeThresholdPercent,
+      label: `посещаемость праймов > ${input.primeThresholdPercent}%`,
+    },
+    {
+      enabled: input.pointsEnabled,
+      passed: input.totalPercent > input.pointsThresholdPercent,
+      label: `учёт баллов > ${input.pointsThresholdPercent}%`,
+    },
+  ].filter((check) => check.enabled);
+
+  const bypassedByDv = input.dvBypassEnabled && input.tags.includes("ДВ");
+  if (bypassedByDv || checks.every((check) => check.passed)) return null;
+
+  const criteria = checks.map((check) => check.label).join(" и ");
+  return reject(
+    input.dvBypassEnabled
+      ? `Не выполнены критерии допуска (${criteria}, либо тег ДВ)`
+      : `Не выполнены критерии допуска (${criteria})`,
+  );
+}
+
+// ГС не обходится тегом ДВ: это про снаряжение, а не про посещаемость.
+function gearScoreRejection(input: SalaryWeightInput) {
+  if (!input.gsEnabled) return null;
+  const required = input.requiredGearScore ?? 0;
+  const actual = input.classGearScore ?? 0;
+  if (actual >= required) return null;
+  return reject(`Недостаточный ГС (${actual} < ${required})`);
+}
+
+function penaltyRejection(input: SalaryWeightInput) {
+  if (input.penaltyPoints < PENALTY_BLOCK_THRESHOLD) return null;
+  return reject(
+    `Заблокирован штрафами (${input.penaltyPoints} >= ${PENALTY_BLOCK_THRESHOLD})`,
+    100,
+  );
 }

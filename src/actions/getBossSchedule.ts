@@ -10,9 +10,9 @@ export async function getFixedTimesForBoss(
   bossName: string,
   weekday: string,
 ): Promise<string[]> {
-  let rows;
+  let rows: { time: string }[];
   try {
-    rows = await sql<any[]>`
+    rows = await sql<{ time: string }[]>`
       SELECT DISTINCT time FROM week_schedule_event
       WHERE boss_name = ${bossName} AND weekday = ${weekday}
       ORDER BY time
@@ -22,7 +22,7 @@ export async function getFixedTimesForBoss(
     throw new Error("Не удалось загрузить расписание босса");
   }
 
-  return rows.map((r) => r.time as string);
+  return rows.map((row) => row.time);
 }
 
 // Слоты АГЛ (боссу "АГЛ" конкретно, не всей категории), которые уже заняты
@@ -31,9 +31,9 @@ export async function getFixedTimesForBoss(
 export async function getTakenAglTimesForDate(date: Date): Promise<string[]> {
   const dateOnly = getMoscowISOString(date).slice(0, 10);
 
-  let rows;
+  let rows: { time: string }[];
   try {
-    rows = await sql<any[]>`
+    rows = await sql<{ time: string }[]>`
       SELECT DISTINCT to_char(r.start_date, 'HH24:MI') AS time
       FROM raid r
       JOIN raid_boss rb ON rb.raid_id = r.id
@@ -45,5 +45,5 @@ export async function getTakenAglTimesForDate(date: Date): Promise<string[]> {
     throw new Error("Не удалось проверить занятые слоты АГЛ");
   }
 
-  return rows.map((r) => r.time as string);
+  return rows.map((row) => row.time);
 }

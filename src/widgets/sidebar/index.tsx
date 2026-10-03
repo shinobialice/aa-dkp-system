@@ -1,6 +1,6 @@
 "use client";
 
-import type { FC, ReactNode } from "react";
+import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -32,16 +32,18 @@ type Props = {
   locationIcon?: ReactNode;
 };
 
-const AppSidebar: FC<Props> = ({
+function AppSidebar({
   isAdmin,
   isRealAdmin,
   viewingAsRegular,
   locationBadge,
   locationIcon,
-}) => {
+}: Props) {
   const pathname = usePathname();
   const activeUrl = findActiveUrl(pathname, ALL_NAV_URLS);
-  const sections = NAV_SECTIONS.filter((section) => !section.adminOnly || isAdmin);
+  const sections = NAV_SECTIONS.filter(
+    (section) => !section.adminOnly || isAdmin,
+  );
 
   return (
     <Sidebar collapsible="icon">
@@ -69,7 +71,9 @@ const AppSidebar: FC<Props> = ({
           />
         </div>
         {locationBadge && (
-          <div className="group-data-[collapsible=icon]:hidden">{locationBadge}</div>
+          <div className="group-data-[collapsible=icon]:hidden">
+            {locationBadge}
+          </div>
         )}
         {locationIcon && (
           <div className="hidden justify-center group-data-[collapsible=icon]:flex">
@@ -81,7 +85,9 @@ const AppSidebar: FC<Props> = ({
       <SidebarContent className="gap-0">
         {sections.map((section) => (
           <SidebarGroup key={section.title ?? "main"} className="py-1">
-            {section.title && <SidebarGroupLabel>{section.title}</SidebarGroupLabel>}
+            {section.title && (
+              <SidebarGroupLabel>{section.title}</SidebarGroupLabel>
+            )}
             <SidebarGroupContent>
               <SidebarMenu>
                 {section.items.map((item) => {
@@ -94,7 +100,10 @@ const AppSidebar: FC<Props> = ({
                         tooltip={item.title}
                         className="data-[active=true]:font-semibold data-[active=true]:[&>svg]:text-green-600 dark:data-[active=true]:[&>svg]:text-green-400"
                       >
-                        <Link href={item.url} aria-current={active ? "page" : undefined}>
+                        <Link
+                          href={item.url}
+                          aria-current={active ? "page" : undefined}
+                        >
                           <item.icon />
                           <span>{item.title}</span>
                         </Link>
@@ -112,7 +121,9 @@ const AppSidebar: FC<Props> = ({
       <SidebarFooter className="border-t">
         <SidebarMenu>
           <OnlineUsersWidget />
-          {isRealAdmin && <ViewAsPlayerSidebarItem initial={!!viewingAsRegular} />}
+          {isRealAdmin && (
+            <ViewAsPlayerSidebarItem initial={!!viewingAsRegular} />
+          )}
           <ThemeSidebarItem />
         </SidebarMenu>
         <NavUser />
@@ -120,6 +131,6 @@ const AppSidebar: FC<Props> = ({
       <SidebarRail />
     </Sidebar>
   );
-};
+}
 
 export default AppSidebar;

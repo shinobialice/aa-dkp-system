@@ -21,7 +21,7 @@ const formatDate = (date: string) =>
     year: "numeric",
   });
 
-const ChangelogPage = async () => {
+async function ChangelogPage() {
   await ensurePrivilieges(["Администратор"]);
 
   return (
@@ -50,6 +50,6 @@ const ChangelogPage = async () => {
       </div>
     </div>
   );
-};
+}
 
 export default ChangelogPage;

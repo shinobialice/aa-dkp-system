@@ -1,10 +1,22 @@
 "use server";
 import sql from "@/shared/lib/db";
+import type { UserRow } from "@/shared/lib/dbTypes";
+
+type StatsUser = Pick<UserRow, "id" | "username" | "class" | "joined_at">;
+
+const DD_CLASSES = ["Милик", "Лук", "Маг", "Стрелок"];
+const RECENT_MEMBERS_LIMIT = 5;
+
+function countByClass(users: StatsUser[], ...names: string[]) {
+  return users.filter((user) =>
+    names.some((name) => user.class?.includes(name)),
+  ).length;
+}
 
 const getStats = async () => {
-  let users;
+  let users: StatsUser[];
   try {
-    users = await sql<any[]>`
+    users = await sql<StatsUser[]>`
       SELECT id, username, class, joined_at FROM "user"
       WHERE active = true
         AND id NOT IN (SELECT user_id FROM user_tags WHERE tag = 'АФК' AND removed_at IS NULL)
@@ -14,30 +26,23 @@ const getStats = async () => {
     throw new Error("Не удалось получить список пользователей");
   }
 
-  const stats = {
-    activePlayers: users.length,
-    dds: users.filter(
-      (user) =>
-        user.class?.includes("Милик") ||
-        user.class?.includes("Лук") ||
-        user.class?.includes("Маг") ||
-        user.class?.includes("Стрелок"),
-    ).length,
-    healers: users.filter((user) => user.class?.includes("Хил")).length,
-    dancers: users.filter((user) => user.class?.includes("Танцор")).length,
-    bards: users.filter((user) => user.class?.includes("Бард")).length,
-    tacticians: users.filter((user) => user.class?.includes("Тактик")).length,
-    recentMembers: users
-      .filter((u) => u.joined_at)
-      .sort(
-        (a, b) =>
-          new Date(b.joined_at!).getTime() - new Date(a.joined_at!).getTime(),
-      )
-      .slice(0, 5)
-      .map((u) => ({ id: u.id, username: u.username })),
-  };
+  const recentMembers = users
+    .flatMap((user) =>
+      user.joined_at ? [{ ...user, joinedAt: user.joined_at }] : [],
+    )
+    .sort((a, b) => b.joinedAt.localeCompare(a.joinedAt))
+    .slice(0, RECENT_MEMBERS_LIMIT)
+    .map((user) => ({ id: user.id, username: user.username }));
 
-  return stats;
+  return {
+    activePlayers: users.length,
+    dds: countByClass(users, ...DD_CLASSES),
+    healers: countByClass(users, "Хил"),
+    dancers: countByClass(users, "Танцор"),
+    bards: countByClass(users, "Бард"),
+    tacticians: countByClass(users, "Тактик"),
+    recentMembers,
+  };
 };
 
 export default getStats;

@@ -1,8 +1,9 @@
 "use server";
 import sql from "@/shared/lib/db";
-import { getMoscowTime } from "@/shared/config/fixedSchedule";
+import { getMoscowISOString } from "@/utils/getMoscowISOString";
 
 const MONTHLY_SKIP_ALLOWANCE = 7;
+const MAX_DAYS = 400;
 
 export type PrimeStreak = {
   streak: number;
@@ -11,31 +12,23 @@ export type PrimeStreak = {
   skipAllowance: number;
 };
 
-// raid.start_date хранится как naive-строка без таймзоны в московском
-// времени (см. getEvents.ts) — сравнивать её нужно с такой же naive-строкой,
-// а не с toISOString(), иначе сравнение съезжает на разницу с UTC.
-function toNaiveMoscowString(date: Date): string {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return (
-    `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}` +
-    `T${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}:${pad(date.getUTCSeconds())}`
-  );
-}
+type PrimeDay = { day: string; attended: boolean };
 
-export async function getUserPrimeStreak(
-  userId: number,
-): Promise<PrimeStreak> {
-  const moscowNow = getMoscowTime();
-  const nowNaive = toNaiveMoscowString(moscowNow);
-  const currentMonthKey = nowNaive.slice(0, 7);
+export async function getUserPrimeStreak(userId: number): Promise<PrimeStreak> {
+  const nowNaive = getMoscowISOString(new Date());
 
-  let raidRows;
+  let days: PrimeDay[];
   try {
-    raidRows = await sql<any[]>`
-      SELECT id, start_date FROM raid
-      WHERE type = 'Прайм' AND start_date <= ${nowNaive}
-      ORDER BY start_date DESC
-      LIMIT 400
+    days = await sql<PrimeDay[]>`
+      SELECT
+        r.start_date::date::text AS day,
+        bool_or(ra.user_id IS NOT NULL) AS attended
+      FROM raid r
+      LEFT JOIN raid_attendance ra ON ra.raid_id = r.id AND ra.user_id = ${userId}
+      WHERE r.type = 'Прайм' AND r.start_date <= ${nowNaive}
+      GROUP BY day
+      ORDER BY day DESC
+      LIMIT ${MAX_DAYS}
     `;
   } catch (error) {
     console.error("Ошибка при получении серии посещений Прайма:", error);
@@ -47,42 +40,23 @@ export async function getUserPrimeStreak(
     };
   }
 
-  const raidIds = raidRows.map((r) => r.id);
-  let attendanceRows: { raid_id: number; user_id: number }[] = [];
-  if (raidIds.length > 0) {
-    attendanceRows = await sql<any[]>`
-      SELECT raid_id, user_id FROM raid_attendance WHERE raid_id = ANY(${raidIds})
-    `;
-  }
-  const attendedRaidIds = new Set(
-    attendanceRows.filter((a) => a.user_id === userId).map((a) => a.raid_id),
-  );
+  const { streak, isOnSkip, skipsUsedByMonth } = countStreak(days);
+  return {
+    streak,
+    isOnSkip,
+    skipsUsedThisMonth: skipsUsedByMonth.get(nowNaive.slice(0, 7)) ?? 0,
+    skipAllowance: MONTHLY_SKIP_ALLOWANCE,
+  };
+}
 
-  // Несколько Праймов в один день — не редкость (пересозданные рейды и
-  // т.п.), но серия считается по дням, а не по количеству рейдов: день
-  // засчитан, если пользователь был хотя бы на одном Прайме в этот день.
-  const dayMap = new Map<string, boolean>();
-  for (const raid of raidRows) {
-    const day = (raid.start_date ?? "").slice(0, 10);
-    if (!day) continue;
-    const attended = attendedRaidIds.has(raid.id);
-    dayMap.set(day, (dayMap.get(day) ?? false) || attended);
-  }
-
-  const days = Array.from(dayMap.keys()).sort().reverse();
-
-  // Пропущенный день не обрывает серию, пока не исчерпан месячный лимит
-  // пропусков — как заморозка серии в Duolingo. Лимит считается по месяцу
-  // самого дня, а не текущему, поэтому при уходе в прошлый месяц он
-  // сбрасывается сам собой.
+// Пропущенный день не обрывает серию, пока не исчерпан лимит пропусков месяца
+// этого дня, как заморозка серии в Duolingo.
+function countStreak(days: PrimeDay[]) {
   const skipsUsedByMonth = new Map<string, number>();
   let streak = 0;
   let isOnSkip = false;
 
-  for (let i = 0; i < days.length; i++) {
-    const day = days[i];
-    const attended = dayMap.get(day) ?? false;
-
+  for (const [index, { day, attended }] of days.entries()) {
     if (attended) {
       streak += 1;
       continue;
@@ -90,19 +64,11 @@ export async function getUserPrimeStreak(
 
     const monthKey = day.slice(0, 7);
     const skipsUsed = skipsUsedByMonth.get(monthKey) ?? 0;
-
-    if (skipsUsed >= MONTHLY_SKIP_ALLOWANCE) {
-      break;
-    }
+    if (skipsUsed >= MONTHLY_SKIP_ALLOWANCE) break;
 
     skipsUsedByMonth.set(monthKey, skipsUsed + 1);
-    if (i === 0) isOnSkip = true;
+    if (index === 0) isOnSkip = true;
   }
 
-  return {
-    streak,
-    isOnSkip,
-    skipsUsedThisMonth: skipsUsedByMonth.get(currentMonthKey) ?? 0,
-    skipAllowance: MONTHLY_SKIP_ALLOWANCE,
-  };
+  return { streak, isOnSkip, skipsUsedByMonth };
 }

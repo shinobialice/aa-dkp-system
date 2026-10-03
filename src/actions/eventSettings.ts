@@ -1,9 +1,13 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import type { EventSettingsRow } from "@/shared/lib/dbTypes";
+
 import { saveUploadedFile } from "@/shared/lib/localStorage";
 import ensurePrivilieges from "./ensurePrivilieges";
 import { revalidatePath } from "next/cache";
+
+type EventRow = Omit<EventSettingsRow, "id" | "updated_at">;
 
 export type EventSettings = {
   title: string | null;
@@ -17,9 +21,9 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
 
 export async function getEventSettings(): Promise<EventSettings> {
-  let data;
+  let data: EventRow | undefined;
   try {
-    [data] = await sql<any[]>`
+    [data] = await sql<EventRow[]>`
       SELECT title, image_url, starts_at, ends_at, link FROM event_settings WHERE id = 1
     `;
   } catch (error) {
@@ -49,7 +53,7 @@ export async function updateEventSettings(input: {
   }
 
   try {
-    await sql<any[]>`
+    await sql`
       INSERT INTO event_settings (id, title, starts_at, ends_at, link, updated_at)
       VALUES (1, ${input.title}, ${input.startsAt}, ${input.endsAt}, ${input.link}, now())
       ON CONFLICT (id) DO UPDATE SET
@@ -95,7 +99,7 @@ export async function uploadEventBanner(formData: FormData): Promise<string> {
   const imageUrl = `${publicUrl}?t=${Date.now()}`;
 
   try {
-    await sql<any[]>`
+    await sql`
       INSERT INTO event_settings (id, image_url, updated_at)
       VALUES (1, ${imageUrl}, now())
       ON CONFLICT (id) DO UPDATE SET
@@ -117,7 +121,7 @@ export async function endEventNow() {
   await ensurePrivilieges(["Администратор"]);
 
   try {
-    await sql<any[]>`
+    await sql`
       UPDATE event_settings SET ends_at = now() WHERE id = 1
     `;
   } catch (error) {

@@ -1,135 +1,12 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import { ChevronDown } from "lucide-react";
-import { getRunesForSlot, type Rune } from "./itemsData/runes";
-import { getItemGradeIconUrl } from "./itemsData/paths";
+import { getRunesForSlot } from "./itemsData/runes";
 import type { WeaponHandedness } from "./itemsData/weaponHandedness";
 import type { UserEquipment } from "@/actions/getUserEquipment";
-import { getEphenRuneSetForRune } from "./ephenRuneSetBonus";
-import {
-  getSealGradeColor,
-  getSealGradeLabel,
-} from "@/widgets/profile/seals/sealsData";
-import {
-  Input,
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@/shared/ui";
-import { EffectText, highlightNumbers } from "./highlightNumbers";
-
-function RuneSetTierRow({
-  count,
-  text,
-  active,
-}: {
-  count: number;
-  text: string;
-  active: boolean;
-}) {
-  return (
-    <div className={active ? "text-green-500" : "text-muted-foreground/70"}>
-      <div className="text-[11px] font-semibold">[{count} шт.]</div>
-      {text.split("\n").map((line, i) => (
-        <div key={i} className="text-xs">
-          {active ? highlightNumbers(line) : line}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-export function RuneIcon({ rune, size }: { rune: Rune; size: number }) {
-  return (
-    <div className="relative shrink-0" style={{ width: size, height: size }}>
-      <Image
-        src={rune.iconUrl}
-        alt={rune.name}
-        width={size}
-        height={size}
-        className="absolute inset-0"
-      />
-      <Image
-        src={getItemGradeIconUrl(rune.grade)}
-        alt=""
-        width={size}
-        height={size}
-        className="absolute inset-0"
-      />
-    </div>
-  );
-}
-
-export function RuneTooltip({
-  rune,
-  side = "left",
-  equipment,
-  children,
-}: {
-  rune: Rune;
-  side?: "left" | "right" | "top" | "bottom";
-  equipment?: UserEquipment[];
-  children: React.ReactNode;
-}) {
-  const color = getSealGradeColor(rune.grade);
-  const ephenSet = equipment ? getEphenRuneSetForRune(rune.id, equipment) : null;
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>{children}</TooltipTrigger>
-      <TooltipContent
-        side={side}
-        className="dark pointer-events-none w-64 border-border bg-background p-3 text-foreground"
-      >
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <RuneIcon rune={rune} size={32} />
-            <div className="min-w-0">
-              <div className="text-xs" style={{ color: color ?? undefined }}>
-                {getSealGradeLabel(rune.grade)} предмет
-              </div>
-              <div
-                className="truncate text-sm font-semibold"
-                style={{ color: color ?? undefined }}
-              >
-                {rune.name}
-              </div>
-            </div>
-          </div>
-          {rune.effect && (
-            <>
-              <div className="border-t border-border" />
-              <div className="space-y-0.5 text-xs text-muted-foreground">
-                <EffectText text={rune.effect} />
-              </div>
-            </>
-          )}
-          {ephenSet && (
-            <>
-              <div className="border-t border-border" />
-              <div className="space-y-1">
-                <div className="text-xs font-semibold">
-                  {ephenSet.name} ({ephenSet.count}/8)
-                </div>
-                <div className="space-y-1.5">
-                  {ephenSet.tiers.map((tier) => (
-                    <RuneSetTierRow
-                      key={tier.count}
-                      count={tier.count}
-                      text={tier.text}
-                      active={tier.active}
-                    />
-                  ))}
-                </div>
-              </div>
-            </>
-          )}
-        </div>
-      </TooltipContent>
-    </Tooltip>
-  );
-}
+import { Input } from "@/shared/ui";
+import { RuneIcon } from "./RuneIcon";
+import { RuneTooltip } from "./RuneTooltip";
 
 export function RunePicker({
   slot,
@@ -189,7 +66,9 @@ export function RunePicker({
             </span>
           </span>
         ) : (
-          <span className="text-muted-foreground">Начните вводить название...</span>
+          <span className="text-muted-foreground">
+            Начните вводить название...
+          </span>
         )}
         <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
       </button>

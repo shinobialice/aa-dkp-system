@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import type { BossIncomeStat } from "@/actions/guildStats";
-import { GOLD_ICON } from "../Loot/LootBuy/LootItemList";
-import { formatNumber } from "./statsModel";
+import { formatNumber } from "@/shared/lib/format";
+import { GOLD_ICON_URL } from "@/shared/ui";
 
 export default function BossIncomeCard({ data }: { data: BossIncomeStat[] }) {
   const rows = [...data].sort((a, b) => b.income - a.income);
@@ -13,7 +13,7 @@ export default function BossIncomeCard({ data }: { data: BossIncomeStat[] }) {
   return (
     <section className="flex min-w-0 flex-col gap-3 rounded-xl border bg-card p-4">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-[15px] font-semibold">Доход от боссов</h2>
+        <h2 className="text-base font-semibold">Доход от боссов</h2>
         <span className="text-xs text-muted-foreground">
           продано из казны за месяц
         </span>
@@ -33,7 +33,7 @@ export default function BossIncomeCard({ data }: { data: BossIncomeStat[] }) {
                 <span className="truncate font-medium" title={row.boss}>
                   {row.boss}
                 </span>
-                <span className="h-[22px] overflow-hidden rounded-md bg-muted">
+                <span className="h-5.5 overflow-hidden rounded-md bg-muted">
                   <span
                     className="block h-full rounded-md bg-gradient-to-r from-amber-400/70 to-amber-500"
                     style={{
@@ -43,9 +43,9 @@ export default function BossIncomeCard({ data }: { data: BossIncomeStat[] }) {
                 </span>
                 <span className="min-w-20 text-right leading-tight tabular-nums">
                   <span className="block font-semibold">
-                    {formatNumber(row.income)}
+                    {formatNumber(row.income, 0)}
                   </span>
-                  <span className="text-[11px] text-muted-foreground">
+                  <span className="text-2xs text-muted-foreground">
                     {row.itemsSold} предм.
                   </span>
                 </span>
@@ -55,8 +55,8 @@ export default function BossIncomeCard({ data }: { data: BossIncomeStat[] }) {
           <div className="flex items-center justify-between border-t pt-2.5 font-semibold">
             <span>Итого</span>
             <span className="flex items-center gap-1.5 tabular-nums">
-              <Image src={GOLD_ICON} alt="" width={16} height={16} />
-              {formatNumber(total)}
+              <Image src={GOLD_ICON_URL} alt="" width={16} height={16} />
+              {formatNumber(total, 0)}
             </span>
           </div>
         </>

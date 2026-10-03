@@ -1,4 +1,5 @@
 import sql from "@/shared/lib/db";
+import type { UserRow } from "@/shared/lib/dbTypes";
 import { getSessionUser } from "@/shared/lib/session";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
@@ -17,9 +18,13 @@ export async function GET() {
     return NextResponse.json({ error: "Invalid token" }, { status: 401 });
   }
 
-  const [user] = await sql<any[]>`
+  const [user] = await sql<Pick<UserRow, "id" | "username" | "avatar_url">[]>`
     SELECT id, username, avatar_url FROM "user" WHERE id = ${sessionUser.id}
   `;
+
+  if (!user) {
+    return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+  }
 
   return NextResponse.json(
     {

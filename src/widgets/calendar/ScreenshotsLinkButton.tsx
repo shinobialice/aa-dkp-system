@@ -3,7 +3,14 @@
 import { useEffect, useState } from "react";
 import { Pencil, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
-import { Button, Input, Label, Popover, PopoverContent, PopoverTrigger } from "@/shared/ui";
+import {
+  Button,
+  Input,
+  Label,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/shared/ui";
 import {
   getScreenshotsLinkSettings,
   updateScreenshotsLinkSettings,
@@ -15,7 +22,9 @@ type Props = {
 };
 
 export default function ScreenshotsLinkButton({ canEdit }: Props) {
-  const [settings, setSettings] = useState<ScreenshotsLinkSettings | null>(null);
+  const [settings, setSettings] = useState<ScreenshotsLinkSettings | null>(
+    null,
+  );
   const [open, setOpen] = useState(false);
   const [draftUrl, setDraftUrl] = useState("");
   const [draftMonth, setDraftMonth] = useState("");

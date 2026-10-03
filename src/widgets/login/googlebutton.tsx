@@ -1,5 +1,6 @@
 "use client";
 
+import { requireEnv } from "@/shared/lib/env";
 import Cookies from "js-cookie";
 import { GoogleIcon } from "./authIcons";
 import { Button } from "@/shared/ui";
@@ -16,7 +17,10 @@ export default function GoogleLoginButton() {
     const origin = getBaseUrl();
 
     const params = new URLSearchParams({
-      client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
+      client_id: requireEnv(
+        process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+        "NEXT_PUBLIC_GOOGLE_CLIENT_ID",
+      ),
       redirect_uri: `${origin}/api/auth/google/callback`,
       response_type: "code",
       scope: "openid email profile",

@@ -1,11 +1,12 @@
 "use server";
 import sql from "@/shared/lib/db";
+import { hasPgCode, UNIQUE_VIOLATION } from "@/shared/lib/pgErrors";
 import { saveUploadedFile } from "@/shared/lib/localStorage";
 import ensurePrivilieges from "./ensurePrivilieges";
 import { randomUUID } from "crypto";
 import {
   PROFILE_ITEM_CATEGORIES,
-  ProfileItemCategory,
+  type ProfileItemCategory,
 } from "./profileItemCategories";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -50,13 +51,13 @@ export async function createProfileItemType({
     throw new Error("Некорректная категория");
   }
   try {
-    await sql<any[]>`
+    await sql`
       INSERT INTO profile_item_type (name, category, icon_url)
       VALUES (${trimmed}, ${category}, ${iconUrl})
     `;
-  } catch (error: any) {
+  } catch (error) {
     console.error("Ошибка при создании предмета профиля:", error);
-    if (error?.code === "23505") {
+    if (hasPgCode(error, UNIQUE_VIOLATION)) {
       throw new Error("Предмет с таким названием уже существует");
     }
     throw new Error("Не удалось создать предмет");
@@ -84,14 +85,14 @@ export async function updateProfileItemType(
     throw new Error("Некорректная категория");
   }
   try {
-    await sql<any[]>`
+    await sql`
       UPDATE profile_item_type
       SET name = ${trimmed}, category = ${category}, icon_url = ${iconUrl}
       WHERE id = ${id}
     `;
-  } catch (error: any) {
+  } catch (error) {
     console.error("Ошибка при обновлении предмета профиля:", error);
-    if (error?.code === "23505") {
+    if (hasPgCode(error, UNIQUE_VIOLATION)) {
       throw new Error("Предмет с таким названием уже существует");
     }
     throw new Error("Не удалось обновить предмет");
@@ -105,7 +106,7 @@ export async function deleteProfileItemType(id: number) {
     SELECT name, category FROM profile_item_type WHERE id = ${id}
   `;
   if (row) {
-    const [used] = await sql<any[]>`
+    const [used] = await sql`
       SELECT 1 FROM user_inventory WHERE name = ${row.name} AND type = ${row.category} LIMIT 1
     `;
     if (used) {
@@ -116,7 +117,7 @@ export async function deleteProfileItemType(id: number) {
   }
 
   try {
-    await sql<any[]>`DELETE FROM profile_item_type WHERE id = ${id}`;
+    await sql`DELETE FROM profile_item_type WHERE id = ${id}`;
   } catch (error) {
     console.error("Ошибка при удалении предмета профиля:", error);
     throw new Error("Не удалось удалить предмет");

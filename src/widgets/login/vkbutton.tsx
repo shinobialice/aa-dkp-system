@@ -1,3 +1,4 @@
+import { requireEnv } from "@/shared/lib/env";
 import { generateCodeChallenge, generateCodeVerifier } from "@/utils/pkce";
 import Cookies from "js-cookie";
 import { VkIcon } from "./authIcons";
@@ -12,7 +13,10 @@ export default function VkLoginButton() {
 
     const params = new URLSearchParams({
       response_type: "code",
-      client_id: process.env.NEXT_PUBLIC_VK_CLIENT_ID!,
+      client_id: requireEnv(
+        process.env.NEXT_PUBLIC_VK_CLIENT_ID,
+        "NEXT_PUBLIC_VK_CLIENT_ID",
+      ),
       redirect_uri: `${getBaseUrl()}/api/auth/vk/callback`,
       code_challenge: codeChallenge,
       code_challenge_method: "S256",

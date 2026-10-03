@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { X } from "lucide-react";
-import { Button, Checkbox, Input, Label } from "@/shared/ui";
+import { Button, Input, Label } from "@/shared/ui";
 import {
   getAttendanceBonusTypesForSettings,
   createAttendanceBonusType,
@@ -14,120 +14,9 @@ import { cn } from "@/shared/lib/tw-merge";
 import { useSettingsDraft } from "./settingsDraft";
 import { Loading, SettingsCard } from "./settingsUi";
 import { getBossPointsForSettings } from "@/actions/bossPointsSettings";
-import type {
-  AttendanceBonusMode,
-  AttendanceBonusTypeRow,
-} from "@/utils/attendanceBonusDefaults";
-
-const CATEGORY_ORDER = ["Прайм", "АГЛ"];
-const AGL_BOSS_ORDER = ["АГЛ", "Морф", "Марли Прок", "Кошка"];
-
-type BossOption = { id: number; boss_name: string; category: string };
-
-function ModeToggle({
-  mode,
-  onChange,
-}: {
-  mode: AttendanceBonusMode;
-  onChange: (mode: AttendanceBonusMode) => void;
-}) {
-  return (
-    <div className="flex overflow-hidden rounded-md border">
-      <button
-        type="button"
-        className={`w-7 cursor-pointer text-sm ${mode === "add" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
-        onClick={() => onChange("add")}
-        title="Прибавить балл"
-      >
-        +
-      </button>
-      <button
-        type="button"
-        className={`w-7 cursor-pointer border-l text-sm ${mode === "multiply" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
-        onClick={() => onChange("multiply")}
-        title="Умножить на значение"
-      >
-        ×
-      </button>
-    </div>
-  );
-}
-
-function BossScopePicker({
-  bosses,
-  bossIds,
-  onChange,
-}: {
-  bosses: BossOption[];
-  bossIds: number[];
-  onChange: (bossIds: number[]) => void;
-}) {
-  return (
-    <div className="space-y-2">
-      {CATEGORY_ORDER.map((category) => {
-        const categoryBosses = bosses
-          .filter((b) => b.category === category)
-          .sort((a, b) => {
-            if (category !== "АГЛ") return 0;
-            return (
-              AGL_BOSS_ORDER.indexOf(a.boss_name) -
-              AGL_BOSS_ORDER.indexOf(b.boss_name)
-            );
-          });
-        if (categoryBosses.length === 0) return null;
-
-        const allSelected = categoryBosses.every((b) => bossIds.includes(b.id));
-
-        function toggleAll(checked: boolean) {
-          const others = bossIds.filter(
-            (id) => !categoryBosses.some((b) => b.id === id),
-          );
-          onChange(
-            checked ? [...others, ...categoryBosses.map((b) => b.id)] : others,
-          );
-        }
-
-        function toggleBoss(bossId: number, checked: boolean) {
-          onChange(
-            checked
-              ? [...bossIds, bossId]
-              : bossIds.filter((id) => id !== bossId),
-          );
-        }
-
-        return (
-          <div key={category} className="rounded-md border p-2">
-            <label className="flex cursor-pointer items-center gap-2 text-sm font-medium">
-              <Checkbox
-                className="cursor-pointer"
-                checked={allSelected}
-                onCheckedChange={(checked) => toggleAll(checked === true)}
-              />
-              {category}
-            </label>
-            <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 pl-6 text-sm text-muted-foreground">
-              {categoryBosses.map((b) => (
-                <label
-                  key={b.id}
-                  className="flex cursor-pointer items-center gap-2"
-                >
-                  <Checkbox
-                    className="cursor-pointer"
-                    checked={bossIds.includes(b.id)}
-                    onCheckedChange={(checked) =>
-                      toggleBoss(b.id, checked === true)
-                    }
-                  />
-                  {b.boss_name}
-                </label>
-              ))}
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
+import type { AttendanceBonusTypeRow } from "@/utils/attendanceBonusDefaults";
+import ModeToggle from "./BonusModeToggle";
+import BossScopePicker, { type BossOption } from "./BossScopePicker";
 
 export function AttendanceBonusSettingsForm() {
   const bonuses = useSettingsDraft<AttendanceBonusTypeRow[]>({
@@ -166,7 +55,6 @@ export function AttendanceBonusSettingsForm() {
     );
   }
 
-  // Добавление и удаление сразу пишутся в базу — как и раньше.
   async function handleAdd() {
     setAdding(true);
     try {

@@ -4,6 +4,7 @@ import { Camera } from "lucide-react";
 import { toast } from "sonner";
 import { uploadCharacterPortrait } from "@/actions/uploadCharacterPortrait";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/shared/ui";
+import { errorMessage } from "@/shared/lib/errorMessage";
 
 const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
@@ -30,9 +31,7 @@ export function CharacterPortraitUpload({
       onUploaded(url);
       toast.success("Скриншот сохранён");
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Не удалось загрузить скриншот",
-      );
+      toast.error(errorMessage(error, "Не удалось загрузить скриншот"));
     } finally {
       setUploading(false);
     }

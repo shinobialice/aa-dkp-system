@@ -28,7 +28,11 @@ export async function uploadAvatar(formData: FormData): Promise<string> {
 
   let publicUrl: string;
   try {
-    publicUrl = await saveUploadedFile("avatars", `${sessionUserId}/avatar`, file);
+    publicUrl = await saveUploadedFile(
+      "avatars",
+      `${sessionUserId}/avatar`,
+      file,
+    );
   } catch (uploadError) {
     console.error("Failed to upload avatar:", uploadError);
     throw new Error("Не удалось загрузить аватар");
@@ -37,7 +41,7 @@ export async function uploadAvatar(formData: FormData): Promise<string> {
   const avatarUrl = `${publicUrl}?t=${Date.now()}`;
 
   try {
-    await sql<any[]>`
+    await sql`
       UPDATE "user" SET avatar_url = ${avatarUrl} WHERE id = ${sessionUserId}
     `;
   } catch (updateError) {

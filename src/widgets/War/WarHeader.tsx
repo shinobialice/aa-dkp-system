@@ -2,18 +2,22 @@
 
 import type { ReactNode } from "react";
 import Image from "next/image";
-import type { GuildFaction, GuildMode } from "@/actions/guildStatusSettings";
+import { useClock } from "@/hooks/useClock";
 import {
   FACTION_LABEL,
   MODE_ICON,
   MODE_LABEL,
+  type GuildFaction,
+  type GuildMode,
 } from "@/shared/config/guildStatus";
 import { cn } from "@/shared/lib/tw-merge";
+import { periodTone } from "./periodStyles";
 import {
   formatDayMonth,
   formatFullDate,
   formatSpan,
-  useMinuteNow,
+  MINUTE_MS,
+  MINUTE_POLL_MS,
 } from "./warModel";
 
 const LIVE_LABEL: Record<GuildMode, string> = {
@@ -25,49 +29,15 @@ const ENDED_LABEL: Record<GuildMode, string> = {
   freeshard: "Завершена",
 };
 
-function StatusChip({
-  mode,
-  startedAt,
-  endedAt,
-}: {
+type Props = {
   mode: GuildMode;
+  server: string;
+  faction: GuildFaction;
   startedAt: string | null;
-  endedAt: string | null;
-}) {
-  const now = useMinuteNow();
-  const live = !endedAt;
-  const endMs = endedAt ? new Date(endedAt).getTime() : now;
-  const span =
-    startedAt && endMs !== null ? formatSpan(startedAt, endMs) : null;
-
-  return (
-    <span
-      className={cn(
-        "inline-flex h-6 items-center gap-1.5 rounded-full border px-2.5 text-xs font-semibold whitespace-nowrap",
-        !live && "border-border bg-muted text-muted-foreground",
-        live &&
-          mode === "pvp" &&
-          "border-red-200 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400",
-        live &&
-          mode === "freeshard" &&
-          "border-green-200 bg-green-50 text-green-700 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-400",
-      )}
-    >
-      <span
-        className={cn(
-          "size-1.5 rounded-full",
-          !live
-            ? "bg-muted-foreground/60"
-            : mode === "pvp"
-              ? "bg-red-600"
-              : "bg-green-600",
-        )}
-      />
-      {live ? LIVE_LABEL[mode] : ENDED_LABEL[mode]}
-      {span && ` · ${span}`}
-    </span>
-  );
-}
+  endedAt?: string | null;
+  compact?: boolean;
+  aside?: ReactNode;
+};
 
 export default function WarHeader({
   mode,
@@ -77,21 +47,9 @@ export default function WarHeader({
   endedAt = null,
   compact = false,
   aside,
-}: {
-  mode: GuildMode;
-  server: string;
-  faction: GuildFaction;
-  startedAt: string | null;
-  endedAt?: string | null;
-  compact?: boolean;
-  aside?: ReactNode;
-}) {
+}: Props) {
   const Heading = compact ? "h2" : "h1";
-  const period = !startedAt
-    ? null
-    : endedAt
-      ? `${formatFullDate(startedAt)} — ${formatFullDate(endedAt)}`
-      : `с ${formatDayMonth(startedAt, true)}`;
+  const period = periodLabel(startedAt, endedAt);
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-4">
@@ -111,7 +69,7 @@ export default function WarHeader({
             <Heading
               className={cn(
                 "leading-tight font-bold tracking-tight",
-                compact ? "text-xl" : "text-2xl sm:text-[26px]",
+                compact ? "text-xl" : "text-2xl",
               )}
             >
               {MODE_LABEL[mode]}
@@ -127,4 +85,40 @@ export default function WarHeader({
       {aside}
     </div>
   );
+}
+
+type StatusChipProps = {
+  mode: GuildMode;
+  startedAt: string | null;
+  endedAt: string | null;
+};
+
+function StatusChip({ mode, startedAt, endedAt }: StatusChipProps) {
+  const now = useClock(MINUTE_MS, MINUTE_POLL_MS);
+  const live = !endedAt;
+  const tone = periodTone(mode, live);
+  const endMs = endedAt ? new Date(endedAt).getTime() : now;
+  const span =
+    startedAt && endMs !== null ? formatSpan(startedAt, endMs) : null;
+
+  return (
+    <span
+      className={cn(
+        "inline-flex h-6 items-center gap-1.5 rounded-full border px-2.5 text-xs font-semibold whitespace-nowrap",
+        tone.chip,
+      )}
+    >
+      <span className={cn("size-1.5 rounded-full", tone.dot)} />
+      {live ? LIVE_LABEL[mode] : ENDED_LABEL[mode]}
+      {span && ` · ${span}`}
+    </span>
+  );
+}
+
+function periodLabel(startedAt: string | null, endedAt: string | null) {
+  if (!startedAt) return null;
+  if (endedAt) {
+    return `${formatFullDate(startedAt)} — ${formatFullDate(endedAt)}`;
+  }
+  return `с ${formatDayMonth(startedAt, true)}`;
 }

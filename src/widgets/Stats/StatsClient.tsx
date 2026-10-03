@@ -1,13 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import {
-  getBossIncomeByMonth,
   getGuildAglStatsByYear,
-  getGuildAttendanceAgl,
-  getGuildAttendancePrime,
   getGuildPrimeStatsByYear,
   getRaidsByDay,
   type BossIncomeStat,
@@ -17,10 +13,7 @@ import {
   type RosterClassStat,
   type SealGradeStat,
 } from "@/actions/guildStats";
-import {
-  mergeDailyAttendance,
-  mergeMonthlyAttendance,
-} from "@/utils/mergeAttendanceSeries";
+import { mergeMonthlyAttendance } from "@/utils/mergeAttendanceSeries";
 import AttendanceCard, { type AttendanceView } from "./AttendanceCard";
 import BossIncomeCard from "./BossIncomeCard";
 import CompositionCard from "./CompositionCard";
@@ -29,7 +22,6 @@ import StatsKpis from "./StatsKpis";
 import {
   fillMonth,
   FIRST_YEAR,
-  isRaidDay,
   periodLabel,
   samePeriod,
   shiftPeriod,
@@ -37,6 +29,8 @@ import {
   type MonthlyAttendance,
   type Period,
 } from "./statsModel";
+import { loadMonth, defaultDate } from "./statsLoaders";
+import PeriodSwitcher from "./PeriodSwitcher";
 
 export type MonthStats = {
   daily: DailyAttendance;
@@ -44,32 +38,6 @@ export type MonthStats = {
   income: BossIncomeStat[];
   previousIncome: BossIncomeStat[];
 };
-
-async function loadDaily({ year, month }: Period) {
-  const [prime, agl] = await Promise.all([
-    getGuildAttendancePrime({ year, month }),
-    getGuildAttendanceAgl({ year, month }),
-  ]);
-  return mergeDailyAttendance(prime, agl);
-}
-
-async function loadMonth(period: Period): Promise<MonthStats> {
-  const previous = shiftPeriod(period, -1);
-  const [daily, previousDaily, income, previousIncome] = await Promise.all([
-    loadDaily(period),
-    loadDaily(previous),
-    getBossIncomeByMonth(period.month + 1, period.year),
-    getBossIncomeByMonth(previous.month + 1, previous.year),
-  ]);
-  return { daily, previousDaily, income, previousIncome };
-}
-
-/** Сегодня, если он в этом месяце, иначе последний день с рейдом. */
-function defaultDate(period: Period, today: string, daily: DailyAttendance) {
-  const days = fillMonth(period, daily);
-  if (days.some((d) => d.date === today)) return today;
-  return [...days].reverse().find(isRaidDay)?.date ?? days[0]?.date ?? null;
-}
 
 export default function StatsClient({
   today,
@@ -168,39 +136,17 @@ export default function StatsClient({
     <div className="mx-auto flex w-full max-w-6xl min-w-0 flex-col gap-4 text-sm">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight sm:text-[26px]">
-            Статистика
-          </h1>
+          <h1 className="text-2xl font-bold tracking-tight">Статистика</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Посещаемость, доход и состав гильдии за выбранный месяц.
           </p>
         </div>
-        <div
-          aria-label="Период"
-          className="inline-flex items-center rounded-lg border bg-card"
-        >
-          <button
-            type="button"
-            aria-label="Предыдущий месяц"
-            disabled={!canGoBack}
-            onClick={() => changePeriod(shiftPeriod(period, -1))}
-            className="grid size-9 cursor-pointer place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground disabled:cursor-default disabled:opacity-30 disabled:hover:bg-transparent"
-          >
-            <ChevronLeft className="size-4" />
-          </button>
-          <span className="min-w-36 text-center font-semibold tabular-nums">
-            {periodLabel(period)}
-          </span>
-          <button
-            type="button"
-            aria-label="Следующий месяц"
-            disabled={!canGoForward}
-            onClick={() => changePeriod(shiftPeriod(period, 1))}
-            className="grid size-9 cursor-pointer place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground disabled:cursor-default disabled:opacity-30 disabled:hover:bg-transparent"
-          >
-            <ChevronRight className="size-4" />
-          </button>
-        </div>
+        <PeriodSwitcher
+          label={periodLabel(period)}
+          canGoBack={canGoBack}
+          canGoForward={canGoForward}
+          onShift={(delta) => changePeriod(shiftPeriod(period, delta))}
+        />
       </div>
 
       <div

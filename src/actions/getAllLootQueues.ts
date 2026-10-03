@@ -2,15 +2,16 @@
 
 import sql from "@/shared/lib/db";
 import {
+  type QueueQueryRow,
   mapQueueRow,
   sortQueue,
   type QueueMap,
 } from "@/widgets/Loot/LootBuy/lootBuyModel";
 
 export const getAllLootQueues = async (): Promise<QueueMap> => {
-  let rows;
+  let rows: QueueQueryRow[];
   try {
-    rows = await sql<any[]>`
+    rows = await sql<QueueQueryRow[]>`
       SELECT
         lq.id,
         lq.user_id,

@@ -24,7 +24,11 @@ function getColumns(count: number): 1 | 2 | 3 {
   return 1;
 }
 
-export default function PlayerNameList({ players }: { players: NamedPlayer[] }) {
+export default function PlayerNameList({
+  players,
+}: {
+  players: NamedPlayer[];
+}) {
   if (players.length === 0) return null;
 
   return (
@@ -39,14 +43,19 @@ export default function PlayerNameList({ players }: { players: NamedPlayer[] }) 
             {icon && (
               <span
                 className="flex size-4 shrink-0 items-center justify-center rounded-full text-background"
-                style={{ backgroundColor: classColors[player.class!] ?? FALLBACK_COLOR }}
+                style={{
+                  backgroundColor:
+                    classColors[player.class ?? ""] ?? FALLBACK_COLOR,
+                }}
                 title={player.class ?? undefined}
               >
                 {cloneElement(icon, { className: "size-2.5" })}
               </span>
             )}
             <span>{player.username}</span>
-            {player.suffix && <span className="opacity-70"> {player.suffix}</span>}
+            {player.suffix && (
+              <span className="opacity-70"> {player.suffix}</span>
+            )}
           </div>
         );
       })}

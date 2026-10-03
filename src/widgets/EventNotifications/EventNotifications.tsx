@@ -4,7 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { X } from "lucide-react";
 import { Card } from "@/shared/ui";
-import { useUpcomingEvents, bossImages } from "@/hooks/useUpcomingEvents";
+import { useUpcomingEvents } from "@/hooks/useUpcomingEvents";
+import { bossImages } from "@/shared/config/bossImages";
 import { useSoundNotificationsEnabled } from "@/hooks/useSoundNotificationsEnabled";
 
 const notifyBeforeMin = 10;

@@ -12,9 +12,7 @@ export type ClassArchetypeStat = {
 
 const UNSET_LABEL = "Не выбран";
 
-// Распределение игровых классов (3 специализации -> имя, см. user_archetype)
-// среди активных участников гильдии. Только мейн (role_slot = 1) — доп.
-// роли (2/3) не должны раздувать статистику по классам.
+// Только мейн-роль: доп. роли не должны раздувать статистику по классам.
 export async function getClassArchetypeStats(): Promise<ClassArchetypeStat[]> {
   const rows = await sql<
     { class_name: string | null; username: string; class: string | null }[]
@@ -29,36 +27,31 @@ export async function getClassArchetypeStats(): Promise<ClassArchetypeStat[]> {
     throw new Error("Не удалось загрузить статистику по классам");
   });
 
-  const counts = new Map<string, number>();
-  const players = new Map<string, NamedPlayer[]>();
+  const playersByClass = new Map<string, NamedPlayer[]>();
   for (const row of rows) {
     const name = row.class_name ?? UNSET_LABEL;
-    counts.set(name, (counts.get(name) ?? 0) + 1);
-    if (!players.has(name)) players.set(name, []);
-    players.get(name)!.push({ username: row.username, class: row.class });
+    const list = playersByClass.get(name) ?? [];
+    list.push({ username: row.username, class: row.class });
+    playersByClass.set(name, list);
   }
 
-  const total = rows.length;
-  const unsetCount = counts.get(UNSET_LABEL) ?? 0;
-  counts.delete(UNSET_LABEL);
+  const toStat = (className: string, members: NamedPlayer[]) => ({
+    className,
+    count: members.length,
+    percent: rows.length ? (members.length / rows.length) * 100 : 0,
+    players: sortPlayers(members),
+  });
 
-  const result = [...counts.entries()]
-    .map(([className, count]) => ({
-      className,
-      count,
-      percent: total ? (count / total) * 100 : 0,
-      players: sortPlayers(players.get(className) ?? []),
-    }))
-    .sort((a, b) => b.count - a.count || a.className.localeCompare(b.className, "ru"));
+  const unset = playersByClass.get(UNSET_LABEL);
+  playersByClass.delete(UNSET_LABEL);
 
-  if (unsetCount > 0) {
-    result.push({
-      className: UNSET_LABEL,
-      count: unsetCount,
-      percent: total ? (unsetCount / total) * 100 : 0,
-      players: sortPlayers(players.get(UNSET_LABEL) ?? []),
-    });
-  }
+  const result = [...playersByClass]
+    .map(([className, members]) => toStat(className, members))
+    .sort(
+      (a, b) =>
+        b.count - a.count || a.className.localeCompare(b.className, "ru"),
+    );
+  if (unset) result.push(toStat(UNSET_LABEL, unset));
 
   return result;
 }

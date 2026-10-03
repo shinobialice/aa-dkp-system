@@ -1,10 +1,16 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import type { BossRespawnRow } from "@/shared/lib/dbTypes";
+
+export type BossRespawnStatus = Pick<
+  BossRespawnRow,
+  "boss_name" | "last_kill" | "updated_at"
+> & { marked_by: string | null };
 
 export async function getBossRespawnStatus(bossNames: string[]) {
   try {
-    return await sql<any[]>`
+    return await sql<BossRespawnStatus[]>`
       SELECT br.boss_name, br.last_kill, br.updated_at, mark.username AS marked_by
       FROM boss_respawn br
       LEFT JOIN LATERAL (

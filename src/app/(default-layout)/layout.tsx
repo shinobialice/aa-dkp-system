@@ -49,7 +49,9 @@ export default async function DefaultLayout({
                 height={32}
                 className="size-8 object-contain"
               />
-              <span className="truncate text-lg font-bold text-primary">No Fear</span>
+              <span className="truncate text-lg font-bold text-primary">
+                No Fear
+              </span>
             </Link>
             <GuildLocationBadge variant="compact" />
           </header>
@@ -57,7 +59,9 @@ export default async function DefaultLayout({
             {children}
             <Toaster
               richColors
-              mobileOffset={{ bottom: "calc(5rem + env(safe-area-inset-bottom))" }}
+              mobileOffset={{
+                bottom: "calc(5rem + env(safe-area-inset-bottom))",
+              }}
             />
           </main>
         </div>

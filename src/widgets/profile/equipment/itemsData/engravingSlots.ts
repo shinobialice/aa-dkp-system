@@ -34,47 +34,47 @@ export function getEngravingCategory(slotKey: string): EngravingCategory {
   return "none";
 }
 
+type SlotThreshold = [minGrade: number, slots: number];
+
+const SLOT_THRESHOLDS: Partial<
+  Record<EngravingCategory | "beltOrBracers", SlotThreshold[]>
+> = {
+  beltOrBracers: [
+    [12, 6],
+    [11, 5],
+    [8, 4],
+    [2, 3],
+  ],
+  armor: [
+    [12, 8],
+    [11, 7],
+    [8, 6],
+    [2, 5],
+  ],
+  underwear: [
+    [8, 4],
+    [7, 3],
+    [5, 2],
+    [2, 1],
+  ],
+  weapon: [
+    [12, 9],
+    [11, 8],
+    [8, 7],
+    [2, 6],
+  ],
+  jewelry: [
+    [12, 3],
+    [10, 2],
+    [7, 1],
+  ],
+};
+
 export function getEngravingSlotCount(slotKey: string, grade: number): number {
-  const category = getEngravingCategory(slotKey);
-
-  if (slotKey === "belt" || slotKey === "bracers") {
-    if (grade >= 12) return 6;
-    if (grade >= 11) return 5;
-    if (grade >= 8) return 4;
-    if (grade >= 2) return 3;
-    return 0;
-  }
-
-  if (category === "armor") {
-    if (grade >= 12) return 8;
-    if (grade >= 11) return 7;
-    if (grade >= 8) return 6;
-    if (grade >= 2) return 5;
-    return 0;
-  }
-
-  if (category === "underwear") {
-    if (grade >= 8) return 4;
-    if (grade >= 7) return 3;
-    if (grade >= 5) return 2;
-    if (grade >= 2) return 1;
-    return 0;
-  }
-
-  if (category === "weapon") {
-    if (grade >= 12) return 9;
-    if (grade >= 11) return 8;
-    if (grade >= 8) return 7;
-    if (grade >= 2) return 6;
-    return 0;
-  }
-
-  if (category === "jewelry") {
-    if (grade >= 12) return 3;
-    if (grade >= 10) return 2;
-    if (grade >= 7) return 1;
-    return 0;
-  }
-
-  return 0;
+  const key =
+    slotKey === "belt" || slotKey === "bracers"
+      ? "beltOrBracers"
+      : getEngravingCategory(slotKey);
+  const thresholds = SLOT_THRESHOLDS[key] ?? [];
+  return thresholds.find(([minGrade]) => grade >= minGrade)?.[1] ?? 0;
 }

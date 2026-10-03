@@ -1,7 +1,7 @@
 import MembersTable from "@/widgets/MembersTable";
 import { getMembersTableData } from "@/actions/getMembersTableData";
 
-const MembersPage = async () => {
+async function MembersPage() {
   const tableData = await getMembersTableData();
 
   if (!tableData) {
@@ -9,6 +9,6 @@ const MembersPage = async () => {
   }
 
   return <MembersTable data={tableData} />;
-};
+}
 
 export default MembersPage;

@@ -1,47 +1,41 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import type { UserPenaltyPointsRow } from "@/shared/lib/dbTypes";
 import ensurePrivilieges from "./ensurePrivilieges";
-import { triggerFinanceRecalcForCurrentMonth } from "./recalculateFinanceForMonth";
+import { triggerFinanceRecalcForCurrentMonth } from "@/server/finance/recalc";
 
 export const getUserPenaltyPoints = async (userId: number) => {
   try {
-    const data = await sql<any[]>`
+    return await sql<UserPenaltyPointsRow[]>`
       SELECT * FROM user_penalty_points
       WHERE user_id = ${userId}
       ORDER BY created_at DESC
     `;
-    return data;
   } catch (error) {
     console.error("Ошибка при получении штрафов:", error);
     throw new Error("Не удалось загрузить штрафы пользователя");
   }
 };
 
-// Батч-версия getUserPenaltyPoints — суммирует штрафы сразу для всех
-// переданных пользователей одним запросом (используется при расчёте причин
-// отказа в ЗП для всей гильдии на странице /members).
 export const getUserPenaltyPointsBatch = async (
   userIds: number[],
 ): Promise<Record<number, number>> => {
   if (userIds.length === 0) return {};
 
-  let data;
+  let data: { user_id: number; total: number }[];
   try {
-    data = await sql<any[]>`
-      SELECT user_id, amount FROM user_penalty_points
+    data = await sql<{ user_id: number; total: number }[]>`
+      SELECT user_id, SUM(amount)::float8 AS total FROM user_penalty_points
       WHERE user_id = ANY(${userIds})
+      GROUP BY user_id
     `;
   } catch (error) {
     console.error("Ошибка при получении штрафов:", error);
     throw new Error("Не удалось загрузить штрафы пользователей");
   }
 
-  const result: Record<number, number> = {};
-  for (const row of data ?? []) {
-    result[row.user_id] = (result[row.user_id] ?? 0) + (row.amount ?? 0);
-  }
-  return result;
+  return Object.fromEntries(data.map((row) => [row.user_id, row.total]));
 };
 
 export async function addUserPenaltyPoints({
@@ -62,7 +56,7 @@ export async function addUserPenaltyPoints({
   }
 
   try {
-    await sql<any[]>`
+    await sql`
       INSERT INTO user_penalty_points (user_id, amount, reason, created_at)
       VALUES (${userId}, ${amount}, ${reason}, now())
     `;
@@ -77,7 +71,7 @@ export async function addUserPenaltyPoints({
 export async function deleteUserPenaltyPoints(id: number) {
   await ensurePrivilieges(["Администратор"]);
   try {
-    await sql<any[]>`
+    await sql`
       DELETE FROM user_penalty_points WHERE id = ${id}
     `;
   } catch (error) {

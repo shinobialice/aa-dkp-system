@@ -16,7 +16,7 @@ export const hasTag = async (
     redirect("/login");
   }
 
-  const [tagRow] = await sql<any[]>`
+  const [tagRow] = await sql<{ tag: string }[]>`
     SELECT tag FROM user_tags
     WHERE user_id = ${user.id} AND tag = ANY(${tags}) AND removed_at IS NULL
   `;

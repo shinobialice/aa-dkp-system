@@ -1,19 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { cn } from "@/shared/lib/tw-merge";
+import type { InventoryItem } from "@/actions/getUserInventory";
 import InventoryCategories from "./InventoryCategories";
-
-const FILTERS = [
-  { value: false, label: "Все" },
-  { value: true, label: "Только есть" },
-];
+import { Segmented } from "@/shared/ui";
 
 export default function InventoryTabsClient({
   inventory,
   userId,
 }: {
-  inventory: any[];
+  inventory: InventoryItem[];
   userId: number;
 }) {
   const [ownedOnly, setOwnedOnly] = useState(false);
@@ -25,36 +21,20 @@ export default function InventoryTabsClient({
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-[15px] font-semibold">Инвентарь</h2>
+          <h2 className="text-base font-semibold">Инвентарь</h2>
           <p className="mt-0.5 text-xs text-muted-foreground">
             Техника, глайдеры и петы для коллекций
           </p>
         </div>
-        <div
-          role="group"
-          aria-label="Что показать"
-          className="inline-flex gap-0.5 rounded-lg bg-muted p-[3px]"
-        >
-          {FILTERS.map((filter) => {
-            const active = filter.value === ownedOnly;
-            return (
-              <button
-                key={filter.label}
-                type="button"
-                aria-pressed={active}
-                onClick={() => setOwnedOnly(filter.value)}
-                className={cn(
-                  "h-8 cursor-pointer rounded-md px-3 text-sm transition-colors",
-                  active
-                    ? "bg-background font-semibold shadow-sm dark:bg-input/30"
-                    : "font-medium text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {filter.label}
-              </button>
-            );
-          })}
-        </div>
+        <Segmented
+          label="Что показать"
+          value={ownedOnly ? "owned" : "all"}
+          onChange={(value) => setOwnedOnly(value === "owned")}
+          options={[
+            { value: "all", label: "Все" },
+            { value: "owned", label: "Только есть" },
+          ]}
+        />
       </div>
       <InventoryCategories
         canEdit={false}

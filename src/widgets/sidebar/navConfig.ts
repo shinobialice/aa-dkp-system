@@ -91,7 +91,9 @@ export function findActiveUrl(pathname: string, urls: string[]) {
   let best: string | null = null;
   for (const url of urls) {
     const matches =
-      url === "/" ? pathname === "/" : pathname === url || pathname.startsWith(`${url}/`);
+      url === "/"
+        ? pathname === "/"
+        : pathname === url || pathname.startsWith(`${url}/`);
     if (matches && (!best || url.length > best.length)) best = url;
   }
   return best;

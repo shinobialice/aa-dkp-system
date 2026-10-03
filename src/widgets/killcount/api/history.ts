@@ -3,10 +3,10 @@
 import sql from "@/shared/lib/db";
 import ensurePrivilieges from "@/actions/ensurePrivilieges";
 import {
-  DB_GetKillCountDto,
-  DB_UpdateKillCountDto,
-  KillCountHistoryData,
-  KillCountWar,
+  type DB_GetKillCountDto,
+  type DB_UpdateKillCountDto,
+  type KillCountHistoryData,
+  type KillCountWar,
 } from "@/widgets/killcount/types";
 
 export const getKillCountWars = async () => {

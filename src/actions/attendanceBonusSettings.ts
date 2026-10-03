@@ -1,6 +1,10 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import type {
+  AttendanceBonusBossRow,
+  AttendanceBonusTypesRow,
+} from "@/shared/lib/dbTypes";
 import ensurePrivilieges from "./ensurePrivilieges";
 import { revalidatePath } from "next/cache";
 import { getGuildStatus, getGuildModeAtDate } from "./guildStatusSettings";
@@ -10,87 +14,100 @@ import type {
   ResolvedAttendanceBonus,
 } from "@/utils/attendanceBonusDefaults";
 
+function toBonusMode(value: string): AttendanceBonusMode {
+  return value === "multiply" ? "multiply" : "add";
+}
+
+function toBonusType(
+  row: AttendanceBonusTypesRow,
+  bossIds: number[],
+): AttendanceBonusTypeRow {
+  return {
+    id: row.id,
+    label: row.label,
+    modeFreeshard: toBonusMode(row.mode_freeshard),
+    modePvp: toBonusMode(row.mode_pvp),
+    valueFreeshard: row.value_freeshard,
+    valuePvp: row.value_pvp,
+    bossIds,
+    sortOrder: row.sort_order,
+  };
+}
+
+function getBonusTypes() {
+  return sql<AttendanceBonusTypesRow[]>`
+    SELECT * FROM attendance_bonus_types ORDER BY sort_order, id
+  `;
+}
+
 async function getBossIdsByBonus(): Promise<Map<number, number[]>> {
-  const rows = await sql<any[]>`SELECT bonus_type_id, boss_id FROM attendance_bonus_boss`;
+  const rows = await sql<AttendanceBonusBossRow[]>`
+    SELECT bonus_type_id, boss_id FROM attendance_bonus_boss
+  `;
   const map = new Map<number, number[]>();
-  for (const r of rows) {
-    const list = map.get(r.bonus_type_id) ?? [];
-    list.push(r.boss_id);
-    map.set(r.bonus_type_id, list);
+  for (const row of rows) {
+    const list = map.get(row.bonus_type_id) ?? [];
+    list.push(row.boss_id);
+    map.set(row.bonus_type_id, list);
   }
   return map;
 }
 
-// Используется в Настройках — полный редактируемый набор бонусов.
 export async function getAttendanceBonusTypesForSettings(): Promise<
   AttendanceBonusTypeRow[]
 > {
-  let rows, bossIdsByBonus;
   try {
-    [rows, bossIdsByBonus] = await Promise.all([
-      sql<any[]>`SELECT * FROM attendance_bonus_types ORDER BY sort_order, id`,
+    const [rows, bossIdsByBonus] = await Promise.all([
+      getBonusTypes(),
       getBossIdsByBonus(),
     ]);
+    return rows.map((row) =>
+      toBonusType(row, bossIdsByBonus.get(row.id) ?? []),
+    );
   } catch (error) {
     console.error("Ошибка при получении бонусов за посещение:", error);
     throw new Error("Не удалось загрузить бонусы за посещение");
   }
-
-  return rows.map((r) => ({
-    id: r.id,
-    label: r.label,
-    modeFreeshard: r.mode_freeshard,
-    modePvp: r.mode_pvp,
-    valueFreeshard: Number(r.value_freeshard),
-    valuePvp: Number(r.value_pvp),
-    bossIds: bossIdsByBonus.get(r.id) ?? [],
-    sortOrder: r.sort_order,
-  }));
 }
 
-// Используется при создании/редактировании рейда — резолвит под режим гильдии
-// (фришка/пвп), как getBosses() делает для dkp_points. Если передана дата
-// рейда (atDate), резолвит по режиму, действовавшему на неё, а не по текущему
-// — иначе рейд, добавленный/отредактированный задним числом после смены
-// режима, посчитался бы по ставкам "не своего" периода.
+// Если передана дата рейда, ставки берутся по режиму гильдии на эту дату,
+// иначе рейд, отредактированный задним числом после смены режима, посчитался
+// бы по ставкам чужого периода.
 export async function getAttendanceBonusTypesForRaid(
   atDate?: Date | string,
 ): Promise<ResolvedAttendanceBonus[]> {
-  let rows, mode, bossIdsByBonus;
   try {
-    [rows, mode, bossIdsByBonus] = await Promise.all([
-      sql<any[]>`SELECT * FROM attendance_bonus_types ORDER BY sort_order, id`,
-      atDate ? getGuildModeAtDate(atDate) : getGuildStatus().then((s) => s.mode),
+    const [rows, mode, bossIdsByBonus] = await Promise.all([
+      getBonusTypes(),
+      atDate
+        ? getGuildModeAtDate(atDate)
+        : getGuildStatus().then((status) => status.mode),
       getBossIdsByBonus(),
     ]);
+    const isPvp = mode === "pvp";
+
+    return rows.map((row) => ({
+      id: row.id,
+      label: row.label,
+      mode: toBonusMode(isPvp ? row.mode_pvp : row.mode_freeshard),
+      value: isPvp ? row.value_pvp : row.value_freeshard,
+      bossIds: bossIdsByBonus.get(row.id) ?? [],
+    }));
   } catch (error) {
     console.error("Ошибка при получении бонусов за посещение:", error);
     throw new Error("Не удалось загрузить бонусы за посещение");
   }
-
-  const isPvp = mode === "pvp";
-
-  return rows.map((r) => ({
-    id: r.id,
-    label: r.label,
-    mode: isPvp ? r.mode_pvp : r.mode_freeshard,
-    value: Number(isPvp ? r.value_pvp : r.value_freeshard),
-    bossIds: bossIdsByBonus.get(r.id) ?? [],
-  }));
 }
 
 export async function createAttendanceBonusType(): Promise<AttendanceBonusTypeRow> {
   await ensurePrivilieges(["Администратор"]);
 
-  let row;
+  let row: AttendanceBonusTypesRow | undefined;
   try {
-    const [{ next_order }] = await sql<any[]>`
-      SELECT COALESCE(MAX(sort_order), 0) + 1 AS next_order
-      FROM attendance_bonus_types
-    `;
-    [row] = await sql<any[]>`
+    [row] = await sql<AttendanceBonusTypesRow[]>`
       INSERT INTO attendance_bonus_types (label, sort_order)
-      VALUES ('Новый бонус', ${next_order})
+      SELECT 'Новый бонус', COALESCE(MAX(sort_order), 0) + 1
+      FROM attendance_bonus_types
       RETURNING *
     `;
   } catch (error) {
@@ -98,54 +115,38 @@ export async function createAttendanceBonusType(): Promise<AttendanceBonusTypeRo
     throw new Error("Не удалось создать бонус");
   }
 
+  if (!row) throw new Error("Не удалось создать бонус");
+
   revalidatePath("/settings");
-  return {
-    id: row.id,
-    label: row.label,
-    modeFreeshard: row.mode_freeshard,
-    modePvp: row.mode_pvp,
-    valueFreeshard: Number(row.value_freeshard),
-    valuePvp: Number(row.value_pvp),
-    bossIds: [],
-    sortOrder: row.sort_order,
-  };
+  return toBonusType(row, []);
 }
 
 export async function updateAttendanceBonusTypes(
-  rows: {
-    id: number;
-    label: string;
-    modeFreeshard: AttendanceBonusMode;
-    modePvp: AttendanceBonusMode;
-    valueFreeshard: number;
-    valuePvp: number;
-    bossIds: number[];
-  }[],
+  rows: Omit<AttendanceBonusTypeRow, "sortOrder">[],
 ) {
   await ensurePrivilieges(["Администратор"]);
 
   try {
-    await Promise.all(
-      rows.map(async (r) => {
-        await sql<any[]>`
+    await sql.begin(async (tx) => {
+      for (const row of rows) {
+        await tx`
           UPDATE attendance_bonus_types SET
-            label = ${r.label},
-            mode_freeshard = ${r.modeFreeshard},
-            mode_pvp = ${r.modePvp},
-            value_freeshard = ${r.valueFreeshard},
-            value_pvp = ${r.valuePvp}
-          WHERE id = ${r.id}
+            label = ${row.label},
+            mode_freeshard = ${row.modeFreeshard},
+            mode_pvp = ${row.modePvp},
+            value_freeshard = ${row.valueFreeshard},
+            value_pvp = ${row.valuePvp}
+          WHERE id = ${row.id}
         `;
-        await sql<any[]>`DELETE FROM attendance_bonus_boss WHERE bonus_type_id = ${r.id}`;
-        if (r.bossIds.length > 0) {
-          await sql<any[]>`
-            INSERT INTO attendance_bonus_boss ${sql(
-              r.bossIds.map((boss_id) => ({ bonus_type_id: r.id, boss_id })),
-            )}
-          `;
-        }
-      }),
-    );
+        await tx`DELETE FROM attendance_bonus_boss WHERE bonus_type_id = ${row.id}`;
+        if (row.bossIds.length === 0) continue;
+        await tx`
+          INSERT INTO attendance_bonus_boss ${tx(
+            row.bossIds.map((boss_id) => ({ bonus_type_id: row.id, boss_id })),
+          )}
+        `;
+      }
+    });
   } catch (error) {
     console.error("Ошибка при сохранении бонусов за посещение:", error);
     throw new Error("Не удалось сохранить бонусы за посещение");
@@ -158,7 +159,7 @@ export async function deleteAttendanceBonusType(id: number) {
   await ensurePrivilieges(["Администратор"]);
 
   try {
-    await sql<any[]>`DELETE FROM attendance_bonus_types WHERE id = ${id}`;
+    await sql`DELETE FROM attendance_bonus_types WHERE id = ${id}`;
   } catch (error) {
     console.error("Ошибка при удалении бонуса за посещение:", error);
     throw new Error("Не удалось удалить бонус");

@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
-import { Receiver } from "@upstash/qstash";
+import { type NextRequest, NextResponse } from "next/server";
+import { readVerifiedQstashBody } from "@/server/qstashSignature";
 import { sendVkMessage } from "@/shared/lib/vkBot";
 import { getBaseUrl } from "@/shared/lib";
 import { getVkMentionTag } from "@/shared/lib/vkQuietHours";
@@ -14,27 +14,9 @@ import {
 
 export const runtime = "nodejs";
 
-const receiver = new Receiver({
-  currentSigningKey: process.env.QSTASH_CURRENT_SIGNING_KEY!,
-  nextSigningKey: process.env.QSTASH_NEXT_SIGNING_KEY!,
-});
-
 export async function POST(req: NextRequest) {
-  const body = await req.text();
-  const signature = req.headers.get("upstash-signature") ?? "";
-
-  let isValid = false;
-  try {
-    isValid = await receiver.verify({
-      body,
-      signature,
-      url: `${getBaseUrl()}/api/notify-respawn`,
-    });
-  } catch {
-    isValid = false;
-  }
-
-  if (!isValid) {
+  const body = await readVerifiedQstashBody(req, "/api/notify-respawn");
+  if (body === null) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 

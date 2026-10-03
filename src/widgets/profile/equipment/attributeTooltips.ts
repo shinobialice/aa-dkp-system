@@ -1,4 +1,7 @@
-export const ATTRIBUTE_TOOLTIPS: Record<string, { title: string; lines: string[] }> = {
+export const ATTRIBUTE_TOOLTIPS: Record<
+  string,
+  { title: string; lines: string[] }
+> = {
   str: {
     title: "Сила",
     lines: [

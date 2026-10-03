@@ -1,3 +1,4 @@
+import type { InventoryItem } from "@/actions/getUserInventory";
 import {
   Select,
   SelectTrigger,
@@ -5,166 +6,74 @@ import {
   SelectContent,
   SelectItem,
 } from "@/shared/ui";
+import {
+  NONE,
+  PRESENT,
+  SELECTOR_OPTIONS,
+  selectorKind,
+  selectorValue,
+} from "./inventoryModel";
 
-type ItemSelectorProps = {
-  item: any;
-  userItem: any;
+type Props = {
+  itemName: string;
+  userItem?: InventoryItem;
   onChange: (value: string) => void;
   canEdit: boolean;
 };
 
-const triggerClass =
-  "h-6 w-auto min-w-0 gap-1 rounded-full border-none bg-secondary px-2.5 text-[11px] font-medium shadow-none hover:bg-secondary/80 cursor-pointer data-[size=sm]:h-6";
+const TRIGGER_CLASS =
+  "h-6 w-auto min-w-0 gap-1 rounded-full border-none bg-secondary px-2.5 text-2xs font-medium shadow-none hover:bg-secondary/80 cursor-pointer data-[size=sm]:h-6";
+
+const BADGE_TONES = {
+  tier2:
+    "bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300",
+  present:
+    "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-400",
+  missing: "bg-muted text-muted-foreground",
+};
 
 export default function ItemSelector({
-  item,
+  itemName,
   userItem,
   onChange,
   canEdit,
-}: ItemSelectorProps) {
-  const isBafalka = item.name === "Бафалка";
-
-  const isSpecialItem = [
-    "Коллеционный глайдер",
-    "Коллеционный глайдер т2",
-    "Коллекционный фамильяр",
-    "Коллекционный фамильяр т2",
-    "Коллекционный пет",
-    "Коллекционный пет т2",
-  ].includes(item.name);
-
-  const isDragon = item.name === "Дракон";
-  const getDisplayValue = () => {
-    if (isBafalka) {
-      return !userItem
-        ? "Нет"
-        : userItem.quality === "3"
-          ? "3 эпоха"
-          : userItem.quality === "4"
-            ? "4 эпоха"
-            : userItem.quality === "5"
-              ? "5 эпоха"
-              : "Нет";
-    }
-
-    if (isDragon) {
-      return userItem?.name || "Нет";
-    }
-
-    if (isSpecialItem) {
-      return !userItem
-        ? "Нет"
-        : userItem.quality === "3"
-          ? "T1"
-          : userItem.quality === "4"
-            ? "T2"
-            : "Нет";
-    }
-
-    return userItem ? "Есть" : "Нет";
-  };
+}: Props) {
+  const kind = selectorKind(itemName);
 
   if (!canEdit) {
-    const value = isDragon && userItem ? "Есть" : getDisplayValue();
-    const isPresent = value !== "Нет";
-    const isTier2 = value === "T2";
-    return (
-      <span
-        className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold whitespace-nowrap ${
-          isTier2
-            ? "bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300"
-            : isPresent
-              ? "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-400"
-              : "bg-muted text-muted-foreground"
-        }`}
-      >
-        {value}
-      </span>
-    );
-  }
-  if (isBafalka) {
-    return (
-      <Select
-        value={
-          !userItem
-            ? "Нет"
-            : userItem.quality === "3"
-              ? "3 эпоха"
-              : userItem.quality === "4"
-                ? "4 эпоха"
-                : userItem.quality === "5"
-                  ? "5 эпоха"
-                  : "Нет"
-        }
-        onValueChange={onChange}
-      >
-        <SelectTrigger size="sm" className={triggerClass}>
-          <SelectValue placeholder="Выбрать" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="Нет">Нет</SelectItem>
-          <SelectItem value="3 эпоха">3 эпоха</SelectItem>
-          <SelectItem value="4 эпоха">4 эпоха</SelectItem>
-          <SelectItem value="5 эпоха">5 эпоха</SelectItem>
-        </SelectContent>
-      </Select>
-    );
-  }
-
-  if (isDragon) {
-    return (
-      <Select
-        value={!userItem ? "Нет" : userItem.name}
-        onValueChange={onChange}
-      >
-        <SelectTrigger size="sm" className={triggerClass}>
-          <SelectValue placeholder="Выбрать" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="Нет">Нет</SelectItem>
-          <SelectItem value="Красный Дракон">Красный Дракон</SelectItem>
-          <SelectItem value="Черный Дракон">Черный Дракон</SelectItem>
-          <SelectItem value="Зеленый Дракон">Зеленый Дракон</SelectItem>
-        </SelectContent>
-      </Select>
-    );
-  }
-
-  if (isSpecialItem) {
-    return (
-      <Select
-        value={
-          !userItem
-            ? "Нет"
-            : userItem.quality === "3"
-              ? "T1"
-              : userItem.quality === "4"
-                ? "T2"
-                : "Нет"
-        }
-        onValueChange={onChange}
-      >
-        <SelectTrigger size="sm" className={triggerClass}>
-          <SelectValue placeholder="Выбрать" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="Нет">Нет</SelectItem>
-          <SelectItem value="T1">T1</SelectItem>
-          <SelectItem value="T2">T2</SelectItem>
-        </SelectContent>
-      </Select>
-    );
+    const value =
+      kind === "dragon" && userItem ? PRESENT : selectorValue(kind, userItem);
+    return <PresenceBadge value={value} />;
   }
 
   return (
-    <Select value={userItem ? "Есть" : "Нет"} onValueChange={onChange}>
-      <SelectTrigger size="sm" className={triggerClass}>
+    <Select value={selectorValue(kind, userItem)} onValueChange={onChange}>
+      <SelectTrigger size="sm" className={TRIGGER_CLASS}>
         <SelectValue placeholder="Выбрать" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="Есть">Есть</SelectItem>
-        <SelectItem value="Нет">Нет</SelectItem>
+        {SELECTOR_OPTIONS[kind].map((option) => (
+          <SelectItem key={option} value={option}>
+            {option}
+          </SelectItem>
+        ))}
       </SelectContent>
     </Select>
   );
+}
+
+function PresenceBadge({ value }: { value: string }) {
+  const tone = badgeTone(value);
+  return (
+    <span
+      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold whitespace-nowrap ${BADGE_TONES[tone]}`}
+    >
+      {value}
+    </span>
+  );
+}
+
+function badgeTone(value: string): keyof typeof BADGE_TONES {
+  if (value === "T2") return "tier2";
+  return value === NONE ? "missing" : "present";
 }

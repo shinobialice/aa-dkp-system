@@ -3,9 +3,9 @@
 import sql from "@/shared/lib/db";
 
 export async function getLootStock() {
-  let data;
+  let data: { quantity: number; item_name: string }[];
   try {
-    data = await sql<any[]>`
+    data = await sql<{ quantity: number; item_name: string }[]>`
       SELECT l.quantity, it.name AS item_name
       FROM loot l
       JOIN item_type it ON it.id = l.item_type_id
@@ -18,9 +18,7 @@ export async function getLootStock() {
 
   const stock: Record<string, number> = {};
   for (const row of data) {
-    const name = row.item_name;
-    if (!name) continue;
-    stock[name] = (stock[name] ?? 0) + (row.quantity ?? 0);
+    stock[row.item_name] = (stock[row.item_name] ?? 0) + row.quantity;
   }
 
   return stock;

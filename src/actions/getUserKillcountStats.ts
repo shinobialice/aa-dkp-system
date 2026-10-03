@@ -13,7 +13,7 @@ export async function getUserKillcountStats(
   userId: number,
 ): Promise<KillcountStats | null> {
   try {
-    const [row] = await sql<any[]>`
+    const [row] = await sql<KillcountStats[]>`
       WITH season AS (
         SELECT * FROM (
           SELECT started_at, NULL::timestamp AS ended_at, true AS is_current
@@ -50,21 +50,18 @@ export async function getUserKillcountStats(
           ROW_NUMBER() OVER (ORDER BY kills DESC, honor DESC, user_id)::int AS place
         FROM totals
       )
-      SELECT ranked.*, season.is_current AS "isCurrentWar"
+      SELECT
+        ranked.kills,
+        ranked."avgKills",
+        ranked."avgHonor",
+        ranked.place,
+        season.is_current AS "isCurrentWar"
       FROM ranked
       CROSS JOIN season
       WHERE ranked.user_id = ${userId}
     `;
 
-    if (!row) return null;
-
-    return {
-      kills: row.kills,
-      avgKills: row.avgKills,
-      avgHonor: row.avgHonor,
-      place: row.place,
-      isCurrentWar: row.isCurrentWar,
-    };
+    return row ?? null;
   } catch (error) {
     console.error("Ошибка при получении киллкаунта игрока:", error);
     return null;

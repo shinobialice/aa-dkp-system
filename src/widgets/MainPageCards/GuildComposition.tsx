@@ -13,7 +13,11 @@ export default function GuildComposition({ stats }: { stats: Stats | null }) {
     ? [
         { name: "ДД", count: stats.dds, color: "#f97316" },
         { name: "Хилы", count: stats.healers, color: classColors["Хил"] },
-        { name: "Тактики", count: stats.tacticians, color: classColors["Тактик"] },
+        {
+          name: "Тактики",
+          count: stats.tacticians,
+          color: classColors["Тактик"],
+        },
         { name: "Барды", count: stats.bards, color: classColors["Бард"] },
         { name: "Танцоры", count: stats.dancers, color: classColors["Танцор"] },
       ]
@@ -26,7 +30,9 @@ export default function GuildComposition({ stats }: { stats: Stats | null }) {
         <div className="flex items-baseline gap-2">
           <h2 className="font-semibold">Состав гильдии</h2>
           {stats && (
-            <span className="text-sm text-muted-foreground">{total} активных</span>
+            <span className="text-sm text-muted-foreground">
+              {total} активных
+            </span>
           )}
         </div>
         <Link
@@ -46,8 +52,11 @@ export default function GuildComposition({ stats }: { stats: Stats | null }) {
               .map((role) => (
                 <span
                   key={role.name}
-                  className="block min-w-1 rounded-[3px]"
-                  style={{ flex: `${role.count} 0 0`, backgroundColor: role.color }}
+                  className="block min-w-1 rounded-sm"
+                  style={{
+                    flex: `${role.count} 0 0`,
+                    backgroundColor: role.color,
+                  }}
                 />
               ))}
           </div>
@@ -55,7 +64,7 @@ export default function GuildComposition({ stats }: { stats: Stats | null }) {
             {roles.map((role) => (
               <li key={role.name} className="flex items-center gap-1.5 text-sm">
                 <span
-                  className="size-2.5 shrink-0 rounded-[3px]"
+                  className="size-2.5 shrink-0 rounded-sm"
                   style={{ backgroundColor: role.color }}
                 />
                 <span className="flex-1 sm:flex-none">{role.name}</span>

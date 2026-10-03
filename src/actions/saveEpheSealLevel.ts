@@ -1,7 +1,7 @@
 "use server";
 import sql from "@/shared/lib/db";
 import ensureCanEditUserData from "./ensureCanEditUserData";
-import getUserEquipment, { UserEquipment } from "./getUserEquipment";
+import getUserEquipment, { type UserEquipment } from "./getUserEquipment";
 import { isValidEquipmentSlot } from "@/widgets/profile/equipment/equipmentData";
 import { isValidEpheSealLevel } from "@/widgets/profile/ephe/epheSealsData";
 

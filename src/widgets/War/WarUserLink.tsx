@@ -1,15 +1,13 @@
 import Link from "next/link";
 import { cn } from "@/shared/lib/tw-merge";
 
-export default function WarUserLink({
-  userId,
-  name,
-  className,
-}: {
+type Props = {
   userId: number;
   name: string;
   className?: string;
-}) {
+};
+
+export default function WarUserLink({ userId, name, className }: Props) {
   return (
     <Link
       href={`/profile/${userId}`}

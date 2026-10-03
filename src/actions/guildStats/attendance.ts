@@ -3,21 +3,19 @@
 import sql from "@/shared/lib/db";
 
 async function getDailyAttendance(year: number, month: number, type: string) {
-  let data;
+  let data: { date: string; percent: number }[];
   try {
-    data = await sql<any[]>`
+    data = await sql<{ date: string; percent: number }[]>`
       SELECT * FROM get_daily_attendance(${year}, ${month}, ${type})
     `;
   } catch {
     throw new Error("Ошибка при загрузке посещаемости");
   }
 
-  const daily: { date: string; value: number }[] = (data ?? []).map(
-    (row: { date: string; percent: number }) => ({
-      date: row.date,
-      value: Number(row.percent),
-    }),
-  );
+  const daily = data.map((row) => ({
+    date: row.date,
+    value: Number(row.percent),
+  }));
 
   const percent =
     daily.reduce((acc, d) => acc + d.value, 0) / (daily.length || 1);

@@ -1,6 +1,7 @@
 "use server";
 import sql from "@/shared/lib/db";
-import type { RoleSlot } from "./getUserArchetype";
+import type { UserSkillBuildRow } from "@/shared/lib/dbTypes";
+import { isRoleSlot, type RoleSlot } from "@/shared/config/roleSlots";
 
 // Билд одной ветки специализации: какие конкретно навыки взяты и в какой
 // форме (эфе'рунд) — необязательная детализация поверх выбора в
@@ -18,15 +19,14 @@ export type UserSkillBuild = Record<RoleSlot, RoleSkillBuild>;
 
 const getUserSkillBuild = async (userId: number): Promise<UserSkillBuild> => {
   try {
-    const rows = await sql<any[]>`
+    const rows = await sql<Pick<UserSkillBuildRow, "role_slot" | "build">[]>`
       SELECT role_slot, build FROM user_skill_build WHERE user_id = ${userId}
     `;
 
     const result: UserSkillBuild = { 1: {}, 2: {}, 3: {} };
     for (const row of rows) {
-      const slot = row.role_slot as RoleSlot;
-      if (slot !== 1 && slot !== 2 && slot !== 3) continue;
-      result[slot] = row.build ?? {};
+      if (!isRoleSlot(row.role_slot)) continue;
+      result[row.role_slot] = (row.build as RoleSkillBuild | null) ?? {};
     }
     return result;
   } catch (error) {

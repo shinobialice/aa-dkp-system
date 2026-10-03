@@ -7,7 +7,11 @@ type SealIconProps = {
   className?: string;
 };
 
-export default function SealIcon({ grade, size = 40, className }: SealIconProps) {
+export default function SealIcon({
+  grade,
+  size = 40,
+  className,
+}: SealIconProps) {
   return (
     <div
       className={className}

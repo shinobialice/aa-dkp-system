@@ -2,17 +2,15 @@
 
 import Image from "next/image";
 import { cn } from "@/shared/lib/tw-merge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui";
-import { LootIcon } from "./icons/LootIconComponent";
 import {
-  avatarSrc,
-  plural,
-  priceLabel,
-  type BuyItem,
-  type QueueEntry,
-} from "./lootBuyModel";
-
-export const GOLD_ICON = "https://archeagecodex.com/items/gold.png";
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  GOLD_ICON_URL,
+} from "@/shared/ui";
+import { LootIcon } from "./icons/LootIconComponent";
+import { priceLabel, type BuyItem, type QueueEntry } from "./lootBuyModel";
+import { avatarSrc, plural } from "@/shared/lib/format";
 
 export type ItemGroup = {
   source: string;
@@ -25,7 +23,7 @@ function StockBadge({ stock }: { stock: number }) {
   return (
     <span
       className={cn(
-        "rounded-full px-2 py-px text-[12.5px] font-medium whitespace-nowrap",
+        "rounded-full px-2 py-px text-xs font-medium whitespace-nowrap",
         stock > 0
           ? "bg-green-100 text-green-800 dark:bg-green-500/15 dark:text-green-300"
           : "text-muted-foreground",
@@ -39,14 +37,12 @@ function StockBadge({ stock }: { stock: number }) {
 function Price({ item }: { item: BuyItem }) {
   if (item.price === null) {
     return (
-      <span className="text-[12.5px] text-muted-foreground">
-        {priceLabel(item)}
-      </span>
+      <span className="text-xs text-muted-foreground">{priceLabel(item)}</span>
     );
   }
   return (
     <span className="inline-flex items-center gap-1 font-semibold text-foreground tabular-nums">
-      <Image src={GOLD_ICON} alt="" width={14} height={14} />
+      <Image src={GOLD_ICON_URL} alt="" width={14} height={14} />
       {priceLabel(item)}
     </span>
   );
@@ -54,21 +50,24 @@ function Price({ item }: { item: BuyItem }) {
 
 function QueueFaces({ entries }: { entries: QueueEntry[] }) {
   if (entries.length === 0) {
-    return <span className="text-[12.5px] text-muted-foreground">пусто</span>;
+    return <span className="text-xs text-muted-foreground">пусто</span>;
   }
   return (
     <span className="flex items-center gap-2">
       <span className="flex -space-x-1.5">
         {entries.slice(0, 3).map((entry) => (
-          <Avatar key={entry.id} className="size-[22px] ring-2 ring-background">
-            <AvatarImage src={avatarSrc(entry)} alt="" />
-            <AvatarFallback className="text-[9px]">
+          <Avatar key={entry.id} className="size-5.5 ring-2 ring-background">
+            <AvatarImage
+              src={avatarSrc(entry.username, entry.avatarUrl)}
+              alt=""
+            />
+            <AvatarFallback className="text-2xs">
               {entry.username.slice(0, 1)}
             </AvatarFallback>
           </Avatar>
         ))}
       </span>
-      <span className="text-[13px] font-semibold tabular-nums">
+      <span className="text-sm font-semibold tabular-nums">
         {entries.length}
       </span>
     </span>
@@ -103,7 +102,7 @@ function ItemRow({
         <span className="leading-tight font-medium @[40rem]/list:truncate">
           {item.name}
         </span>
-        <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12.5px] text-muted-foreground @[40rem]/list:hidden">
+        <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground @[40rem]/list:hidden">
           <Price item={item} />
           <StockBadge stock={item.stock} />
           {queue.length > 0 && <span>{queue.length} в очереди</span>}
@@ -122,10 +121,10 @@ function ItemRow({
       <span className="hidden w-28 shrink-0 justify-end @[40rem]/list:flex">
         <Price item={item} />
       </span>
-      <span className="hidden w-[76px] shrink-0 justify-center @[40rem]/list:flex">
+      <span className="hidden w-19 shrink-0 justify-center @[40rem]/list:flex">
         <StockBadge stock={item.stock} />
       </span>
-      <span className="hidden w-[120px] shrink-0 @[40rem]/list:flex">
+      <span className="hidden w-30 shrink-0 @[40rem]/list:flex">
         <QueueFaces entries={queue} />
       </span>
     </button>
@@ -164,8 +163,8 @@ export default function LootItemList({
             className="flex flex-col gap-2"
           >
             <div className="flex items-baseline gap-2 px-1">
-              <h2 className="text-[15px] font-bold">{group.source}</h2>
-              <span className="text-[12.5px] text-muted-foreground">
+              <h2 className="text-base font-bold">{group.source}</h2>
+              <span className="text-xs text-muted-foreground">
                 {group.items.length}{" "}
                 {plural(group.items.length, "предмет", "предмета", "предметов")}
                 {inStock > 0 && ` · ${inStock} в наличии`}
@@ -175,8 +174,8 @@ export default function LootItemList({
               <div className="hidden items-center gap-3 border-b bg-muted/50 px-3.5 py-1.5 text-xs font-medium text-muted-foreground @[40rem]/list:flex">
                 <span className="flex-1">Предмет</span>
                 <span className="w-28 text-right">Цена</span>
-                <span className="w-[76px] text-center">Склад</span>
-                <span className="w-[120px]">Очередь</span>
+                <span className="w-19 text-center">Склад</span>
+                <span className="w-30">Очередь</span>
               </div>
               {group.items.map((item) => (
                 <ItemRow

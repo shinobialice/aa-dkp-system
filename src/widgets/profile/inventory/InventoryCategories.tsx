@@ -1,19 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import type { InventoryItem } from "@/actions/getUserInventory";
 import InventoryCategoryGrid from "./InventoryCategoryGrid";
+import { CATALOG_CATEGORIES, INVENTORY_CATEGORIES } from "./inventoryModel";
 import {
   getProfileItemTypes,
-  ProfileItemTypeRow,
+  type ProfileItemTypeRow,
 } from "@/actions/profileItemTypeAdmin";
 import {
   getInventoryCatalog,
-  OtherInventoryCatalogItem,
+  type OtherInventoryCatalogItem,
 } from "@/actions/getInventoryCatalog";
-
-const categories = ["Техника", "Глайдеры", "Петы", "Другое"];
-
-const catalogCategories = ["Глайдеры", "Петы", "Другое"];
 
 export default function InventoryCategories({
   inventory,
@@ -23,7 +21,7 @@ export default function InventoryCategories({
   isAdmin,
   ownedOnly = false,
 }: {
-  inventory: any[];
+  inventory: InventoryItem[];
   userId: number;
   onChange: () => void;
   canEdit: boolean;
@@ -40,11 +38,11 @@ export default function InventoryCategories({
   const reloadExtraItemTypes = useCallback(() => {
     getProfileItemTypes().then(setExtraItemTypes);
     Promise.all(
-      catalogCategories.map((category) => getInventoryCatalog(category)),
+      CATALOG_CATEGORIES.map((category) => getInventoryCatalog(category)),
     ).then((catalogs) => {
       setCatalogsByCategory(
         Object.fromEntries(
-          catalogCategories.map((category, i) => [category, catalogs[i]]),
+          CATALOG_CATEGORIES.map((category, i) => [category, catalogs[i]]),
         ),
       );
     });
@@ -56,7 +54,7 @@ export default function InventoryCategories({
 
   return (
     <div className="space-y-5">
-      {categories.map((type) => (
+      {INVENTORY_CATEGORIES.map((type) => (
         <div key={type}>
           <InventoryCategoryGrid
             ownedOnly={ownedOnly}

@@ -44,7 +44,9 @@ export function SynthesisEffectPicker({
             <label
               key={effect.id}
               className={`flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent ${
-                disabled ? "cursor-not-allowed opacity-40 hover:bg-transparent" : ""
+                disabled
+                  ? "cursor-not-allowed opacity-40 hover:bg-transparent"
+                  : ""
               }`}
             >
               <input
@@ -55,7 +57,8 @@ export function SynthesisEffectPicker({
                 className="cursor-pointer"
               />
               <span className="min-w-0 flex-1 truncate">
-                {effect.label}: {formatEffectValue(effect.value, effect.isPercent)}
+                {effect.label}:{" "}
+                {formatEffectValue(effect.value, effect.isPercent)}
               </span>
             </label>
           );

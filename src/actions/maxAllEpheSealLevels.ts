@@ -1,7 +1,7 @@
 "use server";
 import sql from "@/shared/lib/db";
 import ensureCanEditUserData from "./ensureCanEditUserData";
-import getUserEquipment, { UserEquipment } from "./getUserEquipment";
+import getUserEquipment, { type UserEquipment } from "./getUserEquipment";
 import {
   EPHE_SLOT_TRACK,
   EPHE_TRACK_MAX_LEVEL,

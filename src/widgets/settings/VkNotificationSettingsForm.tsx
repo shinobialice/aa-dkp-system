@@ -7,7 +7,6 @@ import {
   updateVkNotificationSettings,
 } from "@/actions/vkNotificationSettings";
 import {
-  resolveNotifyMinutes,
   PRIME_EVENT_NAME,
   type VkNotificationSettings,
 } from "@/shared/config/vkNotificationDefaults";
@@ -15,88 +14,10 @@ import { bosses } from "@/shared/config/bossRespawn";
 import { fixedScheduleEvents } from "@/shared/config/fixedSchedule";
 import { useSettingsDraft } from "./settingsDraft";
 import { Loading, SettingRow, SettingsCard, Unit } from "./settingsUi";
+import { splitPrimeTime, joinPrimeTime, weekDays } from "./primeTime";
+import EventRow from "./VkEventRow";
 
 export const VK_DRAFT_ID = "vk";
-
-// Разбираем "HH:MM" на часы/минуты для двух отдельных числовых полей —
-// это (в отличие от <input type="time">) даёт гарантированно 24-часовой
-// формат независимо от локали браузера/ОС пользователя.
-function splitPrimeTime(value: string | null): [string, string] {
-  if (!value) return ["", ""];
-  const [h, m] = value.split(":");
-  return [h ?? "", m ?? ""];
-}
-
-function joinPrimeTime(hour: string, minute: string): string | null {
-  if (hour === "" && minute === "") return null;
-  const h = String(Math.min(23, Math.max(0, Number(hour) || 0))).padStart(
-    2,
-    "0",
-  );
-  const m = String(Math.min(59, Math.max(0, Number(minute) || 0))).padStart(
-    2,
-    "0",
-  );
-  return `${h}:${m}`;
-}
-
-const weekDays: { label: string; value: number }[] = [
-  { label: "Пн", value: 1 },
-  { label: "Вт", value: 2 },
-  { label: "Ср", value: 3 },
-  { label: "Чт", value: 4 },
-  { label: "Пт", value: 5 },
-  { label: "Сб", value: 6 },
-  { label: "Вс", value: 0 },
-];
-
-type Vk = ReturnType<typeof useSettingsDraft<VkNotificationSettings>>;
-
-/** Строка события: включено ли напоминание и за сколько минут. */
-function EventRow({ name, vk }: { name: string; vk: Vk }) {
-  const settings = vk.value!;
-  const enabled = settings.enabledBosses.includes(name);
-  return (
-    <SettingRow
-      title={name}
-      changed={vk.changed((v) => [
-        v.enabledBosses.includes(name),
-        resolveNotifyMinutes(v, name),
-      ])}
-    >
-      <Input
-        type="number"
-        min={0}
-        aria-label={`За сколько минут: ${name}`}
-        className="h-8 w-16 text-right"
-        disabled={!enabled}
-        value={resolveNotifyMinutes(settings, name)}
-        onChange={(e) =>
-          vk.setValue((v) => ({
-            ...v,
-            notifyMinutesByEvent: {
-              ...v.notifyMinutesByEvent,
-              [name]: Number(e.target.value),
-            },
-          }))
-        }
-      />
-      <Unit>мин</Unit>
-      <Switch
-        aria-label={`Напоминать: ${name}`}
-        checked={enabled}
-        onCheckedChange={(checked) =>
-          vk.setValue((v) => ({
-            ...v,
-            enabledBosses: checked
-              ? [...v.enabledBosses, name]
-              : v.enabledBosses.filter((b) => b !== name),
-          }))
-        }
-      />
-    </SettingRow>
-  );
-}
 
 export function VkNotificationSettingsForm() {
   const vk = useSettingsDraft<VkNotificationSettings>({
@@ -116,7 +37,7 @@ export function VkNotificationSettingsForm() {
   return (
     <>
       <SettingsCard title="Прайм">
-        <EventRow name={PRIME_EVENT_NAME} vk={vk} />
+        <EventRow name={PRIME_EVENT_NAME} vk={vk} settings={settings} />
         <SettingRow
           title="Время прайма"
           hint="МСК, 24 часа"
@@ -186,13 +107,13 @@ export function VkNotificationSettingsForm() {
         hint="без фиксированного времени · за сколько минут напомнить"
       >
         {bosses.map((boss) => (
-          <EventRow key={boss} name={boss} vk={vk} />
+          <EventRow key={boss} name={boss} vk={vk} settings={settings} />
         ))}
       </SettingsCard>
 
       <SettingsCard title="Расписание" hint="за сколько минут напомнить">
         {fixedScheduleEvents.map((name) => (
-          <EventRow key={name} name={name} vk={vk} />
+          <EventRow key={name} name={name} vk={vk} settings={settings} />
         ))}
       </SettingsCard>
 

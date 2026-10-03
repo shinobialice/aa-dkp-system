@@ -1,9 +1,11 @@
 "use client";
+import type { ProfileUser } from "@/actions/getUser";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useAsyncData } from "@/hooks/useAsyncData";
 import Image from "next/image";
-import { Plus, ShieldCheck, X } from "lucide-react";
-import { Button } from "@/shared/ui";
+import { Plus } from "lucide-react";
+import { Button, GOLD_ICON_URL } from "@/shared/ui";
 import calculateGuildTenureBonus from "@/utils/calculateGuildTenureBonus";
 import { calculatePenaltyPercent } from "@/utils/calculateSalaryWeight";
 import { deleteUserSalaryBonus } from "@/actions/addUserSalaryBonus";
@@ -14,61 +16,11 @@ import {
 } from "@/actions/penaltyActions";
 import AddSalaryBonusDialog from "./AddSalaryBonusDialog";
 import AddPenaltyPointsDialog from "./AddPenaltyPointsDialog";
-import { UserTagsSection } from "./UserTagsSection";
-
-type Entry = { id: number; amount: number; reason: string };
+import AdminTagsPanel from "./AdminTagsPanel";
+import { formatPercent } from "@/shared/lib/format";
+import Row, { type Entry } from "./SalaryEntryRow";
 
 const MONTH = new Date().toLocaleDateString("ru-RU", { month: "long" });
-
-function formatPercent(value: number): string {
-  return value.toLocaleString("ru-RU", { maximumFractionDigits: 1 });
-}
-
-function Row({
-  title,
-  hint,
-  value,
-  positive,
-  onRemove,
-}: {
-  title: string;
-  hint: string;
-  value: string;
-  positive: boolean | null;
-  onRemove?: () => void;
-}) {
-  return (
-    <li className="grid min-h-12 grid-cols-[minmax(0,1fr)_auto_32px] items-center gap-2.5 border-t border-border/60 px-2.5 py-1.5">
-      <div className="min-w-0">
-        <div className="font-medium">{title}</div>
-        <div className="text-xs text-muted-foreground">{hint}</div>
-      </div>
-      <span
-        className={
-          positive === null
-            ? "font-bold text-muted-foreground tabular-nums"
-            : positive
-              ? "font-bold text-green-700 tabular-nums dark:text-green-400"
-              : "font-bold text-red-700 tabular-nums dark:text-red-400"
-        }
-      >
-        {value}
-      </span>
-      {onRemove ? (
-        <button
-          type="button"
-          onClick={onRemove}
-          aria-label={`Убрать: ${title}`}
-          className="flex size-8 cursor-pointer items-center justify-center rounded-md text-muted-foreground/70 transition-colors hover:bg-accent hover:text-foreground"
-        >
-          <X className="size-4" />
-        </button>
-      ) : (
-        <span />
-      )}
-    </li>
-  );
-}
 
 export default function ProfileSalaryTab({
   user,
@@ -79,35 +31,25 @@ export default function ProfileSalaryTab({
   averageGuildGS,
   isAdmin,
 }: {
-  user: any;
+  user: ProfileUser;
   salary: number | null;
   tags: { id: number; tag: string }[];
   setTags: (tags: { id: number; tag: string }[]) => void;
-  setUser: (user: any) => void;
+  setUser: (user: ProfileUser) => void;
   averageGuildGS: number;
   isAdmin: boolean;
 }) {
-  const [bonuses, setBonuses] = useState<Entry[]>([]);
-  const [penalties, setPenalties] = useState<Entry[]>([]);
-  const [version, setVersion] = useState(0);
   const [bonusDialogOpen, setBonusDialogOpen] = useState(false);
   const [penaltyDialogOpen, setPenaltyDialogOpen] = useState(false);
-  const reload = () => setVersion((value) => value + 1);
-
-  useEffect(() => {
-    let cancelled = false;
-    Promise.all([
+  const { data, reload } = useAsyncData(String(user.id), async () => {
+    const [bonuses, penalties] = await Promise.all([
       getUserSalaryBonus(user.id),
       getUserPenaltyPoints(user.id),
-    ]).then(([bonusRows, penaltyRows]) => {
-      if (cancelled) return;
-      setBonuses(bonusRows as Entry[]);
-      setPenalties(penaltyRows as Entry[]);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [user.id, version]);
+    ]);
+    return { bonuses, penalties };
+  });
+  const bonuses: Entry[] = data?.bonuses ?? [];
+  const penalties: Entry[] = data?.penalties ?? [];
 
   const tenureBonus = calculateGuildTenureBonus(user.joined_at ?? null);
   const penaltyPoints = penalties.reduce(
@@ -122,9 +64,9 @@ export default function ProfileSalaryTab({
         aria-label="Из чего складывается зарплата"
         className="flex flex-col rounded-xl border bg-card"
       >
-        <div className="flex items-start justify-between gap-3 px-4 pt-4 pb-2.5 sm:px-[18px]">
+        <div className="flex items-start justify-between gap-3 px-4 pt-4 pb-2.5 sm:px-4.5">
           <div>
-            <h2 className="text-[15px] font-semibold">
+            <h2 className="text-base font-semibold">
               Из чего складывается зарплата
             </h2>
             <p className="mt-0.5 text-xs text-muted-foreground">
@@ -134,12 +76,7 @@ export default function ProfileSalaryTab({
           </div>
           <div className="shrink-0 text-right">
             <div className="flex items-center justify-end gap-1.5 text-xl font-bold tabular-nums">
-              <Image
-                src="https://archeagecodex.com/items/gold.png"
-                alt=""
-                width={16}
-                height={16}
-              />
+              <Image src={GOLD_ICON_URL} alt="" width={16} height={16} />
               {salary != null ? salary.toLocaleString("ru-RU") : "—"}
             </div>
             <div className="text-xs text-muted-foreground">за {MONTH}</div>
@@ -191,12 +128,12 @@ export default function ProfileSalaryTab({
             title="Итого штрафов"
             hint={
               penaltyPoints > 0
-                ? `${penaltyPoints} — минус ${formatPercent(penaltyPercent)}% к зарплате`
+                ? `${penaltyPoints} — минус ${formatPercent(penaltyPercent, 1)} к зарплате`
                 : "штрафов нет"
             }
             value={
               penaltyPoints > 0
-                ? `−${formatPercent(Math.min(100, penaltyPercent))}%`
+                ? `−${formatPercent(Math.min(100, penaltyPercent), 1)}`
                 : "0%"
             }
             positive={penaltyPoints > 0 ? false : null}
@@ -204,7 +141,7 @@ export default function ProfileSalaryTab({
         </ul>
 
         {isAdmin && (
-          <div className="flex gap-2 border-t border-border/60 px-4 pt-3 pb-4 sm:px-[18px]">
+          <div className="flex gap-2 border-t border-border/60 px-4 pt-3 pb-4 sm:px-4.5">
             <Button
               variant="outline"
               size="sm"
@@ -228,29 +165,13 @@ export default function ProfileSalaryTab({
       </section>
 
       {isAdmin && (
-        <section
-          aria-label="Теги"
-          className="flex flex-col rounded-xl border bg-card"
-        >
-          <div className="flex items-center gap-2 px-4 pt-4 pb-2 sm:px-[18px]">
-            <h2 className="text-[15px] font-semibold">Теги</h2>
-            <span className="ml-auto inline-flex items-center gap-1 text-xs text-muted-foreground">
-              <ShieldCheck className="size-3.5" />
-              видно только администрации
-            </span>
-          </div>
-          <div className="px-4 pb-4 sm:px-[18px]">
-            <UserTagsSection
-              user={user}
-              onUpdate={() => {}}
-              tags={tags}
-              setTags={setTags}
-              setUser={setUser}
-              averageGuildGS={averageGuildGS}
-              isAdmin={isAdmin}
-            />
-          </div>
-        </section>
+        <AdminTagsPanel
+          user={user}
+          tags={tags}
+          setTags={setTags}
+          setUser={setUser}
+          averageGuildGS={averageGuildGS}
+        />
       )}
 
       {isAdmin && (

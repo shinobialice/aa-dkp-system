@@ -3,65 +3,35 @@
 import Image from "next/image";
 import { cn } from "@/shared/lib/tw-merge";
 import type { BossIncomeStat } from "@/actions/guildStats";
-import { GOLD_ICON } from "../Loot/LootBuy/LootItemList";
 import {
   AGL_COLOR,
   averagePercent,
-  formatNumber,
   isRaidDay,
   PRIME_COLOR,
   type DailyAttendance,
 } from "./statsModel";
+import { formatNumber } from "@/shared/lib/format";
+import { StatTile, StatUnit, GOLD_ICON_URL } from "@/shared/ui";
 
 function Delta({ value, unit = "" }: { value: number | null; unit?: string }) {
   if (value === null) {
-    return <span className="text-[11.5px] text-muted-foreground">—</span>;
+    return <span className="text-2xs text-muted-foreground">—</span>;
   }
   const rounded = Math.round(value);
   const up = rounded >= 0;
   return (
     <span
       className={cn(
-        "self-start rounded-full px-2 py-px text-[11.5px] font-semibold whitespace-nowrap",
+        "self-start rounded-full px-2 py-px text-2xs font-semibold whitespace-nowrap",
         up
           ? "bg-green-100 text-green-800 dark:bg-green-500/15 dark:text-green-300"
           : "bg-red-100 text-red-800 dark:bg-red-500/15 dark:text-red-300",
       )}
     >
       {up ? "+" : "−"}
-      {formatNumber(Math.abs(rounded))}
+      {formatNumber(Math.abs(rounded), 0)}
       {unit} к прошлому
     </span>
-  );
-}
-
-function Kpi({
-  label,
-  swatch,
-  children,
-  delta,
-}: {
-  label: string;
-  swatch?: string;
-  children: React.ReactNode;
-  delta?: React.ReactNode;
-}) {
-  return (
-    <div className="flex min-w-0 flex-col gap-1 rounded-xl border bg-card px-3.5 py-3 last:col-span-2 sm:last:col-span-1">
-      <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-        {swatch && (
-          <span
-            className="size-2.5 rounded-[3px]"
-            style={{ backgroundColor: swatch }}
-          />
-        )}
-        {label}
-      </span>
-      <span className="flex items-baseline gap-1.5 text-2xl font-bold tracking-tight tabular-nums">
-        {children}
-      </span>
-      {delta}
-    </div>
   );
 }
 
@@ -96,10 +66,10 @@ export default function StatsKpis({
       aria-label="Итоги месяца"
       className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5"
     >
-      <Kpi
+      <StatTile
         label="Прайм, средняя"
         swatch={PRIME_COLOR}
-        delta={
+        hint={
           <Delta
             value={difference(prime, averagePercent(previousDaily, "prime"))}
             unit=" п.п."
@@ -107,11 +77,11 @@ export default function StatsKpis({
         }
       >
         {prime === null ? "—" : `${Math.round(prime)}%`}
-      </Kpi>
-      <Kpi
+      </StatTile>
+      <StatTile
         label="АГЛ, средняя"
         swatch={AGL_COLOR}
-        delta={
+        hint={
           <Delta
             value={difference(agl, averagePercent(previousDaily, "agl"))}
             unit=" п.п."
@@ -119,26 +89,22 @@ export default function StatsKpis({
         }
       >
         {agl === null ? "—" : `${Math.round(agl)}%`}
-      </Kpi>
-      <Kpi label="Рейдовых дней">
+      </StatTile>
+      <StatTile label="Рейдовых дней">
         {raidDays}
-        <span className="text-[13px] font-medium text-muted-foreground">
-          из {days.length}
-        </span>
-      </Kpi>
-      <Kpi
+        <StatUnit>из {days.length}</StatUnit>
+      </StatTile>
+      <StatTile
         label="Доход от боссов"
-        delta={<Delta value={total - previousTotal} />}
+        hint={<Delta value={total - previousTotal} />}
       >
-        <Image src={GOLD_ICON} alt="" width={20} height={20} />
-        {formatNumber(total)}
-      </Kpi>
-      <Kpi label="Активный состав">
+        <Image src={GOLD_ICON_URL} alt="" width={20} height={20} />
+        {formatNumber(total, 0)}
+      </StatTile>
+      <StatTile label="Активный состав" className="col-span-2 sm:col-span-1">
         {rosterCount ?? "—"}
-        <span className="text-[13px] font-medium text-muted-foreground">
-          игроков
-        </span>
-      </Kpi>
+        <StatUnit>игроков</StatUnit>
+      </StatTile>
     </section>
   );
 }

@@ -1,5 +1,8 @@
 "use client";
+import type { ProfileUser } from "@/actions/getUser";
+import type { InventoryItem } from "@/actions/getUserInventory";
 import { useState } from "react";
+import type { UserSeal } from "@/actions/getUserSeals";
 import getUserInventory from "@/actions/getUserInventory";
 import type { PrimeStreak } from "@/actions/getUserPrimeStreak";
 import type { KillcountStats } from "@/actions/getUserKillcountStats";
@@ -36,14 +39,13 @@ export default function ProfilePageWrapper({
   canEditEquipment,
   isOwnProfile,
 }: {
-  user: any;
+  user: ProfileUser;
   tags: { id: number; tag: string }[];
-  inventory: any[];
-  seals: any[];
+  inventory: InventoryItem[];
+  seals: UserSeal[];
   archetype: UserArchetype;
   skillBuild: UserSkillBuild;
   equipment: UserEquipment[];
-  notes: any[];
   usernameHistory: {
     id: number;
     old_username: string;

@@ -1,14 +1,14 @@
 "use server";
 import sql from "@/shared/lib/db";
+import type { SalaryRow } from "@/shared/lib/dbTypes";
+import { getMoscowYearMonth } from "@/utils/getMoscowISOString";
 
 export async function getCurrentMonthSalaries() {
-  const now = new Date();
-  const month = now.getMonth() + 1;
-  const year = now.getFullYear();
+  const { month, year } = getMoscowYearMonth(new Date());
 
-  let data;
+  let data: Pick<SalaryRow, "userId" | "total">[];
   try {
-    data = await sql<any[]>`
+    data = await sql<Pick<SalaryRow, "userId" | "total">[]>`
       SELECT "userId", total FROM "Salary" WHERE month = ${month} AND year = ${year}
     `;
   } catch (error) {
@@ -18,7 +18,7 @@ export async function getCurrentMonthSalaries() {
 
   const salaries: Record<number, number> = {};
   for (const row of data) {
-    salaries[row.userId] = row.total ?? 0;
+    salaries[row.userId] = row.total;
   }
   return salaries;
 }

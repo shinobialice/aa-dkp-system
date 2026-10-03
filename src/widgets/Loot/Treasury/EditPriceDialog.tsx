@@ -13,17 +13,15 @@ import {
   Input,
   Label,
 } from "@/shared/ui";
-import type { StockGroup } from "./treasuryModel";
+import type { StockGroup } from "./stockModel";
 
-export function EditPriceDialog({
-  group,
-  onClose,
-  onSave,
-}: {
+type Props = {
   group: StockGroup | null;
   onClose: () => void;
   onSave: (group: StockGroup, price: number | null) => Promise<void>;
-}) {
+};
+
+export default function EditPriceDialog({ group, onClose, onSave }: Props) {
   const [value, setValue] = useState("");
   const [saving, setSaving] = useState(false);
   const [lastGroup, setLastGroup] = useState(group);
@@ -35,7 +33,7 @@ export function EditPriceDialog({
 
   const shown = group ?? lastGroup;
 
-  const save = async () => {
+  const handleSave = async () => {
     if (!group) return;
     const price = value.trim() === "" ? null : Number(value);
     if (price !== null && (Number.isNaN(price) || price < 0)) {
@@ -55,8 +53,11 @@ export function EditPriceDialog({
   };
 
   return (
-    <Dialog open={!!group} onOpenChange={(open) => !open && !saving && onClose()}>
-      <DialogContent className="sm:max-w-[400px]">
+    <Dialog
+      open={!!group}
+      onOpenChange={(open) => !open && !saving && onClose()}
+    >
+      <DialogContent className="sm:max-w-100">
         <DialogHeader>
           <DialogTitle>Цена за штуку</DialogTitle>
           <DialogDescription>
@@ -73,7 +74,9 @@ export function EditPriceDialog({
             value={value}
             placeholder={shown?.isBundled ? "Идут в комплекте" : "Не задана"}
             onChange={(event) => setValue(event.target.value)}
-            onKeyDown={(event) => event.key === "Enter" && save()}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") handleSave();
+            }}
           />
           <p className="text-xs text-muted-foreground">
             Оставьте пустым, если у предмета нет цены
@@ -83,7 +86,7 @@ export function EditPriceDialog({
           <Button variant="outline" onClick={onClose} disabled={saving}>
             Отмена
           </Button>
-          <Button onClick={save} disabled={saving}>
+          <Button onClick={handleSave} disabled={saving}>
             Сохранить
           </Button>
         </DialogFooter>

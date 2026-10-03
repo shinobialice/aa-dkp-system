@@ -44,11 +44,11 @@ export function UserSelect({
             : "Выберите пользователя"}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[380px] p-0">
+      <PopoverContent className="w-95 p-0">
         <Command>
           <CommandInput placeholder="Поиск пользователя..." />
           <CommandEmpty>Не найдено</CommandEmpty>
-          <CommandGroup className="max-h-[500px] overflow-y-auto">
+          <CommandGroup className="max-h-125 overflow-y-auto">
             {users.map((user) => (
               <CommandItem
                 className="cursor-pointer"

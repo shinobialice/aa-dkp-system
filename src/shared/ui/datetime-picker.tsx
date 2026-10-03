@@ -688,7 +688,6 @@ function TimePicker({
       }
     }, 1);
     return () => clearTimeout(timeoutId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const onHourChange = useCallback(

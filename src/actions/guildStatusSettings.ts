@@ -1,18 +1,19 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+import {
+  toGuildFaction,
+  toGuildMode,
+  toGuildServer,
+  type GuildFaction,
+  type GuildMode,
+} from "@/shared/config/guildStatus";
 import sql from "@/shared/lib/db";
+import type { GuildStatusSettingsRow } from "@/shared/lib/dbTypes";
+import { getMoscowISOString, toMoscowIso } from "@/utils/getMoscowISOString";
+import type { GuildServer } from "@/utils/guildServers";
 import ensurePrivilieges from "./ensurePrivilieges";
 import { getSessionUserId } from "./getSessionUserId";
-import { revalidatePath } from "next/cache";
-import type { GuildServer } from "@/utils/guildServers";
-import { getMoscowISOString } from "@/utils/getMoscowISOString";
-
-export type GuildMode = "freeshard" | "pvp";
-export type GuildFaction = "nuian" | "hariharan";
-
-const DEFAULT_MODE: GuildMode = "freeshard";
-const DEFAULT_SERVER: GuildServer = "Луций";
-const DEFAULT_FACTION: GuildFaction = "nuian";
 
 export type GuildStatus = {
   mode: GuildMode;
@@ -22,22 +23,17 @@ export type GuildStatus = {
   opponentGuild: string | null;
 };
 
-// В базе started_at/ended_at хранятся как "naive" timestamp (без таймзоны,
-// фактически московское время — см. комментарий про raid.start_date и
-// src/shared/lib/db.ts). Без явного смещения new Date(...) на клиенте
-// разберёт такую строку как локальное время браузера, а не московское —
-// добавляем фиксированное +03:00 (у Москвы нет перехода на летнее с 2014),
-// пока строка ещё на сервере, чтобы дальше это было однозначным моментом
-// времени независимо от часового пояса зрителя.
-function toMoscowIso(naive: string | null): string | null {
-  if (!naive) return null;
-  return /[+-]\d{2}:?\d{2}$|Z$/.test(naive) ? naive : `${naive}+03:00`;
-}
+type ModeRow = { mode: string };
 
 export async function getGuildStatus(): Promise<GuildStatus> {
-  let data;
+  let status:
+    | Pick<
+        GuildStatusSettingsRow,
+        "mode" | "server" | "faction" | "started_at" | "opponent_guild"
+      >
+    | undefined;
   try {
-    [data] = await sql<any[]>`
+    [status] = await sql<NonNullable<typeof status>[]>`
       SELECT mode, server, faction, started_at, opponent_guild
       FROM guild_status_settings WHERE id = 1
     `;
@@ -46,62 +42,48 @@ export async function getGuildStatus(): Promise<GuildStatus> {
     throw new Error("Не удалось загрузить статус гильдии");
   }
 
-  if (!data) {
-    return {
-      mode: DEFAULT_MODE,
-      server: DEFAULT_SERVER,
-      faction: DEFAULT_FACTION,
-      startedAt: null,
-      opponentGuild: null,
-    };
-  }
-
   return {
-    mode: (data.mode as GuildMode) ?? DEFAULT_MODE,
-    server: (data.server as GuildServer) ?? DEFAULT_SERVER,
-    faction: (data.faction as GuildFaction) ?? DEFAULT_FACTION,
-    startedAt: toMoscowIso(data.started_at ?? null),
-    opponentGuild: data.opponent_guild ?? null,
+    mode: toGuildMode(status?.mode),
+    server: toGuildServer(status?.server),
+    faction: toGuildFaction(status?.faction),
+    startedAt: toMoscowIso(status?.started_at ?? null),
+    opponentGuild: status?.opponent_guild ?? null,
   };
 }
 
 // Режим гильдии, действовавший на указанную дату/время (а не текущий) —
 // нужен, чтобы рейд, задним числом созданный или отредактированный уже после
 // смены фришка<->пвп, всё равно считался по ставкам того периода, в который
-// реально попадает дата рейда. Периоды не пересекаются (см. updateGuildStatus:
-// смена режима закрывает предыдущий период его же started_at/ended_at), так
-// что "последний период, начавшийся не позже даты" однозначно её содержит.
+// реально попадает дата рейда. Периоды не пересекаются (смена режима
+// закрывает предыдущий период), так что "последний период, начавшийся не
+// позже даты" однозначно её содержит.
 export async function getGuildModeAtDate(
   date: Date | string,
 ): Promise<GuildMode> {
   const naive = typeof date === "string" ? date : getMoscowISOString(date);
+  const periods = sql`
+    SELECT mode, started_at FROM guild_period_history
+    UNION ALL
+    SELECT mode, started_at FROM guild_status_settings WHERE id = 1
+  `;
 
   try {
-    const [match] = await sql<any[]>`
-      SELECT mode FROM (
-        SELECT mode, started_at FROM guild_period_history
-        UNION ALL
-        SELECT mode, started_at FROM guild_status_settings WHERE id = 1
-      ) periods
+    const [match] = await sql<ModeRow[]>`
+      SELECT mode FROM (${periods}) periods
       WHERE started_at IS NOT NULL AND started_at <= ${naive}::timestamp
       ORDER BY started_at DESC
       LIMIT 1
     `;
-    if (match) return match.mode as GuildMode;
+    if (match) return toGuildMode(match.mode);
 
-    // Дата раньше самого раннего зафиксированного периода (например, рейд
-    // старше всей истории переключений) — берём режим самого старого
-    // известного периода как лучшее приближение.
-    const [earliest] = await sql<any[]>`
-      SELECT mode FROM (
-        SELECT mode, started_at FROM guild_period_history
-        UNION ALL
-        SELECT mode, started_at FROM guild_status_settings WHERE id = 1
-      ) periods
+    // Дата раньше самого раннего зафиксированного периода — берём режим
+    // самого старого известного периода как лучшее приближение.
+    const [earliest] = await sql<ModeRow[]>`
+      SELECT mode FROM (${periods}) periods
       ORDER BY started_at ASC NULLS LAST
       LIMIT 1
     `;
-    return (earliest?.mode as GuildMode) ?? DEFAULT_MODE;
+    return toGuildMode(earliest?.mode);
   } catch (error) {
     console.error("Ошибка при определении режима гильдии на дату:", error);
     throw new Error("Не удалось определить режим гильдии на указанную дату");
@@ -112,59 +94,13 @@ export async function updateGuildStatus(mode: GuildMode) {
   await ensurePrivilieges(["Администратор"]);
 
   try {
-    const [current] = await sql<any[]>`
-      SELECT mode, server, faction, opponent_guild, opponent_ended_at, started_at
-      FROM guild_status_settings WHERE id = 1
+    const [current] = await sql<GuildStatusSettingsRow[]>`
+      SELECT * FROM guild_status_settings WHERE id = 1
     `;
-
     if (current && current.mode !== mode) {
-      // Реальная смена режима (фришка <-> вар) — закрываем текущий период
-      // в историю и открываем новый: обнуляем таймер и имя соперника.
-      // started_at/ended_at хранятся как naive-московское время (см. toMoscowIso
-      // выше) — нельзя писать сюда postgres now() напрямую: он вернёт текущее
-      // время в таймзоне сессии БД (обычно UTC), а не Москвы, и toMoscowIso
-      // потом ошибочно добавит +03:00 поверх уже UTC-времени, сдвигая момент
-      // старта на 3 часа в прошлое.
-      const nowMoscow = getMoscowISOString(new Date());
-      const userId = await getSessionUserId();
-      try {
-        await sql.begin(async (tx) => {
-          const [history] = await tx<any[]>`
-            INSERT INTO guild_period_history
-              (mode, server, faction, opponent_guild, opponent_ended_at,
-               started_at, ended_at, ended_by_user_id)
-            VALUES (
-              ${current.mode}, ${current.server}, ${current.faction},
-              ${current.opponent_guild}, ${current.opponent_ended_at},
-              ${current.started_at}, ${nowMoscow}, ${userId}
-            )
-            RETURNING id
-          `;
-          await tx`
-            UPDATE guild_war_opponents
-            SET period_history_id = ${history.id}
-            WHERE period_history_id IS NULL
-          `;
-        });
-      } catch (historyError) {
-        // Не блокируем саму смену режима, если запись истории не удалась
-        // (как с user_username_history в editUser.ts).
-        console.error("Не удалось записать историю периода:", historyError);
-      }
-
-      await sql`
-        INSERT INTO guild_status_settings
-          (id, mode, opponent_guild, opponent_ended_at, started_at, updated_at)
-        VALUES (1, ${mode}, NULL, NULL, ${nowMoscow}, now())
-        ON CONFLICT (id) DO UPDATE SET
-          mode = EXCLUDED.mode,
-          opponent_guild = EXCLUDED.opponent_guild,
-          opponent_ended_at = EXCLUDED.opponent_ended_at,
-          started_at = EXCLUDED.started_at,
-          updated_at = EXCLUDED.updated_at
-      `;
+      await switchPeriod(current, mode);
     } else {
-      await sql<any[]>`
+      await sql`
         INSERT INTO guild_status_settings (id, mode, updated_at)
         VALUES (1, ${mode}, now())
         ON CONFLICT (id) DO UPDATE SET
@@ -182,199 +118,6 @@ export async function updateGuildStatus(mode: GuildMode) {
   revalidatePath("/", "layout");
 }
 
-export type WarOpponent = {
-  id: number;
-  name: string;
-  startedAt: string;
-  endedAt: string | null;
-};
-
-export type WarOpponentsState = {
-  primary: { name: string | null; endedAt: string | null };
-  opponents: WarOpponent[];
-};
-
-const EMPTY_WAR_OPPONENTS: WarOpponentsState = {
-  primary: { name: null, endedAt: null },
-  opponents: [],
-};
-
-async function selectWarOpponentsState(): Promise<WarOpponentsState> {
-  const [[status], rows] = await Promise.all([
-    sql<any[]>`
-      SELECT opponent_guild, opponent_ended_at
-      FROM guild_status_settings WHERE id = 1
-    `,
-    sql<any[]>`
-      SELECT id, name, started_at, ended_at
-      FROM guild_war_opponents
-      WHERE period_history_id IS NULL
-      ORDER BY started_at, id
-    `,
-  ]);
-  return {
-    primary: {
-      name: status?.opponent_guild ?? null,
-      endedAt: toMoscowIso(status?.opponent_ended_at ?? null),
-    },
-    opponents: rows.map((r) => ({
-      id: r.id,
-      name: r.name,
-      startedAt: toMoscowIso(r.started_at)!,
-      endedAt: toMoscowIso(r.ended_at),
-    })),
-  };
-}
-
-export async function getCurrentWarOpponents(): Promise<WarOpponentsState> {
-  try {
-    return await selectWarOpponentsState();
-  } catch (error) {
-    console.error("Ошибка при получении противников вара:", error);
-    return EMPTY_WAR_OPPONENTS;
-  }
-}
-
-export type WarOpponentDraft = {
-  id: number | null;
-  name: string;
-  ended: boolean;
-};
-
-export async function saveWarOpponents(
-  primary: { name: string | null; ended: boolean },
-  opponents: WarOpponentDraft[],
-): Promise<WarOpponentsState> {
-  await ensurePrivilieges(["Администратор"]);
-  const primaryName = primary.name?.trim() || null;
-  const drafts = opponents.map((o) => ({ ...o, name: o.name.trim() }));
-  if (drafts.some((o) => !o.name)) {
-    throw new Error("Укажите название гильдии-противника");
-  }
-  const nowMoscow = getMoscowISOString(new Date());
-
-  const [status] = await sql<any[]>`
-    SELECT mode FROM guild_status_settings WHERE id = 1
-  `;
-  if (status?.mode !== "pvp") throw new Error("Вар сейчас не идёт");
-
-  try {
-    await sql.begin(async (tx) => {
-      await tx`
-        UPDATE guild_status_settings
-        SET
-          opponent_guild = ${primaryName},
-          opponent_ended_at = CASE
-            WHEN ${primary.ended}::boolean
-            THEN COALESCE(opponent_ended_at, ${nowMoscow}::timestamp)
-          END,
-          updated_at = now()
-        WHERE id = 1
-      `;
-      for (const draft of drafts) {
-        if (draft.id === null) {
-          await tx`
-            INSERT INTO guild_war_opponents (name, started_at)
-            VALUES (${draft.name}, ${nowMoscow})
-          `;
-        } else {
-          await tx`
-            UPDATE guild_war_opponents
-            SET
-              name = ${draft.name},
-              ended_at = CASE
-                WHEN ${draft.ended}::boolean
-                THEN COALESCE(ended_at, ${nowMoscow}::timestamp)
-              END
-            WHERE id = ${draft.id} AND period_history_id IS NULL
-          `;
-        }
-      }
-    });
-  } catch (error) {
-    console.error("Ошибка при сохранении противников вара:", error);
-    throw new Error("Не удалось сохранить противников");
-  }
-
-  revalidatePath("/war");
-  return selectWarOpponentsState();
-}
-
-export type WarPeriodHistoryRow = {
-  id: number;
-  mode: GuildMode;
-  server: GuildServer;
-  faction: GuildFaction;
-  opponentGuild: string | null;
-  opponentEndedAt: string | null;
-  extraOpponents: { name: string; startedAt: string; endedAt: string | null }[];
-  startedAt: string;
-  endedAt: string;
-  endedByUserId: number | null;
-};
-
-export async function getWarPeriodHistory(
-  page: number,
-  pageSize: number,
-): Promise<{ rows: WarPeriodHistoryRow[]; total: number }> {
-  try {
-    const [{ count }] = await sql<any[]>`
-      SELECT count(*)::int AS count FROM guild_period_history
-    `;
-    const rows = await sql<any[]>`
-      SELECT
-        h.id, h.mode, h.server, h.faction, h.opponent_guild, h.opponent_ended_at,
-        h.started_at, h.ended_at, h.ended_by_user_id,
-        COALESCE(
-          (
-            SELECT json_agg(
-              json_build_object(
-                'name', o.name,
-                'startedAt', o.started_at,
-                'endedAt', o.ended_at
-              )
-              ORDER BY o.started_at, o.id
-            )
-            FROM guild_war_opponents o
-            WHERE o.period_history_id = h.id
-          ),
-          '[]'::json
-        ) AS extra_opponents
-      FROM guild_period_history h
-      ORDER BY h.ended_at DESC
-      LIMIT ${pageSize} OFFSET ${(page - 1) * pageSize}
-    `;
-    return {
-      rows: rows.map((r) => ({
-        id: r.id,
-        mode: r.mode as GuildMode,
-        server: r.server as GuildServer,
-        faction: r.faction as GuildFaction,
-        opponentGuild: r.opponent_guild ?? null,
-        opponentEndedAt: toMoscowIso(r.opponent_ended_at ?? null),
-        extraOpponents: (
-          r.extra_opponents as {
-            name: string;
-            startedAt: string;
-            endedAt: string | null;
-          }[]
-        ).map((o) => ({
-          name: o.name,
-          startedAt: toMoscowIso(o.startedAt)!,
-          endedAt: toMoscowIso(o.endedAt),
-        })),
-        startedAt: toMoscowIso(r.started_at)!,
-        endedAt: toMoscowIso(r.ended_at)!,
-        endedByUserId: r.ended_by_user_id ?? null,
-      })),
-      total: count as number,
-    };
-  } catch (error) {
-    console.error("Ошибка при получении истории периодов:", error);
-    return { rows: [], total: 0 };
-  }
-}
-
 export async function updateGuildLocation(
   server: GuildServer,
   faction: GuildFaction,
@@ -382,7 +125,7 @@ export async function updateGuildLocation(
   await ensurePrivilieges(["Администратор"]);
 
   try {
-    await sql<any[]>`
+    await sql`
       INSERT INTO guild_status_settings (id, server, faction, updated_at)
       VALUES (1, ${server}, ${faction}, now())
       ON CONFLICT (id) DO UPDATE SET
@@ -399,65 +142,48 @@ export async function updateGuildLocation(
   revalidatePath("/", "layout");
 }
 
-export type PvpPlayerStats = {
-  userId: number;
-  userName: string;
-  avatarUrl: string | null;
-  userClass: string | null;
-  kills: number;
-  honor: number;
-};
+// Реальная смена режима (фришка <-> вар): закрываем текущий период в историю
+// и открываем новый — обнуляем таймер и имя соперника. started_at/ended_at
+// хранятся как naive-московское время: нельзя писать сюда postgres now() —
+// он вернёт время в таймзоне сессии БД (обычно UTC), и toMoscowIso потом
+// сдвинул бы момент старта на 3 часа в прошлое.
+async function switchPeriod(current: GuildStatusSettingsRow, mode: GuildMode) {
+  const nowMoscow = getMoscowISOString(new Date());
+  const userId = await getSessionUserId();
 
-export interface GuildPvpStats {
-  totalHonor: number;
-  totalKills: number;
-  players: PvpPlayerStats[];
-}
-
-export async function getStatsForPeriod(
-  startDate: string,
-  endDate: string | null = null,
-): Promise<GuildPvpStats> {
-  const rangeEnd = endDate ?? "infinity";
   try {
-    const [totalStats, players] = await Promise.all([
-      sql<any[]>`
-        SELECT
-          COALESCE(SUM(end_kills - start_kills), 0) AS "totalKills",
-          COALESCE(SUM(end_honor - start_honor), 0) AS "totalHonor"
-        FROM killcount_stats
-        WHERE recorded_at >= ${startDate} AND recorded_at < ${rangeEnd}
-      `,
-      sql<any[]>`
-        SELECT
-          u.id AS "userId",
-          u.username AS "userName",
-          u.avatar_url AS "avatarUrl",
-          u.class AS "userClass",
-          SUM(s.end_kills - s.start_kills) AS kills,
-          SUM(s.end_honor - s.start_honor) AS honor
-        FROM killcount_stats s
-        JOIN "user" u ON s.user_id = u.id
-        WHERE s.recorded_at >= ${startDate} AND s.recorded_at < ${rangeEnd}
-        GROUP BY u.id, u.username, u.avatar_url, u.class
-        ORDER BY kills DESC, honor DESC, u.id
-      `,
-    ]);
-
-    return {
-      totalKills: Number(totalStats[0]?.totalKills ?? 0),
-      totalHonor: Number(totalStats[0]?.totalHonor ?? 0),
-      players: players.map((row) => ({
-        userId: row.userId,
-        userName: row.userName,
-        avatarUrl: row.avatarUrl ?? null,
-        userClass: row.userClass ?? null,
-        kills: Number(row.kills),
-        honor: Number(row.honor),
-      })),
-    };
+    await sql.begin(async (tx) => {
+      const [history] = await tx<{ id: number }[]>`
+        INSERT INTO guild_period_history
+          (mode, server, faction, opponent_guild, opponent_ended_at,
+           started_at, ended_at, ended_by_user_id)
+        VALUES (
+          ${current.mode}, ${current.server}, ${current.faction},
+          ${current.opponent_guild}, ${current.opponent_ended_at},
+          ${current.started_at}, ${nowMoscow}, ${userId}
+        )
+        RETURNING id
+      `;
+      await tx`
+        UPDATE guild_war_opponents
+        SET period_history_id = ${history.id}
+        WHERE period_history_id IS NULL
+      `;
+    });
   } catch (error) {
-    console.error("Ошибка при получении статистики киллкаунта за период:", error);
-    return { totalHonor: 0, totalKills: 0, players: [] };
+    // Не блокируем саму смену режима, если запись истории не удалась.
+    console.error("Не удалось записать историю периода:", error);
   }
+
+  await sql`
+    INSERT INTO guild_status_settings
+      (id, mode, opponent_guild, opponent_ended_at, started_at, updated_at)
+    VALUES (1, ${mode}, NULL, NULL, ${nowMoscow}, now())
+    ON CONFLICT (id) DO UPDATE SET
+      mode = EXCLUDED.mode,
+      opponent_guild = EXCLUDED.opponent_guild,
+      opponent_ended_at = EXCLUDED.opponent_ended_at,
+      started_at = EXCLUDED.started_at,
+      updated_at = EXCLUDED.updated_at
+  `;
 }

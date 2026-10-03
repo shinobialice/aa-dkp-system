@@ -10,12 +10,32 @@ export type RingSynthesisEffect = {
 // заменить выбор можно ирамийской гадальной руной.
 export const RING_SYNTHESIS_EFFECTS: RingSynthesisEffect[] = [
   { id: 1, label: "Пробивание брони", value: 1200, isPercent: false },
-  { id: 2, label: "Игнорирование сопротивления", value: 1200, isPercent: false },
+  {
+    id: 2,
+    label: "Игнорирование сопротивления",
+    value: 1200,
+    isPercent: false,
+  },
   { id: 3, label: "Получаемый урон", value: -3.0, isPercent: true },
-  { id: 4, label: "Устойчивость к критическому урону", value: 750, isPercent: false },
+  {
+    id: 4,
+    label: "Устойчивость к критическому урону",
+    value: 750,
+    isPercent: false,
+  },
   { id: 5, label: "Устойчивость к атакам в PVP", value: 500, isPercent: false },
-  { id: 6, label: "Доп. урон умений в ближнем бою", value: 3.5, isPercent: true },
-  { id: 7, label: "Доп. урон умений в дальнем бою", value: 3.5, isPercent: true },
+  {
+    id: 6,
+    label: "Доп. урон умений в ближнем бою",
+    value: 3.5,
+    isPercent: true,
+  },
+  {
+    id: 7,
+    label: "Доп. урон умений в дальнем бою",
+    value: 3.5,
+    isPercent: true,
+  },
   { id: 8, label: "Доп. урон заклинаний", value: 3.5, isPercent: true },
   { id: 9, label: "Доп. эффективность исцеления", value: 3.5, isPercent: true },
 ];
@@ -29,7 +49,9 @@ export function isRingSynthesisItem(itemId: number): boolean {
   return RING_SYNTHESIS_ITEM_IDS.has(itemId);
 }
 
-export function findRingSynthesisEffect(id: number): RingSynthesisEffect | undefined {
+export function findRingSynthesisEffect(
+  id: number,
+): RingSynthesisEffect | undefined {
   return RING_SYNTHESIS_EFFECTS.find((e) => e.id === id);
 }
 

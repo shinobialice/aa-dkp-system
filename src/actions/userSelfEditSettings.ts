@@ -1,6 +1,7 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import type { UserSelfEditSettingsRow } from "@/shared/lib/dbTypes";
 import ensurePrivilieges from "./ensurePrivilieges";
 import { revalidatePath } from "next/cache";
 
@@ -28,7 +29,7 @@ const DEFAULT_SETTINGS: UserSelfEditSettings = {
 
 export async function getUserSelfEditSettings(): Promise<UserSelfEditSettings> {
   try {
-    const [data] = await sql<any[]>`
+    const [data] = await sql<UserSelfEditSettingsRow[]>`
       SELECT * FROM user_self_edit_settings WHERE id = 1
     `;
 
@@ -59,7 +60,7 @@ export async function updateUserSelfEditSettings(
   await ensurePrivilieges(["Администратор"]);
 
   try {
-    await sql<any[]>`
+    await sql`
       INSERT INTO user_self_edit_settings
         (id, nickname_edit_enabled, gs_edit_enabled, inventory_edit_enabled, seals_edit_enabled, archetype_edit_enabled, extra_role_edit_enabled, equipment_edit_enabled, vk_edit_enabled, updated_at)
       VALUES

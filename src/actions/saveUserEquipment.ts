@@ -1,32 +1,8 @@
 "use server";
 import sql from "@/shared/lib/db";
 import ensureCanEditUserData from "./ensureCanEditUserData";
-import getUserEquipment, { UserEquipment } from "./getUserEquipment";
-import { isValidEquipmentSlot } from "@/widgets/profile/equipment/equipmentData";
-import { isValidSealGrade } from "@/widgets/profile/seals/sealsData";
-import {
-  isValidEnchantLevel,
-  isValidExtraProtectionLevel,
-} from "@/widgets/profile/equipment/itemsData/statsFormula";
-import { getEngravingSlotCount } from "@/widgets/profile/equipment/itemsData/engravingSlots";
-import { isValidEngravingId } from "@/widgets/profile/equipment/itemsData/engravings";
-import { isValidRuneId } from "@/widgets/profile/equipment/itemsData/runes";
-import { WEAPON_HANDEDNESS } from "@/widgets/profile/equipment/itemsData/weaponHandedness";
-import { findGearItem } from "@/widgets/profile/equipment/itemsData";
-import {
-  getCostumeRole,
-  getCostumeSynthesisSlotCount,
-  isValidCostumeSynthesisEffectId,
-} from "@/widgets/profile/equipment/itemsData/costumeSynthesis";
-import {
-  getUnderwearRole,
-  getUnderwearSynthesisSlotCount,
-  isValidUnderwearSynthesisEffectId,
-} from "@/widgets/profile/equipment/itemsData/underwearSynthesis";
-import { isValidCursedArmorSynthesisEffectIds } from "@/widgets/profile/equipment/itemsData/cursedArmorSynthesis";
-import { isValidRingSynthesisEffectIds } from "@/widgets/profile/equipment/itemsData/ringSynthesis";
-import { isValidEphenSynthesisSelection } from "@/widgets/profile/equipment/itemsData/ephenSynthesis";
-import { isValidEpheSealLevel } from "@/widgets/profile/ephe/epheSealsData";
+import getUserEquipment, { type UserEquipment } from "./getUserEquipment";
+import { assertValidEquipmentItem } from "@/server/equipmentValidation";
 
 export type EquipmentInput = {
   slot: string;
@@ -58,113 +34,12 @@ const saveUserEquipment = async (
     throw new Error("Слоты экипировки не должны повторяться");
   }
 
-  for (const item of items) {
-    if (!isValidEquipmentSlot(item.slot)) {
-      throw new Error(`Неизвестный слот экипировки: ${item.slot}`);
-    }
-    if (!isValidSealGrade(item.grade)) {
-      throw new Error(`Некорректный грейд: ${item.grade}`);
-    }
-    if (!isValidEnchantLevel(item.enchant)) {
-      throw new Error(`Некорректный уровень заточки: ${item.enchant}`);
-    }
-    if (!isValidExtraProtectionLevel(item.extraProtection, item.slot)) {
-      throw new Error(
-        `Некорректный уровень защиты от доп. урона: ${item.extraProtection}`,
-      );
-    }
-    const gearItem = findGearItem(item.slot, item.itemName);
-    const handedness = gearItem ? WEAPON_HANDEDNESS[gearItem.id] : undefined;
-    if (
-      !item.engravings.every(
-        (id) =>
-          id === 0 ||
-          isValidEngravingId(id, item.slot, handedness, gearItem?.id),
-      )
-    ) {
-      throw new Error(`Некорректная гравировка в слоте: ${item.slot}`);
-    }
-    const maxSlots = getEngravingSlotCount(item.slot, item.grade);
-    if (item.engravings.length > maxSlots) {
-      throw new Error(`Слишком много гравировок для слота: ${item.slot}`);
-    }
-    if (
-      item.runeId !== 0 &&
-      !isValidRuneId(item.runeId, item.slot, handedness, gearItem?.id)
-    ) {
-      throw new Error(
-        `Некорректный лунный камень / руна в слоте: ${item.slot}`,
-      );
-    }
-    if (item.costumeSynthesisEffects.length > 0) {
-      const role = getCostumeRole(item.itemName ?? "");
-      const maxSlots = getCostumeSynthesisSlotCount(item.grade);
-      if (
-        !role ||
-        item.costumeSynthesisEffects.length > maxSlots ||
-        !item.costumeSynthesisEffects.every((id) =>
-          isValidCostumeSynthesisEffectId(id, role),
-        )
-      ) {
-        throw new Error(
-          `Некорректные эффекты синтеза костюма в слоте: ${item.slot}`,
-        );
-      }
-    }
-    if (item.underwearSynthesisEffects.length > 0) {
-      const role = getUnderwearRole(item.itemName ?? "");
-      const maxSlots = getUnderwearSynthesisSlotCount(item.grade);
-      if (
-        !role ||
-        item.underwearSynthesisEffects.length > maxSlots ||
-        !item.underwearSynthesisEffects.every((id) =>
-          isValidUnderwearSynthesisEffectId(id, role),
-        )
-      ) {
-        throw new Error(
-          `Некорректные эффекты синтеза белья в слоте: ${item.slot}`,
-        );
-      }
-    }
-    if (
-      item.cursedSynthesisEffects.length > 0 &&
-      !isValidCursedArmorSynthesisEffectIds(
-        gearItem?.id ?? -1,
-        item.cursedSynthesisEffects,
-      )
-    ) {
-      throw new Error(`Некорректные эффекты синтеза в слоте: ${item.slot}`);
-    }
-    if (
-      !isValidRingSynthesisEffectIds(
-        gearItem?.id ?? -1,
-        item.ringSynthesisEffects,
-      )
-    ) {
-      throw new Error(
-        `Некорректные эффекты синтеза кольца в слоте: ${item.slot}`,
-      );
-    }
-    if (
-      !isValidEphenSynthesisSelection(
-        gearItem?.id ?? -1,
-        item.grade,
-        item.ephenSynthesisPercent,
-        item.ephenSynthesisPrimary,
-        item.ephenSynthesisSecondary,
-        item.ephenSynthesisTertiary,
-      )
-    ) {
-      throw new Error(
-        `Некорректный синтез эфенского предмета в слоте: ${item.slot}`,
-      );
-    }
-    if (!isValidEpheSealLevel(item.slot, item.epheSealLevel)) {
-      throw new Error(`Некорректный уровень печати Эфе в слоте: ${item.slot}`);
-    }
-  }
+  items.forEach(assertValidEquipmentItem);
 
-  const filled = items.filter((i) => (i.itemName ?? "").trim() !== "");
+  const filled = items.flatMap((item) => {
+    const itemName = item.itemName?.trim();
+    return itemName ? [{ ...item, itemName }] : [];
+  });
 
   try {
     await sql.begin(async (tx) => {
@@ -172,7 +47,7 @@ const saveUserEquipment = async (
       for (const item of filled) {
         await tx`
           INSERT INTO user_equipment (user_id, slot, item_name, grade, enchant, extra_protection, engravings, rune_id, costume_synthesis_effects, underwear_synthesis_effects, cursed_synthesis_effects, ring_synthesis_effects, ephen_synthesis_percent, ephen_synthesis_primary, ephen_synthesis_secondary, ephen_synthesis_tertiary, ephe_seal_level)
-          VALUES (${userId}, ${item.slot}, ${item.itemName!.trim()}, ${item.grade}, ${item.enchant}, ${item.extraProtection}, ${sql.array(item.engravings)}::integer[], ${item.runeId}, ${sql.array(item.costumeSynthesisEffects)}::integer[], ${sql.array(item.underwearSynthesisEffects)}::integer[], ${sql.array(item.cursedSynthesisEffects)}::integer[], ${sql.array(item.ringSynthesisEffects)}::integer[], ${item.ephenSynthesisPercent}, ${item.ephenSynthesisPrimary}, ${item.ephenSynthesisSecondary}, ${sql.array(item.ephenSynthesisTertiary)}::text[], ${item.epheSealLevel})
+          VALUES (${userId}, ${item.slot}, ${item.itemName}, ${item.grade}, ${item.enchant}, ${item.extraProtection}, ${sql.array(item.engravings)}::integer[], ${item.runeId}, ${sql.array(item.costumeSynthesisEffects)}::integer[], ${sql.array(item.underwearSynthesisEffects)}::integer[], ${sql.array(item.cursedSynthesisEffects)}::integer[], ${sql.array(item.ringSynthesisEffects)}::integer[], ${item.ephenSynthesisPercent}, ${item.ephenSynthesisPrimary}, ${item.ephenSynthesisSecondary}, ${sql.array(item.ephenSynthesisTertiary)}::text[], ${item.epheSealLevel})
         `;
       }
     });

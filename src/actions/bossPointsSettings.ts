@@ -1,25 +1,22 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import type { BossRow } from "@/shared/lib/dbTypes";
 import ensurePrivilieges from "./ensurePrivilieges";
 import { revalidatePath } from "next/cache";
 
-export type BossPointsRow = {
-  id: number;
-  boss_name: string;
-  category: string;
-  dkp_points_freeshard: number;
-  dkp_points_pvp: number;
-};
+export type BossPointsRow = Pick<
+  BossRow,
+  "id" | "boss_name" | "category" | "dkp_points_freeshard" | "dkp_points_pvp"
+>;
 
 export async function getBossPointsForSettings(): Promise<BossPointsRow[]> {
   try {
-    const data = await sql<any[]>`
+    return await sql<BossPointsRow[]>`
       SELECT id, boss_name, category, dkp_points_freeshard, dkp_points_pvp
       FROM boss
       ORDER BY id ASC
     `;
-    return data;
   } catch (error) {
     console.error("Ошибка при получении очков боссов:", error);
     throw new Error("Не удалось загрузить очки боссов");
@@ -31,13 +28,8 @@ export async function updateBossPoints(
 ) {
   await ensurePrivilieges(["Администратор"]);
 
-  for (const u of updates) {
-    if (
-      !Number.isInteger(u.freeshard) ||
-      u.freeshard < 0 ||
-      !Number.isInteger(u.pvp) ||
-      u.pvp < 0
-    ) {
+  for (const update of updates) {
+    if (!isPointsValue(update.freeshard) || !isPointsValue(update.pvp)) {
       throw new Error(
         "Значения очков должны быть целыми неотрицательными числами",
       );
@@ -45,18 +37,23 @@ export async function updateBossPoints(
   }
 
   try {
-    await Promise.all(
-      updates.map(
-        (u) => sql<any[]>`
-          UPDATE boss SET dkp_points_freeshard = ${u.freeshard}, dkp_points_pvp = ${u.pvp}
-          WHERE id = ${u.id}
-        `,
-      ),
-    );
+    await sql.begin(async (tx) => {
+      for (const update of updates) {
+        await tx`
+          UPDATE boss
+          SET dkp_points_freeshard = ${update.freeshard}, dkp_points_pvp = ${update.pvp}
+          WHERE id = ${update.id}
+        `;
+      }
+    });
   } catch (error) {
     console.error("Ошибка при сохранении очков боссов:", error);
     throw new Error("Не удалось сохранить очки боссов");
   }
 
   revalidatePath("/settings");
+}
+
+function isPointsValue(value: number) {
+  return Number.isInteger(value) && value >= 0;
 }

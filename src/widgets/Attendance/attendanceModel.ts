@@ -1,68 +1,19 @@
-import type { CSSProperties } from "react";
 import type { RangeRaid } from "@/actions/getRaidsInRange";
+import { plural } from "@/shared/lib/format";
+import { raidKind, type RaidKind } from "./raidKinds";
 
-export type RaidKind = "prime" | "agl" | "koshka" | "morph" | "marli";
 export type KindFilter = Record<RaidKind, boolean>;
 export type AttendanceView = "week" | "month";
+export type RaidState = "empty" | "attended" | "missed";
+export type DayTone = "full" | "part" | "none";
 
-export const KINDS: { kind: RaidKind; label: string; dot: string }[] = [
-  { kind: "prime", label: "Праймы", dot: "bg-red-600" },
-  { kind: "agl", label: "АГЛ", dot: "bg-green-700" },
-  { kind: "koshka", label: "Кошка", dot: "bg-pink-700" },
-  { kind: "morph", label: "Морф", dot: "bg-blue-700" },
-  { kind: "marli", label: "Марли Прок", dot: "bg-amber-800" },
-];
-
-const PRIME_COLORS: Record<string, { light: string; dark: string }> = {
-  Кракен: { light: "#dc2626", dark: "#f87171" },
-  Калидис: { light: "#7c3aed", dark: "#a78bfa" },
-  Левиафан: { light: "#0e7490", dark: "#22d3ee" },
-  Ксанатос: { light: "#c2410c", dark: "#fb923c" },
-  Анталлон: { light: "#a16207", dark: "#facc15" },
-  Корвус: { light: "#9333ea", dark: "#c084fc" },
-  Калеиль: { light: "#0f766e", dark: "#2dd4bf" },
-  Дельфиец: { light: "#2563eb", dark: "#60a5fa" },
-  Осада: { light: "#18181b", dark: "#f4f4f5" },
+export const ALL_KINDS: KindFilter = {
+  prime: true,
+  agl: true,
+  koshka: true,
+  morph: true,
+  marli: true,
 };
-
-const KIND_COLORS: Record<RaidKind, { light: string; dark: string }> = {
-  prime: { light: "#b91c1c", dark: "#f87171" },
-  agl: { light: "#15803d", dark: "#4ade80" },
-  koshka: { light: "#be185d", dark: "#f472b6" },
-  morph: { light: "#1d4ed8", dark: "#60a5fa" },
-  marli: { light: "#92400e", dark: "#fbbf24" },
-};
-
-export function raidKind(raid: { type: string; bosses: string[] }): RaidKind {
-  if (raid.type === "Прайм") return "prime";
-  const names = raid.bosses.join(" ");
-  if (names.includes("Кошка")) return "koshka";
-  if (names.includes("Морф")) return "morph";
-  if (names.includes("Марли")) return "marli";
-  return "agl";
-}
-
-export function raidTitle(raid: { type: string; bosses: string[] }) {
-  return raid.bosses.length ? raid.bosses.join(", ") : raid.type;
-}
-
-export function raidColorStyle(raid: {
-  type: string;
-  bosses: string[];
-}): CSSProperties {
-  const kind = raidKind(raid);
-  const colors =
-    (kind === "prime" && PRIME_COLORS[raid.bosses[0]]) || KIND_COLORS[kind];
-  return {
-    "--raid-color": colors.light,
-    "--raid-color-dark": colors.dark,
-  } as CSSProperties;
-}
-
-export const RAID_TEXT =
-  "text-[var(--raid-color)] dark:text-[var(--raid-color-dark)]";
-export const RAID_BG =
-  "bg-[var(--raid-color)] dark:bg-[var(--raid-color-dark)]";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const MSK_OFFSET_MS = 3 * 60 * 60 * 1000;
@@ -208,15 +159,26 @@ export function percent(part: number, total: number) {
 }
 
 export function raidsCount(n: number) {
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-  if (mod10 === 1 && mod100 !== 11) return `${n} рейд`;
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
-    return `${n} рейда`;
-  }
-  return `${n} рейдов`;
+  return `${n} ${plural(n, "рейд", "рейда", "рейдов")}`;
 }
 
-export function bossColorStyle(bossName: string, category: string) {
-  return raidColorStyle({ type: category, bosses: [bossName] });
+export function raidState(raid: RangeRaid): RaidState {
+  if (raid.people === 0) return "empty";
+  return raid.attended ? "attended" : "missed";
+}
+
+export function dayTone(attended: number, total: number): DayTone | null {
+  if (total === 0) return null;
+  if (attended === total) return "full";
+  return attended > 0 ? "part" : "none";
+}
+
+export function selectedDayOf(
+  days: string[],
+  pickedDay: string | null,
+  todayKey: string,
+) {
+  if (pickedDay && days.includes(pickedDay)) return pickedDay;
+  if (days.includes(todayKey)) return todayKey;
+  return days[0];
 }

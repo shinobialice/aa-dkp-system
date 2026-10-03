@@ -3,13 +3,13 @@
 import {
   getCustomBonusBatch,
   getSalaryEligibilityContext,
-} from "./financeActions";
+} from "@/server/finance/salaryContext";
 import {
   buildSalaryWeightResult,
   type SalaryWeightUser,
 } from "@/utils/buildSalaryWeightResult";
 import getSalaryAsOfDate from "@/utils/getSalaryAsOfDate";
-import { computeMonthlyAttendanceForUsers } from "./getAllUsersActivityWithPercent";
+import { computeMonthlyAttendanceForUsers } from "@/server/attendance";
 import { getUserTagsBatch } from "./userTagsActions";
 import { getUserPenaltyPointsBatch } from "./penaltyActions";
 

@@ -2,6 +2,7 @@ import {
   EPHEN_SYNTHESIS_CATEGORIES,
   type EphenSynthesisCategoryKey,
   type EphenSynthesisCategory,
+  type EphenSynthesisGroup,
 } from "./ephenSynthesisData";
 
 const ITEM_CATEGORY: Record<number, EphenSynthesisCategoryKey> = {
@@ -477,37 +478,47 @@ export function isValidEphenSynthesisSelection(
   if (grade < category.minGrade) return false;
   if (!Number.isInteger(percent) || percent < 0 || percent > 100) return false;
 
-  // Уникальное легендарное оружие: 2 независимых пула вместо пары
-  // "1-я/2-я характеристика" + доп. — pool А (может быть >1 выбора)
-  // хранится в tertiary, pool Б (1 выбор) — в secondary, primary не используется.
+  return isValidPoolSelection(category, primary, secondary, tertiary);
+}
+
+// У уникального оружия два независимых пула: пул А хранится в tertiary,
+// пул Б в secondary, primary не используется.
+function isValidPoolSelection(
+  category: EphenSynthesisCategory,
+  primary: string,
+  secondary: string,
+  tertiary: string[],
+) {
   if (category.groups.length === 2) {
     const [poolA, poolB] = category.groups;
-    if (primary) return false;
-    if (secondary && !poolB.options.some((o) => o.key === secondary))
-      return false;
-    if (tertiary.length > poolA.pickCount) return false;
-    if (new Set(tertiary).size !== tertiary.length) return false;
-    if (!tertiary.every((key) => poolA.options.some((o) => o.key === key)))
-      return false;
-    return true;
+    return (
+      !primary &&
+      isValidSingle(poolB, secondary) &&
+      isValidMulti(poolA, tertiary)
+    );
   }
 
-  // Для обычных (3-групповых) категорий group[0]/group[1] раньше всегда были
-  // одним и тем же пулом атрибутов (str/dex/sta/int/spi), поэтому проверка
-  // была захардкожена под ATTRIBUTE_KEYS. У рамианской линейки group[1] может
-  // быть отдельным пулом (PvE-бонус) — проверяем против опций своей группы.
   const [primaryGroup, secondaryGroup, tertiaryGroup] = category.groups;
-  if (primary && !primaryGroup?.options.some((o) => o.key === primary))
-    return false;
-  if (secondary && !secondaryGroup?.options.some((o) => o.key === secondary))
-    return false;
-  if (primary && secondary && primary === secondary) return false;
-  if (tertiary.length > (tertiaryGroup?.pickCount ?? 0)) return false;
-  if (new Set(tertiary).size !== tertiary.length) return false;
-  if (
-    !tertiary.every((key) => tertiaryGroup?.options.some((o) => o.key === key))
-  ) {
-    return false;
-  }
-  return true;
+  return (
+    isValidSingle(primaryGroup, primary) &&
+    isValidSingle(secondaryGroup, secondary) &&
+    !(primary && primary === secondary) &&
+    isValidMulti(tertiaryGroup, tertiary)
+  );
+}
+
+function hasOption(group: EphenSynthesisGroup | undefined, key: string) {
+  return !!group?.options.some((option) => option.key === key);
+}
+
+function isValidSingle(group: EphenSynthesisGroup | undefined, key: string) {
+  return !key || hasOption(group, key);
+}
+
+function isValidMulti(group: EphenSynthesisGroup | undefined, keys: string[]) {
+  return (
+    keys.length <= (group?.pickCount ?? 0) &&
+    new Set(keys).size === keys.length &&
+    keys.every((key) => hasOption(group, key))
+  );
 }

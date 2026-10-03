@@ -1,5 +1,5 @@
 import { hasTag } from "@/actions/hasTag";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
 export async function GET(req: NextRequest) {

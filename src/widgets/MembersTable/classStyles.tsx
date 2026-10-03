@@ -1,5 +1,13 @@
-import { JSX } from "react";
-import { BowArrow, Drum, HeartPlus, Music, Shield, Sword, Wand } from "lucide-react";
+import { type JSX } from "react";
+import {
+  BowArrow,
+  Drum,
+  HeartPlus,
+  Music,
+  Shield,
+  Sword,
+  Wand,
+} from "lucide-react";
 import { Pistol } from "@/shared/ui/icons/Pistol";
 
 export const classColors: Record<string, string> = {

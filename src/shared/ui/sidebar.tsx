@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
-import { VariantProps, cva } from "class-variance-authority";
+import { type VariantProps, cva } from "class-variance-authority";
 import { PanelLeftIcon } from "lucide-react";
 
 import { Button } from "@/shared/ui";
@@ -600,6 +600,12 @@ function SidebarMenuBadge({
   );
 }
 
+function hashString(value: string) {
+  let hash = 0;
+  for (const char of value) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
+  return hash;
+}
+
 function SidebarMenuSkeleton({
   className,
   showIcon = false,
@@ -607,11 +613,8 @@ function SidebarMenuSkeleton({
 }: React.ComponentProps<"div"> & {
   showIcon?: boolean;
 }) {
-  // Random width between 50 to 90%.
-  const width = React.useMemo(
-    () => `${Math.floor(Math.random() * 40) + 50}%`,
-    [],
-  );
+  const id = React.useId();
+  const width = `${50 + (hashString(id) % 40)}%`;
 
   return (
     <div

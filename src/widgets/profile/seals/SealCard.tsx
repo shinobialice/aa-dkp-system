@@ -37,9 +37,9 @@ export default function SealCard({
       <div className="flex items-center gap-2.5">
         <SealIcon grade={grade} size={44} />
         <div className="flex min-w-0 flex-col">
-          <span className="text-[15px] font-bold">{name}</span>
+          <span className="text-base font-bold">{name}</span>
           {info && (
-            <span className="text-[12.5px] text-muted-foreground">
+            <span className="text-xs text-muted-foreground">
               {info.playstyle} ·{" "}
               {info.roles.map((role, index) => (
                 <span key={role}>
@@ -53,7 +53,7 @@ export default function SealCard({
       </div>
 
       <div className="flex flex-col gap-1">
-        <span className="flex items-baseline justify-between gap-2 text-[12.5px]">
+        <span className="flex items-baseline justify-between gap-2 text-xs">
           <span className="font-semibold" style={{ color: gradeColor }}>
             {getSealGradeLabel(grade)}
           </span>
@@ -75,14 +75,14 @@ export default function SealCard({
           {bonuses.length === 1 ? "бонус" : "бонусов"}
         </span>
         {bonuses.length === 0 ? (
-          <span className="text-[12.5px] text-muted-foreground">
+          <span className="text-xs text-muted-foreground">
             Печать ещё не прокачана
           </span>
         ) : (
           visible.map((bonus) => (
             <div
               key={bonus.stat}
-              className="flex justify-between gap-2 text-[12.5px]"
+              className="flex justify-between gap-2 text-xs"
             >
               <span className="min-w-0 text-muted-foreground">
                 {bonus.stat}
@@ -115,13 +115,9 @@ export default function SealCard({
         type="button"
         aria-expanded={expanded}
         onClick={() => setExpanded((value) => !value)}
-        className="mt-auto flex h-9 cursor-pointer items-center justify-center gap-1 rounded-lg bg-muted text-[12.5px] font-semibold text-foreground/80 transition-colors hover:bg-muted/70"
+        className="mt-auto flex h-9 cursor-pointer items-center justify-center gap-1 rounded-lg bg-muted text-xs font-semibold text-foreground/80 transition-colors hover:bg-muted/70"
       >
-        {expanded
-          ? "Свернуть"
-          : bonuses.length > PREVIEW_COUNT
-            ? `Ещё ${bonuses.length - PREVIEW_COUNT} · все уровни`
-            : "Все уровни"}
+        {toggleLabel(expanded, bonuses.length)}
         <ChevronDown
           className={cn(
             "size-3.5 transition-transform",
@@ -131,4 +127,12 @@ export default function SealCard({
       </button>
     </article>
   );
+}
+
+function toggleLabel(expanded: boolean, bonusCount: number) {
+  if (expanded) return "Свернуть";
+  if (bonusCount > PREVIEW_COUNT) {
+    return `Ещё ${bonusCount - PREVIEW_COUNT} · все уровни`;
+  }
+  return "Все уровни";
 }

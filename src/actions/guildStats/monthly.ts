@@ -1,42 +1,25 @@
 "use server";
 
 import sql from "@/shared/lib/db";
-
-const MONTHS = [
-  "Январь",
-  "Февраль",
-  "Март",
-  "Апрель",
-  "Май",
-  "Июнь",
-  "Июль",
-  "Август",
-  "Сентябрь",
-  "Октябрь",
-  "Ноябрь",
-  "Декабрь",
-];
+import { MONTH_NAMES } from "@/shared/config/months";
 
 async function getMonthlyAttendance(year: number, type: string) {
-  let data;
+  let data: { month: number; percent: number }[];
   try {
-    data = await sql<any[]>`
+    data = await sql<{ month: number; percent: number }[]>`
       SELECT * FROM get_monthly_attendance(${year}, ${type})
     `;
   } catch {
     throw new Error("Ошибка при загрузке посещаемости");
   }
 
-  const percentByMonth = new Map<number, number>(
-    (data ?? []).map((row: { month: number; percent: number }) => [
-      row.month,
-      Number(row.percent),
-    ]),
+  const percentByMonth = new Map(
+    data.map((row) => [row.month, Number(row.percent)]),
   );
 
-  return MONTHS.map((label, i) => ({
+  return MONTH_NAMES.map((label, index) => ({
     month: label,
-    percent: percentByMonth.get(i + 1) ?? 0,
+    percent: percentByMonth.get(index + 1) ?? 0,
   }));
 }
 

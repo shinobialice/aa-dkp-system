@@ -1,5 +1,10 @@
 "use server";
 import sql from "@/shared/lib/db";
+import {
+  hasPgCode,
+  UNIQUE_VIOLATION,
+  FOREIGN_KEY_VIOLATION,
+} from "@/shared/lib/pgErrors";
 import { saveUploadedFile } from "@/shared/lib/localStorage";
 import ensurePrivilieges from "./ensurePrivilieges";
 import { randomUUID } from "crypto";
@@ -18,7 +23,9 @@ export type MarketplaceItemTypeRow = {
 // путать с item_type (казна/лут/покупка лута). Управляется на вкладке
 // "Доска объявлений" на /items. Чтение доступно любому авторизованному
 // участнику (нужно всем при создании объявления), запись — только админам.
-export async function getMarketplaceItemTypes(): Promise<MarketplaceItemTypeRow[]> {
+export async function getMarketplaceItemTypes(): Promise<
+  MarketplaceItemTypeRow[]
+> {
   return await sql<MarketplaceItemTypeRow[]>`
     SELECT id, name, icon_url, grade FROM marketplace_item_type ORDER BY name
   `;
@@ -43,9 +50,9 @@ export async function createMarketplaceItemType({
       INSERT INTO marketplace_item_type (name, icon_url, grade)
       VALUES (${trimmed}, ${iconUrl}, ${grade})
     `;
-  } catch (error: any) {
+  } catch (error) {
     console.error("Ошибка при создании предмета доски объявлений:", error);
-    if (error?.code === "23505") {
+    if (hasPgCode(error, UNIQUE_VIOLATION)) {
       throw new Error("Предмет с таким названием уже существует");
     }
     throw new Error("Не удалось создать предмет");
@@ -54,7 +61,11 @@ export async function createMarketplaceItemType({
 
 export async function updateMarketplaceItemType(
   id: number,
-  { name, iconUrl, grade }: { name: string; iconUrl: string | null; grade: number },
+  {
+    name,
+    iconUrl,
+    grade,
+  }: { name: string; iconUrl: string | null; grade: number },
 ) {
   await ensurePrivilieges(["Администратор"]);
   const trimmed = name.trim();
@@ -67,9 +78,9 @@ export async function updateMarketplaceItemType(
       SET name = ${trimmed}, icon_url = ${iconUrl}, grade = ${grade}
       WHERE id = ${id}
     `;
-  } catch (error: any) {
+  } catch (error) {
     console.error("Ошибка при обновлении предмета доски объявлений:", error);
-    if (error?.code === "23505") {
+    if (hasPgCode(error, UNIQUE_VIOLATION)) {
       throw new Error("Предмет с таким названием уже существует");
     }
     throw new Error("Не удалось обновить предмет");
@@ -80,9 +91,9 @@ export async function deleteMarketplaceItemType(id: number) {
   await ensurePrivilieges(["Администратор"]);
   try {
     await sql`DELETE FROM marketplace_item_type WHERE id = ${id}`;
-  } catch (error: any) {
+  } catch (error) {
     console.error("Ошибка при удалении предмета доски объявлений:", error);
-    if (error?.code === "23503") {
+    if (hasPgCode(error, FOREIGN_KEY_VIOLATION)) {
       throw new Error(
         "Предмет уже используется в объявлениях — удалить нельзя, можно только переименовать/изменить иконку",
       );

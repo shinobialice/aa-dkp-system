@@ -11,6 +11,7 @@ import {
   dismissRaidSuggestion,
   type RaidSuggestion,
 } from "@/actions/raidSuggestions";
+import { errorMessage } from "@/shared/lib/errorMessage";
 
 function formatMoscowDateTime(iso: string): string {
   return new Date(iso).toLocaleString("ru-RU", {
@@ -32,7 +33,9 @@ export default function RaidSuggestionsCard({
   const [pending, setPending] = useState<number | null>(null);
 
   const reload = useCallback(() => {
-    getPendingRaidSuggestions().then(setSuggestions).catch(() => {});
+    getPendingRaidSuggestions()
+      .then(setSuggestions)
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -49,9 +52,7 @@ export default function RaidSuggestionsCard({
       setSuggestions((prev) => prev.filter((s) => s.id !== suggestion.id));
       onRaidCreated?.();
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Не удалось создать рейд",
-      );
+      toast.error(errorMessage(error, "Не удалось создать рейд"));
     } finally {
       setPending(null);
     }

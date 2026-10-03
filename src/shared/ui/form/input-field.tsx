@@ -2,9 +2,9 @@
 import {
   ChangeEvent,
   cloneElement,
-  ComponentProps,
-  FC,
-  HTMLAttributes,
+  type ComponentProps,
+  type FC,
+  type HTMLAttributes,
   JSX,
 } from "react";
 import {
@@ -22,12 +22,12 @@ export { Form } from "./base-form";
 
 type InputVariant = "integer" | "text";
 
-interface InputFieldProps extends ComponentProps<"input"> {
+type InputFieldProps = {
   name: string;
   label?: string;
   description?: string;
   inputVariant?: InputVariant;
-}
+} & ComponentProps<"input">;
 
 const getInputMode = ({
   inputMode,

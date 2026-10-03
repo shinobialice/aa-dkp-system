@@ -1,12 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { getBaseUrl } from "@/shared/lib";
 import {
   completeSocialAuth,
   loginErrorRedirect,
 } from "@/shared/lib/socialAuth";
-
-const baseUrl = getBaseUrl();
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -41,7 +39,7 @@ export async function GET(req: NextRequest) {
     body: new URLSearchParams({
       grant_type: "authorization_code",
       code,
-      redirect_uri: `${baseUrl}/api/auth/mailru/callback`,
+      redirect_uri: `${getBaseUrl()}/api/auth/mailru/callback`,
     }),
   });
 

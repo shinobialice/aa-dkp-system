@@ -1,12 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { requireEnv } from "@/shared/lib/env";
+import { type NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { getBaseUrl } from "@/shared/lib";
 import {
   completeSocialAuth,
   loginErrorRedirect,
 } from "@/shared/lib/socialAuth";
-
-const baseUrl = getBaseUrl();
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -38,8 +37,8 @@ export async function GET(req: NextRequest) {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       grant_type: "authorization_code",
-      client_id: process.env.VK_CLIENT_ID!,
-      redirect_uri: `${baseUrl}/api/auth/vk/callback`,
+      client_id: requireEnv(process.env.VK_CLIENT_ID, "VK_CLIENT_ID"),
+      redirect_uri: `${getBaseUrl()}/api/auth/vk/callback`,
       code,
       code_verifier: codeVerifier,
       device_id,
@@ -58,7 +57,7 @@ export async function GET(req: NextRequest) {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       access_token: tokenData.access_token,
-      client_id: process.env.VK_CLIENT_ID!,
+      client_id: requireEnv(process.env.VK_CLIENT_ID, "VK_CLIENT_ID"),
     }),
   });
 

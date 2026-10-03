@@ -1,11 +1,14 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import type { WeekScheduleEventRow } from "@/shared/lib/dbTypes";
+
+type ScheduleRow = Pick<WeekScheduleEventRow, "weekday" | "time" | "boss_name">;
 
 export async function getWeeklySchedule() {
-  let data;
+  let data: ScheduleRow[];
   try {
-    data = await sql<any[]>`
+    data = await sql<ScheduleRow[]>`
       SELECT weekday, time, boss_name FROM week_schedule_event
     `;
   } catch (error) {
@@ -13,17 +16,14 @@ export async function getWeeklySchedule() {
     return {};
   }
 
-  // Группируем по дням недели
   const schedule: Record<string, [string, string][]> = {};
 
   for (const { weekday, time, boss_name } of data) {
-    if (!schedule[weekday]) schedule[weekday] = [];
-    schedule[weekday].push([time, boss_name]);
+    (schedule[weekday] ??= []).push([time, boss_name]);
   }
 
-  // Сортировка по времени
-  for (const day in schedule) {
-    schedule[day].sort((a, b) => a[0].localeCompare(b[0]));
+  for (const entries of Object.values(schedule)) {
+    entries.sort((a, b) => a[0].localeCompare(b[0]));
   }
 
   return schedule;
