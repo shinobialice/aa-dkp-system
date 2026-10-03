@@ -41,7 +41,7 @@ export default function ParticipantGroups({
               {group.selected} / {group.total}
             </span>
           </span>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-col gap-1">
             {group.people.map((user) => (
               <ParticipantChip
                 key={user.id}

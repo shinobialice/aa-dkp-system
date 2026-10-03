@@ -37,7 +37,7 @@ export default function ParticipantChip({
     <span
       style={chipStyle}
       className={cn(
-        "inline-flex items-center overflow-hidden rounded-full border",
+        "flex items-center overflow-hidden rounded-lg border",
         selected ? "border-foreground/30 bg-muted" : "bg-background",
       )}
     >
@@ -46,7 +46,7 @@ export default function ParticipantChip({
         aria-pressed={selected}
         onClick={onToggle}
         className={cn(
-          "inline-flex h-8 cursor-pointer items-center gap-1.5 pr-2.5 pl-2 text-sm font-medium",
+          "flex h-8 flex-1 cursor-pointer items-center gap-1.5 pr-2.5 pl-2 text-left text-sm font-medium",
           !selected && "text-muted-foreground hover:text-foreground",
         )}
       >

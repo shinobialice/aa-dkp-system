@@ -1,4 +1,5 @@
 import { hasTag } from "@/actions/hasTag";
+import { KILLCOUNT_EDITOR_TAGS } from "@/server/killcountEditors";
 import { Button } from "@/shared/ui";
 import {
   getKillCountByDate,
@@ -45,8 +46,8 @@ export default async function Page({
 
   const sessionToken = (await cookies()).get("session_token")?.value ?? "";
 
-  const [isAdmin, dataByDate, history] = await Promise.all([
-    hasTag(sessionToken, ["Администратор"]),
+  const [canEditKillcount, dataByDate, history] = await Promise.all([
+    hasTag(sessionToken, KILLCOUNT_EDITOR_TAGS),
     getKillCountByDate(slug),
     getKillCountHistory(),
   ]);
@@ -80,7 +81,11 @@ export default async function Page({
         </div>
       </KillcountHeader>
 
-      <KillcountDay data={dataByDate} mode="saved" isCanEdit={isAdmin} />
+      <KillcountDay
+        data={dataByDate}
+        mode="saved"
+        isCanEdit={canEditKillcount}
+      />
     </div>
   );
 }

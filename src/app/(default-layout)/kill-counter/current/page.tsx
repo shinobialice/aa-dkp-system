@@ -1,6 +1,7 @@
 import { getKillCountCurrent } from "@/widgets/killcount/api/current";
 import { cookies } from "next/headers";
 import { hasTag } from "@/actions/hasTag";
+import { KILLCOUNT_EDITOR_TAGS } from "@/server/killcountEditors";
 import { AddKillCount } from "@/widgets/killcount/add-kill-count";
 import { KillcountHeader } from "@/widgets/killcount/ui/KillcountHeader";
 import { KillcountDay } from "@/widgets/killcount/ui/KillcountDay";
@@ -15,8 +16,8 @@ function moscowToday() {
 export default async function KillCounterPage() {
   const sessionToken = (await cookies()).get("session_token")?.value ?? "";
 
-  const [isAdmin, currentKillCount] = await Promise.all([
-    hasTag(sessionToken, ["Администратор"]),
+  const [canEditKillcount, currentKillCount] = await Promise.all([
+    hasTag(sessionToken, KILLCOUNT_EDITOR_TAGS),
     getKillCountCurrent(),
   ]);
 
@@ -30,10 +31,10 @@ export default async function KillCounterPage() {
           data={currentKillCount}
           mode="saved"
           canAddToday
-          isCanEdit={isAdmin}
+          isCanEdit={canEditKillcount}
         />
       ) : (
-        <AddKillCount isCanEdit={isAdmin} />
+        <AddKillCount isCanEdit={canEditKillcount} />
       )}
     </div>
   );

@@ -4,6 +4,7 @@ import sql from "@/shared/lib/db";
 import { getBaseUrl } from "@/shared/lib";
 import { sendVkMessage } from "@/shared/lib/vkBot";
 import ensurePrivilieges from "@/actions/ensurePrivilieges";
+import { KILLCOUNT_EDITOR_TAGS } from "@/server/killcountEditors";
 import { type KillCount } from "../types";
 
 export const getKillCountCurrent = async () => {
@@ -38,13 +39,13 @@ export const getKillCountCurrent = async () => {
 };
 
 export const setKillCountCurrent = async (dto: KillCount[]) => {
-  await ensurePrivilieges(["Администратор"]);
+  await ensurePrivilieges(KILLCOUNT_EDITOR_TAGS);
   await insertKillCountRows(dto);
   await notifyKillCountAdded();
 };
 
 export const addKillCountRowToday = async (row: KillCount) => {
-  await ensurePrivilieges(["Администратор"]);
+  await ensurePrivilieges(KILLCOUNT_EDITOR_TAGS);
   await insertKillCountRows([row]);
 };
 

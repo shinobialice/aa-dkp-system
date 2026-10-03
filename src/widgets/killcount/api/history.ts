@@ -2,6 +2,7 @@
 
 import sql from "@/shared/lib/db";
 import ensurePrivilieges from "@/actions/ensurePrivilieges";
+import { KILLCOUNT_EDITOR_TAGS } from "@/server/killcountEditors";
 import {
   type DB_GetKillCountDto,
   type DB_UpdateKillCountDto,
@@ -145,7 +146,7 @@ export const updateKillCountById = async ({
   endKills,
   comment,
 }: DB_UpdateKillCountDto) => {
-  await ensurePrivilieges(["Администратор"]);
+  await ensurePrivilieges(KILLCOUNT_EDITOR_TAGS);
   try {
     const result = await sql`
     UPDATE killcount_stats
