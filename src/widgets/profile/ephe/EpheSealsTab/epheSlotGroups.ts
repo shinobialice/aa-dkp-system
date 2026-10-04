@@ -31,9 +31,3 @@ export const EPHE_SIDEBAR_GROUPS: { label: string; slots: string[] }[] = [
     slots: ["necklace", "earring1", "earring2", "ring1", "ring2", "instrument"],
   },
 ];
-
-export const TIER_LABELS = {
-  default: "РБ",
-  ephen: "Эфенское",
-  ramian: "Рамианское/данж.",
-};

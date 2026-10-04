@@ -4,6 +4,9 @@ import { ITEMS_DIR, readCatalog } from "./readCatalog.mjs";
 
 const SYNTHESIS_OUTPUT = `${ITEMS_DIR}/gameSynthesis.ts`;
 const SET_BONUSES_OUTPUT = `${ITEMS_DIR}/gameSetBonuses.ts`;
+const ITEM_PASSIVES_OUTPUT = `${ITEMS_DIR}/gameItemPassives.ts`;
+const ITEM_LEVELS_OUTPUT = `${ITEMS_DIR}/gameItemLevels.ts`;
+const ARMOR_TYPES_OUTPUT = `${ITEMS_DIR}/armorType.ts`;
 const BUFFS_OUTPUT = `${ITEMS_DIR}/gameBuffs.ts`;
 const HEADER =
   "// Сгенерировано `pnpm game:tables` из данных игры. Не редактировать вручную.";
@@ -84,6 +87,11 @@ const UNIT_ATTRIBUTES = {
   67: [82, 0.2],
   68: [83, 0.2],
 };
+
+const ARMOR_WEIGHTS = { cloth: "light", leather: "medium", plate: "heavy" };
+// Слоты шлема, нагрудника, пояса, наручей, перчаток, поножей и сапог — только
+// они входят в комплект лёгких, средних или тяжелых доспехов.
+const ARMOR_SET_SLOTS = new Set([1, 2, 3, 4, 5, 7, 8]);
 
 const MAX_GRADE = 12;
 const SYNTHESIS_START_PERCENT = 0;
@@ -243,6 +251,9 @@ const catalog = readCatalog();
 
 await writeSynthesis();
 await writeSetBonuses();
+await writeItemPassives();
+await writeItemLevels();
+await writeArmorTypes();
 await writeBuffs();
 
 async function writeSynthesis() {
@@ -343,6 +354,71 @@ async function writeSetBonuses() {
     "};",
   ]);
   console.log(`${setLines.length} sets → ${SET_BONUSES_OUTPUT}`);
+}
+
+// Постоянные модификаторы предмета и эффекты «Экипировка». Модификаторы,
+// которые растут с уровнем, и эффекты предметов с бонусом за грейд уже есть в
+// статах по грейдам (itemGradeStats.ts), их здесь нет.
+async function writeItemPassives() {
+  const itemLines = [];
+  for (const [itemId, name] of catalog) {
+    const record = clientData.records[itemId];
+    if (!record) continue;
+    const hasGradeBuffs =
+      Object.keys(record.gradeBuffModifiers ?? {}).length > 0;
+    const modifiers = [
+      ...(record.modifiers ?? []),
+      ...(hasGradeBuffs ? [] : (record.passiveModifiers ?? [])),
+    ].filter(([, , , perLevel]) => perLevel === 0);
+    const stats = stepStats(modifiers, 0);
+    if (stats.length === 0) continue;
+    const body = stats.map(([code, value]) => `${code}: ${value}`).join(", ");
+    itemLines.push(`  ${itemId}: { ${body} }, // ${name}`);
+  }
+
+  await writeSource(ITEM_PASSIVES_OUTPUT, [
+    HEADER,
+    "export const GAME_ITEM_PASSIVES: Record<number, Record<number, number>> = {",
+    ...itemLines,
+    "};",
+  ]);
+  console.log(`${itemLines.length} items → ${ITEM_PASSIVES_OUTPUT}`);
+}
+
+async function writeItemLevels() {
+  const itemLines = catalog.flatMap(([itemId, name]) => {
+    const level = clientData.records[itemId]?.level;
+    return level === undefined ? [] : [`  ${itemId}: ${level}, // ${name}`];
+  });
+
+  await writeSource(ITEM_LEVELS_OUTPUT, [
+    HEADER,
+    "export const GAME_ITEM_LEVELS: Record<number, number> = {",
+    ...itemLines,
+    "};",
+  ]);
+  console.log(`${itemLines.length} items → ${ITEM_LEVELS_OUTPUT}`);
+}
+
+async function writeArmorTypes() {
+  const itemLines = catalog.flatMap(([itemId, name]) => {
+    const record = clientData.records[itemId];
+    const weight = ARMOR_WEIGHTS[record?.armorType];
+    const isBodyArmor = record?.slots.some((slot) => ARMOR_SET_SLOTS.has(slot));
+    return weight && isBodyArmor
+      ? [`  ${itemId}: "${weight}", // ${name}`]
+      : [];
+  });
+
+  await writeSource(ARMOR_TYPES_OUTPUT, [
+    HEADER,
+    'export type ArmorWeight = "light" | "medium" | "heavy";',
+    "",
+    "export const ARMOR_TYPE: Record<number, ArmorWeight> = {",
+    ...itemLines,
+    "};",
+  ]);
+  console.log(`${itemLines.length} items → ${ARMOR_TYPES_OUTPUT}`);
 }
 
 async function writeBuffs() {

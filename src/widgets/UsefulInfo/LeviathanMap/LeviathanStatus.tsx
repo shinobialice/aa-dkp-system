@@ -1,8 +1,5 @@
-import {
-  formatDuration,
-  formatSpawnDate,
-  type LeviathanState,
-} from "./leviathanModel";
+import { formatDuration, formatSpawnDate } from "../spawnScheduleModel";
+import { type LeviathanState } from "./leviathanModel";
 
 type Props = {
   state: LeviathanState | null;

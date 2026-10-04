@@ -1,3 +1,4 @@
+import KrakenMap from "./KrakenMap";
 import LeviathanMap from "./LeviathanMap";
 import ZoomableImage from "./ZoomableImage";
 
@@ -28,6 +29,8 @@ export default function UsefulInfo() {
       </section>
 
       <LeviathanMap />
+
+      <KrakenMap />
     </div>
   );
 }

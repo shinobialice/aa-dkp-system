@@ -1,3 +1,5 @@
+import { GAME_ITEM_LEVELS } from "../equipment/itemsData/gameItemLevels";
+
 export type EpheTrackKey =
   | "weapon_melee"
   | "weapon_ranged"
@@ -235,132 +237,23 @@ export function getEpheEffectiveness(
   return Math.round(count * 10) / 100;
 }
 
-export type EpheItemTier = "default" | "ephen" | "ramian";
-
-const WEAPON_PERCENT_CURVE: Record<EpheItemTier, [number, number][]> = {
-  default: [
-    [0.2, 0.65],
-    [0.4, 1.3],
-    [0.7, 2.28],
-    [0.9, 2.93],
-    [1.1, 3.59],
-    [1.4, 4.56],
-    [1.7, 5.54],
-    [2.0, 6.52],
-    [2.3, 7.5],
-    [2.6, 8.51],
-    [3.0, 9.78],
-  ],
-  ephen: [
-    [0.2, 0.66],
-    [0.4, 1.32],
-    [0.7, 2.3],
-    [0.9, 2.96],
-    [1.1, 3.62],
-    [1.4, 4.6],
-    [1.7, 5.59],
-    [2.0, 6.58],
-    [2.3, 7.53],
-    [2.6, 8.55],
-    [3.0, 9.86],
-  ],
-  ramian: [
-    [0.2, 0.66],
-    [0.4, 1.32],
-    [0.7, 2.31],
-    [0.9, 2.97],
-    [1.1, 3.63],
-    [1.4, 4.62],
-    [1.7, 5.61],
-    [2.0, 6.6],
-    [2.3, 7.59],
-    [2.6, 8.58],
-    [3.0, 9.9],
-  ],
-};
-
-const SHIELD_PERCENT_CURVE: Record<EpheItemTier, [number, number][]> = {
-  default: [
-    [0.2, 0.29],
-    [0.4, 0.59],
-    [0.7, 1.03],
-    [0.9, 1.32],
-    [1.1, 1.62],
-    [1.4, 2.06],
-    [1.7, 2.5],
-    [2.0, 2.94],
-    [2.3, 3.38],
-    [2.6, 3.82],
-    [3.0, 4.41],
-  ],
-  ephen: [
-    [0.2, 0.3],
-    [0.4, 0.59],
-    [0.7, 1.03],
-    [0.9, 1.33],
-    [1.1, 1.63],
-    [1.4, 2.07],
-    [1.7, 2.51],
-    [2.0, 2.96],
-    [2.3, 3.4],
-    [2.6, 3.84],
-    [3.0, 4.43],
-  ],
-  ramian: [
-    [0.2, 0.3],
-    [0.4, 0.6],
-    [0.7, 1.04],
-    [0.9, 1.34],
-    [1.1, 1.64],
-    [1.4, 2.09],
-    [1.7, 2.54],
-    [2.0, 2.98],
-    [2.3, 3.43],
-    [2.6, 3.88],
-    [3.0, 4.47],
-  ],
-};
-
-// В игре доспехи на эффективности 3.5 получают +5.01% (возрождённый алтарник):
-// после 3.0 прирост замедляется. Защита щита на слоте оружия растёт без
-// замедления (+5.14%), поэтому у неё своя кривая.
-const ARMOR_PERCENT_CURVE: Record<EpheItemTier, [number, number][]> = {
-  default: [...SHIELD_PERCENT_CURVE.default, [3.5, 5.01]],
-  ephen: [...SHIELD_PERCENT_CURVE.ephen, [3.5, 5.03]],
-  ramian: [...SHIELD_PERCENT_CURVE.ramian, [3.5, 5.08]],
-};
-
-const PERCENT_CURVES = {
-  weapon: WEAPON_PERCENT_CURVE,
-  armor: ARMOR_PERCENT_CURVE,
-  shield: SHIELD_PERCENT_CURVE,
-};
-
-function evalPercentCurve(points: [number, number][], x: number): number {
-  const full: [number, number][] = [[0, 0], ...points];
-  if (x <= full[0][0]) return full[0][1];
-  const last = full.length - 1;
-  if (x >= full[last][0]) {
-    const [x0, y0] = full[last - 1];
-    const [x1, y1] = full[last];
-    const slope = (y1 - y0) / (x1 - x0);
-    return y1 + (x - x1) * slope;
-  }
-  for (let i = 0; i < last; i++) {
-    const [x0, y0] = full[i];
-    const [x1, y1] = full[i + 1];
-    if (x >= x0 && x <= x1) {
-      const t = (x - x0) / (x1 - x0);
-      return y0 + t * (y1 - y0);
-    }
-  }
-  return full[last][1];
-}
-
 export function getEphePercentBonus(
-  category: keyof typeof PERCENT_CURVES,
-  tier: EpheItemTier,
+  category: "weapon" | "armor",
+  itemId: number,
   effectiveness: number,
 ): number {
-  return evalPercentCurve(PERCENT_CURVES[category][tier], effectiveness);
+  const level = GAME_ITEM_LEVELS[itemId];
+  const base = category === "weapon" ? weaponBase : armorBase;
+  return (base(level + effectiveness) / base(level) - 1) * 100;
+}
+
+// Печать Эфе поднимает уровень предмета на величину эффективности. Урон оружия,
+// защита и сопротивление доспехов и щитов считаются формулами игры от уровня
+// предмета (у разных предметов они отличаются только постоянным множителем).
+function weaponBase(itemLevel: number): number {
+  return itemLevel * 1.4 + 15 + itemLevel * 2.2 ** ((itemLevel / 100) * 3);
+}
+
+function armorBase(itemLevel: number): number {
+  return Math.floor(itemLevel ** 1.1 * 85 + 100);
 }

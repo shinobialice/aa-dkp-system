@@ -2,16 +2,14 @@
 
 import Image from "next/image";
 import { useClock } from "@/hooks/useClock";
+import { BOSS_ICON, toMapPercent } from "../spawnScheduleModel";
 import LeviathanStatus from "./LeviathanStatus";
 import {
   getLeviathanState,
   LEVIATHAN_MAP,
   LEVIATHAN_SCHEDULE_TEXT,
   ROUTE,
-  toMapPercent,
 } from "./leviathanModel";
-
-const LEVIATHAN_ICON = "/images/maps/leviathan-marker.png";
 const ROUTE_POINTS = ROUTE.map(([x, y]) => `${x},${y}`).join(" ");
 const [START_X, START_Y] = ROUTE[0];
 
@@ -80,12 +78,12 @@ export default function LeviathanMap() {
         </svg>
         {position && (
           <Image
-            src={LEVIATHAN_ICON}
+            src={BOSS_ICON}
             alt="Левиафан"
             width={36}
             height={39}
             unoptimized
-            style={toMapPercent([position.x, position.y])}
+            style={toMapPercent([position.x, position.y], LEVIATHAN_MAP)}
             className="absolute -translate-x-1/2 -translate-y-1/2 drop-shadow-[0_1px_2px_rgb(0_0_0/0.6)] transition-[left,top] duration-1000 ease-linear"
           />
         )}

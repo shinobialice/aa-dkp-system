@@ -59,7 +59,7 @@ export function computeEphenRuneSetBonuses(
 
 function parseTierBonuses(text: string): [string, number][] {
   return text.split("\n").flatMap((line) => {
-    const match = line.match(/^(.+?):\s*([+-]?\d+(?:\.\d+)?)%?$/);
+    const match = line.match(/^(.+?):\s*([+-]?\d+(?:\.\d+)?)\s*(?:%|ед\.)?$/);
     if (!match) return [];
     return [[match[1].trim(), Number(match[2])] as [string, number]];
   });

@@ -1,6 +1,5 @@
 import type { UserEquipment } from "@/actions/getUserEquipment";
 import { findGearItem } from "../equipment/itemsData";
-import { getEpheItemTier } from "./epheItemTiers";
 import {
   EPHE_SLOT_TRACK,
   EPHE_TRACK_PERCENT_CATEGORY,
@@ -44,12 +43,10 @@ export function getEpheStatMultipliers(eq: UserEquipment): EpheStatMultipliers {
   if (!gearItem) return {};
   const effectiveness = getEpheEffectiveness(track, eq.ephe_seal_level);
   if (effectiveness <= 0) return {};
-  const tier = getEpheItemTier(gearItem.id);
   const weaponMultiplier =
-    1 + getEphePercentBonus("weapon", tier, effectiveness) / 100;
-  const armorCurve = category === "weapon" ? "shield" : "armor";
+    1 + getEphePercentBonus("weapon", gearItem.id, effectiveness) / 100;
   const armorMultiplier =
-    1 + getEphePercentBonus(armorCurve, tier, effectiveness) / 100;
+    1 + getEphePercentBonus("armor", gearItem.id, effectiveness) / 100;
   return Object.fromEntries([
     ...WEAPON_PERCENT_STATS.map((stat) => [stat, weaponMultiplier]),
     ...ARMOR_PERCENT_STATS.map((stat) => [stat, armorMultiplier]),

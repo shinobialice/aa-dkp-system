@@ -2,7 +2,10 @@ import type { UserEquipment } from "@/actions/getUserEquipment";
 import type { UserSeal } from "@/actions/getUserSeals";
 import { computeSealBonusSummary } from "@/widgets/profile/seals/sealBonusSummary";
 import { ITEM_STATS, findGearItem } from "./itemsData";
-import { getItemGradeStats } from "./itemsData/itemGradeStats";
+import {
+  getItemGradeBonusStats,
+  getItemGradeStats,
+} from "./itemsData/itemGradeStats";
 import { scaleStat, STAT_LABELS } from "./itemsData/statsFormula";
 import { addStat, STAT_LABEL, type StatBonuses } from "./itemsData/statEffects";
 import { computeEngravingBonuses, ENGRAVING_STAT } from "./engravingBonuses";
@@ -10,6 +13,7 @@ import { computeEphenRuneSetBonuses } from "./ephenRuneSetBonus";
 import { computeRuneBonuses } from "./runeBonuses";
 import { computeSynthesisBonuses } from "./synthesisBonuses";
 import { computeSetStatBonuses } from "./setStatBonuses";
+import { computeItemPassiveBonuses } from "./itemPassives";
 import { computeBuffStatBonuses, type SelectedBuffs } from "./characterBuffs";
 import {
   computeEpheSealsFlatBonus,
@@ -110,23 +114,39 @@ export function addGearStats(
   const gearItem = findGearItem(eq.slot, eq.item_name);
   if (!gearItem) return;
   const gradeStats = getItemGradeStats(gearItem.id, eq.grade);
-  const base = gradeStats ?? ITEM_STATS[gearItem.id];
-  if (!base) return;
+  const bonusStats = getItemGradeBonusStats(gearItem.id, eq.grade) ?? {};
+  const base = gradeStats ?? ITEM_STATS[gearItem.id] ?? {};
 
   const epheMultipliers = getEpheStatMultipliers(eq);
   for (const [key, value] of Object.entries(base)) {
+    if (key in bonusStats) continue;
     // Статы из ITEM_GRADE_STATS уже финальные для грейда, scaleStat к ним не применяется.
-    const scaled =
-      (gradeStats ? value : scaleStat(value, eq.grade, eq.enchant ?? 0, key)) *
-      (epheMultipliers[key] ?? 1);
-    const weaponLabel = weaponStatLabel(key, eq.slot);
-    if (key === "wearable_armor") totals.defense += scaled;
-    else if (key === "wearable_magic_resistance") totals.resist += scaled;
-    else if (weaponLabel) addStat(flat, weaponLabel, scaled);
-    else {
-      const label = FLAT_GEAR_STAT_LABELS[key] ?? STAT_LABELS[key];
-      if (label) addStat(flat, label, scaled);
-    }
+    const gradeValue = gradeStats
+      ? value
+      : scaleStat(value, eq.grade, eq.enchant ?? 0, key);
+    const scaled = gradeValue * (epheMultipliers[key] ?? 1);
+    addItemStat(totals, flat, eq.slot, key, scaled);
+  }
+  for (const [key, value] of Object.entries(bonusStats)) {
+    const scaled = value * (epheMultipliers[key] ?? 1);
+    addItemStat(totals, flat, eq.slot, key, scaled);
+  }
+}
+
+function addItemStat(
+  totals: EquippedBonuses,
+  flat: StatBonuses,
+  slot: string,
+  key: string,
+  value: number,
+) {
+  const weaponLabel = weaponStatLabel(key, slot);
+  if (key === "wearable_armor") totals.defense += value;
+  else if (key === "wearable_magic_resistance") totals.resist += value;
+  else if (weaponLabel) addStat(flat, weaponLabel, value);
+  else {
+    const label = FLAT_GEAR_STAT_LABELS[key] ?? STAT_LABELS[key];
+    if (label) addStat(flat, label, value);
   }
 }
 
@@ -145,6 +165,7 @@ export function collectStatSources(
     computeEphenRuneSetBonuses(equipment),
     computeSynthesisBonuses(equipment),
     computeSetStatBonuses(equipment),
+    computeItemPassiveBonuses(equipment),
     computeBuffStatBonuses(buffs),
     computeSealBonusSummary(sealPicks).map(
       ({ stat, value }): [string, number] => [stat, value],

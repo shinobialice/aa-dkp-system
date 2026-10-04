@@ -5,23 +5,19 @@ import saveEpheSealLevel from "@/actions/saveEpheSealLevel";
 import maxAllEpheSealLevels from "@/actions/maxAllEpheSealLevels";
 import type { UserEquipment } from "@/actions/getUserEquipment";
 import { getEquipmentSlot } from "../../equipment/equipmentData";
-import { findGearItem } from "../../equipment/itemsData";
 import {
   EPHE_SLOT_TRACK,
   EPHE_TRACK_MAX_LEVEL,
-  EPHE_TRACK_PERCENT_CATEGORY,
   getEpheTrackLevels,
-  getEpheEffectiveness,
-  getEphePercentBonus,
 } from "../epheSealsData";
-import { getEpheItemTier } from "../epheItemTiers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
 import { Button } from "@/shared/ui";
 import CharacterTabsSwitcher from "@/widgets/profile/CharacterTabsSwitcher";
 import { errorMessage } from "@/shared/lib/errorMessage";
 import EpheSidebar from "./EpheSidebar";
 import EpheLevelList from "./EpheLevelList";
-import { EPHE_SIDEBAR_GROUPS, TIER_LABELS } from "./epheSlotGroups";
+import { EPHE_SIDEBAR_GROUPS } from "./epheSlotGroups";
+import EpheBonusNote from "./EpheBonusNote";
 
 export default function EpheSealsTab({
   userId,
@@ -74,17 +70,6 @@ export default function EpheSealsTab({
   const activeLevel = activeEq?.ephe_seal_level ?? 0;
   const maxLevel = EPHE_TRACK_MAX_LEVEL[activeTrack];
   const rows = getEpheTrackLevels(activeTrack);
-  const percentCategory = EPHE_TRACK_PERCENT_CATEGORY[activeTrack];
-
-  const gearItem = activeEq
-    ? findGearItem(activeSlot, activeEq.item_name)
-    : undefined;
-  const effectiveness = getEpheEffectiveness(activeTrack, activeLevel);
-  const tier = gearItem ? getEpheItemTier(gearItem.id) : "default";
-  const percentBonus =
-    percentCategory && effectiveness > 0
-      ? getEphePercentBonus(percentCategory, tier, effectiveness)
-      : 0;
 
   return (
     <Card className="min-h-187.5 gap-3 py-4">
@@ -126,13 +111,7 @@ export default function EpheSealsTab({
                     {" "}
                     — выбрано до уровня {activeLevel} / {maxLevel}
                   </span>
-                  {percentCategory && (
-                    <span className="text-muted-foreground">
-                      {" "}
-                      · эффективность {effectiveness.toFixed(1)} · бонус +
-                      {percentBonus.toFixed(2)}% ({TIER_LABELS[tier]})
-                    </span>
-                  )}
+                  <EpheBonusNote eq={activeEq} />
                 </div>
                 {canEdit && activeLevel > 0 && (
                   <Button

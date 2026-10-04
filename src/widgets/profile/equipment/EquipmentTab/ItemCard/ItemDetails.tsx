@@ -6,6 +6,8 @@ import { EffectText } from "../../highlightNumbers";
 import EngravingDisplay from "./EngravingDisplay";
 import SynthesisDisplay from "./SynthesisDisplay";
 import { describeEquipmentSynthesis } from "../../synthesisBonuses";
+import { findGearItem } from "../../itemsData";
+import { getItemPassiveRolls } from "../../itemPassives";
 
 type Props = {
   slotKey: string;
@@ -18,9 +20,17 @@ export default function ItemDetails({ slotKey, item, divided }: Props) {
   const engravingCount = getEngravingSlotCount(slotKey, item.grade);
   const divider = divided && <div className="border-t border-border" />;
   const synthesis = describeEquipmentSynthesis(item);
+  const gearItem = findGearItem(item.slot, item.item_name);
+  const passives = gearItem ? getItemPassiveRolls(gearItem.id) : [];
 
   return (
     <>
+      {passives.length > 0 && (
+        <>
+          {divider}
+          <SynthesisDisplay title="Экипировка" rolls={passives} />
+        </>
+      )}
       {rune && (
         <>
           {divider}

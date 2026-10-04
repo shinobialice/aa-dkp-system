@@ -779,36 +779,6 @@ export const ITEM_GRADE_STATS: Record<
     },
   },
 
-  // Кларнет Тростникового Короля
-  40624: {
-    0: { wearable_magic_resistance: 520 },
-    2: { wearable_magic_resistance: 545 },
-    3: { wearable_magic_resistance: 570 },
-    4: { wearable_magic_resistance: 595 },
-    5: { wearable_magic_resistance: 620 },
-    6: { wearable_magic_resistance: 645 },
-    7: { wearable_magic_resistance: 695 },
-    8: { wearable_magic_resistance: 745 },
-    9: { wearable_magic_resistance: 795 },
-    10: { wearable_magic_resistance: 845 },
-    11: { wearable_magic_resistance: 895 },
-    12: { wearable_magic_resistance: 945 },
-  },
-  // Лютня Солнечной Башни
-  40622: {
-    0: { wearable_armor: 520 },
-    2: { wearable_armor: 545 },
-    3: { wearable_armor: 570 },
-    4: { wearable_armor: 595 },
-    5: { wearable_armor: 620 },
-    6: { wearable_armor: 645 },
-    7: { wearable_armor: 695 },
-    8: { wearable_armor: 745 },
-    9: { wearable_armor: 795 },
-    10: { wearable_armor: 845 },
-    11: { wearable_armor: 895 },
-    12: { wearable_armor: 945 },
-  },
   // Иферийское ожерелье мудреца (значения = value + linear_level_bonus * item_level / 100,
   // сверено с archeagecodex.com — так у всех предметов "Иферийского" сета ниже)
   31638: {
@@ -1186,6 +1156,38 @@ export const ITEM_GRADE_BONUS_STATS: Record<
     10: { wearable_armor: 737 },
     11: { wearable_armor: 787 },
     12: { wearable_armor: 837 },
+  },
+  // Кларнет Тростникового Короля
+  40624: {
+    0: { wearable_magic_resistance: 520 },
+    1: { wearable_magic_resistance: 520 },
+    2: { wearable_magic_resistance: 545 },
+    3: { wearable_magic_resistance: 570 },
+    4: { wearable_magic_resistance: 595 },
+    5: { wearable_magic_resistance: 620 },
+    6: { wearable_magic_resistance: 645 },
+    7: { wearable_magic_resistance: 695 },
+    8: { wearable_magic_resistance: 745 },
+    9: { wearable_magic_resistance: 795 },
+    10: { wearable_magic_resistance: 845 },
+    11: { wearable_magic_resistance: 895 },
+    12: { wearable_magic_resistance: 945 },
+  },
+  // Лютня Солнечной Башни
+  40622: {
+    0: { wearable_armor: 520 },
+    1: { wearable_armor: 520 },
+    2: { wearable_armor: 545 },
+    3: { wearable_armor: 570 },
+    4: { wearable_armor: 595 },
+    5: { wearable_armor: 620 },
+    6: { wearable_armor: 645 },
+    7: { wearable_armor: 695 },
+    8: { wearable_armor: 745 },
+    9: { wearable_armor: 795 },
+    10: { wearable_armor: 845 },
+    11: { wearable_armor: 895 },
+    12: { wearable_armor: 945 },
   },
   // Зеркальная аргенитовая лютня
   34701: {

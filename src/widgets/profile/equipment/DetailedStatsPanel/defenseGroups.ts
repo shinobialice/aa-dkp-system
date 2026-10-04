@@ -12,8 +12,6 @@ type DefenseKind = {
 };
 
 const BASE_VULNERABILITY = 100;
-const BASE_CRIT_DAMAGE_RESIST = 20;
-const BASE_PVP_RESIST = 10;
 
 export function buildDefenseGroups(stats: DerivedStats): RowGroup[] {
   return [
@@ -24,7 +22,7 @@ export function buildDefenseGroups(stats: DerivedStats): RowGroup[] {
         computedRow("Уклонение", stats.dodge, "%", 1),
         bonusRow(
           "Устойчивость к крит. урону",
-          BASE_CRIT_DAMAGE_RESIST,
+          0,
           "",
           0,
           ENGRAVING_STAT.CRIT_DAMAGE_RESIST,
@@ -41,7 +39,7 @@ export function buildDefenseGroups(stats: DerivedStats): RowGroup[] {
         ),
         bonusRow(
           "Устойчивость к атакам в PVP",
-          BASE_PVP_RESIST,
+          0,
           "",
           0,
           ENGRAVING_STAT.PVP_RESIST,
