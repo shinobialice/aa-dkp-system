@@ -5,7 +5,7 @@ import { Button, Input } from "@/shared/ui";
 import { cn } from "@/shared/lib/tw-merge";
 import type { EquipmentSlot } from "../../equipmentData";
 import { ITEMS_BY_SLOT } from "../../itemsData";
-import { GearItemPicker } from "../../GearItemPicker";
+import GearItemPicker from "../../GearItemPicker";
 import ItemCard from "../ItemCard";
 import { CUBE_ELIGIBLE_SLOTS } from "../slotLayout";
 import { EMPTY_SLOT_VALUES, type SlotValues } from "../slotValues";

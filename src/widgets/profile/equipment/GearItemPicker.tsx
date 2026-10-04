@@ -1,77 +1,75 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useState, type SyntheticEvent } from "react";
 import { ChevronDown } from "lucide-react";
 import { GearItemIcon } from "./GearItemIcon";
 import type { GearItem } from "./itemsData";
-import { Input } from "@/shared/ui";
+import {
+  Input,
+  Popover,
+  PopoverContent,
+  PopoverPortal,
+  PopoverTrigger,
+} from "@/shared/ui";
+import { cn } from "@/shared/lib/tw-merge";
 
-export function GearItemPicker({
-  items,
-  value,
-  onSelect,
-}: {
+type Props = {
   items: GearItem[];
   value: string;
   onSelect: (item: GearItem) => void;
-}) {
+};
+
+export default function GearItemPicker({ items, value, onSelect }: Props) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const containerRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
-      ) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [open]);
-
-  const selected = items.find((i) => i.name === value);
-
-  const filtered = query.trim()
-    ? items.filter((i) =>
-        i.name.toLowerCase().includes(query.trim().toLowerCase()),
-      )
+  const selected = items.find((item) => item.name === value);
+  const search = query.trim().toLowerCase();
+  const filtered = search
+    ? items.filter((item) => item.name.toLowerCase().includes(search))
     : items;
 
-  return (
-    <div ref={containerRef} className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-md border bg-input/30 px-3 py-2 text-sm"
-      >
-        {selected ? (
-          <span className="flex min-w-0 flex-1 items-center gap-2">
-            <GearItemIcon item={selected} grade={selected.grade} size={20} />
-            <span className="min-w-0 flex-1 truncate text-left">
-              {selected.name}
-            </span>
-          </span>
-        ) : (
-          <span className="text-muted-foreground">Выберите предмет</span>
-        )}
-        <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
-      </button>
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen) setQuery("");
+  };
 
-      {open && (
-        <div className="absolute z-50 mt-1 w-full rounded-md border bg-popover text-popover-foreground shadow-md">
-          <div className="p-1.5">
+  const handleSelect = (item: GearItem) => {
+    onSelect(item);
+    handleOpenChange(false);
+  };
+
+  // The list is portaled out of the dialog, and the dialog's scroll lock
+  // cancels wheel and touch scrolling that happens outside of it.
+  const handleScrollEvent = (event: SyntheticEvent) => event.stopPropagation();
+
+  return (
+    <Popover open={open} onOpenChange={handleOpenChange}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-md border bg-input/30 px-3 py-2 text-sm"
+        >
+          <SelectedItem item={selected} />
+          <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
+        </button>
+      </PopoverTrigger>
+      <PopoverPortal>
+        <PopoverContent
+          align="start"
+          collisionPadding={8}
+          onWheel={handleScrollEvent}
+          onTouchMove={handleScrollEvent}
+          className="dark flex max-h-(--radix-popover-content-available-height) w-(--radix-popover-trigger-width) flex-col border-border p-0"
+        >
+          <div className="shrink-0 p-1.5">
             <Input
-              autoFocus
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(event) => setQuery(event.target.value)}
               placeholder="Начните вводить название..."
               autoComplete="off"
             />
           </div>
-          <div className="max-h-56 space-y-0.5 overflow-y-auto p-1">
+          <div className="max-h-80 min-h-0 space-y-0.5 overflow-y-auto p-1">
             {filtered.length === 0 && (
               <div className="px-2 py-1.5 text-sm text-muted-foreground">
                 Ничего не найдено
@@ -81,22 +79,31 @@ export function GearItemPicker({
               <button
                 key={item.id}
                 type="button"
-                onClick={() => {
-                  onSelect(item);
-                  setOpen(false);
-                  setQuery("");
-                }}
-                className={`flex w-full cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-sm hover:bg-accent ${
-                  value === item.name ? "bg-accent" : ""
-                }`}
+                onClick={() => handleSelect(item)}
+                className={cn(
+                  "flex w-full cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-sm hover:bg-accent",
+                  value === item.name && "bg-accent",
+                )}
               >
                 <GearItemIcon item={item} grade={item.grade} size={28} />
                 <span className="min-w-0 flex-1 truncate">{item.name}</span>
               </button>
             ))}
           </div>
-        </div>
-      )}
-    </div>
+        </PopoverContent>
+      </PopoverPortal>
+    </Popover>
+  );
+}
+
+function SelectedItem({ item }: { item: GearItem | undefined }) {
+  if (!item) {
+    return <span className="text-muted-foreground">Выберите предмет</span>;
+  }
+  return (
+    <span className="flex min-w-0 flex-1 items-center gap-2">
+      <GearItemIcon item={item} grade={item.grade} size={20} />
+      <span className="min-w-0 flex-1 truncate text-left">{item.name}</span>
+    </span>
   );
 }

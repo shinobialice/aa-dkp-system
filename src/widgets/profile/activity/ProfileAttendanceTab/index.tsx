@@ -1,10 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { getGuildPeriods } from "@/actions/getGuildPeriods";
 import { getUserMonthlyAttendance } from "@/actions/getUserMonthlyAttendance";
 import { getUserMonthlyRaids } from "@/actions/getUserMonthlyRaids";
+import { getUserYearlyAttendance } from "@/actions/getUserYearlyAttendance";
 import { useAsyncData } from "@/hooks/useAsyncData";
 import { MONTH_NAMES } from "@/shared/config/months";
+import AttendanceChart from "./AttendanceChart";
 import AttendanceTiles from "./AttendanceTiles";
 import PeriodPicker from "./PeriodPicker";
 import RaidList from "./RaidList";
@@ -29,6 +32,14 @@ export default function ProfileAttendanceTab({ userId }: { userId: number }) {
       return { attendance, raids };
     },
   );
+
+  const { data: yearly } = useAsyncData(`${userId}-${year}`, async () => {
+    const [months, periods] = await Promise.all([
+      getUserYearlyAttendance(userId, year),
+      getGuildPeriods(year),
+    ]);
+    return { months, periods };
+  });
 
   const raids = useMemo(() => sortRaids(data?.raids ?? [], sort), [data, sort]);
   const years = Array.from(
@@ -64,6 +75,15 @@ export default function ProfileAttendanceTab({ userId }: { userId: number }) {
         />
       </div>
 
+      {yearly && (
+        <AttendanceChart
+          months={yearly.months}
+          periods={yearly.periods}
+          year={year}
+          selectedMonth={month}
+          onMonthSelect={setMonth}
+        />
+      )}
       {(isLoading || !data) && (
         <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">
           Загрузка…
