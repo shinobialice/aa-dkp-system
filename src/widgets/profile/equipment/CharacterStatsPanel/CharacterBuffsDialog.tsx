@@ -1,5 +1,4 @@
 import { useState } from "react";
-import Image from "next/image";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import saveCharacterBuffs from "@/actions/saveCharacterBuffs";
@@ -12,30 +11,21 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
 } from "@/shared/ui";
 import { errorMessage } from "@/shared/lib/errorMessage";
-import type { CharacterBuff } from "../itemsData/buffTypes";
 import {
-  buffIconUrl,
-  findBuff,
-  findOption,
+  BUFF_OFF,
   isRequirementMet,
   PERSONAL_BUFFS,
   type SelectedBuffs,
 } from "../characterBuffs";
+import BuffOptionRow from "./BuffOptionRow";
 
 type Props = {
   userId: number;
   buffs: SelectedBuffs;
   onChange: (buffs: SelectedBuffs) => void;
 };
-
-const BUFF_OFF = "off";
 
 export default function CharacterBuffsDialog({
   userId,
@@ -123,59 +113,5 @@ export default function CharacterBuffsDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
-}
-
-type BuffOptionRowProps = {
-  buff: CharacterBuff;
-  value: string;
-  available: boolean;
-  onChange: (value: string) => void;
-};
-
-function BuffOptionRow({
-  buff,
-  value,
-  available,
-  onChange,
-}: BuffOptionRowProps) {
-  const requiredName =
-    buff.requiresBuffId === undefined
-      ? undefined
-      : findBuff(buff.requiresBuffId)?.name;
-
-  const icon = buffIconUrl(buff, findOption(buff, value));
-
-  return (
-    <div className="flex items-center gap-3">
-      <Image
-        src={icon}
-        alt=""
-        width={28}
-        height={28}
-        className="size-7 shrink-0 rounded"
-      />
-      <div className="min-w-0 flex-1 text-sm">
-        <div className="truncate">{buff.name}</div>
-        {!available && requiredName && (
-          <div className="text-xs text-muted-foreground">
-            Нужно «{requiredName}»
-          </div>
-        )}
-      </div>
-      <Select value={value} onValueChange={onChange} disabled={!available}>
-        <SelectTrigger className="w-44 shrink-0 cursor-pointer">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value={BUFF_OFF}>Выключен</SelectItem>
-          {buff.options.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
   );
 }

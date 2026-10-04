@@ -198,4 +198,18 @@ export const INSTRUMENT_ITEMS: GearItem[] = [
     iconUrl: ITEM_ICON("instrument", "укрепленный_аргенитовый_кларнет"),
     sealIconUrl: SEAL_ICON("top_obsidian"),
   },
+  {
+    id: 34701,
+    name: "Зеркальная аргенитовая лютня",
+    grade: 1,
+    iconUrl: ITEM_ICON("instrument", "зеркальная_аргенитовая_лютня"),
+    sealIconUrl: SEAL_ICON("top_obsidian"),
+  },
+  {
+    id: 34702,
+    name: "Зеркальный аргенитовый кларнет",
+    grade: 1,
+    iconUrl: ITEM_ICON("instrument", "зеркальный_аргенитовый_кларнет"),
+    sealIconUrl: SEAL_ICON("top_obsidian"),
+  },
 ];

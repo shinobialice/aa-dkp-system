@@ -6,6 +6,7 @@ import { computePassiveBonuses } from "./skillPassiveBonuses";
 import { addStat, STAT_LABEL, type StatBonuses } from "./itemsData/statEffects";
 import { ENGRAVING_STAT } from "./engravingBonuses";
 import { computeEquipmentBuffBonuses } from "./equipmentBuffBonuses";
+import { computeHeroicLevelBonuses } from "./heroicLevelBonuses";
 import {
   computeParry,
   computeDodge,
@@ -87,6 +88,7 @@ export function computeCharacterBonuses(
   seals: UserSeal[] = [],
   buffs: SelectedBuffs = {},
   skillBuild: RoleSkillBuild = {},
+  heroicLevel = 0,
 ): CharacterBonuses {
   const totals = { ...EMPTY_BONUSES };
   const flat: StatBonuses = new Map();
@@ -98,6 +100,7 @@ export function computeCharacterBonuses(
     ...collectStatSources(equipment, seals, buffs),
     equipmentBuffs.stats,
     passives.stats,
+    computeHeroicLevelBonuses(heroicLevel),
   ];
   for (const source of sources) {
     for (const [label, value] of source) addStat(flat, label, value);
