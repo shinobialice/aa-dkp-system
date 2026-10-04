@@ -130,12 +130,28 @@ export const eventEmoji: Record<string, string> = {
 };
 
 const vkNotificationExcludedEvents = new Set(["Великий луг", "Оборона Ифнира"]);
+const vkNotificationSplitByTime = new Set(["Пепельные равнины"]);
+
+export function vkScheduleEventName(boss: string, time: string) {
+  if (!vkNotificationSplitByTime.has(boss)) return boss;
+  return `${boss} ${time}`;
+}
+
+const allScheduleEntries = dayNames.flatMap((day) => schedule[day] ?? []);
 
 export const fixedScheduleEvents = Array.from(
-  new Set(
-    dayNames.flatMap((day) => schedule[day] ?? []).map(([, boss]) => boss),
-  ),
-).filter((name) => !vkNotificationExcludedEvents.has(name));
+  new Set(allScheduleEntries.map(([, boss]) => boss)),
+)
+  .filter((boss) => !vkNotificationExcludedEvents.has(boss))
+  .flatMap((boss) => {
+    if (!vkNotificationSplitByTime.has(boss)) return [boss];
+    const times = allScheduleEntries
+      .filter(([, entryBoss]) => entryBoss === boss)
+      .map(([time]) => time);
+    return Array.from(new Set(times))
+      .sort()
+      .map((time) => vkScheduleEventName(boss, time));
+  });
 
 export function getMoscowTime(now: Date = new Date()): Date {
   const utc = now.getTime() + now.getTimezoneOffset() * 60000;

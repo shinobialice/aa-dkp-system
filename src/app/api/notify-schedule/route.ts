@@ -17,6 +17,7 @@ import {
   getMoscowTime,
   getDateWithTime,
   eventEmoji,
+  vkScheduleEventName,
 } from "@/shared/config/fixedSchedule";
 
 export const runtime = "nodejs";
@@ -51,9 +52,10 @@ export async function POST(req: NextRequest) {
   let sent = 0;
 
   for (const [time, boss] of todayEvents) {
-    if (!settings.enabledBosses.includes(boss)) continue;
+    const settingsName = vkScheduleEventName(boss, time);
+    if (!settings.enabledBosses.includes(settingsName)) continue;
 
-    const leadMinutes = resolveNotifyMinutes(settings, boss);
+    const leadMinutes = resolveNotifyMinutes(settings, settingsName);
     const start = getDateWithTime(msk, time, 0);
     const minutesUntilStart = (start.getTime() - msk.getTime()) / 60000;
 

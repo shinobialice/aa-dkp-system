@@ -9,7 +9,7 @@ import { Card } from "@/shared/ui";
 import SoundNotificationToggle from "../SoundNotificationToggle";
 import NextEvent from "./NextEvent";
 import UpcomingEventRow from "./UpcomingEventRow";
-import { groupEventsByDay } from "./upcomingModel";
+import { groupEventsByDay, splitNextEvents } from "./upcomingModel";
 
 const LIST_SIZE = 10;
 
@@ -18,7 +18,7 @@ type Props = {
 };
 
 export default function UpcomingEvents({ className }: Props) {
-  const [next, ...rest] = useUpcomingEvents();
+  const { next, rest } = splitNextEvents(useUpcomingEvents());
   const groups = groupEventsByDay(rest.slice(0, LIST_SIZE), getMoscowTime());
 
   return (
@@ -28,8 +28,10 @@ export default function UpcomingEvents({ className }: Props) {
         <SoundNotificationToggle />
       </div>
 
-      {next && <NextEvent event={next} />}
-      {!next && (
+      {next.map((event) => (
+        <NextEvent key={event.key} event={event} />
+      ))}
+      {next.length === 0 && (
         <p className="px-4 pb-4 text-sm text-muted-foreground">
           Событий на неделю вперёд нет
         </p>

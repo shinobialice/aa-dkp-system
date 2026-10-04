@@ -26,7 +26,6 @@ export type MonthStats = {
   stockValue: number;
   stockQuantity: number;
   stockPositions: number;
-  staleCount: number;
 };
 
 export function monthName(month: number) {
@@ -91,7 +90,6 @@ export function buildMonthStats({
     stockValue: stock.reduce((sum, group) => sum + (group.value ?? 0), 0),
     stockQuantity: stock.reduce((sum, group) => sum + group.quantity, 0),
     stockPositions: stock.length,
-    staleCount: stock.filter((group) => group.isStale).length,
   };
 }
 

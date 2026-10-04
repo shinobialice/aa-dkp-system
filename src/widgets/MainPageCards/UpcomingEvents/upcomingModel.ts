@@ -20,6 +20,17 @@ export function groupEventsByDay(
   return groups;
 }
 
+export function splitNextEvents(events: UpcomingEvent[]) {
+  const [first] = events;
+  if (!first) return { next: [], rest: [] };
+  const isNext = (event: UpcomingEvent) =>
+    first.isNow ? event.isNow : event.date.getTime() === first.date.getTime();
+  return {
+    next: events.filter(isNext),
+    rest: events.filter((event) => !isNext(event)),
+  };
+}
+
 export function isRespawnEvent(event: UpcomingEvent) {
   return (respawnBosses as string[]).includes(event.boss);
 }
