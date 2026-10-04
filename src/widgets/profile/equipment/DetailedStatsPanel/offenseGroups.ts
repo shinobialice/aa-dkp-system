@@ -1,123 +1,97 @@
 import { ENGRAVING_STAT } from "../engravingBonuses";
+import { STAT_LABEL } from "../itemsData/statEffects";
 import { type DerivedStats, type EquippedBonuses } from "../characterStats";
 
-import {
-  computedRow,
-  engravingRow,
-  staticRow,
-  type RowGroup,
-} from "./statRows";
+import { bonusRow, computedRow, type RowGroup } from "./statRows";
+
+type AttackKind = {
+  accuracy: [label: string, key: string];
+  critChance: [label: string, value: number, boosted: boolean];
+  critDamage: [label: string, key: string];
+  backstab: [label: string, key: string];
+  skillDamage: [label: string, key: string];
+  pveDamage: [label: string, key: string];
+  pvpDamage: [label: string, key: string];
+};
+
+const BASE_ACCURACY = 90;
+const BASE_CRIT_DAMAGE = 150;
+const BASE_DAMAGE_PERCENT = 100;
 
 export function buildOffenseGroups(
   stats: DerivedStats,
   bonus: EquippedBonuses,
 ): RowGroup[] {
   return [
-    {
-      rows: [
-        staticRow("Точность ударов в ближнем бою", "0.05%"),
-        computedRow(
-          "Шанс крит. удара в ближнем бою",
-          stats.critChanceMelee,
-          "%",
-          2,
-          bonus.str !== 0,
-        ),
-        engravingRow(
-          "Критический урон в ближнем бою",
-          150.0,
-          "%",
-          1,
-          ENGRAVING_STAT.MELEE_CRIT_DAMAGE,
-        ),
-        staticRow("Урон в ближнем бою со спины", "100%"),
-        staticRow("Доп урон умений ближнего боя", "100%"),
-        engravingRow(
-          "Доп урон умений ближнего боя в PVE",
-          100,
-          "%",
-          1,
-          ENGRAVING_STAT.MELEE_SKILL_DMG_PVE,
-        ),
-        engravingRow(
-          "Доп урон умений ближнего боя в PVP",
-          100,
-          "%",
-          1,
-          ENGRAVING_STAT.MELEE_SKILL_DMG_PVP,
-        ),
+    attackGroup({
+      accuracy: ["Точность ударов в ближнем бою", STAT_LABEL.MELEE_ACCURACY],
+      critChance: [
+        "Шанс крит. удара в ближнем бою",
+        stats.critChanceMelee,
+        bonus.str !== 0 || bonus.critChanceMelee !== 0,
       ],
-    },
-    {
-      rows: [
-        staticRow("Точность ударов в дальнем бою", "0.05%"),
-        computedRow(
-          "Шанс крит. удара в дальнем бою",
-          stats.critChanceRanged,
-          "%",
-          2,
-          bonus.dex !== 0,
-        ),
-        engravingRow(
-          "Критический урон в дальнем бою",
-          150.0,
-          "%",
-          1,
-          ENGRAVING_STAT.RANGED_CRIT_DAMAGE,
-        ),
-        staticRow("Урон в дальнем бою со спины", "100%"),
-        staticRow("Доп урон умений дальнего боя", "100%"),
-        engravingRow(
-          "Доп урон умений дальнего боя в PVE",
-          100,
-          "%",
-          1,
-          ENGRAVING_STAT.RANGED_SKILL_DMG_PVE,
-        ),
-        engravingRow(
-          "Доп урон умений дальнего боя в PVP",
-          100,
-          "%",
-          1,
-          ENGRAVING_STAT.RANGED_SKILL_DMG_PVP,
-        ),
+      critDamage: [
+        "Критический урон в ближнем бою",
+        ENGRAVING_STAT.MELEE_CRIT_DAMAGE,
       ],
-    },
-    {
-      rows: [
-        staticRow("Точность заклинаний", "0.05%"),
-        computedRow(
-          "Шанс крит. удара заклинанием",
-          stats.critChanceSpell,
-          "%",
-          2,
-          bonus.int !== 0,
-        ),
-        engravingRow(
-          "Критический урон заклинаний",
-          150.0,
-          "%",
-          1,
-          ENGRAVING_STAT.SPELL_CRIT_DAMAGE,
-        ),
-        staticRow("Урон заклинаниями со спины", "100%"),
-        staticRow("Доп урон умений заклинателя", "100%"),
-        engravingRow(
-          "Доп урон умений заклинателя в PVE",
-          100,
-          "%",
-          1,
-          ENGRAVING_STAT.SPELL_SKILL_DMG_PVE,
-        ),
-        engravingRow(
-          "Доп урон умений заклинателя в PVP",
-          100,
-          "%",
-          1,
-          ENGRAVING_STAT.SPELL_SKILL_DMG_PVP,
-        ),
+      backstab: ["Урон в ближнем бою со спины", STAT_LABEL.MELEE_BACKSTAB],
+      skillDamage: ["Доп урон умений ближнего боя", STAT_LABEL.MELEE_SKILL_DMG],
+      pveDamage: [
+        "Доп урон умений ближнего боя в PVE",
+        ENGRAVING_STAT.MELEE_SKILL_DMG_PVE,
       ],
-    },
+      pvpDamage: [
+        "Доп урон умений ближнего боя в PVP",
+        ENGRAVING_STAT.MELEE_SKILL_DMG_PVP,
+      ],
+    }),
+    attackGroup({
+      accuracy: ["Точность ударов в дальнем бою", STAT_LABEL.RANGED_ACCURACY],
+      critChance: [
+        "Шанс крит. удара в дальнем бою",
+        stats.critChanceRanged,
+        bonus.dex !== 0 || bonus.critChanceRanged !== 0,
+      ],
+      critDamage: [
+        "Критический урон в дальнем бою",
+        ENGRAVING_STAT.RANGED_CRIT_DAMAGE,
+      ],
+      backstab: ["Урон в дальнем бою со спины", STAT_LABEL.RANGED_BACKSTAB],
+      skillDamage: [
+        "Доп урон умений дальнего боя",
+        STAT_LABEL.RANGED_SKILL_DMG,
+      ],
+      pveDamage: [
+        "Доп урон умений дальнего боя в PVE",
+        ENGRAVING_STAT.RANGED_SKILL_DMG_PVE,
+      ],
+      pvpDamage: [
+        "Доп урон умений дальнего боя в PVP",
+        ENGRAVING_STAT.RANGED_SKILL_DMG_PVP,
+      ],
+    }),
+    attackGroup({
+      accuracy: ["Точность заклинаний", STAT_LABEL.SPELL_ACCURACY],
+      critChance: [
+        "Шанс крит. удара заклинанием",
+        stats.critChanceSpell,
+        bonus.int !== 0 || bonus.critChanceSpell !== 0,
+      ],
+      critDamage: [
+        "Критический урон заклинаний",
+        ENGRAVING_STAT.SPELL_CRIT_DAMAGE,
+      ],
+      backstab: ["Урон заклинаниями со спины", STAT_LABEL.SPELL_BACKSTAB],
+      skillDamage: ["Доп урон умений заклинателя", STAT_LABEL.SPELL_SKILL_DMG],
+      pveDamage: [
+        "Доп урон умений заклинателя в PVE",
+        ENGRAVING_STAT.SPELL_SKILL_DMG_PVE,
+      ],
+      pvpDamage: [
+        "Доп урон умений заклинателя в PVP",
+        ENGRAVING_STAT.SPELL_SKILL_DMG_PVP,
+      ],
+    }),
     {
       rows: [
         computedRow(
@@ -127,15 +101,15 @@ export function buildOffenseGroups(
           0,
           bonus.str !== 0 || bonus.dex !== 0 || bonus.tacticalReadiness !== 0,
         ),
-        staticRow("Шанс обхода обороны", "0%"),
-        engravingRow(
+        bonusRow("Шанс обхода обороны", 0, "%", 1, STAT_LABEL.DEFENSE_BYPASS),
+        bonusRow(
           "Пробивание брони",
           0,
           "",
           0,
           ENGRAVING_STAT.ARMOR_PENETRATION,
         ),
-        engravingRow(
+        bonusRow(
           "Игнорирование сопротивления",
           0,
           "",
@@ -145,4 +119,43 @@ export function buildOffenseGroups(
       ],
     },
   ];
+}
+
+function attackGroup(kind: AttackKind): RowGroup {
+  const [critLabel, critValue, critBoosted] = kind.critChance;
+  return {
+    rows: [
+      bonusRow(kind.accuracy[0], BASE_ACCURACY, "%", 1, kind.accuracy[1]),
+      computedRow(critLabel, critValue, "%", 1, critBoosted),
+      bonusRow(
+        kind.critDamage[0],
+        BASE_CRIT_DAMAGE,
+        "%",
+        1,
+        kind.critDamage[1],
+      ),
+      bonusRow(kind.backstab[0], BASE_DAMAGE_PERCENT, "%", 1, kind.backstab[1]),
+      bonusRow(
+        kind.skillDamage[0],
+        BASE_DAMAGE_PERCENT,
+        "%",
+        1,
+        kind.skillDamage[1],
+      ),
+      bonusRow(
+        kind.pveDamage[0],
+        BASE_DAMAGE_PERCENT,
+        "%",
+        1,
+        kind.pveDamage[1],
+      ),
+      bonusRow(
+        kind.pvpDamage[0],
+        BASE_DAMAGE_PERCENT,
+        "%",
+        1,
+        kind.pvpDamage[1],
+      ),
+    ],
+  };
 }

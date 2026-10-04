@@ -16,10 +16,13 @@ import { RING_ITEMS } from "./ring";
 import { WEAPON_MAIN_ITEMS } from "./weapon_main";
 import { WEAPON_OFF_ITEMS } from "./weapon_off";
 import { WEAPON_RANGED_ITEMS } from "./weapon_ranged";
-import { ITEM_STATS } from "./stats";
+import { MANUAL_ITEM_STATS } from "./stats";
+import { GAME_ITEM_STATS } from "./gameItemStats";
 
 export type { GearItem };
-export { ITEM_STATS };
+
+export const ITEM_STATS = mergeItemStats(GAME_ITEM_STATS, MANUAL_ITEM_STATS);
+
 export const ITEMS_BY_SLOT: Record<string, GearItem[]> = {
   head: HEAD_ITEMS,
   chest: CHEST_ITEMS,
@@ -56,4 +59,15 @@ export function findGearItemById(id: number): GearItem | undefined {
     if (found) return found;
   }
   return undefined;
+}
+
+function mergeItemStats(
+  generated: Record<number, Record<string, number>>,
+  manual: Record<number, Record<string, number>>,
+): Record<number, Record<string, number>> {
+  const merged = { ...generated };
+  for (const [id, stats] of Object.entries(manual)) {
+    merged[Number(id)] = { ...merged[Number(id)], ...stats };
+  }
+  return merged;
 }

@@ -16,14 +16,8 @@ export const EMPTY_SLOT_VALUES: SlotValues = {
   extraProtection: DEFAULT_EXTRA_PROTECTION,
   engravings: [],
   runeId: 0,
-  costumeSynthesisEffects: [],
-  underwearSynthesisEffects: [],
-  cursedSynthesisEffects: [],
-  ringSynthesisEffects: [],
-  ephenSynthesisPercent: 0,
-  ephenSynthesisPrimary: "",
-  ephenSynthesisSecondary: "",
-  ephenSynthesisTertiary: [],
+  synthesisEffects: [],
+  synthesisPercent: 0,
 };
 
 function toSlotValues(item: UserEquipment | undefined): SlotValues {
@@ -35,14 +29,8 @@ function toSlotValues(item: UserEquipment | undefined): SlotValues {
     extraProtection: item.extra_protection,
     engravings: item.engravings,
     runeId: item.rune_id,
-    costumeSynthesisEffects: item.costume_synthesis_effects,
-    underwearSynthesisEffects: item.underwear_synthesis_effects,
-    cursedSynthesisEffects: item.cursed_synthesis_effects,
-    ringSynthesisEffects: item.ring_synthesis_effects,
-    ephenSynthesisPercent: item.ephen_synthesis_percent,
-    ephenSynthesisPrimary: item.ephen_synthesis_primary,
-    ephenSynthesisSecondary: item.ephen_synthesis_secondary,
-    ephenSynthesisTertiary: item.ephen_synthesis_tertiary,
+    synthesisEffects: item.synthesis_effects,
+    synthesisPercent: item.synthesis_percent,
   };
 }
 

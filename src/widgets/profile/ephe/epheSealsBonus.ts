@@ -1,19 +1,13 @@
 import type { UserEquipment } from "@/actions/getUserEquipment";
 import { findGearItem } from "../equipment/itemsData";
-import { getEphenSynthesisCategoryKey } from "../equipment/itemsData/ephenSynthesis";
+import { getEpheItemTier } from "./epheItemTiers";
 import {
   EPHE_SLOT_TRACK,
+  EPHE_TRACK_PERCENT_CATEGORY,
   getEpheEffectiveness,
   getEpheTrackLevels,
   getEphePercentBonus,
-  type EpheItemTier,
 } from "./epheSealsData";
-
-export function getEpheItemTier(itemId: number): EpheItemTier {
-  const key = getEphenSynthesisCategoryKey(itemId);
-  if (!key) return "default";
-  return key.startsWith("ramian_") ? "ramian" : "ephen";
-}
 
 export function computeEpheSealsFlatBonus(
   equipment: UserEquipment[],
@@ -32,14 +26,31 @@ export function computeEpheSealsFlatBonus(
   return bonus;
 }
 
-export function getEpheArmorMultiplier(eq: UserEquipment): number {
+export type EpheStatMultipliers = Partial<Record<string, number>>;
+
+const EPHE_PERCENT_STATS: [stat: string, category: "weapon" | "armor"][] = [
+  ["weapon_dps", "weapon"],
+  ["weapon_magic_power", "weapon"],
+  ["weapon_heal_power", "weapon"],
+  ["wearable_armor", "armor"],
+  ["wearable_magic_resistance", "armor"],
+];
+
+export function getEpheStatMultipliers(eq: UserEquipment): EpheStatMultipliers {
   const track = EPHE_SLOT_TRACK[eq.slot];
-  if (!track || eq.ephe_seal_level <= 0) return 1;
+  if (!track || eq.ephe_seal_level <= 0) return {};
+  const category = EPHE_TRACK_PERCENT_CATEGORY[track];
+  if (!category) return {};
   const gearItem = findGearItem(eq.slot, eq.item_name);
-  if (!gearItem) return 1;
+  if (!gearItem) return {};
   const effectiveness = getEpheEffectiveness(track, eq.ephe_seal_level);
-  if (effectiveness <= 0) return 1;
+  if (effectiveness <= 0) return {};
   const tier = getEpheItemTier(gearItem.id);
-  const percent = getEphePercentBonus("armor", tier, effectiveness);
-  return 1 + percent / 100;
+  // Печать на слоте оружия усиливает и защиту щита, но по кривой доспехов.
+  return Object.fromEntries(
+    EPHE_PERCENT_STATS.map(([stat, statCategory]) => [
+      stat,
+      1 + getEphePercentBonus(statCategory, tier, effectiveness) / 100,
+    ]),
+  );
 }

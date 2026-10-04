@@ -1,8 +1,12 @@
 "use client";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/ui";
 import type { UserEquipment } from "@/actions/getUserEquipment";
-import { computeEngravingBonuses } from "../engravingBonuses";
-import { computeEquippedBonuses, computeDerivedStats } from "../characterStats";
+import type { UserSeal } from "@/actions/getUserSeals";
+import {
+  computeCharacterBonuses,
+  computeDerivedStats,
+} from "../characterStats";
+import type { SelectedBuffs } from "../characterBuffs";
 import GroupedRows from "./GroupedRows";
 import { buildOffenseGroups } from "./offenseGroups";
 import { buildDefenseGroups } from "./defenseGroups";
@@ -11,7 +15,9 @@ import type { RowGroup } from "./statRows";
 
 type Props = {
   equipment: UserEquipment[];
+  seals: UserSeal[];
   level: number;
+  buffs: SelectedBuffs;
 };
 
 type StatsTab = {
@@ -21,9 +27,12 @@ type StatsTab = {
   withHeaders: boolean;
 };
 
-export function DetailedStatsPanel({ equipment, level }: Props) {
-  const engravingBonuses = computeEngravingBonuses(equipment);
-  const bonus = computeEquippedBonuses(equipment);
+export function DetailedStatsPanel({ equipment, seals, level, buffs }: Props) {
+  const { totals: bonus, flat } = computeCharacterBonuses(
+    equipment,
+    seals,
+    buffs,
+  );
   const stats = computeDerivedStats(bonus, level);
 
   const tabs: StatsTab[] = [
@@ -69,7 +78,7 @@ export function DetailedStatsPanel({ equipment, level }: Props) {
               <GroupedRows
                 groups={tab.groups}
                 withHeaders={tab.withHeaders}
-                engravingBonuses={engravingBonuses}
+                bonuses={flat}
               />
             </TabsContent>
           ))}

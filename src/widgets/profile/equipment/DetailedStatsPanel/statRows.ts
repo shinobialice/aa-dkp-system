@@ -4,13 +4,13 @@ export type StaticRow = {
   value: string;
   indent?: boolean;
 };
-export type EngravingRow = {
-  kind: "engraving";
+export type BonusRow = {
+  kind: "bonus";
   label: string;
   base: number;
   unit: string;
   decimals: number;
-  engravingKey: string;
+  bonusKey: string;
   indent?: boolean;
 };
 export type ComputedRow = {
@@ -22,7 +22,7 @@ export type ComputedRow = {
   boosted: boolean;
   indent?: boolean;
 };
-export type Row = StaticRow | EngravingRow | ComputedRow;
+export type Row = StaticRow | BonusRow | ComputedRow;
 export type RowGroup = { title?: string; rows: Row[] };
 
 export function staticRow(
@@ -33,23 +33,15 @@ export function staticRow(
   return { kind: "static", label, value, indent };
 }
 
-export function engravingRow(
+export function bonusRow(
   label: string,
   base: number,
   unit: string,
   decimals: number,
-  engravingKey: string,
+  bonusKey: string,
   indent?: boolean,
-): EngravingRow {
-  return {
-    kind: "engraving",
-    label,
-    base,
-    unit,
-    decimals,
-    engravingKey,
-    indent,
-  };
+): BonusRow {
+  return { kind: "bonus", label, base, unit, decimals, bonusKey, indent };
 }
 
 export function computedRow(

@@ -12,14 +12,8 @@ export type EquipmentInput = {
   extraProtection: number;
   engravings: number[];
   runeId: number;
-  costumeSynthesisEffects: number[];
-  underwearSynthesisEffects: number[];
-  cursedSynthesisEffects: number[];
-  ringSynthesisEffects: number[];
-  ephenSynthesisPercent: number;
-  ephenSynthesisPrimary: string;
-  ephenSynthesisSecondary: string;
-  ephenSynthesisTertiary: string[];
+  synthesisEffects: number[];
+  synthesisPercent: number;
   epheSealLevel: number;
 };
 
@@ -46,8 +40,8 @@ const saveUserEquipment = async (
       await tx`DELETE FROM user_equipment WHERE user_id = ${userId}`;
       for (const item of filled) {
         await tx`
-          INSERT INTO user_equipment (user_id, slot, item_name, grade, enchant, extra_protection, engravings, rune_id, costume_synthesis_effects, underwear_synthesis_effects, cursed_synthesis_effects, ring_synthesis_effects, ephen_synthesis_percent, ephen_synthesis_primary, ephen_synthesis_secondary, ephen_synthesis_tertiary, ephe_seal_level)
-          VALUES (${userId}, ${item.slot}, ${item.itemName}, ${item.grade}, ${item.enchant}, ${item.extraProtection}, ${sql.array(item.engravings)}::integer[], ${item.runeId}, ${sql.array(item.costumeSynthesisEffects)}::integer[], ${sql.array(item.underwearSynthesisEffects)}::integer[], ${sql.array(item.cursedSynthesisEffects)}::integer[], ${sql.array(item.ringSynthesisEffects)}::integer[], ${item.ephenSynthesisPercent}, ${item.ephenSynthesisPrimary}, ${item.ephenSynthesisSecondary}, ${sql.array(item.ephenSynthesisTertiary)}::text[], ${item.epheSealLevel})
+          INSERT INTO user_equipment (user_id, slot, item_name, grade, enchant, extra_protection, engravings, rune_id, synthesis_effects, synthesis_percent, ephe_seal_level)
+          VALUES (${userId}, ${item.slot}, ${item.itemName}, ${item.grade}, ${item.enchant}, ${item.extraProtection}, ${sql.array(item.engravings)}::integer[], ${item.runeId}, ${sql.array(item.synthesisEffects)}::integer[], ${item.synthesisPercent}, ${item.epheSealLevel})
         `;
       }
     });

@@ -1,12 +1,11 @@
 import { ENGRAVING_STAT } from "../engravingBonuses";
+import { STAT_LABEL } from "../itemsData/statEffects";
 import { type DerivedStats, type EquippedBonuses } from "../characterStats";
 
-import {
-  computedRow,
-  engravingRow,
-  staticRow,
-  type RowGroup,
-} from "./statRows";
+import { bonusRow, computedRow, staticRow, type RowGroup } from "./statRows";
+
+const BASE_HEAL_CRIT_EFFECT = 50;
+const BASE_HEAL_RECEIVED = 100;
 
 export function buildHealGroups(
   stats: DerivedStats,
@@ -20,19 +19,32 @@ export function buildHealGroups(
           "Шанс критического эффекта исцеления",
           stats.critChanceHeal,
           "%",
-          2,
-          bonus.spi !== 0,
+          1,
+          bonus.spi !== 0 || bonus.critChanceHeal !== 0,
         ),
-        engravingRow(
+        bonusRow(
           "Критический эффект исцеления",
-          50,
+          BASE_HEAL_CRIT_EFFECT,
           "%",
-          0,
+          1,
           ENGRAVING_STAT.HEAL_CRIT_EFFECT,
         ),
-        staticRow("Доп. эффективность умений целителя", "0%"),
-        staticRow("Урон исцеляющими умениями", "0%", true),
-        engravingRow(
+        bonusRow(
+          "Доп. эффективность умений целителя",
+          0,
+          "%",
+          1,
+          STAT_LABEL.HEALER_SKILL_BONUS,
+        ),
+        bonusRow(
+          "Урон исцеляющими умениями",
+          0,
+          "%",
+          1,
+          STAT_LABEL.HEALING_SKILL_DMG,
+          true,
+        ),
+        bonusRow(
           "Доп. эффективность исцеления",
           0,
           "%",
@@ -40,7 +52,14 @@ export function buildHealGroups(
           ENGRAVING_STAT.HEAL_EFFECTIVENESS_BONUS,
           true,
         ),
-        staticRow("Урон исцеляющими умениями в PvE", "0%", true),
+        bonusRow(
+          "Урон исцеляющими умениями в PvE",
+          0,
+          "%",
+          1,
+          STAT_LABEL.HEALING_SKILL_DMG_PVE,
+          true,
+        ),
       ],
     },
     {
@@ -51,33 +70,58 @@ export function buildHealGroups(
           stats.healthRegen,
           "",
           0,
-          bonus.sta !== 0,
+          bonus.sta !== 0 || bonus.healthRegen !== 0,
         ),
-        staticRow("Восстановление здоровья в бою", "0"),
+        bonusRow(
+          "Восстановление здоровья в бою",
+          0,
+          "",
+          0,
+          STAT_LABEL.COMBAT_HEALTH_REGEN,
+        ),
         computedRow(
           "Восстановление маны",
           stats.manaRegen,
           "",
           0,
-          bonus.spi !== 0,
+          bonus.spi !== 0 || bonus.manaRegen !== 0,
         ),
-        staticRow("Восстановление маны в бою", "0"),
+        bonusRow(
+          "Восстановление маны в бою",
+          0,
+          "",
+          0,
+          STAT_LABEL.COMBAT_MANA_REGEN,
+        ),
       ],
     },
     {
       title: "Прочее",
       rows: [
-        engravingRow(
+        bonusRow(
           "Восприимчивость к исцелению",
-          0,
+          BASE_HEAL_RECEIVED,
           "%",
           1,
           ENGRAVING_STAT.HEAL_RECEIVED,
         ),
+        bonusRow(
+          "Задержка применения умений при получении удара",
+          0,
+          "%",
+          1,
+          STAT_LABEL.CAST_PUSHBACK,
+        ),
         staticRow("Дополнительный опыт", "100%"),
         staticRow("Дополнительный шанс получения трофеев", "100%"),
         staticRow("Дополнительный шанс получения монет", "100%"),
-        staticRow("Дальность обнаружения скрытых существ", "0%"),
+        bonusRow(
+          "Дальность обнаружения скрытых существ",
+          0,
+          "%",
+          0,
+          STAT_LABEL.STEALTH_DETECTION,
+        ),
       ],
     },
   ];

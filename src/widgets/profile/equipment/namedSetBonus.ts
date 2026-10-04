@@ -5,7 +5,10 @@ import {
   type NamedSet,
   type NamedSetTier,
 } from "./itemsData/namedSets";
-import { BASE_CHARACTER_STATS, computeEquippedBonuses } from "./characterStats";
+import {
+  BASE_CHARACTER_STATS,
+  computeCharacterBonuses,
+} from "./characterStats";
 
 const ARMOR_SLOT_ORDER = [
   "head",
@@ -80,7 +83,7 @@ function resolveTierText(
   equipment: UserEquipment[],
 ): string {
   if (!tier.dynamic) return tier.text;
-  const bonus = computeEquippedBonuses(equipment);
+  const { totals: bonus } = computeCharacterBonuses(equipment);
   const total =
     BASE_CHARACTER_STATS[tier.dynamic.stat] + bonus[tier.dynamic.stat];
   const value = Math.round(total * tier.dynamic.coefficient);

@@ -24,6 +24,7 @@ export type ProfileUser = Pick<
   | "joined_at"
   | "avatar_url"
   | "character_level"
+  | "character_buffs"
   | "character_portrait_url"
 >;
 
@@ -50,6 +51,7 @@ const getUser = async (userId: number): Promise<ProfileUser | null> => {
         joined_at,
         avatar_url,
         character_level,
+        character_buffs,
         character_portrait_url
       FROM "user"
       WHERE id = ${userId}

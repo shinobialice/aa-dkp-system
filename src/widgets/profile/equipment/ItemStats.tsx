@@ -1,41 +1,23 @@
-import { ITEM_STATS } from "./itemsData";
-import {
-  getItemGradeStats,
-  getItemGradeBonusStats,
-} from "./itemsData/itemGradeStats";
-import {
-  STAT_ORDER,
-  STAT_LABELS,
-  STAT_UNITS,
-  scaleStat,
-} from "./itemsData/statsFormula";
+import type { EpheStatMultipliers } from "../ephe/epheSealsBonus";
+import { getItemStatLines } from "./itemStatLines";
 
-export function ItemStats({
-  itemId,
-  grade,
-  enchant = 0,
-  bare = false,
-}: {
+type Props = {
   itemId: number;
   grade: number;
-  enchant?: number;
+  enchant: number;
+  epheMultipliers: EpheStatMultipliers;
   bare?: boolean;
-}) {
-  const gradeStats = getItemGradeStats(itemId, grade);
-  const bonusStats = getItemGradeBonusStats(itemId, grade);
-  const base = gradeStats ?? ITEM_STATS[itemId];
-  if (!base && !bonusStats) return null;
+};
 
-  const entries = STAT_ORDER.filter(
-    (key) => (base && key in base) || (bonusStats && key in bonusStats),
-  );
-  if (entries.length === 0) return null;
-
-  const statValue = (key: string) => {
-    if (bonusStats && key in bonusStats) return bonusStats[key];
-    const baseValue = base?.[key] ?? 0;
-    return gradeStats ? baseValue : scaleStat(baseValue, grade, enchant, key);
-  };
+export default function ItemStats({
+  itemId,
+  grade,
+  enchant,
+  epheMultipliers,
+  bare = false,
+}: Props) {
+  const lines = getItemStatLines(itemId, grade, enchant, epheMultipliers);
+  if (lines.length === 0) return null;
 
   return (
     <div
@@ -43,20 +25,24 @@ export function ItemStats({
         bare ? "space-y-1 text-sm" : "space-y-1 rounded-md border p-2 text-sm"
       }
     >
-      {entries.map((key) => {
-        const value = statValue(key);
-        const sign = value > 0 ? "+" : "";
-        return (
-          <div key={key} className="flex items-center justify-between">
-            <span className="text-muted-foreground">{STAT_LABELS[key]}</span>
-            <span className="font-medium">
-              {sign}
-              {value}
-              {STAT_UNITS[key] ?? ""}
-            </span>
-          </div>
-        );
-      })}
+      {lines.map((line) => (
+        <div key={line.key} className="flex items-center justify-between">
+          <span className="text-muted-foreground">{line.label}</span>
+          <span className="font-medium">
+            {line.value > 0 && "+"}
+            {line.value}
+            {line.unit}
+            {line.epheBonus > 0 && (
+              <span
+                className="ml-1 text-xs font-normal text-green-500"
+                title="Прибавка от печатей Эфе"
+              >
+                (+{line.epheBonus} Эфе)
+              </span>
+            )}
+          </span>
+        </div>
+      ))}
     </div>
   );
 }

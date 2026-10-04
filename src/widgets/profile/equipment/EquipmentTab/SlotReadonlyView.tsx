@@ -6,7 +6,8 @@ import {
 } from "@/widgets/profile/seals/sealsData";
 import type { GearItem } from "../itemsData";
 import { GearItemIcon } from "../GearItemIcon";
-import { ItemStats } from "../ItemStats";
+import ItemStats from "../ItemStats";
+import { getEpheStatMultipliers } from "@/widgets/profile/ephe/epheSealsBonus";
 import ItemDetails from "./ItemCard/ItemDetails";
 import { CUBE_ELIGIBLE_SLOTS } from "./slotLayout";
 
@@ -49,6 +50,7 @@ export default function SlotReadonlyView({ slotKey, item, gearItem }: Props) {
           itemId={gearItem.id}
           grade={item.grade}
           enchant={item.enchant}
+          epheMultipliers={getEpheStatMultipliers(item)}
         />
       )}
       <ItemDetails slotKey={slotKey} item={item} />

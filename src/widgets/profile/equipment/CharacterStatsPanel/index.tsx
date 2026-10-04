@@ -6,12 +6,12 @@ import type { UserEquipment } from "@/actions/getUserEquipment";
 import type { UserSeal } from "@/actions/getUserSeals";
 import saveCharacterLevel from "@/actions/saveCharacterLevel";
 import { isValidCharacterLevel } from "../characterLevel";
-import { computeEquippedBonuses, computeDerivedStats } from "../characterStats";
-import { getActiveWeaponBuff } from "../weaponBuffs";
-
-import { getActiveSetBuffs } from "../setBonuses";
-import { getActiveQualitySetBuffs } from "../qualitySetBonus";
-import BuffIcon from "./BuffIcon";
+import {
+  computeCharacterBonuses,
+  computeDerivedStats,
+} from "../characterStats";
+import type { SelectedBuffs } from "../characterBuffs";
+import BuffRow from "./BuffRow";
 import LevelControl from "./LevelControl";
 import StatBar from "./StatBar";
 import StatRow from "./StatRow";
@@ -32,6 +32,8 @@ export function CharacterStatsPanel({
   canEdit,
   level,
   onLevelChange,
+  buffs,
+  onBuffsChange,
 }: {
   userId: number;
   equipment: UserEquipment[];
@@ -40,18 +42,14 @@ export function CharacterStatsPanel({
   canEdit: boolean;
   level: number;
   onLevelChange: (level: number) => void;
+  buffs: SelectedBuffs;
+  onBuffsChange: (buffs: SelectedBuffs) => void;
 }) {
   const [savingLevel, setSavingLevel] = useState(false);
   const [levelEditing, setLevelEditing] = useState(false);
 
-  const bonus = computeEquippedBonuses(equipment, seals);
+  const { totals: bonus } = computeCharacterBonuses(equipment, seals, buffs);
   const stats = computeDerivedStats(bonus, level);
-  const weaponBuff = getActiveWeaponBuff(equipment);
-  const setBuffs = [
-    ...getActiveSetBuffs(equipment),
-    ...getActiveQualitySetBuffs(equipment),
-    ...(weaponBuff ? [weaponBuff] : []),
-  ];
 
   const handleLevelChange = async (value: string) => {
     const next = Number(value);
@@ -103,18 +101,13 @@ export function CharacterStatsPanel({
         </div>
       </div>
 
-      {setBuffs.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {setBuffs.map((buff, i) => (
-            <BuffIcon
-              key={i}
-              icon={buff.icon}
-              title={buff.title}
-              description={buff.description}
-            />
-          ))}
-        </div>
-      )}
+      <BuffRow
+        userId={userId}
+        equipment={equipment}
+        buffs={buffs}
+        canEdit={canEdit}
+        onBuffsChange={onBuffsChange}
+      />
 
       <div className="border-t" />
 

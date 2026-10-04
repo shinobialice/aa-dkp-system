@@ -1,0 +1,81 @@
+import * as v from "valibot";
+import type { CharacterBuff, CharacterBuffOption } from "./itemsData/buffTypes";
+import { GAME_BUFFS } from "./itemsData/gameBuffs";
+import {
+  addStat,
+  signedEffectValue,
+  STAT_EFFECTS,
+  type StatBonuses,
+} from "./itemsData/statEffects";
+
+export type SelectedBuffs = Record<string, string>;
+
+export type ActiveBuff = {
+  buff: CharacterBuff;
+  option: CharacterBuffOption;
+};
+
+export const CHARACTER_BUFFS = GAME_BUFFS;
+
+const BUFF_ICON_DIR = "/images/equipment/";
+
+const SELECTED_BUFFS_SCHEMA = v.record(v.string(), v.string());
+
+export function parseSelectedBuffs(value: unknown): SelectedBuffs {
+  const result = v.safeParse(SELECTED_BUFFS_SCHEMA, value);
+  return result.success ? result.output : {};
+}
+
+export function isValidBuffSelection(value: unknown): value is SelectedBuffs {
+  if (!v.is(SELECTED_BUFFS_SCHEMA, value)) return false;
+  return Object.entries(value).every(([buffId, optionValue]) => {
+    const buff = findBuff(buffId);
+    return !!buff && !!findOption(buff, optionValue);
+  });
+}
+
+export function buffIconUrl(
+  buff: CharacterBuff,
+  option?: CharacterBuffOption,
+): string {
+  return BUFF_ICON_DIR + (option?.icon ?? buff.icon);
+}
+
+export function findBuff(buffId: number | string): CharacterBuff | undefined {
+  return CHARACTER_BUFFS.find((buff) => String(buff.id) === String(buffId));
+}
+
+export function getActiveBuffs(selected: SelectedBuffs): ActiveBuff[] {
+  return CHARACTER_BUFFS.flatMap((buff) => {
+    const option = findOption(buff, selected[buff.id]);
+    if (!option || !isRequirementMet(buff, selected)) return [];
+    return [{ buff, option }];
+  });
+}
+
+export function isRequirementMet(
+  buff: CharacterBuff,
+  selected: SelectedBuffs,
+): boolean {
+  return buff.requiresBuffId === undefined || !!selected[buff.requiresBuffId];
+}
+
+export function computeBuffStatBonuses(selected: SelectedBuffs): StatBonuses {
+  const bonuses: StatBonuses = new Map();
+  for (const { option } of getActiveBuffs(selected)) {
+    for (const [code, value] of Object.entries(option.stats)) {
+      const effect = STAT_EFFECTS[Number(code)];
+      if (effect) {
+        addStat(bonuses, effect.label, signedEffectValue(effect, value));
+      }
+    }
+  }
+  return bonuses;
+}
+
+export function findOption(
+  buff: CharacterBuff,
+  optionValue: string | undefined,
+): CharacterBuffOption | undefined {
+  return buff.options.find((option) => option.value === optionValue);
+}

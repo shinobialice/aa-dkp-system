@@ -45,7 +45,7 @@ export const INSTRUMENT_ITEMS: GearItem[] = [
     sealIconUrl: null,
   },
   {
-    id: 910039,
+    id: 8003205,
     name: "Амальгамный рамианский кларнет",
     grade: 1,
     iconUrl: ITEM_ICON("instrument", "совершенный_рамианский_кларнет"),
@@ -80,7 +80,7 @@ export const INSTRUMENT_ITEMS: GearItem[] = [
     sealIconUrl: SEAL_ICON("top_seal_ipnir_4"),
   },
   {
-    id: 940038,
+    id: 8003310,
     name: "Амальгамный эфенский кларнет",
     grade: 1,
     iconUrl: ITEM_ICON("instrument", "амальгамный_эфенский_кларнет"),
@@ -129,7 +129,7 @@ export const INSTRUMENT_ITEMS: GearItem[] = [
     sealIconUrl: null,
   },
   {
-    id: 910040,
+    id: 8003204,
     name: "Амальгамная рамианская лютня",
     grade: 1,
     iconUrl: ITEM_ICON("instrument", "совершенная_рамианская_лютня"),
@@ -164,7 +164,7 @@ export const INSTRUMENT_ITEMS: GearItem[] = [
     sealIconUrl: SEAL_ICON("top_seal_ipnir_4"),
   },
   {
-    id: 940037,
+    id: 8003309,
     name: "Амальгамная эфенская лютня",
     grade: 1,
     iconUrl: ITEM_ICON("instrument", "амальгамная_эфенская_лютня"),

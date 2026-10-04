@@ -18,6 +18,7 @@ import { classColors } from "@/widgets/MembersTable/classStyles";
 import { EQUIPMENT_SLOTS, type EquipmentSlot } from "../equipmentData";
 import { CharacterStatsPanel } from "../CharacterStatsPanel";
 import { DetailedStatsPanel } from "../DetailedStatsPanel";
+import { parseSelectedBuffs } from "../characterBuffs";
 import EquipmentSlotButton from "./EquipmentSlotButton";
 import CharacterDoll from "./CharacterDoll";
 import SlotList from "./SlotList";
@@ -52,6 +53,9 @@ export default function EquipmentTab({
     Object.fromEntries(equipment.map((item) => [item.slot, item]));
 
   const [level, setLevel] = useState(user.character_level ?? 1);
+  const [buffs, setBuffs] = useState(() =>
+    parseSelectedBuffs(user.character_buffs),
+  );
   const [portraitUrl, setPortraitUrl] = useState(user.character_portrait_url);
   const narrow = useNarrowScreen();
   const [viewOverride, setViewOverride] = useState<View | null>(null);
@@ -115,6 +119,8 @@ export default function EquipmentTab({
             canEdit={canEdit}
             level={level}
             onLevelChange={setLevel}
+            buffs={buffs}
+            onBuffsChange={setBuffs}
           />
         </div>
 
@@ -148,7 +154,12 @@ export default function EquipmentTab({
         </div>
 
         <div className="min-w-0">
-          <DetailedStatsPanel equipment={equipment} level={level} />
+          <DetailedStatsPanel
+            equipment={equipment}
+            seals={seals}
+            level={level}
+            buffs={buffs}
+          />
         </div>
       </CardContent>
     </Card>

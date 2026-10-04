@@ -3,16 +3,17 @@ import type { UserSeal } from "@/actions/getUserSeals";
 import { computeSealBonusSummary } from "@/widgets/profile/seals/sealBonusSummary";
 import { ITEM_STATS, findGearItem } from "./itemsData";
 import { getItemGradeStats } from "./itemsData/itemGradeStats";
-import { scaleStat } from "./itemsData/statsFormula";
+import { scaleStat, STAT_LABELS } from "./itemsData/statsFormula";
+import { addStat, STAT_LABEL, type StatBonuses } from "./itemsData/statEffects";
 import { computeEngravingBonuses, ENGRAVING_STAT } from "./engravingBonuses";
-import { computeCostumeSynthesisBonuses } from "./costumeSynthesisBonuses";
-import { computeUnderwearSynthesisBonuses } from "./underwearSynthesisBonuses";
-import { computeCursedArmorSynthesisBonuses } from "./cursedArmorSynthesisBonuses";
-import { computeRingSynthesisBonuses } from "./ringSynthesisBonuses";
 import { computeEphenRuneSetBonuses } from "./ephenRuneSetBonus";
+import { computeRuneBonuses } from "./runeBonuses";
+import { computeSynthesisBonuses } from "./synthesisBonuses";
+import { computeSetStatBonuses } from "./setStatBonuses";
+import { computeBuffStatBonuses, type SelectedBuffs } from "./characterBuffs";
 import {
   computeEpheSealsFlatBonus,
-  getEpheArmorMultiplier,
+  getEpheStatMultipliers,
 } from "../ephe/epheSealsBonus";
 import { type EquippedBonuses } from "./characterStats";
 
@@ -39,11 +40,22 @@ export const EMPTY_BONUSES: EquippedBonuses = {
   block: 0,
   pvpResist: 0,
   critDamageResist: 0,
+  critChanceMelee: 0,
+  critChanceRanged: 0,
+  critChanceSpell: 0,
+  critChanceHeal: 0,
+  healthRegen: 0,
+  manaRegen: 0,
 };
 
 export const ATTRIBUTES = ["str", "int", "dex", "spi", "sta"] as const;
 
 export const FLAT_STAT_TARGETS: [keyof EquippedBonuses, string][] = [
+  ["str", STAT_LABEL.STR],
+  ["int", STAT_LABEL.INT],
+  ["dex", STAT_LABEL.DEX],
+  ["spi", STAT_LABEL.SPI],
+  ["sta", STAT_LABEL.STA],
   ["defense", ENGRAVING_STAT.DEFENSE],
   ["resist", ENGRAVING_STAT.RESIST],
   ["health", ENGRAVING_STAT.HEALTH],
@@ -61,60 +73,81 @@ export const FLAT_STAT_TARGETS: [keyof EquippedBonuses, string][] = [
   ["block", ENGRAVING_STAT.BLOCK],
   ["pvpResist", ENGRAVING_STAT.PVP_RESIST],
   ["critDamageResist", ENGRAVING_STAT.CRIT_DAMAGE_RESIST],
+  ["critChanceMelee", ENGRAVING_STAT.MELEE_CRIT_CHANCE],
+  ["critChanceRanged", ENGRAVING_STAT.RANGED_CRIT_CHANCE],
+  ["critChanceSpell", ENGRAVING_STAT.SPELL_CRIT_CHANCE],
+  ["critChanceHeal", ENGRAVING_STAT.HEAL_CRIT_CHANCE],
+  ["healthRegen", STAT_LABEL.HEALTH_REGEN],
+  ["manaRegen", STAT_LABEL.MANA_REGEN],
 ];
 
-export function addGearStats(totals: EquippedBonuses, eq: UserEquipment) {
+const RANGED_WEAPON_SLOT = "weapon_ranged";
+
+// Урон оружия в слотах 1–2 идёт в силу атаки в ближнем бою, урон лука или
+// винтовки — в силу атаки в дальнем бою.
+function weaponStatLabel(key: string, slot: string): string | undefined {
+  if (key === "weapon_dps") {
+    return slot === RANGED_WEAPON_SLOT
+      ? ENGRAVING_STAT.RANGED_ATTACK
+      : ENGRAVING_STAT.MELEE_ATTACK;
+  }
+  if (key === "weapon_magic_power") return ENGRAVING_STAT.SPELL_POWER;
+  if (key === "weapon_heal_power") return ENGRAVING_STAT.HEAL_POWER;
+  return undefined;
+}
+
+const FLAT_GEAR_STAT_LABELS: Record<string, string> = {
+  flat_sta: STAT_LABEL.STA,
+  flat_spi: STAT_LABEL.SPI,
+};
+
+export function addGearStats(
+  totals: EquippedBonuses,
+  flat: StatBonuses,
+  eq: UserEquipment,
+) {
   const gearItem = findGearItem(eq.slot, eq.item_name);
   if (!gearItem) return;
   const gradeStats = getItemGradeStats(gearItem.id, eq.grade);
   const base = gradeStats ?? ITEM_STATS[gearItem.id];
   if (!base) return;
 
-  // Статы из ITEM_GRADE_STATS уже финальные для грейда, scaleStat к ним не применяется.
-  const stat = (key: string): number => {
-    const value = base[key];
-    if (value === undefined) return 0;
-    return gradeStats
-      ? value
-      : scaleStat(value, eq.grade, eq.enchant ?? 0, key);
-  };
-
-  const armorMultiplier = getEpheArmorMultiplier(eq);
-  totals.defense += stat("wearable_armor") * armorMultiplier;
-  totals.resist += stat("wearable_magic_resistance") * armorMultiplier;
-  for (const attribute of ATTRIBUTES) totals[attribute] += stat(attribute);
-  totals.sta += base.flat_sta ?? 0;
-  totals.spi += base.flat_spi ?? 0;
-  totals.skillSpeed += base.skill_speed ?? 0;
-  totals.tacticalReadiness += base.tactical_readiness ?? 0;
+  const epheMultipliers = getEpheStatMultipliers(eq);
+  for (const [key, value] of Object.entries(base)) {
+    // Статы из ITEM_GRADE_STATS уже финальные для грейда, scaleStat к ним не применяется.
+    const scaled =
+      (gradeStats ? value : scaleStat(value, eq.grade, eq.enchant ?? 0, key)) *
+      (epheMultipliers[key] ?? 1);
+    const weaponLabel = weaponStatLabel(key, eq.slot);
+    if (key === "wearable_armor") totals.defense += scaled;
+    else if (key === "wearable_magic_resistance") totals.resist += scaled;
+    else if (weaponLabel) addStat(flat, weaponLabel, scaled);
+    else {
+      const label = FLAT_GEAR_STAT_LABELS[key] ?? STAT_LABELS[key];
+      if (label) addStat(flat, label, scaled);
+    }
+  }
 }
 
-export function collectFlatBonuses(
+export function collectStatSources(
   equipment: UserEquipment[],
   seals: UserSeal[],
-  ephenSynthesisStats: Iterable<[string, number]>,
-) {
-  const flat = computeEngravingBonuses(equipment);
-  const add = (entries: Iterable<[string, number]>) => {
-    for (const [label, value] of entries) {
-      flat.set(label, (flat.get(label) ?? 0) + value);
-    }
-  };
-  add(computeCostumeSynthesisBonuses(equipment));
-  add(computeUnderwearSynthesisBonuses(equipment));
-  add(computeCursedArmorSynthesisBonuses(equipment));
-  add(computeRingSynthesisBonuses(equipment));
-  add(computeEphenRuneSetBonuses(equipment));
-  add(ephenSynthesisStats);
+  buffs: SelectedBuffs,
+): Iterable<[string, number]>[] {
   const sealPicks = seals.map((seal) => ({
     sealName: seal.seal_name,
     level: seal.level,
   }));
-  add(
+  return [
+    computeEngravingBonuses(equipment),
+    computeRuneBonuses(equipment),
+    computeEphenRuneSetBonuses(equipment),
+    computeSynthesisBonuses(equipment),
+    computeSetStatBonuses(equipment),
+    computeBuffStatBonuses(buffs),
     computeSealBonusSummary(sealPicks).map(
-      ({ stat, value }) => [stat, value] as [string, number],
+      ({ stat, value }): [string, number] => [stat, value],
     ),
-  );
-  add(computeEpheSealsFlatBonus(equipment));
-  return flat;
+    computeEpheSealsFlatBonus(equipment),
+  ];
 }

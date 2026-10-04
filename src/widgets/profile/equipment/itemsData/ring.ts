@@ -73,7 +73,7 @@ export const RING_ITEMS: GearItem[] = [
     sealIconUrl: SEAL_ICON("top_seal_ipnir_3"),
   },
   {
-    id: 940040,
+    id: 8003311,
     name: "Амальгамное эфенское кольцо",
     grade: 1,
     iconUrl: ITEM_ICON("ring", "амальгамное_эфенское_кольцо"),

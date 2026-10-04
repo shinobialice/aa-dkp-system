@@ -2,20 +2,14 @@ import { BONUS_COLOR } from "../statColors";
 
 import type { Row, RowGroup } from "./statRows";
 
-function RowLine({
-  row,
-  engravingBonuses,
-}: {
-  row: Row;
-  engravingBonuses: Map<string, number>;
-}) {
+function RowLine({ row, bonuses }: { row: Row; bonuses: Map<string, number> }) {
   let boosted = false;
   let value: string;
 
   if (row.kind === "static") {
     value = row.value;
-  } else if (row.kind === "engraving") {
-    const delta = engravingBonuses.get(row.engravingKey) ?? 0;
+  } else if (row.kind === "bonus") {
+    const delta = bonuses.get(row.bonusKey) ?? 0;
     boosted = delta !== 0;
     value = `${(row.base + delta).toFixed(row.decimals)}${row.unit}`;
   } else {
@@ -45,11 +39,11 @@ function RowLine({
 export default function GroupedRows({
   groups,
   withHeaders,
-  engravingBonuses,
+  bonuses,
 }: {
   groups: RowGroup[];
   withHeaders: boolean;
-  engravingBonuses: Map<string, number>;
+  bonuses: Map<string, number>;
 }) {
   return (
     <div className="space-y-3">
@@ -61,11 +55,7 @@ export default function GroupedRows({
           )}
           <div className="space-y-1.5">
             {group.rows.map((row) => (
-              <RowLine
-                key={row.label}
-                row={row}
-                engravingBonuses={engravingBonuses}
-              />
+              <RowLine key={row.label} row={row} bonuses={bonuses} />
             ))}
           </div>
         </div>

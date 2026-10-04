@@ -48,7 +48,7 @@ const LIBRARY_ITEM_IDS = [
   ...idRange(47271, 47305),
   ...idRange(49582, 49616),
   ...idRange(55412, 55446),
-  ...idRange(900001, 900035),
+  ...idRange(8003144, 8003178),
 ];
 
 const LIBRARY_RUNE_SLOTS = [

@@ -14,7 +14,7 @@ import {
   getEpheEffectiveness,
   getEphePercentBonus,
 } from "../epheSealsData";
-import { getEpheItemTier } from "../epheSealsBonus";
+import { getEpheItemTier } from "../epheItemTiers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
 import { Button } from "@/shared/ui";
 import CharacterTabsSwitcher from "@/widgets/profile/CharacterTabsSwitcher";

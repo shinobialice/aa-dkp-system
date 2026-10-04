@@ -11,19 +11,7 @@ import { isValidEngravingId } from "@/widgets/profile/equipment/itemsData/engrav
 import { isValidRuneId } from "@/widgets/profile/equipment/itemsData/runes";
 import { WEAPON_HANDEDNESS } from "@/widgets/profile/equipment/itemsData/weaponHandedness";
 import { findGearItem } from "@/widgets/profile/equipment/itemsData";
-import {
-  getCostumeRole,
-  getCostumeSynthesisSlotCount,
-  isValidCostumeSynthesisEffectId,
-} from "@/widgets/profile/equipment/itemsData/costumeSynthesis";
-import {
-  getUnderwearRole,
-  getUnderwearSynthesisSlotCount,
-  isValidUnderwearSynthesisEffectId,
-} from "@/widgets/profile/equipment/itemsData/underwearSynthesis";
-import { isValidCursedArmorSynthesisEffectIds } from "@/widgets/profile/equipment/itemsData/cursedArmorSynthesis";
-import { isValidRingSynthesisEffectIds } from "@/widgets/profile/equipment/itemsData/ringSynthesis";
-import { isValidEphenSynthesisSelection } from "@/widgets/profile/equipment/itemsData/ephenSynthesis";
+import { isValidSynthesisSelection } from "@/widgets/profile/equipment/itemsData/synthesis";
 import { isValidEpheSealLevel } from "@/widgets/profile/ephe/epheSealsData";
 
 type CheckContext = {
@@ -79,39 +67,14 @@ const CHECKS: Check[] = [
       `Некорректный лунный камень / руна в слоте: ${item.slot}`,
   },
   {
-    isValid: (item) => isValidCostumeSynthesis(item),
-    message: (item) =>
-      `Некорректные эффекты синтеза костюма в слоте: ${item.slot}`,
-  },
-  {
-    isValid: (item) => isValidUnderwearSynthesis(item),
-    message: (item) =>
-      `Некорректные эффекты синтеза белья в слоте: ${item.slot}`,
-  },
-  {
     isValid: (item, { gearId }) =>
-      item.cursedSynthesisEffects.length === 0 ||
-      isValidCursedArmorSynthesisEffectIds(gearId, item.cursedSynthesisEffects),
-    message: (item) => `Некорректные эффекты синтеза в слоте: ${item.slot}`,
-  },
-  {
-    isValid: (item, { gearId }) =>
-      isValidRingSynthesisEffectIds(gearId, item.ringSynthesisEffects),
-    message: (item) =>
-      `Некорректные эффекты синтеза кольца в слоте: ${item.slot}`,
-  },
-  {
-    isValid: (item, { gearId }) =>
-      isValidEphenSynthesisSelection(
+      isValidSynthesisSelection(
         gearId,
         item.grade,
-        item.ephenSynthesisPercent,
-        item.ephenSynthesisPrimary,
-        item.ephenSynthesisSecondary,
-        item.ephenSynthesisTertiary,
+        item.synthesisEffects,
+        item.synthesisPercent,
       ),
-    message: (item) =>
-      `Некорректный синтез эфенского предмета в слоте: ${item.slot}`,
+    message: (item) => `Некорректные эффекты синтеза в слоте: ${item.slot}`,
   },
   {
     isValid: (item) => isValidEpheSealLevel(item.slot, item.epheSealLevel),
@@ -128,30 +91,4 @@ export function assertValidEquipmentItem(item: EquipmentInput) {
   };
   const failed = CHECKS.find((check) => !check.isValid(item, context));
   if (failed) throw new Error(failed.message(item));
-}
-
-function isValidCostumeSynthesis(item: EquipmentInput) {
-  if (item.costumeSynthesisEffects.length === 0) return true;
-  const role = getCostumeRole(item.itemName ?? "");
-  return (
-    !!role &&
-    item.costumeSynthesisEffects.length <=
-      getCostumeSynthesisSlotCount(item.grade) &&
-    item.costumeSynthesisEffects.every((id) =>
-      isValidCostumeSynthesisEffectId(id, role),
-    )
-  );
-}
-
-function isValidUnderwearSynthesis(item: EquipmentInput) {
-  if (item.underwearSynthesisEffects.length === 0) return true;
-  const role = getUnderwearRole(item.itemName ?? "");
-  return (
-    !!role &&
-    item.underwearSynthesisEffects.length <=
-      getUnderwearSynthesisSlotCount(item.grade) &&
-    item.underwearSynthesisEffects.every((id) =>
-      isValidUnderwearSynthesisEffectId(id, role),
-    )
-  );
 }

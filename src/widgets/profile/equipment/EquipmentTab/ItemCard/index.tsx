@@ -1,7 +1,8 @@
 import type { UserEquipment } from "@/actions/getUserEquipment";
 import type { GearItem } from "../../itemsData";
 import { GearItemIcon } from "../../GearItemIcon";
-import { ItemStats } from "../../ItemStats";
+import ItemStats from "../../ItemStats";
+import { getEpheStatMultipliers } from "@/widgets/profile/ephe/epheSealsBonus";
 import {
   getSealGradeLabel,
   getSealGradeColor,
@@ -53,6 +54,7 @@ export default function ItemCard({
         itemId={gearItem.id}
         grade={item.grade}
         enchant={item.enchant}
+        epheMultipliers={getEpheStatMultipliers(item)}
         bare
       />
 
