@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { Coins } from "lucide-react";
 import { formatNumber } from "@/shared/lib/format";
-import { cn } from "@/shared/lib/tw-merge";
 import { Card, Skeleton } from "@/shared/ui";
 
 type Props = {
@@ -9,7 +8,6 @@ type Props = {
   value: number;
   hint: string;
   footer: ReactNode;
-  footerOnMobile?: boolean;
   loading: boolean;
 };
 
@@ -18,7 +16,6 @@ export default function StatCard({
   value,
   hint,
   footer,
-  footerOnMobile,
   loading,
 }: Props) {
   return (
@@ -32,12 +29,7 @@ export default function StatCard({
         </p>
       )}
       <p className="text-xs text-muted-foreground">{hint}</p>
-      <div
-        className={cn(
-          "mt-auto flex-wrap items-center justify-between gap-x-2 gap-y-1 border-t pt-3 text-xs",
-          footerOnMobile ? "flex" : "hidden sm:flex",
-        )}
-      >
+      <div className="mt-auto hidden flex-wrap items-center justify-between gap-x-2 gap-y-1 border-t pt-3 text-xs sm:flex">
         {footer}
       </div>
     </Card>

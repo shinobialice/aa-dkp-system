@@ -70,11 +70,10 @@ export default function TreasuryPage({ isAdmin }: Props) {
 
       <TreasuryStats
         stats={stats}
+        fund={data.fund}
         month={month}
         loading={!data.loaded}
-        onShowStale={() =>
-          setView({ tab: "stock", sort: "oldest", search: "" })
-        }
+        fundLoading={!data.fundLoaded}
       />
 
       <TreasuryTabs

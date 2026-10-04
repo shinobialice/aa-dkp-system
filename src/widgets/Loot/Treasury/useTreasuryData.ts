@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { getExpenses } from "@/actions/expenseActions";
+import { getGuildFunds } from "@/actions/financeActions";
 import { getActiveUsers } from "@/actions/getActiveUsers";
 import { getItemTypes, getLoot } from "@/actions/lootActions";
 import { getMiscLootTotals } from "@/actions/miscLootTotals";
@@ -20,6 +21,9 @@ export function useTreasuryData(month: number, year: number, isAdmin: boolean) {
   const misc = useAsyncData(`misc:${year}-${month}`, () =>
     getMiscLootTotals(month, year),
   );
+  const fund = useAsyncData(`fund:${year}-${month}`, () =>
+    getGuildFunds(month, year),
+  );
   const users = useAsyncData(isAdmin ? "active-users" : null, getActiveUsers);
 
   const loadFailed = [loot, expenses, itemTypes].some(
@@ -33,6 +37,7 @@ export function useTreasuryData(month: number, year: number, isAdmin: boolean) {
     loot.reload();
     expenses.reload();
     misc.reload();
+    fund.reload();
   }, POLL_MS);
 
   return {
@@ -40,8 +45,10 @@ export function useTreasuryData(month: number, year: number, isAdmin: boolean) {
     expenses: expenses.data ?? [],
     itemTypes: itemTypes.data ?? [],
     misc: misc.data ?? [],
+    fund: fund.data ?? null,
     users: users.data ?? [],
     loaded: !loot.isLoading && !expenses.isLoading && !itemTypes.isLoading,
+    fundLoaded: !fund.isLoading,
     refreshLoot: loot.reload,
     refreshExpenses: expenses.reload,
     refreshMisc: misc.reload,

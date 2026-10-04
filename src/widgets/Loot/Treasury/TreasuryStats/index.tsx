@@ -1,30 +1,26 @@
 import Link from "next/link";
+import type { GuildFundsRow } from "@/shared/lib/dbTypes";
 import { formatNumber, plural } from "@/shared/lib/format";
 import { formatShortDate, monthName, type MonthStats } from "../treasuryModel";
-import StaleStockFooter from "./StaleStockFooter";
 import StatCard from "./StatCard";
 
 type Props = {
   stats: MonthStats;
+  fund: GuildFundsRow | null;
   month: number;
   loading: boolean;
-  onShowStale: () => void;
+  fundLoading: boolean;
 };
 
 export default function TreasuryStats({
   stats,
+  fund,
   month,
   loading,
-  onShowStale,
+  fundLoading,
 }: Props) {
   const treasuryCount = `${stats.treasuryCount} ${plural(stats.treasuryCount, "поступление", "поступления", "поступлений")}`;
   const expensesCount = `${stats.expensesCount} ${plural(stats.expensesCount, "запись", "записи", "записей")}`;
-  const positions = plural(
-    stats.stockPositions,
-    "позиция",
-    "позиции",
-    "позиций",
-  );
 
   return (
     <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
@@ -70,16 +66,14 @@ export default function TreasuryStats({
         }
       />
       <StatCard
-        label="На складе сейчас"
-        value={stats.stockValue}
-        loading={loading}
-        footerOnMobile={stats.staleCount > 0}
-        hint={`${stats.stockQuantity} шт. · ${stats.stockPositions} ${positions}`}
+        label="В казне"
+        value={fund?.inTreasury ?? 0}
+        loading={fundLoading}
+        hint={carryOverLabel(fund)}
         footer={
-          <StaleStockFooter
-            staleCount={stats.staleCount}
-            onShowStale={onShowStale}
-          />
+          <span className="text-muted-foreground">
+            {advanceSentLabel(fund)}
+          </span>
         }
       />
     </div>
@@ -91,6 +85,16 @@ function lastTreasuryLabel({ lastTreasury, treasuryCount }: MonthStats) {
   const prefix = treasuryCount > 1 ? "Последнее: " : "";
   const source = lastTreasury.source ?? "без источника";
   return `${prefix}${source} · ${formatShortDate(lastTreasury.at)}`;
+}
+
+function carryOverLabel(fund: GuildFundsRow | null) {
+  if (!fund) return "Фонд за месяц ещё не посчитан";
+  return `с прошлого месяца ${formatNumber(fund.carryOver)}`;
+}
+
+function advanceSentLabel(fund: GuildFundsRow | null) {
+  if (!fund?.advanceSent) return "Авансом ещё ничего не выслано";
+  return `Выслано авансом ${formatNumber(fund.advanceSent)}`;
 }
 
 function topExpenseLabel({ topExpense }: MonthStats) {
