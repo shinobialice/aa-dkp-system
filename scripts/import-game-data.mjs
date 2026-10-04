@@ -109,7 +109,7 @@ function computeArmorStats(armor) {
   const attributeScale =
     config.wearable_stat_const * PERCENT * armor.coverage * 0.01;
   for (const [key, value] of computeAttributes(armor, attributeScale)) {
-    stats[key] = Math.trunc(value + 0.5);
+    stats[key] = roundTo(value, 2);
   }
   return stats;
 }

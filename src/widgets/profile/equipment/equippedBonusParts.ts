@@ -18,6 +18,7 @@ import {
 import { type EquippedBonuses } from "./characterStats";
 
 export const EMPTY_BONUSES: EquippedBonuses = {
+  manaPercent: 0,
   defense: 0,
   resist: 0,
   str: 0,

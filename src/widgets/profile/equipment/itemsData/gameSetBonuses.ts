@@ -1,4 +1,4 @@
-// Сгенерировано `pnpm game:marafon` из данных калькулятора marafon.direkiller.ru. Не редактировать вручную.
+// Сгенерировано `pnpm game:tables` из данных игры. Не редактировать вручную.
 export const GAME_SET_BONUSES: Record<
   number,
   Record<number, Record<number, number>>

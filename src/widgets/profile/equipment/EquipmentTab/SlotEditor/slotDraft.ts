@@ -83,6 +83,7 @@ export function draftToPreviewItem(
   return {
     id: item?.id ?? 0,
     user_id: item?.user_id ?? 0,
+    role_slot: item?.role_slot ?? 1,
     ephe_seal_level: item?.ephe_seal_level ?? 0,
     slot: slotKey,
     item_name: values.itemName,

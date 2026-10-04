@@ -170,7 +170,7 @@ const JEWELRY_PVP_VALUES: Record<number, number> = {
   11: 10,
   12: 10,
   13: 10,
-  14: 20,
+  14: 30,
 };
 const JEWELRY_CRIT_VALUES: Record<number, number> = {
   1: 5,
@@ -279,7 +279,7 @@ const WEAPON_PERCENT_CURVE: Record<EpheItemTier, [number, number][]> = {
   ],
 };
 
-const ARMOR_PERCENT_CURVE: Record<EpheItemTier, [number, number][]> = {
+const SHIELD_PERCENT_CURVE: Record<EpheItemTier, [number, number][]> = {
   default: [
     [0.2, 0.29],
     [0.4, 0.59],
@@ -321,6 +321,21 @@ const ARMOR_PERCENT_CURVE: Record<EpheItemTier, [number, number][]> = {
   ],
 };
 
+// В игре доспехи на эффективности 3.5 получают +5.01% (возрождённый алтарник):
+// после 3.0 прирост замедляется. Защита щита на слоте оружия растёт без
+// замедления (+5.14%), поэтому у неё своя кривая.
+const ARMOR_PERCENT_CURVE: Record<EpheItemTier, [number, number][]> = {
+  default: [...SHIELD_PERCENT_CURVE.default, [3.5, 5.01]],
+  ephen: [...SHIELD_PERCENT_CURVE.ephen, [3.5, 5.03]],
+  ramian: [...SHIELD_PERCENT_CURVE.ramian, [3.5, 5.08]],
+};
+
+const PERCENT_CURVES = {
+  weapon: WEAPON_PERCENT_CURVE,
+  armor: ARMOR_PERCENT_CURVE,
+  shield: SHIELD_PERCENT_CURVE,
+};
+
 function evalPercentCurve(points: [number, number][], x: number): number {
   const full: [number, number][] = [[0, 0], ...points];
   if (x <= full[0][0]) return full[0][1];
@@ -343,12 +358,9 @@ function evalPercentCurve(points: [number, number][], x: number): number {
 }
 
 export function getEphePercentBonus(
-  category: "weapon" | "armor",
+  category: keyof typeof PERCENT_CURVES,
   tier: EpheItemTier,
   effectiveness: number,
 ): number {
-  const curve = (
-    category === "weapon" ? WEAPON_PERCENT_CURVE : ARMOR_PERCENT_CURVE
-  )[tier];
-  return evalPercentCurve(curve, effectiveness);
+  return evalPercentCurve(PERCENT_CURVES[category][tier], effectiveness);
 }

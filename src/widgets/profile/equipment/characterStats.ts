@@ -1,6 +1,8 @@
 import type { UserEquipment } from "@/actions/getUserEquipment";
 import type { UserSeal } from "@/actions/getUserSeals";
+import type { RoleSkillBuild } from "@/actions/getUserSkillBuild";
 import type { SelectedBuffs } from "./characterBuffs";
+import { computePassiveBonuses } from "./skillPassiveBonuses";
 import { addStat, STAT_LABEL, type StatBonuses } from "./itemsData/statEffects";
 import { ENGRAVING_STAT } from "./engravingBonuses";
 import { computeEquipmentBuffBonuses } from "./equipmentBuffBonuses";
@@ -36,6 +38,7 @@ export const BASE_CHARACTER_STATS = {
 };
 
 export type EquippedBonuses = {
+  manaPercent: number;
   defense: number;
   resist: number;
   str: number;
@@ -83,15 +86,18 @@ export function computeCharacterBonuses(
   equipment: UserEquipment[],
   seals: UserSeal[] = [],
   buffs: SelectedBuffs = {},
+  skillBuild: RoleSkillBuild = {},
 ): CharacterBonuses {
   const totals = { ...EMPTY_BONUSES };
   const flat: StatBonuses = new Map();
   for (const eq of equipment) addGearStats(totals, flat, eq);
 
   const equipmentBuffs = computeEquipmentBuffBonuses(equipment);
+  const passives = computePassiveBonuses(skillBuild, equipment);
   const sources = [
     ...collectStatSources(equipment, seals, buffs),
     equipmentBuffs.stats,
+    passives.stats,
   ];
   for (const source of sources) {
     for (const [label, value] of source) addStat(flat, label, value);
@@ -102,8 +108,12 @@ export function computeCharacterBonuses(
   for (const [key, label] of FLAT_STAT_TARGETS) {
     totals[key] += flat.get(label) ?? 0;
   }
-  totals.defense *= 1 + equipmentBuffs.defensePercent / 100;
-  totals.resist *= 1 + equipmentBuffs.resistPercent / 100;
+  const defensePercent =
+    equipmentBuffs.defensePercent + passives.defensePercent;
+  const resistPercent = equipmentBuffs.resistPercent + passives.resistPercent;
+  totals.defense *= 1 + defensePercent / 100;
+  totals.resist *= 1 + resistPercent / 100;
+  totals.manaPercent = passives.manaPercent;
   return { totals, flat };
 }
 
@@ -165,7 +175,8 @@ export function computeDerivedStats(
     rangedAttack: dex * 0.25 + bonus.rangedAttack,
     spellPower: int * 0.25 + bonus.spellPower,
     healPower: spi * 0.25 + bonus.healPower,
-    mana: FLAT_MANA_POOL + int * 10 + bonus.mana,
+    mana:
+      (FLAT_MANA_POOL + int * 10 + bonus.mana) * (1 + bonus.manaPercent / 100),
     health: FLAT_HEALTH_POOL + sta * 12 + bonus.health,
     defense: sta * 1 + bonus.defense,
     resist: sta * 1 + bonus.resist,

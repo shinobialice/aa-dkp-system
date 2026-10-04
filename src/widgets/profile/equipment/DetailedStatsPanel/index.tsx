@@ -2,11 +2,14 @@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/ui";
 import type { UserEquipment } from "@/actions/getUserEquipment";
 import type { UserSeal } from "@/actions/getUserSeals";
+import type { RoleSkillBuild } from "@/actions/getUserSkillBuild";
 import {
   computeCharacterBonuses,
   computeDerivedStats,
+  type DerivedStats,
 } from "../characterStats";
 import type { SelectedBuffs } from "../characterBuffs";
+import type { ProfileStats } from "../statComparison";
 import GroupedRows from "./GroupedRows";
 import { buildOffenseGroups } from "./offenseGroups";
 import { buildDefenseGroups } from "./defenseGroups";
@@ -18,6 +21,8 @@ type Props = {
   seals: UserSeal[];
   level: number;
   buffs: SelectedBuffs;
+  skillBuild: RoleSkillBuild;
+  viewer: ProfileStats | null;
 };
 
 type StatsTab = {
@@ -27,35 +32,23 @@ type StatsTab = {
   withHeaders: boolean;
 };
 
-export function DetailedStatsPanel({ equipment, seals, level, buffs }: Props) {
+export function DetailedStatsPanel({
+  equipment,
+  seals,
+  level,
+  buffs,
+  skillBuild,
+  viewer,
+}: Props) {
   const { totals: bonus, flat } = computeCharacterBonuses(
     equipment,
     seals,
     buffs,
+    skillBuild,
   );
   const stats = computeDerivedStats(bonus, level);
-
-  const tabs: StatsTab[] = [
-    {
-      value: "offense",
-      label: "Атака",
-      groups: buildOffenseGroups(stats, bonus),
-      withHeaders: false,
-    },
-    {
-      value: "defense",
-      label: "Защита",
-      groups: buildDefenseGroups(stats, bonus),
-      withHeaders: false,
-    },
-    {
-      value: "heal",
-      label: "Исцеление",
-      groups: buildHealGroups(stats, bonus),
-      withHeaders: true,
-    },
-    { value: "gear", label: "Прочее", groups: GEAR_GROUPS, withHeaders: true },
-  ];
+  const tabs = buildStatsTabs(stats);
+  const viewerTabs = viewer && buildStatsTabs(viewer.stats);
 
   return (
     <div className="w-full shrink-0 rounded-xl border bg-muted/40 p-3">
@@ -73,12 +66,14 @@ export function DetailedStatsPanel({ equipment, seals, level, buffs }: Props) {
         </TabsList>
 
         <div className="h-160 overflow-y-auto pr-1">
-          {tabs.map((tab) => (
+          {tabs.map((tab, index) => (
             <TabsContent key={tab.value} value={tab.value}>
               <GroupedRows
                 groups={tab.groups}
                 withHeaders={tab.withHeaders}
                 bonuses={flat}
+                viewerGroups={viewerTabs?.[index].groups ?? null}
+                viewerBonuses={viewer?.flat ?? null}
               />
             </TabsContent>
           ))}
@@ -86,4 +81,28 @@ export function DetailedStatsPanel({ equipment, seals, level, buffs }: Props) {
       </Tabs>
     </div>
   );
+}
+
+function buildStatsTabs(stats: DerivedStats): StatsTab[] {
+  return [
+    {
+      value: "offense",
+      label: "Атака",
+      groups: buildOffenseGroups(stats),
+      withHeaders: false,
+    },
+    {
+      value: "defense",
+      label: "Защита",
+      groups: buildDefenseGroups(stats),
+      withHeaders: false,
+    },
+    {
+      value: "heal",
+      label: "Исцеление",
+      groups: buildHealGroups(stats),
+      withHeaders: true,
+    },
+    { value: "gear", label: "Прочее", groups: GEAR_GROUPS, withHeaders: true },
+  ];
 }

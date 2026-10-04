@@ -10,6 +10,7 @@ export type CharacterBuff = {
   id: number;
   name: string;
   icon: string;
+  guild?: boolean;
   requiresBuffId?: number;
   options: CharacterBuffOption[];
 };

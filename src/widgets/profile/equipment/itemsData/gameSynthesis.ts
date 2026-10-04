@@ -1,4 +1,4 @@
-// Сгенерировано `pnpm game:marafon` из данных калькулятора marafon.direkiller.ru. Не редактировать вручную.
+// Сгенерировано `pnpm game:tables` из данных игры. Не редактировать вручную.
 import type { ItemSynthesis } from "./synthesisTypes";
 
 const POOL_1 = {

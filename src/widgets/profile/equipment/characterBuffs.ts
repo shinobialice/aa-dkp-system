@@ -16,6 +16,8 @@ export type ActiveBuff = {
 };
 
 export const CHARACTER_BUFFS = GAME_BUFFS;
+export const PERSONAL_BUFFS = GAME_BUFFS.filter((buff) => !buff.guild);
+export const GUILD_BUFFS = GAME_BUFFS.filter((buff) => buff.guild);
 
 const BUFF_ICON_DIR = "/images/equipment/";
 
@@ -26,12 +28,27 @@ export function parseSelectedBuffs(value: unknown): SelectedBuffs {
   return result.success ? result.output : {};
 }
 
-export function isValidBuffSelection(value: unknown): value is SelectedBuffs {
+export function isValidBuffSelection(
+  value: unknown,
+  allowed: CharacterBuff[],
+): value is SelectedBuffs {
   if (!v.is(SELECTED_BUFFS_SCHEMA, value)) return false;
   return Object.entries(value).every(([buffId, optionValue]) => {
-    const buff = findBuff(buffId);
+    const buff = allowed.find((candidate) => String(candidate.id) === buffId);
     return !!buff && !!findOption(buff, optionValue);
   });
+}
+
+export function pickBuffs(
+  selected: SelectedBuffs,
+  allowed: CharacterBuff[],
+): SelectedBuffs {
+  return Object.fromEntries(
+    allowed.flatMap((buff) => {
+      const value = selected[buff.id];
+      return value === undefined ? [] : [[String(buff.id), value]];
+    }),
+  );
 }
 
 export function buffIconUrl(

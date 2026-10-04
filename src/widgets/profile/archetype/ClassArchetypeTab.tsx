@@ -1,5 +1,4 @@
 "use client";
-import type { ProfileUser } from "@/actions/getUser";
 import { useState } from "react";
 import { toast } from "sonner";
 import saveUserArchetype from "@/actions/saveUserArchetype";
@@ -12,13 +11,13 @@ import { Button } from "@/shared/ui";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
 import CharacterTabsSwitcher from "@/widgets/profile/CharacterTabsSwitcher";
 import { errorMessage } from "@/shared/lib/errorMessage";
-import { hasRole, specIdsOf, hasAnySkillSelected } from "./archetypeRoles";
+import { specIdsOf, hasAnySkillSelected } from "./archetypeRoles";
 import BuildEditor from "./BuildEditor";
 import BuildView from "./BuildView";
 
 export default function ClassArchetypeTab({
   userId,
-  user,
+  roleSlot,
   archetype,
   onChange,
   skillBuild,
@@ -26,7 +25,7 @@ export default function ClassArchetypeTab({
   canEdit,
 }: {
   userId: number;
-  user: ProfileUser;
+  roleSlot: RoleSlot;
   archetype: UserArchetype;
   onChange: (archetype: UserArchetype) => void;
   skillBuild: UserSkillBuild;
@@ -39,10 +38,7 @@ export default function ClassArchetypeTab({
   const [skillBuildDraft, setSkillBuildDraft] =
     useState<UserSkillBuild>(skillBuild);
 
-  const activeSlots = ([1, 2, 3] as RoleSlot[]).filter((slot) =>
-    hasRole(user, slot),
-  );
-  const showLabels = activeSlots.length > 1;
+  const activeSlots = [roleSlot];
 
   const startEditing = () => {
     setDraft(archetype);
@@ -103,7 +99,7 @@ export default function ClassArchetypeTab({
     <Card className="min-h-187.5 gap-3 py-4">
       <CardHeader className="border-b">
         <CardTitle className="flex items-center justify-between">
-          <CharacterTabsSwitcher />
+          <CharacterTabsSwitcher group="character" />
           {canEdit && !editing && (
             <Button
               variant="outline"
@@ -152,14 +148,14 @@ export default function ClassArchetypeTab({
               {editing ? (
                 <BuildEditor
                   slot={slot}
-                  showLabel={showLabels}
+                  showLabel={false}
                   draft={draft[slot]}
                   onSpecChange={(key, value) => setSpec(slot, key, value)}
                 />
               ) : (
                 <BuildView
                   slot={slot}
-                  showLabel={showLabels}
+                  showLabel={false}
                   archetype={archetype[slot]}
                 />
               )}

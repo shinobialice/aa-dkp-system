@@ -1,5 +1,9 @@
-import type { EpheStatMultipliers } from "../ephe/epheSealsBonus";
-import { ITEM_STATS } from "./itemsData";
+import type { UserEquipment } from "@/actions/getUserEquipment";
+import {
+  getEpheStatMultipliers,
+  type EpheStatMultipliers,
+} from "../ephe/epheSealsBonus";
+import { findGearItem, ITEM_STATS } from "./itemsData";
 import {
   getItemGradeStats,
   getItemGradeBonusStats,
@@ -16,7 +20,6 @@ export type ItemStatLine = {
   label: string;
   value: number;
   unit: string;
-  epheBonus: number;
 };
 
 const WEAPON_DAMAGE_STAT = "weapon_dps";
@@ -41,18 +44,30 @@ export function getItemStatLines(
         : scaleStat(base[key], grade, enchant, key);
     } else continue;
 
-    const line = { key, label: STAT_LABELS[key], unit: STAT_UNITS[key] ?? "" };
     const multiplier = epheMultipliers[key];
-    if (multiplier === undefined) {
-      lines.push({ ...line, value, epheBonus: 0 });
-      continue;
-    }
     const decimals = key === WEAPON_DAMAGE_STAT ? 1 : 0;
-    const shown = roundTo(value * multiplier, decimals);
-    const epheBonus = roundTo(shown - roundTo(value, decimals), decimals);
-    lines.push({ ...line, value: shown, epheBonus });
+    lines.push({
+      key,
+      label: STAT_LABELS[key],
+      unit: STAT_UNITS[key] ?? "",
+      value:
+        multiplier === undefined
+          ? value
+          : roundTo(value * multiplier, decimals),
+    });
   }
   return lines;
+}
+
+export function getEquipmentStatLines(eq: UserEquipment): ItemStatLine[] {
+  const gearItem = findGearItem(eq.slot, eq.item_name);
+  if (!gearItem) return [];
+  return getItemStatLines(
+    gearItem.id,
+    eq.grade,
+    eq.enchant,
+    getEpheStatMultipliers(eq),
+  );
 }
 
 function roundTo(value: number, decimals: number): number {

@@ -14,6 +14,7 @@ type Props = {
   userId: number;
   equipment: UserEquipment[];
   buffs: SelectedBuffs;
+  guildBuffs: SelectedBuffs;
   canEdit: boolean;
   onBuffsChange: (buffs: SelectedBuffs) => void;
 };
@@ -22,6 +23,7 @@ export default function BuffRow({
   userId,
   equipment,
   buffs,
+  guildBuffs,
   canEdit,
   onBuffsChange,
 }: Props) {
@@ -31,7 +33,7 @@ export default function BuffRow({
     ...getActiveQualitySetBuffs(equipment),
     ...(weaponBuff ? [weaponBuff] : []),
   ];
-  const characterBuffs = getActiveBuffs(buffs);
+  const characterBuffs = getActiveBuffs({ ...buffs, ...guildBuffs });
   if (gearBuffs.length === 0 && characterBuffs.length === 0 && !canEdit) {
     return null;
   }

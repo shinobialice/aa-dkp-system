@@ -4,7 +4,11 @@ import { toast } from "sonner";
 import type { ProfileUser } from "@/actions/getUser";
 import type { UserEquipment } from "@/actions/getUserEquipment";
 import type { UserSeal } from "@/actions/getUserSeals";
+import type { RoleSkillBuild } from "@/actions/getUserSkillBuild";
+import type { RoleSlot } from "@/shared/config/roleSlots";
 import saveUserEquipment from "@/actions/saveUserEquipment";
+import { getGuildBuffSettings } from "@/actions/guildBuffSettings";
+import { useAsyncData } from "@/hooks/useAsyncData";
 import {
   Card,
   CardContent,
@@ -14,22 +18,33 @@ import {
 } from "@/shared/ui";
 import { errorMessage } from "@/shared/lib/errorMessage";
 import CharacterTabsSwitcher from "@/widgets/profile/CharacterTabsSwitcher";
-import { classColors } from "@/widgets/MembersTable/classStyles";
 import { EQUIPMENT_SLOTS, type EquipmentSlot } from "../equipmentData";
 import { CharacterStatsPanel } from "../CharacterStatsPanel";
 import { DetailedStatsPanel } from "../DetailedStatsPanel";
-import { parseSelectedBuffs } from "../characterBuffs";
+import {
+  parseSelectedBuffs,
+  PERSONAL_BUFFS,
+  pickBuffs,
+} from "../characterBuffs";
 import EquipmentSlotButton from "./EquipmentSlotButton";
 import CharacterDoll from "./CharacterDoll";
 import SlotList from "./SlotList";
 import { buildEquipmentPayload, type SlotValues } from "./slotValues";
 import { useNarrowScreen } from "./useNarrowScreen";
+import CopyEquipmentButton from "./CopyEquipmentButton";
+import ClassBadge from "./ClassBadge";
+import { useViewerComparison } from "./useViewerComparison";
+import { roleClassOf } from "@/widgets/profile/archetype/archetypeRoles";
+import type { EquipmentCopySource } from "../equipmentRoles";
 
 type Props = {
   userId: number;
+  roleSlot: RoleSlot;
+  copySources: EquipmentCopySource[];
   user: ProfileUser;
   equipment: UserEquipment[];
   seals: UserSeal[];
+  skillBuild: RoleSkillBuild;
   onChange: (equipment: UserEquipment[]) => void;
   canEdit: boolean;
 };
@@ -43,9 +58,12 @@ const VIEW_OPTIONS = [
 
 export default function EquipmentTab({
   userId,
+  roleSlot,
+  copySources,
   user,
   equipment,
   seals,
+  skillBuild,
   onChange,
   canEdit,
 }: Props) {
@@ -54,13 +72,17 @@ export default function EquipmentTab({
 
   const [level, setLevel] = useState(user.character_level ?? 1);
   const [buffs, setBuffs] = useState(() =>
-    parseSelectedBuffs(user.character_buffs),
+    pickBuffs(parseSelectedBuffs(user.character_buffs), PERSONAL_BUFFS),
   );
+  const guildBuffs =
+    useAsyncData("guild-buffs", getGuildBuffSettings).data ?? {};
+  const viewer = useViewerComparison(userId, guildBuffs);
   const [portraitUrl, setPortraitUrl] = useState(user.character_portrait_url);
   const narrow = useNarrowScreen();
   const [viewOverride, setViewOverride] = useState<View | null>(null);
   const view = viewOverride ?? (narrow ? "list" : "doll");
 
+  const roleClass = roleClassOf(user, roleSlot);
   const filledCount = EQUIPMENT_SLOTS.filter(
     (slot) => equipmentBySlot[slot.key]?.item_name,
   ).length;
@@ -68,7 +90,7 @@ export default function EquipmentTab({
   const saveSlot = async (slotKey: string, values: SlotValues) => {
     try {
       const payload = buildEquipmentPayload(equipmentBySlot, slotKey, values);
-      onChange(await saveUserEquipment(userId, payload));
+      onChange(await saveUserEquipment(userId, roleSlot, payload));
       toast.success("Экипировка сохранена");
     } catch (error) {
       toast.error(errorMessage(error, "Не удалось сохранить экипировку"));
@@ -88,6 +110,7 @@ export default function EquipmentTab({
       canEdit={canEdit}
       tooltipSide={side}
       showRune={showRune}
+      compareItem={viewer.equipment?.find((item) => item.slot === slot.key)}
       onSave={(values) => saveSlot(slot.key, values)}
     />
   );
@@ -96,10 +119,18 @@ export default function EquipmentTab({
     <Card className="@container gap-0 py-0">
       <CardHeader className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b px-3 py-3 sm:px-4 [.border-b]:pb-3">
         <CardTitle className="min-w-0">
-          <CharacterTabsSwitcher />
+          <CharacterTabsSwitcher group="character" />
         </CardTitle>
+        {canEdit && copySources.length > 0 && (
+          <CopyEquipmentButton
+            userId={userId}
+            roleSlot={roleSlot}
+            sources={copySources}
+            onCopied={onChange}
+          />
+        )}
         <div className="ml-auto flex items-center gap-2 text-sm text-muted-foreground">
-          {user.class && <ClassBadge userClass={user.class} />}
+          {roleClass && <ClassBadge userClass={roleClass} />}
           <span>
             ур. <b className="text-foreground">{level}</b>
           </span>
@@ -120,6 +151,9 @@ export default function EquipmentTab({
             level={level}
             onLevelChange={setLevel}
             buffs={buffs}
+            guildBuffs={guildBuffs}
+            skillBuild={skillBuild}
+            viewer={viewer.stats}
             onBuffsChange={setBuffs}
           />
         </div>
@@ -158,25 +192,12 @@ export default function EquipmentTab({
             equipment={equipment}
             seals={seals}
             level={level}
-            buffs={buffs}
+            buffs={{ ...buffs, ...guildBuffs }}
+            skillBuild={skillBuild}
+            viewer={viewer.stats}
           />
         </div>
       </CardContent>
     </Card>
-  );
-}
-
-function ClassBadge({ userClass }: { userClass: string }) {
-  const color = classColors[userClass];
-  return (
-    <span
-      className="rounded-full px-2.5 py-0.5 font-semibold"
-      style={{
-        color,
-        backgroundColor: `color-mix(in srgb, ${color ?? "#71717a"} 12%, transparent)`,
-      }}
-    >
-      {userClass}
-    </span>
   );
 }

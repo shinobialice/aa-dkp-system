@@ -6,9 +6,9 @@ const SYNTHESIS_OUTPUT = `${ITEMS_DIR}/gameSynthesis.ts`;
 const SET_BONUSES_OUTPUT = `${ITEMS_DIR}/gameSetBonuses.ts`;
 const BUFFS_OUTPUT = `${ITEMS_DIR}/gameBuffs.ts`;
 const HEADER =
-  "// Сгенерировано `pnpm game:marafon` из данных калькулятора marafon.direkiller.ru. Не редактировать вручную.";
+  "// Сгенерировано `pnpm game:tables` из данных игры. Не редактировать вручную.";
 
-// unit_attribute игры → [код эффекта из statEffects.ts, множитель], как в client-equipment.js marafon.
+// unit_attribute игры → [код эффекта из statEffects.ts, множитель].
 const UNIT_ATTRIBUTES = {
   0: [8, 1],
   1: [10, 1],
@@ -90,12 +90,12 @@ const SYNTHESIS_START_PERCENT = 0;
 const SYNTHESIS_FULL_PERCENT = 100;
 const PVE_SET_NAME = /_PVE$/i;
 
-// Сноровка в игре — четыре одинаковых модификатора скорости, marafon сводит их в один.
+// Сноровка в игре — четыре одинаковых модификатора скорости, сводим их в один.
 const PROFICIENCY_PARTS = [54, 55, 74, 119];
 const PROFICIENCY = 218;
 const FLAT_MODIFIER = 0;
 
-// Ключи баффов в effects.json marafon → код эффекта из statEffects.ts.
+// Ключи баффов в effects.json → код эффекта из statEffects.ts.
 const BUFF_STAT_CODES = {
   hp: 0,
   mp: 1,
@@ -155,9 +155,52 @@ const BUFF_STAT_CODES = {
 // Поправки по подсказкам баффов и окну характеристик в игре (2026-10): у статуи
 // бонус к урону идёт в урон исцеляющими умениями, а не в умения целителя, и не
 // снижает осадный урон; гильдейский PvE-бафф действует и на исцеляющие умения;
-// у «Благословения предела» восстановление в бою +50 / +10.
+// у «Благословения предела» восстановление в бою +50 / +10. Титула «Истребитель
+// драконов» в effects.json нет — он взят из дампа игры (бафф 8000780).
 const BUFF_OVERRIDES = {
-  0: { dropStats: ["vulnSiege"], renameStats: { skillHeal: "healingDamage" } },
+  23: {
+    extraOptions: [
+      {
+        value: "19",
+        label: "Истребитель драконов",
+        icon: "titles/icon_item_6016.png",
+        text: [
+          "Все основные характеристики +30",
+          "Шанс критического удара и исцеления +3%",
+          "Доп. урон умений +4%",
+          "Устойчивость к критическому урону +500 ед.",
+          "Пробивание брони и игнорирование сопротивления +500 ед.",
+          "Игнорирование устойчивости к атакам в PvP +50 ед.",
+          "Игнорирование устойчивости к критическому урону +100 ед.",
+        ].join("\n"),
+        flat: {
+          str: 30,
+          dex: 30,
+          sta: 30,
+          int: 30,
+          spi: 30,
+          critM: 3,
+          critR: 3,
+          critS: 3,
+          critHeal: 3,
+          skillM: 4,
+          skillR: 4,
+          skillS: 4,
+          skillHeal: 4,
+          critRes: 500,
+          pierce: 500,
+          ignoreRes: 500,
+          pvpResPen: 50,
+          critResPen: 100,
+        },
+      },
+    ],
+  },
+  0: {
+    dropStats: ["vulnSiege"],
+    renameStats: { skillHeal: "healingDamage" },
+    optionIcons: { 2: "buffs/effects/30765.png" },
+  },
   17: { copyStats: { skillPveM: "healingDamagePve" } },
   9: {
     stats: { healthRegenCombat: 50, manaRegenCombat: 10 },
@@ -172,12 +215,15 @@ const BUFF_OVERRIDES = {
 };
 const BUFF_ICON_PREFIX = "icons/reference/images/";
 const BUFF_TEXT_HEADER_LINES = 2;
+const GUILD_BUFF_CATEGORY = "Гильдия";
+// Нумены ремесленника и ученика не влияют на боевые характеристики.
+const HIDDEN_BUFF_IDS = new Set(["15", "16"]);
 const TITLE_ICON_PATH = BUFF_ICON_PREFIX + "titles/";
 
 const dataDir = process.argv[2];
 if (!dataDir) {
   console.error(
-    "Usage: pnpm game:marafon <folder with growth.json and client-data.json from marafon.direkiller.ru>",
+    "Usage: pnpm game:tables <folder with growth.json and client-data.json>",
   );
   process.exit(1);
 }
@@ -293,17 +339,24 @@ async function writeSetBonuses() {
 
 async function writeBuffs() {
   const unknownKeys = new Set();
-  const buffs = effects.map((buff) => {
+  const visibleBuffs = effects.filter(
+    (buff) => !HIDDEN_BUFF_IDS.has(String(buff.id)),
+  );
+  const buffs = visibleBuffs.map((buff) => {
     const requires = Object.keys(buff.options[0].requires ?? {});
     const buffIcon = buff.icon.replace(BUFF_ICON_PREFIX, "");
     const override = BUFF_OVERRIDES[buff.id] ?? {};
+    const category = buff.options[0].description.split("\n")[1];
     return {
       id: Number(buff.id),
       name: buff.name,
       icon: buffIcon,
+      ...(category === GUILD_BUFF_CATEGORY && { guild: true }),
       ...(requires.length > 0 && { requiresBuffId: Number(requires[0]) }),
       options: buff.options.map((option) => {
-        const icon = option.icon?.replace(BUFF_ICON_PREFIX, "");
+        const icon =
+          override.optionIcons?.[option.value] ??
+          option.icon?.replace(BUFF_ICON_PREFIX, "");
         const lines = option.description
           .split("\n")
           .slice(BUFF_TEXT_HEADER_LINES);
@@ -320,6 +373,15 @@ async function writeBuffs() {
       }),
     };
   });
+  for (const buff of buffs) {
+    const extraOptions = BUFF_OVERRIDES[buff.id]?.extraOptions ?? [];
+    for (const { flat, ...option } of extraOptions) {
+      buff.options.push({
+        ...option,
+        stats: buffStats({ primary: {}, flat }, {}, unknownKeys),
+      });
+    }
+  }
 
   await writeSource(BUFFS_OUTPUT, [
     HEADER,
@@ -378,7 +440,7 @@ function buffStats(option, override, unknownKeys) {
   return stats;
 }
 
-// Для предметов без growth.json marafon считает синтез прямо по игровым
+// Для предметов без growth.json синтез считается прямо по игровым
 // таблицам item_rnd_attr_*: 0% опыта — минимум диапазона, 100% — максимум.
 function buildSynthesisTables() {
   const groupBy = (rows, key) => {
@@ -449,7 +511,7 @@ function tableSlots(tables, category, quality) {
   return slots.slice(0, property.max_unit_modifier_num);
 }
 
-// В growth.json marafon нет PvE-слота (устойчивость к атакам монстров),
+// В growth.json нет PvE-слота (устойчивость к атакам монстров),
 // который игровые таблицы дают, например, проклятым доспехам на 12 грейде.
 function withPveSlots(tables, category, profile) {
   if (!category) return profile;

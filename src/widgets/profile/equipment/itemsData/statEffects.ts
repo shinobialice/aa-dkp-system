@@ -81,7 +81,7 @@ const PERCENT = { unit: "%", decimals: 1 };
 const POINTS = { unit: "", decimals: 0 };
 const FRACTIONAL_POINTS = { unit: "", decimals: 1 };
 
-// Коды эффектов — как в данных калькулятора marafon.direkiller.ru (это их коды, а не unit_attribute игры).
+// Коды эффектов — внутренние коды калькулятора, а не unit_attribute игры.
 // Эффекты «на снижение» в данных положительные, а у нас хранятся со знаком минус,
 // как у гравировок.
 export const STAT_EFFECTS: Record<number, StatEffect> = {

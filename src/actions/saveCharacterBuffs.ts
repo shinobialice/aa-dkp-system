@@ -3,6 +3,7 @@ import sql from "@/shared/lib/db";
 import ensureCanEditUserData from "./ensureCanEditUserData";
 import {
   isValidBuffSelection,
+  PERSONAL_BUFFS,
   type SelectedBuffs,
 } from "@/widgets/profile/equipment/characterBuffs";
 
@@ -12,7 +13,7 @@ const saveCharacterBuffs = async (
 ): Promise<void> => {
   await ensureCanEditUserData(userId, "equipmentEditEnabled");
 
-  if (!isValidBuffSelection(buffs)) {
+  if (!isValidBuffSelection(buffs, PERSONAL_BUFFS)) {
     throw new Error("Некорректный набор баффов");
   }
 

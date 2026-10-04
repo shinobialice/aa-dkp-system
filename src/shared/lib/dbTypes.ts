@@ -154,6 +154,12 @@ export type GivenawaylootRow = {
   status: string | null;
 };
 
+export type GuildBuffSettingsRow = {
+  id: number;
+  levels: unknown;
+  updated_at: string;
+};
+
 export type GuildPeriodHistoryRow = {
   id: number;
   mode: string;
@@ -451,6 +457,7 @@ export type UserEquipmentRow = {
   ephe_seal_level: number;
   synthesis_effects: number[];
   synthesis_percent: number;
+  role_slot: number;
 };
 
 export type UserInventoryRow = {

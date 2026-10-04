@@ -1,47 +1,49 @@
-import type { DerivedStats, EquippedBonuses } from "../characterStats";
+import type { DerivedStats } from "../characterStats";
 import { ATTRIBUTE_TOOLTIPS } from "../attributeTooltips";
 
 export type StatLine = {
   label: string;
-  value: string;
-  boosted: boolean;
+  amount: number;
+  decimals: number;
+  unit?: string;
   tooltip?: { title: string; lines: string[] };
 };
 
-export function powerStats(
-  stats: DerivedStats,
-  bonus: EquippedBonuses,
-): StatLine[] {
+export function formatStatLine(line: StatLine): string {
+  return `${line.amount.toFixed(line.decimals)}${line.unit ?? ""}`;
+}
+
+export function powerStats(stats: DerivedStats): StatLine[] {
   return [
     {
       label: "Сила атаки в ближнем бою",
-      value: stats.meleeAttack.toFixed(2),
-      boosted: bonus.meleeAttack !== 0 || bonus.str !== 0,
+      amount: stats.meleeAttack,
+      decimals: 2,
     },
     {
       label: "Сила атаки в дальнем бою",
-      value: stats.rangedAttack.toFixed(2),
-      boosted: bonus.rangedAttack !== 0 || bonus.dex !== 0,
+      amount: stats.rangedAttack,
+      decimals: 2,
     },
     {
       label: "Сила заклинаний",
-      value: stats.spellPower.toFixed(2),
-      boosted: bonus.spellPower !== 0 || bonus.int !== 0,
+      amount: stats.spellPower,
+      decimals: 2,
     },
     {
       label: "Эффективность исцеления",
-      value: stats.healPower.toFixed(2),
-      boosted: bonus.healPower !== 0 || bonus.spi !== 0,
+      amount: stats.healPower,
+      decimals: 2,
     },
     {
       label: "Защита",
-      value: String(Math.round(stats.defense)),
-      boosted: bonus.defense !== 0 || bonus.sta !== 0,
+      amount: stats.defense,
+      decimals: 0,
     },
     {
       label: "Сопротивление",
-      value: String(Math.round(stats.resist)),
-      boosted: bonus.resist !== 0 || bonus.sta !== 0,
+      amount: stats.resist,
+      decimals: 0,
     },
   ];
 }
@@ -60,49 +62,45 @@ const ATTRIBUTE_COLUMNS: { key: AttributeKey; label: string }[][] = [
   ],
 ];
 
-export function attributeColumns(
-  stats: DerivedStats,
-  bonus: EquippedBonuses,
-): StatLine[][] {
+export function attributeColumns(stats: DerivedStats): StatLine[][] {
   return ATTRIBUTE_COLUMNS.map((column) =>
     column.map(({ key, label }) => ({
       label,
-      value: String(stats[key]),
-      boosted: bonus[key] > 0,
+      amount: stats[key],
+      decimals: 0,
       tooltip: ATTRIBUTE_TOOLTIPS[key],
     })),
   );
 }
 
-export function utilityStats(
-  stats: DerivedStats,
-  bonus: EquippedBonuses,
-): StatLine[] {
+export function utilityStats(stats: DerivedStats): StatLine[] {
   return [
     {
       label: "Скорость передвижения",
-      value: `${stats.moveSpeed.toFixed(1)} м/с`,
-      boosted: bonus.moveSpeed !== 0,
+      amount: stats.moveSpeed,
+      decimals: 1,
+      unit: " м/с",
     },
     {
       label: "Время применения умений",
-      value: `${stats.skillSpeed.toFixed(1)}%`,
-      boosted: bonus.skillSpeed !== 0,
+      amount: stats.skillSpeed,
+      decimals: 1,
+      unit: "%",
     },
     {
       label: "Сноровка",
-      value: String(stats.proficiency),
-      boosted: bonus.proficiency !== 0,
+      amount: stats.proficiency,
+      decimals: 0,
     },
     {
       label: "Устойчивость к атакам в PvP",
-      value: String(stats.pvpResist),
-      boosted: bonus.pvpResist !== 0,
+      amount: stats.pvpResist,
+      decimals: 0,
     },
     {
       label: "Устойчивость к критическому урону",
-      value: String(stats.critDamageResist),
-      boosted: bonus.critDamageResist !== 0,
+      amount: stats.critDamageResist,
+      decimals: 0,
     },
   ];
 }

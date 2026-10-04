@@ -1,6 +1,6 @@
 import { ENGRAVING_STAT } from "../engravingBonuses";
 import { STAT_LABEL } from "../itemsData/statEffects";
-import { type DerivedStats, type EquippedBonuses } from "../characterStats";
+import type { DerivedStats } from "../characterStats";
 
 import { bonusRow, computedRow, staticRow, type RowGroup } from "./statRows";
 
@@ -15,34 +15,13 @@ const BASE_VULNERABILITY = 100;
 const BASE_CRIT_DAMAGE_RESIST = 20;
 const BASE_PVP_RESIST = 10;
 
-export function buildDefenseGroups(
-  stats: DerivedStats,
-  bonus: EquippedBonuses,
-): RowGroup[] {
+export function buildDefenseGroups(stats: DerivedStats): RowGroup[] {
   return [
     {
       rows: [
-        computedRow(
-          "Парирование",
-          stats.parry,
-          "%",
-          1,
-          bonus.str !== 0 || bonus.parry !== 0,
-        ),
-        computedRow(
-          "Блокирование",
-          stats.block,
-          "%",
-          1,
-          bonus.sta !== 0 || bonus.block !== 0,
-        ),
-        computedRow(
-          "Уклонение",
-          stats.dodge,
-          "%",
-          1,
-          bonus.dex !== 0 || bonus.dodge !== 0,
-        ),
+        computedRow("Парирование", stats.parry, "%", 1),
+        computedRow("Блокирование", stats.block, "%", 1),
+        computedRow("Уклонение", stats.dodge, "%", 1),
         bonusRow(
           "Устойчивость к крит. урону",
           BASE_CRIT_DAMAGE_RESIST,

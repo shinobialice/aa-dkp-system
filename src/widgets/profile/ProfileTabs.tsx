@@ -11,8 +11,8 @@ import InventoryTabsClient from "./inventory/InventoryTabsClient";
 import PurchasesAndGiveaways from "./inventory/PurchasesAndGiveaways";
 import ProfileSalaryTab from "./notes/ProfileSalaryTab";
 import SealsTab from "./seals/SealsTab";
-import ClassArchetypeTab from "./archetype/ClassArchetypeTab";
-import EquipmentTab from "./equipment/EquipmentTab";
+import CharacterRoleTabs from "./CharacterRoleTabs";
+import { epheEquipmentView } from "./equipment/equipmentRoles";
 import EpheSealsTab from "./ephe/EpheSealsTab";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/ui";
 
@@ -21,6 +21,7 @@ const TABS = [
   { value: "attendance", label: "Посещаемость" },
   { value: "salary", label: "Зарплата" },
   { value: "purchases", label: "Покупки" },
+  { value: "seals", label: "Печати" },
   { value: "character", label: "Персонаж" },
 ];
 
@@ -109,20 +110,18 @@ export default function ProfileTabs({
         <PurchasesAndGiveaways userId={user.id} username={user.username} />
       </TabsContent>
 
-      <TabsContent value="character" className="min-w-0">
-        <Tabs defaultValue="equipment">
-          <TabsContent value="equipment">
-            <EquipmentTab
+      <TabsContent value="seals" className="min-w-0">
+        <Tabs defaultValue="ephe">
+          <TabsContent value="ephe">
+            <EpheSealsTab
               userId={user.id}
-              user={user}
-              equipment={equipment}
-              seals={seals}
+              equipment={epheEquipmentView(equipment)}
               onChange={setEquipment}
               canEdit={canEditEquipment}
             />
           </TabsContent>
 
-          <TabsContent value="seals">
+          <TabsContent value="hero">
             <SealsTab
               userId={user.id}
               seals={seals}
@@ -130,28 +129,22 @@ export default function ProfileTabs({
               canEdit={canEditSeals}
             />
           </TabsContent>
-
-          <TabsContent value="ephe">
-            <EpheSealsTab
-              userId={user.id}
-              equipment={equipment}
-              onChange={setEquipment}
-              canEdit={canEditEquipment}
-            />
-          </TabsContent>
-
-          <TabsContent value="class">
-            <ClassArchetypeTab
-              userId={user.id}
-              user={user}
-              archetype={archetype}
-              onChange={setArchetype}
-              skillBuild={skillBuild}
-              onSkillBuildChange={setSkillBuild}
-              canEdit={canEditArchetype}
-            />
-          </TabsContent>
         </Tabs>
+      </TabsContent>
+
+      <TabsContent value="character" className="min-w-0">
+        <CharacterRoleTabs
+          user={user}
+          archetype={archetype}
+          onArchetypeChange={setArchetype}
+          skillBuild={skillBuild}
+          onSkillBuildChange={setSkillBuild}
+          equipment={equipment}
+          onEquipmentChange={setEquipment}
+          seals={seals}
+          canEditEquipment={canEditEquipment}
+          canEditArchetype={canEditArchetype}
+        />
       </TabsContent>
     </Tabs>
   );

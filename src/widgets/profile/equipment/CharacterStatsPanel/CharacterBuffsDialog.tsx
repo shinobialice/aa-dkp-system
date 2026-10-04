@@ -22,10 +22,10 @@ import { errorMessage } from "@/shared/lib/errorMessage";
 import type { CharacterBuff } from "../itemsData/buffTypes";
 import {
   buffIconUrl,
-  CHARACTER_BUFFS,
   findBuff,
   findOption,
   isRequirementMet,
+  PERSONAL_BUFFS,
   type SelectedBuffs,
 } from "../characterBuffs";
 
@@ -90,11 +90,11 @@ export default function CharacterBuffsDialog({
           <DialogTitle>Баффы</DialogTitle>
           <DialogDescription>
             Включённые баффы учитываются в характеристиках и видны всем в
-            профиле
+            профиле. Гильдейские баффы настраивает администратор
           </DialogDescription>
         </DialogHeader>
         <div className="max-h-[60vh] space-y-2 overflow-y-auto pr-1">
-          {CHARACTER_BUFFS.map((buff) => (
+          {PERSONAL_BUFFS.map((buff) => (
             <BuffOptionRow
               key={buff.id}
               buff={buff}

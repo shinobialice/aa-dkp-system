@@ -1,16 +1,13 @@
 import { ENGRAVING_STAT } from "../engravingBonuses";
 import { STAT_LABEL } from "../itemsData/statEffects";
-import { type DerivedStats, type EquippedBonuses } from "../characterStats";
+import type { DerivedStats } from "../characterStats";
 
 import { bonusRow, computedRow, staticRow, type RowGroup } from "./statRows";
 
 const BASE_HEAL_CRIT_EFFECT = 50;
 const BASE_HEAL_RECEIVED = 100;
 
-export function buildHealGroups(
-  stats: DerivedStats,
-  bonus: EquippedBonuses,
-): RowGroup[] {
+export function buildHealGroups(stats: DerivedStats): RowGroup[] {
   return [
     {
       title: "Исцеление",
@@ -20,7 +17,6 @@ export function buildHealGroups(
           stats.critChanceHeal,
           "%",
           1,
-          bonus.spi !== 0 || bonus.critChanceHeal !== 0,
         ),
         bonusRow(
           "Критический эффект исцеления",
@@ -65,13 +61,7 @@ export function buildHealGroups(
     {
       title: "Восстановление",
       rows: [
-        computedRow(
-          "Восстановление здоровья",
-          stats.healthRegen,
-          "",
-          0,
-          bonus.sta !== 0 || bonus.healthRegen !== 0,
-        ),
+        computedRow("Восстановление здоровья", stats.healthRegen, "", 0),
         bonusRow(
           "Восстановление здоровья в бою",
           0,
@@ -79,13 +69,7 @@ export function buildHealGroups(
           0,
           STAT_LABEL.COMBAT_HEALTH_REGEN,
         ),
-        computedRow(
-          "Восстановление маны",
-          stats.manaRegen,
-          "",
-          0,
-          bonus.spi !== 0 || bonus.manaRegen !== 0,
-        ),
+        computedRow("Восстановление маны", stats.manaRegen, "", 0),
         bonusRow(
           "Восстановление маны в бою",
           0,

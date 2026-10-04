@@ -2,6 +2,7 @@ import type { UserEquipment } from "@/actions/getUserEquipment";
 import type { GearItem } from "../../itemsData";
 import { GearItemIcon } from "../../GearItemIcon";
 import ItemStats from "../../ItemStats";
+import { getEquipmentStatLines } from "../../itemStatLines";
 import { getEpheStatMultipliers } from "@/widgets/profile/ephe/epheSealsBonus";
 import {
   getSealGradeLabel,
@@ -16,6 +17,7 @@ type Props = {
   item: UserEquipment;
   gearItem: GearItem;
   equipment: UserEquipment[];
+  compareItem?: UserEquipment;
 };
 
 export default function ItemCard({
@@ -23,6 +25,7 @@ export default function ItemCard({
   item,
   gearItem,
   equipment,
+  compareItem,
 }: Props) {
   const gradeColor = getSealGradeColor(item.grade) ?? undefined;
 
@@ -55,6 +58,7 @@ export default function ItemCard({
         grade={item.grade}
         enchant={item.enchant}
         epheMultipliers={getEpheStatMultipliers(item)}
+        compareLines={compareItem && getEquipmentStatLines(compareItem)}
         bare
       />
 

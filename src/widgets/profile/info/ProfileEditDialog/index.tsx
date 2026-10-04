@@ -38,6 +38,7 @@ type Props = {
   canEditVk: boolean;
   canEditJoinedAt: boolean;
   canEditInventory: boolean;
+  canSkipRequired: boolean;
 };
 
 export default function ProfileEditDialog({

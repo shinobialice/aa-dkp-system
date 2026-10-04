@@ -90,7 +90,7 @@ export default function EpheSealsTab({
     <Card className="min-h-187.5 gap-3 py-4">
       <CardHeader className="border-b">
         <CardTitle className="flex items-center justify-between gap-2">
-          <CharacterTabsSwitcher />
+          <CharacterTabsSwitcher group="seals" />
           {canEdit && (
             <Button
               variant="outline"

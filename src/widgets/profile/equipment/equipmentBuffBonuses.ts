@@ -106,7 +106,7 @@ const CRIT_DAMAGE_LABELS = [
 const each = (labels: string[], value: number): StatLine[] =>
   labels.map((label) => [label, value]);
 
-// Двуручное и оружие в обеих руках — числа из калькулятора marafon.direkiller.ru;
+// Двуручное и оружие в обеих руках — числа из данных игры;
 // щит — по подсказке и окну характеристик игры (крит. урон он не даёт).
 const WEAPON_BUFF_STATS: Record<WeaponBuff["key"], StatLine[]> = {
   two_handed: [

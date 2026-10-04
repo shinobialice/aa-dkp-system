@@ -28,13 +28,12 @@ export function computeEpheSealsFlatBonus(
 
 export type EpheStatMultipliers = Partial<Record<string, number>>;
 
-const EPHE_PERCENT_STATS: [stat: string, category: "weapon" | "armor"][] = [
-  ["weapon_dps", "weapon"],
-  ["weapon_magic_power", "weapon"],
-  ["weapon_heal_power", "weapon"],
-  ["wearable_armor", "armor"],
-  ["wearable_magic_resistance", "armor"],
+const WEAPON_PERCENT_STATS = [
+  "weapon_dps",
+  "weapon_magic_power",
+  "weapon_heal_power",
 ];
+const ARMOR_PERCENT_STATS = ["wearable_armor", "wearable_magic_resistance"];
 
 export function getEpheStatMultipliers(eq: UserEquipment): EpheStatMultipliers {
   const track = EPHE_SLOT_TRACK[eq.slot];
@@ -46,11 +45,13 @@ export function getEpheStatMultipliers(eq: UserEquipment): EpheStatMultipliers {
   const effectiveness = getEpheEffectiveness(track, eq.ephe_seal_level);
   if (effectiveness <= 0) return {};
   const tier = getEpheItemTier(gearItem.id);
-  // Печать на слоте оружия усиливает и защиту щита, но по кривой доспехов.
-  return Object.fromEntries(
-    EPHE_PERCENT_STATS.map(([stat, statCategory]) => [
-      stat,
-      1 + getEphePercentBonus(statCategory, tier, effectiveness) / 100,
-    ]),
-  );
+  const weaponMultiplier =
+    1 + getEphePercentBonus("weapon", tier, effectiveness) / 100;
+  const armorCurve = category === "weapon" ? "shield" : "armor";
+  const armorMultiplier =
+    1 + getEphePercentBonus(armorCurve, tier, effectiveness) / 100;
+  return Object.fromEntries([
+    ...WEAPON_PERCENT_STATS.map((stat) => [stat, weaponMultiplier]),
+    ...ARMOR_PERCENT_STATS.map((stat) => [stat, armorMultiplier]),
+  ]);
 }

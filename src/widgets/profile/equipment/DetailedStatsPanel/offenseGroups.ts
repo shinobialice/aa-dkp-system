@@ -1,12 +1,12 @@
 import { ENGRAVING_STAT } from "../engravingBonuses";
 import { STAT_LABEL } from "../itemsData/statEffects";
-import { type DerivedStats, type EquippedBonuses } from "../characterStats";
+import type { DerivedStats } from "../characterStats";
 
 import { bonusRow, computedRow, type RowGroup } from "./statRows";
 
 type AttackKind = {
   accuracy: [label: string, key: string];
-  critChance: [label: string, value: number, boosted: boolean];
+  critChance: [label: string, value: number];
   critDamage: [label: string, key: string];
   backstab: [label: string, key: string];
   skillDamage: [label: string, key: string];
@@ -18,18 +18,11 @@ const BASE_ACCURACY = 90;
 const BASE_CRIT_DAMAGE = 150;
 const BASE_DAMAGE_PERCENT = 100;
 
-export function buildOffenseGroups(
-  stats: DerivedStats,
-  bonus: EquippedBonuses,
-): RowGroup[] {
+export function buildOffenseGroups(stats: DerivedStats): RowGroup[] {
   return [
     attackGroup({
       accuracy: ["Точность ударов в ближнем бою", STAT_LABEL.MELEE_ACCURACY],
-      critChance: [
-        "Шанс крит. удара в ближнем бою",
-        stats.critChanceMelee,
-        bonus.str !== 0 || bonus.critChanceMelee !== 0,
-      ],
+      critChance: ["Шанс крит. удара в ближнем бою", stats.critChanceMelee],
       critDamage: [
         "Критический урон в ближнем бою",
         ENGRAVING_STAT.MELEE_CRIT_DAMAGE,
@@ -47,11 +40,7 @@ export function buildOffenseGroups(
     }),
     attackGroup({
       accuracy: ["Точность ударов в дальнем бою", STAT_LABEL.RANGED_ACCURACY],
-      critChance: [
-        "Шанс крит. удара в дальнем бою",
-        stats.critChanceRanged,
-        bonus.dex !== 0 || bonus.critChanceRanged !== 0,
-      ],
+      critChance: ["Шанс крит. удара в дальнем бою", stats.critChanceRanged],
       critDamage: [
         "Критический урон в дальнем бою",
         ENGRAVING_STAT.RANGED_CRIT_DAMAGE,
@@ -72,11 +61,7 @@ export function buildOffenseGroups(
     }),
     attackGroup({
       accuracy: ["Точность заклинаний", STAT_LABEL.SPELL_ACCURACY],
-      critChance: [
-        "Шанс крит. удара заклинанием",
-        stats.critChanceSpell,
-        bonus.int !== 0 || bonus.critChanceSpell !== 0,
-      ],
+      critChance: ["Шанс крит. удара заклинанием", stats.critChanceSpell],
       critDamage: [
         "Критический урон заклинаний",
         ENGRAVING_STAT.SPELL_CRIT_DAMAGE,
@@ -94,13 +79,7 @@ export function buildOffenseGroups(
     }),
     {
       rows: [
-        computedRow(
-          "Тактическая подготовка",
-          stats.tacticalReadiness,
-          "",
-          0,
-          bonus.str !== 0 || bonus.dex !== 0 || bonus.tacticalReadiness !== 0,
-        ),
+        computedRow("Тактическая подготовка", stats.tacticalReadiness, "", 0),
         bonusRow("Шанс обхода обороны", 0, "%", 1, STAT_LABEL.DEFENSE_BYPASS),
         bonusRow(
           "Пробивание брони",
@@ -122,11 +101,11 @@ export function buildOffenseGroups(
 }
 
 function attackGroup(kind: AttackKind): RowGroup {
-  const [critLabel, critValue, critBoosted] = kind.critChance;
+  const [critLabel, critValue] = kind.critChance;
   return {
     rows: [
       bonusRow(kind.accuracy[0], BASE_ACCURACY, "%", 1, kind.accuracy[1]),
-      computedRow(critLabel, critValue, "%", 1, critBoosted),
+      computedRow(critLabel, critValue, "%", 1),
       bonusRow(
         kind.critDamage[0],
         BASE_CRIT_DAMAGE,
