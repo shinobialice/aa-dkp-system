@@ -7,6 +7,7 @@ import {
   History,
   House,
   Info,
+  Lightbulb,
   LineChart,
   Megaphone,
   Newspaper,
@@ -34,6 +35,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { title: "Главная", url: "/", icon: House },
       { title: "Основная информация", url: "/news", icon: Info },
+      { title: "Полезная информация", url: "/useful-info", icon: Lightbulb },
       { title: "Новости", url: "/game-news", icon: Newspaper },
       { title: "Доска объявлений", url: "/marketplace", icon: Megaphone },
     ],
