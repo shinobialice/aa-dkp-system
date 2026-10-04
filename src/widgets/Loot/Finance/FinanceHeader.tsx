@@ -35,35 +35,28 @@ export default function FinanceHeader({
         </p>
       </div>
       <div className="flex items-center gap-2">
-        {isAdmin && (
-          <div className="inline-flex h-10 items-center rounded-lg border bg-background">
-            <button
-              type="button"
-              onClick={() => onShiftMonth(-1)}
-              aria-label="Предыдущий месяц"
-              className="flex size-10 cursor-pointer items-center justify-center rounded-l-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-            >
-              <ChevronLeft className="size-4" />
-            </button>
-            <span className="min-w-32 text-center text-sm font-semibold">
-              {periodLabel}
-            </span>
-            <button
-              type="button"
-              onClick={() => onShiftMonth(1)}
-              disabled={isLatestMonth}
-              aria-label="Следующий месяц"
-              className="flex size-10 cursor-pointer items-center justify-center rounded-r-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent"
-            >
-              <ChevronRight className="size-4" />
-            </button>
-          </div>
-        )}
-        {!isAdmin && (
-          <span className="inline-flex h-10 items-center rounded-lg border px-3 text-sm font-semibold">
+        <div className="inline-flex h-10 items-center rounded-lg border bg-background">
+          <button
+            type="button"
+            onClick={() => onShiftMonth(-1)}
+            aria-label="Предыдущий месяц"
+            className="flex size-10 cursor-pointer items-center justify-center rounded-l-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          >
+            <ChevronLeft className="size-4" />
+          </button>
+          <span className="min-w-32 text-center text-sm font-semibold">
             {periodLabel}
           </span>
-        )}
+          <button
+            type="button"
+            onClick={() => onShiftMonth(1)}
+            disabled={isLatestMonth}
+            aria-label="Следующий месяц"
+            className="flex size-10 cursor-pointer items-center justify-center rounded-r-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent"
+          >
+            <ChevronRight className="size-4" />
+          </button>
+        </div>
         {isAdmin && (
           <Button
             variant="outline"
