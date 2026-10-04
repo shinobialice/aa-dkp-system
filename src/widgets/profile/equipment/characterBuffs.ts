@@ -19,6 +19,8 @@ export const CHARACTER_BUFFS = GAME_BUFFS;
 export const PERSONAL_BUFFS = GAME_BUFFS.filter((buff) => !buff.guild);
 export const GUILD_BUFFS = GAME_BUFFS.filter((buff) => buff.guild);
 
+export const BUFF_OFF = "off";
+
 const BUFF_ICON_DIR = "/images/equipment/";
 
 const SELECTED_BUFFS_SCHEMA = v.record(v.string(), v.string());
@@ -56,6 +58,10 @@ export function buffIconUrl(
   option?: CharacterBuffOption,
 ): string {
   return BUFF_ICON_DIR + (option?.icon ?? buff.icon);
+}
+
+export function hasOptionIcons(buff: CharacterBuff): boolean {
+  return buff.options.some((option) => option.icon !== undefined);
 }
 
 export function findBuff(buffId: number | string): CharacterBuff | undefined {

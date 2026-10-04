@@ -45,6 +45,7 @@ export function DetailedStatsPanel({
     seals,
     buffs,
     skillBuild,
+    level,
   );
   const stats = computeDerivedStats(bonus, level);
   const tabs = buildStatsTabs(stats);

@@ -131,15 +131,17 @@ export const MANUAL_ITEM_STATS: Record<number, Record<string, number>> = {
   52660: { proficiency: 123 }, // Вечный плащ эфенского воителя
   52661: { skill_speed: -11 }, // Вечный плащ эфенского заклинателя
   // Поверх данных из дампа: значения по игре (2026-09)
-  18661: { weapon_dps: 211.2 }, // Нарвиг, огненный клинок Морфеоса
+  18661: { weapon_dps: 211.2, damage_taken_reduction: -3 }, // Нарвиг, огненный клинок Морфеоса
   19401: { sta: 2, spi: 15 }, // Ласты ныряльщика
   34684: { wearable_armor: 437, wearable_magic_resistance: 437 }, // Укрепленная аргенитовая лютня
   34685: { wearable_armor: 437 }, // Укрепленный аргенитовый кларнет
+  34701: { wearable_armor: 495, wearable_magic_resistance: 495 }, // Зеркальная аргенитовая лютня
+  34702: { wearable_armor: 495 }, // Зеркальный аргенитовый кларнет
   40622: { wearable_armor: 520, wearable_magic_resistance: 520 }, // Лютня Солнечной Башни
   40624: { wearable_armor: 520 }, // Кларнет Тростникового Короля
-  43073: { weapon_dps: 309 }, // Пламенеющий Нарвиг
+  43073: { weapon_dps: 309, damage_taken_reduction: -4 }, // Пламенеющий Нарвиг
   43668: { weapon_magic_power: 1.18, weapon_heal_power: 1.18 }, // Поножи иферийского советника
   49385: { weapon_magic_power: 1.97, weapon_heal_power: 1.97 }, // Поножи иферийского визиря
-  50340: { weapon_dps: 499.6 }, // Нарвиг, повелевающий пламенем
+  50340: { weapon_dps: 499.6, damage_taken_reduction: -5 }, // Нарвиг, повелевающий пламенем
   55203: { weapon_magic_power: 2.37, weapon_heal_power: 2.37 }, // Поножи иферийского наместника
 };

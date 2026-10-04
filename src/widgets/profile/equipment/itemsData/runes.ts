@@ -10,6 +10,9 @@ export type Rune = {
   restrictedToItemIds?: number[];
 };
 
+const idRange = (start: number, end: number) =>
+  Array.from({ length: end - start + 1 }, (_, i) => start + i);
+
 const EPHEN_ITEM_IDS = [
   54953, 54954, 54955, 54956, 54957, 54958, 54959, 54960, 54961, 54962, 54963,
   54964, 54965, 54966, 54967, 54968, 54969, 54970, 54971, 54972, 54973, 54974,
@@ -25,7 +28,7 @@ const EPHEN_ITEM_IDS = [
   55090, 55091, 55092, 55093, 55094, 55095, 55096, 55097, 55098, 55099, 55100,
   55101, 55102, 55103, 55104, 55105, 55106, 55107, 55108, 55109, 55110, 55111,
   55112, 55113, 55114, 55115, 55121,
-];
+].concat(idRange(8003273, 8003314));
 
 const EPHEN_RUNE_SLOTS = [
   "head",
@@ -40,9 +43,6 @@ const EPHEN_RUNE_SLOTS = [
   "shield",
   "ranged",
 ];
-
-const idRange = (start: number, end: number) =>
-  Array.from({ length: end - start + 1 }, (_, i) => start + i);
 
 const LIBRARY_ITEM_IDS = [
   ...idRange(47271, 47305),
@@ -689,6 +689,14 @@ export const RUNES: Rune[] = [
     iconUrl: RUNE_ICON("ограненный_лунный_камень_легкой_поступи_45571"),
     effect: "Скорость передвижения: +5%",
     slots: ["feet"],
+  },
+  {
+    id: 45580,
+    name: "Ограненный лунный камень провокации",
+    grade: 3,
+    iconUrl: RUNE_ICON("ограненный_лунный_камень_провокации_45580"),
+    effect: "Уровень угрозы: +12%",
+    slots: ["one_handed"],
   },
   {
     id: 24717,

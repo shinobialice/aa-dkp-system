@@ -1187,6 +1187,38 @@ export const ITEM_GRADE_BONUS_STATS: Record<
     11: { wearable_armor: 787 },
     12: { wearable_armor: 837 },
   },
+  // Зеркальная аргенитовая лютня
+  34701: {
+    0: { wearable_magic_resistance: 495 },
+    1: { wearable_magic_resistance: 495 },
+    2: { wearable_magic_resistance: 520 },
+    3: { wearable_magic_resistance: 545 },
+    4: { wearable_magic_resistance: 570 },
+    5: { wearable_magic_resistance: 595 },
+    6: { wearable_magic_resistance: 620 },
+    7: { wearable_magic_resistance: 645 },
+    8: { wearable_magic_resistance: 695 },
+    9: { wearable_magic_resistance: 745 },
+    10: { wearable_magic_resistance: 795 },
+    11: { wearable_magic_resistance: 845 },
+    12: { wearable_magic_resistance: 895 },
+  },
+  // Зеркальный аргенитовый кларнет
+  34702: {
+    0: { wearable_armor: 495 },
+    1: { wearable_armor: 495 },
+    2: { wearable_armor: 520 },
+    3: { wearable_armor: 545 },
+    4: { wearable_armor: 570 },
+    5: { wearable_armor: 595 },
+    6: { wearable_armor: 620 },
+    7: { wearable_armor: 645 },
+    8: { wearable_armor: 695 },
+    9: { wearable_armor: 745 },
+    10: { wearable_armor: 795 },
+    11: { wearable_armor: 845 },
+    12: { wearable_armor: 895 },
+  },
   // Иферийское ожерелье авантюриста (значения = value + linear_level_bonus * item_level / 100,
   // сверено с archeagecodex.com — так у всех предметов "Иферийского" сета ниже)
   35409: {

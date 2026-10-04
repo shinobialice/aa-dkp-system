@@ -1254,6 +1254,13 @@ export const GAME_BUFFS: CharacterBuff[] = [
           "65": 4,
         },
       },
+      {
+        value: "20",
+        label: "Ключевая фигура",
+        icon: "titles/icon_skill_buff235.png",
+        text: "Устойчивость к атакам в PvP +400 ед.",
+        stats: { "46": 400 },
+      },
     ],
   },
 ];

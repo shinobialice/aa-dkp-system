@@ -28,6 +28,7 @@ export function computeProfileStats(
     profile.seals,
     { ...profile.buffs, ...guildBuffs },
     profile.skillBuild,
+    profile.level,
   );
   return { flat, stats: computeDerivedStats(totals, profile.level) };
 }
