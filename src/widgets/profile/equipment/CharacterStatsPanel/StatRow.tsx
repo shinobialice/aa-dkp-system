@@ -1,19 +1,16 @@
 import { highlightNumbers } from "../highlightNumbers";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/shared/ui";
 
-import { BONUS_COLOR } from "../statColors";
+import StatDiff from "../StatDiff";
+import { formatStatLine, type StatLine } from "./statSections";
 
-export default function StatRow({
-  label,
-  value,
-  boosted,
-  tooltip,
-}: {
-  label: string;
-  value: string;
-  boosted: boolean;
-  tooltip?: { title: string; lines: string[] };
-}) {
+type Props = {
+  line: StatLine;
+  viewerAmount?: number;
+};
+
+export default function StatRow({ line, viewerAmount }: Props) {
+  const { label, tooltip } = line;
   const labelNode = tooltip ? (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -40,13 +37,18 @@ export default function StatRow({
   );
 
   return (
-    <div className="flex items-center justify-between gap-3 text-xs">
+    <div className="flex items-start justify-between gap-2 text-xs">
       {labelNode}
-      <span
-        className="whitespace-nowrap font-medium tabular-nums"
-        style={{ color: boosted ? BONUS_COLOR : undefined }}
-      >
-        {value}
+      <span className="flex shrink-0 flex-col items-end">
+        <span className="whitespace-nowrap font-medium tabular-nums">
+          {formatStatLine(line)}
+        </span>
+        <StatDiff
+          label={label}
+          viewer={viewerAmount}
+          owner={line.amount}
+          decimals={line.decimals}
+        />
       </span>
     </div>
   );

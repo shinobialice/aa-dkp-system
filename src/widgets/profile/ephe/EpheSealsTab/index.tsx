@@ -14,7 +14,7 @@ import {
   getEpheEffectiveness,
   getEphePercentBonus,
 } from "../epheSealsData";
-import { getEpheItemTier } from "../epheSealsBonus";
+import { getEpheItemTier } from "../epheItemTiers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
 import { Button } from "@/shared/ui";
 import CharacterTabsSwitcher from "@/widgets/profile/CharacterTabsSwitcher";
@@ -90,7 +90,7 @@ export default function EpheSealsTab({
     <Card className="min-h-187.5 gap-3 py-4">
       <CardHeader className="border-b">
         <CardTitle className="flex items-center justify-between gap-2">
-          <CharacterTabsSwitcher />
+          <CharacterTabsSwitcher group="seals" />
           {canEdit && (
             <Button
               variant="outline"

@@ -12,6 +12,7 @@ import { VkNotificationSettingsForm } from "../VkNotificationSettingsForm";
 import { EventSettingsForm } from "../EventSettingsForm";
 import { InventoryStockSettingsForm } from "../InventoryStockSettingsForm";
 import { GuildLocationSettingsForm } from "../GuildLocationSettingsForm";
+import { GuildBuffSettingsForm } from "../GuildBuffSettingsForm";
 import { SettingsOverview } from "../SettingsOverview";
 import { SettingsDraftProvider, SettingsSaveBar } from "../settingsDraft";
 import { isSectionId, type SectionId } from "../settingsSections";
@@ -106,6 +107,9 @@ function SettingsPage() {
             </Section>
             <Section id="guild" active={active === "guild"}>
               <GuildLocationSettingsForm />
+            </Section>
+            <Section id="guildBuffs" active={active === "guildBuffs"}>
+              <GuildBuffSettingsForm />
             </Section>
             <Section id="event" active={active === "event"}>
               <EventSettingsForm />

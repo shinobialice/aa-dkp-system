@@ -16,9 +16,16 @@ export type FormPermissions = {
   canEditGs: boolean;
   canAddExtraRole: boolean;
   canEditArchetype: boolean;
+  canSkipRequired: boolean;
 };
 
 export type ProfileForm = ReturnType<typeof useProfileForm>;
+
+const NO_ROLE_ERRORS: RoleErrors = {
+  className: false,
+  gs: false,
+  archetype: false,
+};
 
 export function useProfileForm(
   user: ProfileUser,
@@ -45,6 +52,7 @@ export function useProfileForm(
     slot === 1 || !!draft.roles[slot].className;
 
   const roleErrors = (slot: RoleSlot): RoleErrors => {
+    if (permissions.canSkipRequired) return NO_ROLE_ERRORS;
     const role = draft.roles[slot];
     const editable = isRoleEditable(slot);
     const filled = isRoleFilled(slot);

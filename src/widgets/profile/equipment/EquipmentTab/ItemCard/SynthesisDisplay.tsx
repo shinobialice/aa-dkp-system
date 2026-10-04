@@ -1,28 +1,22 @@
 import { highlightNumbers } from "../../highlightNumbers";
-
-export type SynthesisLine = {
-  key: string | number;
-  label: string;
-  value: number;
-  isPercent: boolean;
-};
+import {
+  formatSynthesisValue,
+  type SynthesisRoll,
+} from "../../itemsData/synthesis";
 
 type Props = {
   title: string;
-  lines: SynthesisLine[];
-  showPlus?: boolean;
+  rolls: SynthesisRoll[];
 };
 
-export default function SynthesisDisplay({ title, lines, showPlus }: Props) {
-  if (lines.length === 0) return null;
-
+export default function SynthesisDisplay({ title, rolls }: Props) {
   return (
     <div className="space-y-0.5">
       <div className="text-xs text-muted-foreground">{title}</div>
-      {lines.map((line) => (
-        <div key={line.key} className="text-xs text-green-500">
+      {rolls.map((roll, slot) => (
+        <div key={slot} className="text-xs text-green-500">
           {highlightNumbers(
-            `${line.label}: ${showPlus && line.value >= 0 ? "+" : ""}${line.value}${line.isPercent ? "%" : " ед."}`,
+            `${roll.effect.label}: ${formatSynthesisValue(roll)}`,
           )}
         </div>
       ))}

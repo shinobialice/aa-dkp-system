@@ -45,7 +45,7 @@ export const WEAPON_RANGED_ITEMS: GearItem[] = [
     sealIconUrl: null,
   },
   {
-    id: 910037,
+    id: 8003203,
     name: "Амальгамный рамианский лук",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_ranged", "совершенный_рамианский_лук"),
@@ -80,7 +80,7 @@ export const WEAPON_RANGED_ITEMS: GearItem[] = [
     sealIconUrl: SEAL_ICON("top_seal_ipnir_4"),
   },
   {
-    id: 940035,
+    id: 8003307,
     name: "Амальгамный эфенский лук",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_ranged", "амальгамный_эфенский_лук"),
@@ -129,7 +129,7 @@ export const WEAPON_RANGED_ITEMS: GearItem[] = [
     sealIconUrl: null,
   },
   {
-    id: 910038,
+    id: 8003209,
     name: "Амальгамная рамианская винтовка",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_ranged", "совершенная_рамианская_винтовка"),
@@ -164,7 +164,7 @@ export const WEAPON_RANGED_ITEMS: GearItem[] = [
     sealIconUrl: SEAL_ICON("top_seal_ipnir_4"),
   },
   {
-    id: 940039,
+    id: 8003314,
     name: "Амальгамная эфенская винтовка",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_ranged", "амальгамная_эфенская_винтовка"),
@@ -199,7 +199,7 @@ export const WEAPON_RANGED_ITEMS: GearItem[] = [
     sealIconUrl: SEAL_ICON("top_fire"),
   },
   {
-    id: 920009,
+    id: 8003325,
     name: "Иг'нис, Всепоглощающее пламя",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_ranged", "игнис_всепоглощающее_пламя"),
@@ -220,7 +220,7 @@ export const WEAPON_RANGED_ITEMS: GearItem[] = [
     sealIconUrl: SEAL_ICON("top_obsidian"),
   },
   {
-    id: 920004,
+    id: 8003320,
     name: "Возрожденная Джераб, слуга смерти",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_ranged", "возрожденная_джераб_слуга_смерти"),
@@ -258,7 +258,7 @@ export const WEAPON_RANGED_ITEMS: GearItem[] = [
     sealIconUrl: SEAL_ICON("top_fire"),
   },
   {
-    id: 920013,
+    id: 8003329,
     name: "Дра'орис, Всепоглощающее разрушение",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_ranged", "драорис_всепоглощающее_разрушение"),

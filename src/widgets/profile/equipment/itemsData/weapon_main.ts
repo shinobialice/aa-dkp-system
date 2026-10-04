@@ -10,7 +10,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: SEAL_ICON("top_seal_ipnir_4"),
   },
   {
-    id: 940032,
+    id: 8003304,
     name: "Амальгамная эфенская алебарда",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "амальгамная_эфенская_алебарда"),
@@ -45,7 +45,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: null,
   },
   {
-    id: 910022,
+    id: 8003200,
     name: "Амальгамная рамианская алебарда",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "совершенная_рамианская_алебарда"),
@@ -94,7 +94,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: SEAL_ICON("top_seal_ipnir_4"),
   },
   {
-    id: 940024,
+    id: 8003296,
     name: "Амальгамный эфенский клеймор",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "амальгамный_эфенский_клеймор"),
@@ -129,7 +129,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: null,
   },
   {
-    id: 910023,
+    id: 8003192,
     name: "Амальгамный рамианский клеймор",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "совершенный_рамианский_клеймор"),
@@ -185,7 +185,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: SEAL_ICON("top_obsidian"),
   },
   {
-    id: 920001,
+    id: 8003317,
     name: "Возрожденный Ишхар, грань измерений",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "возрожденный_ишхар_грань_измерений"),
@@ -199,7 +199,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: SEAL_ICON("top_seal_ipnir_4"),
   },
   {
-    id: 940026,
+    id: 8003298,
     name: "Амальгамный эфенский палаш",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "амальгамный_эфенский_палаш"),
@@ -234,7 +234,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: null,
   },
   {
-    id: 910024,
+    id: 8003194,
     name: "Амальгамный рамианский палаш",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "совершенный_рамианский_палаш"),
@@ -283,7 +283,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: SEAL_ICON("top_fire"),
   },
   {
-    id: 920010,
+    id: 8003326,
     name: "Мор'гур, Всепоглощающая смерть",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "моргур_всепоглощающая_смерть"),
@@ -304,7 +304,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: SEAL_ICON("top_seal_ipnir_4"),
   },
   {
-    id: 940028,
+    id: 8003300,
     name: "Амальгамная эфенская секира",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "амальгамная_эфенская_секира"),
@@ -339,7 +339,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: null,
   },
   {
-    id: 910025,
+    id: 8003196,
     name: "Амальгамный рамианский лабрис",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "совершенный_рамианский_лабрис"),
@@ -395,7 +395,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: null,
   },
   {
-    id: 920003,
+    id: 8003319,
     name: "Возрожденная Гирра, пробивающий брешь",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "возрожденная_гирра_пробивающий_брешь"),
@@ -409,7 +409,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: SEAL_ICON("top_seal_ipnir_4"),
   },
   {
-    id: 940030,
+    id: 8003302,
     name: "Амальгамный эфенский боевой молот",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "амальгамный_эфенский_боевой_молот"),
@@ -444,7 +444,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: null,
   },
   {
-    id: 910026,
+    id: 8003198,
     name: "Амальгамный рамианский боевой молот",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "совершенный_рамианский_боевой_молот"),
@@ -493,7 +493,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: SEAL_ICON("top_seal_ipnir_4"),
   },
   {
-    id: 940034,
+    id: 8003306,
     name: "Амальгамный эфенский боевой посох",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "амальгамный_эфенский_боевой_посох"),
@@ -528,7 +528,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: null,
   },
   {
-    id: 910027,
+    id: 8003202,
     name: "Амальгамный рамианский боевой посох",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "совершенный_рамианский_боевой_посох"),
@@ -577,7 +577,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: SEAL_ICON("top_fire"),
   },
   {
-    id: 920011,
+    id: 8003327,
     name: "Вул'данор, Всепоглощающая тьма",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "вулданор_всепоглощающая_тьма"),
@@ -646,7 +646,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: SEAL_ICON("top_seal_ipnir_4"),
   },
   {
-    id: 940022,
+    id: 8003294,
     name: "Амальгамный эфенский кинжал",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "амальгамный_эфенский_кинжал"),
@@ -695,7 +695,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: null,
   },
   {
-    id: 910028,
+    id: 8003190,
     name: "Амальгамный рамианский кинжал",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "совершенный_рамианский_кинжал"),
@@ -730,7 +730,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: SEAL_ICON("top_seal_ipnir_4"),
   },
   {
-    id: 940023,
+    id: 8003295,
     name: "Амальгамный эфенский меч",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "амальгамный_эфенский_меч"),
@@ -779,7 +779,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: null,
   },
   {
-    id: 910029,
+    id: 8003191,
     name: "Амальгамный рамианский меч",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "совершенный_рамианский_меч"),
@@ -800,7 +800,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: SEAL_ICON("top_fire"),
   },
   {
-    id: 920007,
+    id: 8003323,
     name: "Рави'мар, Всепоглощающий гнев",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "равимар_всепоглощающий_гнев"),
@@ -835,7 +835,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: SEAL_ICON("top_seal_ipnir_4"),
   },
   {
-    id: 940025,
+    id: 8003297,
     name: "Амальгамный эфенский ятаган",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "амальгамный_эфенский_ятаган"),
@@ -884,7 +884,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: null,
   },
   {
-    id: 910030,
+    id: 8003193,
     name: "Амальгамный рамианский ятаган",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "совершенный_рамианский_ятаган"),
@@ -905,7 +905,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: SEAL_ICON("top_obsidian"),
   },
   {
-    id: 920002,
+    id: 8003318,
     name: "Возрожденная Ташш, змеиное жало",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "возрожденная_ташш_змеиное_жало"),
@@ -940,7 +940,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: SEAL_ICON("top_seal_ipnir_4"),
   },
   {
-    id: 940027,
+    id: 8003299,
     name: "Амальгамный эфенский боевой топор",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "амальгамный_эфенский_боевой_топор"),
@@ -989,7 +989,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: null,
   },
   {
-    id: 910031,
+    id: 8003195,
     name: "Амальгамный рамианский топор",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "совершенный_рамианский_топор"),
@@ -1045,7 +1045,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: SEAL_ICON("top_seal_ipnir_4"),
   },
   {
-    id: 940033,
+    id: 8003305,
     name: "Амальгамный эфенский короткий посох",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "амальгамный_эфенский_короткий_посох"),
@@ -1094,7 +1094,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: null,
   },
   {
-    id: 910032,
+    id: 8003201,
     name: "Амальгамный рамианский посох",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "совершенный_рамианский_посох"),
@@ -1115,7 +1115,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: SEAL_ICON("top_obsidian"),
   },
   {
-    id: 920006,
+    id: 8003322,
     name: "Возрожденный Нирах, искушающий",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "возрожденный_нирах_искушающий"),
@@ -1150,7 +1150,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: SEAL_ICON("top_seal_ipnir_4"),
   },
   {
-    id: 940029,
+    id: 8003301,
     name: "Амальгамный эфенский молот",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "амальгамный_эфенский_молот"),
@@ -1199,7 +1199,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: null,
   },
   {
-    id: 910033,
+    id: 8003197,
     name: "Амальгамная рамианская булава",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "совершенная_рамианская_булава"),
@@ -1220,7 +1220,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: SEAL_ICON("top_fire"),
   },
   {
-    id: 920012,
+    id: 8003328,
     name: "Дра'кордис, Всепоглощающее безмолвие",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "дракордис_всепоглощающее_безмолвие"),
@@ -1255,7 +1255,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: SEAL_ICON("top_seal_ipnir_4"),
   },
   {
-    id: 940031,
+    id: 8003303,
     name: "Амальгамная эфенская глефа",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "амальгамная_эфенская_глефа"),
@@ -1304,7 +1304,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     sealIconUrl: null,
   },
   {
-    id: 910034,
+    id: 8003199,
     name: "Амальгамное рамианское копье",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "совершенное_рамианское_копье"),

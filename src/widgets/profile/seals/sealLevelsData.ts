@@ -6284,7 +6284,7 @@ export const SEAL_LEVEL_STATS: Record<string, SealLevelStat[]> = {
     { level: 86, stat: "Сопротивление", value: 17, isPercent: false },
     { level: 87, stat: "Блокирование", value: 1, isPercent: true },
     { level: 88, stat: "Восстановление маны", value: 9, isPercent: false },
-    { level: 89, stat: "Здоровье", value: 397, isPercent: false },
+    { level: 89, stat: "Мана", value: 397, isPercent: false },
     {
       level: 90,
       stat: "Время применения умений",

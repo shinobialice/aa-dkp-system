@@ -42,7 +42,7 @@ export const ENGRAVING_STAT = {
   HEAL_EFFECTIVENESS_BONUS: "Дополнительная эффективность исцеления",
 } as const;
 
-const EFFECT_LINE_PATTERN = /^(.+?):\s*([+-]?\d+(?:\.\d+)?)%?$/;
+const EFFECT_LINE_PATTERN = /^(.+?):\s*([+-]?\d+(?:\.\d+)?)\s*(?:%|ед\.)?$/;
 
 export function parseEngravingEffect(
   effect: string,

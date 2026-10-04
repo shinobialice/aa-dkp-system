@@ -1,6 +1,11 @@
 import type { UserEquipment } from "@/actions/getUserEquipment";
 import type { UserSeal } from "@/actions/getUserSeals";
-import { computeEphenSynthesisBonuses } from "./ephenSynthesisBonus";
+import type { RoleSkillBuild } from "@/actions/getUserSkillBuild";
+import type { SelectedBuffs } from "./characterBuffs";
+import { computePassiveBonuses } from "./skillPassiveBonuses";
+import { addStat, STAT_LABEL, type StatBonuses } from "./itemsData/statEffects";
+import { ENGRAVING_STAT } from "./engravingBonuses";
+import { computeEquipmentBuffBonuses } from "./equipmentBuffBonuses";
 import {
   computeParry,
   computeDodge,
@@ -13,10 +18,9 @@ import {
 } from "./attributeFormulas";
 import {
   EMPTY_BONUSES,
-  ATTRIBUTES,
   FLAT_STAT_TARGETS,
   addGearStats,
-  collectFlatBonuses,
+  collectStatSources,
 } from "./equippedBonusParts";
 
 export const BASE_CHARACTER_STATS = {
@@ -34,6 +38,7 @@ export const BASE_CHARACTER_STATS = {
 };
 
 export type EquippedBonuses = {
+  manaPercent: number;
   defense: number;
   resist: number;
   str: number;
@@ -56,25 +61,60 @@ export type EquippedBonuses = {
   block: number;
   pvpResist: number;
   critDamageResist: number;
+  critChanceMelee: number;
+  critChanceRanged: number;
+  critChanceSpell: number;
+  critChanceHeal: number;
+  healthRegen: number;
+  manaRegen: number;
 };
 
-export function computeEquippedBonuses(
+// «Получаемый урон» в окне характеристик игры входит во все уязвимости, кроме PvE.
+const DAMAGE_TAKEN_TARGETS = [
+  ENGRAVING_STAT.MELEE_VULN,
+  ENGRAVING_STAT.RANGED_VULN,
+  ENGRAVING_STAT.SPELL_VULN,
+  STAT_LABEL.SIEGE_VULN,
+];
+
+export type CharacterBonuses = {
+  totals: EquippedBonuses;
+  flat: StatBonuses;
+};
+
+export function computeCharacterBonuses(
   equipment: UserEquipment[],
   seals: UserSeal[] = [],
-): EquippedBonuses {
+  buffs: SelectedBuffs = {},
+  skillBuild: RoleSkillBuild = {},
+): CharacterBonuses {
   const totals = { ...EMPTY_BONUSES };
-  for (const eq of equipment) addGearStats(totals, eq);
+  const flat: StatBonuses = new Map();
+  for (const eq of equipment) addGearStats(totals, flat, eq);
 
-  const ephenSynthesis = computeEphenSynthesisBonuses(equipment);
-  for (const attribute of ATTRIBUTES) {
-    totals[attribute] += ephenSynthesis.attributes[attribute];
+  const equipmentBuffs = computeEquipmentBuffBonuses(equipment);
+  const passives = computePassiveBonuses(skillBuild, equipment);
+  const sources = [
+    ...collectStatSources(equipment, seals, buffs),
+    equipmentBuffs.stats,
+    passives.stats,
+  ];
+  for (const source of sources) {
+    for (const [label, value] of source) addStat(flat, label, value);
   }
+  const damageTaken = flat.get(STAT_LABEL.DAMAGE_TAKEN) ?? 0;
+  for (const label of DAMAGE_TAKEN_TARGETS) addStat(flat, label, damageTaken);
 
-  const flat = collectFlatBonuses(equipment, seals, ephenSynthesis.stats);
-  for (const [key, stat] of FLAT_STAT_TARGETS) {
-    totals[key] += flat.get(stat) ?? 0;
+  for (const [key, label] of FLAT_STAT_TARGETS) {
+    totals[key] += flat.get(label) ?? 0;
   }
-  return totals;
+  const defensePercent =
+    equipmentBuffs.defensePercent + passives.defensePercent;
+  const resistPercent = equipmentBuffs.resistPercent + passives.resistPercent;
+  totals.defense *= 1 + defensePercent / 100;
+  totals.resist *= 1 + resistPercent / 100;
+  totals.manaPercent = passives.manaPercent;
+  return { totals, flat };
 }
 
 const FLAT_HEALTH_POOL =
@@ -135,11 +175,12 @@ export function computeDerivedStats(
     rangedAttack: dex * 0.25 + bonus.rangedAttack,
     spellPower: int * 0.25 + bonus.spellPower,
     healPower: spi * 0.25 + bonus.healPower,
-    mana: FLAT_MANA_POOL + int * 10 + bonus.mana,
+    mana:
+      (FLAT_MANA_POOL + int * 10 + bonus.mana) * (1 + bonus.manaPercent / 100),
     health: FLAT_HEALTH_POOL + sta * 12 + bonus.health,
     defense: sta * 1 + bonus.defense,
     resist: sta * 1 + bonus.resist,
-    moveSpeed: base.moveSpeed + bonus.moveSpeed,
+    moveSpeed: base.moveSpeed * (1 + bonus.moveSpeed / 100),
     skillSpeed:
       100 - computeSkillTimeReduction(int + spi) * 100 + bonus.skillSpeed,
     proficiency: base.proficiency + bonus.proficiency,
@@ -148,12 +189,15 @@ export function computeDerivedStats(
     block: computeBlock(sta) * 100 + bonus.block,
     tacticalReadiness:
       computeTacticalReadiness(str + dex) + bonus.tacticalReadiness,
-    manaRegen: computeManaRegen(spi),
-    healthRegen: computeHealthRegen(sta),
-    critChanceMelee: computeCritChance(str, heroicLevel),
-    critChanceRanged: computeCritChance(dex, heroicLevel),
-    critChanceSpell: computeCritChance(int, heroicLevel),
-    critChanceHeal: computeCritChance(spi, heroicLevel),
+    manaRegen: computeManaRegen(spi) + bonus.manaRegen,
+    healthRegen: computeHealthRegen(sta) + bonus.healthRegen,
+    critChanceMelee:
+      computeCritChance(str, heroicLevel) + bonus.critChanceMelee,
+    critChanceRanged:
+      computeCritChance(dex, heroicLevel) + bonus.critChanceRanged,
+    critChanceSpell:
+      computeCritChance(int, heroicLevel) + bonus.critChanceSpell,
+    critChanceHeal: computeCritChance(spi, heroicLevel) + bonus.critChanceHeal,
     pvpResist: bonus.pvpResist,
     critDamageResist: bonus.critDamageResist,
   };

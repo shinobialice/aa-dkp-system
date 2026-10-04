@@ -1,9 +1,11 @@
 "use server";
 import sql from "@/shared/lib/db";
+import type { RoleSlot } from "@/shared/config/roleSlots";
 
 export type UserEquipment = {
   id: number;
   user_id: number;
+  role_slot: RoleSlot;
   slot: string;
   item_name: string | null;
   grade: number;
@@ -11,21 +13,15 @@ export type UserEquipment = {
   extra_protection: number;
   engravings: number[];
   rune_id: number;
-  costume_synthesis_effects: number[];
-  underwear_synthesis_effects: number[];
-  cursed_synthesis_effects: number[];
-  ring_synthesis_effects: number[];
-  ephen_synthesis_percent: number;
-  ephen_synthesis_primary: string;
-  ephen_synthesis_secondary: string;
-  ephen_synthesis_tertiary: string[];
+  synthesis_effects: number[];
+  synthesis_percent: number;
   ephe_seal_level: number;
 };
 
 const getUserEquipment = async (userId: number): Promise<UserEquipment[]> => {
   try {
     return await sql<UserEquipment[]>`
-      SELECT id, user_id, slot, item_name, grade, enchant, extra_protection, engravings, rune_id, costume_synthesis_effects, underwear_synthesis_effects, cursed_synthesis_effects, ring_synthesis_effects, ephen_synthesis_percent, ephen_synthesis_primary, ephen_synthesis_secondary, ephen_synthesis_tertiary, ephe_seal_level
+      SELECT id, user_id, role_slot, slot, item_name, grade, enchant, extra_protection, engravings, rune_id, synthesis_effects, synthesis_percent, ephe_seal_level
       FROM user_equipment
       WHERE user_id = ${userId}
     `;

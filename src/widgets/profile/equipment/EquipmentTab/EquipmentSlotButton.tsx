@@ -35,6 +35,7 @@ type Props = {
   onSave: (values: SlotValues) => Promise<void>;
   tooltipSide?: Side;
   showRune?: boolean;
+  compareItem?: UserEquipment;
 };
 
 const EMPTY_GLOW = "var(--border)";
@@ -48,6 +49,7 @@ export default function EquipmentSlotButton({
   onSave,
   tooltipSide = "left",
   showRune = true,
+  compareItem,
 }: Props) {
   const [open, setOpen] = useState(false);
   const gearItem = findGearItem(slot.key, item?.item_name);
@@ -74,6 +76,7 @@ export default function EquipmentSlotButton({
                 item={item}
                 gearItem={gearItem}
                 equipment={equipment}
+                compareItem={compareItem}
               />
             </TooltipContent>
           </Tooltip>

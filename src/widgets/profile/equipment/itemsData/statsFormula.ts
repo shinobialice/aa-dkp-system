@@ -21,6 +21,11 @@ const FLAT_STATS = new Set([
   "pvp_resist",
   "crit_damage_resist",
   "tactical_readiness",
+  "max_hp",
+  "block_chance",
+  "proficiency",
+  "parry_chance",
+  "move_speed",
 ]);
 
 export function scaleStatByGrade(base: number, grade: number): number {
@@ -185,6 +190,9 @@ export const STAT_ORDER = [
   "skill_dmg_ranged_pve",
   "skill_dmg_spell_pve",
   "heal_skill_dmg_pve",
+  "proficiency",
+  "parry_chance",
+  "move_speed",
 ];
 
 export const STAT_LABELS: Record<string, string> = {
@@ -240,6 +248,9 @@ export const STAT_LABELS: Record<string, string> = {
   skill_dmg_ranged_pve: "Доп. урон умений дальнего боя по монстрам",
   skill_dmg_spell_pve: "Доп. урон умений заклинателя по монстрам",
   heal_skill_dmg_pve: "Урон исцеляющими умениями по монстрам",
+  proficiency: "Сноровка",
+  parry_chance: "Парирование атак ближнего боя",
+  move_speed: "Скорость передвижения",
 };
 
 // Проценты выводим со знаком %, секунды — с пробелом перед "сек.", остальное — как есть (в ед.).
@@ -273,4 +284,6 @@ export const STAT_UNITS: Record<string, string> = {
   skill_dmg_ranged_pve: "%",
   skill_dmg_spell_pve: "%",
   heal_skill_dmg_pve: "%",
+  parry_chance: "%",
+  move_speed: "%",
 };

@@ -1,16 +1,24 @@
 import { TabsList, TabsTrigger } from "@/shared/ui";
 
-const SECTIONS = [
-  ["equipment", "Экипировка"],
-  ["seals", "Печати героя"],
-  ["ephe", "Печати Эфе"],
-  ["class", "Класс персонажа"],
-] as const;
+type Props = {
+  group: keyof typeof SECTIONS;
+};
 
-export default function CharacterTabsSwitcher() {
+const SECTIONS = {
+  seals: [
+    ["ephe", "Печати Эфе"],
+    ["hero", "Печати героя"],
+  ],
+  character: [
+    ["equipment", "Экипировка"],
+    ["class", "Класс персонажа"],
+  ],
+} as const;
+
+export default function CharacterTabsSwitcher({ group }: Props) {
   return (
     <TabsList className="max-w-full justify-start overflow-x-auto [scrollbar-width:none]">
-      {SECTIONS.map(([value, label]) => (
+      {SECTIONS[group].map(([value, label]) => (
         <TabsTrigger
           key={value}
           className="shrink-0 cursor-pointer px-3"

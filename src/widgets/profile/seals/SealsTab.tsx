@@ -85,7 +85,7 @@ export default function SealsTab({ userId, seals, onChange, canEdit }: Props) {
     <Card className="min-h-187.5 gap-3 py-4">
       <CardHeader className="border-b">
         <CardTitle className="flex flex-wrap items-center justify-between gap-2">
-          <CharacterTabsSwitcher />
+          <CharacterTabsSwitcher group="seals" />
           <div className="flex gap-2">
             <SealBonusSummaryButton picks={currentPicks} />
             {canEdit && !editing && (

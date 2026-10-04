@@ -1,56 +1,30 @@
-import { BONUS_COLOR } from "../statColors";
+import StatDiff from "../StatDiff";
 
-import type { Row, RowGroup } from "./statRows";
+import { rowValue, type Row, type RowGroup } from "./statRows";
 
-function RowLine({
-  row,
-  engravingBonuses,
-}: {
-  row: Row;
-  engravingBonuses: Map<string, number>;
-}) {
-  let boosted = false;
-  let value: string;
-
-  if (row.kind === "static") {
-    value = row.value;
-  } else if (row.kind === "engraving") {
-    const delta = engravingBonuses.get(row.engravingKey) ?? 0;
-    boosted = delta !== 0;
-    value = `${(row.base + delta).toFixed(row.decimals)}${row.unit}`;
-  } else {
-    boosted = row.boosted;
-    value = `${row.value.toFixed(row.decimals)}${row.unit}`;
-  }
-
-  return (
-    <div className="flex items-center justify-between gap-3 text-xs">
-      <span
-        className={
-          row.indent ? "pl-3 text-muted-foreground/70" : "text-muted-foreground"
-        }
-      >
-        {row.indent ? `- ${row.label}` : row.label}
-      </span>
-      <span
-        className="whitespace-nowrap font-medium tabular-nums"
-        style={{ color: boosted ? BONUS_COLOR : undefined }}
-      >
-        {value}
-      </span>
-    </div>
-  );
-}
+type Props = {
+  groups: RowGroup[];
+  withHeaders: boolean;
+  bonuses: Map<string, number>;
+  viewerGroups: RowGroup[] | null;
+  viewerBonuses: Map<string, number> | null;
+};
 
 export default function GroupedRows({
   groups,
   withHeaders,
-  engravingBonuses,
-}: {
-  groups: RowGroup[];
-  withHeaders: boolean;
-  engravingBonuses: Map<string, number>;
-}) {
+  bonuses,
+  viewerGroups,
+  viewerBonuses,
+}: Props) {
+  const viewerAmounts = new Map<string, number>();
+  if (viewerGroups && viewerBonuses) {
+    for (const row of viewerGroups.flatMap((group) => group.rows)) {
+      const { amount } = rowValue(row, viewerBonuses);
+      if (amount !== null) viewerAmounts.set(row.label, amount);
+    }
+  }
+
   return (
     <div className="space-y-3">
       {groups.map((group, i) => (
@@ -64,12 +38,46 @@ export default function GroupedRows({
               <RowLine
                 key={row.label}
                 row={row}
-                engravingBonuses={engravingBonuses}
+                bonuses={bonuses}
+                viewerAmount={viewerAmounts.get(row.label)}
               />
             ))}
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+type RowLineProps = {
+  row: Row;
+  bonuses: Map<string, number>;
+  viewerAmount: number | undefined;
+};
+
+function RowLine({ row, bonuses, viewerAmount }: RowLineProps) {
+  const { text, amount, decimals } = rowValue(row, bonuses);
+
+  return (
+    <div className="flex items-center justify-between gap-3 text-xs">
+      <span
+        className={
+          row.indent ? "pl-3 text-muted-foreground/70" : "text-muted-foreground"
+        }
+      >
+        {row.indent ? `- ${row.label}` : row.label}
+      </span>
+      <span className="inline-flex shrink-0 items-baseline gap-1.5 whitespace-nowrap font-medium tabular-nums">
+        {text}
+        {amount !== null && (
+          <StatDiff
+            label={row.label}
+            viewer={viewerAmount}
+            owner={amount}
+            decimals={decimals}
+          />
+        )}
+      </span>
     </div>
   );
 }

@@ -1,4 +1,3 @@
-import { Fragment } from "react";
 import type { UserEquipment } from "@/actions/getUserEquipment";
 import { RuneIcon } from "../../RuneIcon";
 import { findRune } from "../../itemsData/runes";
@@ -6,7 +5,7 @@ import { getEngravingSlotCount } from "../../itemsData/engravingSlots";
 import { EffectText } from "../../highlightNumbers";
 import EngravingDisplay from "./EngravingDisplay";
 import SynthesisDisplay from "./SynthesisDisplay";
-import { synthesisBlocks } from "./synthesisLines";
+import { describeEquipmentSynthesis } from "../../synthesisBonuses";
 
 type Props = {
   slotKey: string;
@@ -18,6 +17,7 @@ export default function ItemDetails({ slotKey, item, divided }: Props) {
   const rune = item.rune_id ? findRune(item.rune_id) : undefined;
   const engravingCount = getEngravingSlotCount(slotKey, item.grade);
   const divider = divided && <div className="border-t border-border" />;
+  const synthesis = describeEquipmentSynthesis(item);
 
   return (
     <>
@@ -43,12 +43,12 @@ export default function ItemDetails({ slotKey, item, divided }: Props) {
           />
         </>
       )}
-      {synthesisBlocks(slotKey, item).map((block, index) => (
-        <Fragment key={index}>
+      {synthesis.rolls.length > 0 && (
+        <>
           {divider}
-          <SynthesisDisplay {...block} />
-        </Fragment>
-      ))}
+          <SynthesisDisplay {...synthesis} />
+        </>
+      )}
     </>
   );
 }

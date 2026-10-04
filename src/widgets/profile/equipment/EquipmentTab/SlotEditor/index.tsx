@@ -21,8 +21,7 @@ import QualityField from "./QualityField";
 import EnchantFields from "./EnchantFields";
 import EngravingField from "./EngravingField";
 import RuneField from "./RuneField";
-import SynthesisFields from "./SynthesisFields";
-import EphenSynthesisField from "./EphenSynthesisField";
+import SynthesisField from "./SynthesisField";
 
 type Props = {
   slot: EquipmentSlot;
@@ -118,8 +117,7 @@ export default function SlotEditor({
             <EngravingField {...fieldProps} />
           )}
           {hasItemName && <RuneField {...fieldProps} equipment={equipment} />}
-          <SynthesisFields {...fieldProps} />
-          <EphenSynthesisField {...fieldProps} />
+          <SynthesisField {...fieldProps} />
         </div>
       </div>
       <div className="flex shrink-0 items-center gap-2 border-t px-5 py-3">

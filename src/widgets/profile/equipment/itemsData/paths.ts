@@ -7,7 +7,6 @@ export const SEAL_ICON = (file: string) =>
 
 const OVERLAYS_WITHOUT_CUBE_MARK: Record<string, string | null> = {
   [SEAL_ICON("top_thiol_1")]: null,
-  [SEAL_ICON("top_thiol_2")]: SEAL_ICON("top_spike"),
   [SEAL_ICON("top_thiol_6")]: SEAL_ICON("top_seal_ipnir_4"),
 };
 

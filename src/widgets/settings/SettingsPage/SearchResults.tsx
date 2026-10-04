@@ -1,5 +1,6 @@
 import { ChevronRight } from "lucide-react";
-import { SEARCH_INDEX, sectionById, type SectionId } from "../settingsSections";
+import { sectionById, type SectionId } from "../settingsSections";
+import { SEARCH_INDEX } from "../settingsSearchIndex";
 
 export default function SearchResults({
   query,

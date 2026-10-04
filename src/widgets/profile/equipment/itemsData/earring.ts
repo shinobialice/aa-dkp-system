@@ -80,7 +80,7 @@ export const EARRING_ITEMS: GearItem[] = [
     sealIconUrl: SEAL_ICON("top_seal_ipnir_3"),
   },
   {
-    id: 940041,
+    id: 8003313,
     name: "Амальгамная эфенская серьга",
     grade: 1,
     iconUrl: ITEM_ICON("earring", "амальгамная_эфенская_серьга"),

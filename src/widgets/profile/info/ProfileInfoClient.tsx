@@ -151,6 +151,7 @@ export default function ProfileInfoClient({
           canEditVk={canEditVk}
           canEditJoinedAt={canEditAdminFields}
           canEditInventory={canEditInventory}
+          canSkipRequired={canEditAdminFields}
         />
       )}
       <ProfileStats
