@@ -44,8 +44,24 @@ const EPHEN_ITEM_IDS = new Set([
   55114, 55115, 55116, 55117, 55121, 8003328,
 ]);
 
+type IdRange = [first: number, last: number];
+
+const AMALGAM_RAMIAN_ID_RANGE: IdRange = [8003190, 8003230];
+const AMALGAM_EPHEN_ID_RANGE: IdRange = [8003273, 8003314];
+
 export function getEpheItemTier(itemId: number): EpheItemTier {
-  if (RAMIAN_ITEM_IDS.has(itemId)) return "ramian";
-  if (EPHEN_ITEM_IDS.has(itemId)) return "ephen";
+  if (
+    RAMIAN_ITEM_IDS.has(itemId) ||
+    isInRange(itemId, AMALGAM_RAMIAN_ID_RANGE)
+  ) {
+    return "ramian";
+  }
+  if (EPHEN_ITEM_IDS.has(itemId) || isInRange(itemId, AMALGAM_EPHEN_ID_RANGE)) {
+    return "ephen";
+  }
   return "default";
+}
+
+function isInRange(itemId: number, [first, last]: IdRange): boolean {
+  return itemId >= first && itemId <= last;
 }

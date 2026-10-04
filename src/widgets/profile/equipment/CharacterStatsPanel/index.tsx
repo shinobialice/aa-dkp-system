@@ -56,6 +56,7 @@ export function CharacterStatsPanel({
     seals,
     { ...buffs, ...guildBuffs },
     skillBuild,
+    level,
   );
   const stats = computeDerivedStats(bonus, level);
 
