@@ -126,6 +126,8 @@ const FLAT_HEALTH_POOL =
 const FLAT_MANA_POOL =
   BASE_CHARACTER_STATS.mana - BASE_CHARACTER_STATS.int * 10;
 
+const MIN_SKILL_SPEED = 40;
+
 export type DerivedStats = {
   str: number;
   dex: number;
@@ -184,8 +186,10 @@ export function computeDerivedStats(
     defense: sta * 1 + bonus.defense,
     resist: sta * 1 + bonus.resist,
     moveSpeed: base.moveSpeed * (1 + bonus.moveSpeed / 100),
-    skillSpeed:
+    skillSpeed: Math.max(
+      MIN_SKILL_SPEED,
       100 - computeSkillTimeReduction(int + spi) * 100 + bonus.skillSpeed,
+    ),
     proficiency: base.proficiency + bonus.proficiency,
     parry: computeParry(str) * 100 + bonus.parry,
     dodge: computeDodge(dex) * 100 + bonus.dodge,
