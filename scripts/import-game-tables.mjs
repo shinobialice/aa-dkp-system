@@ -8,6 +8,7 @@ const ITEM_PASSIVES_OUTPUT = `${ITEMS_DIR}/gameItemPassives.ts`;
 const ITEM_LEVELS_OUTPUT = `${ITEMS_DIR}/gameItemLevels.ts`;
 const ARMOR_TYPES_OUTPUT = `${ITEMS_DIR}/armorType.ts`;
 const BUFFS_OUTPUT = `${ITEMS_DIR}/gameBuffs.ts`;
+const ARMOR_QUALITY_BUFFS_OUTPUT = `${ITEMS_DIR}/gameArmorQualityBuffs.ts`;
 const HEADER =
   "// Сгенерировано `pnpm game:tables` из данных игры. Не редактировать вручную.";
 
@@ -92,6 +93,10 @@ const ARMOR_WEIGHTS = { cloth: "light", leather: "medium", plate: "heavy" };
 // Слоты шлема, нагрудника, пояса, наручей, перчаток, поножей и сапог — только
 // они входят в комплект лёгких, средних или тяжелых доспехов.
 const ARMOR_SET_SLOTS = new Set([1, 2, 3, 4, 5, 7, 8]);
+
+const MAX_HEALTH_ATTRIBUTE = 6;
+const MAX_MANA_ATTRIBUTE = 7;
+const MELEE_SKILL_DAMAGE_ATTRIBUTE = 51;
 
 const MAX_GRADE = 12;
 const SYNTHESIS_START_PERCENT = 0;
@@ -255,6 +260,7 @@ await writeItemPassives();
 await writeItemLevels();
 await writeArmorTypes();
 await writeBuffs();
+await writeArmorQualityBuffs();
 
 async function writeSynthesis() {
   const profileByItemId = new Map();
@@ -419,6 +425,40 @@ async function writeArmorTypes() {
     "};",
   ]);
   console.log(`${itemLines.length} items → ${ARMOR_TYPES_OUTPUT}`);
+}
+
+async function writeArmorQualityBuffs() {
+  const weightLines = Object.entries(clientData.armorQuality.types).flatMap(
+    ([armorType, grades]) => [
+      `  ${ARMOR_WEIGHTS[armorType]}: {`,
+      ...Object.entries(grades).map(([grade, { modifiers }]) => {
+        const perLevel = (attributeId) =>
+          modifiers.find(([id]) => id === attributeId)[3];
+        return `    ${grade}: { health: ${perLevel(MAX_HEALTH_ATTRIBUTE)}, mana: ${perLevel(MAX_MANA_ATTRIBUTE)}, skillDamage: ${perLevel(MELEE_SKILL_DAMAGE_ATTRIBUTE)} },`;
+      }),
+      "  },",
+    ],
+  );
+
+  await writeSource(ARMOR_QUALITY_BUFFS_OUTPUT, [
+    HEADER,
+    'import type { ArmorWeight } from "./armorType";',
+    "",
+    "// Прибавка за 100 уровней баффа; skillDamage — в десятых долях процента.",
+    "export type ArmorQualityBuffRates = {",
+    "  health: number;",
+    "  mana: number;",
+    "  skillDamage: number;",
+    "};",
+    "",
+    "export const ARMOR_QUALITY_BUFF_RATES: Record<",
+    "  ArmorWeight,",
+    "  Record<number, ArmorQualityBuffRates>",
+    "> = {",
+    ...weightLines,
+    "};",
+  ]);
+  console.log(`${weightLines.length} lines → ${ARMOR_QUALITY_BUFFS_OUTPUT}`);
 }
 
 async function writeBuffs() {

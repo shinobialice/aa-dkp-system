@@ -98,9 +98,10 @@ function valueAt(
   code: number,
   percent: number,
 ): number {
-  let lower = levels[0];
-  let upper = levels[levels.length - 1];
-  for (const level of levels) {
+  const pointsWithCode = levels.filter(([, slots]) => code in slots[slot]);
+  let lower = pointsWithCode[0];
+  let upper = pointsWithCode[pointsWithCode.length - 1];
+  for (const level of pointsWithCode) {
     if (level[0] <= percent) lower = level;
     if (level[0] >= percent) {
       upper = level;

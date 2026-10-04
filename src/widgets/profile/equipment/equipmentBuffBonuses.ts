@@ -3,7 +3,10 @@ import { ENGRAVING_STAT } from "./engravingBonuses";
 import type { ArmorWeight } from "./itemsData/armorType";
 import { addStat, STAT_LABEL, type StatBonuses } from "./itemsData/statEffects";
 import { getActiveSetBuffs, type SetBuffTier } from "./setBonuses";
-import { getActiveQualitySetBuffs } from "./qualitySetBonus";
+import {
+  getActiveQualitySetBuffs,
+  type QualitySetBuff,
+} from "./qualitySetBonus";
 import { getActiveWeaponBuff, type WeaponBuff } from "./weaponBuffs";
 
 type StatLine = [label: string, value: number];
@@ -130,10 +133,6 @@ const WEAPON_BUFF_STATS: Record<WeaponBuff["key"], StatLine[]> = {
   ],
 };
 
-const QUALITY_HEALTH_LINE = /Объем здоровья \+(\d+)/;
-const QUALITY_MANA_LINE = /Объем маны \+(\d+)/;
-const QUALITY_SKILL_LINE = /(?:целительных|исцеляющих) умений \+([\d.]+)%/;
-
 export function computeEquipmentBuffBonuses(
   equipment: UserEquipment[],
 ): EquipmentBuffBonuses {
@@ -156,7 +155,7 @@ export function computeEquipmentBuffBonuses(
   }
 
   for (const buff of getActiveQualitySetBuffs(equipment)) {
-    for (const [label, value] of qualitySetStats(buff.description)) {
+    for (const [label, value] of qualitySetStats(buff)) {
       addStat(stats, label, value);
     }
   }
@@ -164,13 +163,10 @@ export function computeEquipmentBuffBonuses(
   return { stats, defensePercent, resistPercent };
 }
 
-function qualitySetStats(description: string): StatLine[] {
-  const health = Number(description.match(QUALITY_HEALTH_LINE)?.[1] ?? 0);
-  const mana = Number(description.match(QUALITY_MANA_LINE)?.[1] ?? 0);
-  const skill = Number(description.match(QUALITY_SKILL_LINE)?.[1] ?? 0);
+function qualitySetStats(buff: QualitySetBuff): StatLine[] {
   return [
-    [ENGRAVING_STAT.HEALTH, health],
-    [ENGRAVING_STAT.MANA, mana],
-    ...each(SKILL_DAMAGE_LABELS, skill),
+    [ENGRAVING_STAT.HEALTH, buff.health],
+    [ENGRAVING_STAT.MANA, buff.mana],
+    ...each(SKILL_DAMAGE_LABELS, buff.skillDamagePercent),
   ];
 }
