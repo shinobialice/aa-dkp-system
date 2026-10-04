@@ -5,8 +5,7 @@ export const ITEM_ICON = (slot: string, slug: string) =>
 export const SEAL_ICON = (file: string) =>
   `/images/equipment/seals/${file}.png`;
 
-const OVERLAYS_WITHOUT_CUBE_MARK: Record<string, string | null> = {
-  [SEAL_ICON("top_thiol_1")]: null,
+const OVERLAYS_WITHOUT_CUBE_MARK: Record<string, string> = {
   [SEAL_ICON("top_thiol_6")]: SEAL_ICON("top_seal_ipnir_4"),
 };
 

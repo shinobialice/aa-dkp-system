@@ -36,45 +36,76 @@ export function getEngravingCategory(slotKey: string): EngravingCategory {
 
 type SlotThreshold = [minGrade: number, slots: number];
 
-const SLOT_THRESHOLDS: Partial<
-  Record<EngravingCategory | "beltOrBracers", SlotThreshold[]>
-> = {
-  beltOrBracers: [
-    [12, 6],
-    [11, 5],
-    [8, 4],
-    [2, 3],
-  ],
-  armor: [
+const ARMOR_SLOT_THRESHOLDS: Record<string, SlotThreshold[]> = {
+  head: [
     [12, 8],
     [11, 7],
     [8, 6],
     [2, 5],
   ],
-  underwear: [
-    [8, 4],
-    [7, 3],
-    [5, 2],
-    [2, 1],
-  ],
-  weapon: [
+  chest: [
     [12, 9],
     [11, 8],
     [8, 7],
     [2, 6],
   ],
-  jewelry: [
-    [12, 3],
-    [10, 2],
-    [7, 1],
+  legs: [
+    [12, 8],
+    [11, 7],
+    [8, 6],
+    [2, 5],
+  ],
+  hands: [
+    [12, 7],
+    [11, 6],
+    [8, 5],
+    [2, 4],
+  ],
+  feet: [
+    [12, 7],
+    [11, 6],
+    [8, 5],
+    [2, 4],
+  ],
+  belt: [
+    [12, 6],
+    [11, 5],
+    [8, 4],
+    [2, 3],
+  ],
+  bracers: [
+    [12, 6],
+    [11, 5],
+    [8, 4],
+    [2, 3],
   ],
 };
 
+const CATEGORY_THRESHOLDS: Partial<Record<EngravingCategory, SlotThreshold[]>> =
+  {
+    underwear: [
+      [8, 4],
+      [7, 3],
+      [5, 2],
+      [2, 1],
+    ],
+    weapon: [
+      [12, 9],
+      [11, 8],
+      [8, 7],
+      [2, 6],
+    ],
+    jewelry: [
+      [12, 3],
+      [10, 2],
+      [7, 1],
+    ],
+  };
+
 export function getEngravingSlotCount(slotKey: string, grade: number): number {
-  const key =
-    slotKey === "belt" || slotKey === "bracers"
-      ? "beltOrBracers"
-      : getEngravingCategory(slotKey);
-  const thresholds = SLOT_THRESHOLDS[key] ?? [];
+  const thresholds =
+    ARMOR_SLOT_THRESHOLDS[slotKey] ??
+    CATEGORY_THRESHOLDS[getEngravingCategory(slotKey)] ??
+    [];
   return thresholds.find(([minGrade]) => grade >= minGrade)?.[1] ?? 0;
 }
