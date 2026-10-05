@@ -5,6 +5,7 @@ import type {
   LootWishlistRow,
   MiscLootGrantsRow,
   UserRow,
+  UserTagsRow,
 } from "@/shared/lib/dbTypes";
 import { hasTag } from "@/actions/hasTag";
 import { getSessionUserId } from "@/actions/getSessionUserId";
@@ -40,8 +41,9 @@ export default async function Page() {
     "user_id" | "id" | "item_name" | "comment"
   >[];
   let itemTypeRows: Pick<ItemTypeRow, "name" | "icon_url" | "grade">[];
+  let afkRows: Pick<UserTagsRow, "user_id">[];
   try {
-    [users, giveawayRows, miscGrantRows, wishlistRows, itemTypeRows] =
+    [users, giveawayRows, miscGrantRows, wishlistRows, itemTypeRows, afkRows] =
       await Promise.all([
         sql<typeof users>`
           SELECT id, username, active, avatar_url FROM "user" ORDER BY id ASC
@@ -56,6 +58,9 @@ export default async function Page() {
           SELECT user_id, id, item_name, comment FROM loot_wishlist
         `,
         sql<typeof itemTypeRows>`SELECT name, icon_url, grade FROM item_type`,
+        sql<typeof afkRows>`
+          SELECT user_id FROM user_tags WHERE tag = 'АФК' AND removed_at IS NULL
+        `,
       ]);
   } catch (error) {
     console.error("Failed to load users:", error);
@@ -88,6 +93,7 @@ export default async function Page() {
   const giveawayByUser = Map.groupBy(giveawayRows, (row) => row.user_id);
   const miscGrantsByUser = Map.groupBy(miscGrantRows, (row) => row.user_id);
   const wishlistByUser = Map.groupBy(wishlistRows, (row) => row.user_id);
+  const afkUserIds = new Set(afkRows.map((row) => row.user_id));
 
   const initialPlayers: Player[] = users.map((user) => {
     const givenawayloot = giveawayByUser.get(user.id) ?? [];
@@ -95,6 +101,7 @@ export default async function Page() {
       id: user.id,
       username: user.username,
       active: user.active,
+      isAfk: afkUserIds.has(user.id),
       avatarUrl: user.avatar_url,
       items: items.map(({ name }) => {
         const record = givenawayloot.find((i) => i.name === name);

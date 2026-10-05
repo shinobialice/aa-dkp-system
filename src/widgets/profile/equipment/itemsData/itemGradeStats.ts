@@ -1037,76 +1037,10 @@ export const ITEM_GRADE_STATS: Record<
     },
   },
 
-  // Ниже — уникальные предметы с фиксированным (не масштабируемым по грейду) статом,
-  // который в базе задан как items.buff_id (постоянный баф самого предмета, а не
-  // item_grade_buff). Записаны под собственным грейдом предмета из ring.ts/earring.ts.
-  // Серьга Дома Норьетт
-  46593: { 1: { damage_taken_reduction_pve: -2 } },
-  // Серьга фаворита Дома Норьетт
-  46594: { 1: { damage_taken_reduction_pve: -3 } },
-  // Серьга чемпиона Дома Норьетт
-  46595: { 1: { damage_taken_reduction_pve: -4 } },
+  // Постоянные бафы самих предметов (items.buff_id) берутся из данных игры
+  // в gameItemPassives.ts; здесь только то, чего там нет.
   // Счастливая серьга корабела
   28906: { 4: { swim_speed: 10 } },
-  // Перстень Дома Норьетт
-  46590: {
-    1: {
-      skill_dmg_melee_pve: 2,
-      skill_dmg_ranged_pve: 2,
-      skill_dmg_spell_pve: 2,
-      heal_skill_dmg_pve: 2,
-    },
-  },
-  // Перстень фаворита Дома Норьетт
-  46591: {
-    1: {
-      skill_dmg_melee_pve: 3,
-      skill_dmg_ranged_pve: 3,
-      skill_dmg_spell_pve: 3,
-      heal_skill_dmg_pve: 3,
-    },
-  },
-  // Перстень чемпиона Дома Норьетт
-  46592: {
-    1: {
-      skill_dmg_melee_pve: 4,
-      skill_dmg_ranged_pve: 4,
-      skill_dmg_spell_pve: 4,
-      heal_skill_dmg_pve: 4,
-    },
-  },
-  // Перстень Инистера
-  39146: {
-    6: {
-      skill_dmg_melee: 2.5,
-      skill_dmg_ranged: 2.5,
-      skill_dmg_spell: 2.5,
-      armor_penetration: 700,
-      resist_ignore: 700,
-      heal_skill_dmg: 2.5,
-    },
-  },
-  // Акхиумный перстень Безмятежного моря
-  28802: {
-    7: {
-      sta: 40,
-      skill_dmg_melee: 3,
-      skill_dmg_ranged: 3,
-      skill_dmg_spell: 3,
-      armor_penetration: 900,
-      resist_ignore: 900,
-      heal_skill_dmg: 3,
-    },
-  },
-  // Маледиктовый перстень говорящего с духами
-  48558: {
-    7: {
-      sta: 40,
-      damage_taken_reduction: -2.5,
-      crit_resist_ignore: 600,
-      pvp_resist: 420,
-    },
-  },
 };
 
 export function getItemGradeStats(

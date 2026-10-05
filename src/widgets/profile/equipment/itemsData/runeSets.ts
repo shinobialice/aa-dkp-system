@@ -1,19 +1,101 @@
-export type EphenRuneSetTier = {
+export type RuneSetTier = {
   count: number;
   text: string;
 };
 
-export type EphenRuneSet = {
+export type RuneSet = {
   runeId: number;
   name: string;
-  tiers: EphenRuneSetTier[];
+  size: number;
+  tiers: RuneSetTier[];
 };
+
+type SetWithoutSize = Omit<RuneSet, "size">;
+
+const EPHEN_SET_SIZE = 8;
+const IFNIR_SET_SIZE = 6;
+const LIBRARY_SET_SIZE = 7;
 
 const FOUR_PIECE_TEXT = "Устойчивость к критическому урону: +560 ед.";
 const EIGHT_PIECE_EXTRA_TEXT =
   "Дополнительный урон и эффективность исцеления при ношении двуручного оружия: +4.5%";
 
-export const EPHEN_RUNE_SETS: EphenRuneSet[] = [
+// Урон умений веток в характеристиках не считается, поэтому эти строки без
+// двоеточия: они только показываются в подсказке.
+const IFNIR_RUNE_SETS: SetWithoutSize[] = [
+  {
+    runeId: 55262,
+    name: "Легендарная руна ифнирского бойца",
+    tiers: [
+      { count: 4, text: "Парирование атак ближнего боя: +4%" },
+      { count: 6, text: "Урон умений веток «Нападение» и «Коварство» +2%" },
+    ],
+  },
+  {
+    runeId: 55267,
+    name: "Легендарная руна ифнирского лучника",
+    tiers: [
+      { count: 4, text: "Шанс обхода обороны: +4%" },
+      {
+        count: 6,
+        text: "Урон умений веток «Преследование» и «Стрельба» +2%",
+      },
+    ],
+  },
+  {
+    runeId: 55272,
+    name: "Легендарная руна ифнирского чародея",
+    tiers: [
+      { count: 4, text: "Здоровье: +600 ед." },
+      { count: 6, text: "Урон умений веток «Волшебство» и «Гнев» +2%" },
+    ],
+  },
+  {
+    runeId: 55277,
+    name: "Легендарная руна ифнирского лекаря",
+    tiers: [
+      { count: 4, text: "Здоровье: +600 ед." },
+      { count: 6, text: "Урон умений веток «Исцеление» и «Танец» +2%" },
+    ],
+  },
+];
+
+const LIBRARY_RUNE_SETS: SetWithoutSize[] = [
+  {
+    runeId: 47467,
+    name: "Призрачная руна яростного воина",
+    tiers: [
+      { count: 3, text: "Шанс критического удара в ближнем бою: +5%" },
+      { count: 5, text: "Пробивание брони: +600 ед." },
+    ],
+  },
+  {
+    runeId: 47466,
+    name: "Призрачная руна меткого стрелка",
+    tiers: [
+      { count: 3, text: "Шанс критического удара в дальнем бою: +5%" },
+      { count: 5, text: "Пробивание брони: +600 ед." },
+    ],
+  },
+  {
+    runeId: 47464,
+    name: "Призрачная руна могущественного мага",
+    tiers: [
+      { count: 3, text: "Шанс критического удара заклинанием: +5%" },
+      { count: 5, text: "Игнорирование сопротивления: +600 ед." },
+    ],
+  },
+  {
+    runeId: 47465,
+    name: "Призрачная руна искусного целителя",
+    tiers: [
+      { count: 3, text: "Шанс критического эффекта исцеления: +5%" },
+      { count: 5, text: "Время применения умений: -4%" },
+    ],
+  },
+];
+
+const EPHEN_RUNE_SETS: SetWithoutSize[] = [
   {
     runeId: 43154,
     name: "Эфенская руна карающего огня",
@@ -120,6 +202,12 @@ export const EPHEN_RUNE_SETS: EphenRuneSet[] = [
   },
 ];
 
-export function findEphenRuneSet(runeId: number): EphenRuneSet | undefined {
-  return EPHEN_RUNE_SETS.find((s) => s.runeId === runeId);
+const RUNE_SETS: RuneSet[] = [
+  ...EPHEN_RUNE_SETS.map((set) => ({ ...set, size: EPHEN_SET_SIZE })),
+  ...IFNIR_RUNE_SETS.map((set) => ({ ...set, size: IFNIR_SET_SIZE })),
+  ...LIBRARY_RUNE_SETS.map((set) => ({ ...set, size: LIBRARY_SET_SIZE })),
+];
+
+export function findRuneSet(runeId: number): RuneSet | undefined {
+  return RUNE_SETS.find((set) => set.runeId === runeId);
 }

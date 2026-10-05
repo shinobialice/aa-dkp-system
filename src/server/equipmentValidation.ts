@@ -3,13 +3,17 @@ import type { EquipmentInput } from "@/actions/saveUserEquipment";
 import { isValidEquipmentSlot } from "@/widgets/profile/equipment/equipmentData";
 import { isValidSealGrade } from "@/widgets/profile/seals/sealsData";
 import {
+  getMaxEnchant,
   isValidEnchantLevel,
   isValidExtraProtectionLevel,
 } from "@/widgets/profile/equipment/itemsData/statsFormula";
 import { getEngravingSlotCount } from "@/widgets/profile/equipment/itemsData/engravingSlots";
 import { isValidEngravingId } from "@/widgets/profile/equipment/itemsData/engravings";
 import { isValidRuneId } from "@/widgets/profile/equipment/itemsData/runes";
-import { WEAPON_HANDEDNESS } from "@/widgets/profile/equipment/itemsData/weaponHandedness";
+import {
+  WEAPON_HANDEDNESS,
+  isTwoHandedMainWeapon,
+} from "@/widgets/profile/equipment/itemsData/weaponHandedness";
 import { findGearItem } from "@/widgets/profile/equipment/itemsData";
 import { isValidSynthesisSelection } from "@/widgets/profile/equipment/itemsData/synthesis";
 import { isValidEpheSealLevel } from "@/widgets/profile/ephe/epheSealsData";
@@ -37,7 +41,8 @@ const CHECKS: Check[] = [
     message: (item) => `Некорректный грейд: ${item.grade}`,
   },
   {
-    isValid: (item) => isValidEnchantLevel(item.enchant),
+    isValid: (item, { gearItemId }) =>
+      isValidEnchantLevel(item.enchant, getMaxEnchant(gearItemId)),
     message: (item) => `Некорректный уровень заточки: ${item.enchant}`,
   },
   {
@@ -91,4 +96,12 @@ export function assertValidEquipmentItem(item: EquipmentInput) {
   };
   const failed = CHECKS.find((check) => !check.isValid(item, context));
   if (failed) throw new Error(failed.message(item));
+}
+
+export function assertValidWeaponSet(items: EquipmentInput[]) {
+  const mainHand = items.find((item) => item.slot === "weapon_main");
+  const offHand = items.find((item) => item.slot === "weapon_off");
+  if (isTwoHandedMainWeapon(mainHand?.itemName) && offHand?.itemName?.trim()) {
+    throw new Error("С двуручным оружием нельзя надеть предмет во вторую руку");
+  }
 }

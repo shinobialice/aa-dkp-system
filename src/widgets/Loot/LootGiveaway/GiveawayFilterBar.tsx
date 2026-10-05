@@ -70,7 +70,7 @@ export default function GiveawayFilterBar({
             checked={query.showInactive}
             onCheckedChange={(showInactive) => onChange({ showInactive })}
           />
-          Неактивные
+          Неактивные и АФК
         </label>
       </div>
     </div>

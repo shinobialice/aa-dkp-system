@@ -5,10 +5,12 @@ type Props = {
   hint: string;
   value: number;
   max: number;
-  format: (value: number) => string;
+  prefix: string;
   onChange: (value: number) => void;
   showMax?: boolean;
 };
+
+const NON_DIGITS = /\D/g;
 
 const STEP_BUTTON_CLASS =
   "flex h-full w-10 cursor-pointer items-center justify-center text-lg hover:bg-muted disabled:cursor-default disabled:opacity-40";
@@ -18,7 +20,7 @@ export default function Stepper({
   hint,
   value,
   max,
-  format,
+  prefix,
   onChange,
   showMax,
 }: Props) {
@@ -37,9 +39,21 @@ export default function Stepper({
         >
           −
         </button>
-        <span className="flex-1 text-center text-base font-extrabold tabular-nums">
-          {format(value)}
-        </span>
+        <label className="flex flex-1 cursor-text items-center justify-center text-base font-extrabold tabular-nums">
+          <span className="whitespace-pre">{prefix}</span>
+          <input
+            type="text"
+            inputMode="numeric"
+            aria-label={label}
+            value={value}
+            onFocus={(event) => event.target.select()}
+            onChange={(event) =>
+              set(Number(event.target.value.replace(NON_DIGITS, "")))
+            }
+            style={{ width: `${String(value).length}ch` }}
+            className="bg-transparent outline-none"
+          />
+        </label>
         <button
           type="button"
           aria-label={`${label}: больше`}

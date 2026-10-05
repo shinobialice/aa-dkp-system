@@ -4,7 +4,10 @@ import type { UserEquipmentRow } from "@/shared/lib/dbTypes";
 import { isRoleSlot, type RoleSlot } from "@/shared/config/roleSlots";
 import ensureCanEditUserData from "./ensureCanEditUserData";
 import getUserEquipment, { type UserEquipment } from "./getUserEquipment";
-import { assertValidEquipmentItem } from "@/server/equipmentValidation";
+import {
+  assertValidEquipmentItem,
+  assertValidWeaponSet,
+} from "@/server/equipmentValidation";
 
 export type EquipmentInput = {
   slot: string;
@@ -36,6 +39,7 @@ const saveUserEquipment = async (
   }
 
   items.forEach(assertValidEquipmentItem);
+  assertValidWeaponSet(items);
 
   const filled = items.flatMap((item) => {
     const itemName = item.itemName?.trim();

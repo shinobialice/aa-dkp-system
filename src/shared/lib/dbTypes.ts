@@ -435,6 +435,13 @@ export type UserArchetypeRow = {
   role_slot: number;
 };
 
+export type UserCharacterBuffsRow = {
+  user_id: number;
+  role_slot: number;
+  buffs: unknown;
+  updated_at: string;
+};
+
 export type UserEquipmentRow = {
   id: number;
   user_id: number;

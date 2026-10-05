@@ -1,3 +1,5 @@
+import { GAME_MAX_ENCHANT } from "./gameEnchantLimits";
+
 const GRADE_MULTIPLIERS = [
   0.8, 1.0, 1.05, 1.1, 1.15, 1.2, 1.25, 1.35, 1.5, 1.7, 1.9, 2.0, 2.1,
 ];
@@ -98,11 +100,17 @@ export function isValidExtraProtectionLevel(
   );
 }
 
+// У каждого предмета в игре свой предел заточки (+30, +35 или без заточки).
+export function getMaxEnchant(itemId: number | undefined): number {
+  if (itemId === undefined) return MAX_ENCHANT;
+  return GAME_MAX_ENCHANT[itemId] ?? MAX_ENCHANT;
+}
+
 // В самой игре куб прыгает сразу с 0 на 10 (промежуточных +1…+9 не бывает),
-// но поле ввода — свободное число 0-35: для непопадающих в таблицу
-// уровней bonus просто 0%, это безопасный фолбэк.
-export function isValidEnchantLevel(level: number): boolean {
-  return Number.isInteger(level) && level >= 0 && level <= MAX_ENCHANT;
+// но поле ввода — свободное число: для непопадающих в таблицу уровней bonus
+// просто 0%, это безопасный фолбэк.
+export function isValidEnchantLevel(level: number, maxLevel: number): boolean {
+  return Number.isInteger(level) && level >= 0 && level <= maxLevel;
 }
 
 // Заточка увеличивает Защиту/Сопротивление у брони и щитов, Урон/Силу

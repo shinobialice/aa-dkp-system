@@ -1,4 +1,5 @@
 import type { UserEquipment } from "@/actions/getUserEquipment";
+import type { RoleSlot } from "@/shared/config/roleSlots";
 import { getActiveWeaponBuff } from "../weaponBuffs";
 import { getActiveSetBuffs } from "../setBonuses";
 import { getActiveQualitySetBuffs } from "../qualitySetBonus";
@@ -12,6 +13,7 @@ import CharacterBuffsDialog from "./CharacterBuffsDialog";
 
 type Props = {
   userId: number;
+  roleSlot: RoleSlot;
   equipment: UserEquipment[];
   buffs: SelectedBuffs;
   guildBuffs: SelectedBuffs;
@@ -21,6 +23,7 @@ type Props = {
 
 export default function BuffRow({
   userId,
+  roleSlot,
   equipment,
   buffs,
   guildBuffs,
@@ -59,6 +62,7 @@ export default function BuffRow({
       {canEdit && (
         <CharacterBuffsDialog
           userId={userId}
+          roleSlot={roleSlot}
           buffs={buffs}
           onChange={onBuffsChange}
         />

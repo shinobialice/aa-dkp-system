@@ -3,6 +3,7 @@ import type { GearItem } from "../../itemsData";
 import { GearItemIcon } from "../../GearItemIcon";
 import ItemStats from "../../ItemStats";
 import { getEquipmentStatLines } from "../../itemStatLines";
+import { getItemKind } from "../../itemKind";
 import { getEpheStatMultipliers } from "@/widgets/profile/ephe/epheSealsBonus";
 import {
   getSealGradeLabel,
@@ -28,6 +29,7 @@ export default function ItemCard({
   compareItem,
 }: Props) {
   const gradeColor = getSealGradeColor(item.grade) ?? undefined;
+  const itemKind = getItemKind(slotKey, gearItem.id);
 
   return (
     <div className="space-y-2">
@@ -41,6 +43,9 @@ export default function ItemCard({
             {item.enchant > 0 && `+${item.enchant} `}
             {gearItem.name}
           </div>
+          {itemKind && (
+            <div className="text-xs text-muted-foreground">{itemKind}</div>
+          )}
         </div>
       </div>
 

@@ -1,11 +1,12 @@
 import { ENGRAVING_STAT } from "../engravingBonuses";
 import { STAT_LABEL } from "../itemsData/statEffects";
-import type { DerivedStats } from "../characterStats";
+import { BASE_CHARACTER_STATS, type DerivedStats } from "../characterStats";
+import { computeAttributeAccuracy } from "../attributeFormulas";
 
 import { bonusRow, computedRow, type RowGroup } from "./statRows";
 
 type AttackKind = {
-  accuracy: [label: string, key: string];
+  accuracy: [label: string, key: string, fromAttributes: number];
   critChance: [label: string, value: number];
   critDamage: [label: string, key: string];
   backstab: [label: string, key: string];
@@ -14,14 +15,21 @@ type AttackKind = {
   pvpDamage: [label: string, key: string];
 };
 
+// Точность персонажа с базовыми атрибутами; атрибуты сверх базы добавляют
+// к ней рейтинг точности.
 const BASE_ACCURACY = 90;
 const BASE_CRIT_DAMAGE = 150;
 const BASE_DAMAGE_PERCENT = 100;
 
 export function buildOffenseGroups(stats: DerivedStats): RowGroup[] {
+  const base = BASE_CHARACTER_STATS;
   return [
     attackGroup({
-      accuracy: ["Точность ударов в ближнем бою", STAT_LABEL.MELEE_ACCURACY],
+      accuracy: [
+        "Точность ударов в ближнем бою",
+        STAT_LABEL.MELEE_ACCURACY,
+        computeAttributeAccuracy(stats.str - base.str),
+      ],
       critChance: ["Шанс крит. удара в ближнем бою", stats.critChanceMelee],
       critDamage: [
         "Критический урон в ближнем бою",
@@ -39,7 +47,11 @@ export function buildOffenseGroups(stats: DerivedStats): RowGroup[] {
       ],
     }),
     attackGroup({
-      accuracy: ["Точность ударов в дальнем бою", STAT_LABEL.RANGED_ACCURACY],
+      accuracy: [
+        "Точность ударов в дальнем бою",
+        STAT_LABEL.RANGED_ACCURACY,
+        computeAttributeAccuracy(stats.dex - base.dex),
+      ],
       critChance: ["Шанс крит. удара в дальнем бою", stats.critChanceRanged],
       critDamage: [
         "Критический урон в дальнем бою",
@@ -60,7 +72,13 @@ export function buildOffenseGroups(stats: DerivedStats): RowGroup[] {
       ],
     }),
     attackGroup({
-      accuracy: ["Точность заклинаний", STAT_LABEL.SPELL_ACCURACY],
+      accuracy: [
+        "Точность заклинаний",
+        STAT_LABEL.SPELL_ACCURACY,
+        computeAttributeAccuracy(
+          (stats.int - base.int + stats.spi - base.spi) / 2,
+        ),
+      ],
       critChance: ["Шанс крит. удара заклинанием", stats.critChanceSpell],
       critDamage: [
         "Критический урон заклинаний",
@@ -101,10 +119,17 @@ export function buildOffenseGroups(stats: DerivedStats): RowGroup[] {
 }
 
 function attackGroup(kind: AttackKind): RowGroup {
+  const [accuracyLabel, accuracyKey, accuracyFromAttributes] = kind.accuracy;
   const [critLabel, critValue] = kind.critChance;
   return {
     rows: [
-      bonusRow(kind.accuracy[0], BASE_ACCURACY, "%", 1, kind.accuracy[1]),
+      bonusRow(
+        accuracyLabel,
+        BASE_ACCURACY + accuracyFromAttributes,
+        "%",
+        1,
+        accuracyKey,
+      ),
       computedRow(critLabel, critValue, "%", 1),
       bonusRow(
         kind.critDamage[0],

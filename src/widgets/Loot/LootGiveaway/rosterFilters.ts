@@ -21,7 +21,7 @@ export type RosterQuery = {
 export function filterRoster(players: Player[], query: RosterQuery) {
   const term = query.search.trim().toLowerCase();
   const searched = players
-    .filter((player) => player.active || query.showInactive)
+    .filter((player) => (player.active && !player.isAfk) || query.showInactive)
     .filter((player) => !term || player.username.toLowerCase().includes(term));
 
   const displayed = sortForItem(

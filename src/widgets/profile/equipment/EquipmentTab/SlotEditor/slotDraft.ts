@@ -1,5 +1,5 @@
 import type { UserEquipment } from "@/actions/getUserEquipment";
-import { findGearItem } from "../../itemsData";
+import { findGearItem, type GearItem } from "../../itemsData";
 import {
   DEFAULT_ENCHANT,
   DEFAULT_EXTRA_PROTECTION,
@@ -56,6 +56,10 @@ export function draftFromItem(
   };
 }
 
+export function draftForGearItem(gearItem: GearItem): SlotDraft {
+  return { ...EMPTY_DRAFT, itemName: gearItem.name, grade: gearItem.grade };
+}
+
 export function draftToValues(
   slotKey: string,
   draft: SlotDraft,
@@ -64,7 +68,7 @@ export function draftToValues(
   return {
     itemName: draft.itemName,
     grade: draft.grade,
-    enchant: draft.enchant,
+    enchant: Math.min(draft.enchant, options.maxEnchant),
     extraProtection: draft.extraProtection,
     engravings: draft.engravings.slice(0, options.maxEngravingSlots),
     runeId: draft.runeId,

@@ -9,7 +9,7 @@ import {
 import { scaleStat, STAT_LABELS } from "./itemsData/statsFormula";
 import { addStat, STAT_LABEL, type StatBonuses } from "./itemsData/statEffects";
 import { computeEngravingBonuses, ENGRAVING_STAT } from "./engravingBonuses";
-import { computeEphenRuneSetBonuses } from "./ephenRuneSetBonus";
+import { computeRuneSetBonuses } from "./runeSetBonus";
 import { computeRuneBonuses } from "./runeBonuses";
 import { computeSynthesisBonuses } from "./synthesisBonuses";
 import { computeSetStatBonuses } from "./setStatBonuses";
@@ -162,7 +162,7 @@ export function collectStatSources(
   return [
     computeEngravingBonuses(equipment),
     computeRuneBonuses(equipment),
-    computeEphenRuneSetBonuses(equipment),
+    computeRuneSetBonuses(equipment),
     computeSynthesisBonuses(equipment),
     computeSetStatBonuses(equipment),
     computeItemPassiveBonuses(equipment),

@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import type { UserEquipment } from "@/actions/getUserEquipment";
 import type { UserSeal } from "@/actions/getUserSeals";
 import type { RoleSkillBuild } from "@/actions/getUserSkillBuild";
+import type { RoleSlot } from "@/shared/config/roleSlots";
 import saveCharacterLevel from "@/actions/saveCharacterLevel";
 import { isValidCharacterLevel } from "../characterLevel";
 import {
@@ -13,16 +14,18 @@ import {
 } from "../characterStats";
 import type { SelectedBuffs } from "../characterBuffs";
 import type { ProfileStats } from "../statComparison";
-import StatDiff from "../StatDiff";
 import BuffRow from "./BuffRow";
 import LevelControl from "./LevelControl";
 import StatBar from "./StatBar";
 import StatList from "./StatList";
 import { attributeColumns, powerStats, utilityStats } from "./statSections";
 import { errorMessage } from "@/shared/lib/errorMessage";
+import { formatNumber } from "@/shared/lib/format";
+import { computeTestGearScore } from "../gearScore";
 
 export function CharacterStatsPanel({
   userId,
+  roleSlot,
   equipment,
   seals,
   user,
@@ -36,6 +39,7 @@ export function CharacterStatsPanel({
   viewer,
 }: {
   userId: number;
+  roleSlot: RoleSlot;
   equipment: UserEquipment[];
   seals: UserSeal[];
   user?: { username?: string | null } | null;
@@ -96,30 +100,18 @@ export function CharacterStatsPanel({
         </div>
         <div className="relative mt-1 space-y-0.5">
           <StatBar
+            label="Здоровье"
             value={stats.health}
+            viewerValue={viewer?.stats.health}
             color="#72a91a"
             borderColor="#b9d48d"
-            diff={
-              <StatDiff
-                label="Здоровье"
-                viewer={viewer?.stats.health}
-                owner={stats.health}
-                decimals={0}
-              />
-            }
           />
           <StatBar
+            label="Мана"
             value={stats.mana}
+            viewerValue={viewer?.stats.mana}
             color="#3190f4"
             borderColor="#98c8fa"
-            diff={
-              <StatDiff
-                label="Мана"
-                viewer={viewer?.stats.mana}
-                owner={stats.mana}
-                decimals={0}
-              />
-            }
           />
 
           <div className="pointer-events-none absolute -top-10 -left-1 z-10 size-23">
@@ -136,6 +128,7 @@ export function CharacterStatsPanel({
 
       <BuffRow
         userId={userId}
+        roleSlot={roleSlot}
         equipment={equipment}
         buffs={buffs}
         guildBuffs={guildBuffs}
@@ -169,6 +162,18 @@ export function CharacterStatsPanel({
         lines={utilityStats(stats)}
         viewerLines={viewer && utilityStats(viewer.stats)}
       />
+
+      <div className="border-t" />
+
+      <div
+        className="flex items-center justify-between text-xs text-muted-foreground"
+        title="Примерная оценка: ГС предметов по формулам игры и уровни печатей героя"
+      >
+        <span>ГС (тест, примерно)</span>
+        <span className="tabular-nums">
+          {formatNumber(computeTestGearScore(equipment, seals))}
+        </span>
+      </div>
     </div>
   );
 }

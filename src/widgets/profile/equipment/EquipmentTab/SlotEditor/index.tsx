@@ -4,12 +4,13 @@ import type { UserEquipment } from "@/actions/getUserEquipment";
 import { Button, Input } from "@/shared/ui";
 import { cn } from "@/shared/lib/tw-merge";
 import type { EquipmentSlot } from "../../equipmentData";
-import { ITEMS_BY_SLOT } from "../../itemsData";
+import { ITEMS_BY_SLOT, type GearItem } from "../../itemsData";
 import GearItemPicker from "../../GearItemPicker";
 import ItemCard from "../ItemCard";
 import { CUBE_ELIGIBLE_SLOTS } from "../slotLayout";
 import { EMPTY_SLOT_VALUES, type SlotValues } from "../slotValues";
 import {
+  draftForGearItem,
   draftFromItem,
   draftToPreviewItem,
   draftToValues,
@@ -48,6 +49,10 @@ export default function SlotEditor({
   const onChange = (patch: Partial<SlotDraft>) =>
     setDraft((current) => ({ ...current, ...patch }));
   const fieldProps = { slotKey: slot.key, draft, options, onChange };
+
+  const handleItemSelect = (gearItem: GearItem) => {
+    if (gearItem.name !== draft.itemName) setDraft(draftForGearItem(gearItem));
+  };
 
   const save = async (values: SlotValues) => {
     setSaving(true);
@@ -94,11 +99,10 @@ export default function SlotEditor({
             <FieldLabel>Предмет</FieldLabel>
             {knownItems && (
               <GearItemPicker
+                slotKey={slot.key}
                 items={knownItems}
                 value={draft.itemName}
-                onSelect={(gearItem) =>
-                  onChange({ itemName: gearItem.name, grade: gearItem.grade })
-                }
+                onSelect={handleItemSelect}
               />
             )}
             {!knownItems && (

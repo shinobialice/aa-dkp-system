@@ -3,6 +3,7 @@ import type { UserArchetype } from "@/actions/getUserArchetype";
 import type { UserEquipment } from "@/actions/getUserEquipment";
 import type { UserSeal } from "@/actions/getUserSeals";
 import type { UserSkillBuild } from "@/actions/getUserSkillBuild";
+import type { UserCharacterBuffs } from "@/actions/getUserCharacterBuffs";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui";
 import ClassArchetypeTab from "./archetype/ClassArchetypeTab";
 import { hasRole, ROLE_SLOTS, roleTabLabel } from "./archetype/archetypeRoles";
@@ -19,6 +20,8 @@ type Props = {
   onArchetypeChange: (archetype: UserArchetype) => void;
   skillBuild: UserSkillBuild;
   onSkillBuildChange: (skillBuild: UserSkillBuild) => void;
+  characterBuffs: UserCharacterBuffs;
+  onCharacterBuffsChange: (characterBuffs: UserCharacterBuffs) => void;
   equipment: UserEquipment[];
   onEquipmentChange: (equipment: UserEquipment[]) => void;
   seals: UserSeal[];
@@ -33,6 +36,8 @@ export default function CharacterRoleTabs(props: Props) {
     onArchetypeChange,
     skillBuild,
     onSkillBuildChange,
+    characterBuffs,
+    onCharacterBuffsChange,
     equipment,
     onEquipmentChange,
     seals,
@@ -67,6 +72,10 @@ export default function CharacterRoleTabs(props: Props) {
                 equipment={equipmentForRole(equipment, slot)}
                 seals={seals}
                 skillBuild={skillBuild[slot]}
+                buffs={characterBuffs[slot]}
+                onBuffsChange={(buffs) =>
+                  onCharacterBuffsChange({ ...characterBuffs, [slot]: buffs })
+                }
                 onChange={onEquipmentChange}
                 canEdit={canEditEquipment}
               />

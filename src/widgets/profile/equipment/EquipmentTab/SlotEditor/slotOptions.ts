@@ -1,5 +1,6 @@
 import { findGearItem } from "../../itemsData";
 import { getEngravingSlotCount } from "../../itemsData/engravingSlots";
+import { getMaxEnchant } from "../../itemsData/statsFormula";
 import {
   getSynthesisSlotOptions,
   hasSynthesisGrowth,
@@ -17,6 +18,7 @@ export function deriveSlotOptions(slotKey: string, draft: SlotDraft) {
     gearItem,
     fixedGrade: gearItem ? getFixedGrade(gearItem.name, gearItem.grade) : null,
     maxEngravingSlots: getEngravingSlotCount(slotKey, draft.grade),
+    maxEnchant: getMaxEnchant(gearItem?.id),
     handedness: gearItem ? WEAPON_HANDEDNESS[gearItem.id] : undefined,
     synthesisSlots: gearItem
       ? getSynthesisSlotOptions(

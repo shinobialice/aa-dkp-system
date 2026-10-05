@@ -22,7 +22,8 @@ import { RuneTooltip } from "../RuneTooltip";
 import ItemCard from "./ItemCard";
 import SlotEditor from "./SlotEditor";
 import SlotReadonlyView from "./SlotReadonlyView";
-import type { SlotValues } from "./slotValues";
+import LockedSlotButton from "./LockedSlotButton";
+import { isSlotLocked, type SlotValues } from "./slotValues";
 import { DEFAULT_GRADE } from "./slotLayout";
 
 type Side = "left" | "right";
@@ -33,8 +34,8 @@ type Props = {
   equipment: UserEquipment[];
   canEdit: boolean;
   onSave: (values: SlotValues) => Promise<void>;
-  tooltipSide?: Side;
-  showRune?: boolean;
+  tooltipSide: Side;
+  showRune: boolean;
   compareItem?: UserEquipment;
 };
 
@@ -47,13 +48,17 @@ export default function EquipmentSlotButton({
   equipment,
   canEdit,
   onSave,
-  tooltipSide = "left",
-  showRune = true,
+  tooltipSide,
+  showRune,
   compareItem,
 }: Props) {
   const [open, setOpen] = useState(false);
   const gearItem = findGearItem(slot.key, item?.item_name);
   const rune = item?.rune_id ? findRune(item.rune_id) : undefined;
+
+  if (isSlotLocked(slot.key, equipment)) {
+    return <LockedSlotButton slot={slot} tooltipSide={tooltipSide} />;
+  }
 
   const trigger = (
     <DialogTrigger asChild>

@@ -3,6 +3,7 @@ import { useState, type SyntheticEvent } from "react";
 import { ChevronDown } from "lucide-react";
 import { GearItemIcon } from "./GearItemIcon";
 import type { GearItem } from "./itemsData";
+import { getItemKind } from "./itemKind";
 import {
   Input,
   Popover,
@@ -13,12 +14,18 @@ import {
 import { cn } from "@/shared/lib/tw-merge";
 
 type Props = {
+  slotKey: string;
   items: GearItem[];
   value: string;
   onSelect: (item: GearItem) => void;
 };
 
-export default function GearItemPicker({ items, value, onSelect }: Props) {
+export default function GearItemPicker({
+  slotKey,
+  items,
+  value,
+  onSelect,
+}: Props) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
 
@@ -86,7 +93,12 @@ export default function GearItemPicker({ items, value, onSelect }: Props) {
                 )}
               >
                 <GearItemIcon item={item} grade={item.grade} size={28} />
-                <span className="min-w-0 flex-1 truncate">{item.name}</span>
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <span className="truncate">{item.name}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {getItemKind(slotKey, item.id)}
+                  </span>
+                </span>
               </button>
             ))}
           </div>

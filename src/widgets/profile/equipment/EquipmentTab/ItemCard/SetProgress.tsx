@@ -2,7 +2,7 @@ import Image from "next/image";
 import type { UserEquipment } from "@/actions/getUserEquipment";
 import { highlightNumbers } from "../../highlightNumbers";
 import { getNamedSetForItem } from "../../namedSetBonus";
-import { getEphenRuneSetForRune } from "../../ephenRuneSetBonus";
+import { getRuneSetForRune } from "../../runeSetBonus";
 
 type Props = {
   itemId: number;
@@ -12,13 +12,9 @@ type Props = {
 
 type Tier = { count: number; text: string; active: boolean };
 
-const EPHEN_RUNE_SET_SIZE = 8;
-
 export default function SetProgress({ itemId, runeId, equipment }: Props) {
   const namedSet = getNamedSetForItem(itemId, equipment);
-  const ephenRuneSet = runeId
-    ? getEphenRuneSetForRune(runeId, equipment)
-    : null;
+  const runeSet = runeId ? getRuneSetForRune(runeId, equipment) : null;
 
   return (
     <>
@@ -56,10 +52,10 @@ export default function SetProgress({ itemId, runeId, equipment }: Props) {
           </div>
         </SetSection>
       )}
-      {ephenRuneSet && (
+      {runeSet && (
         <SetSection
-          title={`${ephenRuneSet.name} (${ephenRuneSet.count}/${EPHEN_RUNE_SET_SIZE})`}
-          tiers={ephenRuneSet.tiers}
+          title={`${runeSet.name} (${runeSet.count}/${runeSet.size})`}
+          tiers={runeSet.tiers}
         />
       )}
     </>

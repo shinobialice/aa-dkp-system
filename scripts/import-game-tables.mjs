@@ -7,6 +7,9 @@ const SET_BONUSES_OUTPUT = `${ITEMS_DIR}/gameSetBonuses.ts`;
 const ITEM_PASSIVES_OUTPUT = `${ITEMS_DIR}/gameItemPassives.ts`;
 const ITEM_LEVELS_OUTPUT = `${ITEMS_DIR}/gameItemLevels.ts`;
 const ARMOR_TYPES_OUTPUT = `${ITEMS_DIR}/armorType.ts`;
+const WEAPON_KINDS_OUTPUT = `${ITEMS_DIR}/weaponKind.ts`;
+const ENCHANT_LIMITS_OUTPUT = `${ITEMS_DIR}/gameEnchantLimits.ts`;
+const WEAPON_GEAR_SCORE_OUTPUT = `${ITEMS_DIR}/gameWeaponGearScore.ts`;
 const BUFFS_OUTPUT = `${ITEMS_DIR}/gameBuffs.ts`;
 const ARMOR_QUALITY_BUFFS_OUTPUT = `${ITEMS_DIR}/gameArmorQualityBuffs.ts`;
 const HEADER =
@@ -93,6 +96,28 @@ const ARMOR_WEIGHTS = { cloth: "light", leather: "medium", plate: "heavy" };
 // Слоты шлема, нагрудника, пояса, наручей, перчаток, поножей и сапог — только
 // они входят в комплект лёгких, средних или тяжелых доспехов.
 const ARMOR_SET_SLOTS = new Set([1, 2, 3, 4, 5, 7, 8]);
+
+// Названия holdables в данных игры корейские; русские — из категорий предметов игры.
+const WEAPON_KIND_NAMES = {
+  단검: "Кинжал",
+  한손검: "Одноручный меч",
+  한손도: "Одноручный клинок",
+  한손도끼: "Одноручный топор",
+  한손둔기: "Одноручное дробящее",
+  한손지팡이: "Одноручный посох",
+  한손창: "Одноручное древковое",
+  양손검: "Двуручный меч",
+  양손도: "Двуручный клинок",
+  양손도끼: "Двуручный топор",
+  양손둔기: "Двуручное дробящее",
+  양손지팡이: "Двуручный посох",
+  양손창: "Двуручное древковое",
+  방패: "Щит",
+  활: "Лук",
+  산탄총: "Огнестрельное оружие",
+  현악기: "Струнный инструмент",
+  관악기: "Духовой инструмент",
+};
 
 const MAX_HEALTH_ATTRIBUTE = 6;
 const MAX_MANA_ATTRIBUTE = 7;
@@ -259,6 +284,9 @@ await writeSetBonuses();
 await writeItemPassives();
 await writeItemLevels();
 await writeArmorTypes();
+await writeWeaponKinds();
+await writeEnchantLimits();
+await writeWeaponGearScore();
 await writeBuffs();
 await writeArmorQualityBuffs();
 
@@ -425,6 +453,59 @@ async function writeArmorTypes() {
     "};",
   ]);
   console.log(`${itemLines.length} items → ${ARMOR_TYPES_OUTPUT}`);
+}
+
+async function writeWeaponKinds() {
+  const itemLines = catalog.flatMap(([itemId, name]) => {
+    const record = clientData.records[itemId];
+    if (record?.kind !== "weapon") return [];
+    const holdableName = clientData.holdables[record.holdable]?.name;
+    const kind = WEAPON_KIND_NAMES[holdableName];
+    if (!kind) throw new Error(`Нет названия типа оружия: ${holdableName}`);
+    return [`  ${itemId}: "${kind}", // ${name}`];
+  });
+
+  await writeSource(WEAPON_KINDS_OUTPUT, [
+    HEADER,
+    "export const WEAPON_KIND: Record<number, string> = {",
+    ...itemLines,
+    "};",
+  ]);
+  console.log(`${itemLines.length} items → ${WEAPON_KINDS_OUTPUT}`);
+}
+
+async function writeWeaponGearScore() {
+  const itemLines = catalog.flatMap(([itemId, name]) => {
+    const record = clientData.records[itemId];
+    if (record?.kind !== "weapon") return [];
+    const multiplier =
+      clientData.holdables[record.holdable].gear_score_multiplier / 100;
+    return [`  ${itemId}: ${multiplier}, // ${name}`];
+  });
+
+  await writeSource(WEAPON_GEAR_SCORE_OUTPUT, [
+    HEADER,
+    "export const GAME_WEAPON_GEAR_SCORE: Record<number, number> = {",
+    ...itemLines,
+    "};",
+  ]);
+  console.log(`${itemLines.length} items → ${WEAPON_GEAR_SCORE_OUTPUT}`);
+}
+
+async function writeEnchantLimits() {
+  const itemLines = catalog.flatMap(([itemId, name]) => {
+    const record = clientData.records[itemId];
+    if (record?.kind !== "weapon" && record?.kind !== "armor") return [];
+    return [`  ${itemId}: ${record.maxCube}, // ${name}`];
+  });
+
+  await writeSource(ENCHANT_LIMITS_OUTPUT, [
+    HEADER,
+    "export const GAME_MAX_ENCHANT: Record<number, number> = {",
+    ...itemLines,
+    "};",
+  ]);
+  console.log(`${itemLines.length} items → ${ENCHANT_LIMITS_OUTPUT}`);
 }
 
 async function writeArmorQualityBuffs() {

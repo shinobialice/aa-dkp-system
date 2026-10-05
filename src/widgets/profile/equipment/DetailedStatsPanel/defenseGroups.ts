@@ -2,7 +2,7 @@ import { ENGRAVING_STAT } from "../engravingBonuses";
 import { STAT_LABEL } from "../itemsData/statEffects";
 import type { DerivedStats } from "../characterStats";
 
-import { bonusRow, computedRow, staticRow, type RowGroup } from "./statRows";
+import { bonusRow, computedRow, type RowGroup } from "./statRows";
 
 type DefenseKind = {
   vulnerability: [label: string, key: string];
@@ -13,8 +13,37 @@ type DefenseKind = {
 
 const BASE_VULNERABILITY = 100;
 
+// По замерам в игре: защита 158 → 1.96%, 808 → 9.28%, 1996 → 20.17%,
+// сопротивление 4017 → 33.71%.
+const DAMAGE_REDUCTION_CONSTANT = 7900;
+// Из данных игры для устойчивости к PvP: устойчивость / (устойчивость + 8000).
+// Устойчивость к крит. урону снижает размер крита по той же кривой, а шанс —
+// по ней же с потолком 22%: при 20 ед. это −0.05% и −0.25%, как в игре.
+const RESIST_REDUCTION_CONSTANT = 8000;
+const CRIT_CHANCE_TAKEN_SHARE = 0.22;
+
 export function buildDefenseGroups(stats: DerivedStats): RowGroup[] {
+  const critDamageReduction = reductionPercent(
+    stats.critDamageResist,
+    RESIST_REDUCTION_CONSTANT,
+  );
   return [
+    {
+      rows: [
+        computedRow(
+          "Снижение урона в ближнем и дальнем бою",
+          reductionPercent(stats.defense, DAMAGE_REDUCTION_CONSTANT),
+          "%",
+          1,
+        ),
+        computedRow(
+          "Снижение урона от заклинаний",
+          reductionPercent(stats.resist, DAMAGE_REDUCTION_CONSTANT),
+          "%",
+          1,
+        ),
+      ],
+    },
     {
       rows: [
         computedRow("Парирование", stats.parry, "%", 1),
@@ -27,8 +56,20 @@ export function buildDefenseGroups(stats: DerivedStats): RowGroup[] {
           0,
           ENGRAVING_STAT.CRIT_DAMAGE_RESIST,
         ),
-        staticRow("Шанс получения критического урона", "-0.05%", true),
-        staticRow("Размер критического урона", "-0.25%", true),
+        computedRow(
+          "Шанс получения критического урона",
+          -CRIT_CHANCE_TAKEN_SHARE * critDamageReduction,
+          "%",
+          2,
+          true,
+        ),
+        computedRow(
+          "Размер критического урона",
+          -critDamageReduction,
+          "%",
+          2,
+          true,
+        ),
         bonusRow(
           "Игнор устойчивости к крит. урону",
           0,
@@ -43,6 +84,13 @@ export function buildDefenseGroups(stats: DerivedStats): RowGroup[] {
           "",
           0,
           ENGRAVING_STAT.PVP_RESIST,
+        ),
+        computedRow(
+          "Снижение урона в PvP",
+          reductionPercent(stats.pvpResist, RESIST_REDUCTION_CONSTANT),
+          "%",
+          1,
+          true,
         ),
         bonusRow(
           "Игнор устойчивости к атакам в PVP",
@@ -143,4 +191,8 @@ function defenseGroup(kind: DefenseKind): RowGroup {
       bonusRow(kind.pveResist[0], 0, "", 0, kind.pveResist[1]),
     ],
   };
+}
+
+function reductionPercent(value: number, constant: number): number {
+  return (value / (value + constant)) * 100;
 }

@@ -1,6 +1,6 @@
 import { type Rune } from "./itemsData/runes";
 import type { UserEquipment } from "@/actions/getUserEquipment";
-import { getEphenRuneSetForRune } from "./ephenRuneSetBonus";
+import { getRuneSetForRune } from "./runeSetBonus";
 import {
   getSealGradeColor,
   getSealGradeLabel,
@@ -42,9 +42,7 @@ export function RuneTooltip({
   children: React.ReactNode;
 }) {
   const color = getSealGradeColor(rune.grade);
-  const ephenSet = equipment
-    ? getEphenRuneSetForRune(rune.id, equipment)
-    : null;
+  const runeSet = equipment ? getRuneSetForRune(rune.id, equipment) : null;
 
   return (
     <Tooltip>
@@ -76,15 +74,15 @@ export function RuneTooltip({
               </div>
             </>
           )}
-          {ephenSet && (
+          {runeSet && (
             <>
               <div className="border-t border-border" />
               <div className="space-y-1">
                 <div className="text-xs font-semibold">
-                  {ephenSet.name} ({ephenSet.count}/8)
+                  {runeSet.name} ({runeSet.count}/{runeSet.size})
                 </div>
                 <div className="space-y-1.5">
-                  {ephenSet.tiers.map((tier) => (
+                  {runeSet.tiers.map((tier) => (
                     <RuneSetTierRow
                       key={tier.count}
                       count={tier.count}

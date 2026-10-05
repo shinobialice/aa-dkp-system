@@ -5,6 +5,7 @@ import type { UserSeal } from "@/actions/getUserSeals";
 import type { ProfileTag } from "@/widgets/profile/profileTypes";
 import type { UserArchetype } from "@/actions/getUserArchetype";
 import type { UserSkillBuild } from "@/actions/getUserSkillBuild";
+import type { UserCharacterBuffs } from "@/actions/getUserCharacterBuffs";
 import type { UserEquipment } from "@/actions/getUserEquipment";
 import ProfileAttendanceTab from "./activity/ProfileAttendanceTab";
 import InventoryTabsClient from "./inventory/InventoryTabsClient";
@@ -36,6 +37,8 @@ export default function ProfileTabs({
   setArchetype,
   skillBuild,
   setSkillBuild,
+  characterBuffs,
+  setCharacterBuffs,
   equipment,
   setEquipment,
   tags,
@@ -58,6 +61,8 @@ export default function ProfileTabs({
   setArchetype: (archetype: UserArchetype) => void;
   skillBuild: UserSkillBuild;
   setSkillBuild: (skillBuild: UserSkillBuild) => void;
+  characterBuffs: UserCharacterBuffs;
+  setCharacterBuffs: (characterBuffs: UserCharacterBuffs) => void;
   equipment: UserEquipment[];
   setEquipment: (equipment: UserEquipment[]) => void;
   tags: ProfileTag[];
@@ -139,6 +144,8 @@ export default function ProfileTabs({
           onArchetypeChange={setArchetype}
           skillBuild={skillBuild}
           onSkillBuildChange={setSkillBuild}
+          characterBuffs={characterBuffs}
+          onCharacterBuffsChange={setCharacterBuffs}
           equipment={equipment}
           onEquipmentChange={setEquipment}
           seals={seals}

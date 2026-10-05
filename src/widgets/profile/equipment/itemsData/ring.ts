@@ -184,4 +184,11 @@ export const RING_ITEMS: GearItem[] = [
     iconUrl: ITEM_ICON("ring", "иферийское_кольцо_целителя"),
     sealIconUrl: null,
   },
+  {
+    id: 55118,
+    name: "Обновленное эфенское кольцо",
+    grade: 1,
+    iconUrl: ITEM_ICON("ring", "эфенское_кольцо"),
+    sealIconUrl: SEAL_ICON("top_seal_ipnir_4"),
+  },
 ];

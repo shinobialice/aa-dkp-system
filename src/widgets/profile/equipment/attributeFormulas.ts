@@ -1,104 +1,66 @@
-const PARRY_CURVE: [number, number][] = [
-  [200, 0.109],
-  [300, 0.121],
-  [400, 0.13],
-  [500, 0.138],
-  [600, 0.145],
-  [700, 0.15],
-  [800, 0.156],
-  [900, 0.161],
-  [1000, 0.165],
-  [1100, 0.169],
-  [1200, 0.173],
-  [1300, 0.177],
-  [1400, 0.18],
-  [1500, 0.183],
-  [1600, 0.186],
-  [1700, 0.189],
-  [1800, 0.192],
-  [1900, 0.195],
-  [2000, 0.198],
-  [2100, 0.201],
-  [2200, 0.203],
-  [2300, 0.205],
-  [2400, 0.207],
-  [2500, 0.209],
-];
+const CHARACTER_LEVEL = 55;
 
-function evalCurve(points: [number, number][], x: number): number {
-  if (x <= points[0][0]) {
-    const [x0, y0] = points[0];
-    const [x1, y1] = points[1];
-    const slope = (y1 - y0) / (x1 - x0);
-    return y0 + (x - x0) * slope;
-  }
-  const last = points.length - 1;
-  if (x >= points[last][0]) {
-    const [x0, y0] = points[last - 1];
-    const [x1, y1] = points[last];
-    const slope = (y1 - y0) / (x1 - x0);
-    return y1 + (x - x1) * slope;
-  }
-  for (let i = 0; i < last; i++) {
-    const [x0, y0] = points[i];
-    const [x1, y1] = points[i + 1];
-    if (x >= x0 && x <= x1) {
-      const t = (x - x0) / (x1 - x0);
-      return y0 + t * (y1 - y0);
-    }
-  }
-  return points[last][1];
-}
+// В данных игры (unit_formulas) парирование, уклонение, блок, точность и шанс
+// крита считаются в рейтинге: 1% — это (уровень^1.3 + уровень × 3 + 17) × 100.
+const RATING_PER_PERCENT =
+  (CHARACTER_LEVEL ** 1.3 + CHARACTER_LEVEL * 3 + 17) * 100;
+
+const PARRY_RATING = 100_000;
+const DODGE_RATING = 50_000;
+const BLOCK_RATING = 166_000;
+const DEFENSE_CHANCE_POWER = 0.26;
+const CRIT_LEVEL_POWER = 1.3009;
+const ACCURACY_RATING_PER_POINT = 500;
 
 export function computeParry(strTotal: number): number {
-  return evalCurve(PARRY_CURVE, strTotal);
+  return defenseChance(PARRY_RATING, strTotal);
 }
 
 export function computeDodge(dexTotal: number): number {
-  return evalCurve(PARRY_CURVE, dexTotal) * 0.5;
+  return defenseChance(DODGE_RATING, dexTotal);
 }
 
 export function computeBlock(staTotal: number): number {
-  return evalCurve(PARRY_CURVE, staTotal) * 1.655;
-}
-
-export function computeTacticalReadiness(strPlusDex: number): number {
-  return 47.837 * Math.pow(strPlusDex, 0.4386);
-}
-
-export function computeSkillTimeReduction(intPlusSpi: number): number {
-  return 0.0396 * Math.pow(intPlusSpi, 0.1631);
-}
-
-export function computeManaRegen(spiTotal: number): number {
-  return spiTotal * 0.297 + 18;
-}
-
-export function computeHealthRegen(staTotal: number): number {
-  return (staTotal / 100) * 13 + 50;
-}
-
-const CRIT_CHANCE_HEROIC_TIERS: [number, number][] = [
-  [40, 1],
-  [45, 1.1],
-  [50, 1.2],
-  [55, 1.3],
-  [60, 1.35],
-  [65, 1.4],
-  [70, 1.45],
-];
-
-export function getCritChanceRate(heroicLevel: number): number {
-  let rate = 0;
-  for (const [lvl, r] of CRIT_CHANCE_HEROIC_TIERS) {
-    if (heroicLevel >= lvl) rate = r;
-  }
-  return rate;
+  return defenseChance(BLOCK_RATING, staTotal);
 }
 
 export function computeCritChance(
   attrTotal: number,
   heroicLevel: number,
 ): number {
-  return attrTotal * getCritChanceRate(heroicLevel) * 0.01;
+  return (
+    (attrTotal * (CHARACTER_LEVEL + heroicLevel) ** CRIT_LEVEL_POWER) /
+    RATING_PER_PERCENT
+  );
+}
+
+// Точность заклинаний в игре берёт половину интеллекта и половину силы духа.
+export function computeAttributeAccuracy(attrPoints: number): number {
+  return (attrPoints * ACCURACY_RATING_PER_POINT) / RATING_PER_PERCENT;
+}
+
+// Логарифм в формулах игры десятичный (множитель 9.12 в тактике — это ln(10)^2.65).
+export function computeTacticalReadiness(strPlusDex: number): number {
+  const average = strPlusDex / 2;
+  if (average <= 0) return 0;
+  return Math.log10(average) ** 2.65 * 7.9 * 9.12;
+}
+
+// Формула игры даёт сокращение в десятых долях процента.
+export function computeSkillTimeReduction(intPlusSpi: number): number {
+  const scaled = intPlusSpi / 16;
+  if (scaled <= 0) return 0;
+  return ((1.98 * Math.log10(scaled) - 0.1915) * 30.582) / 10;
+}
+
+export function computeManaRegen(spiTotal: number): number {
+  return spiTotal * 0.3 + 15;
+}
+
+export function computeHealthRegen(staTotal: number): number {
+  return (staTotal / 100) * 13 + 50;
+}
+
+function defenseChance(rating: number, attrTotal: number): number {
+  return (rating * attrTotal ** DEFENSE_CHANCE_POWER) / RATING_PER_PERCENT;
 }

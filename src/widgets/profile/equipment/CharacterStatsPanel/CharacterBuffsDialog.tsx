@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import saveCharacterBuffs from "@/actions/saveCharacterBuffs";
+import type { RoleSlot } from "@/shared/config/roleSlots";
 import {
   Button,
   Dialog,
@@ -23,12 +24,14 @@ import BuffOptionRow from "./BuffOptionRow";
 
 type Props = {
   userId: number;
+  roleSlot: RoleSlot;
   buffs: SelectedBuffs;
   onChange: (buffs: SelectedBuffs) => void;
 };
 
 export default function CharacterBuffsDialog({
   userId,
+  roleSlot,
   buffs,
   onChange,
 }: Props) {
@@ -53,7 +56,7 @@ export default function CharacterBuffsDialog({
   const handleSave = async () => {
     setSaving(true);
     try {
-      await saveCharacterBuffs(userId, draft);
+      await saveCharacterBuffs(userId, roleSlot, draft);
       onChange(draft);
       setOpen(false);
       toast.success("Баффы сохранены");

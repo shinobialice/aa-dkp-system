@@ -15,11 +15,16 @@ export default function PlayerName({ player }: { player: Player }) {
         </AvatarFallback>
       </Avatar>
       <span className="truncate font-semibold">{player.username}</span>
-      {!player.active && (
-        <span className="shrink-0 rounded-full border px-1.5 text-2xs text-muted-foreground">
-          неактивен
-        </span>
-      )}
+      {!player.active && <StatusBadge>неактивен</StatusBadge>}
+      {player.active && player.isAfk && <StatusBadge>АФК</StatusBadge>}
+    </span>
+  );
+}
+
+function StatusBadge({ children }: { children: string }) {
+  return (
+    <span className="shrink-0 rounded-full border px-1.5 text-2xs text-muted-foreground">
+      {children}
     </span>
   );
 }

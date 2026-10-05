@@ -29,6 +29,7 @@ export type Player = {
   id: number;
   username: string;
   active: boolean;
+  isAfk: boolean;
   avatarUrl: string | null;
   items: PlayerItem[];
   miscGrants: MiscLootGrant[];
@@ -36,6 +37,12 @@ export type Player = {
 };
 
 export type RosterFilter = "all" | "want" | "stock";
+
+export function playerStatusLabel(player: Player) {
+  if (!player.active) return "Неактивен";
+  if (player.isAfk) return "АФК";
+  return "Активен";
+}
 
 export function todayIso() {
   return new Date().toISOString().split("T")[0];

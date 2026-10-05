@@ -188,12 +188,12 @@ export function computeDerivedStats(
     moveSpeed: base.moveSpeed * (1 + bonus.moveSpeed / 100),
     skillSpeed: Math.max(
       MIN_SKILL_SPEED,
-      100 - computeSkillTimeReduction(int + spi) * 100 + bonus.skillSpeed,
+      100 - computeSkillTimeReduction(int + spi) + bonus.skillSpeed,
     ),
     proficiency: base.proficiency + bonus.proficiency,
-    parry: computeParry(str) * 100 + bonus.parry,
-    dodge: computeDodge(dex) * 100 + bonus.dodge,
-    block: computeBlock(sta) * 100 + bonus.block,
+    parry: computeParry(str) + bonus.parry,
+    dodge: computeDodge(dex) + bonus.dodge,
+    block: computeBlock(sta) + bonus.block,
     tacticalReadiness:
       computeTacticalReadiness(str + dex) + bonus.tacticalReadiness,
     manaRegen: computeManaRegen(spi) + bonus.manaRegen,

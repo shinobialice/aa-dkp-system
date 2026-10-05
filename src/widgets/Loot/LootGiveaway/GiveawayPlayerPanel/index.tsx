@@ -10,6 +10,7 @@ import { GiveawayStatusIcon } from "../GiveawayStatusIcon";
 import {
   formatDate,
   formatWishlistItem,
+  playerStatusLabel,
   type Player,
   type TrackedItem,
 } from "../giveawayModel";
@@ -119,8 +120,8 @@ export default function GiveawayPlayerPanel({
             {player.username}
           </h2>
           <p className="text-xs text-muted-foreground">
-            {player.active ? "Активен" : "Неактивен"} · гильдия выдала{" "}
-            {givenCount} из {items.length}
+            {playerStatusLabel(player)} · гильдия выдала {givenCount} из{" "}
+            {items.length}
           </p>
         </div>
         {isAdmin && (

@@ -156,4 +156,18 @@ export const EARRING_ITEMS: GearItem[] = [
     iconUrl: ITEM_ICON("earring", "счастливая_серьга_корабела"),
     sealIconUrl: null,
   },
+  {
+    id: 55120,
+    name: "Обновленная эфенская серьга",
+    grade: 1,
+    iconUrl: ITEM_ICON("earring", "эфенская_серьга"),
+    sealIconUrl: SEAL_ICON("top_seal_ipnir_4"),
+  },
+  {
+    id: 33154,
+    name: "Серьга хранителя тайны Эрнарда",
+    grade: 7,
+    iconUrl: ITEM_ICON("earring", "серьга_хранителя_тайны_эрнарда"),
+    sealIconUrl: null,
+  },
 ];
