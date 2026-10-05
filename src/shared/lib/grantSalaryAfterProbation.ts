@@ -1,6 +1,7 @@
 import "server-only";
 import sql from "./db";
 import isProbationOver from "@/utils/isProbationOver";
+import { publishChanges } from "@/server/liveChanges";
 
 export async function grantSalaryAfterProbation() {
   try {
@@ -23,6 +24,7 @@ export async function grantSalaryAfterProbation() {
       SET is_eligible_for_salary = true, probation_salary_granted = true
       WHERE id IN ${sql(ids)}
     `;
+    await publishChanges("members");
   } catch (error) {
     console.error(
       "Ошибка автоначисления зарплаты после испытательного срока:",

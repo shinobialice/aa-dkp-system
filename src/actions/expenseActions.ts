@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { triggerFinanceRecalc } from "@/server/finance/recalc";
+import { publishChanges } from "@/server/liveChanges";
 import sql from "@/shared/lib/db";
 import type { ExpenseRow } from "@/shared/lib/dbTypes";
 import { getUtcYearMonth } from "@/utils/getUtcYearMonth";
@@ -53,6 +54,7 @@ export const addExpense = async (input: ExpenseInput) => {
   }
 
   revalidatePath("/loot");
+  await publishChanges("loot");
   await recalcMonths([input.date]);
 };
 
@@ -83,6 +85,7 @@ export const updateExpense = async ({
   }
 
   revalidatePath("/loot");
+  await publishChanges("loot");
   await recalcMonths(previous ? [input.date, previous.date] : [input.date]);
 };
 
@@ -97,6 +100,7 @@ export const deleteExpense = async (id: number, date: string) => {
   }
 
   revalidatePath("/loot");
+  await publishChanges("loot");
   await recalcMonths([date]);
 };
 

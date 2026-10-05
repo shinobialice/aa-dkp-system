@@ -9,6 +9,7 @@ import {
 import ensurePrivilieges from "./ensurePrivilieges";
 import { insertRaidLinks, RAID_EDITOR_TAGS } from "@/server/raidLinks";
 import { triggerFinanceRecalc } from "@/server/finance/recalc";
+import { publishChanges } from "@/server/liveChanges";
 
 const createRaidEvent = async (
   type: string,
@@ -51,9 +52,10 @@ const createRaidEvent = async (
     console.error("Failed to create raid:", error);
     throw new Error("Ошибка при создании рейда");
   }
+  await publishChanges("raids");
 
   // Посещаемость влияет на веса зарплат за месяц рейда (см. generateSalaries)
-  // — пересчитываем сразу, не дожидаясь таймера на /loot/finance.
+  // — пересчитываем сразу.
   const { year, month } = getMoscowYearMonth(start_date);
   await triggerFinanceRecalc(month, year);
 

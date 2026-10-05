@@ -12,6 +12,7 @@ import {
   type BossName,
   type KillAction,
 } from "@/shared/config/bossRespawn";
+import { publishChanges } from "@/server/liveChanges";
 import { resolveNotifyMinutes } from "@/shared/config/vkNotificationDefaults";
 import sql from "@/shared/lib/db";
 import type { BossRespawnRow } from "@/shared/lib/dbTypes";
@@ -61,6 +62,7 @@ export async function registerBossKill(
   } catch (error) {
     console.error("Не удалось обновить подсказку по созданию рейда:", error);
   }
+  await publishChanges("respawn", "raidSuggestions");
 
   try {
     await scheduleNotifications(boss, killTimeIso, nextRespawn);

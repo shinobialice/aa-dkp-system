@@ -1,6 +1,7 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import { publishChanges } from "@/server/liveChanges";
 import { saveUploadedFile } from "@/shared/lib/localStorage";
 import { getSessionUserId } from "./getSessionUserId";
 
@@ -48,6 +49,7 @@ export async function uploadAvatar(formData: FormData): Promise<string> {
     console.error("Failed to save avatar url:", updateError);
     throw new Error("Не удалось сохранить аватар");
   }
+  await publishChanges("members");
 
   return avatarUrl;
 }

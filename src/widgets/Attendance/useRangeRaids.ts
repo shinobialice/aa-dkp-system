@@ -2,10 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { getRaidsInRange, type RangeRaid } from "@/actions/getRaidsInRange";
-import { useVisiblePolling } from "@/hooks/useVisiblePolling";
+import { useLiveChanges } from "@/hooks/useLiveChanges";
 import type { DateRange } from "./attendanceModel";
-
-const POLL_INTERVAL_MS = 30_000;
 
 type Loaded = { key: string; raids: RangeRaid[] };
 
@@ -33,7 +31,7 @@ export function useRangeRaids(
       setLoaded({ key: requestKey, raids }),
     );
 
-  useVisiblePolling(refresh, POLL_INTERVAL_MS);
+  useLiveChanges(["raids"], refresh);
 
   return { raids: isLoaded ? loaded.raids : [], isLoaded, refresh };
 }

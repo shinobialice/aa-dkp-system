@@ -1,4 +1,5 @@
 import "server-only";
+import { publishChanges } from "@/server/liveChanges";
 import { getMoscowYearMonth } from "@/utils/getMoscowISOString";
 import { generateGuildFunds } from "./generateGuildFunds";
 import { generateSalaries } from "./generateSalaries";
@@ -19,6 +20,7 @@ export async function recalculateFinanceForMonth(month: number, year: number) {
     // фонд всё равно должен отобразиться.
   }
   await generateGuildFunds(month, year);
+  await publishChanges("finance");
 }
 
 // Пересчёт — производная величина: ошибка в нём не должна валить уже успешно

@@ -1,6 +1,7 @@
 "use server";
 import { cookies } from "next/headers";
 import sql from "@/shared/lib/db";
+import { publishChanges } from "@/server/liveChanges";
 import type { UserRow } from "@/shared/lib/dbTypes";
 import { hasTag } from "./hasTag";
 import { getSessionUserId } from "./getSessionUserId";
@@ -112,6 +113,7 @@ const editUser = async (
     console.error("Failed to update user: not found");
     throw new Error("Ошибка при обновлении игрока");
   }
+  await publishChanges("members");
 
   if (existing.username !== username) {
     try {

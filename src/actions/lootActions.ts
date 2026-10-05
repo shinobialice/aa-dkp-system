@@ -1,6 +1,7 @@
 "use server";
 
 import { triggerFinanceRecalc } from "@/server/finance/recalc";
+import { publishChanges } from "@/server/liveChanges";
 import sql from "@/shared/lib/db";
 import type { ItemTypeRow, LootRow } from "@/shared/lib/dbTypes";
 import { getUtcYearMonth } from "@/utils/getUtcYearMonth";
@@ -98,6 +99,7 @@ export const addLootItem = async ({
     console.error("Ошибка при добавлении лута:", error);
     throw new Error("Не удалось добавить предмет");
   }
+  await publishChanges("loot");
 
   // "В казну"/"Продано" сразу с income (quick-add в казну из AddLootDialog) —
   // пересчитываем фонд месяца продажи сразу.
@@ -140,6 +142,7 @@ export const updateTreasuryIncome = async ({
     throw new Error("Не удалось изменить поступление в казну");
   }
   if (!updated) throw new Error("Запись не найдена");
+  await publishChanges("loot");
 
   if (updated.sold_at) {
     const { year, month } = getUtcYearMonth(new Date(updated.sold_at));

@@ -1,6 +1,7 @@
 "use server";
 
 import { triggerFinanceRecalc } from "@/server/finance/recalc";
+import { publishChanges } from "@/server/liveChanges";
 import { distributeLot, type StockLotRow } from "@/server/lootDistribution";
 import { syncTreasuryGiveaway } from "@/server/syncTreasuryGiveaway";
 import sql from "@/shared/lib/db";
@@ -89,6 +90,7 @@ export async function distributeLootStock({
       isFree ? "Не удалось выдать предметы" : "Не удалось продать предметы",
     );
   }
+  await publishChanges("loot");
 
   if (!isFree) {
     const { year, month } = getUtcYearMonth(new Date(soldAt));
@@ -188,6 +190,7 @@ export async function updateLootSale({
     console.error(error);
     throw new Error("Ошибка при обновлении записи о продаже");
   }
+  await publishChanges("loot");
 
   // Цена/статус могли измениться в любую сторону, а дата продажи — уехать в
   // другой месяц: пересчитываем и старый, и новый месяц.

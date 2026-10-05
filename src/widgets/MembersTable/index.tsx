@@ -5,7 +5,7 @@ import { ArrowDown, ArrowUp, Search } from "lucide-react";
 import { Input } from "@/shared/ui";
 import { cn } from "@/shared/lib/tw-merge";
 import { getMembersTableData } from "@/actions/getMembersTableData";
-import { useVisiblePolling } from "@/hooks/useVisiblePolling";
+import { useLiveChanges } from "@/hooks/useLiveChanges";
 import {
   DESC_FIRST,
   classCounts,
@@ -21,8 +21,6 @@ import { MemberRow, ROW_COLUMNS } from "./MemberRow";
 import { MemberCard } from "./MemberCard";
 import GroupHeader from "./GroupHeader";
 import ClassChips, { type ClassChip } from "./ClassChips";
-
-const POLL_MS = 45_000;
 
 const HEADERS: { key: SortKey; label: string; align?: "right" }[] = [
   { key: "username", label: "Игрок" },
@@ -43,10 +41,10 @@ export default function MembersTable({ data }: { data: Member[] }) {
   const tableRef = useRef<HTMLDivElement>(null);
   const scrollTableToTop = () => tableRef.current?.scrollTo({ top: 0 });
 
-  useVisiblePolling(async () => {
+  useLiveChanges(["members", "raids", "finance"], async () => {
     const fresh = await getMembersTableData();
     if (fresh) setRows(fresh as Member[]);
-  }, POLL_MS);
+  });
 
   const counts = useMemo(() => classCounts(rows), [rows]);
   const visible = useMemo(() => {

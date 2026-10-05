@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Check, Swords, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/shared/ui";
-import { useVisiblePolling } from "@/hooks/useVisiblePolling";
+import { useLiveChanges } from "@/hooks/useLiveChanges";
 import {
   getPendingRaidSuggestions,
   approveRaidSuggestion,
@@ -42,7 +42,7 @@ export default function RaidSuggestionsCard({
     reload();
   }, [reload]);
 
-  useVisiblePolling(reload, 30_000);
+  useLiveChanges(["raidSuggestions"], reload);
 
   const handleApprove = async (suggestion: RaidSuggestion) => {
     setPending(suggestion.id);

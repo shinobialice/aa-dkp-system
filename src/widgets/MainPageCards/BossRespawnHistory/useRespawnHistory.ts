@@ -2,9 +2,7 @@
 
 import { getBossRespawnHistoryPage } from "@/actions/getBossRespawnHistoryPage";
 import { useAsyncData } from "@/hooks/useAsyncData";
-import { useVisiblePolling } from "@/hooks/useVisiblePolling";
-
-const REFRESH_MS = 20_000;
+import { useLiveChanges } from "@/hooks/useLiveChanges";
 
 export function useRespawnHistory(
   page: number,
@@ -15,7 +13,7 @@ export function useRespawnHistory(
     enabled ? `${page}:${pageSize}` : null,
     () => getBossRespawnHistoryPage(page, pageSize),
   );
-  useVisiblePolling(reload, REFRESH_MS);
+  useLiveChanges(["respawn"], reload);
 
   return {
     rows: data?.rows ?? [],

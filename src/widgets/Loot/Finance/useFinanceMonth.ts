@@ -6,10 +6,8 @@ import {
   getSalariesForMonth,
   updateSalaryAdvance,
 } from "@/actions/financeActions";
-import { useVisiblePolling } from "@/hooks/useVisiblePolling";
+import { useLiveChanges } from "@/hooks/useLiveChanges";
 import type { Fund, SalaryEntry } from "./financeModel";
-
-const AUTO_REFRESH_MS = 30_000;
 
 type Loaded = {
   key: string;
@@ -48,7 +46,7 @@ export function useFinanceMonth(month: number, year: number) {
     loadMonth();
   }, [key]);
 
-  useVisiblePolling(refresh, AUTO_REFRESH_MS);
+  useLiveChanges(["finance", "members"], refresh);
 
   const changeAdvance = async (
     salaryId: number,

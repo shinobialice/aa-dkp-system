@@ -1,6 +1,7 @@
 "use server";
 
 import { triggerFinanceRecalc } from "@/server/finance/recalc";
+import { publishChanges } from "@/server/liveChanges";
 import sql from "@/shared/lib/db";
 import type { MiscLootTotalsRow } from "@/shared/lib/dbTypes";
 import { MISC_LOOT_ITEM_NAMES } from "@/shared/config/miscLoot";
@@ -50,6 +51,7 @@ export async function setMiscLootTotal({
     console.error("Ошибка при сохранении суммы по разному:", error);
     throw new Error("Не удалось сохранить сумму");
   }
+  await publishChanges("loot");
 
   await triggerFinanceRecalc(month, year);
 }

@@ -5,6 +5,7 @@ import ensurePrivilieges from "./ensurePrivilieges";
 import createRaidEvent from "./createRaidEvent";
 import { getBosses } from "./getBosses";
 import { revalidatePath } from "next/cache";
+import { publishChanges } from "@/server/liveChanges";
 import type { BossName } from "@/shared/config/bossRespawn";
 
 const SUGGESTION_MANAGER_TAGS = ["Администратор", "Секретутка"];
@@ -71,6 +72,7 @@ export async function approveRaidSuggestion(id: number) {
   await sql`DELETE FROM boss_kill_raid_suggestions WHERE id = ${id}`;
 
   revalidatePath("/activities");
+  await publishChanges("raidSuggestions");
 
   return raid;
 }
@@ -84,4 +86,5 @@ export async function dismissRaidSuggestion(id: number) {
     UPDATE boss_kill_raid_suggestions SET status = 'dismissed' WHERE id = ${id}
   `;
   revalidatePath("/activities");
+  await publishChanges("raidSuggestions");
 }

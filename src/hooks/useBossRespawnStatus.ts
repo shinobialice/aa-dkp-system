@@ -2,9 +2,7 @@
 
 import { getBossRespawnStatus } from "@/actions/getBossRespawnStatus";
 import { bosses, isBossName, type BossName } from "@/shared/config/bossRespawn";
-import { createPolledStore } from "./createPolledStore";
-
-const POLL_INTERVAL_MS = 15_000;
+import { createLiveStore } from "./createLiveStore";
 
 export type BossRespawnState = {
   lastKill: string | null;
@@ -20,7 +18,7 @@ const EMPTY_STATE: BossRespawnState = {
   markedBy: null,
 };
 
-const respawnStore = createPolledStore<BossRespawnStates | null>(
+const respawnStore = createLiveStore<BossRespawnStates | null>(
   async () => {
     const rows = await getBossRespawnStatus([...bosses]);
     const states = Object.fromEntries(
@@ -36,7 +34,7 @@ const respawnStore = createPolledStore<BossRespawnStates | null>(
     }
     return states;
   },
-  POLL_INTERVAL_MS,
+  ["respawn"],
   null,
 );
 

@@ -14,6 +14,7 @@ import {
   RAID_EDITOR_TAGS,
 } from "@/server/raidLinks";
 import { triggerFinanceRecalc } from "@/server/finance/recalc";
+import { publishChanges } from "@/server/liveChanges";
 
 const updateEvent = async (
   id: number,
@@ -54,9 +55,10 @@ const updateEvent = async (
     console.error("Ошибка при обновлении события:", error);
     throw new Error("Не удалось обновить событие");
   }
+  await publishChanges("raids");
 
   // Посещаемость/dkp влияют на веса зарплат за месяц рейда — пересчитываем
-  // сразу, не дожидаясь таймера на /loot/finance.
+  // сразу.
   const { year: newYear, month: newMonth } = getMoscowYearMonth(start_date);
   const monthsToRecalc = new Set([`${newYear}-${newMonth}`]);
   if (previousRaid?.start_date) {

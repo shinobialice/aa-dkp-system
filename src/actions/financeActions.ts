@@ -1,6 +1,7 @@
 "use server";
 
 import { generateGuildFunds } from "@/server/finance/generateGuildFunds";
+import { publishChanges } from "@/server/liveChanges";
 import sql from "@/shared/lib/db";
 import type { GuildFundsRow, SalaryRow, UserRow } from "@/shared/lib/dbTypes";
 import ensurePrivilieges from "./ensurePrivilieges";
@@ -92,4 +93,5 @@ export const updateSalaryAdvance = async (
   } catch (error) {
     console.error("Ошибка при пересчёте фонда после изменения аванса:", error);
   }
+  await publishChanges("finance");
 };

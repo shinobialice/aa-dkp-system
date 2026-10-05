@@ -5,6 +5,7 @@ import type { RaidRow } from "@/shared/lib/dbTypes";
 import ensurePrivilieges from "./ensurePrivilieges";
 import { deleteRaidLinks, RAID_EDITOR_TAGS } from "@/server/raidLinks";
 import { triggerFinanceRecalc } from "@/server/finance/recalc";
+import { publishChanges } from "@/server/liveChanges";
 import {
   getMoscowYearMonth,
   parseMoscowISOString,
@@ -27,6 +28,7 @@ export default async function deleteEvent(eventId: number) {
     console.error("Failed to delete raid:", error);
     throw new Error("Ошибка при удалении события");
   }
+  await publishChanges("raids", "loot");
 
   if (raid?.start_date) {
     const { month, year } = getMoscowYearMonth(

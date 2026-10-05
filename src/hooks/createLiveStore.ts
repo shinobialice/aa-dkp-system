@@ -1,18 +1,19 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import type { LiveTopic } from "@/shared/config/liveTopics";
+import { subscribeToLiveChanges } from "./useLiveChanges";
 
-// Один общий поллинг на всех подписчиков: self-hosted Postgres не даёт
-// realtime-подписок, а несколько компонентов читают одни и те же данные
-// одновременно — без общего стора каждый плодил бы свои запросы.
-export function createPolledStore<T>(
+// Один общий стор на всех подписчиков: несколько компонентов читают одни и
+// те же данные одновременно — без него каждый плодил бы свои запросы.
+export function createLiveStore<T>(
   fetchValue: (current: T) => Promise<T>,
-  intervalMs: number,
+  topics: readonly LiveTopic[],
   initial: T,
 ) {
   let value = initial;
   const listeners = new Set<() => void>();
-  let timer: ReturnType<typeof setInterval> | null = null;
+  let unsubscribeLive: (() => void) | null = null;
 
   const refresh = async () => {
     try {
@@ -28,15 +29,15 @@ export function createPolledStore<T>(
 
   const subscribe = (onChange: () => void) => {
     listeners.add(onChange);
-    if (!timer) {
+    if (!unsubscribeLive) {
       refresh();
-      timer = setInterval(refresh, intervalMs);
+      unsubscribeLive = subscribeToLiveChanges(topics, refresh);
     }
     return () => {
       listeners.delete(onChange);
-      if (listeners.size === 0 && timer) {
-        clearInterval(timer);
-        timer = null;
+      if (listeners.size === 0 && unsubscribeLive) {
+        unsubscribeLive();
+        unsubscribeLive = null;
       }
     };
   };

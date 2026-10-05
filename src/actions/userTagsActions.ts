@@ -3,6 +3,7 @@ import sql from "@/shared/lib/db";
 import type { UserTagsRow } from "@/shared/lib/dbTypes";
 import ensurePrivilieges from "./ensurePrivilieges";
 import { triggerFinanceRecalcForCurrentMonth } from "@/server/finance/recalc";
+import { publishChanges } from "@/server/liveChanges";
 
 // asOf задаёт момент, на который нужны тэги: при перегенерации ЗП за прошлый
 // месяц более поздние снятия/добавления тэга не должны её менять.
@@ -68,6 +69,7 @@ export async function addUserTag(userId: number, tag: string) {
     throw new Error("Не удалось добавить тэг");
   }
 
+  await publishChanges("members");
   await triggerFinanceRecalcForCurrentMonth();
 
   return data;
@@ -85,5 +87,6 @@ export async function deleteUserTag(tagId: number) {
     throw new Error("Не удалось удалить тэг");
   }
 
+  await publishChanges("members");
   await triggerFinanceRecalcForCurrentMonth();
 }

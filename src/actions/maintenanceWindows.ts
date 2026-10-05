@@ -5,6 +5,7 @@ import type { BossMaintenanceWindowsRow } from "@/shared/lib/dbTypes";
 
 import ensurePrivilieges from "./ensurePrivilieges";
 import { revalidatePath } from "next/cache";
+import { publishChanges } from "@/server/liveChanges";
 
 type WindowRow = Pick<BossMaintenanceWindowsRow, "id" | "start_at" | "end_at">;
 
@@ -56,6 +57,7 @@ export async function addMaintenanceWindow(
   }
 
   revalidatePath("/settings");
+  await publishChanges("maintenance");
 }
 
 export async function extendMaintenanceWindow(id: number, endAt: string) {
@@ -83,6 +85,7 @@ export async function extendMaintenanceWindow(id: number, endAt: string) {
   }
 
   revalidatePath("/settings");
+  await publishChanges("maintenance");
 }
 
 export async function deleteMaintenanceWindow(id: number) {
@@ -98,4 +101,5 @@ export async function deleteMaintenanceWindow(id: number) {
   }
 
   revalidatePath("/settings");
+  await publishChanges("maintenance");
 }

@@ -1,6 +1,7 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import { publishChanges } from "@/server/liveChanges";
 import type { UserRow } from "@/shared/lib/dbTypes";
 
 import { revalidatePath } from "next/cache";
@@ -24,6 +25,7 @@ export async function createUser(username: string) {
   }
 
   if (!data) throw new Error("Не удалось создать пользователя");
+  await publishChanges("members");
 
   revalidatePath("/settings");
   return data;

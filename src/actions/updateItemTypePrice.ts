@@ -1,5 +1,6 @@
 "use server";
 import sql from "@/shared/lib/db";
+import { publishChanges } from "@/server/liveChanges";
 import ensurePrivilieges from "./ensurePrivilieges";
 
 export async function updateItemTypePrice(name: string, price: number | null) {
@@ -12,4 +13,5 @@ export async function updateItemTypePrice(name: string, price: number | null) {
     console.error("Ошибка при обновлении цены предмета:", error);
     throw new Error("Не удалось обновить цену");
   }
+  await publishChanges("loot");
 }

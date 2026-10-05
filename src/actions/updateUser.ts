@@ -1,6 +1,7 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import { publishChanges } from "@/server/liveChanges";
 import ensurePrivilieges from "./ensurePrivilieges";
 
 export async function updateUser(
@@ -32,4 +33,5 @@ export async function updateUser(
     console.error("Ошибка при обновлении пользователя: not found");
     throw new Error("Не удалось обновить пользователя");
   }
+  await publishChanges("members");
 }

@@ -2,6 +2,7 @@
 
 import { RAID_EDITOR_TAGS } from "@/server/raidLinks";
 import sql from "@/shared/lib/db";
+import { publishChanges } from "@/server/liveChanges";
 import ensurePrivilieges from "./ensurePrivilieges";
 
 export const linkLootToRaid = async (lootIds: number[], raidId: number) => {
@@ -16,4 +17,5 @@ export const linkLootToRaid = async (lootIds: number[], raidId: number) => {
     console.error("Ошибка при привязке лута к рейду:", error);
     throw new Error("Не удалось привязать лут к рейду");
   }
+  await publishChanges("loot");
 };

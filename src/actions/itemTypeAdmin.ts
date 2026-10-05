@@ -1,5 +1,6 @@
 "use server";
 import sql from "@/shared/lib/db";
+import { publishChanges } from "@/server/liveChanges";
 import {
   hasPgCode,
   UNIQUE_VIOLATION,
@@ -87,6 +88,7 @@ export async function createItemType({
     }
     throw new Error("Не удалось создать предмет");
   }
+  await publishChanges("loot");
 }
 
 export async function updateItemType(id: number, input: ItemTypeInput) {
@@ -112,6 +114,7 @@ export async function updateItemType(id: number, input: ItemTypeInput) {
     }
     throw new Error("Не удалось обновить предмет");
   }
+  await publishChanges("loot");
 }
 
 export async function deleteItemType(id: number) {
@@ -128,6 +131,7 @@ export async function deleteItemType(id: number) {
     }
     throw new Error("Не удалось удалить предмет");
   }
+  await publishChanges("loot");
 }
 
 export async function uploadItemTypeIcon(formData: FormData): Promise<string> {

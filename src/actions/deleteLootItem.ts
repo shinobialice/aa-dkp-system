@@ -1,6 +1,7 @@
 "use server";
 
 import sql from "@/shared/lib/db";
+import { publishChanges } from "@/server/liveChanges";
 import ensurePrivilieges from "./ensurePrivilieges";
 
 export async function deleteLootItem(id: number) {
@@ -12,4 +13,5 @@ export async function deleteLootItem(id: number) {
     console.error("Failed to delete loot item:", error);
     throw new Error("Ошибка при удалении предмета");
   }
+  await publishChanges("loot");
 }

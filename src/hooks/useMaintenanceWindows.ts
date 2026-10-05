@@ -2,16 +2,14 @@
 
 import { getMaintenanceWindows } from "@/actions/maintenanceWindows";
 import type { MaintenanceWindow } from "@/shared/config/bossRespawn";
-import { createPolledStore } from "./createPolledStore";
+import { createLiveStore } from "./createLiveStore";
 
-const POLL_INTERVAL_MS = 30_000;
-
-const maintenanceStore = createPolledStore<MaintenanceWindow[]>(
+const maintenanceStore = createLiveStore<MaintenanceWindow[]>(
   async () => {
     const rows = await getMaintenanceWindows();
     return rows.map((row) => ({ startAt: row.startAt, endAt: row.endAt }));
   },
-  POLL_INTERVAL_MS,
+  ["maintenance"],
   [],
 );
 

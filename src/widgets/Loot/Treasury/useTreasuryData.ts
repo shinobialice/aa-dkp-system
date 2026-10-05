@@ -8,9 +8,7 @@ import { getActiveUsers } from "@/actions/getActiveUsers";
 import { getItemTypes, getLoot } from "@/actions/lootActions";
 import { getMiscLootTotals } from "@/actions/miscLootTotals";
 import { useAsyncData } from "@/hooks/useAsyncData";
-import { useVisiblePolling } from "@/hooks/useVisiblePolling";
-
-const POLL_MS = 30_000;
+import { useLiveChanges } from "@/hooks/useLiveChanges";
 
 export type TreasuryData = ReturnType<typeof useTreasuryData>;
 
@@ -33,12 +31,12 @@ export function useTreasuryData(month: number, year: number, isAdmin: boolean) {
     if (loadFailed) toast.error("Не удалось загрузить казну");
   }, [loadFailed]);
 
-  useVisiblePolling(() => {
+  useLiveChanges(["loot"], () => {
     loot.reload();
     expenses.reload();
     misc.reload();
-    fund.reload();
-  }, POLL_MS);
+  });
+  useLiveChanges(["finance"], fund.reload);
 
   return {
     loot: loot.data ?? [],
