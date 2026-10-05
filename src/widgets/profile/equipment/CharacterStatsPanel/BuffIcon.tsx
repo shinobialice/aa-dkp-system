@@ -21,6 +21,7 @@ export default function BuffIcon({
           style={{ boxShadow: `0 0 0 2px ${BONUS_COLOR}` }}
         >
           <Image
+            unoptimized
             src={icon}
             alt={title}
             fill

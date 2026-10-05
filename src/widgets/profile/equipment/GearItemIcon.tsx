@@ -22,6 +22,7 @@ export function GearItemIcon({
     return (
       <div className={`absolute inset-0 ${className}`}>
         <Image
+          unoptimized
           src={item.iconUrl}
           alt={item.name}
           fill
@@ -30,6 +31,7 @@ export function GearItemIcon({
         />
         {overlayUrl && (
           <Image
+            unoptimized
             src={overlayUrl}
             alt=""
             fill
@@ -38,6 +40,7 @@ export function GearItemIcon({
           />
         )}
         <Image
+          unoptimized
           src={getItemGradeIconUrl(grade)}
           alt=""
           fill
@@ -54,6 +57,7 @@ export function GearItemIcon({
       style={{ width: size, height: size }}
     >
       <Image
+        unoptimized
         src={item.iconUrl}
         alt={item.name}
         width={size}
@@ -62,6 +66,7 @@ export function GearItemIcon({
       />
       {overlayUrl && (
         <Image
+          unoptimized
           src={overlayUrl}
           alt=""
           width={size}
@@ -70,6 +75,7 @@ export function GearItemIcon({
         />
       )}
       <Image
+        unoptimized
         src={getItemGradeIconUrl(grade)}
         alt=""
         width={size}

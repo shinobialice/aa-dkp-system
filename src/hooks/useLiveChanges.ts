@@ -15,7 +15,7 @@ const MAX_RECONNECT_MS = 60_000;
 
 const subscribers = new Set<Subscriber>();
 let isStarted = false;
-let hasConnected = false;
+let lastEventId: string | null = null;
 let reconnectDelay = MIN_RECONNECT_MS;
 
 export function subscribeToLiveChanges(
@@ -49,16 +49,25 @@ export function useLiveChanges(
   }, [topicsKey]);
 }
 
+// Пропущенное за время обрыва сервер досылает сам по номеру последнего
+// события: браузер передаёт его в Last-Event-ID, а при ручном
+// переподключении — мы в параметре запроса.
 function connect() {
-  const source = new EventSource(LIVE_URL);
+  const url = lastEventId
+    ? `${LIVE_URL}?lastEventId=${encodeURIComponent(lastEventId)}`
+    : LIVE_URL;
+  const source = new EventSource(url);
 
   source.onopen = () => {
     reconnectDelay = MIN_RECONNECT_MS;
-    if (hasConnected) markChanged(LIVE_TOPICS);
-    hasConnected = true;
   };
 
+  source.addEventListener("hello", (event: MessageEvent<string>) => {
+    lastEventId = event.lastEventId;
+  });
+
   source.onmessage = (event: MessageEvent<string>) => {
+    lastEventId = event.lastEventId;
     markChanged(event.data.split(","));
   };
 

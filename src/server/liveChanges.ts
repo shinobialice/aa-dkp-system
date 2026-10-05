@@ -2,13 +2,19 @@ import "server-only";
 import sql from "@/shared/lib/db";
 import { LIVE_TOPICS, type LiveTopic } from "@/shared/config/liveTopics";
 
-type Listener = (topics: string[]) => void;
+export type LiveEvent = { id: string; topics: string[] };
+
+type Listener = (event: LiveEvent) => void;
 
 const CHANNEL = "live_changes";
 const BATCH_MS = 300;
+const HISTORY_SIZE = 200;
+const BOOT_ID = Date.now().toString(36);
 
 const listeners = new Set<Listener>();
 const pendingTopics = new Set<string>();
+const recentEvents: { seq: number; topics: string[] }[] = [];
+let lastSeq = 0;
 let flushTimer: ReturnType<typeof setTimeout> | null = null;
 let listenRequest: Promise<unknown> | null = null;
 let hasListened = false;
@@ -27,6 +33,27 @@ export function subscribeToChanges(listener: Listener) {
   return () => {
     listeners.delete(listener);
   };
+}
+
+export function getLastEventId() {
+  return `${BOOT_ID}-${lastSeq}`;
+}
+
+// Номер события из другого запуска сервера или слишком старый — значит,
+// вкладка могла пропустить что угодно.
+export function getMissedTopics(lastEventId: string): string[] {
+  const [bootId, seqText] = lastEventId.split("-");
+  const seq = Number(seqText);
+  const oldestSeq = recentEvents[0]?.seq ?? lastSeq + 1;
+  if (bootId !== BOOT_ID || !Number.isInteger(seq) || seq < oldestSeq - 1) {
+    return [...LIVE_TOPICS];
+  }
+
+  const topics = new Set<string>();
+  for (const event of recentEvents) {
+    if (event.seq > seq) event.topics.forEach((topic) => topics.add(topic));
+  }
+  return [...topics];
 }
 
 function startListening() {
@@ -54,5 +81,11 @@ function flush() {
   const topics = [...pendingTopics];
   pendingTopics.clear();
   flushTimer = null;
-  for (const listener of listeners) listener(topics);
+
+  lastSeq += 1;
+  recentEvents.push({ seq: lastSeq, topics });
+  if (recentEvents.length > HISTORY_SIZE) recentEvents.shift();
+
+  const event = { id: getLastEventId(), topics };
+  for (const listener of listeners) listener(event);
 }

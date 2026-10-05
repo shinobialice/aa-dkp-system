@@ -14,6 +14,7 @@ export default function BuffTooltipCard({ icon, title, description }: Props) {
       <div className="flex items-center gap-2">
         <div className="relative size-8 shrink-0 overflow-hidden rounded-md">
           <Image
+            unoptimized
             src={icon}
             alt={title}
             fill

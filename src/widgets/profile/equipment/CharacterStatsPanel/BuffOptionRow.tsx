@@ -45,6 +45,7 @@ export default function BuffOptionRow({
   return (
     <div className="flex items-center gap-3">
       <Image
+        unoptimized
         src={buffIconUrl(buff, selectedOption)}
         alt=""
         width={28}
@@ -95,6 +96,7 @@ function BuffOptionItem({
         <SelectItem value={option.value} className="cursor-pointer">
           {showIcon && (
             <Image
+              unoptimized
               src={icon}
               alt=""
               width={20}

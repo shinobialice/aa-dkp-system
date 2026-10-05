@@ -38,6 +38,7 @@ export default function SetProgress({ itemId, runeId, equipment }: Props) {
                   >
                     {piece.iconUrl && (
                       <Image
+                        unoptimized
                         src={piece.iconUrl}
                         alt=""
                         fill

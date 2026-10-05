@@ -12,6 +12,7 @@ export function EngravingIcon({
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}>
       <Image
+        unoptimized
         src={engraving.iconUrl}
         alt={engraving.name}
         width={size}
@@ -19,6 +20,7 @@ export function EngravingIcon({
         className="absolute inset-0"
       />
       <Image
+        unoptimized
         src={getItemGradeIconUrl(engraving.grade)}
         alt=""
         width={size}

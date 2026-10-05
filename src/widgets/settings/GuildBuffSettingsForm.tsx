@@ -58,6 +58,7 @@ export function GuildBuffSettingsForm() {
             title={
               <span className="flex items-center gap-2">
                 <Image
+                  unoptimized
                   src={buffIconUrl(buff, option)}
                   alt=""
                   width={24}

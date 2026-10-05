@@ -178,6 +178,7 @@ function SlotIconButton({
       )}
       {!gearItem && (
         <Image
+          unoptimized
           src={equipmentSlot.iconUrl}
           alt={equipmentSlot.label}
           fill

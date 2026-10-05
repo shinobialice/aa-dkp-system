@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import sql from "@/shared/lib/db";
 import type { RaidAttendanceRow, RaidRow } from "@/shared/lib/dbTypes";
 
@@ -21,6 +22,17 @@ type MonthRaidRow = Pick<RaidRow, "id" | "type" | "dkp_summary"> & {
 };
 
 const LATE_WEIGHT = 0.5;
+
+// Таблица участников считает посещаемость и сама, и внутри причин зарплаты —
+// в рамках одного запроса рейды месяца грузятся один раз.
+const loadMonthRaidRows = cache(
+  async (monthStartIso: string, endDateIso: string) => sql<MonthRaidRow[]>`
+    SELECT r.id, r.type, r.start_date, r.dkp_summary, ra.user_id, ra.is_late
+    FROM raid r
+    LEFT JOIN raid_attendance ra ON ra.raid_id = r.id
+    WHERE r.start_date >= ${monthStartIso} AND r.start_date < ${endDateIso}
+  `,
+);
 
 export function summarizeAttendance(raids: AttendedRaid[]): MonthlyAttendance {
   const totals = { prime: 0, agl: 0, points: 0 };
@@ -61,12 +73,7 @@ export async function computeMonthlyAttendanceForUsers(
 
   let rows: MonthRaidRow[];
   try {
-    rows = await sql<MonthRaidRow[]>`
-      SELECT r.id, r.type, r.start_date, r.dkp_summary, ra.user_id, ra.is_late
-      FROM raid r
-      LEFT JOIN raid_attendance ra ON ra.raid_id = r.id
-      WHERE r.start_date >= ${monthStart.toISOString()} AND r.start_date < ${endDate}
-    `;
+    rows = await loadMonthRaidRows(monthStart.toISOString(), endDate);
   } catch (raidsError) {
     console.error("Ошибка при получении рейдов:", raidsError);
     throw new Error("Не удалось получить рейды");

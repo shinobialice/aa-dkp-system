@@ -17,6 +17,7 @@ export default function LockedSlotButton({ slot, tooltipSide }: Props) {
           className="relative flex size-11 shrink-0 cursor-not-allowed items-center justify-center rounded-md"
         >
           <Image
+            unoptimized
             src={slot.iconUrl}
             alt={slot.label}
             fill
