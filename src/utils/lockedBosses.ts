@@ -11,4 +11,5 @@ export const LOCKED_SINGLE_TIME_PRIME_BOSSES = [
   "Анталлон",
   "Левиафан",
   "Ксанатос",
+  "Фесаникс",
 ];

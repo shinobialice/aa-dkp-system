@@ -8,6 +8,7 @@ export const PRIME_LINKABLE_BOSSES = [
   "Анталлон",
   "Ксанатос",
   "Левиафан",
+  "Фесаникс",
 ];
 
 export function isPrimeLinkableSource(source: string | null | undefined) {

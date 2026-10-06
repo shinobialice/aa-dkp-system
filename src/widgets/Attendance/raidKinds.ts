@@ -19,6 +19,7 @@ const PRIME_COLORS: Record<string, ColorPair> = {
   Левиафан: { light: "#0e7490", dark: "#22d3ee" },
   Ксанатос: { light: "#c2410c", dark: "#fb923c" },
   Анталлон: { light: "#a16207", dark: "#facc15" },
+  Фесаникс: { light: "#0284c7", dark: "#7dd3fc" },
   Корвус: { light: "#9333ea", dark: "#c084fc" },
   Калеиль: { light: "#0f766e", dark: "#2dd4bf" },
   Дельфиец: { light: "#2563eb", dark: "#60a5fa" },

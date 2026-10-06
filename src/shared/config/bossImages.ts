@@ -6,6 +6,7 @@ export const bossImages: Record<string, string> = {
   Анталлон: "/images/bosses/antallon.png",
   Ксанатос: "/images/bosses/ksanatos.png",
   Левиафан: "/images/bosses/leviathan.png",
+  Фесаникс: "/images/bosses/fesanix.png",
   "Оборона Ифнира": "/images/bosses/ifnir.png",
   "Осада замка": "/images/bosses/osada.png",
   Кошка: "/images/bosses/koshka.png",

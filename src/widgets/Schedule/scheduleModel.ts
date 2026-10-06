@@ -45,6 +45,7 @@ export const EVENT_COLORS: Record<string, { light: string; dark: string }> = {
   Левиафан: { light: "#0e7490", dark: "#22d3ee" },
   Ксанатос: { light: "#c2410c", dark: "#fb923c" },
   Анталлон: { light: "#a16207", dark: "#facc15" },
+  Фесаникс: { light: "#0284c7", dark: "#7dd3fc" },
   "Осада замка": { light: "#18181b", dark: "#f4f4f5" },
   "Пепельные равнины": { light: "#57534e", dark: "#d6d3d1" },
   "Великий луг": { light: "#15803d", dark: "#4ade80" },
@@ -57,6 +58,7 @@ const PRIME_EVENTS = [
   "Левиафан",
   "Ксанатос",
   "Анталлон",
+  "Фесаникс",
   "Осада замка",
 ];
 
