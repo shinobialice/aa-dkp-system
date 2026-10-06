@@ -19,8 +19,8 @@ export const KRAKEN_MAP: MapImage = {
 export const KRAKEN_SCHEDULE_TEXT = "Пн, Чт, Сб · 19:30 МСК";
 
 export const KRAKEN_SPAWNS: { label: string; point: MapPoint }[] = [
-  { label: "Низ", point: [616, 569] },
-  { label: "Вверх", point: [464, 351] },
+  { label: "Низ", point: [664, 574] },
+  { label: "Вверх", point: [530, 346] },
 ];
 
 const KRAKEN_SCHEDULE: WeeklySchedule = {
