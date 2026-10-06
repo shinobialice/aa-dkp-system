@@ -17,16 +17,13 @@ const BASE_VULNERABILITY = 100;
 // сопротивление 4017 → 33.71%.
 const DAMAGE_REDUCTION_CONSTANT = 7900;
 // Из данных игры для устойчивости к PvP: устойчивость / (устойчивость + 8000).
-// Устойчивость к крит. урону снижает размер крита по той же кривой, а шанс —
-// по ней же с потолком 22%: при 20 ед. это −0.05% и −0.25%, как в игре.
 const RESIST_REDUCTION_CONSTANT = 8000;
-const CRIT_CHANCE_TAKEN_SHARE = 0.22;
+// Устойчивость к крит. урону снижает шанс и размер крита линейно, без потолка:
+// при 20 ед. это −0.05% и −0.25%, как в игре.
+const CRIT_CHANCE_TAKEN_PER_POINT = 0.00275;
+const CRIT_DAMAGE_TAKEN_PER_POINT = 0.0125;
 
 export function buildDefenseGroups(stats: DerivedStats): RowGroup[] {
-  const critDamageReduction = reductionPercent(
-    stats.critDamageResist,
-    RESIST_REDUCTION_CONSTANT,
-  );
   return [
     {
       rows: [
@@ -58,14 +55,14 @@ export function buildDefenseGroups(stats: DerivedStats): RowGroup[] {
         ),
         computedRow(
           "Шанс получения критического урона",
-          -CRIT_CHANCE_TAKEN_SHARE * critDamageReduction,
+          -stats.critDamageResist * CRIT_CHANCE_TAKEN_PER_POINT,
           "%",
           2,
           true,
         ),
         computedRow(
           "Размер критического урона",
-          -critDamageReduction,
+          -stats.critDamageResist * CRIT_DAMAGE_TAKEN_PER_POINT,
           "%",
           2,
           true,

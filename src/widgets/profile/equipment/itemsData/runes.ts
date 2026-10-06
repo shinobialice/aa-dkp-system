@@ -69,7 +69,7 @@ export const RUNES: Rune[] = [
     name: "Ледяная руна",
     grade: 12,
     iconUrl: RUNE_ICON("ледяная_руна_55762"),
-    effect: null,
+    effect: "Игнорирование устойчивости к атакам в PvP: +800 ед.",
     slots: ["costume"],
   },
   {
@@ -77,7 +77,7 @@ export const RUNES: Rune[] = [
     name: "Ледяная руна",
     grade: 11,
     iconUrl: RUNE_ICON("ледяная_руна_55767"),
-    effect: null,
+    effect: "Игнорирование устойчивости к атакам в PvP: +500 ед.",
     slots: ["costume"],
   },
   {
@@ -85,7 +85,7 @@ export const RUNES: Rune[] = [
     name: "Ледяная руна",
     grade: 10,
     iconUrl: RUNE_ICON("ледяная_руна_55766"),
-    effect: null,
+    effect: "Игнорирование устойчивости к атакам в PvP: +300 ед.",
     slots: ["costume"],
   },
   {
@@ -93,7 +93,7 @@ export const RUNES: Rune[] = [
     name: "Ледяная руна",
     grade: 9,
     iconUrl: RUNE_ICON("ледяная_руна_55765"),
-    effect: null,
+    effect: "Игнорирование устойчивости к атакам в PvP: +200 ед.",
     slots: ["costume"],
   },
   {
@@ -101,7 +101,7 @@ export const RUNES: Rune[] = [
     name: "Ледяная руна",
     grade: 8,
     iconUrl: RUNE_ICON("ледяная_руна_55764"),
-    effect: null,
+    effect: "Игнорирование устойчивости к атакам в PvP: +100 ед.",
     slots: ["costume"],
   },
   {

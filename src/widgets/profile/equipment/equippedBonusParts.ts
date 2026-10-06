@@ -17,6 +17,7 @@ import { computeItemPassiveBonuses } from "./itemPassives";
 import { computeBuffStatBonuses, type SelectedBuffs } from "./characterBuffs";
 import {
   computeEpheSealsFlatBonus,
+  getEpheAttributeMultiplier,
   getEpheStatMultipliers,
 } from "../ephe/epheSealsBonus";
 import { type EquippedBonuses } from "./characterStats";
@@ -55,6 +56,8 @@ export const EMPTY_BONUSES: EquippedBonuses = {
 
 export const ATTRIBUTES = ["str", "int", "dex", "spi", "sta"] as const;
 
+const ATTRIBUTE_KEYS = new Set<string>(ATTRIBUTES);
+
 export const FLAT_STAT_TARGETS: [keyof EquippedBonuses, string][] = [
   ["str", STAT_LABEL.STR],
   ["int", STAT_LABEL.INT],
@@ -87,9 +90,11 @@ export const FLAT_STAT_TARGETS: [keyof EquippedBonuses, string][] = [
 ];
 
 const RANGED_WEAPON_SLOT = "weapon_ranged";
+const OFF_HAND_SLOT = "weapon_off";
 
-// Урон оружия в слотах 1–2 идёт в силу атаки в ближнем бою, урон лука или
-// винтовки — в силу атаки в дальнем бою.
+// Урон оружия в правой руке идёт в силу атаки в ближнем бою, урон лука или
+// винтовки — в силу атаки в дальнем бою. Урон оружия в левой руке игра в силу
+// атаки не включает.
 function weaponStatLabel(key: string, slot: string): string | undefined {
   if (key === "weapon_dps") {
     return slot === RANGED_WEAPON_SLOT
@@ -118,12 +123,18 @@ export function addGearStats(
   const base = gradeStats ?? ITEM_STATS[gearItem.id] ?? {};
 
   const epheMultipliers = getEpheStatMultipliers(eq);
+  const epheAttributeMultiplier = getEpheAttributeMultiplier(eq);
   for (const [key, value] of Object.entries(base)) {
     if (key in bonusStats) continue;
+    // Основные характеристики игра пересчитывает от поднятого печатью Эфе
+    // уровня предмета и только потом округляет по грейду.
+    const levelValue = ATTRIBUTE_KEYS.has(key)
+      ? value * epheAttributeMultiplier
+      : value;
     // Статы из ITEM_GRADE_STATS уже финальные для грейда, scaleStat к ним не применяется.
     const gradeValue = gradeStats
       ? value
-      : scaleStat(value, eq.grade, eq.enchant ?? 0, key);
+      : scaleStat(levelValue, eq.grade, eq.enchant ?? 0, key);
     const scaled = gradeValue * (epheMultipliers[key] ?? 1);
     addItemStat(totals, flat, eq.slot, key, scaled);
   }
@@ -140,6 +151,7 @@ function addItemStat(
   key: string,
   value: number,
 ) {
+  if (key === "weapon_dps" && slot === OFF_HAND_SLOT) return;
   const weaponLabel = weaponStatLabel(key, slot);
   if (key === "wearable_armor") totals.defense += value;
   else if (key === "wearable_magic_resistance") totals.resist += value;
