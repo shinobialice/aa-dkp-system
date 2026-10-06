@@ -106,6 +106,7 @@ export const schedule: Record<string, [string, string][]> = {
 export const defaultDurationMinutes = 60;
 export const eventDurationMinutes: Record<string, number> = {
   АГЛ: 30,
+  Левиафан: 120,
 };
 
 export const dayNames = [
