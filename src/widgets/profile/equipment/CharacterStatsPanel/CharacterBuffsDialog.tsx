@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
-import saveCharacterBuffs from "@/actions/saveCharacterBuffs";
-import type { RoleSlot } from "@/shared/config/roleSlots";
 import {
   Button,
   Dialog,
@@ -17,23 +15,21 @@ import { errorMessage } from "@/shared/lib/errorMessage";
 import {
   BUFF_OFF,
   isRequirementMet,
-  PERSONAL_BUFFS,
   type SelectedBuffs,
 } from "../characterBuffs";
+import type { CharacterBuff } from "../itemsData/buffTypes";
 import BuffOptionRow from "./BuffOptionRow";
 
 type Props = {
-  userId: number;
-  roleSlot: RoleSlot;
   buffs: SelectedBuffs;
-  onChange: (buffs: SelectedBuffs) => void;
+  choices: CharacterBuff[];
+  onSave: (buffs: SelectedBuffs) => Promise<void>;
 };
 
 export default function CharacterBuffsDialog({
-  userId,
-  roleSlot,
   buffs,
-  onChange,
+  choices,
+  onSave,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState(buffs);
@@ -56,16 +52,31 @@ export default function CharacterBuffsDialog({
   const handleSave = async () => {
     setSaving(true);
     try {
-      await saveCharacterBuffs(userId, roleSlot, draft);
-      onChange(draft);
+      await onSave(draft);
       setOpen(false);
-      toast.success("Баффы сохранены");
     } catch (error) {
       toast.error(errorMessage(error, "Не удалось сохранить баффы"));
     } finally {
       setSaving(false);
     }
   };
+
+  const personalChoices = choices.filter((buff) => !buff.guild);
+  const guildChoices = choices.filter((buff) => buff.guild);
+  const description =
+    guildChoices.length > 0
+      ? "Включённые баффы учитываются в характеристиках"
+      : "Включённые баффы учитываются в характеристиках. Гильдейские баффы настраивает администратор";
+
+  const renderRow = (buff: CharacterBuff) => (
+    <BuffOptionRow
+      key={buff.id}
+      buff={buff}
+      value={draft[buff.id] ?? BUFF_OFF}
+      available={isRequirementMet(buff, draft)}
+      onChange={(value) => handleOptionChange(buff.id, value)}
+    />
+  );
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -81,21 +92,16 @@ export default function CharacterBuffsDialog({
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Баффы</DialogTitle>
-          <DialogDescription>
-            Включённые баффы учитываются в характеристиках и видны всем в
-            профиле. Гильдейские баффы настраивает администратор
-          </DialogDescription>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         <div className="max-h-[60vh] space-y-2 overflow-y-auto pr-1">
-          {PERSONAL_BUFFS.map((buff) => (
-            <BuffOptionRow
-              key={buff.id}
-              buff={buff}
-              value={draft[buff.id] ?? BUFF_OFF}
-              available={isRequirementMet(buff, draft)}
-              onChange={(value) => handleOptionChange(buff.id, value)}
-            />
-          ))}
+          {personalChoices.map(renderRow)}
+          {guildChoices.length > 0 && (
+            <div className="pt-3 pb-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+              Гильдейские
+            </div>
+          )}
+          {guildChoices.map(renderRow)}
         </div>
         <DialogFooter>
           <Button

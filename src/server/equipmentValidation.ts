@@ -5,7 +5,6 @@ import { isValidSealGrade } from "@/widgets/profile/seals/sealsData";
 import {
   getMaxEnchant,
   isValidEnchantLevel,
-  isValidExtraProtectionLevel,
 } from "@/widgets/profile/equipment/itemsData/statsFormula";
 import { getEngravingSlotCount } from "@/widgets/profile/equipment/itemsData/engravingSlots";
 import { isValidEngravingId } from "@/widgets/profile/equipment/itemsData/engravings";
@@ -44,12 +43,6 @@ const CHECKS: Check[] = [
     isValid: (item, { gearItemId }) =>
       isValidEnchantLevel(item.enchant, getMaxEnchant(gearItemId)),
     message: (item) => `Некорректный уровень заточки: ${item.enchant}`,
-  },
-  {
-    isValid: (item) =>
-      isValidExtraProtectionLevel(item.extraProtection, item.slot),
-    message: (item) =>
-      `Некорректный уровень защиты от доп. урона: ${item.extraProtection}`,
   },
   {
     isValid: (item, { gearItemId, handedness }) =>

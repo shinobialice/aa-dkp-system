@@ -14,10 +14,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
 import { Button } from "@/shared/ui";
 import CharacterTabsSwitcher from "@/widgets/profile/CharacterTabsSwitcher";
 import { errorMessage } from "@/shared/lib/errorMessage";
-import EpheSidebar from "./EpheSidebar";
-import EpheLevelList from "./EpheLevelList";
-import { EPHE_SIDEBAR_GROUPS } from "./epheSlotGroups";
-import EpheBonusNote from "./EpheBonusNote";
+import EpheSidebar from "../EpheSidebar";
+import EpheLevelList from "../EpheLevelList";
+import { EPHE_SIDEBAR_GROUPS } from "../epheSlotGroups";
+import EpheBonusNote from "../EpheBonusNote";
 
 export default function EpheSealsTab({
   userId,

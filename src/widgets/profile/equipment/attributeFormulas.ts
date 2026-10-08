@@ -34,31 +34,41 @@ export function computeCritChance(
   );
 }
 
-// Точность заклинаний в игре берёт половину интеллекта и половину силы духа.
+export function computeRatingPercent(points: number): number {
+  return (points * 100) / RATING_PER_PERCENT;
+}
+
+// Рейтинг точности в данных игры — атрибут × 500; у заклинаний это половина
+// интеллекта и половина силы духа. Как и другие формулы от атрибутов, игра
+// считает её в целых единицах (здесь — десятых долях процента).
 export function computeAttributeAccuracy(attrPoints: number): number {
-  return (attrPoints * ACCURACY_RATING_PER_POINT) / RATING_PER_PERCENT;
+  return (
+    Math.trunc(
+      (attrPoints * ACCURACY_RATING_PER_POINT * 10) / RATING_PER_PERCENT,
+    ) / 10
+  );
 }
 
 // Логарифм в формулах игры десятичный (множитель 9.12 в тактике — это ln(10)^2.65).
 export function computeTacticalReadiness(strPlusDex: number): number {
   const average = strPlusDex / 2;
   if (average <= 0) return 0;
-  return Math.log10(average) ** 2.65 * 7.9 * 9.12;
+  return Math.trunc(Math.log10(average) ** 2.65 * 7.9 * 9.12);
 }
 
 // Формула игры даёт сокращение в десятых долях процента.
 export function computeSkillTimeReduction(intPlusSpi: number): number {
   const scaled = intPlusSpi / 16;
   if (scaled <= 0) return 0;
-  return ((1.98 * Math.log10(scaled) - 0.1915) * 30.582) / 10;
+  return Math.trunc((1.98 * Math.log10(scaled) - 0.1915) * 30.582) / 10;
 }
 
 export function computeManaRegen(spiTotal: number): number {
-  return spiTotal * 0.3 + 15;
+  return Math.trunc(spiTotal * 0.3 + 15);
 }
 
 export function computeHealthRegen(staTotal: number): number {
-  return (staTotal / 100) * 13 + 50;
+  return Math.trunc((staTotal / 100) * 13 + 50);
 }
 
 function defenseChance(rating: number, attrTotal: number): number {

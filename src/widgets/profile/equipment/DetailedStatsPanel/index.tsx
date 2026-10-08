@@ -10,10 +10,15 @@ import {
 } from "../characterStats";
 import type { SelectedBuffs } from "../characterBuffs";
 import type { ProfileStats } from "../statComparison";
+import {
+  computeGearElementStats,
+  type GearElementStats,
+} from "../weaponElements";
 import GroupedRows from "./GroupedRows";
 import { buildOffenseGroups } from "./offenseGroups";
 import { buildDefenseGroups } from "./defenseGroups";
-import { buildHealGroups, GEAR_GROUPS } from "./healGroups";
+import { buildHealGroups } from "./healGroups";
+import { buildGearGroups } from "./gearGroups";
 import type { RowGroup } from "./statRows";
 
 type Props = {
@@ -48,8 +53,8 @@ export function DetailedStatsPanel({
     level,
   );
   const stats = computeDerivedStats(bonus, level);
-  const tabs = buildStatsTabs(stats);
-  const viewerTabs = viewer && buildStatsTabs(viewer.stats);
+  const tabs = buildStatsTabs(stats, computeGearElementStats(equipment));
+  const viewerTabs = viewer && buildStatsTabs(viewer.stats, viewer.gear);
 
   return (
     <div className="w-full shrink-0 rounded-xl border bg-muted/40 p-3">
@@ -84,7 +89,10 @@ export function DetailedStatsPanel({
   );
 }
 
-function buildStatsTabs(stats: DerivedStats): StatsTab[] {
+function buildStatsTabs(
+  stats: DerivedStats,
+  gear: GearElementStats,
+): StatsTab[] {
   return [
     {
       value: "offense",
@@ -104,6 +112,11 @@ function buildStatsTabs(stats: DerivedStats): StatsTab[] {
       groups: buildHealGroups(stats),
       withHeaders: true,
     },
-    { value: "gear", label: "Прочее", groups: GEAR_GROUPS, withHeaders: true },
+    {
+      value: "gear",
+      label: "Прочее",
+      groups: buildGearGroups(gear),
+      withHeaders: true,
+    },
   ];
 }

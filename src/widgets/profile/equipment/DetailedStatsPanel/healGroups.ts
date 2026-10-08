@@ -110,25 +110,3 @@ export function buildHealGroups(stats: DerivedStats): RowGroup[] {
     },
   ];
 }
-
-export const GEAR_GROUPS: RowGroup[] = [
-  {
-    title: "Доп. урон оружия",
-    rows: [
-      staticRow("Оружие для правой руки", "5000"),
-      staticRow("Оружие для левой руки", "0"),
-      staticRow("Оружие дальнего боя", "5000"),
-    ],
-  },
-  {
-    title: "Защита от доп. урона оружия",
-    rows: [
-      staticRow("Доспехи", "Лёгкие"),
-      staticRow("Колющий урон", "5000"),
-      staticRow("Режущий урон", "5000"),
-      staticRow("Маг урон", "5000"),
-      staticRow("Рубящий урон", "5000"),
-      staticRow("Дробящий урон", "5000"),
-    ],
-  },
-];

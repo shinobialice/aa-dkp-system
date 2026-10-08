@@ -9,7 +9,7 @@ import { GearItemIcon } from "../GearItemIcon";
 import ItemStats from "../ItemStats";
 import { getEpheStatMultipliers } from "@/widgets/profile/ephe/epheSealsBonus";
 import ItemDetails from "./ItemCard/ItemDetails";
-import { CUBE_ELIGIBLE_SLOTS } from "./slotLayout";
+import { getItemElementLabel } from "../weaponElements";
 
 type Props = {
   slotKey: string;
@@ -21,6 +21,7 @@ export default function SlotReadonlyView({ slotKey, item, gearItem }: Props) {
   if (!item?.item_name) {
     return <div className="px-5 py-4 text-sm text-muted-foreground">Пусто</div>;
   }
+  const elementLabel = gearItem && getItemElementLabel(gearItem.id, item.grade);
 
   return (
     <div className="space-y-1.5 overflow-y-auto px-5 py-4">
@@ -40,10 +41,8 @@ export default function SlotReadonlyView({ slotKey, item, gearItem }: Props) {
         <Badge variant="outline">{getSealGradeLabel(item.grade)}</Badge>
         {item.enchant > 0 && <Badge variant="outline">+{item.enchant}</Badge>}
       </div>
-      {gearItem && CUBE_ELIGIBLE_SLOTS.has(slotKey) && (
-        <div className="text-xs text-muted-foreground/70">
-          Защита от доп. урона оружия Lv.{item.extra_protection}
-        </div>
+      {elementLabel && (
+        <div className="text-xs text-muted-foreground/70">{elementLabel}</div>
       )}
       {gearItem && (
         <ItemStats

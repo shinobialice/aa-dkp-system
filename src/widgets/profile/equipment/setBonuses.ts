@@ -2,7 +2,7 @@ import type { UserEquipment } from "@/actions/getUserEquipment";
 import { findGearItem } from "./itemsData";
 import { ARMOR_TYPE, type ArmorWeight } from "./itemsData/armorType";
 
-const ARMOR_SLOTS = [
+export const ARMOR_SLOTS = [
   "head",
   "chest",
   "belt",

@@ -1,6 +1,7 @@
 import { ENGRAVING_STAT } from "../engravingBonuses";
 import { STAT_LABEL } from "../itemsData/statEffects";
 import type { DerivedStats } from "../characterStats";
+import { computeRatingPercent } from "../attributeFormulas";
 
 import { bonusRow, computedRow, type RowGroup } from "./statRows";
 
@@ -18,9 +19,9 @@ const BASE_VULNERABILITY = 100;
 const DAMAGE_REDUCTION_CONSTANT = 7900;
 // Из данных игры для устойчивости к PvP: устойчивость / (устойчивость + 8000).
 const RESIST_REDUCTION_CONSTANT = 8000;
-// Устойчивость к крит. урону снижает шанс и размер крита линейно, без потолка:
-// при 20 ед. это −0.05% и −0.25%, как в игре.
-const CRIT_CHANCE_TAKEN_PER_POINT = 0.00275;
+// Устойчивость к крит. урону снижает размер крита линейно, без потолка:
+// при 20 ед. это −0.25%, как в игре. Шанс крита она снижает по той же шкале
+// рейтинга, что и шанс крита атакующего.
 const CRIT_DAMAGE_TAKEN_PER_POINT = 0.0125;
 
 export function buildDefenseGroups(stats: DerivedStats): RowGroup[] {
@@ -55,7 +56,7 @@ export function buildDefenseGroups(stats: DerivedStats): RowGroup[] {
         ),
         computedRow(
           "Шанс получения критического урона",
-          -stats.critDamageResist * CRIT_CHANCE_TAKEN_PER_POINT,
+          -computeRatingPercent(stats.critDamageResist),
           "%",
           2,
           true,

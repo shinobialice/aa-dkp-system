@@ -74,7 +74,7 @@ export default function SealSlotEditor({
                   ),
                 )
               }
-              className="h-8 w-16 text-right"
+              className="h-8 w-20 shrink-0 text-right"
             />
           </div>
           <div className="space-y-1 text-xs font-medium text-muted-foreground">

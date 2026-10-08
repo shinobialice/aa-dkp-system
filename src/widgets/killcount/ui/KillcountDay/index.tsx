@@ -158,7 +158,7 @@ export function KillcountDay({
               onChange={setSortKey}
               options={[
                 { value: "kills", label: "По килам" },
-                { value: "honor", label: "По хоноре" },
+                { value: "honor", label: "По хонору" },
               ]}
             />
             {(mode === "draft" || canAddToday) && isCanEdit && (

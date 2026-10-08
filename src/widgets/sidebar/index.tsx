@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { cn } from "@/shared/lib/tw-merge";
 import {
   Sidebar,
   SidebarContent,
@@ -13,6 +14,7 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
@@ -103,16 +105,26 @@ function AppSidebar({
                         asChild
                         isActive={active}
                         tooltip={item.title}
-                        className="data-[active=true]:font-semibold data-[active=true]:[&>svg]:text-green-600 dark:data-[active=true]:[&>svg]:text-green-400"
+                        className="data-[active=true]:font-semibold"
                       >
                         <Link
                           href={item.url}
                           aria-current={active ? "page" : undefined}
                         >
-                          <item.icon />
+                          <item.icon
+                            className={cn(
+                              "fill-current/20",
+                              section.iconClassName,
+                            )}
+                          />
                           <span>{item.title}</span>
                         </Link>
                       </SidebarMenuButton>
+                      {item.isNew && (
+                        <SidebarMenuBadge className="rounded-full bg-green-100 px-2 text-2xs font-semibold text-green-800 dark:bg-green-500/15 dark:text-green-300">
+                          новое
+                        </SidebarMenuBadge>
+                      )}
                     </SidebarMenuItem>
                   );
                 })}

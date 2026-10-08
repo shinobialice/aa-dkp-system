@@ -71,35 +71,6 @@ export const ENCHANT_BONUS_PERCENT: Record<number, number> = {
 export const DEFAULT_ENCHANT = 0;
 export const MAX_ENCHANT = 35;
 
-export const DEFAULT_EXTRA_PROTECTION = 0;
-export const MAX_EXTRA_PROTECTION = 5;
-export const MAX_EXTRA_PROTECTION_WEAPON = 10;
-
-const WEAPON_SLOT_KEYS = new Set([
-  "weapon_main",
-  "weapon_off",
-  "weapon_ranged",
-]);
-
-export function getMaxExtraProtectionLevel(slotKey: string): number {
-  return WEAPON_SLOT_KEYS.has(slotKey)
-    ? MAX_EXTRA_PROTECTION_WEAPON
-    : MAX_EXTRA_PROTECTION;
-}
-
-// Защита от доп. урона оружия — уровень 0-5 у брони, 0-10 у оружия, просто
-// отображается в тултипе (Lv.N), на статы не влияет.
-export function isValidExtraProtectionLevel(
-  level: number,
-  slotKey: string,
-): boolean {
-  return (
-    Number.isInteger(level) &&
-    level >= 0 &&
-    level <= getMaxExtraProtectionLevel(slotKey)
-  );
-}
-
 // У каждого предмета в игре свой предел заточки (+30, +35 или без заточки).
 export function getMaxEnchant(itemId: number | undefined): number {
   if (itemId === undefined) return MAX_ENCHANT;

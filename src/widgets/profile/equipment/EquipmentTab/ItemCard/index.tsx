@@ -9,7 +9,7 @@ import {
   getSealGradeLabel,
   getSealGradeColor,
 } from "@/widgets/profile/seals/sealsData";
-import { CUBE_ELIGIBLE_SLOTS } from "../slotLayout";
+import { getItemElementLabel } from "../../weaponElements";
 import ItemDetails from "./ItemDetails";
 import SetProgress from "./SetProgress";
 
@@ -30,6 +30,7 @@ export default function ItemCard({
 }: Props) {
   const gradeColor = getSealGradeColor(item.grade) ?? undefined;
   const itemKind = getItemKind(slotKey, gearItem.id);
+  const elementLabel = getItemElementLabel(gearItem.id, item.grade);
 
   return (
     <div className="space-y-2">
@@ -49,11 +50,8 @@ export default function ItemCard({
         </div>
       </div>
 
-      {CUBE_ELIGIBLE_SLOTS.has(slotKey) && (
-        <div className="text-xs text-muted-foreground/70">
-          Защита от доп. урона оружия Lv.
-          {item.extra_protection}
-        </div>
+      {elementLabel && (
+        <div className="text-xs text-muted-foreground/70">{elementLabel}</div>
       )}
 
       <div className="border-t border-border" />

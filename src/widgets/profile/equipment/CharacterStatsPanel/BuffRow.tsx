@@ -1,5 +1,4 @@
 import type { UserEquipment } from "@/actions/getUserEquipment";
-import type { RoleSlot } from "@/shared/config/roleSlots";
 import { getActiveWeaponBuff } from "../weaponBuffs";
 import { getActiveSetBuffs } from "../setBonuses";
 import { getActiveQualitySetBuffs } from "../qualitySetBonus";
@@ -8,27 +7,26 @@ import {
   getActiveBuffs,
   type SelectedBuffs,
 } from "../characterBuffs";
+import type { CharacterBuff } from "../itemsData/buffTypes";
 import BuffIcon from "./BuffIcon";
 import CharacterBuffsDialog from "./CharacterBuffsDialog";
 
 type Props = {
-  userId: number;
-  roleSlot: RoleSlot;
   equipment: UserEquipment[];
   buffs: SelectedBuffs;
   guildBuffs: SelectedBuffs;
+  buffChoices: CharacterBuff[];
   canEdit: boolean;
-  onBuffsChange: (buffs: SelectedBuffs) => void;
+  onBuffsSave: (buffs: SelectedBuffs) => Promise<void>;
 };
 
 export default function BuffRow({
-  userId,
-  roleSlot,
   equipment,
   buffs,
   guildBuffs,
+  buffChoices,
   canEdit,
-  onBuffsChange,
+  onBuffsSave,
 }: Props) {
   const weaponBuff = getActiveWeaponBuff(equipment);
   const gearBuffs = [
@@ -61,10 +59,9 @@ export default function BuffRow({
       ))}
       {canEdit && (
         <CharacterBuffsDialog
-          userId={userId}
-          roleSlot={roleSlot}
           buffs={buffs}
-          onChange={onBuffsChange}
+          choices={buffChoices}
+          onSave={onBuffsSave}
         />
       )}
     </div>

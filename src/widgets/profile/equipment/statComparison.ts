@@ -6,10 +6,15 @@ import {
   type DerivedStats,
 } from "./characterStats";
 import type { StatBonuses } from "./itemsData/statEffects";
+import {
+  computeGearElementStats,
+  type GearElementStats,
+} from "./weaponElements";
 
 export type ProfileStats = {
   flat: StatBonuses;
   stats: DerivedStats;
+  gear: GearElementStats;
 };
 
 const LOWER_IS_BETTER_PREFIXES = [
@@ -30,7 +35,11 @@ export function computeProfileStats(
     profile.skillBuild,
     profile.level,
   );
-  return { flat, stats: computeDerivedStats(totals, profile.level) };
+  return {
+    flat,
+    stats: computeDerivedStats(totals, profile.level),
+    gear: computeGearElementStats(profile.equipment),
+  };
 }
 
 export function statDiff(

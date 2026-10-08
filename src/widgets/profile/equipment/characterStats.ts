@@ -40,6 +40,8 @@ export const BASE_CHARACTER_STATS = {
 
 export type EquippedBonuses = {
   manaPercent: number;
+  defensePercent: number;
+  resistPercent: number;
   defense: number;
   resist: number;
   str: number;
@@ -111,11 +113,9 @@ export function computeCharacterBonuses(
   for (const [key, label] of FLAT_STAT_TARGETS) {
     totals[key] += flat.get(label) ?? 0;
   }
-  const defensePercent =
+  totals.defensePercent =
     equipmentBuffs.defensePercent + passives.defensePercent;
-  const resistPercent = equipmentBuffs.resistPercent + passives.resistPercent;
-  totals.defense *= 1 + defensePercent / 100;
-  totals.resist *= 1 + resistPercent / 100;
+  totals.resistPercent = equipmentBuffs.resistPercent + passives.resistPercent;
   totals.manaPercent = passives.manaPercent;
   return { totals, flat };
 }
@@ -183,8 +183,8 @@ export function computeDerivedStats(
     mana:
       (FLAT_MANA_POOL + int * 10 + bonus.mana) * (1 + bonus.manaPercent / 100),
     health: FLAT_HEALTH_POOL + sta * 12 + bonus.health,
-    defense: sta * 1 + bonus.defense,
-    resist: sta * 1 + bonus.resist,
+    defense: (sta + bonus.defense) * (1 + bonus.defensePercent / 100),
+    resist: (sta + bonus.resist) * (1 + bonus.resistPercent / 100),
     moveSpeed: base.moveSpeed * (1 + bonus.moveSpeed / 100),
     skillSpeed: Math.max(
       MIN_SKILL_SPEED,

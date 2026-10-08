@@ -2,11 +2,7 @@ import type { EquipmentInput } from "@/actions/saveUserEquipment";
 import type { UserEquipment } from "@/actions/getUserEquipment";
 import { EQUIPMENT_SLOTS } from "../equipmentData";
 import { findGearItem } from "../itemsData";
-import {
-  DEFAULT_ENCHANT,
-  DEFAULT_EXTRA_PROTECTION,
-  getMaxEnchant,
-} from "../itemsData/statsFormula";
+import { DEFAULT_ENCHANT, getMaxEnchant } from "../itemsData/statsFormula";
 import { getEngravingSlotCount } from "../itemsData/engravingSlots";
 import { isTwoHandedMainWeapon } from "../itemsData/weaponHandedness";
 import { DEFAULT_GRADE } from "./slotLayout";
@@ -17,7 +13,6 @@ export const EMPTY_SLOT_VALUES: SlotValues = {
   itemName: "",
   grade: DEFAULT_GRADE,
   enchant: DEFAULT_ENCHANT,
-  extraProtection: DEFAULT_EXTRA_PROTECTION,
   engravings: [],
   runeId: 0,
   synthesisEffects: [],
@@ -34,7 +29,6 @@ function toSlotValues(
     itemName: item.item_name ?? "",
     grade: item.grade,
     enchant: Math.min(item.enchant, getMaxEnchant(gearItem?.id)),
-    extraProtection: item.extra_protection,
     engravings: item.engravings.slice(
       0,
       getEngravingSlotCount(slotKey, item.grade),

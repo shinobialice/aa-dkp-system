@@ -19,7 +19,7 @@ import {
 import { errorMessage } from "@/shared/lib/errorMessage";
 import CharacterTabsSwitcher from "@/widgets/profile/CharacterTabsSwitcher";
 import { EQUIPMENT_SLOTS, type EquipmentSlot } from "../equipmentData";
-import { CharacterStatsPanel } from "../CharacterStatsPanel";
+import CharacterStatsPanel from "../CharacterStatsPanel";
 import { DetailedStatsPanel } from "../DetailedStatsPanel";
 import type { SelectedBuffs } from "../characterBuffs";
 import EquipmentSlotButton from "./EquipmentSlotButton";
@@ -31,6 +31,7 @@ import CopyEquipmentButton from "./CopyEquipmentButton";
 import CompareSwitch from "./CompareSwitch";
 import ClassBadge from "./ClassBadge";
 import { useViewerComparison } from "./useViewerComparison";
+import { useCharacterSettings } from "./useCharacterSettings";
 import { roleClassOf } from "@/widgets/profile/archetype/archetypeRoles";
 import type { EquipmentCopySource } from "../equipmentRoles";
 
@@ -71,7 +72,7 @@ export default function EquipmentTab({
   const equipmentBySlot: Record<string, UserEquipment | undefined> =
     Object.fromEntries(equipment.map((item) => [item.slot, item]));
 
-  const [level, setLevel] = useState(user.character_level ?? 1);
+  const character = useCharacterSettings(userId, roleSlot, user, onBuffsChange);
   const guildBuffs =
     useAsyncData("guild-buffs", getGuildBuffSettings).data ?? {};
   const viewer = useViewerComparison(userId, guildBuffs);
@@ -136,7 +137,7 @@ export default function EquipmentTab({
         <div className="ml-auto flex items-center gap-2 text-sm text-muted-foreground">
           {roleClass && <ClassBadge userClass={roleClass} />}
           <span>
-            ур. <b className="text-foreground">{level}</b>
+            ур. <b className="text-foreground">{character.level}</b>
           </span>
           <span>·</span>
           <span>
@@ -147,19 +148,17 @@ export default function EquipmentTab({
       <CardContent className="grid gap-4 p-3 sm:p-4 @[48rem]:grid-cols-2 @[60rem]:grid-cols-[280px_minmax(0,1fr)_300px] @[60rem]:items-start">
         <div className="flex min-w-0 flex-col">
           <CharacterStatsPanel
-            userId={userId}
-            roleSlot={roleSlot}
             equipment={equipment}
             seals={seals}
             user={user}
             canEdit={canEdit}
-            level={level}
-            onLevelChange={setLevel}
+            level={character.level}
+            onLevelChange={character.changeLevel}
             buffs={buffs}
             guildBuffs={guildBuffs}
             skillBuild={skillBuild}
             viewer={viewer.stats}
-            onBuffsChange={onBuffsChange}
+            onBuffsSave={character.saveBuffs}
           />
         </div>
 
@@ -184,6 +183,7 @@ export default function EquipmentTab({
             <CharacterDoll
               userId={userId}
               user={user}
+              roleClass={roleClass}
               portraitUrl={portraitUrl}
               onPortraitChange={setPortraitUrl}
               canEdit={canEdit}
@@ -196,7 +196,7 @@ export default function EquipmentTab({
           <DetailedStatsPanel
             equipment={equipment}
             seals={seals}
-            level={level}
+            level={character.level}
             buffs={{ ...buffs, ...guildBuffs }}
             skillBuild={skillBuild}
             viewer={viewer.stats}

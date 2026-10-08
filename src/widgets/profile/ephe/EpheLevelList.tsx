@@ -1,6 +1,6 @@
 import { cn } from "@/shared/lib/tw-merge";
-import { getSealGradeColor, getSealGradeLabel } from "../../seals/sealsData";
-import type { EpheLevelRow } from "../epheSealsData";
+import { getSealGradeColor, getSealGradeLabel } from "../seals/sealsData";
+import type { EpheLevelRow } from "./epheSealsData";
 
 type Props = {
   rows: EpheLevelRow[];

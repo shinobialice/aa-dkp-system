@@ -2,6 +2,14 @@ import type { ProfileUser } from "@/actions/getUser";
 import type { ArchetypeSlot, RoleSlot } from "@/actions/getUserArchetype";
 import type { RoleSkillBuild } from "@/actions/getUserSkillBuild";
 
+type RoleClasses = Pick<
+  ProfileUser,
+  "class" | "secondary_class" | "tertiary_class"
+>;
+
+type RoleOwner = RoleClasses &
+  Pick<ProfileUser, "secondary_class_gear_score" | "tertiary_class_gear_score">;
+
 export const ROLE_LABELS: Record<RoleSlot, string> = {
   1: "Роль 1",
   2: "Роль 2",
@@ -19,12 +27,12 @@ const ROLE_CLASS_FIELD: Record<
 
 export const ROLE_SLOTS: RoleSlot[] = [1, 2, 3];
 
-export function roleClassOf(user: ProfileUser, slot: RoleSlot): string | null {
+export function roleClassOf(user: RoleClasses, slot: RoleSlot): string | null {
   return user[ROLE_CLASS_FIELD[slot]];
 }
 
 export function roleTabLabel(
-  user: ProfileUser,
+  user: RoleClasses,
   slot: RoleSlot,
   archetypeSlot: ArchetypeSlot,
 ): string {
@@ -34,7 +42,7 @@ export function roleTabLabel(
 }
 
 // Роль 1 есть у всех, 2/3 — только если игрок их себе завёл (см. ProfileClasses).
-export function hasRole(user: ProfileUser, slot: RoleSlot): boolean {
+export function hasRole(user: RoleOwner, slot: RoleSlot): boolean {
   if (slot === 1) return true;
   if (slot === 2) {
     return !!user.secondary_class || user.secondary_class_gear_score != null;

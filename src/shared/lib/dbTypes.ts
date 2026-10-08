@@ -134,6 +134,20 @@ export type BossRespawnHistoryRow = {
   packs_needed: number | null;
 };
 
+export type CalculatorBuildRow = {
+  id: number;
+  author_id: number;
+  build: unknown;
+  updated_at: string;
+};
+
+export type CalculatorShareRow = {
+  id: string;
+  author_id: number;
+  builds: unknown;
+  created_at: string;
+};
+
 export type EventSettingsRow = {
   id: number;
   title: string | null;

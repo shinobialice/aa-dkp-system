@@ -15,9 +15,10 @@ type AttackKind = {
   pvpDamage: [label: string, key: string];
 };
 
-// Точность персонажа с базовыми атрибутами; атрибуты сверх базы добавляют
-// к ней рейтинг точности.
-const BASE_ACCURACY = 90;
+// База и потолок точности подобраны по окну характеристик игры: без снаряжения
+// при 203 силе и 46 героическом уровне там ровно 90%.
+const BASE_ACCURACY = 85;
+const MAX_ACCURACY = 100;
 const BASE_CRIT_DAMAGE = 150;
 const BASE_DAMAGE_PERCENT = 100;
 
@@ -28,7 +29,7 @@ export function buildOffenseGroups(stats: DerivedStats): RowGroup[] {
       accuracy: [
         "Точность ударов в ближнем бою",
         STAT_LABEL.MELEE_ACCURACY,
-        computeAttributeAccuracy(stats.str - base.str),
+        computeAttributeAccuracy(stats.str),
       ],
       critChance: ["Шанс крит. удара в ближнем бою", stats.critChanceMelee],
       critDamage: [
@@ -50,7 +51,7 @@ export function buildOffenseGroups(stats: DerivedStats): RowGroup[] {
       accuracy: [
         "Точность ударов в дальнем бою",
         STAT_LABEL.RANGED_ACCURACY,
-        computeAttributeAccuracy(stats.dex - base.dex),
+        computeAttributeAccuracy(stats.dex),
       ],
       critChance: ["Шанс крит. удара в дальнем бою", stats.critChanceRanged],
       critDamage: [
@@ -75,9 +76,7 @@ export function buildOffenseGroups(stats: DerivedStats): RowGroup[] {
       accuracy: [
         "Точность заклинаний",
         STAT_LABEL.SPELL_ACCURACY,
-        computeAttributeAccuracy(
-          (stats.int - base.int + stats.spi - base.spi) / 2,
-        ),
+        computeAttributeAccuracy((stats.int + stats.spi) / 2),
       ],
       critChance: ["Шанс крит. удара заклинанием", stats.critChanceSpell],
       critDamage: [
@@ -123,13 +122,16 @@ function attackGroup(kind: AttackKind): RowGroup {
   const [critLabel, critValue] = kind.critChance;
   return {
     rows: [
-      bonusRow(
-        accuracyLabel,
-        BASE_ACCURACY + accuracyFromAttributes,
-        "%",
-        1,
-        accuracyKey,
-      ),
+      {
+        ...bonusRow(
+          accuracyLabel,
+          BASE_ACCURACY + accuracyFromAttributes,
+          "%",
+          1,
+          accuracyKey,
+        ),
+        max: MAX_ACCURACY,
+      },
       computedRow(critLabel, critValue, "%", 1),
       bonusRow(
         kind.critDamage[0],

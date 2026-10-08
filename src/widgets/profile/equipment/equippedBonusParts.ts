@@ -24,6 +24,8 @@ import { type EquippedBonuses } from "./characterStats";
 
 export const EMPTY_BONUSES: EquippedBonuses = {
   manaPercent: 0,
+  defensePercent: 0,
+  resistPercent: 0,
   defense: 0,
   resist: 0,
   str: 0,
@@ -87,6 +89,9 @@ export const FLAT_STAT_TARGETS: [keyof EquippedBonuses, string][] = [
   ["critChanceHeal", ENGRAVING_STAT.HEAL_CRIT_CHANCE],
   ["healthRegen", STAT_LABEL.HEALTH_REGEN],
   ["manaRegen", STAT_LABEL.MANA_REGEN],
+  // Восстановление в бою игра включает и в обычное восстановление.
+  ["healthRegen", STAT_LABEL.COMBAT_HEALTH_REGEN],
+  ["manaRegen", STAT_LABEL.COMBAT_MANA_REGEN],
 ];
 
 const RANGED_WEAPON_SLOT = "weapon_ranged";

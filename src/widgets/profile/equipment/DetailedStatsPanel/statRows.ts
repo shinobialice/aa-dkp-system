@@ -12,6 +12,7 @@ export type BonusRow = {
   decimals: number;
   bonusKey: string;
   indent?: boolean;
+  max?: number;
 };
 export type ComputedRow = {
   kind: "computed";
@@ -65,7 +66,7 @@ export function rowValue(row: Row, bonuses: Map<string, number>): RowValue {
   }
   if (row.kind === "bonus") {
     const delta = bonuses.get(row.bonusKey) ?? 0;
-    const amount = row.base + delta;
+    const amount = Math.min(row.base + delta, row.max ?? Infinity);
     return {
       text: `${amount.toFixed(row.decimals)}${row.unit}`,
       amount,

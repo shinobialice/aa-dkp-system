@@ -1,12 +1,12 @@
 import type { UserEquipment } from "@/actions/getUserEquipment";
-import { findGearItem } from "../../equipment/itemsData";
-import { GAME_ITEM_LEVELS } from "../../equipment/itemsData/gameItemLevels";
+import { findGearItem } from "../equipment/itemsData";
+import { GAME_ITEM_LEVELS } from "../equipment/itemsData/gameItemLevels";
 import {
   EPHE_SLOT_TRACK,
   EPHE_TRACK_PERCENT_CATEGORY,
   getEpheEffectiveness,
   getEphePercentBonus,
-} from "../epheSealsData";
+} from "./epheSealsData";
 
 type Props = {
   eq: UserEquipment;

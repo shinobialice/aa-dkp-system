@@ -12,6 +12,7 @@ const ENCHANT_LIMITS_OUTPUT = `${ITEMS_DIR}/gameEnchantLimits.ts`;
 const WEAPON_GEAR_SCORE_OUTPUT = `${ITEMS_DIR}/gameWeaponGearScore.ts`;
 const BUFFS_OUTPUT = `${ITEMS_DIR}/gameBuffs.ts`;
 const ARMOR_QUALITY_BUFFS_OUTPUT = `${ITEMS_DIR}/gameArmorQualityBuffs.ts`;
+const ELEMENT_LEVELS_OUTPUT = `${ITEMS_DIR}/gameElementLevels.ts`;
 const HEADER =
   "// Сгенерировано `pnpm game:tables` из данных игры. Не редактировать вручную.";
 
@@ -248,6 +249,9 @@ const BUFF_OVERRIDES = {
     optionIcons: { 2: "buffs/effects/30765.png" },
   },
   17: { copyStats: { skillPveM: "healingDamagePve" } },
+  // Время применения у «Стремления к совершенству» — это уже пересчитанный
+  // эффект его интеллекта и силы духа, а не отдельный бонус.
+  21: { dropStats: ["cast"] },
   9: {
     stats: { healthRegenCombat: 50, manaRegenCombat: 10 },
     text: [
@@ -289,6 +293,7 @@ await writeEnchantLimits();
 await writeWeaponGearScore();
 await writeBuffs();
 await writeArmorQualityBuffs();
+await writeElementLevels();
 
 async function writeSynthesis() {
   const profileByItemId = new Map();
@@ -544,6 +549,54 @@ async function writeArmorQualityBuffs() {
     "};",
   ]);
   console.log(`${weightLines.length} lines → ${ARMOR_QUALITY_BUFFS_OUTPUT}`);
+}
+
+// Уровень доп. урона оружия и защиты от него задан на категорию синтеза и
+// грейд (max_element_level), тип урона оружия — на holdable (element_id).
+async function writeElementLevels() {
+  const levelByCategoryGrade = new Map(
+    clientData.synthesis.properties.map((row) => [
+      `${row.item_rnd_attr_category_id}:${row.grade_id}`,
+      row.max_element_level,
+    ]),
+  );
+  const levelLines = [];
+  const elementLines = [];
+  for (const [itemId, name] of catalog) {
+    const record = clientData.records[itemId];
+    if (!record?.category) continue;
+    const levels = [];
+    for (let quality = 1; quality <= MAX_GRADE; quality++) {
+      const gradeId = clientData.grades[quality]?.id;
+      const level = levelByCategoryGrade.get(`${record.category}:${gradeId}`);
+      if (level) levels.push(`${quality}: ${level}`);
+    }
+    if (levels.length > 0) {
+      levelLines.push(`  ${itemId}: { ${levels.join(", ")} }, // ${name}`);
+    }
+    const element =
+      record.kind === "weapon"
+        ? clientData.holdables[record.holdable].element_id
+        : 0;
+    if (element) elementLines.push(`  ${itemId}: ${element}, // ${name}`);
+  }
+
+  await writeSource(ELEMENT_LEVELS_OUTPUT, [
+    HEADER,
+    "// Уровень по грейду предмета.",
+    "export const GAME_ELEMENT_LEVELS: Record<number, Record<number, number>> = {",
+    ...levelLines,
+    "};",
+    "",
+    "// Тип доп. урона оружия: 1 — колющий, 2 — режущий, 3 — магический,",
+    "// 4 — рубящий, 5 — дробящий.",
+    "export const GAME_WEAPON_ELEMENT: Record<number, number> = {",
+    ...elementLines,
+    "};",
+  ]);
+  console.log(
+    `${levelLines.length} levels, ${elementLines.length} weapons → ${ELEMENT_LEVELS_OUTPUT}`,
+  );
 }
 
 async function writeBuffs() {

@@ -58,7 +58,7 @@ function DimonishMenuItem() {
         tooltip="Димониш"
         onClick={show}
       >
-        <Ghost />
+        <Ghost className="fill-current/20 text-violet-600 dark:text-violet-400" />
         <span>Димониш</span>
       </SidebarMenuButton>
       {overlay}

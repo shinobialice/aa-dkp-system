@@ -3,7 +3,7 @@ import { Check, ChevronDown, ChevronRight } from "lucide-react";
 import type { UserEquipment } from "@/actions/getUserEquipment";
 import { Badge } from "@/shared/ui";
 import { cn } from "@/shared/lib/tw-merge";
-import { EPHE_SLOT_TRACK, EPHE_TRACK_MAX_LEVEL } from "../epheSealsData";
+import { EPHE_SLOT_TRACK, EPHE_TRACK_MAX_LEVEL } from "./epheSealsData";
 import { EPHE_SIDEBAR_GROUPS, EPHE_SLOT_SHORT_LABELS } from "./epheSlotGroups";
 
 const CHECK_COLOR = "#4ade80";

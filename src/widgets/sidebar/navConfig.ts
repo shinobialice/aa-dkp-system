@@ -1,5 +1,6 @@
 import {
   BadgeDollarSign,
+  Calculator,
   Calendar,
   CalendarDays,
   Gift,
@@ -20,11 +21,17 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-export type NavItem = { title: string; url: string; icon: LucideIcon };
+export type NavItem = {
+  title: string;
+  url: string;
+  icon: LucideIcon;
+  isNew?: boolean;
+};
 
 export type NavSection = {
   title: string | null;
   items: NavItem[];
+  iconClassName: string;
   adminOnly?: boolean;
   withDimonish?: boolean;
 };
@@ -32,16 +39,24 @@ export type NavSection = {
 export const NAV_SECTIONS: NavSection[] = [
   {
     title: null,
+    iconClassName: "text-emerald-600 dark:text-emerald-400",
     items: [
       { title: "Главная", url: "/", icon: House },
       { title: "Основная информация", url: "/news", icon: Info },
       { title: "Полезная информация", url: "/useful-info", icon: Lightbulb },
       { title: "Новости", url: "/game-news", icon: Newspaper },
       { title: "Доска объявлений", url: "/marketplace", icon: Megaphone },
+      {
+        title: "Калькулятор сборок",
+        url: "/calc",
+        icon: Calculator,
+        isNew: true,
+      },
     ],
   },
   {
     title: "Гильдия",
+    iconClassName: "text-sky-600 dark:text-sky-400",
     withDimonish: true,
     items: [
       { title: "Участники", url: "/members", icon: Users },
@@ -52,6 +67,7 @@ export const NAV_SECTIONS: NavSection[] = [
   },
   {
     title: "Добыча",
+    iconClassName: "text-amber-600 dark:text-amber-400",
     items: [
       { title: "Казна", url: "/loot", icon: PiggyBank },
       { title: "Финансы", url: "/loot/finance", icon: HandCoins },
@@ -61,6 +77,7 @@ export const NAV_SECTIONS: NavSection[] = [
   },
   {
     title: "Киллкаунт α",
+    iconClassName: "text-rose-600 dark:text-rose-400",
     items: [
       { title: "Сегодня", url: "/kill-counter/current", icon: Swords },
       { title: "История", url: "/kill-counter/history", icon: History },
@@ -68,6 +85,7 @@ export const NAV_SECTIONS: NavSection[] = [
   },
   {
     title: "Управление",
+    iconClassName: "text-slate-500 dark:text-slate-400",
     adminOnly: true,
     items: [
       { title: "Настройки", url: "/settings", icon: Settings },

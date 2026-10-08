@@ -1,9 +1,6 @@
 import type { UserEquipment } from "@/actions/getUserEquipment";
 import { findGearItem, type GearItem } from "../../itemsData";
-import {
-  DEFAULT_ENCHANT,
-  DEFAULT_EXTRA_PROTECTION,
-} from "../../itemsData/statsFormula";
+import { DEFAULT_ENCHANT } from "../../itemsData/statsFormula";
 import { NO_SYNTHESIS_EFFECT } from "../../itemsData/synthesis";
 import { DEFAULT_GRADE, getFixedGrade } from "../slotLayout";
 import type { SlotValues } from "../slotValues";
@@ -13,7 +10,6 @@ export type SlotDraft = {
   itemName: string;
   grade: number;
   enchant: number;
-  extraProtection: number;
   engravings: number[];
   selectedEngravingId: number;
   runeId: number;
@@ -25,7 +21,6 @@ const EMPTY_DRAFT: SlotDraft = {
   itemName: "",
   grade: DEFAULT_GRADE,
   enchant: DEFAULT_ENCHANT,
-  extraProtection: DEFAULT_EXTRA_PROTECTION,
   engravings: [],
   selectedEngravingId: 0,
   runeId: 0,
@@ -47,7 +42,6 @@ export function draftFromItem(
     itemName: item.item_name ?? "",
     grade: fixedGrade ?? item.grade,
     enchant: item.enchant,
-    extraProtection: item.extra_protection,
     engravings: item.engravings,
     selectedEngravingId: item.engravings.find(Boolean) ?? 0,
     runeId: item.rune_id,
@@ -69,7 +63,6 @@ export function draftToValues(
     itemName: draft.itemName,
     grade: draft.grade,
     enchant: Math.min(draft.enchant, options.maxEnchant),
-    extraProtection: draft.extraProtection,
     engravings: draft.engravings.slice(0, options.maxEngravingSlots),
     runeId: draft.runeId,
     synthesisEffects: chosenSynthesisEffects(draft.synthesisEffects, options),
@@ -93,7 +86,6 @@ export function draftToPreviewItem(
     item_name: values.itemName,
     grade: values.grade,
     enchant: values.enchant,
-    extra_protection: values.extraProtection,
     engravings: values.engravings,
     rune_id: values.runeId,
     synthesis_effects: values.synthesisEffects,

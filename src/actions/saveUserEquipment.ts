@@ -14,7 +14,6 @@ export type EquipmentInput = {
   itemName: string | null;
   grade: number;
   enchant: number;
-  extraProtection: number;
   engravings: number[];
   runeId: number;
   synthesisEffects: number[];
@@ -62,8 +61,8 @@ const saveUserEquipment = async (
       for (const item of filled) {
         const epheSealLevel = epheLevels.get(item.slot) ?? item.epheSealLevel;
         await tx`
-          INSERT INTO user_equipment (user_id, role_slot, slot, item_name, grade, enchant, extra_protection, engravings, rune_id, synthesis_effects, synthesis_percent, ephe_seal_level)
-          VALUES (${userId}, ${roleSlot}, ${item.slot}, ${item.itemName}, ${item.grade}, ${item.enchant}, ${item.extraProtection}, ${sql.array(item.engravings)}::integer[], ${item.runeId}, ${sql.array(item.synthesisEffects)}::integer[], ${item.synthesisPercent}, ${epheSealLevel})
+          INSERT INTO user_equipment (user_id, role_slot, slot, item_name, grade, enchant, engravings, rune_id, synthesis_effects, synthesis_percent, ephe_seal_level)
+          VALUES (${userId}, ${roleSlot}, ${item.slot}, ${item.itemName}, ${item.grade}, ${item.enchant}, ${sql.array(item.engravings)}::integer[], ${item.runeId}, ${sql.array(item.synthesisEffects)}::integer[], ${item.synthesisPercent}, ${epheSealLevel})
         `;
       }
     });

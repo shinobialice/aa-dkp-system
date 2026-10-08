@@ -1,31 +1,41 @@
 "use client";
 import { useState } from "react";
 import Image from "next/image";
-import { toast } from "sonner";
 import type { UserEquipment } from "@/actions/getUserEquipment";
 import type { UserSeal } from "@/actions/getUserSeals";
 import type { RoleSkillBuild } from "@/actions/getUserSkillBuild";
-import type { RoleSlot } from "@/shared/config/roleSlots";
-import saveCharacterLevel from "@/actions/saveCharacterLevel";
 import { isValidCharacterLevel } from "../characterLevel";
 import {
   computeCharacterBonuses,
   computeDerivedStats,
 } from "../characterStats";
-import type { SelectedBuffs } from "../characterBuffs";
+import { PERSONAL_BUFFS, type SelectedBuffs } from "../characterBuffs";
+import type { CharacterBuff } from "../itemsData/buffTypes";
 import type { ProfileStats } from "../statComparison";
 import BuffRow from "./BuffRow";
 import LevelControl from "./LevelControl";
 import StatBar from "./StatBar";
 import StatList from "./StatList";
 import { attributeColumns, powerStats, utilityStats } from "./statSections";
-import { errorMessage } from "@/shared/lib/errorMessage";
 import { formatNumber } from "@/shared/lib/format";
 import { computeTestGearScore } from "../gearScore";
 
-export function CharacterStatsPanel({
-  userId,
-  roleSlot,
+type Props = {
+  equipment: UserEquipment[];
+  seals: UserSeal[];
+  user?: { username?: string | null } | null;
+  canEdit: boolean;
+  level: number;
+  onLevelChange: (level: number) => Promise<void>;
+  buffs: SelectedBuffs;
+  guildBuffs: SelectedBuffs;
+  buffChoices?: CharacterBuff[];
+  onBuffsSave: (buffs: SelectedBuffs) => Promise<void>;
+  skillBuild: RoleSkillBuild;
+  viewer: ProfileStats | null;
+};
+
+export default function CharacterStatsPanel({
   equipment,
   seals,
   user,
@@ -34,24 +44,11 @@ export function CharacterStatsPanel({
   onLevelChange,
   buffs,
   guildBuffs,
-  onBuffsChange,
+  buffChoices = PERSONAL_BUFFS,
+  onBuffsSave,
   skillBuild,
   viewer,
-}: {
-  userId: number;
-  roleSlot: RoleSlot;
-  equipment: UserEquipment[];
-  seals: UserSeal[];
-  user?: { username?: string | null } | null;
-  canEdit: boolean;
-  level: number;
-  onLevelChange: (level: number) => void;
-  buffs: SelectedBuffs;
-  guildBuffs: SelectedBuffs;
-  onBuffsChange: (buffs: SelectedBuffs) => void;
-  skillBuild: RoleSkillBuild;
-  viewer: ProfileStats | null;
-}) {
+}: Props) {
   const [savingLevel, setSavingLevel] = useState(false);
   const [levelEditing, setLevelEditing] = useState(false);
 
@@ -67,16 +64,9 @@ export function CharacterStatsPanel({
   const handleLevelChange = async (value: string) => {
     const next = Number(value);
     if (!isValidCharacterLevel(next)) return;
-    const prev = level;
-    onLevelChange(next);
     setSavingLevel(true);
     try {
-      await saveCharacterLevel(userId, next);
-    } catch (error) {
-      onLevelChange(prev);
-      toast.error(
-        errorMessage(error, "Не удалось сохранить уровень персонажа"),
-      );
+      await onLevelChange(next);
     } finally {
       setSavingLevel(false);
     }
@@ -94,7 +84,7 @@ export function CharacterStatsPanel({
             onEditingChange={setLevelEditing}
             onChange={handleLevelChange}
           />
-          <div className="min-w-0 flex-1 truncate text-sm font-semibold">
+          <div className="min-w-0 flex-1 truncate text-sm font-semibold text-[#acd49c] [text-shadow:0_0_2px_#141206,0_0_2px_#141206,0_1px_2px_rgb(0_0_0/0.7)]">
             {user?.username ?? "Без имени"}
           </div>
         </div>
@@ -127,13 +117,12 @@ export function CharacterStatsPanel({
       </div>
 
       <BuffRow
-        userId={userId}
-        roleSlot={roleSlot}
         equipment={equipment}
         buffs={buffs}
         guildBuffs={guildBuffs}
+        buffChoices={buffChoices}
         canEdit={canEdit}
-        onBuffsChange={onBuffsChange}
+        onBuffsSave={onBuffsSave}
       />
 
       <div className="border-t" />
