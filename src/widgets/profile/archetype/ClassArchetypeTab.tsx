@@ -11,7 +11,7 @@ import { Button } from "@/shared/ui";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
 import CharacterTabsSwitcher from "@/widgets/profile/CharacterTabsSwitcher";
 import { errorMessage } from "@/shared/lib/errorMessage";
-import { specIdsOf, hasAnySkillSelected } from "./archetypeRoles";
+import { specIdsOf } from "./archetypeRoles";
 import BuildEditor from "./BuildEditor";
 import BuildView from "./BuildView";
 
@@ -32,22 +32,35 @@ export default function ClassArchetypeTab({
   onSkillBuildChange: (skillBuild: UserSkillBuild) => void;
   canEdit: boolean;
 }) {
-  const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [draft, setDraft] = useState<UserArchetype>(archetype);
   const [skillBuildDraft, setSkillBuildDraft] =
     useState<UserSkillBuild>(skillBuild);
+  const [synced, setSynced] = useState({ archetype, skillBuild });
+
+  // Сохранённые данные пришли извне (сохранение, смена пользователя) —
+  // черновик пересобирается из них, чтобы не показывать устаревшее.
+  if (synced.archetype !== archetype || synced.skillBuild !== skillBuild) {
+    setSynced({ archetype, skillBuild });
+    setDraft(archetype);
+    setSkillBuildDraft(skillBuild);
+  }
 
   const activeSlots = [roleSlot];
 
-  const startEditing = () => {
-    setDraft(archetype);
-    setSkillBuildDraft(skillBuild);
-    setEditing(true);
-  };
+  // Владелец редактирует класс и билд сразу, без отдельного режима —
+  // кнопки сохранения появляются, только когда есть несохранённые правки.
+  const editing = canEdit;
+  const dirty =
+    canEdit &&
+    activeSlots.some(
+      (slot) =>
+        JSON.stringify(draft[slot]) !== JSON.stringify(archetype[slot]) ||
+        JSON.stringify(skillBuildDraft[slot] ?? {}) !==
+          JSON.stringify(skillBuild[slot] ?? {}),
+    );
 
-  const cancelEditing = () => {
-    setEditing(false);
+  const resetDraft = () => {
     setDraft(archetype);
     setSkillBuildDraft(skillBuild);
   };
@@ -86,7 +99,6 @@ export default function ClassArchetypeTab({
       }
       onChange(updatedArchetype);
       onSkillBuildChange(updatedSkillBuild);
-      setEditing(false);
       toast.success("Класс сохранён");
     } catch (error) {
       toast.error(errorMessage(error, "Не удалось сохранить класс"));
@@ -100,21 +112,12 @@ export default function ClassArchetypeTab({
       <CardHeader className="border-b">
         <CardTitle className="flex items-center justify-between">
           <CharacterTabsSwitcher group="character" />
-          {canEdit && !editing && (
-            <Button
-              variant="outline"
-              className="cursor-pointer"
-              onClick={startEditing}
-            >
-              Изменить
-            </Button>
-          )}
-          {canEdit && editing && (
+          {dirty && (
             <div className="flex gap-2">
               <Button
                 variant="ghost"
                 className="cursor-pointer"
-                onClick={cancelEditing}
+                onClick={resetDraft}
                 disabled={saving}
               >
                 Отмена
@@ -139,9 +142,7 @@ export default function ClassArchetypeTab({
         )}
         {activeSlots.map((slot, i) => {
           const specIds = specIdsOf(editing ? draft[slot] : archetype[slot]);
-          const showBuild =
-            specIds.length > 0 &&
-            (editing || hasAnySkillSelected(skillBuild[slot]));
+          const showBuild = specIds.length > 0;
 
           return (
             <div key={slot} className={i > 0 ? "border-t pt-4" : undefined}>
