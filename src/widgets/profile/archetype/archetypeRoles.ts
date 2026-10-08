@@ -1,6 +1,5 @@
 import type { ProfileUser } from "@/actions/getUser";
 import type { ArchetypeSlot, RoleSlot } from "@/actions/getUserArchetype";
-import type { RoleSkillBuild } from "@/actions/getUserSkillBuild";
 
 export const ROLE_LABELS: Record<RoleSlot, string> = {
   1: "Роль 1",
@@ -48,13 +47,4 @@ export function specIdsOf(slot: ArchetypeSlot): string[] {
     slot.specialization2,
     slot.specialization3,
   ].filter((s): s is string => !!s);
-}
-
-export function hasAnySkillSelected(
-  roleBuild: RoleSkillBuild | undefined,
-): boolean {
-  if (!roleBuild) return false;
-  return Object.values(roleBuild).some(
-    (spec) => (spec?.selected?.length ?? 0) > 0,
-  );
 }
