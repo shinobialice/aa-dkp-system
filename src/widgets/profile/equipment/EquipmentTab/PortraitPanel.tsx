@@ -10,6 +10,8 @@ type Props = {
   roleClass: string | null;
   portraitUrl: string | null;
   upload: ReactNode;
+  fallbackPortrait?: string;
+  className?: string;
 };
 
 const PORTRAITS_DIR = "/images/equipment/portraits";
@@ -31,13 +33,20 @@ export default function PortraitPanel({
   roleClass,
   portraitUrl,
   upload,
+  fallbackPortrait,
+  className,
 }: Props) {
   const classPortrait = roleClass ? CLASS_PORTRAITS[roleClass] : undefined;
-  const portrait = portraitUrl ?? classPortrait;
+  const portrait = portraitUrl ?? classPortrait ?? fallbackPortrait;
 
   if (!portrait) {
     return (
-      <div className="relative flex w-32 flex-col items-center justify-center gap-2 rounded-xl border bg-muted/40 p-3 sm:w-52">
+      <div
+        className={cn(
+          "relative flex w-32 flex-col items-center justify-center gap-2 rounded-xl border bg-muted/40 p-3 sm:w-52",
+          className,
+        )}
+      >
         <Avatar className="size-16 border-4 border-card shadow-sm sm:size-24">
           <AvatarImage src={avatarSrc(name, avatarUrl)} alt={name} />
           <AvatarFallback className="text-xl">
@@ -53,7 +62,12 @@ export default function PortraitPanel({
   }
 
   return (
-    <div className="relative flex w-40 flex-col rounded-xl border bg-muted/40 p-2 sm:w-60 @[60rem]:w-47.5">
+    <div
+      className={cn(
+        "relative flex w-40 flex-col rounded-xl border bg-muted/40 p-2 sm:w-60 @[60rem]:w-47.5",
+        className,
+      )}
+    >
       <div className="relative h-full w-full overflow-hidden rounded-lg">
         <Image
           src={portrait}

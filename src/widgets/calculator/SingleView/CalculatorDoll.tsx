@@ -13,6 +13,8 @@ type Props = {
   renderSlot: (slot: EquipmentSlot, side: "left" | "right") => ReactNode;
 };
 
+const NO_CLASS_PORTRAIT = "/images/equipment/portraits/no-class.webp";
+
 export default function CalculatorDoll({ build, renderSlot }: Props) {
   return (
     <div className="flex flex-col items-center">
@@ -31,6 +33,8 @@ export default function CalculatorDoll({ build, renderSlot }: Props) {
           roleClass={build.roleClass}
           portraitUrl={build.owner?.portraitUrl ?? null}
           upload={null}
+          fallbackPortrait={NO_CLASS_PORTRAIT}
+          className="max-w-70 min-w-40 flex-1"
         />
 
         <div className="flex flex-col gap-4 pr-8">
