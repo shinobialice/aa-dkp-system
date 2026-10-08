@@ -142,6 +142,7 @@ export type EventSettingsRow = {
   updated_at: string;
   starts_at: string | null;
   link: string | null;
+  promo: string | null;
 };
 
 export type GivenawaylootRow = {
@@ -332,6 +333,25 @@ export type ProfileItemTypeRow = {
   name: string;
   category: string;
   icon_url: string | null;
+  created_at: string;
+};
+
+export type PromoCharacterRow = {
+  id: number;
+  user_id: number;
+  name: string;
+  server: string | null;
+  group_id: number | null;
+  position: number;
+  created_at: string;
+};
+
+export type PromoProgressRow = {
+  character_id: number;
+  event: string;
+  week_start: string;
+  quest_id: number;
+  day_index: number;
   created_at: string;
 };
 
@@ -563,6 +583,15 @@ export type VkNotificationSettingsRow = {
 export type VkScheduleNotifyLogRow = {
   event_key: string;
   notified_at: string;
+};
+
+export type VoucherReportRow = {
+  server: string;
+  period: string;
+  zone: string;
+  amount: number;
+  user_id: number;
+  updated_at: string;
 };
 
 export type WeekScheduleEventRow = {

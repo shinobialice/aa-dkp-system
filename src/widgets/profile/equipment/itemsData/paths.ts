@@ -5,17 +5,6 @@ export const ITEM_ICON = (slot: string, slug: string) =>
 export const SEAL_ICON = (file: string) =>
   `/images/equipment/seals/${file}.png`;
 
-const OVERLAYS_WITHOUT_CUBE_MARK: Record<string, string> = {
-  [SEAL_ICON("top_thiol_6")]: SEAL_ICON("top_seal_ipnir_4"),
-};
-
-export function getItemOverlayUrl(sealIconUrl: string | null | undefined) {
-  if (!sealIconUrl) return null;
-  return sealIconUrl in OVERLAYS_WITHOUT_CUBE_MARK
-    ? OVERLAYS_WITHOUT_CUBE_MARK[sealIconUrl]
-    : sealIconUrl;
-}
-
 const GRADE_FILES = [
   "Basic",
   "Grand",

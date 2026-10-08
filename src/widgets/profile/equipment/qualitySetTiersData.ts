@@ -77,8 +77,8 @@ export function qualitySetTexts(
   const armor = ARMOR_NAMES[weight];
   const skillLine =
     grade === TWELVE_GRADE
-      ? "Дополнительный урон боевых умений и дополнительная эффективность исцеляющих умений"
-      : "Дополнительный урон умений и дополнительная эффективность целительных умений";
+      ? "Доп. урон боевых умений и доп. эффективность исцеляющих умений"
+      : "Доп. урон умений и доп. эффективность целительных умений";
 
   return {
     icon: `/images/equipment/buffs/quality_${weight}/grade${grade}.png`,

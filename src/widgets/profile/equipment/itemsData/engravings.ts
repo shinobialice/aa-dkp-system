@@ -4440,7 +4440,7 @@ export const ENGRAVINGS: Engraving[] = [
     iconUrl: ENGRAVING_ICON(
       "аквамариновая_гравировка_занесенного_клинка_55589",
     ),
-    effect: "Дополнительный урон умений в ближнем бою в PvP: +0.1%",
+    effect: "Доп. урон умений в ближнем бою в PvP: +0.1%",
     slots: ["earring"],
   },
   {
@@ -4450,7 +4450,7 @@ export const ENGRAVINGS: Engraving[] = [
     iconUrl: ENGRAVING_ICON(
       "искусная_аквамариновая_гравировка_занесенного_клинка_55590",
     ),
-    effect: "Дополнительный урон умений в ближнем бою в PvP: +0.2%",
+    effect: "Доп. урон умений в ближнем бою в PvP: +0.2%",
     slots: ["earring"],
   },
   {
@@ -4460,7 +4460,7 @@ export const ENGRAVINGS: Engraving[] = [
     iconUrl: ENGRAVING_ICON(
       "зачарованная_аквамариновая_гравировка_занесенного_клинка_55591",
     ),
-    effect: "Дополнительный урон умений в ближнем бою в PvP: +0.3%",
+    effect: "Доп. урон умений в ближнем бою в PvP: +0.3%",
     slots: ["earring"],
   },
   {
@@ -4470,7 +4470,7 @@ export const ENGRAVINGS: Engraving[] = [
     iconUrl: ENGRAVING_ICON(
       "драгоценная_аквамариновая_гравировка_занесенного_клинка_55592",
     ),
-    effect: "Дополнительный урон умений в ближнем бою в PvP: +0.5%",
+    effect: "Доп. урон умений в ближнем бою в PvP: +0.5%",
     slots: ["earring"],
   },
   {
@@ -4478,7 +4478,7 @@ export const ENGRAVINGS: Engraving[] = [
     name: "Аквамариновая гравировка пустого колчана",
     grade: 3,
     iconUrl: ENGRAVING_ICON("аквамариновая_гравировка_пустого_колчана_55593"),
-    effect: "Дополнительный урон умений в дальнем бою в PvP: +0.1%",
+    effect: "Доп. урон умений в дальнем бою в PvP: +0.1%",
     slots: ["earring"],
   },
   {
@@ -4488,7 +4488,7 @@ export const ENGRAVINGS: Engraving[] = [
     iconUrl: ENGRAVING_ICON(
       "искусная_аквамариновая_гравировка_пустого_колчана_55594",
     ),
-    effect: "Дополнительный урон умений в дальнем бою в PvP: +0.2%",
+    effect: "Доп. урон умений в дальнем бою в PvP: +0.2%",
     slots: ["earring"],
   },
   {
@@ -4498,7 +4498,7 @@ export const ENGRAVINGS: Engraving[] = [
     iconUrl: ENGRAVING_ICON(
       "зачарованная_аквамариновая_гравировка_пустого_колчана_55595",
     ),
-    effect: "Дополнительный урон умений в дальнем бою в PvP: +0.3%",
+    effect: "Доп. урон умений в дальнем бою в PvP: +0.3%",
     slots: ["earring"],
   },
   {
@@ -4508,7 +4508,7 @@ export const ENGRAVINGS: Engraving[] = [
     iconUrl: ENGRAVING_ICON(
       "драгоценная_аквамариновая_гравировка_пустого_колчана_55596",
     ),
-    effect: "Дополнительный урон умений в дальнем бою в PvP: +0.5%",
+    effect: "Доп. урон умений в дальнем бою в PvP: +0.5%",
     slots: ["earring"],
   },
   {
@@ -4516,7 +4516,7 @@ export const ENGRAVINGS: Engraving[] = [
     name: "Аквамариновая гравировка падающей звезды",
     grade: 3,
     iconUrl: ENGRAVING_ICON("аквамариновая_гравировка_падающей_звезды_55597"),
-    effect: "Дополнительный урон умений заклинаниями в PvP: +0.1%",
+    effect: "Доп. урон умений заклинаниями в PvP: +0.1%",
     slots: ["earring"],
   },
   {
@@ -4526,7 +4526,7 @@ export const ENGRAVINGS: Engraving[] = [
     iconUrl: ENGRAVING_ICON(
       "искусная_аквамариновая_гравировка_падающей_звезды_55598",
     ),
-    effect: "Дополнительный урон умений заклинаниями в PvP: +0.2%",
+    effect: "Доп. урон умений заклинаниями в PvP: +0.2%",
     slots: ["earring"],
   },
   {
@@ -4536,7 +4536,7 @@ export const ENGRAVINGS: Engraving[] = [
     iconUrl: ENGRAVING_ICON(
       "зачарованная_аквамариновая_гравировка_падающей_звезды_55599",
     ),
-    effect: "Дополнительный урон умений заклинаниями в PvP: +0.3%",
+    effect: "Доп. урон умений заклинаниями в PvP: +0.3%",
     slots: ["earring"],
   },
   {
@@ -4546,7 +4546,7 @@ export const ENGRAVINGS: Engraving[] = [
     iconUrl: ENGRAVING_ICON(
       "драгоценная_аквамариновая_гравировка_падающей_звезды_55600",
     ),
-    effect: "Дополнительный урон умений заклинаниями в PvP: +0.5%",
+    effect: "Доп. урон умений заклинаниями в PvP: +0.5%",
     slots: ["earring"],
   },
   {
@@ -4554,7 +4554,7 @@ export const ENGRAVINGS: Engraving[] = [
     name: "Аквамариновая гравировка вихря смерти",
     grade: 3,
     iconUrl: ENGRAVING_ICON("аквамариновая_гравировка_вихря_смерти_55601"),
-    effect: "Дополнительный урон умений в ближнем бою в PvE: +0.1%",
+    effect: "Доп. урон умений в ближнем бою в PvE: +0.1%",
     slots: ["earring"],
   },
   {
@@ -4564,7 +4564,7 @@ export const ENGRAVINGS: Engraving[] = [
     iconUrl: ENGRAVING_ICON(
       "искусная_аквамариновая_гравировка_вихря_смерти_55602",
     ),
-    effect: "Дополнительный урон умений в ближнем бою в PvE: +0.2%",
+    effect: "Доп. урон умений в ближнем бою в PvE: +0.2%",
     slots: ["earring"],
   },
   {
@@ -4574,7 +4574,7 @@ export const ENGRAVINGS: Engraving[] = [
     iconUrl: ENGRAVING_ICON(
       "зачарованная_аквамариновая_гравировка_вихря_смерти_55603",
     ),
-    effect: "Дополнительный урон умений в ближнем бою в PvE: +0.3%",
+    effect: "Доп. урон умений в ближнем бою в PvE: +0.3%",
     slots: ["earring"],
   },
   {
@@ -4584,7 +4584,7 @@ export const ENGRAVINGS: Engraving[] = [
     iconUrl: ENGRAVING_ICON(
       "драгоценная_аквамариновая_гравировка_вихря_смерти_55604",
     ),
-    effect: "Дополнительный урон умений в ближнем бою в PvE: +0.5%",
+    effect: "Доп. урон умений в ближнем бою в PvE: +0.5%",
     slots: ["earring"],
   },
   {
@@ -4594,7 +4594,7 @@ export const ENGRAVINGS: Engraving[] = [
     iconUrl: ENGRAVING_ICON(
       "аквамариновая_гравировка_окровавленного_лука_55605",
     ),
-    effect: "Дополнительный урон умений в дальнем бою в PvE: +0.1%",
+    effect: "Доп. урон умений в дальнем бою в PvE: +0.1%",
     slots: ["earring"],
   },
   {
@@ -4604,7 +4604,7 @@ export const ENGRAVINGS: Engraving[] = [
     iconUrl: ENGRAVING_ICON(
       "искусная_аквамариновая_гравировка_окровавленного_лука_55606",
     ),
-    effect: "Дополнительный урон умений в дальнем бою в PvE: +0.2%",
+    effect: "Доп. урон умений в дальнем бою в PvE: +0.2%",
     slots: ["earring"],
   },
   {
@@ -4614,7 +4614,7 @@ export const ENGRAVINGS: Engraving[] = [
     iconUrl: ENGRAVING_ICON(
       "зачарованная_аквамариновая_гравировка_окровавленного_лука_55607",
     ),
-    effect: "Дополнительный урон умений в дальнем бою в PvE: +0.3%",
+    effect: "Доп. урон умений в дальнем бою в PvE: +0.3%",
     slots: ["earring"],
   },
   {
@@ -4624,7 +4624,7 @@ export const ENGRAVINGS: Engraving[] = [
     iconUrl: ENGRAVING_ICON(
       "драгоценная_аквамариновая_гравировка_окровавленного_лука_55608",
     ),
-    effect: "Дополнительный урон умений в дальнем бою в PvE: +0.5%",
+    effect: "Доп. урон умений в дальнем бою в PvE: +0.5%",
     slots: ["earring"],
   },
   {
@@ -4632,7 +4632,7 @@ export const ENGRAVINGS: Engraving[] = [
     name: "Аквамариновая гравировка грозы",
     grade: 3,
     iconUrl: ENGRAVING_ICON("аквамариновая_гравировка_грозы_55609"),
-    effect: "Дополнительный урон умений заклинаниями в PvE: +0.1%",
+    effect: "Доп. урон умений заклинаниями в PvE: +0.1%",
     slots: ["earring"],
   },
   {
@@ -4640,7 +4640,7 @@ export const ENGRAVINGS: Engraving[] = [
     name: "Искусная аквамариновая гравировка грозы",
     grade: 4,
     iconUrl: ENGRAVING_ICON("искусная_аквамариновая_гравировка_грозы_55610"),
-    effect: "Дополнительный урон умений заклинаниями в PvE: +0.2%",
+    effect: "Доп. урон умений заклинаниями в PvE: +0.2%",
     slots: ["earring"],
   },
   {
@@ -4650,7 +4650,7 @@ export const ENGRAVINGS: Engraving[] = [
     iconUrl: ENGRAVING_ICON(
       "зачарованная_аквамариновая_гравировка_грозы_55611",
     ),
-    effect: "Дополнительный урон умений заклинаниями в PvE: +0.3%",
+    effect: "Доп. урон умений заклинаниями в PvE: +0.3%",
     slots: ["earring"],
   },
   {
@@ -4658,7 +4658,7 @@ export const ENGRAVINGS: Engraving[] = [
     name: "Драгоценная аквамариновая гравировка грозы",
     grade: 6,
     iconUrl: ENGRAVING_ICON("драгоценная_аквамариновая_гравировка_грозы_55612"),
-    effect: "Дополнительный урон умений заклинаниями в PvE: +0.5%",
+    effect: "Доп. урон умений заклинаниями в PvE: +0.5%",
     slots: ["earring"],
   },
   {
@@ -4666,7 +4666,7 @@ export const ENGRAVINGS: Engraving[] = [
     name: "Аквамариновая гравировка круговорота жизни",
     grade: 3,
     iconUrl: ENGRAVING_ICON("аквамариновая_гравировка_круговорота_жизни_55613"),
-    effect: "Дополнительная эффективность исцеления: +0.5%",
+    effect: "Доп. эффективность исцеления: +0.5%",
     slots: ["earring"],
   },
   {
@@ -4676,7 +4676,7 @@ export const ENGRAVINGS: Engraving[] = [
     iconUrl: ENGRAVING_ICON(
       "искусная_аквамариновая_гравировка_круговорота_жизни_55614",
     ),
-    effect: "Дополнительная эффективность исцеления: +1%",
+    effect: "Доп. эффективность исцеления: +1%",
     slots: ["earring"],
   },
   {
@@ -4686,7 +4686,7 @@ export const ENGRAVINGS: Engraving[] = [
     iconUrl: ENGRAVING_ICON(
       "зачарованная_аквамариновая_гравировка_круговорота_жизни_55615",
     ),
-    effect: "Дополнительная эффективность исцеления: +1.5%",
+    effect: "Доп. эффективность исцеления: +1.5%",
     slots: ["earring"],
   },
   {
@@ -4696,7 +4696,7 @@ export const ENGRAVINGS: Engraving[] = [
     iconUrl: ENGRAVING_ICON(
       "драгоценная_аквамариновая_гравировка_круговорота_жизни_55616",
     ),
-    effect: "Дополнительная эффективность исцеления: +2.5%",
+    effect: "Доп. эффективность исцеления: +2.5%",
     slots: ["earring"],
   },
   {

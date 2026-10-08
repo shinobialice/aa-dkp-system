@@ -189,7 +189,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     name: "Возрожденный Ишхар, грань измерений",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "возрожденный_ишхар_грань_измерений"),
-    sealIconUrl: SEAL_ICON("top_thiol_2"),
+    sealIconUrl: SEAL_ICON("top_thiol_3"),
   },
   {
     id: 55105,
@@ -287,7 +287,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     name: "Мор'гур, Всепоглощающая смерть",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "моргур_всепоглощающая_смерть"),
-    sealIconUrl: SEAL_ICON("top_thiol_1"),
+    sealIconUrl: SEAL_ICON("top_thiol_4"),
   },
   {
     id: 45302,
@@ -399,7 +399,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     name: "Возрожденная Гирра, пробивающий брешь",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "возрожденная_гирра_пробивающий_брешь"),
-    sealIconUrl: SEAL_ICON("top_thiol_2"),
+    sealIconUrl: SEAL_ICON("top_thiol_3"),
   },
   {
     id: 55109,
@@ -581,7 +581,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     name: "Вул'данор, Всепоглощающая тьма",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "вулданор_всепоглощающая_тьма"),
-    sealIconUrl: SEAL_ICON("top_thiol_1"),
+    sealIconUrl: SEAL_ICON("top_thiol_4"),
   },
   {
     id: 45303,
@@ -804,7 +804,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     name: "Рави'мар, Всепоглощающий гнев",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "равимар_всепоглощающий_гнев"),
-    sealIconUrl: SEAL_ICON("top_thiol_1"),
+    sealIconUrl: SEAL_ICON("top_thiol_4"),
   },
   {
     id: 54977,
@@ -909,7 +909,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     name: "Возрожденная Ташш, змеиное жало",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "возрожденная_ташш_змеиное_жало"),
-    sealIconUrl: SEAL_ICON("top_thiol_2"),
+    sealIconUrl: SEAL_ICON("top_thiol_3"),
   },
   {
     id: 54979,
@@ -1119,7 +1119,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     name: "Возрожденный Нирах, искушающий",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "возрожденный_нирах_искушающий"),
-    sealIconUrl: SEAL_ICON("top_thiol_2"),
+    sealIconUrl: SEAL_ICON("top_thiol_3"),
   },
   {
     id: 54981,
@@ -1224,7 +1224,7 @@ export const WEAPON_MAIN_ITEMS: GearItem[] = [
     name: "Дра'кордис, Всепоглощающее безмолвие",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_main", "дракордис_всепоглощающее_безмолвие"),
-    sealIconUrl: SEAL_ICON("top_thiol_1"),
+    sealIconUrl: SEAL_ICON("top_thiol_4"),
   },
   {
     id: 54983,

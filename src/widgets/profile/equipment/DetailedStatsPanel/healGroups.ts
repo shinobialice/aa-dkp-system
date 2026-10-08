@@ -96,9 +96,9 @@ export function buildHealGroups(stats: DerivedStats): RowGroup[] {
           1,
           STAT_LABEL.CAST_PUSHBACK,
         ),
-        staticRow("Дополнительный опыт", "100%"),
-        staticRow("Дополнительный шанс получения трофеев", "100%"),
-        staticRow("Дополнительный шанс получения монет", "100%"),
+        staticRow("Доп. опыт", "100%"),
+        staticRow("Доп. шанс получения трофеев", "100%"),
+        staticRow("Доп. шанс получения монет", "100%"),
         bonusRow(
           "Дальность обнаружения скрытых существ",
           0,

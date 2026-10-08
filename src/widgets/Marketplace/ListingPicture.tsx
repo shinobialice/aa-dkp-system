@@ -4,18 +4,20 @@ import { cn } from "@/shared/lib/tw-merge";
 import { LootIcon } from "@/widgets/Loot/LootBuy/icons/LootIconComponent";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/ui";
 
-export default function ListingPicture({
-  listing,
-}: {
+type Props = {
   listing: MarketplaceListing;
-}) {
+  size?: number;
+};
+
+export default function ListingPicture({ listing, size = 48 }: Props) {
+  const box = { width: size, height: size };
   if (listing.catalog_item_id) {
     return (
       <LootIcon
         itemName={listing.item_name}
         iconUrl={listing.catalog_icon_url}
         grade={listing.catalog_grade}
-        size={48}
+        size={size}
       />
     );
   }
@@ -27,7 +29,8 @@ export default function ListingPicture({
           <img
             src={listing.image_url}
             alt={listing.item_name}
-            className="size-12 shrink-0 rounded-md bg-muted object-cover"
+            style={box}
+            className="shrink-0 rounded-md bg-muted object-cover"
           />
         </TooltipTrigger>
         <TooltipContent side="right" className="p-1">
@@ -45,14 +48,15 @@ export default function ListingPicture({
   const Icon = isBuy ? ShoppingCart : Tag;
   return (
     <span
+      style={box}
       className={cn(
-        "flex size-12 shrink-0 items-center justify-center rounded-md",
+        "flex shrink-0 items-center justify-center rounded-md",
         isBuy
           ? "bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300"
           : "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300",
       )}
     >
-      <Icon className="size-5" />
+      <Icon className="size-[42%]" />
     </span>
   );
 }

@@ -13,12 +13,14 @@ import { Loading, SettingRow, SettingsCard } from "./settingsUi";
 import { errorMessage } from "@/shared/lib/errorMessage";
 import EventBannerField from "./EventBannerField";
 import EventDateButton from "./EventDateButton";
+import EventPromoSelect from "./EventPromoSelect";
 
 export type EventDraft = {
   title: string;
   link: string;
   startsAt: string | null;
   endsAt: string | null;
+  promo: string | null;
 };
 
 export const EVENT_DRAFT_ID = "event";
@@ -41,6 +43,7 @@ export function EventSettingsForm() {
         link: s.link ?? "",
         startsAt: s.startsAt,
         endsAt: s.endsAt,
+        promo: s.promo,
       };
     },
     save: async (value) => {
@@ -52,6 +55,7 @@ export function EventSettingsForm() {
         startsAt: value.startsAt,
         endsAt: value.endsAt,
         link: value.link.trim(),
+        promo: value.promo,
       });
     },
   });
@@ -140,6 +144,18 @@ export function EventSettingsForm() {
           value={value.endsAt}
           label="Конец"
           onChange={(endsAt) => set({ endsAt })}
+        />
+      </SettingRow>
+      <SettingRow
+        title="Страница ивента"
+        hint="Пока ивент идёт, страница открыта всем и стоит в меню под названием ивента, а баннер висит на ней, а не на главной"
+        htmlFor="event-promo"
+        changed={event.changed((v) => v.promo)}
+      >
+        <EventPromoSelect
+          id="event-promo"
+          value={value.promo}
+          onChange={(promo) => set({ promo })}
         />
       </SettingRow>
       <EventBannerField />

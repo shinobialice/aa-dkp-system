@@ -8,8 +8,6 @@ type Props = {
 };
 
 export default function EventBanner({ event }: Props) {
-  if (!isActive(event)) return null;
-
   const content = <EventBannerContent event={event} />;
   if (!event.link) return <div className={BANNER_CLASS}>{content}</div>;
 
@@ -36,14 +34,5 @@ function EventBannerContent({ event }: Props) {
       alt={event.title ?? ""}
       className="block h-16 w-full object-cover object-left sm:h-auto"
     />
-  );
-}
-
-function isActive(event: EventSettings) {
-  if (!event.title || !event.startsAt || !event.endsAt) return false;
-  const now = Date.now();
-  return (
-    new Date(event.startsAt).getTime() <= now &&
-    new Date(event.endsAt).getTime() > now
   );
 }

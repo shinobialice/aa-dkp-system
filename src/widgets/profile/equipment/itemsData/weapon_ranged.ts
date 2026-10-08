@@ -203,7 +203,7 @@ export const WEAPON_RANGED_ITEMS: GearItem[] = [
     name: "Иг'нис, Всепоглощающее пламя",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_ranged", "игнис_всепоглощающее_пламя"),
-    sealIconUrl: SEAL_ICON("top_thiol_1"),
+    sealIconUrl: SEAL_ICON("top_thiol_4"),
   },
   {
     id: 50868,
@@ -224,7 +224,7 @@ export const WEAPON_RANGED_ITEMS: GearItem[] = [
     name: "Возрожденная Джераб, слуга смерти",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_ranged", "возрожденная_джераб_слуга_смерти"),
-    sealIconUrl: SEAL_ICON("top_thiol_2"),
+    sealIconUrl: SEAL_ICON("top_thiol_3"),
   },
   {
     id: 50847,
@@ -262,7 +262,7 @@ export const WEAPON_RANGED_ITEMS: GearItem[] = [
     name: "Дра'орис, Всепоглощающее разрушение",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_ranged", "драорис_всепоглощающее_разрушение"),
-    sealIconUrl: SEAL_ICON("top_thiol_1"),
+    sealIconUrl: SEAL_ICON("top_thiol_4"),
   },
   {
     id: 51170,

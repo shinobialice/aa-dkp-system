@@ -23,6 +23,8 @@ import { OnlineUsersWidget } from "./OnlineUsersWidget";
 import DimonishMenuItem from "./DimonishMenuItem";
 import { ThemeSidebarItem, ViewAsPlayerSidebarItem } from "./SidebarControls";
 import { ALL_NAV_URLS, NAV_SECTIONS, findActiveUrl } from "./navConfig";
+import PromoMenuItem from "./PromoMenuItem";
+import type { PromoLink } from "@/shared/config/promoPages";
 
 type Props = {
   isAdmin: boolean;
@@ -30,6 +32,7 @@ type Props = {
   viewingAsRegular?: boolean;
   locationBadge?: ReactNode;
   locationIcon?: ReactNode;
+  promo: PromoLink | null;
 };
 
 function AppSidebar({
@@ -38,6 +41,7 @@ function AppSidebar({
   viewingAsRegular,
   locationBadge,
   locationIcon,
+  promo,
 }: Props) {
   const pathname = usePathname();
   const activeUrl = findActiveUrl(pathname, ALL_NAV_URLS);
@@ -83,6 +87,7 @@ function AppSidebar({
       </SidebarHeader>
 
       <SidebarContent className="gap-0">
+        {promo && <PromoMenuItem promo={promo} />}
         {sections.map((section) => (
           <SidebarGroup key={section.title ?? "main"} className="py-1">
             {section.title && (

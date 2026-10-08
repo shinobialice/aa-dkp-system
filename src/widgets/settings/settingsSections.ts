@@ -85,7 +85,7 @@ export const SECTION_GROUPS: { title: string; sections: SettingsSection[] }[] =
           id: "event",
           label: "Ивент и проф. работы",
           icon: PartyPopper,
-          description: "Баннер ивента на главной и окна профилактики.",
+          description: "Баннер и страница ивента, окна профилактики.",
         },
       ],
     },

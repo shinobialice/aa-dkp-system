@@ -154,7 +154,7 @@ export const WEAPON_OFF_ITEMS: GearItem[] = [
     name: "Возрожденный Нерхал, бронзовая чешуя",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_off", "возрожденный_нерхал_бронзовая_чешуя"),
-    sealIconUrl: SEAL_ICON("top_thiol_2"),
+    sealIconUrl: SEAL_ICON("top_thiol_3"),
   },
   {
     id: 45300,
@@ -175,7 +175,7 @@ export const WEAPON_OFF_ITEMS: GearItem[] = [
     name: "Драго'ран, Всепоглощающая ярость",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_off", "драгоран_всепоглощающая_ярость"),
-    sealIconUrl: SEAL_ICON("top_thiol_1"),
+    sealIconUrl: SEAL_ICON("top_thiol_4"),
   },
   {
     id: 45879,
@@ -399,7 +399,7 @@ export const WEAPON_OFF_ITEMS: GearItem[] = [
     name: "Рави'мар, Всепоглощающий гнев",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_off", "равимар_всепоглощающий_гнев"),
-    sealIconUrl: SEAL_ICON("top_thiol_1"),
+    sealIconUrl: SEAL_ICON("top_thiol_4"),
   },
   {
     id: 54977,
@@ -504,7 +504,7 @@ export const WEAPON_OFF_ITEMS: GearItem[] = [
     name: "Возрожденная Ташш, змеиное жало",
     grade: 1,
     iconUrl: ITEM_ICON("weapon_off", "возрожденная_ташш_змеиное_жало"),
-    sealIconUrl: SEAL_ICON("top_thiol_2"),
+    sealIconUrl: SEAL_ICON("top_thiol_3"),
   },
   {
     id: 54979,

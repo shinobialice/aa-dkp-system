@@ -22,12 +22,12 @@ export const ENGRAVING_STAT = {
   TACTICAL_READINESS: "Тактическая подготовка",
   ARMOR_PENETRATION: "Пробивание брони",
   RESIST_IGNORE: "Игнорирование сопротивления",
-  MELEE_SKILL_DMG_PVE: "Дополнительный урон умений в ближнем бою в PvE",
-  MELEE_SKILL_DMG_PVP: "Дополнительный урон умений в ближнем бою в PvP",
-  RANGED_SKILL_DMG_PVE: "Дополнительный урон умений в дальнем бою в PvE",
-  RANGED_SKILL_DMG_PVP: "Дополнительный урон умений в дальнем бою в PvP",
-  SPELL_SKILL_DMG_PVE: "Дополнительный урон умений заклинаниями в PvE",
-  SPELL_SKILL_DMG_PVP: "Дополнительный урон умений заклинаниями в PvP",
+  MELEE_SKILL_DMG_PVE: "Доп. урон умений в ближнем бою в PvE",
+  MELEE_SKILL_DMG_PVP: "Доп. урон умений в ближнем бою в PvP",
+  RANGED_SKILL_DMG_PVE: "Доп. урон умений в дальнем бою в PvE",
+  RANGED_SKILL_DMG_PVP: "Доп. урон умений в дальнем бою в PvP",
+  SPELL_SKILL_DMG_PVE: "Доп. урон умений заклинаниями в PvE",
+  SPELL_SKILL_DMG_PVP: "Доп. урон умений заклинаниями в PvP",
   PARRY: "Парирование атак ближнего боя",
   BLOCK: "Блокирование",
   DODGE: "Уклонение",
@@ -39,7 +39,7 @@ export const ENGRAVING_STAT = {
   HEAL_CRIT_CHANCE: "Шанс критического эффекта исцеления",
   HEAL_CRIT_EFFECT: "Критический эффект исцеления",
   HEAL_RECEIVED: "Восприимчивость к исцелению",
-  HEAL_EFFECTIVENESS_BONUS: "Дополнительная эффективность исцеления",
+  HEAL_EFFECTIVENESS_BONUS: "Доп. эффективность исцеления",
 } as const;
 
 const EFFECT_LINE_PATTERN = /^(.+?):\s*([+-]?\d+(?:\.\d+)?)\s*(?:%|ед\.)?$/;

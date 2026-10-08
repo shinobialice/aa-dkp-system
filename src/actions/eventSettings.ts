@@ -1,5 +1,6 @@
 "use server";
 
+import { isPromoSlug, type PromoSlug } from "@/shared/config/promoPages";
 import sql from "@/shared/lib/db";
 import type { EventSettingsRow } from "@/shared/lib/dbTypes";
 
@@ -15,6 +16,7 @@ export type EventSettings = {
   startsAt: string | null;
   endsAt: string | null;
   link: string | null;
+  promo: PromoSlug | null;
 };
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -24,7 +26,8 @@ export async function getEventSettings(): Promise<EventSettings> {
   let data: EventRow | undefined;
   try {
     [data] = await sql<EventRow[]>`
-      SELECT title, image_url, starts_at, ends_at, link FROM event_settings WHERE id = 1
+      SELECT title, image_url, starts_at, ends_at, link, promo
+      FROM event_settings WHERE id = 1
     `;
   } catch (error) {
     console.error("Ошибка при получении настроек ивента:", error);
@@ -37,7 +40,13 @@ export async function getEventSettings(): Promise<EventSettings> {
     startsAt: data?.starts_at ?? null,
     endsAt: data?.ends_at ?? null,
     link: data?.link ?? null,
+    promo: parsePromo(data?.promo),
   };
+}
+
+function parsePromo(value: string | null | undefined) {
+  if (!value || !isPromoSlug(value)) return null;
+  return value;
 }
 
 export async function updateEventSettings(input: {
@@ -45,22 +54,31 @@ export async function updateEventSettings(input: {
   startsAt: string;
   endsAt: string;
   link: string;
+  promo: string | null;
 }) {
   await ensurePrivilieges(["Администратор"]);
 
   if (new Date(input.endsAt).getTime() <= new Date(input.startsAt).getTime()) {
     throw new Error("Время окончания должно быть позже времени начала");
   }
+  if (input.promo !== null && !isPromoSlug(input.promo)) {
+    throw new Error("Такой промо-страницы нет");
+  }
 
   try {
     await sql`
-      INSERT INTO event_settings (id, title, starts_at, ends_at, link, updated_at)
-      VALUES (1, ${input.title}, ${input.startsAt}, ${input.endsAt}, ${input.link}, now())
+      INSERT INTO event_settings
+        (id, title, starts_at, ends_at, link, promo, updated_at)
+      VALUES (
+        1, ${input.title}, ${input.startsAt}, ${input.endsAt}, ${input.link},
+        ${input.promo}, now()
+      )
       ON CONFLICT (id) DO UPDATE SET
         title = EXCLUDED.title,
         starts_at = EXCLUDED.starts_at,
         ends_at = EXCLUDED.ends_at,
         link = EXCLUDED.link,
+        promo = EXCLUDED.promo,
         updated_at = EXCLUDED.updated_at
     `;
   } catch (error) {
@@ -68,8 +86,7 @@ export async function updateEventSettings(input: {
     throw new Error("Не удалось сохранить настройки ивента");
   }
 
-  revalidatePath("/");
-  revalidatePath("/settings");
+  revalidatePath("/", "layout");
 }
 
 export async function uploadEventBanner(formData: FormData): Promise<string> {
@@ -111,8 +128,7 @@ export async function uploadEventBanner(formData: FormData): Promise<string> {
     throw new Error("Не удалось сохранить картинку");
   }
 
-  revalidatePath("/");
-  revalidatePath("/settings");
+  revalidatePath("/", "layout");
 
   return imageUrl;
 }
@@ -129,6 +145,5 @@ export async function endEventNow() {
     throw new Error("Не удалось завершить ивент");
   }
 
-  revalidatePath("/");
-  revalidatePath("/settings");
+  revalidatePath("/", "layout");
 }

@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { SidebarProvider, Toaster } from "@/shared/ui";
 import { hasTag } from "@/actions/hasTag";
+import { getActivePromoLink } from "@/server/promo";
 import AppSidebar from "@/widgets/sidebar";
 import MobileNav from "@/widgets/sidebar/MobileNav";
 import { HeartbeatTracker } from "@/widgets/sidebar/HeartbeatTracker";
@@ -25,6 +26,7 @@ export default async function DefaultLayout({
     ignorePreview: true,
   });
   const viewingAsRegular = isRealAdmin && !isAdmin;
+  const promo = await getActivePromoLink();
   return (
     <SidebarProvider defaultOpen={sidebarOpen}>
       <HeartbeatTracker />
@@ -38,6 +40,7 @@ export default async function DefaultLayout({
           viewingAsRegular={viewingAsRegular}
           locationBadge={<GuildLocationBadge />}
           locationIcon={<GuildLocationBadge variant="icon" />}
+          promo={promo}
         />
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="flex h-14 items-center gap-2.5 border-b px-4 md:hidden">
@@ -70,6 +73,7 @@ export default async function DefaultLayout({
         isAdmin={isAdmin}
         isRealAdmin={isRealAdmin}
         viewingAsRegular={viewingAsRegular}
+        promo={promo}
       />
     </SidebarProvider>
   );

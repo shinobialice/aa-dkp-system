@@ -21,6 +21,8 @@ import { ALL_NAV_URLS, MOBILE_TABS, findActiveUrl } from "./navConfig";
 import { OnlineUsersRow } from "./OnlineUsersWidget";
 import { ThemeSheetRow, ViewAsPlayerSheetRow } from "./SidebarControls";
 import { DimonishTile } from "./DimonishMenuItem";
+import PromoSheetLink from "./PromoSheetLink";
+import type { PromoLink } from "@/shared/config/promoPages";
 import {
   TAB_URLS,
   TAB_CLASS,
@@ -33,10 +35,12 @@ export default function MobileNav({
   isAdmin,
   isRealAdmin,
   viewingAsRegular,
+  promo,
 }: {
   isAdmin: boolean;
   isRealAdmin: boolean;
   viewingAsRegular: boolean;
+  promo: PromoLink | null;
 }) {
   const pathname = usePathname();
   const user = useCurrentUser();
@@ -142,6 +146,8 @@ export default function MobileNav({
                 </button>
               </div>
             )}
+
+            {promo && <PromoSheetLink promo={promo} onNavigate={close} />}
 
             {buildSheetSections(isAdmin).map((section) => (
               <section key={section.title} className="space-y-2">

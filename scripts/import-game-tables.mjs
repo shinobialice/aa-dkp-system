@@ -331,7 +331,11 @@ async function writeSynthesis() {
     const growthProfile =
       profileByItemId.get(itemId) ?? profileByCategory.get(category);
     const profile = growthProfile
-      ? withPveSlots(synthesisTables, category, growthProfile)
+      ? withPveSlots(
+          synthesisTables,
+          category,
+          withTableValuesForZeros(synthesisTables, category, growthProfile),
+        )
       : tableProfile(synthesisTables, category);
     if (!profile) continue;
     const gradeLines = Object.entries(profile)
@@ -733,6 +737,40 @@ function withPveSlots(tables, category, profile) {
           ...slots,
           ...missing.map((slot) => interpolatePool(slot, Number(percent))),
         ],
+      ]),
+    );
+  }
+  return result;
+}
+
+// В growth.json у невидимых костюмов PvE-статы и обнаружение скрытых существ
+// записаны нулями в начале грейда, а промежуточные точки посчитаны от этих
+// нулей. Для таких статов вся кривая грейда берется из игровых таблиц.
+// Снижающие статы игровые таблицы хранят отрицательными, а growth.json —
+// положительными.
+function withTableValuesForZeros(tables, category, profile) {
+  if (!category) return profile;
+  const result = {};
+  for (const [grade, levels] of Object.entries(profile)) {
+    const slots = tableSlots(tables, category, Number(grade));
+    const startPools = levels[SYNTHESIS_START_PERCENT];
+    result[grade] = Object.fromEntries(
+      Object.entries(levels).map(([percent, pools]) => [
+        percent,
+        pools.map((pool, index) => {
+          if (!slots[index]) return pool;
+          const tableValues = interpolatePool(slots[index], Number(percent));
+          return Object.fromEntries(
+            Object.entries(pool).map(([code, value]) => {
+              const isZeroAtStart = startPools[index][code] === 0;
+              const tableValue = tableValues[code];
+              if (!isZeroAtStart || tableValue === undefined) {
+                return [code, value];
+              }
+              return [code, Math.abs(tableValue)];
+            }),
+          );
+        }),
       ]),
     );
   }

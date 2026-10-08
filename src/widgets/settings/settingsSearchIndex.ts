@@ -44,6 +44,11 @@ export const SEARCH_INDEX: {
   { section: "event", label: "Картинка баннера", keywords: "ивент" },
   {
     section: "event",
+    label: "Страница ивента",
+    keywords: "промо promo марафон меню",
+  },
+  {
+    section: "event",
     label: "Проф. работы",
     keywords: "профилактика окно техработы",
   },
