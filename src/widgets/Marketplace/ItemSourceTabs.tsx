@@ -44,22 +44,34 @@ export default function ItemSourceTabs({
 
       <TabsContent value="catalog" className="flex flex-col gap-2 pt-2">
         <Label>Предмет</Label>
-        {form.itemName && (
-          <div className="flex items-center gap-2">
-            <LootIcon
-              itemName={form.itemName}
-              iconUrl={selectedCatalogItem?.icon_url}
-              grade={selectedCatalogItem?.grade}
-              size={32}
-            />
-            <span className="font-medium">{form.itemName}</span>
-          </div>
-        )}
         <MarketplaceItemSelector
-          value={form.itemName}
-          onSelect={(name) => onChange({ itemName: name })}
+          value={selectedCatalogItem?.name ?? ""}
+          onSelect={(item) =>
+            onChange({ catalogItemId: item.id, itemName: item.name })
+          }
           catalogItems={catalogItems}
         />
+        {selectedCatalogItem && (
+          <>
+            <Label className="pt-1">Название в объявлении</Label>
+            <div className="flex items-center gap-2">
+              <LootIcon
+                itemName={form.itemName}
+                iconUrl={selectedCatalogItem.icon_url}
+                grade={selectedCatalogItem.grade}
+                size={36}
+              />
+              <Input
+                value={form.itemName}
+                onChange={(e) => onChange({ itemName: e.target.value })}
+                placeholder={selectedCatalogItem.name}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Можно написать свое название, иконка останется от предмета из базы
+            </p>
+          </>
+        )}
       </TabsContent>
 
       <TabsContent value="custom" className="flex flex-col gap-2 pt-2">

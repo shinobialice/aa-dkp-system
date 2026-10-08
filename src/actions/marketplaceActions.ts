@@ -76,7 +76,11 @@ async function ensureCanEditListing(id: number, userId: number) {
   if (!listing) {
     throw new Error("Объявление не найдено");
   }
-  if (listing.user_id !== userId) {
+  if (listing.user_id === userId) return;
+
+  const sessionToken = (await cookies()).get("session_token")?.value ?? "";
+  const isAdmin = await hasTag(sessionToken, ["Администратор"]);
+  if (!isAdmin) {
     throw new Error("Access denied: insufficient privileges");
   }
 }
@@ -138,7 +142,15 @@ export async function createMarketplaceListing(input: ListingInput) {
   }
 
   const trimmedName = validateListingInput(input);
-  const { listingType, catalogItemId, quantity, price, currency, description, imageUrl } = input;
+  const {
+    listingType,
+    catalogItemId,
+    quantity,
+    price,
+    currency,
+    description,
+    imageUrl,
+  } = input;
 
   try {
     await sql`
@@ -151,7 +163,10 @@ export async function createMarketplaceListing(input: ListingInput) {
   }
 }
 
-export async function updateMarketplaceListing(id: number, input: ListingInput) {
+export async function updateMarketplaceListing(
+  id: number,
+  input: ListingInput,
+) {
   const userId = await getSessionUserId();
   if (!userId) {
     throw new Error("Необходимо авторизоваться");
@@ -159,7 +174,15 @@ export async function updateMarketplaceListing(id: number, input: ListingInput) 
 
   await ensureCanEditListing(id, userId);
   const trimmedName = validateListingInput(input);
-  const { listingType, catalogItemId, quantity, price, currency, description, imageUrl } = input;
+  const {
+    listingType,
+    catalogItemId,
+    quantity,
+    price,
+    currency,
+    description,
+    imageUrl,
+  } = input;
 
   try {
     await sql`
@@ -186,20 +209,6 @@ export async function deleteMarketplaceListing(id: number) {
     throw new Error("Необходимо авторизоваться");
   }
 
-  const [listing] = await sql<{ user_id: number }[]>`
-    SELECT user_id FROM marketplace_listings WHERE id = ${id}
-  `;
-  if (!listing) {
-    throw new Error("Объявление не найдено");
-  }
-
-  if (listing.user_id !== userId) {
-    const sessionToken = (await cookies()).get("session_token")?.value ?? "";
-    const isAdmin = await hasTag(sessionToken, ["Администратор"]);
-    if (!isAdmin) {
-      throw new Error("Access denied: insufficient privileges");
-    }
-  }
-
+  await ensureCanEditListing(id, userId);
   await sql`DELETE FROM marketplace_listings WHERE id = ${id}`;
 }

@@ -63,8 +63,11 @@ export function ListingFormDialog({
     setForm((current) => ({ ...current, ...patch }));
 
   const selectedCatalogItem = catalogItems.find(
-    (item) => item.name === form.itemName,
+    (item) => item.id === form.catalogItemId,
   );
+  const isItemChosen =
+    form.itemName.trim() !== "" &&
+    (mode === "custom" || selectedCatalogItem !== undefined);
 
   const reset = () => {
     setForm(buildInitialForm(listing));
@@ -82,8 +85,7 @@ export function ListingFormDialog({
     try {
       const input = {
         listingType: form.listingType,
-        catalogItemId:
-          mode === "catalog" ? (selectedCatalogItem?.id ?? null) : null,
+        catalogItemId: mode === "catalog" ? form.catalogItemId : null,
         itemName: form.itemName,
         quantity: form.quantity,
         price,
@@ -136,7 +138,7 @@ export function ListingFormDialog({
             selectedCatalogItem={selectedCatalogItem}
             onModeChange={(next) => {
               setMode(next);
-              update({ itemName: "", imageUrl: "" });
+              update({ catalogItemId: null, itemName: "", imageUrl: "" });
             }}
             onChange={update}
           />
@@ -178,7 +180,7 @@ export function ListingFormDialog({
         <DialogFooter>
           <Button
             className="cursor-pointer"
-            disabled={submitting || !form.itemName.trim()}
+            disabled={submitting || !isItemChosen}
             onClick={handleSubmit}
           >
             {isEdit ? "Сохранить" : "Разместить"}

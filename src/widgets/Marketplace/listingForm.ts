@@ -6,6 +6,7 @@ import {
 
 export type FormState = {
   listingType: MarketplaceListingType;
+  catalogItemId: number | null;
   itemName: string;
   quantity: number;
   price: string;
@@ -18,6 +19,7 @@ export function buildInitialForm(listing?: MarketplaceListing): FormState {
   if (!listing) {
     return {
       listingType: "sell",
+      catalogItemId: null,
       itemName: "",
       quantity: 1,
       price: "",
@@ -28,6 +30,7 @@ export function buildInitialForm(listing?: MarketplaceListing): FormState {
   }
   return {
     listingType: listing.listing_type,
+    catalogItemId: listing.catalog_item_id,
     itemName: listing.item_name,
     quantity: listing.quantity,
     price: listing.price != null ? String(listing.price) : "",

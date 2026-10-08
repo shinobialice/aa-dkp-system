@@ -62,7 +62,7 @@ export default function ListingColumn({
           key={listing.id}
           listing={listing}
           catalogItems={catalogItems}
-          canEdit={listing.user_id === currentUserId}
+          canEdit={isAdmin || listing.user_id === currentUserId}
           canDelete={isAdmin || listing.user_id === currentUserId}
           onChanged={onChanged}
         />

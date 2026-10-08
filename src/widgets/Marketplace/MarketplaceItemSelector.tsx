@@ -19,7 +19,7 @@ export function MarketplaceItemSelector({
   catalogItems,
 }: {
   value: string;
-  onSelect: (name: string) => void;
+  onSelect: (item: MarketplaceItemTypeRow) => void;
   catalogItems: MarketplaceItemTypeRow[];
 }) {
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -51,7 +51,7 @@ export function MarketplaceItemSelector({
                 key={item.id}
                 value={item.name}
                 onSelect={() => {
-                  onSelect(item.name);
+                  onSelect(item);
                   setIsOpen(false);
                   inputRef.current?.blur();
                 }}
