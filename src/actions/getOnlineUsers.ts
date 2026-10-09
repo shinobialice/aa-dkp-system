@@ -2,8 +2,9 @@
 
 import sql from "@/shared/lib/db";
 import type { UserRow, UserTagsRow } from "@/shared/lib/dbTypes";
+import { resolveAvatarFrameUrls, type FrameOwner } from "@/server/avatarFrames";
 
-type OnlineRow = Pick<UserRow, "id" | "username" | "avatar_url">;
+type OnlineRow = FrameOwner & Pick<UserRow, "username" | "avatar_url">;
 
 const ONLINE_THRESHOLD_MS = 2 * 60 * 1000;
 
@@ -15,7 +16,16 @@ export async function getOnlineUsers() {
   let data: OnlineRow[];
   try {
     data = await sql<OnlineRow[]>`
-      SELECT id, username, avatar_url FROM "user"
+      SELECT
+        id,
+        username,
+        avatar_url,
+        joined_at,
+        avatar_frame_id,
+        class,
+        secondary_class,
+        tertiary_class
+      FROM "user"
       WHERE last_seen_at >= ${cutoff}
       ORDER BY username ASC
     `;
@@ -50,8 +60,12 @@ export async function getOnlineUsers() {
     }
   }
 
+  const frameUrls = await resolveAvatarFrameUrls(data);
   const users = data.map((u) => ({
-    ...u,
+    id: u.id,
+    username: u.username,
+    avatar_url: u.avatar_url,
+    avatar_frame_url: frameUrls.get(u.id) ?? null,
     role: roleByUserId.get(u.id) ?? null,
   }));
 

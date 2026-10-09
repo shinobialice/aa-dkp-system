@@ -18,11 +18,11 @@ import {
   computeCritChance,
 } from "./attributeFormulas";
 import {
-  EMPTY_BONUSES,
   FLAT_STAT_TARGETS,
   addGearStats,
   collectStatSources,
 } from "./equippedBonusParts";
+import { EMPTY_BONUSES, type EquippedBonuses } from "./equippedBonuses";
 
 export const BASE_CHARACTER_STATS = {
   health: 10246,
@@ -36,40 +36,6 @@ export const BASE_CHARACTER_STATS = {
   sta: 158,
   moveSpeed: 5.4,
   proficiency: 0,
-};
-
-export type EquippedBonuses = {
-  manaPercent: number;
-  defensePercent: number;
-  resistPercent: number;
-  defense: number;
-  resist: number;
-  str: number;
-  int: number;
-  dex: number;
-  spi: number;
-  sta: number;
-  health: number;
-  mana: number;
-  meleeAttack: number;
-  rangedAttack: number;
-  spellPower: number;
-  healPower: number;
-  moveSpeed: number;
-  skillSpeed: number;
-  proficiency: number;
-  tacticalReadiness: number;
-  parry: number;
-  dodge: number;
-  block: number;
-  pvpResist: number;
-  critDamageResist: number;
-  critChanceMelee: number;
-  critChanceRanged: number;
-  critChanceSpell: number;
-  critChanceHeal: number;
-  healthRegen: number;
-  manaRegen: number;
 };
 
 // «Получаемый урон» в окне характеристик игры входит во все уязвимости, кроме PvE.
@@ -178,8 +144,18 @@ export function computeDerivedStats(
     sta,
     meleeAttack: str * 0.25 + bonus.meleeAttack,
     rangedAttack: dex * 0.25 + bonus.rangedAttack,
-    spellPower: int * 0.25 + bonus.spellPower,
-    healPower: spi * 0.25 + bonus.healPower,
+    spellPower: powerWithPercent(
+      int,
+      bonus.spellPower,
+      bonus.weaponSpellPower,
+      bonus.spellPowerPercent,
+    ),
+    healPower: powerWithPercent(
+      spi,
+      bonus.healPower,
+      bonus.weaponHealPower,
+      bonus.healPowerPercent,
+    ),
     mana:
       (FLAT_MANA_POOL + int * 10 + bonus.mana) * (1 + bonus.manaPercent / 100),
     health: FLAT_HEALTH_POOL + sta * 12 + bonus.health,
@@ -208,4 +184,17 @@ export function computeDerivedStats(
     pvpResist: bonus.pvpResist,
     critDamageResist: bonus.critDamageResist,
   };
+}
+
+// Процент к силе заклинаний и эффективности исцеления игра применяет только к
+// базовой части — от характеристики и оружия. Прибавки от синтеза, гравировок,
+// рун и баффов он не увеличивает.
+function powerWithPercent(
+  attribute: number,
+  flatPower: number,
+  weaponPower: number,
+  percent: number,
+): number {
+  const base = attribute * 0.25 + weaponPower;
+  return base * (1 + percent / 100) + flatPower - weaponPower;
 }

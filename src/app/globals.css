@@ -191,42 +191,331 @@
   }
 }
 
-@keyframes dragon-flyby {
+.dragon-layer {
+  container-type: size;
+}
+
+.dragon-flight {
+  --dragon-size: min(100cqh, 170px);
+  position: absolute;
+  left: 0;
+  top: calc(50% - var(--dragon-size) / 2);
+  width: var(--dragon-size);
+  height: var(--dragon-size);
+  animation: dragon-cross 16s linear infinite both;
+}
+
+.dragon-bob {
+  width: 100%;
+  height: 100%;
+  animation: dragon-bob 1.8s ease-in-out infinite alternate both;
+}
+
+.dragon-sprite {
+  width: 100%;
+  height: 100%;
+  transform: scaleX(-1);
+}
+
+@keyframes dragon-cross {
   0% {
-    left: -15%;
-    top: 55%;
+    translate: -100% 0;
     opacity: 0;
   }
-  2% {
+  4%,
+  76% {
     opacity: 1;
   }
-  12% {
-    top: 30%;
-  }
-  24% {
-    top: 60%;
-  }
-  36% {
-    top: 35%;
-  }
-  38% {
-    left: 115%;
-    top: 45%;
-    opacity: 1;
-  }
-  40% {
-    opacity: 0;
-  }
+  80%,
   100% {
-    left: 115%;
-    top: 45%;
+    translate: 100cqw 0;
     opacity: 0;
   }
 }
 
-.dragon-flyby {
-  animation: dragon-flyby 30s ease-in-out infinite;
-  transform: scaleX(-1);
+@keyframes dragon-bob {
+  from {
+    translate: 0 -12%;
+    rotate: -4deg;
+  }
+  to {
+    translate: 0 10%;
+    rotate: 4deg;
+  }
+}
+
+.pfx-layer {
+  container-type: size;
+}
+
+.pfx {
+  position: absolute;
+  top: 0;
+  animation-duration: var(--dur);
+  animation-delay: var(--delay);
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+}
+
+.pfx-fall {
+  animation-name: pfx-fall;
+}
+
+.pfx-rise {
+  animation-name: pfx-rise;
+}
+
+.pfx-drift {
+  animation-name: pfx-drift;
+  animation-timing-function: ease-in-out;
+}
+
+.pfx-cross {
+  animation-name: pfx-cross;
+}
+
+.pfx-body {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.pfx-body-sway {
+  animation: pfx-sway var(--sway-dur) ease-in-out var(--delay) infinite
+    alternate both;
+}
+
+.pfx-body-spin {
+  animation:
+    pfx-sway var(--sway-dur) ease-in-out var(--delay) infinite alternate both,
+    pfx-spin var(--dur) linear var(--delay) infinite both;
+}
+
+.pfx-body-flutter {
+  animation:
+    pfx-sway var(--sway-dur) ease-in-out var(--delay) infinite alternate both,
+    pfx-spin var(--dur) linear var(--delay) infinite both,
+    pfx-flutter var(--sway-dur) ease-in-out var(--delay) infinite both;
+}
+
+.pfx-body-flap {
+  animation: pfx-flap 0.32s ease-in-out var(--delay) infinite alternate both;
+}
+
+.pfx-body-pulse {
+  animation:
+    pfx-sway var(--sway-dur) ease-in-out var(--delay) infinite alternate both,
+    pfx-pulse var(--sway-dur) ease-in-out var(--delay) infinite both;
+}
+
+.pfx-body-twinkle {
+  animation:
+    pfx-twinkle var(--dur) ease-in-out var(--delay) infinite both,
+    pfx-spin var(--dur) linear var(--delay) infinite both;
+}
+
+.pfx-body-flicker {
+  animation:
+    pfx-sway var(--sway-dur) ease-in-out var(--delay) infinite alternate both,
+    pfx-flicker 1.3s ease-in-out var(--delay) infinite both;
+}
+
+.pfx-body-rainbow {
+  animation:
+    pfx-twinkle var(--dur) ease-in-out var(--delay) infinite both,
+    pfx-hue 6s linear var(--delay) infinite both;
+}
+
+.pfx-body-shimmer {
+  animation:
+    pfx-sway var(--sway-dur) ease-in-out var(--delay) infinite alternate both,
+    pfx-hue 5s linear var(--delay) infinite both;
+}
+
+.pfx-backdrop {
+  position: absolute;
+  inset: 0;
+  animation: pfx-glow 3.2s ease-in-out infinite alternate both;
+}
+
+.pfx-heat {
+  background: linear-gradient(
+    to top,
+    rgb(234 88 12 / 0.45),
+    rgb(234 88 12 / 0) 55%
+  );
+}
+
+.pfx-mist {
+  background: linear-gradient(
+    to top,
+    rgb(126 34 206 / 0.35),
+    rgb(126 34 206 / 0) 60%
+  );
+}
+
+@keyframes pfx-fall {
+  0% {
+    translate: 0 -15cqh;
+    opacity: 0;
+  }
+  8%,
+  90% {
+    opacity: 1;
+  }
+  100% {
+    translate: var(--drift) 110cqh;
+    opacity: 0;
+  }
+}
+
+@keyframes pfx-rise {
+  0% {
+    translate: 0 105cqh;
+    opacity: 0;
+  }
+  12%,
+  85% {
+    opacity: 1;
+  }
+  100% {
+    translate: var(--drift) -15cqh;
+    opacity: 0;
+  }
+}
+
+@keyframes pfx-drift {
+  0% {
+    translate: 0 0;
+    opacity: 0;
+  }
+  25%,
+  75% {
+    opacity: 1;
+  }
+  50% {
+    translate: var(--drift) -12cqh;
+  }
+  100% {
+    translate: calc(var(--drift) * -0.5) -24cqh;
+    opacity: 0;
+  }
+}
+
+@keyframes pfx-cross {
+  0% {
+    translate: -15cqw 0;
+    opacity: 0;
+  }
+  8%,
+  92% {
+    opacity: 1;
+  }
+  35% {
+    translate: 30cqw -8cqh;
+  }
+  65% {
+    translate: 70cqw 6cqh;
+  }
+  100% {
+    translate: 115cqw -4cqh;
+    opacity: 0;
+  }
+}
+
+@keyframes pfx-sway {
+  from {
+    translate: calc(var(--sway) * -1) 0;
+  }
+  to {
+    translate: var(--sway) 0;
+  }
+}
+
+@keyframes pfx-spin {
+  from {
+    rotate: 0deg;
+  }
+  to {
+    rotate: var(--spin);
+  }
+}
+
+@keyframes pfx-flutter {
+  0%,
+  100% {
+    scale: 1 1;
+  }
+  50% {
+    scale: 0.3 1;
+  }
+}
+
+@keyframes pfx-flap {
+  from {
+    scale: 1 1;
+  }
+  to {
+    scale: 1 0.35;
+  }
+}
+
+@keyframes pfx-pulse {
+  0%,
+  100% {
+    scale: 1;
+  }
+  50% {
+    scale: 1.15;
+  }
+}
+
+@keyframes pfx-twinkle {
+  0%,
+  100% {
+    opacity: 0;
+    scale: 0.3;
+  }
+  50% {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes pfx-flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  35% {
+    opacity: 0.45;
+  }
+  65% {
+    opacity: 0.85;
+  }
+}
+
+@keyframes pfx-hue {
+  to {
+    filter: hue-rotate(360deg);
+  }
+}
+
+@keyframes pfx-glow {
+  from {
+    opacity: 0.6;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pfx-layer,
+  .dragon-layer {
+    display: none;
+  }
 }
 
 @keyframes showcase-progress {

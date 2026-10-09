@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import type { UserSeal } from "@/actions/getUserSeals";
 import type { PrimeStreak } from "@/actions/getUserPrimeStreak";
 import type { KillcountStats } from "@/actions/getUserKillcountStats";
+import type { ProfileStyle } from "@/actions/profileStyle";
 import type { UserArchetype } from "@/actions/getUserArchetype";
 import type { SocialProvider } from "@/shared/lib/socialProviders";
 import calculateGuildTenureBonus from "@/utils/calculateGuildTenureBonus";
@@ -50,6 +51,7 @@ export default function ProfileInfoClient({
   salary,
   primeStreak,
   killcountStats,
+  profileStyle,
   onOpenSalary,
 }: {
   user: ProfileUser;
@@ -82,6 +84,7 @@ export default function ProfileInfoClient({
   salary: number | null;
   primeStreak: PrimeStreak;
   killcountStats: KillcountStats | null;
+  profileStyle: ProfileStyle;
   onOpenSalary: () => void;
 }) {
   const [editOpen, setEditOpen] = useState(false);
@@ -128,6 +131,7 @@ export default function ProfileInfoClient({
         archetype={archetype}
         seals={seals}
         vkRealName={vkRealName}
+        profileStyle={profileStyle}
         onSocialUnlinked={handleSocialUnlinked}
       />
       {canEditProfile && (

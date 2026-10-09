@@ -6,6 +6,7 @@ import type { UserSeal } from "@/actions/getUserSeals";
 import getUserInventory from "@/actions/getUserInventory";
 import type { PrimeStreak } from "@/actions/getUserPrimeStreak";
 import type { KillcountStats } from "@/actions/getUserKillcountStats";
+import type { ProfileStyle } from "@/actions/profileStyle";
 import type { UserArchetype } from "@/actions/getUserArchetype";
 import type { UserSkillBuild } from "@/actions/getUserSkillBuild";
 import type { UserCharacterBuffs } from "@/actions/getUserCharacterBuffs";
@@ -28,6 +29,7 @@ export default function ProfilePageWrapper({
   salary,
   primeStreak,
   killcountStats,
+  profileStyle,
   isAdmin,
   canEditProfile,
   canEditNickname,
@@ -66,6 +68,7 @@ export default function ProfilePageWrapper({
   salary: number | null;
   primeStreak: PrimeStreak;
   killcountStats: KillcountStats | null;
+  profileStyle: ProfileStyle;
   isAdmin: boolean;
   canEditProfile: boolean;
   canEditNickname: boolean;
@@ -124,6 +127,7 @@ export default function ProfilePageWrapper({
         salary={salary}
         primeStreak={primeStreak}
         killcountStats={killcountStats}
+        profileStyle={profileStyle}
       />
       <ProfileTabs
         tab={tab}
