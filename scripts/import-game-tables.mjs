@@ -93,6 +93,14 @@ const UNIT_ATTRIBUTES = {
   68: [83, 0.2],
 };
 
+// Процентные модификаторы базовой силы заклинаний и эффективности исцеления
+// (spell_dps, heal_dps) → код эффекта из statEffects.ts. Прибавки к ним
+// (spell_dps_inc, heal_dps_inc) игра этим процентом не увеличивает.
+const PERCENT_UNIT_ATTRIBUTES = {
+  87: 84,
+  173: 85,
+};
+
 const ARMOR_WEIGHTS = { cloth: "light", leather: "medium", plate: "heavy" };
 // Слоты шлема, нагрудника, пояса, наручей, перчаток, поножей и сапог — только
 // они входят в комплект лёгких, средних или тяжелых доспехов.
@@ -133,6 +141,7 @@ const PVE_SET_NAME = /_PVE$/i;
 const PROFICIENCY_PARTS = [54, 55, 74, 119];
 const PROFICIENCY = 218;
 const FLAT_MODIFIER = 0;
+const PERCENT_MODIFIER = 1;
 
 // Ключи баффов в effects.json → код эффекта из statEffects.ts.
 const BUFF_STAT_CODES = {
@@ -413,7 +422,7 @@ async function writeItemPassives() {
       ...(record.modifiers ?? []),
       ...(hasGradeBuffs ? [] : (record.passiveModifiers ?? [])),
     ].filter(([, , , perLevel]) => perLevel === 0);
-    const stats = stepStats(modifiers, 0);
+    const stats = [...stepStats(modifiers, 0), ...percentStats(modifiers)];
     if (stats.length === 0) continue;
     const body = stats.map(([code, value]) => `${code}: ${value}`).join(", ");
     itemLines.push(`  ${itemId}: { ${body} }, // ${name}`);
@@ -870,6 +879,14 @@ function stepStats(modifiers, level) {
     totals.set(code, Math.round(((totals.get(code) ?? 0) + value) * 100) / 100);
   }
   return [...totals];
+}
+
+function percentStats(modifiers) {
+  return modifiers.flatMap(([attributeId, type, value, , extra]) => {
+    const code = PERCENT_UNIT_ATTRIBUTES[attributeId];
+    if (type !== PERCENT_MODIFIER || extra || code === undefined) return [];
+    return [[code, value]];
+  });
 }
 
 async function writeSource(output, lines) {

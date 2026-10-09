@@ -2,6 +2,7 @@ export type Member = {
   id: number;
   username: string;
   avatar_url: string | null;
+  avatar_frame_url: string | null;
   class: string | null;
   class_gear_score: number | null;
   joined_at: string | Date | null;

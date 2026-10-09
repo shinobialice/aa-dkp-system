@@ -87,21 +87,25 @@ const TILE_SOURCES: TileSource[] = [
     decimals: 0,
     valueOf: ({ build }) => computeTestGearScore(build.equipment, build.seals),
   },
-  {
-    label: "Эффективность исцеления",
-    decimals: 2,
-    valueOf: ({ stats }) => stats.stats.healPower,
-  },
-  {
-    label: "Сила атаки в ближнем бою",
-    decimals: 2,
-    valueOf: ({ stats }) => stats.stats.meleeAttack,
-  },
   { label: "Защита", decimals: 0, valueOf: ({ stats }) => stats.stats.defense },
   {
-    label: "Здоровье",
+    label: "Сопротивление",
     decimals: 0,
-    valueOf: ({ stats }) => stats.stats.health,
+    valueOf: ({ stats }) => stats.stats.resist,
+  },
+];
+
+const ATTRIBUTE_TILE_COUNT = 2;
+
+const ATTRIBUTE_TILE_SOURCES: TileSource[] = [
+  { label: "Сила", decimals: 0, valueOf: ({ stats }) => stats.stats.str },
+  { label: "Интеллект", decimals: 0, valueOf: ({ stats }) => stats.stats.int },
+  { label: "Ловкость", decimals: 0, valueOf: ({ stats }) => stats.stats.dex },
+  { label: "Сила духа", decimals: 0, valueOf: ({ stats }) => stats.stats.spi },
+  {
+    label: "Выносливость",
+    decimals: 0,
+    valueOf: ({ stats }) => stats.stats.sta,
   },
 ];
 
@@ -109,7 +113,7 @@ export function buildCompareTiles(
   a: CompareSide,
   b: CompareSide,
 ): CompareTile[] {
-  return TILE_SOURCES.map((tile) => {
+  return [...TILE_SOURCES, ...largestAttributes(a, b)].map((tile) => {
     const valueA = tile.valueOf(a);
     const valueB = tile.valueOf(b);
     const format = (value: number) => formatNumber(value, tile.decimals);
@@ -148,6 +152,13 @@ export function onlyDifferences(groups: CompareGroup[]): CompareGroup[] {
       rows: group.rows.filter((row) => row.tone !== "same"),
     }))
     .filter((group) => group.rows.length > 0);
+}
+
+function largestAttributes(a: CompareSide, b: CompareSide): TileSource[] {
+  const total = (tile: TileSource) => tile.valueOf(a) + tile.valueOf(b);
+  return [...ATTRIBUTE_TILE_SOURCES]
+    .sort((x, y) => total(y) - total(x))
+    .slice(0, ATTRIBUTE_TILE_COUNT);
 }
 
 function mainGroups(profile: ProfileStats): RowGroup[] {

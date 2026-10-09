@@ -49,6 +49,8 @@ export const STAT_LABEL = {
   STEALTH_DETECTION: "Дальность обнаружения скрытых существ",
   CAST_PUSHBACK: "Задержка применения умений при получении удара",
   DAMAGE_TAKEN: "Получаемый урон",
+  SPELL_POWER_INCREASE: "Повышение силы заклинаний",
+  HEAL_POWER_INCREASE: "Повышение эффективности исцеления",
 } as const;
 
 // Названия статов в описаниях рун и в статах предметов отличаются от наших.
@@ -161,6 +163,8 @@ export const STAT_EFFECTS: Record<number, StatEffect> = {
   81: { label: STAT_LABEL.DAMAGE_TAKEN, ...PERCENT, isReduction: true },
   82: { label: STAT_LABEL.COMBAT_HEALTH_REGEN, ...POINTS },
   83: { label: STAT_LABEL.COMBAT_MANA_REGEN, ...POINTS },
+  84: { label: STAT_LABEL.SPELL_POWER_INCREASE, ...PERCENT },
+  85: { label: STAT_LABEL.HEAL_POWER_INCREASE, ...PERCENT },
 };
 
 export function signedEffectValue(effect: StatEffect, value: number): number {

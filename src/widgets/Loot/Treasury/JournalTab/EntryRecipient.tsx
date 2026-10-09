@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PlayerHoverCard from "@/widgets/PlayerHoverCard";
 import { ArrowRight } from "lucide-react";
 import type { JournalEntry } from "../journalModel";
 
@@ -30,11 +31,13 @@ function RecipientName({ entry }: Props) {
     );
   }
   return (
-    <Link
-      href={`/profile/${entry.recipientId}`}
-      className="truncate font-medium hover:underline"
-    >
-      {entry.recipient}
-    </Link>
+    <PlayerHoverCard userId={entry.recipientId}>
+      <Link
+        href={`/profile/${entry.recipientId}`}
+        className="truncate font-medium hover:underline"
+      >
+        {entry.recipient}
+      </Link>
+    </PlayerHoverCard>
   );
 }

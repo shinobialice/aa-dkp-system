@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PlayerHoverCard from "@/widgets/PlayerHoverCard";
 import { cn } from "@/shared/lib/tw-merge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui";
 import { avatarSrc } from "@/shared/lib/format";
@@ -49,12 +50,14 @@ export default function AfkRow({
           </AvatarFallback>
         </Avatar>
         <div className="min-w-0">
-          <Link
-            href={`/profile/${member.id}`}
-            className="block truncate font-semibold hover:underline"
-          >
-            {member.username}
-          </Link>
+          <PlayerHoverCard userId={member.id}>
+            <Link
+              href={`/profile/${member.id}`}
+              className="block truncate font-semibold hover:underline"
+            >
+              {member.username}
+            </Link>
+          </PlayerHoverCard>
           <p className="truncate text-2xs text-muted-foreground">
             {member.vk_name && `${member.vk_name} · `}в гильдии{" "}
             {daysLabel(member.daysInGuild)}

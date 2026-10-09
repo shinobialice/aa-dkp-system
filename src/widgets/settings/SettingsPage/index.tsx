@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { Search } from "lucide-react";
 import { AccessSettings } from "../AccessSettings";
 import { UserSelfEditSettingsForm } from "../UserSelfEditSettingsForm";
+import ProfileCoversSettings from "../ProfileCoversSettings";
+import AvatarFramesSettings from "../AvatarFramesSettings";
 import { SalaryEligibilitySettingsForm } from "../SalaryEligibilitySettingsForm";
 import { BossPointsSettingsForm } from "../BossPointsSettingsForm";
 import { AttendanceBonusSettingsForm } from "../AttendanceBonusSettingsForm";
@@ -104,6 +106,10 @@ function SettingsPage() {
             </Section>
             <Section id="self" active={active === "self"}>
               <UserSelfEditSettingsForm />
+            </Section>
+            <Section id="profileStyle" active={active === "profileStyle"}>
+              <ProfileCoversSettings />
+              <AvatarFramesSettings />
             </Section>
             <Section id="guild" active={active === "guild"}>
               <GuildLocationSettingsForm />

@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { LogOut } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui";
+import { Avatar, AvatarFallback, AvatarFrame, AvatarImage } from "@/shared/ui";
+import { cn } from "@/shared/lib/tw-merge";
 import {
   SidebarMenu,
   SidebarMenuAction,
@@ -22,12 +23,24 @@ export function NavUser() {
       <SidebarMenuItem>
         <SidebarMenuButton size="lg" asChild tooltip={user.name}>
           <Link href={`/profile/${user.id}`}>
-            <Avatar className="h-8 w-8 rounded-lg">
-              <AvatarImage src={user.avatar} alt={user.name} />
-              <AvatarFallback className="rounded-lg">
-                {user.name[0]}
-              </AvatarFallback>
-            </Avatar>
+            <AvatarFrame
+              frameUrl={user.frame}
+              className="group-data-[collapsible=icon]:[&>img]:hidden"
+            >
+              <Avatar
+                className={cn(
+                  "h-8 w-8",
+                  user.frame ? "rounded-full" : "rounded-lg",
+                )}
+              >
+                <AvatarImage src={user.avatar} alt={user.name} />
+                <AvatarFallback
+                  className={user.frame ? "rounded-full" : "rounded-lg"}
+                >
+                  {user.name[0]}
+                </AvatarFallback>
+              </Avatar>
+            </AvatarFrame>
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-semibold">{user.name}</span>
             </div>

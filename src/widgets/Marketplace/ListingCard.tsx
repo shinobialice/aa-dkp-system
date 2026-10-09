@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import PlayerHoverCard from "@/widgets/PlayerHoverCard";
 import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -137,26 +138,28 @@ export function ListingCard({
       )}
 
       <div className="flex items-center gap-2 border-t pt-2.5">
-        <Link
-          href={`/profile/${listing.user_id}`}
-          className="flex min-w-0 items-center gap-1.5 hover:underline"
-        >
-          <Avatar className="size-6 shrink-0">
-            <AvatarImage
-              src={avatarSrc(
-                listing.seller_username,
-                listing.seller_avatar_url,
-              )}
-              alt=""
-            />
-            <AvatarFallback className="text-2xs">
-              {listing.seller_username.slice(0, 1)}
-            </AvatarFallback>
-          </Avatar>
-          <span className="truncate text-sm font-medium">
-            {listing.seller_username}
-          </span>
-        </Link>
+        <PlayerHoverCard userId={listing.user_id}>
+          <Link
+            href={`/profile/${listing.user_id}`}
+            className="flex min-w-0 items-center gap-1.5 hover:underline"
+          >
+            <Avatar className="size-6 shrink-0">
+              <AvatarImage
+                src={avatarSrc(
+                  listing.seller_username,
+                  listing.seller_avatar_url,
+                )}
+                alt=""
+              />
+              <AvatarFallback className="text-2xs">
+                {listing.seller_username.slice(0, 1)}
+              </AvatarFallback>
+            </Avatar>
+            <span className="truncate text-sm font-medium">
+              {listing.seller_username}
+            </span>
+          </Link>
+        </PlayerHoverCard>
         <span className="shrink-0 text-xs text-muted-foreground">
           · {formatListingDate(listing.created_at)}
         </span>

@@ -3,15 +3,10 @@
 import { useEffect, useState } from "react";
 import Lottie from "lottie-react";
 
-const DRAGON_USERNAME = "wdx";
-
-export default function DragonFlyby({ username }: { username: string }) {
-  const isDragonUser = username.toLowerCase() === DRAGON_USERNAME;
+export default function DragonFlyby() {
   const [animationData, setAnimationData] = useState<object | null>(null);
 
   useEffect(() => {
-    if (!isDragonUser) return;
-
     let cancelled = false;
     fetch("/lottie/dragon.json")
       .then((res) => res.json())
@@ -22,14 +17,24 @@ export default function DragonFlyby({ username }: { username: string }) {
     return () => {
       cancelled = true;
     };
-  }, [isDragonUser]);
+  }, []);
 
-  if (!isDragonUser || !animationData) return null;
+  if (!animationData) return null;
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden">
-      <div className="dragon-flyby absolute size-28 md:size-36">
-        <Lottie animationData={animationData} loop autoplay />
+    <div
+      aria-hidden
+      className="dragon-layer pointer-events-none absolute inset-0 z-20 overflow-hidden"
+    >
+      <div className="dragon-flight">
+        <div className="dragon-bob">
+          <Lottie
+            className="dragon-sprite"
+            animationData={animationData}
+            loop
+            autoplay
+          />
+        </div>
       </div>
     </div>
   );
