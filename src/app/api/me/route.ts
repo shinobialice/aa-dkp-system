@@ -1,6 +1,7 @@
 import sql from "@/shared/lib/db";
 import type { UserRow } from "@/shared/lib/dbTypes";
 import { getSessionUser } from "@/shared/lib/session";
+import { resolveAvatarFrameUrls, type FrameOwner } from "@/server/avatarFrames";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
@@ -18,17 +19,32 @@ export async function GET() {
     return NextResponse.json({ error: "Invalid token" }, { status: 401 });
   }
 
-  const [user] = await sql<Pick<UserRow, "id" | "username" | "avatar_url">[]>`
-    SELECT id, username, avatar_url FROM "user" WHERE id = ${sessionUser.id}
+  const [user] = await sql<
+    (FrameOwner & Pick<UserRow, "username" | "avatar_url">)[]
+  >`
+    SELECT
+      id,
+      username,
+      avatar_url,
+      joined_at,
+      avatar_frame_id,
+      class,
+      secondary_class,
+      tertiary_class
+    FROM "user"
+    WHERE id = ${sessionUser.id}
   `;
 
   if (!user) {
     return NextResponse.json({ error: "Invalid token" }, { status: 401 });
   }
 
+  const frameUrls = await resolveAvatarFrameUrls([user]);
+
   return NextResponse.json(
     {
       id: user.id,
+      frame: frameUrls.get(user.id) ?? null,
       name: user.username,
       avatar:
         user.avatar_url ??

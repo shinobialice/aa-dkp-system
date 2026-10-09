@@ -87,6 +87,15 @@ export type AttendanceBonusTypesRow = {
   mode_pvp: string;
 };
 
+export type AvatarFrameRow = {
+  id: number;
+  name: string;
+  image_url: string;
+  unlock_type: string;
+  unlock_value: number;
+  unlock_class: string | null;
+};
+
 export type BossRow = {
   id: number;
   boss_name: string;
@@ -342,6 +351,11 @@ export type MissingActivityOverridesRow = {
   created_at: string;
 };
 
+export type ProfileCoverRow = {
+  id: number;
+  image_url: string;
+};
+
 export type ProfileItemTypeRow = {
   id: number;
   name: string;
@@ -457,6 +471,9 @@ export type UserRow = {
   character_portrait_url: string | null;
   probation_salary_granted: boolean;
   character_buffs: unknown;
+  cover_url: string | null;
+  avatar_frame_id: number | null;
+  profile_effect: string | null;
 };
 
 export type UserArchetypeRow = {

@@ -6,7 +6,7 @@ import {
   getSealGradeForLevel,
   getSealGradeLabel,
 } from "@/widgets/profile/seals/sealsData";
-import { formatJoinedDate } from "./tenure";
+import { formatJoinedDate } from "@/shared/lib/tenure";
 
 export default function ProfileMeta({
   tenure,

@@ -5,6 +5,7 @@ import {
   House,
   KeyRound,
   MapPin,
+  Palette,
   PartyPopper,
   Sparkles,
   Swords,
@@ -16,6 +17,7 @@ export type SectionId =
   | "overview"
   | "access"
   | "self"
+  | "profileStyle"
   | "guild"
   | "guildBuffs"
   | "event"
@@ -61,6 +63,13 @@ export const SECTION_GROUPS: { title: string; sections: SettingsSection[] }[] =
           icon: UserCog,
           description:
             "Какие поля активные игроки могут править в своём профиле без администратора.",
+        },
+        {
+          id: "profileStyle",
+          label: "Оформление профилей",
+          icon: Palette,
+          description:
+            "Обложки и рамки аватара, из которых игроки выбирают в окне «Оформление» своего профиля.",
         },
       ],
     },

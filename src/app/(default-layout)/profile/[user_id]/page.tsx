@@ -9,6 +9,7 @@ import getUserEquipment from "@/actions/getUserEquipment";
 import { getUserMonthlyAttendance } from "@/actions/getUserMonthlyAttendance";
 import { getUserPrimeStreak } from "@/actions/getUserPrimeStreak";
 import { getUserKillcountStats } from "@/actions/getUserKillcountStats";
+import { getProfileStyle } from "@/actions/profileStyle";
 import { getUserCurrentMonthSalary } from "@/actions/getUserCurrentMonthSalary";
 import { getSessionUserId } from "@/actions/getSessionUserId";
 import { hasTag } from "@/actions/hasTag";
@@ -44,6 +45,7 @@ export default async function Page(p: {
     characterBuffs,
     equipment,
     killcountStats,
+    profileStyle,
     averageGuildGS,
     activity,
     isAdmin,
@@ -63,6 +65,7 @@ export default async function Page(p: {
     getUserCharacterBuffs(userId),
     getUserEquipment(userId),
     getUserKillcountStats(userId),
+    getProfileStyle(userId),
     getAverageGuildGS(),
     getUserMonthlyAttendance(userId, year, month),
     hasTag(sessionToken, ["Администратор"]),
@@ -99,6 +102,7 @@ export default async function Page(p: {
       salary={salary}
       primeStreak={primeStreak}
       killcountStats={killcountStats}
+      profileStyle={profileStyle}
     />
   );
 }

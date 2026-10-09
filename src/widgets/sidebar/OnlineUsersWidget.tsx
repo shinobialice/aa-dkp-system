@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/ui";
 import { SidebarMenuButton, SidebarMenuItem } from "@/shared/ui";
-import { Avatar, AvatarImage, AvatarFallback } from "@/shared/ui";
+import { Avatar, AvatarImage, AvatarFallback, AvatarFrame } from "@/shared/ui";
 import { getOnlineUsers } from "@/actions/getOnlineUsers";
 import { useVisiblePolling } from "@/hooks/useVisiblePolling";
 import { avatarSrc } from "@/shared/lib/format";
@@ -23,6 +23,7 @@ type OnlineUser = {
   id: number;
   username: string;
   avatar_url: string | null;
+  avatar_frame_url: string | null;
   role: string | null;
 };
 
@@ -56,15 +57,21 @@ function AvatarStack({ users }: { users: OnlineUser[] }) {
   return (
     <span className="flex">
       {users.slice(0, 3).map((user, index) => (
-        <Avatar
+        <AvatarFrame
           key={user.id}
-          className={`size-6 border-2 border-sidebar ${index > 0 ? "-ml-2" : ""}`}
+          frameUrl={user.avatar_frame_url}
+          className={index > 0 ? "-ml-2" : ""}
         >
-          <AvatarImage src={avatarSrc(user.username, user.avatar_url)} alt="" />
-          <AvatarFallback className="text-2xs">
-            {user.username.slice(0, 2)}
-          </AvatarFallback>
-        </Avatar>
+          <Avatar className="size-6 border-2 border-sidebar">
+            <AvatarImage
+              src={avatarSrc(user.username, user.avatar_url)}
+              alt=""
+            />
+            <AvatarFallback className="text-2xs">
+              {user.username.slice(0, 2)}
+            </AvatarFallback>
+          </Avatar>
+        </AvatarFrame>
       ))}
     </span>
   );
@@ -96,15 +103,17 @@ function OnlineMenu({
             onSelect={() => router.push(`/profile/${u.id}`)}
           >
             <span className="relative shrink-0">
-              <Avatar className="h-6 w-6">
-                <AvatarImage
-                  src={avatarSrc(u.username, u.avatar_url)}
-                  alt={u.username}
-                />
-                <AvatarFallback className="text-2xs">
-                  {u.username.slice(0, 2)}
-                </AvatarFallback>
-              </Avatar>
+              <AvatarFrame frameUrl={u.avatar_frame_url}>
+                <Avatar className="h-6 w-6">
+                  <AvatarImage
+                    src={avatarSrc(u.username, u.avatar_url)}
+                    alt={u.username}
+                  />
+                  <AvatarFallback className="text-2xs">
+                    {u.username.slice(0, 2)}
+                  </AvatarFallback>
+                </Avatar>
+              </AvatarFrame>
               <span className="absolute -right-0.5 -bottom-0.5 h-2 w-2 rounded-full bg-green-500 ring-2 ring-background" />
             </span>
             <span className="truncate">{u.username}</span>
@@ -123,7 +132,7 @@ export function OnlineUsersWidget() {
     <SidebarMenuItem>
       <OnlineMenu users={users} side="top">
         <SidebarMenuButton
-          className="cursor-pointer"
+          className="cursor-pointer overflow-visible group-data-[collapsible=icon]:overflow-hidden"
           tooltip={`Онлайн: ${users.length}`}
         >
           <Users />

@@ -7,6 +7,7 @@ import { LayoutGrid, LogOut } from "lucide-react";
 import {
   Avatar,
   AvatarFallback,
+  AvatarFrame,
   AvatarImage,
   Sheet,
   SheetContent,
@@ -122,10 +123,12 @@ export default function MobileNav({
           <div className="flex flex-col gap-4 px-4 pt-2 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
             {user && (
               <div className="flex items-center gap-3 pr-10">
-                <Avatar className="size-11">
-                  <AvatarImage src={user.avatar} alt="" />
-                  <AvatarFallback>{user.name[0]}</AvatarFallback>
-                </Avatar>
+                <AvatarFrame frameUrl={user.frame}>
+                  <Avatar className="size-11">
+                    <AvatarImage src={user.avatar} alt="" />
+                    <AvatarFallback>{user.name[0]}</AvatarFallback>
+                  </Avatar>
+                </AvatarFrame>
                 <Link
                   href={`/profile/${user.id}`}
                   onClick={close}

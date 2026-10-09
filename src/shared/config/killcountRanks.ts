@@ -41,7 +41,7 @@ export const KILLCOUNT_RANKS: KillcountRank[] = [
   ),
 ];
 
-const TOP_RANK: KillcountRank = {
+export const TOP_RANK: KillcountRank = {
   name: "Топ",
   minKills: 2750,
   icon: "/images/ranks/140px-SeasonalRankTop.png",

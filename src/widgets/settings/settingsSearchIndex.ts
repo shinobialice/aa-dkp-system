@@ -27,6 +27,16 @@ export const SEARCH_INDEX: {
   },
   { section: "self", label: "Экипировка", keywords: "профиль сам" },
   { section: "self", label: "Доп. роли", keywords: "профиль сам" },
+  {
+    section: "profileStyle",
+    label: "Обложки профиля",
+    keywords: "оформление баннер фон картинка",
+  },
+  {
+    section: "profileStyle",
+    label: "Рамки аватара",
+    keywords: "оформление ранг киллкаунт стаж",
+  },
   { section: "guild", label: "Сервер", keywords: "статус шапка" },
   {
     section: "guild",

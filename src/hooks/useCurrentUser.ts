@@ -6,6 +6,7 @@ type User = {
   id: number;
   name: string;
   avatar: string;
+  frame: string | null;
 };
 
 export default function useCurrentUser(): User | null {

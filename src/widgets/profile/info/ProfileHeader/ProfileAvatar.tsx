@@ -2,14 +2,17 @@ import { useRef, useState, type ChangeEvent } from "react";
 import { Camera } from "lucide-react";
 import { toast } from "sonner";
 import { uploadAvatar } from "@/actions/uploadAvatar";
-import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui";
+import { Avatar, AvatarFallback, AvatarFrame, AvatarImage } from "@/shared/ui";
 import { avatarSrc } from "@/shared/lib/format";
 import { errorMessage } from "@/shared/lib/errorMessage";
+import { cn } from "@/shared/lib/tw-merge";
 
 type Props = {
   username: string;
   initialUrl: string | null;
   canUpload: boolean;
+  frameUrl: string | null;
+  hasCover: boolean;
 };
 
 const ACCEPTED_TYPES = "image/png,image/jpeg,image/webp,image/gif";
@@ -18,6 +21,8 @@ export default function ProfileAvatar({
   username,
   initialUrl,
   canUpload,
+  frameUrl,
+  hasCover,
 }: Props) {
   const [avatarUrl, setAvatarUrl] = useState(initialUrl);
   const [uploading, setUploading] = useState(false);
@@ -42,13 +47,22 @@ export default function ProfileAvatar({
   };
 
   return (
-    <div className="relative size-17 shrink-0 sm:row-span-2 sm:size-24">
-      <Avatar className="size-17 sm:size-24">
-        <AvatarImage src={avatarSrc(username, avatarUrl)} alt={username} />
-        <AvatarFallback className="text-2xl">
-          {username.slice(0, 2)}
-        </AvatarFallback>
-      </Avatar>
+    <div
+      className={cn(
+        "relative z-10 size-17 shrink-0 sm:row-span-2 sm:size-24",
+        hasCover && "-mt-12 sm:-mt-16",
+      )}
+    >
+      <AvatarFrame frameUrl={frameUrl}>
+        <Avatar
+          className={cn("size-17 sm:size-24", hasCover && "ring-4 ring-card")}
+        >
+          <AvatarImage src={avatarSrc(username, avatarUrl)} alt={username} />
+          <AvatarFallback className="text-2xl">
+            {username.slice(0, 2)}
+          </AvatarFallback>
+        </Avatar>
+      </AvatarFrame>
       {canUpload && (
         <>
           <button

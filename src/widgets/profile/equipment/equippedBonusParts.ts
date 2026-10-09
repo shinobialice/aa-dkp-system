@@ -20,41 +20,7 @@ import {
   getEpheAttributeMultiplier,
   getEpheStatMultipliers,
 } from "../ephe/epheSealsBonus";
-import { type EquippedBonuses } from "./characterStats";
-
-export const EMPTY_BONUSES: EquippedBonuses = {
-  manaPercent: 0,
-  defensePercent: 0,
-  resistPercent: 0,
-  defense: 0,
-  resist: 0,
-  str: 0,
-  int: 0,
-  dex: 0,
-  spi: 0,
-  sta: 0,
-  health: 0,
-  mana: 0,
-  meleeAttack: 0,
-  rangedAttack: 0,
-  spellPower: 0,
-  healPower: 0,
-  moveSpeed: 0,
-  skillSpeed: 0,
-  proficiency: 0,
-  tacticalReadiness: 0,
-  parry: 0,
-  dodge: 0,
-  block: 0,
-  pvpResist: 0,
-  critDamageResist: 0,
-  critChanceMelee: 0,
-  critChanceRanged: 0,
-  critChanceSpell: 0,
-  critChanceHeal: 0,
-  healthRegen: 0,
-  manaRegen: 0,
-};
+import type { EquippedBonuses } from "./equippedBonuses";
 
 export const ATTRIBUTES = ["str", "int", "dex", "spi", "sta"] as const;
 
@@ -74,6 +40,8 @@ export const FLAT_STAT_TARGETS: [keyof EquippedBonuses, string][] = [
   ["rangedAttack", ENGRAVING_STAT.RANGED_ATTACK],
   ["spellPower", ENGRAVING_STAT.SPELL_POWER],
   ["healPower", ENGRAVING_STAT.HEAL_POWER],
+  ["spellPowerPercent", STAT_LABEL.SPELL_POWER_INCREASE],
+  ["healPowerPercent", STAT_LABEL.HEAL_POWER_INCREASE],
   ["moveSpeed", ENGRAVING_STAT.MOVE_SPEED],
   ["skillSpeed", ENGRAVING_STAT.SKILL_SPEED],
   ["proficiency", ENGRAVING_STAT.PROFICIENCY],
@@ -96,6 +64,11 @@ export const FLAT_STAT_TARGETS: [keyof EquippedBonuses, string][] = [
 
 const RANGED_WEAPON_SLOT = "weapon_ranged";
 const OFF_HAND_SLOT = "weapon_off";
+const WEAPON_SLOTS = new Set([
+  "weapon_main",
+  OFF_HAND_SLOT,
+  RANGED_WEAPON_SLOT,
+]);
 
 // Урон оружия в правой руке идёт в силу атаки в ближнем бою, урон лука или
 // винтовки — в силу атаки в дальнем бою. Урон оружия в левой руке игра в силу
@@ -157,6 +130,7 @@ function addItemStat(
   value: number,
 ) {
   if (key === "weapon_dps" && slot === OFF_HAND_SLOT) return;
+  if (WEAPON_SLOTS.has(slot)) addWeaponPower(totals, key, value);
   const weaponLabel = weaponStatLabel(key, slot);
   if (key === "wearable_armor") totals.defense += value;
   else if (key === "wearable_magic_resistance") totals.resist += value;
@@ -165,6 +139,11 @@ function addItemStat(
     const label = FLAT_GEAR_STAT_LABELS[key] ?? STAT_LABELS[key];
     if (label) addStat(flat, label, value);
   }
+}
+
+function addWeaponPower(totals: EquippedBonuses, key: string, value: number) {
+  if (key === "weapon_magic_power") totals.weaponSpellPower += value;
+  if (key === "weapon_heal_power") totals.weaponHealPower += value;
 }
 
 export function collectStatSources(
