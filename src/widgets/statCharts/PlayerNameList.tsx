@@ -1,4 +1,5 @@
 import { cloneElement } from "react";
+import Link from "next/link";
 import { cn } from "@/shared/lib/tw-merge";
 import { classColors, classIcons } from "@/widgets/MembersTable/classStyles";
 import type { NamedPlayer } from "@/actions/guildStats";
@@ -36,9 +37,10 @@ export default function PlayerNameList({
       {players.map((player) => {
         const icon = player.class ? classIcons[player.class] : null;
         return (
-          <div
-            key={player.username}
-            className="flex items-center gap-1.5 break-inside-avoid whitespace-nowrap py-0.5"
+          <Link
+            key={player.id}
+            href={`/profile/${player.id}`}
+            className="flex items-center gap-1.5 break-inside-avoid whitespace-nowrap py-0.5 transition-colors hover:text-primary"
           >
             {icon && (
               <span
@@ -56,7 +58,7 @@ export default function PlayerNameList({
             {player.suffix && (
               <span className="opacity-70"> {player.suffix}</span>
             )}
-          </div>
+          </Link>
         );
       })}
     </div>

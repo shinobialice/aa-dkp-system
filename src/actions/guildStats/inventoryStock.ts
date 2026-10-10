@@ -131,7 +131,7 @@ function createRoster(players: PlayerRow[]) {
   const playerById = new Map<number, NamedPlayer>(
     players.map((player) => [
       player.id,
-      { username: player.username, class: player.class },
+      { id: player.id, username: player.username, class: player.class },
     ]),
   );
   const playersOf = (ids: Iterable<number>) =>

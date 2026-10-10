@@ -2,6 +2,7 @@
 // вместе с ролью (user.class), чтобы подсвечивать ник иконкой роли
 // (см. PlayerNameList.tsx / classStyles.tsx).
 export type NamedPlayer = {
+  id: number;
   username: string;
   class: string | null;
   // Доп. пометка после ника (например "×2" — сколько печатей этой

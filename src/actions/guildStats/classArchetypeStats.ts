@@ -15,9 +15,14 @@ const UNSET_LABEL = "Не выбран";
 // Только мейн-роль: доп. роли не должны раздувать статистику по классам.
 export async function getClassArchetypeStats(): Promise<ClassArchetypeStat[]> {
   const rows = await sql<
-    { class_name: string | null; username: string; class: string | null }[]
+    {
+      class_name: string | null;
+      id: number;
+      username: string;
+      class: string | null;
+    }[]
   >`
-    SELECT ua.class_name, u.username, u.class
+    SELECT ua.class_name, u.id, u.username, u.class
     FROM "user" u
     LEFT JOIN user_archetype ua ON ua.user_id = u.id AND ua.role_slot = 1
     WHERE u.active = true
@@ -31,7 +36,7 @@ export async function getClassArchetypeStats(): Promise<ClassArchetypeStat[]> {
   for (const row of rows) {
     const name = row.class_name ?? UNSET_LABEL;
     const list = playersByClass.get(name) ?? [];
-    list.push({ username: row.username, class: row.class });
+    list.push({ id: row.id, username: row.username, class: row.class });
     playersByClass.set(name, list);
   }
 

@@ -45,35 +45,37 @@ export default async function DefaultLayout({
           promo={promo}
         />
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-30 flex h-(--app-header) items-center gap-2.5 border-b bg-background/95 px-4 backdrop-blur sm:px-8">
-            <Link
-              href="/"
-              className="flex min-w-0 flex-1 items-center gap-2.5 md:hidden"
-            >
-              <Image
-                src="/images/logo.png"
-                alt=""
-                width={32}
-                height={32}
-                className="size-8 object-contain"
-              />
-              <span className="truncate text-lg font-bold text-primary">
-                No Fear
-              </span>
-            </Link>
-            <GuildLocationBadge variant="compact" className="md:hidden" />
-            <div className="hidden md:block">
-              <HeaderClocks />
-            </div>
-            <div className="ml-auto flex items-center gap-3">
+          <header className="sticky top-0 z-30 h-(--app-header) border-b bg-background/95 px-4 backdrop-blur sm:px-8">
+            <div className="mx-auto flex h-full w-full max-w-6xl items-center gap-2.5">
+              <Link
+                href="/"
+                className="flex min-w-0 flex-1 items-center gap-2.5 md:hidden"
+              >
+                <Image
+                  src="/images/logo.png"
+                  alt=""
+                  width={32}
+                  height={32}
+                  className="size-8 object-contain"
+                />
+                <span className="truncate text-lg font-bold text-primary">
+                  No Fear
+                </span>
+              </Link>
+              <GuildLocationBadge variant="compact" className="md:hidden" />
               <div className="hidden md:block">
-                <OnlineUsersWidget />
+                <HeaderClocks />
               </div>
-              <NotificationCenter isAdmin={isAdmin} />
-              <UserMenu
-                isRealAdmin={isRealAdmin}
-                viewingAsRegular={viewingAsRegular}
-              />
+              <div className="ml-auto flex items-center gap-3">
+                <div className="hidden md:block">
+                  <OnlineUsersWidget />
+                </div>
+                <NotificationCenter isAdmin={isAdmin} />
+                <UserMenu
+                  isRealAdmin={isRealAdmin}
+                  viewingAsRegular={viewingAsRegular}
+                />
+              </div>
             </div>
           </header>
           <main className="flex-1 px-4 pt-6 pb-28 sm:px-8 md:p-8">

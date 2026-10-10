@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { Crown, ShieldCheck, Sparkles } from "lucide-react";
+import { Crown, NotebookPen, ShieldCheck } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,7 +34,7 @@ const roleIcons: Record<string, ReactNode> = {
     <ShieldCheck className="size-3.5 shrink-0" color="rgb(58, 76, 92)" />
   ),
   Секретутка: (
-    <Sparkles className="size-3.5 shrink-0" color="rgb(79, 70, 229)" />
+    <NotebookPen className="size-3.5 shrink-0" color="rgb(79, 70, 229)" />
   ),
 };
 

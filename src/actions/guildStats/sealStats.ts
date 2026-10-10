@@ -36,16 +36,21 @@ export async function getSealGradeStats(): Promise<SealGradeStat[]> {
       (r) => getSealGradeForLevel(r.level) === grade,
     );
 
-    const perUser = new Map<string, { class: string | null; count: number }>();
+    const perUser = new Map<
+      number,
+      { username: string; class: string | null; count: number }
+    >();
     for (const r of matching) {
-      const existing = perUser.get(r.username);
-      perUser.set(r.username, {
+      const existing = perUser.get(r.user_id);
+      perUser.set(r.user_id, {
+        username: r.username,
         class: r.class,
         count: (existing?.count ?? 0) + 1,
       });
     }
     const players: NamedPlayer[] = sortPlayers(
-      [...perUser.entries()].map(([username, { class: cls, count }]) => ({
+      [...perUser.entries()].map(([id, { username, class: cls, count }]) => ({
+        id,
         username,
         class: cls,
         suffix: count > 1 ? `×${count}` : undefined,
