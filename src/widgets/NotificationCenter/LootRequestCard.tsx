@@ -12,6 +12,7 @@ import {
 import PlayerHoverCard from "@/widgets/PlayerHoverCard";
 import { LootIcon } from "@/widgets/Loot/LootBuy/icons/LootIconComponent";
 import { notificationFeedStore } from "./notificationFeedStore";
+import RejectReasonForm from "./RejectReasonForm";
 
 type Props = {
   request: PendingLootQueueRequest;
@@ -21,6 +22,7 @@ type Decision = "approve" | "reject";
 
 export default function LootRequestCard({ request }: Props) {
   const [decision, setDecision] = useState<Decision | null>(null);
+  const [isRejecting, setIsRejecting] = useState(false);
 
   const decide = async (
     choice: Decision,
@@ -46,16 +48,47 @@ export default function LootRequestCard({ request }: Props) {
       `${request.username} теперь в очереди на «${request.itemName}»`,
     );
 
-  const handleReject = () =>
+  const handleReject = (reason: string) =>
     decide(
       "reject",
-      () => rejectLootQueueRequest(request.id),
+      () => rejectLootQueueRequest(request.id, reason),
       `Заявка ${request.username} отклонена`,
     );
 
-  const spinner = <Loader2 className="animate-spin" />;
-  const approveIcon = decision === "approve" ? spinner : <Check />;
-  const rejectIcon = decision === "reject" ? spinner : <X />;
+  const approveIcon =
+    decision === "approve" ? <Loader2 className="animate-spin" /> : <Check />;
+
+  const rejectForm = (
+    <RejectReasonForm
+      isBusy={decision === "reject"}
+      onSubmit={handleReject}
+      onClose={() => setIsRejecting(false)}
+    />
+  );
+
+  const decisionButtons = (
+    <div className="flex gap-2">
+      <Button
+        size="sm"
+        onClick={handleApprove}
+        disabled={decision !== null}
+        className="flex-1 cursor-pointer"
+      >
+        {approveIcon}
+        Принять
+      </Button>
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={() => setIsRejecting(true)}
+        disabled={decision !== null}
+        className="flex-1 cursor-pointer"
+      >
+        <X />
+        Отклонить
+      </Button>
+    </div>
+  );
 
   return (
     <li className="flex gap-3 px-4 py-3">
@@ -94,27 +127,7 @@ export default function LootRequestCard({ request }: Props) {
             {request.comment}
           </p>
         )}
-        <div className="flex gap-2">
-          <Button
-            size="sm"
-            onClick={handleApprove}
-            disabled={decision !== null}
-            className="flex-1 cursor-pointer"
-          >
-            {approveIcon}
-            Принять
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleReject}
-            disabled={decision !== null}
-            className="flex-1 cursor-pointer"
-          >
-            {rejectIcon}
-            Отклонить
-          </Button>
-        </div>
+        {isRejecting ? rejectForm : decisionButtons}
       </div>
     </li>
   );

@@ -82,6 +82,11 @@ export default function QueueRequest({
       {request?.status === "rejected" && (
         <span className="text-center text-xs text-muted-foreground">
           Заявку от {formatQueueDate(request.createdAt)} отклонили
+          {request.rejectReason && (
+            <span className="block break-words">
+              Причина: {request.rejectReason}
+            </span>
+          )}
         </span>
       )}
     </div>

@@ -303,6 +303,7 @@ export type LootQueueRequestRow = {
   created_at: string;
   decided_at: string | null;
   decided_by: number | null;
+  reject_reason: string | null;
 };
 
 export type LootWishlistRow = {

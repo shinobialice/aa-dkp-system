@@ -7,13 +7,22 @@ import type {
   LootQueueRequestRow,
   UserRow,
 } from "@/shared/lib/dbTypes";
+import { v } from "@/shared/lib/valibot";
 import { publishChanges } from "@/server/liveChanges";
 import { LOOT_BUY_LINK } from "@/server/lootQueueNotifications";
 import { notifyUser } from "@/server/notifications";
+import { REJECT_REASON_MAX } from "@/widgets/NotificationCenter/notificationCenterModel";
 import ensurePrivilieges from "./ensurePrivilieges";
 import { getSessionUserId } from "./getSessionUserId";
 
 const REVIEWER_TAGS = ["Администратор"];
+
+const RejectReasonSchema = v.pipe(
+  v.string(),
+  v.trim(),
+  v.nonEmpty("Напишите причину отказа"),
+  v.maxLength(REJECT_REASON_MAX),
+);
 
 type DecidedRequest = Pick<LootQueueRequestRow, "user_id" | "item_type_id"> & {
   item_name: string;
@@ -93,16 +102,25 @@ export async function approveLootQueueRequest(requestId: number) {
   await publishChanges("lootRequests", "notifications");
 }
 
-export async function rejectLootQueueRequest(requestId: number) {
+export async function rejectLootQueueRequest(
+  requestId: number,
+  reason: string,
+) {
   await ensurePrivilieges(REVIEWER_TAGS);
+  const rejectReason = v.parse(RejectReasonSchema, reason);
   const adminId = await getSessionUserId();
 
   await sql.begin(async (tx) => {
     const request = await decideRequest(tx, requestId, "rejected", adminId);
+    await tx`
+      UPDATE loot_queue_request
+      SET reject_reason = ${rejectReason}
+      WHERE id = ${requestId}
+    `;
     await notifyUser(tx, {
       userId: request.user_id,
       kind: "lootRequestRejected",
-      message: `Заявку в очередь на «${request.item_name}» отклонили`,
+      message: `Заявку в очередь на «${request.item_name}» отклонили. Причина: ${rejectReason}`,
       link: LOOT_BUY_LINK,
     });
   });

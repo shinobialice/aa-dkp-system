@@ -69,7 +69,9 @@ export default function NotificationItem({
         <Icon className="size-4" />
       </span>
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="text-sm leading-snug">{notification.message}</span>
+        <span className="text-sm leading-snug break-words">
+          {notification.message}
+        </span>
         <span className="text-xs text-muted-foreground">
           {formatMoscowDateTime(notification.createdAt)}
         </span>

@@ -14,11 +14,15 @@ export type MyLootQueueRequest = {
   id: number;
   status: "pending" | "rejected";
   createdAt: string;
+  rejectReason: string | null;
 };
 
 export type MyLootQueueRequests = Record<string, MyLootQueueRequest>;
 
-type RequestRow = Pick<LootQueueRequestRow, "id" | "created_at"> & {
+type RequestRow = Pick<
+  LootQueueRequestRow,
+  "id" | "created_at" | "reject_reason"
+> & {
   status: MyLootQueueRequest["status"];
 };
 
@@ -34,7 +38,7 @@ export async function getMyLootQueueRequests(): Promise<MyLootQueueRequests> {
   const rows = await sql<(RequestRow & { item_name: string })[]>`
     SELECT * FROM (
       SELECT DISTINCT ON (r.item_type_id)
-        r.id, r.status, r.created_at, it.name AS item_name
+        r.id, r.status, r.created_at, r.reject_reason, it.name AS item_name
       FROM loot_queue_request r
       JOIN item_type it ON it.id = r.item_type_id
       WHERE r.user_id = ${userId}
@@ -68,7 +72,7 @@ export async function requestLootQueue(
   const [request] = await sql<RequestRow[]>`
     INSERT INTO loot_queue_request (user_id, item_type_id, comment)
     VALUES (${userId}, ${item.id}, ${input.comment || null})
-    RETURNING id, status, created_at
+    RETURNING id, status, created_at, reject_reason
   `.catch((error: unknown) => {
     if (hasPgCode(error, UNIQUE_VIOLATION)) {
       throw new Error("Заявка на этот предмет уже ждёт решения");
@@ -106,5 +110,6 @@ function toMyRequest(row: RequestRow): MyLootQueueRequest {
     id: row.id,
     status: row.status,
     createdAt: row.created_at,
+    rejectReason: row.reject_reason,
   };
 }
