@@ -2,6 +2,8 @@ export type EquippedBonuses = {
   manaPercent: number;
   defensePercent: number;
   resistPercent: number;
+  meleeAttackPercent: number;
+  rangedAttackPercent: number;
   spellPowerPercent: number;
   healPowerPercent: number;
   defense: number;
@@ -40,6 +42,8 @@ export const EMPTY_BONUSES: EquippedBonuses = {
   manaPercent: 0,
   defensePercent: 0,
   resistPercent: 0,
+  meleeAttackPercent: 0,
+  rangedAttackPercent: 0,
   spellPowerPercent: 0,
   healPowerPercent: 0,
   defense: 0,

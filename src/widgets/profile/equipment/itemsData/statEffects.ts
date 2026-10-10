@@ -49,6 +49,8 @@ export const STAT_LABEL = {
   STEALTH_DETECTION: "Дальность обнаружения скрытых существ",
   CAST_PUSHBACK: "Задержка применения умений при получении удара",
   DAMAGE_TAKEN: "Получаемый урон",
+  MELEE_ATTACK_INCREASE: "Повышение силы атаки в ближнем бою",
+  RANGED_ATTACK_INCREASE: "Повышение силы атаки в дальнем бою",
   SPELL_POWER_INCREASE: "Повышение силы заклинаний",
   HEAL_POWER_INCREASE: "Повышение эффективности исцеления",
 } as const;

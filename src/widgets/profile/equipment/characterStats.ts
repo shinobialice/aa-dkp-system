@@ -142,8 +142,12 @@ export function computeDerivedStats(
     int,
     spi,
     sta,
-    meleeAttack: str * 0.25 + bonus.meleeAttack,
-    rangedAttack: dex * 0.25 + bonus.rangedAttack,
+    // В отличие от силы заклинаний, процент к силе атаки игра применяет и к
+    // прибавкам от экипировки, а не только к базовой части.
+    meleeAttack:
+      (str * 0.25 + bonus.meleeAttack) * (1 + bonus.meleeAttackPercent / 100),
+    rangedAttack:
+      (dex * 0.25 + bonus.rangedAttack) * (1 + bonus.rangedAttackPercent / 100),
     spellPower: powerWithPercent(
       int,
       bonus.spellPower,

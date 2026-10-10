@@ -40,6 +40,8 @@ export const FLAT_STAT_TARGETS: [keyof EquippedBonuses, string][] = [
   ["rangedAttack", ENGRAVING_STAT.RANGED_ATTACK],
   ["spellPower", ENGRAVING_STAT.SPELL_POWER],
   ["healPower", ENGRAVING_STAT.HEAL_POWER],
+  ["meleeAttackPercent", STAT_LABEL.MELEE_ATTACK_INCREASE],
+  ["rangedAttackPercent", STAT_LABEL.RANGED_ATTACK_INCREASE],
   ["spellPowerPercent", STAT_LABEL.SPELL_POWER_INCREASE],
   ["healPowerPercent", STAT_LABEL.HEAL_POWER_INCREASE],
   ["moveSpeed", ENGRAVING_STAT.MOVE_SPEED],

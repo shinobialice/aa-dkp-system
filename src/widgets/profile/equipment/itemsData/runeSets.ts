@@ -183,7 +183,7 @@ const EPHEN_RUNE_SETS: SetWithoutSize[] = [
       { count: 7, text: "Сноровка: +70 ед." },
       {
         count: 8,
-        text: `Урон в ближнем и дальнем бою: +6%\n${EIGHT_PIECE_EXTRA_TEXT}`,
+        text: `Повышение силы атаки в ближнем бою: +6%\nПовышение силы атаки в дальнем бою: +6%\n${EIGHT_PIECE_EXTRA_TEXT}`,
       },
     ],
   },
@@ -196,7 +196,7 @@ const EPHEN_RUNE_SETS: SetWithoutSize[] = [
       { count: 7, text: "Получаемый урон: -5.6%" },
       {
         count: 8,
-        text: `Сила заклинаний и эффективность исцеления: +6%\n${EIGHT_PIECE_EXTRA_TEXT}`,
+        text: `Повышение силы заклинаний: +6%\nПовышение эффективности исцеления: +6%\n${EIGHT_PIECE_EXTRA_TEXT}`,
       },
     ],
   },
