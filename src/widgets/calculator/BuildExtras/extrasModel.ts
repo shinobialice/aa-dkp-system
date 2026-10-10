@@ -1,10 +1,12 @@
 import type { ArchetypeSlot } from "@/actions/getUserArchetype";
 import type { UserEquipment } from "@/actions/getUserEquipment";
+import type { UserEpheSeals } from "@/actions/getUserEpheSeals";
 import type { UserSeal } from "@/actions/getUserSeals";
 import {
   EPHE_SLOT_TRACK,
   EPHE_TRACK_MAX_LEVEL,
 } from "@/widgets/profile/ephe/epheSealsData";
+import type { EpheSlotCoverage } from "@/widgets/profile/ephe/epheSlotUsage";
 import { lookupClassName } from "@/widgets/profile/archetype/classCombinations";
 import { NO_SEAL, type SealSlot } from "@/widgets/profile/seals/SealSlotEditor";
 import {
@@ -116,4 +118,22 @@ export function withMaxEphe(equipment: UserEquipment[]): UserEquipment[] {
     if (!track) return item;
     return { ...item, ephe_seal_level: EPHE_TRACK_MAX_LEVEL[track] };
   });
+}
+
+export function epheLevelsOf(equipment: UserEquipment[]): UserEpheSeals {
+  return Object.fromEntries(
+    equipment.map((item) => [item.slot, item.ephe_seal_level]),
+  );
+}
+
+export function epheCoverageOf(
+  equipment: UserEquipment[],
+): Record<string, EpheSlotCoverage> {
+  const equippedSlots = new Set(equipment.map((item) => item.slot));
+  return Object.fromEntries(
+    Object.keys(EPHE_SLOT_TRACK).map((slot) => [
+      slot,
+      { active: equippedSlots.has(slot) ? 1 : 0, total: 1 },
+    ]),
+  );
 }

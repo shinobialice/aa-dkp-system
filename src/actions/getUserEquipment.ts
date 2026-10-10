@@ -20,9 +20,11 @@ export type UserEquipment = {
 const getUserEquipment = async (userId: number): Promise<UserEquipment[]> => {
   try {
     return await sql<UserEquipment[]>`
-      SELECT id, user_id, role_slot, slot, item_name, grade, enchant, engravings, rune_id, synthesis_effects, synthesis_percent, ephe_seal_level
-      FROM user_equipment
-      WHERE user_id = ${userId}
+      SELECT e.id, e.user_id, e.role_slot, e.slot, e.item_name, e.grade, e.enchant, e.engravings, e.rune_id, e.synthesis_effects, e.synthesis_percent,
+        coalesce(s.level, 0) AS ephe_seal_level
+      FROM user_equipment e
+      LEFT JOIN user_ephe_seals s ON s.user_id = e.user_id AND s.slot = e.slot
+      WHERE e.user_id = ${userId}
     `;
   } catch (error) {
     console.error("Ошибка при получении экипировки:", error);

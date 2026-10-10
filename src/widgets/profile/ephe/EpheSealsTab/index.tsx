@@ -1,9 +1,14 @@
 "use client";
 import { useState } from "react";
 import { toast } from "sonner";
-import saveEpheSealLevel from "@/actions/saveEpheSealLevel";
+import saveEpheSealLevel, {
+  type EpheSealsUpdate,
+} from "@/actions/saveEpheSealLevel";
 import maxAllEpheSealLevels from "@/actions/maxAllEpheSealLevels";
+import type { ProfileUser } from "@/actions/getUser";
+import type { UserArchetype } from "@/actions/getUserArchetype";
 import type { UserEquipment } from "@/actions/getUserEquipment";
+import type { UserEpheSeals } from "@/actions/getUserEpheSeals";
 import { getEquipmentSlot } from "../../equipment/equipmentData";
 import {
   EPHE_SLOT_TRACK,
@@ -16,34 +21,41 @@ import CharacterTabsSwitcher from "@/widgets/profile/CharacterTabsSwitcher";
 import { errorMessage } from "@/shared/lib/errorMessage";
 import EpheSidebar from "../EpheSidebar";
 import EpheLevelList from "../EpheLevelList";
+import EpheSlotUsageList from "../EpheSlotUsageList";
 import { EPHE_SIDEBAR_GROUPS } from "../epheSlotGroups";
-import EpheBonusNote from "../EpheBonusNote";
+import {
+  getEpheCoverage,
+  getEpheRoles,
+  getEpheSlotUsage,
+} from "../epheSlotUsage";
+
+type Props = {
+  user: ProfileUser;
+  archetype: UserArchetype;
+  epheSeals: UserEpheSeals;
+  equipment: UserEquipment[];
+  onChange: (update: EpheSealsUpdate) => void;
+  canEdit: boolean;
+};
 
 export default function EpheSealsTab({
-  userId,
+  user,
+  archetype,
+  epheSeals,
   equipment,
   onChange,
   canEdit,
-}: {
-  userId: number;
-  equipment: UserEquipment[];
-  onChange: (equipment: UserEquipment[]) => void;
-  canEdit: boolean;
-}) {
+}: Props) {
   const [activeSlot, setActiveSlot] = useState<string>(
     EPHE_SIDEBAR_GROUPS[0].slots[0],
   );
   const [saving, setSaving] = useState(false);
   const [maxingAll, setMaxingAll] = useState(false);
 
-  const equipmentBySlot: Record<string, UserEquipment | undefined> =
-    Object.fromEntries(equipment.map((item) => [item.slot, item]));
-
-  const handleSelectLevel = async (slot: string, level: number) => {
+  const handleSelectLevel = async (level: number) => {
     setSaving(true);
     try {
-      const updated = await saveEpheSealLevel(userId, slot, level);
-      onChange(updated);
+      onChange(await saveEpheSealLevel(user.id, activeSlot, level));
     } catch (error) {
       toast.error(errorMessage(error, "Не удалось сохранить печать Эфе"));
     } finally {
@@ -54,8 +66,7 @@ export default function EpheSealsTab({
   const handleMaxAll = async () => {
     setMaxingAll(true);
     try {
-      const updated = await maxAllEpheSealLevels(userId);
-      onChange(updated);
+      onChange(await maxAllEpheSealLevels(user.id));
       toast.success("Все печати Эфе прокачаны до максимума");
     } catch (error) {
       toast.error(errorMessage(error, "Не удалось прокачать печати Эфе"));
@@ -64,12 +75,10 @@ export default function EpheSealsTab({
     }
   };
 
-  const activeSlotLabel = getEquipmentSlot(activeSlot)?.label;
-  const activeEq = equipmentBySlot[activeSlot];
+  const roles = getEpheRoles(user, archetype);
   const activeTrack = EPHE_SLOT_TRACK[activeSlot];
-  const activeLevel = activeEq?.ephe_seal_level ?? 0;
+  const activeLevel = epheSeals[activeSlot] ?? 0;
   const maxLevel = EPHE_TRACK_MAX_LEVEL[activeTrack];
-  const rows = getEpheTrackLevels(activeTrack);
 
   return (
     <Card className="min-h-187.5 gap-3 py-4">
@@ -91,48 +100,44 @@ export default function EpheSealsTab({
       </CardHeader>
       <CardContent className="flex flex-col gap-4 pt-4 lg:flex-row">
         <EpheSidebar
-          equipmentBySlot={equipmentBySlot}
+          levels={epheSeals}
+          coverage={getEpheCoverage(equipment, roles)}
           activeSlot={activeSlot}
           onSelect={setActiveSlot}
         />
 
         <div className="min-w-0 flex-1">
-          {!activeEq ? (
-            <div className="flex h-full min-h-75 items-center justify-center px-6 text-center text-sm text-muted-foreground">
-              В слоте «{activeSlotLabel}» нет предмета — сначала экипируйте его
-              во вкладке «Экипировка».
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <div className="text-sm">
+              <span className="font-semibold">
+                {getEquipmentSlot(activeSlot)?.label}
+              </span>
+              <span className="text-muted-foreground">
+                {" "}
+                — выбрано до уровня {activeLevel} / {maxLevel}
+              </span>
             </div>
-          ) : (
-            <>
-              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                <div className="text-sm">
-                  <span className="font-semibold">{activeSlotLabel}</span>
-                  <span className="text-muted-foreground">
-                    {" "}
-                    — выбрано до уровня {activeLevel} / {maxLevel}
-                  </span>
-                  <EpheBonusNote eq={activeEq} />
-                </div>
-                {canEdit && activeLevel > 0 && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="cursor-pointer"
-                    onClick={() => handleSelectLevel(activeSlot, 0)}
-                    disabled={saving}
-                  >
-                    Сбросить слот
-                  </Button>
-                )}
-              </div>
-              <EpheLevelList
-                rows={rows}
-                activeLevel={activeLevel}
-                editable={canEdit && !saving}
-                onSelect={(level) => handleSelectLevel(activeSlot, level)}
-              />
-            </>
-          )}
+            {canEdit && activeLevel > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="cursor-pointer"
+                onClick={() => handleSelectLevel(0)}
+                disabled={saving}
+              >
+                Сбросить слот
+              </Button>
+            )}
+          </div>
+          <EpheSlotUsageList
+            usage={getEpheSlotUsage(equipment, roles, activeSlot)}
+          />
+          <EpheLevelList
+            rows={getEpheTrackLevels(activeTrack)}
+            activeLevel={activeLevel}
+            editable={canEdit && !saving}
+            onSelect={handleSelectLevel}
+          />
         </div>
       </CardContent>
     </Card>

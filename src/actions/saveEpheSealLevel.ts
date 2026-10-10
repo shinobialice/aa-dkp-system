@@ -2,40 +2,47 @@
 import sql from "@/shared/lib/db";
 import ensureCanEditUserData from "./ensureCanEditUserData";
 import getUserEquipment, { type UserEquipment } from "./getUserEquipment";
-import { isValidEquipmentSlot } from "@/widgets/profile/equipment/equipmentData";
-import { isValidEpheSealLevel } from "@/widgets/profile/ephe/epheSealsData";
+import getUserEpheSeals, { type UserEpheSeals } from "./getUserEpheSeals";
+import {
+  EPHE_SLOT_TRACK,
+  isValidEpheSealLevel,
+} from "@/widgets/profile/ephe/epheSealsData";
+
+export type EpheSealsUpdate = {
+  epheSeals: UserEpheSeals;
+  equipment: UserEquipment[];
+};
 
 const saveEpheSealLevel = async (
   userId: number,
   slot: string,
   level: number,
-): Promise<UserEquipment[]> => {
+): Promise<EpheSealsUpdate> => {
   await ensureCanEditUserData(userId, "equipmentEditEnabled");
 
-  if (!isValidEquipmentSlot(slot)) {
-    throw new Error(`Неизвестный слот экипировки: ${slot}`);
+  if (!Object.hasOwn(EPHE_SLOT_TRACK, slot)) {
+    throw new Error(`Неизвестный слот печати Эфе: ${slot}`);
   }
   if (!isValidEpheSealLevel(slot, level)) {
     throw new Error(`Некорректный уровень печати Эфе: ${level}`);
   }
 
   try {
-    const result = await sql`
-      UPDATE user_equipment SET ephe_seal_level = ${level}
-      WHERE user_id = ${userId} AND slot = ${slot}
+    await sql`
+      INSERT INTO user_ephe_seals (user_id, slot, level)
+      VALUES (${userId}, ${slot}, ${level})
+      ON CONFLICT (user_id, slot) DO UPDATE SET level = EXCLUDED.level
     `;
-    if (result.count === 0) {
-      throw new Error("В этом слоте нет предмета");
-    }
   } catch (error) {
     console.error("Ошибка при сохранении печати Эфе:", error);
-    throw error instanceof Error &&
-      error.message === "В этом слоте нет предмета"
-      ? error
-      : new Error("Не удалось сохранить печать Эфе");
+    throw new Error("Не удалось сохранить печать Эфе");
   }
 
-  return getUserEquipment(userId);
+  const [epheSeals, equipment] = await Promise.all([
+    getUserEpheSeals(userId),
+    getUserEquipment(userId),
+  ]);
+  return { epheSeals, equipment };
 };
 
 export default saveEpheSealLevel;

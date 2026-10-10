@@ -493,6 +493,12 @@ export type UserCharacterBuffsRow = {
   updated_at: string;
 };
 
+export type UserEpheSealsRow = {
+  user_id: number;
+  slot: string;
+  level: number;
+};
+
 export type UserEquipmentRow = {
   id: number;
   user_id: number;

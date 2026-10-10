@@ -27,8 +27,9 @@ export default function LockedSlotButton({ slot, tooltipSide }: Props) {
           <Lock className="relative size-4 text-muted-foreground" />
         </span>
       </TooltipTrigger>
-      <TooltipContent side={tooltipSide}>
-        Двуручное оружие занимает обе руки
+      <TooltipContent side={tooltipSide} className="max-w-56">
+        Двуручное оружие занимает обе руки. Печать Эфе левой руки в этом классе
+        не учитывается
       </TooltipContent>
     </Tooltip>
   );

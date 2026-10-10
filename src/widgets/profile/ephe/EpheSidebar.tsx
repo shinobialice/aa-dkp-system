@@ -1,21 +1,25 @@
 import { useState } from "react";
 import { Check, ChevronDown, ChevronRight } from "lucide-react";
-import type { UserEquipment } from "@/actions/getUserEquipment";
+import type { UserEpheSeals } from "@/actions/getUserEpheSeals";
 import { Badge } from "@/shared/ui";
 import { cn } from "@/shared/lib/tw-merge";
 import { EPHE_SLOT_TRACK, EPHE_TRACK_MAX_LEVEL } from "./epheSealsData";
 import { EPHE_SIDEBAR_GROUPS, EPHE_SLOT_SHORT_LABELS } from "./epheSlotGroups";
+import { epheCoverageHint, type EpheSlotCoverage } from "./epheSlotUsage";
 
 const CHECK_COLOR = "#4ade80";
+const PARTIAL_CHECK_COLOR = "#fbbf24";
 
 type Props = {
-  equipmentBySlot: Record<string, UserEquipment | undefined>;
+  levels: UserEpheSeals;
+  coverage: Record<string, EpheSlotCoverage>;
   activeSlot: string;
   onSelect: (slot: string) => void;
 };
 
 export default function EpheSidebar({
-  equipmentBySlot,
+  levels,
+  coverage,
   activeSlot,
   onSelect,
 }: Props) {
@@ -47,7 +51,8 @@ export default function EpheSidebar({
                   <SlotButton
                     key={slotKey}
                     slotKey={slotKey}
-                    item={equipmentBySlot[slotKey]}
+                    level={levels[slotKey] ?? 0}
+                    coverage={coverage[slotKey]}
                     active={activeSlot === slotKey}
                     onSelect={onSelect}
                   />
@@ -63,20 +68,25 @@ export default function EpheSidebar({
 
 function SlotButton({
   slotKey,
-  item,
+  level,
+  coverage,
   active,
   onSelect,
 }: {
   slotKey: string;
-  item: UserEquipment | undefined;
+  level: number;
+  coverage: EpheSlotCoverage;
   active: boolean;
   onSelect: (slot: string) => void;
 }) {
-  const level = item?.ephe_seal_level ?? 0;
   const max = EPHE_TRACK_MAX_LEVEL[EPHE_SLOT_TRACK[slotKey]];
+  const isUsed = coverage.active > 0;
+  const checkColor =
+    coverage.active === coverage.total ? CHECK_COLOR : PARTIAL_CHECK_COLOR;
   return (
     <button
       type="button"
+      title={epheCoverageHint(coverage)}
       onClick={() => onSelect(slotKey)}
       className={cn(
         "flex cursor-pointer items-center justify-between gap-2 rounded-md border px-3 py-2 text-left text-sm",
@@ -86,8 +96,8 @@ function SlotButton({
       <span className="flex min-w-0 items-center gap-2">
         <Check
           className="size-3.5 shrink-0"
-          style={{ color: item ? CHECK_COLOR : "var(--muted-foreground)" }}
-          strokeWidth={item ? 3 : 1.5}
+          style={{ color: isUsed ? checkColor : "var(--muted-foreground)" }}
+          strokeWidth={isUsed ? 3 : 1.5}
         />
         <span className="truncate">{EPHE_SLOT_SHORT_LABELS[slotKey]}</span>
       </span>

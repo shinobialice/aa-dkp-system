@@ -11,6 +11,7 @@ import type { UserArchetype } from "@/actions/getUserArchetype";
 import type { UserSkillBuild } from "@/actions/getUserSkillBuild";
 import type { UserCharacterBuffs } from "@/actions/getUserCharacterBuffs";
 import type { UserEquipment } from "@/actions/getUserEquipment";
+import type { UserEpheSeals } from "@/actions/getUserEpheSeals";
 import ProfileInfoClient from "@/widgets/profile/info/ProfileInfoClient";
 import ProfileTabs from "@/widgets/profile/ProfileTabs";
 
@@ -23,6 +24,7 @@ export default function ProfilePageWrapper({
   skillBuild: initialSkillBuild,
   characterBuffs: initialCharacterBuffs,
   equipment: initialEquipment,
+  epheSeals: initialEpheSeals,
   usernameHistory: initialUsernameHistory,
   averageGuildGS,
   activity,
@@ -51,6 +53,7 @@ export default function ProfilePageWrapper({
   skillBuild: UserSkillBuild;
   characterBuffs: UserCharacterBuffs;
   equipment: UserEquipment[];
+  epheSeals: UserEpheSeals;
   usernameHistory: {
     id: number;
     old_username: string;
@@ -89,6 +92,7 @@ export default function ProfilePageWrapper({
   const [skillBuild, setSkillBuild] = useState(initialSkillBuild);
   const [characterBuffs, setCharacterBuffs] = useState(initialCharacterBuffs);
   const [equipment, setEquipment] = useState(initialEquipment);
+  const [epheSeals, setEpheSeals] = useState(initialEpheSeals);
   const [usernameHistory, setUsernameHistory] = useState(
     initialUsernameHistory,
   );
@@ -145,6 +149,8 @@ export default function ProfilePageWrapper({
         setCharacterBuffs={setCharacterBuffs}
         equipment={equipment}
         setEquipment={setEquipment}
+        epheSeals={epheSeals}
+        setEpheSeals={setEpheSeals}
         tags={tags}
         setTags={setTags}
         salary={salary}

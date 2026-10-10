@@ -6,6 +6,7 @@ import getUserArchetype from "@/actions/getUserArchetype";
 import getUserSkillBuild from "@/actions/getUserSkillBuild";
 import getUserCharacterBuffs from "@/actions/getUserCharacterBuffs";
 import getUserEquipment from "@/actions/getUserEquipment";
+import getUserEpheSeals from "@/actions/getUserEpheSeals";
 import { getUserMonthlyAttendance } from "@/actions/getUserMonthlyAttendance";
 import { getUserPrimeStreak } from "@/actions/getUserPrimeStreak";
 import { getUserKillcountStats } from "@/actions/getUserKillcountStats";
@@ -44,6 +45,7 @@ export default async function Page(p: {
     skillBuild,
     characterBuffs,
     equipment,
+    epheSeals,
     killcountStats,
     profileStyle,
     averageGuildGS,
@@ -64,6 +66,7 @@ export default async function Page(p: {
     getUserSkillBuild(userId),
     getUserCharacterBuffs(userId),
     getUserEquipment(userId),
+    getUserEpheSeals(userId),
     getUserKillcountStats(userId),
     getProfileStyle(userId),
     getAverageGuildGS(),
@@ -96,6 +99,7 @@ export default async function Page(p: {
       skillBuild={skillBuild}
       characterBuffs={characterBuffs}
       equipment={equipment}
+      epheSeals={epheSeals}
       usernameHistory={usernameHistory}
       averageGuildGS={averageGuildGS}
       activity={activity}

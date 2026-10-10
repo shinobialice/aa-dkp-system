@@ -7,13 +7,14 @@ import type { UserArchetype } from "@/actions/getUserArchetype";
 import type { UserSkillBuild } from "@/actions/getUserSkillBuild";
 import type { UserCharacterBuffs } from "@/actions/getUserCharacterBuffs";
 import type { UserEquipment } from "@/actions/getUserEquipment";
+import type { UserEpheSeals } from "@/actions/getUserEpheSeals";
+import type { EpheSealsUpdate } from "@/actions/saveEpheSealLevel";
 import ProfileAttendanceTab from "./activity/ProfileAttendanceTab";
 import InventoryTabsClient from "./inventory/InventoryTabsClient";
 import PurchasesAndGiveaways from "./inventory/PurchasesAndGiveaways";
 import ProfileSalaryTab from "./notes/ProfileSalaryTab";
 import SealsTab from "./seals/SealsTab";
 import CharacterRoleTabs from "./CharacterRoleTabs";
-import { epheEquipmentView } from "./equipment/equipmentRoles";
 import EpheSealsTab from "./ephe/EpheSealsTab";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/ui";
 
@@ -41,6 +42,8 @@ export default function ProfileTabs({
   setCharacterBuffs,
   equipment,
   setEquipment,
+  epheSeals,
+  setEpheSeals,
   tags,
   setTags,
   setUser,
@@ -65,6 +68,8 @@ export default function ProfileTabs({
   setCharacterBuffs: (characterBuffs: UserCharacterBuffs) => void;
   equipment: UserEquipment[];
   setEquipment: (equipment: UserEquipment[]) => void;
+  epheSeals: UserEpheSeals;
+  setEpheSeals: (epheSeals: UserEpheSeals) => void;
   tags: ProfileTag[];
   setTags: (tags: ProfileTag[]) => void;
   setUser: (user: ProfileUser) => void;
@@ -75,6 +80,11 @@ export default function ProfileTabs({
   canEditArchetype: boolean;
   canEditEquipment: boolean;
 }) {
+  const handleEpheSealsChange = (update: EpheSealsUpdate) => {
+    setEpheSeals(update.epheSeals);
+    setEquipment(update.equipment);
+  };
+
   return (
     <Tabs value={tab} onValueChange={onTabChange} className="min-w-0 gap-3">
       <div className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:px-0">
@@ -119,9 +129,11 @@ export default function ProfileTabs({
         <Tabs defaultValue="ephe">
           <TabsContent value="ephe">
             <EpheSealsTab
-              userId={user.id}
-              equipment={epheEquipmentView(equipment)}
-              onChange={setEquipment}
+              user={user}
+              archetype={archetype}
+              epheSeals={epheSeals}
+              equipment={equipment}
+              onChange={handleEpheSealsChange}
               canEdit={canEditEquipment}
             />
           </TabsContent>

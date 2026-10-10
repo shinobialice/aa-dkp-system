@@ -19,8 +19,8 @@ const copyRoleEquipment = async (
     await sql.begin(async (tx) => {
       await tx`DELETE FROM user_equipment WHERE user_id = ${userId} AND role_slot = ${toRole}`;
       await tx`
-        INSERT INTO user_equipment (user_id, role_slot, slot, item_name, grade, enchant, engravings, rune_id, synthesis_effects, synthesis_percent, ephe_seal_level)
-        SELECT user_id, ${toRole}, slot, item_name, grade, enchant, engravings, rune_id, synthesis_effects, synthesis_percent, ephe_seal_level
+        INSERT INTO user_equipment (user_id, role_slot, slot, item_name, grade, enchant, engravings, rune_id, synthesis_effects, synthesis_percent)
+        SELECT user_id, ${toRole}, slot, item_name, grade, enchant, engravings, rune_id, synthesis_effects, synthesis_percent
         FROM user_equipment
         WHERE user_id = ${userId} AND role_slot = ${fromRole}
       `;

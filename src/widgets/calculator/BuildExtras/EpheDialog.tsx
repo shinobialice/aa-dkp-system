@@ -18,7 +18,12 @@ import {
   type CalculatorBuild,
 } from "../calculatorModel";
 import EpheSlotLevels from "./EpheSlotLevels";
-import { withEpheLevel, withMaxEphe } from "./extrasModel";
+import {
+  epheCoverageOf,
+  epheLevelsOf,
+  withEpheLevel,
+  withMaxEphe,
+} from "./extrasModel";
 
 type Props = {
   build: CalculatorBuild;
@@ -67,7 +72,8 @@ export default function EpheDialog({ build, onUpdate }: Props) {
         </DialogHeader>
         <div className="flex max-h-[65vh] flex-col gap-4 overflow-y-auto pr-1 lg:flex-row">
           <EpheSidebar
-            equipmentBySlot={draftBySlot}
+            levels={epheLevelsOf(draft)}
+            coverage={epheCoverageOf(draft)}
             activeSlot={activeSlot}
             onSelect={setActiveSlot}
           />

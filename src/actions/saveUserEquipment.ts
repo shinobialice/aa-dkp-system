@@ -1,6 +1,5 @@
 "use server";
 import sql from "@/shared/lib/db";
-import type { UserEquipmentRow } from "@/shared/lib/dbTypes";
 import { isRoleSlot, type RoleSlot } from "@/shared/config/roleSlots";
 import ensureCanEditUserData from "./ensureCanEditUserData";
 import getUserEquipment, { type UserEquipment } from "./getUserEquipment";
@@ -47,22 +46,11 @@ const saveUserEquipment = async (
 
   try {
     await sql.begin(async (tx) => {
-      const epheRows = await tx<
-        Pick<UserEquipmentRow, "slot" | "ephe_seal_level">[]
-      >`
-        SELECT slot, max(ephe_seal_level) AS ephe_seal_level
-        FROM user_equipment WHERE user_id = ${userId}
-        GROUP BY slot
-      `;
-      const epheLevels = new Map(
-        epheRows.map((row) => [row.slot, row.ephe_seal_level]),
-      );
       await tx`DELETE FROM user_equipment WHERE user_id = ${userId} AND role_slot = ${roleSlot}`;
       for (const item of filled) {
-        const epheSealLevel = epheLevels.get(item.slot) ?? item.epheSealLevel;
         await tx`
-          INSERT INTO user_equipment (user_id, role_slot, slot, item_name, grade, enchant, engravings, rune_id, synthesis_effects, synthesis_percent, ephe_seal_level)
-          VALUES (${userId}, ${roleSlot}, ${item.slot}, ${item.itemName}, ${item.grade}, ${item.enchant}, ${sql.array(item.engravings)}::integer[], ${item.runeId}, ${sql.array(item.synthesisEffects)}::integer[], ${item.synthesisPercent}, ${epheSealLevel})
+          INSERT INTO user_equipment (user_id, role_slot, slot, item_name, grade, enchant, engravings, rune_id, synthesis_effects, synthesis_percent)
+          VALUES (${userId}, ${roleSlot}, ${item.slot}, ${item.itemName}, ${item.grade}, ${item.enchant}, ${sql.array(item.engravings)}::integer[], ${item.runeId}, ${sql.array(item.synthesisEffects)}::integer[], ${item.synthesisPercent})
         `;
       }
     });
