@@ -1,4 +1,6 @@
-export const balloons = [
+import { cn } from "@/shared/lib/tw-merge";
+
+const balloons = [
   {
     cx: 17,
     cy: 9,
@@ -31,12 +33,12 @@ export const balloons = [
   },
 ];
 
-export default function BalloonsArt() {
+export default function BalloonsArt({ className }: { className: string }) {
   return (
     <svg
       viewBox="0 0 64 54"
       aria-hidden
-      className="pointer-events-none absolute left-0 top-0 h-[67.5px] w-20 text-muted-foreground"
+      className={cn("pointer-events-none text-muted-foreground", className)}
     >
       {balloons.map((b) => {
         const bottom = b.cy + b.ry;

@@ -10,6 +10,7 @@ import type { UserEquipment } from "@/actions/getUserEquipment";
 import type { UserEpheSeals } from "@/actions/getUserEpheSeals";
 import type { EpheSealsUpdate } from "@/actions/saveEpheSealLevel";
 import ProfileAttendanceTab from "./activity/ProfileAttendanceTab";
+import ProfileKillcountTab from "./killcount/ProfileKillcountTab";
 import InventoryTabsClient from "./inventory/InventoryTabsClient";
 import PurchasesAndGiveaways from "./inventory/PurchasesAndGiveaways";
 import ProfileSalaryTab from "./notes/ProfileSalaryTab";
@@ -17,10 +18,12 @@ import SealsTab from "./seals/SealsTab";
 import CharacterRoleTabs from "./CharacterRoleTabs";
 import EpheSealsTab from "./ephe/EpheSealsTab";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/ui";
+import { DD_CLASSES } from "@/shared/config/classes";
 
 const TABS = [
   { value: "inventory", label: "Инвентарь" },
   { value: "attendance", label: "Посещаемость" },
+  { value: "killcount", label: "Киллкаунт" },
   { value: "salary", label: "Зарплата" },
   { value: "purchases", label: "Покупки" },
   { value: "seals", label: "Печати" },
@@ -85,11 +88,20 @@ export default function ProfileTabs({
     setEquipment(update.equipment);
   };
 
+  const hasKillcount = [
+    user.class,
+    user.secondary_class,
+    user.tertiary_class,
+  ].some((cls) => cls !== null && DD_CLASSES.includes(cls));
+  const tabs = hasKillcount
+    ? TABS
+    : TABS.filter((item) => item.value !== "killcount");
+
   return (
     <Tabs value={tab} onValueChange={onTabChange} className="min-w-0 gap-3">
       <div className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:px-0">
         <TabsList className="h-10">
-          {TABS.map((item) => (
+          {tabs.map((item) => (
             <TabsTrigger
               key={item.value}
               className="cursor-pointer px-3.5"
@@ -108,6 +120,12 @@ export default function ProfileTabs({
       <TabsContent value="attendance">
         <ProfileAttendanceTab userId={user.id} />
       </TabsContent>
+
+      {hasKillcount && (
+        <TabsContent value="killcount">
+          <ProfileKillcountTab userId={user.id} />
+        </TabsContent>
+      )}
 
       <TabsContent value="salary">
         <ProfileSalaryTab

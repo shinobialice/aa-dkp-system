@@ -2,6 +2,11 @@
 
 import { triggerFinanceRecalc } from "@/server/finance/recalc";
 import { publishChanges } from "@/server/liveChanges";
+import {
+  IN_STOCK_STATUS,
+  getStockQuantity,
+  notifyFirstInQueueAboutStock,
+} from "@/server/lootQueueNotifications";
 import sql from "@/shared/lib/db";
 import type { ItemTypeRow, LootRow } from "@/shared/lib/dbTypes";
 import { getUtcYearMonth } from "@/utils/getUtcYearMonth";
@@ -87,19 +92,28 @@ export const addLootItem = async ({
 }) => {
   await ensurePrivilieges(["Администратор"]);
 
+  const lootStatus = status ?? IN_STOCK_STATUS;
+  const isStockArrival = lootStatus === IN_STOCK_STATUS && (quantity ?? 1) > 0;
   try {
-    await sql`
-      INSERT INTO loot (item_type_id, status, sold_at, source, acquired_at, quantity, created_at, raid_id, price)
-      VALUES (
-        ${itemTypeId}, ${status ?? "В наличии"}, ${sold_at ?? null}, ${source ?? null},
-        ${new Date(acquired_at).toISOString()}, ${quantity ?? 1}, now(), ${raidId ?? null}, ${price ?? null}
-      )
-    `;
+    await sql.begin(async (tx) => {
+      const hadStock =
+        isStockArrival && (await getStockQuantity(tx, itemTypeId)) > 0;
+      await tx`
+        INSERT INTO loot (item_type_id, status, sold_at, source, acquired_at, quantity, created_at, raid_id, price)
+        VALUES (
+          ${itemTypeId}, ${lootStatus}, ${sold_at ?? null}, ${source ?? null},
+          ${new Date(acquired_at).toISOString()}, ${quantity ?? 1}, now(), ${raidId ?? null}, ${price ?? null}
+        )
+      `;
+      if (isStockArrival && !hadStock) {
+        await notifyFirstInQueueAboutStock(tx, itemTypeId);
+      }
+    });
   } catch (error) {
     console.error("Ошибка при добавлении лута:", error);
     throw new Error("Не удалось добавить предмет");
   }
-  await publishChanges("loot");
+  await publishChanges("loot", "notifications");
 
   // "В казну"/"Продано" сразу с income (quick-add в казну из AddLootDialog) —
   // пересчитываем фонд месяца продажи сразу.

@@ -8,7 +8,6 @@ import { cn } from "@/shared/lib/tw-merge";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -20,31 +19,20 @@ import {
   SidebarRail,
   SidebarTrigger,
 } from "@/shared/ui";
-import { NavUser } from "./NavUser";
-import { OnlineUsersWidget } from "./OnlineUsersWidget";
 import DimonishMenuItem from "./DimonishMenuItem";
-import { ThemeSidebarItem, ViewAsPlayerSidebarItem } from "./SidebarControls";
 import { ALL_NAV_URLS, NAV_SECTIONS, findActiveUrl } from "./navConfig";
 import PromoMenuItem from "./PromoMenuItem";
 import type { PromoLink } from "@/shared/config/promoPages";
+import AnniversaryBalloons from "@/widgets/AnniversaryBalloons/AnniversaryBalloons";
 
 type Props = {
   isAdmin: boolean;
-  isRealAdmin?: boolean;
-  viewingAsRegular?: boolean;
   locationBadge?: ReactNode;
   locationIcon?: ReactNode;
   promo: PromoLink | null;
 };
 
-function AppSidebar({
-  isAdmin,
-  isRealAdmin,
-  viewingAsRegular,
-  locationBadge,
-  locationIcon,
-  promo,
-}: Props) {
+function AppSidebar({ isAdmin, locationBadge, locationIcon, promo }: Props) {
   const pathname = usePathname();
   const activeUrl = findActiveUrl(pathname, ALL_NAV_URLS);
   const sections = NAV_SECTIONS.filter(
@@ -134,17 +122,7 @@ function AppSidebar({
           </SidebarGroup>
         ))}
       </SidebarContent>
-
-      <SidebarFooter className="border-t">
-        <SidebarMenu>
-          <OnlineUsersWidget />
-          {isRealAdmin && (
-            <ViewAsPlayerSidebarItem initial={!!viewingAsRegular} />
-          )}
-          <ThemeSidebarItem />
-        </SidebarMenu>
-        <NavUser />
-      </SidebarFooter>
+      <AnniversaryBalloons placement="sidebar" />
       <SidebarRail />
     </Sidebar>
   );

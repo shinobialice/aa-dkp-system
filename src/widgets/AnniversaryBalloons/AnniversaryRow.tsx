@@ -3,7 +3,8 @@ import { PartyPopper } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage, Button } from "@/shared/ui";
 import { type Anniversary } from "@/actions/anniversaryActions";
 import { avatarSrc, plural } from "@/shared/lib/format";
-import { NAMES_LIMIT } from "./AnniversaryBalloons";
+
+const NAMES_LIMIT = 5;
 
 export default function AnniversaryRow({
   anniversary,

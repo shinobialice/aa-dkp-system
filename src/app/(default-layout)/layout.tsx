@@ -9,8 +9,12 @@ import MobileNav from "@/widgets/sidebar/MobileNav";
 import { HeartbeatTracker } from "@/widgets/sidebar/HeartbeatTracker";
 import { SessionGuard } from "@/widgets/sidebar/SessionGuard";
 import { GuildLocationBadge } from "@/widgets/sidebar/GuildLocationBadge";
+import { OnlineUsersWidget } from "@/widgets/sidebar/OnlineUsersWidget";
 import { EventNotifications } from "@/widgets/EventNotifications/EventNotifications";
-import { AnniversaryBalloons } from "@/widgets/AnniversaryBalloons/AnniversaryBalloons";
+import AnniversaryBalloons from "@/widgets/AnniversaryBalloons/AnniversaryBalloons";
+import HeaderClocks from "@/widgets/HeaderClocks";
+import NotificationCenter from "@/widgets/NotificationCenter";
+import UserMenu from "@/widgets/UserMenu";
 import { cookies } from "next/headers";
 
 export default async function DefaultLayout({
@@ -32,19 +36,20 @@ export default async function DefaultLayout({
       <HeartbeatTracker />
       <SessionGuard />
       <EventNotifications />
-      <AnniversaryBalloons />
-      <div className="flex bg-background text-foreground w-full">
+      <AnniversaryBalloons placement="floating" />
+      <div className="flex w-full bg-background text-foreground [--app-header:3.5rem]">
         <AppSidebar
           isAdmin={isAdmin}
-          isRealAdmin={isRealAdmin}
-          viewingAsRegular={viewingAsRegular}
           locationBadge={<GuildLocationBadge />}
           locationIcon={<GuildLocationBadge variant="icon" />}
           promo={promo}
         />
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="flex h-14 items-center gap-2.5 border-b px-4 md:hidden">
-            <Link href="/" className="flex min-w-0 flex-1 items-center gap-2.5">
+          <header className="sticky top-0 z-30 flex h-(--app-header) items-center gap-2.5 border-b bg-background/95 px-4 backdrop-blur sm:px-8">
+            <Link
+              href="/"
+              className="flex min-w-0 flex-1 items-center gap-2.5 md:hidden"
+            >
               <Image
                 src="/images/logo.png"
                 alt=""
@@ -56,7 +61,20 @@ export default async function DefaultLayout({
                 No Fear
               </span>
             </Link>
-            <GuildLocationBadge variant="compact" />
+            <GuildLocationBadge variant="compact" className="md:hidden" />
+            <div className="hidden md:block">
+              <HeaderClocks />
+            </div>
+            <div className="ml-auto flex items-center gap-3">
+              <div className="hidden md:block">
+                <OnlineUsersWidget />
+              </div>
+              <NotificationCenter isAdmin={isAdmin} />
+              <UserMenu
+                isRealAdmin={isRealAdmin}
+                viewingAsRegular={viewingAsRegular}
+              />
+            </div>
           </header>
           <main className="flex-1 px-4 pt-6 pb-28 sm:px-8 md:p-8">
             {children}
@@ -69,12 +87,7 @@ export default async function DefaultLayout({
           </main>
         </div>
       </div>
-      <MobileNav
-        isAdmin={isAdmin}
-        isRealAdmin={isRealAdmin}
-        viewingAsRegular={viewingAsRegular}
-        promo={promo}
-      />
+      <MobileNav isAdmin={isAdmin} promo={promo} />
     </SidebarProvider>
   );
 }

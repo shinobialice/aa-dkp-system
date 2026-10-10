@@ -16,9 +16,12 @@ export function useStickyBar(heightVar: string) {
       container.style.setProperty(heightVar, `${bar.offsetHeight}px`);
     });
     resize.observe(bar);
-    const stuck = new IntersectionObserver(([entry]) => {
-      bar.dataset.stuck = String(!entry.isIntersecting);
-    });
+    const stuck = new IntersectionObserver(
+      ([entry]) => {
+        bar.dataset.stuck = String(!entry.isIntersecting);
+      },
+      { rootMargin: `-${stickyTop(bar)}px 0px 0px 0px` },
+    );
     stuck.observe(sentinel);
     return () => {
       resize.disconnect();
@@ -28,10 +31,15 @@ export function useStickyBar(heightVar: string) {
 
   const scrollToListTop = () => {
     const sentinel = sentinelRef.current;
-    if (!sentinel) return;
-    const top = sentinel.getBoundingClientRect().top;
+    const bar = barRef.current;
+    if (!sentinel || !bar) return;
+    const top = sentinel.getBoundingClientRect().top - stickyTop(bar);
     if (top < 0) window.scrollTo({ top: top + window.scrollY });
   };
 
   return { containerRef, barRef, sentinelRef, scrollToListTop };
+}
+
+function stickyTop(bar: HTMLElement) {
+  return parseFloat(getComputedStyle(bar).top) || 0;
 }

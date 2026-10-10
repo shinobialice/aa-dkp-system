@@ -3,12 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, LogOut } from "lucide-react";
+import { LayoutGrid } from "lucide-react";
 import {
-  Avatar,
-  AvatarFallback,
-  AvatarFrame,
-  AvatarImage,
   Sheet,
   SheetContent,
   SheetDescription,
@@ -16,11 +12,8 @@ import {
   SheetTitle,
 } from "@/shared/ui";
 import { cn } from "@/shared/lib/tw-merge";
-import useCurrentUser from "@/hooks/useCurrentUser";
-import { logout } from "@/actions/logout";
 import { ALL_NAV_URLS, MOBILE_TABS, findActiveUrl } from "./navConfig";
 import { OnlineUsersRow } from "./OnlineUsersWidget";
-import { ThemeSheetRow, ViewAsPlayerSheetRow } from "./SidebarControls";
 import { DimonishTile } from "./DimonishMenuItem";
 import PromoSheetLink from "./PromoSheetLink";
 import type { PromoLink } from "@/shared/config/promoPages";
@@ -32,19 +25,13 @@ import {
   buildSheetSections,
 } from "./mobileNavSections";
 
-export default function MobileNav({
-  isAdmin,
-  isRealAdmin,
-  viewingAsRegular,
-  promo,
-}: {
+type Props = {
   isAdmin: boolean;
-  isRealAdmin: boolean;
-  viewingAsRegular: boolean;
   promo: PromoLink | null;
-}) {
+};
+
+export default function MobileNav({ isAdmin, promo }: Props) {
   const pathname = usePathname();
-  const user = useCurrentUser();
   const [open, setOpen] = useState(false);
   const activeTab = findActiveUrl(pathname, TAB_URLS);
   const activeUrl = findActiveUrl(pathname, ALL_NAV_URLS);
@@ -117,39 +104,10 @@ export default function MobileNav({
             <SheetTitle>Меню</SheetTitle>
             <SheetDescription>Все разделы сайта</SheetDescription>
           </SheetHeader>
-          <div className="flex justify-center pt-2">
+          <div className="flex h-10 shrink-0 items-center justify-center">
             <span className="h-1 w-10 rounded-full bg-muted-foreground/30" />
           </div>
-          <div className="flex flex-col gap-4 px-4 pt-2 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
-            {user && (
-              <div className="flex items-center gap-3 pr-10">
-                <AvatarFrame frameUrl={user.frame}>
-                  <Avatar className="size-11">
-                    <AvatarImage src={user.avatar} alt="" />
-                    <AvatarFallback>{user.name[0]}</AvatarFallback>
-                  </Avatar>
-                </AvatarFrame>
-                <Link
-                  href={`/profile/${user.id}`}
-                  onClick={close}
-                  className="min-w-0 flex-1"
-                >
-                  <span className="block truncate font-bold">{user.name}</span>
-                  <span className="block text-xs text-muted-foreground">
-                    Мой профиль
-                  </span>
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => logout()}
-                  aria-label="Выйти"
-                  className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-xl border text-muted-foreground"
-                >
-                  <LogOut className="size-4.5" />
-                </button>
-              </div>
-            )}
-
+          <div className="flex flex-col gap-4 px-4 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
             {promo && <PromoSheetLink promo={promo} onNavigate={close} />}
 
             {buildSheetSections(isAdmin).map((section) => (
@@ -191,12 +149,8 @@ export default function MobileNav({
               </section>
             ))}
 
-            <div className="divide-y rounded-xl border">
+            <div className="rounded-xl border">
               <OnlineUsersRow />
-              {isRealAdmin && (
-                <ViewAsPlayerSheetRow initial={viewingAsRegular} />
-              )}
-              <ThemeSheetRow />
             </div>
           </div>
         </SheetContent>

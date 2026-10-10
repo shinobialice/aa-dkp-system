@@ -14,6 +14,7 @@ import SocialAccountsAdminPanel from "../SocialAccountsAdminPanel";
 import { vkProfileUrl } from "@/shared/lib/format";
 import TagChip from "./TagChip";
 import { formatTenure } from "@/shared/lib/tenure";
+import { cn } from "@/shared/lib/tw-merge";
 import ProfileMeta from "./ProfileMeta";
 import ProfileAvatar from "./ProfileAvatar";
 import ProfileHeaderActions from "./ProfileHeaderActions";
@@ -73,7 +74,12 @@ export default function ProfileHeader({
         coverClassName="-mx-4 -mt-4 mb-3 h-28 sm:-mx-5 sm:-mt-5 sm:mb-2 sm:h-40"
       />
 
-      <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-4 gap-y-3 sm:gap-x-5 sm:gap-y-2">
+      <div
+        className={cn(
+          "relative grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-4 gap-y-3 sm:gap-x-5 sm:gap-y-2",
+          style.effect && "pfx-legible",
+        )}
+      >
         <ProfileAvatar
           username={user.username}
           initialUrl={user.avatar_url}

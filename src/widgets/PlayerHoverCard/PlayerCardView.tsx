@@ -12,6 +12,7 @@ type Props = {
 export default function PlayerCardView({ player }: Props) {
   const { style } = player;
   const hasCover = style.coverUrl !== null;
+  const hasEffect = style.effect !== null;
   const gearScore = player.class_gear_score
     ? ` · ${formatNumber(player.class_gear_score)} ГС`
     : "";
@@ -23,7 +24,7 @@ export default function PlayerCardView({ player }: Props) {
         effect={style.effect}
         coverClassName="-mx-4 -mt-4 mb-2 h-20"
       />
-      <div className="flex items-end gap-3">
+      <div className={cn("flex items-end gap-3", hasEffect && "pfx-legible")}>
         <AvatarFrame
           frameUrl={style.frameUrl}
           className={cn("z-10", hasCover && "-mt-10")}
@@ -43,7 +44,12 @@ export default function PlayerCardView({ player }: Props) {
           )}
         </div>
       </div>
-      <dl className="relative z-10 mt-3 grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 text-sm">
+      <dl
+        className={cn(
+          "relative z-10 mt-3 grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 text-sm",
+          hasEffect && "pfx-legible",
+        )}
+      >
         <dt className="text-muted-foreground">Класс</dt>
         <dd className="truncate">
           {player.class ?? "не указан"}

@@ -39,7 +39,7 @@ export default function GiveawayRoster({
       aria-label="Игроки"
       className="@container/roster min-w-0 overflow-hidden rounded-xl border bg-card"
     >
-      <div className="hidden max-h-[calc(100dvh-var(--give-bar,0px)-2rem)] overflow-auto overscroll-contain @[44rem]/roster:block">
+      <div className="hidden max-h-[calc(100dvh-var(--app-header)-var(--give-bar,0px)-2rem)] overflow-auto overscroll-contain @[44rem]/roster:block">
         <table className="w-full border-collapse tabular-nums">
           <thead className="sticky top-0 z-10 bg-muted text-2xs shadow-[0_1px_0_var(--color-border)] font-semibold tracking-wide text-muted-foreground uppercase">
             <tr>

@@ -72,7 +72,7 @@ export default function GuildRules({
                 key={section.id}
                 id={section.id}
                 aria-labelledby={`${section.id}-title`}
-                className="scroll-mt-6 rounded-xl border bg-card"
+                className="scroll-mt-[calc(var(--app-header)+1.5rem)] rounded-xl border bg-card"
               >
                 <button
                   type="button"
@@ -115,7 +115,7 @@ export default function GuildRules({
         </div>
       </div>
 
-      <aside className="sticky top-6 hidden flex-col gap-4 xl:flex">
+      <aside className="sticky top-[calc(var(--app-header)+1.5rem)] hidden flex-col gap-4 xl:flex">
         <nav
           aria-label="Содержание"
           className="flex flex-col gap-0.5 rounded-xl border bg-card px-2.5 py-3.5"

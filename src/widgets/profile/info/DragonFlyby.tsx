@@ -24,7 +24,7 @@ export default function DragonFlyby() {
   return (
     <div
       aria-hidden
-      className="dragon-layer pointer-events-none absolute inset-0 z-20 overflow-hidden"
+      className="dragon-layer pointer-events-none absolute inset-0 overflow-hidden"
     >
       <div className="dragon-flight">
         <div className="dragon-bob">

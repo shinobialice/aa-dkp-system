@@ -9,6 +9,8 @@ export const CLASS_ORDER = [
   "Хил",
 ];
 
+export const DD_CLASSES = ["Милик", "Лук", "Маг", "Стрелок"];
+
 const CLASS_PLURAL: Record<string, string> = {
   Бард: "Барды",
   Лук: "Луки",

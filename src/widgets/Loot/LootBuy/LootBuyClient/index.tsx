@@ -15,6 +15,12 @@ import {
   type BuyFilters,
 } from "./buyFilters";
 import { useStickyBar } from "@/hooks/useStickyBar";
+import { useLiveChanges } from "@/hooks/useLiveChanges";
+import { getAllLootQueues } from "@/actions/getAllLootQueues";
+import {
+  getMyLootQueueRequests,
+  type MyLootQueueRequests,
+} from "@/actions/lootQueueRequests";
 
 const WIDE_LAYOUT_PX = 960;
 const SIDE_SHEET_PX = 640;
@@ -23,6 +29,7 @@ type Props = {
   initialItems: BuyItem[];
   sources: string[];
   initialQueues: QueueMap;
+  initialRequests: MyLootQueueRequests;
   players: QueuePlayer[];
   isAdmin: boolean;
   currentUserId: number | null;
@@ -32,12 +39,14 @@ export default function LootBuyClient({
   initialItems,
   sources,
   initialQueues,
+  initialRequests,
   players,
   isAdmin,
   currentUserId,
 }: Props) {
   const [items, setItems] = useState(initialItems);
   const [queues, setQueues] = useState(initialQueues);
+  const [requests, setRequests] = useState(initialRequests);
   const [filters, setFilters] = useState<BuyFilters>({
     source: null,
     inStockOnly: false,
@@ -48,6 +57,15 @@ export default function LootBuyClient({
   const [sheetSide, setSheetSide] = useState<"bottom" | "right">("bottom");
   const { containerRef, barRef, sentinelRef, scrollToListTop } =
     useStickyBar("--buy-bar");
+
+  useLiveChanges(["lootRequests"], async () => {
+    const [freshQueues, freshRequests] = await Promise.all([
+      getAllLootQueues(),
+      getMyLootQueueRequests(),
+    ]);
+    setQueues(freshQueues);
+    setRequests(freshRequests);
+  });
 
   const myPlaces = useMemo(
     () => findMyPlaces(queues, currentUserId),
@@ -89,11 +107,13 @@ export default function LootBuyClient({
   const panelProps = selectedItem && {
     item: selectedItem,
     queue: queues[selectedItem.name] ?? [],
+    request: requests[selectedItem.name] ?? null,
     currentUserId,
     isAdmin,
     players,
     onQueueChange: handleQueueChange,
     onPriceChange: handlePriceChange,
+    onRequestsChange: setRequests,
   };
 
   return (
@@ -131,7 +151,7 @@ export default function LootBuyClient({
         {panelProps && (
           <aside
             aria-label="Очередь на предмет"
-            className="sticky top-[calc(var(--buy-bar,0px)+1rem)] hidden max-h-[calc(100dvh-var(--buy-bar,0px)-2rem)] flex-col overflow-hidden rounded-xl border bg-card @[60rem]/buy:flex"
+            className="sticky top-[calc(var(--app-header)+var(--buy-bar,0px)+1rem)] hidden max-h-[calc(100dvh-var(--app-header)-var(--buy-bar,0px)-2rem)] flex-col overflow-hidden rounded-xl border bg-card @[60rem]/buy:flex"
           >
             <LootQueuePanel
               key={panelProps.item.name}

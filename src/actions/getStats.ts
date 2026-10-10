@@ -1,10 +1,10 @@
 "use server";
 import sql from "@/shared/lib/db";
 import type { UserRow } from "@/shared/lib/dbTypes";
+import { DD_CLASSES } from "@/shared/config/classes";
 
 type StatsUser = Pick<UserRow, "id" | "username" | "class" | "joined_at">;
 
-const DD_CLASSES = ["Милик", "Лук", "Маг", "Стрелок"];
 const RECENT_MEMBERS_LIMIT = 5;
 
 function countByClass(users: StatsUser[], ...names: string[]) {

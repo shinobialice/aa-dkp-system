@@ -8,6 +8,8 @@ export const AMOUNT_QUEUE_ITEMS = [
 
 export const MISC_SOURCE = "Разное";
 
+export const QUEUE_REQUEST_COMMENT_MAX = 300;
+
 export type QueueKind = "plain" | "roll" | "amount";
 
 export type BuyItem = {

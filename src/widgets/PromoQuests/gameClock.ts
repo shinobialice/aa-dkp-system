@@ -48,3 +48,10 @@ export function formatMoscowTime(timeMs: number) {
 export function formatGameHour(gameHour: number) {
   return `${String(gameHour).padStart(2, "0")}:00`;
 }
+
+export function formatGameTime(nowMs: number) {
+  const timeOfDay = gameTimeOfDay(nowMs);
+  const hours = Math.floor(timeOfDay / HOUR_MS);
+  const minutes = Math.floor((timeOfDay % HOUR_MS) / MINUTE_MS);
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+}

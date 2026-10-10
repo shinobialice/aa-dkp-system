@@ -53,7 +53,7 @@ function CriteriaCard({ settings }: { settings: SalaryEligibilitySettings }) {
     <section
       id="criteria"
       aria-label="Допуск к зарплате"
-      className="flex scroll-mt-6 flex-col rounded-xl border bg-card"
+      className="flex scroll-mt-[calc(var(--app-header)+1.5rem)] flex-col rounded-xl border bg-card"
     >
       <div className="px-4 pt-4 pb-2.5 sm:px-4.5">
         <h2 className="text-base font-semibold">Допуск к зарплате</h2>
@@ -139,7 +139,7 @@ function BossPointsCard({ bosses, mode }: { bosses: Boss[]; mode: GuildMode }) {
     <section
       id="points"
       aria-label="Баллы за боссов"
-      className="flex scroll-mt-6 flex-col rounded-xl border bg-card"
+      className="flex scroll-mt-[calc(var(--app-header)+1.5rem)] flex-col rounded-xl border bg-card"
     >
       <div className="flex items-start justify-between gap-3 px-4 pt-4 pb-2.5 sm:px-4.5">
         <div>

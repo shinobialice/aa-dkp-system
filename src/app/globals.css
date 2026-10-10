@@ -248,6 +248,16 @@
   container-type: size;
 }
 
+.pfx-legible {
+  text-shadow:
+    0 0 2px var(--card),
+    0 0 6px var(--card);
+}
+
+.pfx-legible svg {
+  filter: drop-shadow(0 0 2px var(--card));
+}
+
 .pfx {
   position: absolute;
   top: 0;

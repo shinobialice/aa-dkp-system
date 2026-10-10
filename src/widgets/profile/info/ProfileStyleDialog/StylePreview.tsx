@@ -31,7 +31,9 @@ export default function StylePreview({
         effect={effect}
         coverClassName="-mx-4 -mt-4 mb-3 h-24 sm:h-28"
       />
-      <div className="flex items-end gap-4">
+      <div
+        className={cn("relative flex items-end gap-4", effect && "pfx-legible")}
+      >
         <AvatarFrame
           frameUrl={frameUrl}
           className={cn("z-10", hasCover && "-mt-12")}

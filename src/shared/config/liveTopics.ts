@@ -4,6 +4,8 @@ export const LIVE_TOPICS = [
   "raidSuggestions",
   "raids",
   "loot",
+  "lootRequests",
+  "notifications",
   "finance",
   "members",
 ] as const;

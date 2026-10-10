@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { getLootGrouped } from "@/actions/getLootGrouped";
 import { getLootStock } from "@/actions/getLootStock";
 import { getAllLootQueues } from "@/actions/getAllLootQueues";
+import { getMyLootQueueRequests } from "@/actions/lootQueueRequests";
 import { getActiveUsers } from "@/actions/getActiveUsers";
 import { getSessionUserId } from "@/actions/getSessionUserId";
 import { hasTag } from "@/actions/hasTag";
@@ -10,15 +11,23 @@ import { MISC_SOURCE, type BuyItem } from "@/widgets/Loot/LootBuy/lootBuyModel";
 
 export default async function LootBuyPage() {
   const sessionToken = (await cookies()).get("session_token")?.value ?? "";
-  const [lootBySource, stock, queues, activeUsers, isAdmin, currentUserId] =
-    await Promise.all([
-      getLootGrouped(),
-      getLootStock(),
-      getAllLootQueues(),
-      getActiveUsers(),
-      hasTag(sessionToken, ["Администратор"]),
-      getSessionUserId(),
-    ]);
+  const [
+    lootBySource,
+    stock,
+    queues,
+    myRequests,
+    activeUsers,
+    isAdmin,
+    currentUserId,
+  ] = await Promise.all([
+    getLootGrouped(),
+    getLootStock(),
+    getAllLootQueues(),
+    getMyLootQueueRequests(),
+    getActiveUsers(),
+    hasTag(sessionToken, ["Администратор"]),
+    getSessionUserId(),
+  ]);
 
   const sources = [
     ...Object.keys(lootBySource).filter((source) => source !== MISC_SOURCE),
@@ -40,6 +49,7 @@ export default async function LootBuyPage() {
       initialItems={items}
       sources={sources}
       initialQueues={queues}
+      initialRequests={myRequests}
       players={activeUsers.map((user) => ({
         id: user.id as number,
         username: user.username as string,

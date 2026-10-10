@@ -62,7 +62,7 @@ export default function MainPageHeader() {
       <h1 className="text-2xl font-bold tracking-tight">
         {date.charAt(0).toUpperCase() + date.slice(1)}
       </h1>
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 md:hidden">
         <ClockPill
           icon={<Clock className="size-4" />}
           label="Москва"

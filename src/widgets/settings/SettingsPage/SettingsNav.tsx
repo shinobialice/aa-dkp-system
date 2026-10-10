@@ -16,7 +16,7 @@ export default function SettingsNav({
   return (
     <nav
       aria-label="Разделы настроек"
-      className="-mx-4 flex gap-1.5 overflow-x-auto px-4 [scrollbar-width:none] md:sticky md:top-6 md:mx-0 md:flex-col md:gap-3.5 md:overflow-visible md:px-0"
+      className="-mx-4 flex gap-1.5 overflow-x-auto px-4 [scrollbar-width:none] md:sticky md:top-[calc(var(--app-header)+1.5rem)] md:mx-0 md:flex-col md:gap-3.5 md:overflow-visible md:px-0"
     >
       {SECTION_GROUPS.map((group) => (
         <div key={group.title || "top"} className="contents md:block">

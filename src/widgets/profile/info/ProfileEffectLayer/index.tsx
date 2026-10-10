@@ -17,7 +17,7 @@ export default function ProfileEffectLayer({ effect }: Props) {
   return (
     <div
       aria-hidden
-      className="pfx-layer pointer-events-none absolute inset-0 z-10 overflow-hidden"
+      className="pfx-layer pointer-events-none absolute inset-0 overflow-hidden"
     >
       {backdrop && <span className={cn("pfx-backdrop", backdrop)} />}
       {effectParticles(effect).map((particle) => (

@@ -26,7 +26,7 @@ export default function FilterBar({
     <div
       ref={barRef}
       data-stuck="false"
-      className="sticky top-0 z-20 -mx-4 flex flex-col gap-2 border-b border-transparent bg-background/95 px-4 py-2.5 backdrop-blur transition-[border-color,box-shadow] data-[stuck=true]:border-border data-[stuck=true]:shadow-sm sm:-mx-8 sm:px-8 @[60rem]/buy:flex-row @[60rem]/buy:items-center"
+      className="sticky top-(--app-header) z-20 -mx-4 flex flex-col gap-2 border-b border-transparent bg-background/95 px-4 py-2.5 backdrop-blur transition-[border-color,box-shadow] data-[stuck=true]:border-border data-[stuck=true]:shadow-sm sm:-mx-8 sm:px-8 @[60rem]/buy:flex-row @[60rem]/buy:items-center"
     >
       <label className="relative flex w-full shrink-0 items-center @[60rem]/buy:w-52">
         <Search className="pointer-events-none absolute left-3 size-4 text-muted-foreground" />

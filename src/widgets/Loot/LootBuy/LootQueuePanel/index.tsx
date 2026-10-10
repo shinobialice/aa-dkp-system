@@ -4,6 +4,10 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/shared/lib/tw-merge";
 import { updateItemTypePrice } from "@/actions/updateItemTypePrice";
+import type {
+  MyLootQueueRequest,
+  MyLootQueueRequests,
+} from "@/actions/lootQueueRequests";
 import { LootIcon } from "../icons/LootIconComponent";
 import QueueEntryRow from "../QueueEntryRow";
 import {
@@ -17,6 +21,7 @@ import {
 import AddToQueue, { type QueuePlayer } from "./AddToQueue";
 import QueueStats from "./QueueStats";
 import AdminToolbar from "./AdminToolbar";
+import QueueRequest from "./QueueRequest";
 import { useQueueActions } from "./useQueueActions";
 
 export type { QueuePlayer };
@@ -24,12 +29,14 @@ export type { QueuePlayer };
 type Props = {
   item: BuyItem;
   queue: QueueEntry[];
+  request: MyLootQueueRequest | null;
   currentUserId: number | null;
   isAdmin: boolean;
   players: QueuePlayer[];
   scrollQueue: boolean;
   onQueueChange: (itemName: string, queue: QueueEntry[]) => void;
   onPriceChange: (itemName: string, price: number | null) => void;
+  onRequestsChange: (requests: MyLootQueueRequests) => void;
 };
 
 const KIND_HINTS: Partial<Record<QueueKind, string>> = {
@@ -40,12 +47,14 @@ const KIND_HINTS: Partial<Record<QueueKind, string>> = {
 export default function LootQueuePanel({
   item,
   queue,
+  request,
   currentUserId,
   isAdmin,
   players,
   scrollQueue,
   onQueueChange,
   onPriceChange,
+  onRequestsChange,
 }: Props) {
   const [editing, setEditing] = useState(false);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
@@ -90,6 +99,13 @@ export default function LootQueuePanel({
 
       {myIndex >= 0 && (
         <MyPlace place={myIndex} createdAt={queue[myIndex].createdAt} />
+      )}
+      {myIndex < 0 && currentUserId !== null && (
+        <QueueRequest
+          itemName={item.name}
+          request={request}
+          onRequestsChange={onRequestsChange}
+        />
       )}
       {KIND_HINTS[kind] && (
         <p className="mx-4 mt-2.5 text-xs text-muted-foreground">

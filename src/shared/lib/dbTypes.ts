@@ -294,6 +294,17 @@ export type LootQueueRow = {
   position: number | null;
 };
 
+export type LootQueueRequestRow = {
+  id: number;
+  user_id: number;
+  item_type_id: number;
+  comment: string | null;
+  status: string;
+  created_at: string;
+  decided_at: string | null;
+  decided_by: number | null;
+};
+
 export type LootWishlistRow = {
   id: string;
   user_id: number;
@@ -349,6 +360,16 @@ export type MissingActivityOverridesRow = {
   boss_name: string;
   kind: string;
   created_at: string;
+};
+
+export type NotificationRow = {
+  id: number;
+  user_id: number;
+  kind: string;
+  message: string;
+  link: string | null;
+  created_at: string;
+  read_at: string | null;
 };
 
 export type ProfileCoverRow = {
@@ -518,7 +539,6 @@ export type UserEquipmentRow = {
   ephen_synthesis_secondary: string;
   ephen_synthesis_tertiary: string[];
   ring_synthesis_effects: number[];
-  ephe_seal_level: number;
   synthesis_effects: number[];
   synthesis_percent: number;
   role_slot: number;

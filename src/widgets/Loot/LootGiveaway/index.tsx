@@ -111,7 +111,7 @@ export default function LootGiveaway({
         {panelProps && (
           <aside
             aria-label="Игрок"
-            className="sticky top-[calc(var(--give-bar,0px)+1rem)] hidden max-h-[calc(100dvh-var(--give-bar,0px)-2rem)] flex-col overflow-hidden rounded-xl border bg-card min-[960px]:flex"
+            className="sticky top-[calc(var(--app-header)+var(--give-bar,0px)+1rem)] hidden max-h-[calc(100dvh-var(--app-header)-var(--give-bar,0px)-2rem)] flex-col overflow-hidden rounded-xl border bg-card min-[960px]:flex"
           >
             <GiveawayPlayerPanel key={panelProps.player.id} {...panelProps} />
           </aside>

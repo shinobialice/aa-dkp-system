@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { Users, Crown, ShieldCheck, Sparkles } from "lucide-react";
+import { Crown, ShieldCheck, Sparkles } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +11,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shared/ui";
-import { SidebarMenuButton, SidebarMenuItem } from "@/shared/ui";
 import { Avatar, AvatarImage, AvatarFallback, AvatarFrame } from "@/shared/ui";
 import { getOnlineUsers } from "@/actions/getOnlineUsers";
 import { useVisiblePolling } from "@/hooks/useVisiblePolling";
@@ -62,7 +61,7 @@ function AvatarStack({ users }: { users: OnlineUser[] }) {
           frameUrl={user.avatar_frame_url}
           className={index > 0 ? "-ml-2" : ""}
         >
-          <Avatar className="size-6 border-2 border-sidebar">
+          <Avatar className="size-6 border-2 border-background">
             <AvatarImage
               src={avatarSrc(user.username, user.avatar_url)}
               alt=""
@@ -83,14 +82,14 @@ function OnlineMenu({
   children,
 }: {
   users: OnlineUser[];
-  side: "top" | "right";
+  side: "top" | "bottom";
   children: ReactNode;
 }) {
   const router = useRouter();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
-      <DropdownMenuContent side={side} className="w-62.5">
+      <DropdownMenuContent side={side} align="end" className="w-62.5">
         <DropdownMenuLabel>Сейчас на сайте: {users.length}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {users.length === 0 && (
@@ -129,21 +128,19 @@ export function OnlineUsersWidget() {
   const users = useOnlineUsers();
 
   return (
-    <SidebarMenuItem>
-      <OnlineMenu users={users} side="top">
-        <SidebarMenuButton
-          className="cursor-pointer overflow-visible group-data-[collapsible=icon]:overflow-hidden"
-          tooltip={`Онлайн: ${users.length}`}
-        >
-          <Users />
-          <span className="flex-1">Онлайн</span>
-          <AvatarStack users={users} />
-          <span className="min-w-4 text-right text-xs text-muted-foreground">
-            {users.length}
-          </span>
-        </SidebarMenuButton>
-      </OnlineMenu>
-    </SidebarMenuItem>
+    <OnlineMenu users={users} side="bottom">
+      <button
+        type="button"
+        title={`Сейчас на сайте: ${users.length}`}
+        className="flex h-9 shrink-0 cursor-pointer items-center gap-2 rounded-full border bg-muted/50 pr-3 pl-1.5 text-sm transition hover:bg-muted data-[state=open]:bg-muted"
+      >
+        <AvatarStack users={users} />
+        <span className="flex items-center gap-1.5 font-medium whitespace-nowrap">
+          <span className="size-2 rounded-full bg-green-500" />
+          {users.length} онлайн
+        </span>
+      </button>
+    </OnlineMenu>
   );
 }
 
