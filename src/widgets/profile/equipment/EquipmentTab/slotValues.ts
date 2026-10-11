@@ -31,7 +31,7 @@ function toSlotValues(
     enchant: Math.min(item.enchant, getMaxEnchant(gearItem?.id)),
     engravings: item.engravings.slice(
       0,
-      getEngravingSlotCount(slotKey, item.grade),
+      getEngravingSlotCount(slotKey, item.grade, gearItem?.id),
     ),
     runeId: item.rune_id,
     synthesisEffects: item.synthesis_effects,

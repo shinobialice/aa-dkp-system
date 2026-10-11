@@ -136,6 +136,13 @@ const MAX_GRADE = 12;
 const SYNTHESIS_START_PERCENT = 0;
 const SYNTHESIS_FULL_PERCENT = 100;
 const PVE_SET_NAME = /_PVE$/i;
+// В игре у амальгамных эфенских колец и серёг второй слот основной
+// характеристики такой же, как первый (46 и 46 на 12 грейде), хотя таблицы
+// клиента дают ему 10. Набор синтеза → набор, из которого берутся значения.
+const SYNTHESIS_SET_VALUE_SOURCES = {
+  859: 858,
+  865: 864,
+};
 
 // Сноровка в игре — четыре одинаковых модификатора скорости, сводим их в один.
 const PROFICIENCY_PARTS = [54, 55, 74, 119];
@@ -763,7 +770,8 @@ function tableSlots(tables, category, quality) {
   for (const set of tables.sets.get(category) ?? []) {
     const min = {};
     const max = {};
-    for (const group of tables.groups.get(set.id) ?? []) {
+    const valueSetId = SYNTHESIS_SET_VALUE_SOURCES[set.id] ?? set.id;
+    for (const group of tables.groups.get(valueSetId) ?? []) {
       const range = tables.values.get(`${group.id}:${gradeId}`);
       const mapping = UNIT_ATTRIBUTES[group.unit_attribute_id];
       if (!range || !mapping || group.unit_modifier_type_id !== FLAT_MODIFIER) {

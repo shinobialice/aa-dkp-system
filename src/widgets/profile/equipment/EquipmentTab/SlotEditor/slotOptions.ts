@@ -17,7 +17,11 @@ export function deriveSlotOptions(slotKey: string, draft: SlotDraft) {
   return {
     gearItem,
     fixedGrade: gearItem ? getFixedGrade(gearItem.name, gearItem.grade) : null,
-    maxEngravingSlots: getEngravingSlotCount(slotKey, draft.grade),
+    maxEngravingSlots: getEngravingSlotCount(
+      slotKey,
+      draft.grade,
+      gearItem?.id,
+    ),
     maxEnchant: getMaxEnchant(gearItem?.id),
     handedness: gearItem ? WEAPON_HANDEDNESS[gearItem.id] : undefined,
     synthesisSlots: gearItem

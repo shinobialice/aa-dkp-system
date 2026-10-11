@@ -1,4 +1,4 @@
-import { EngravingPicker } from "../../EngravingPicker";
+import EngravingPicker from "../../EngravingPicker";
 import { EngravingIcon } from "../../EngravingIcon";
 import { EngravingTooltip } from "../../EngravingTooltip";
 import { findEngraving } from "../../itemsData/engravings";

@@ -25,6 +25,41 @@ const WEAPON_SLOT_KEYS = new Set([
 
 const JEWELRY_SLOT_KEYS = new Set(["ring1", "ring2", "earring1", "earring2"]);
 
+const ENGRAVABLE_JEWELRY_ITEM_IDS = new Set([
+  46590, // Перстень Дома Норьетт
+  46591, // Перстень фаворита Дома Норьетт
+  46592, // Перстень чемпиона Дома Норьетт
+  46593, // Серьга Дома Норьетт
+  46594, // Серьга фаворита Дома Норьетт
+  46595, // Серьга чемпиона Дома Норьетт
+  54860, // Серьга ифнирского бойца
+  54891, // Серьга ифнирского лучника
+  54892, // Серьга ифнирского чародея
+  54893, // Серьга ифнирского лекаря
+  54992, // Эфенская серьга
+  54993, // Эфенское кольцо
+  55034, // Искаженное эфенское кольцо
+  55036, // Искаженная эфенская серьга
+  55076, // Изначальное эфенское кольцо
+  55078, // Изначальная эфенская серьга
+  55118, // Обновленное эфенское кольцо
+  55120, // Обновленная эфенская серьга
+  55320, // Кольцо ифнирского бойца
+  55321, // Кольцо ифнирского лучника
+  55322, // Кольцо ифнирского чародея
+  55323, // Кольцо ифнирского лекаря
+  55801, // Драгоценная серьга ифнирского бойца
+  55802, // Драгоценная серьга ифнирского лучника
+  55803, // Драгоценная серьга ифнирского чародея
+  55804, // Драгоценная серьга ифнирского лекаря
+  55805, // Драгоценное кольцо ифнирского бойца
+  55806, // Драгоценное кольцо ифнирского лучника
+  55807, // Драгоценное кольцо ифнирского чародея
+  55808, // Драгоценное кольцо ифнирского лекаря
+  8003311, // Амальгамное эфенское кольцо
+  8003313, // Амальгамная эфенская серьга
+]);
+
 export function getEngravingCategory(slotKey: string): EngravingCategory {
   if (ARMOR_SLOT_KEYS.has(slotKey)) return "armor";
   if (slotKey === "cloak") return "cloak";
@@ -102,7 +137,21 @@ const CATEGORY_THRESHOLDS: Partial<Record<EngravingCategory, SlotThreshold[]>> =
     ],
   };
 
-export function getEngravingSlotCount(slotKey: string, grade: number): number {
+export function canEngraveJewelry(itemId: number | undefined): boolean {
+  return itemId === undefined || ENGRAVABLE_JEWELRY_ITEM_IDS.has(itemId);
+}
+
+export function getEngravingSlotCount(
+  slotKey: string,
+  grade: number,
+  itemId: number | undefined,
+): number {
+  if (
+    getEngravingCategory(slotKey) === "jewelry" &&
+    !canEngraveJewelry(itemId)
+  ) {
+    return 0;
+  }
   const thresholds =
     ARMOR_SLOT_THRESHOLDS[slotKey] ??
     CATEGORY_THRESHOLDS[getEngravingCategory(slotKey)] ??

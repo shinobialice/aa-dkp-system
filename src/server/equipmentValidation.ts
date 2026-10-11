@@ -53,8 +53,9 @@ const CHECKS: Check[] = [
     message: (item) => `Некорректная гравировка в слоте: ${item.slot}`,
   },
   {
-    isValid: (item) =>
-      item.engravings.length <= getEngravingSlotCount(item.slot, item.grade),
+    isValid: (item, { gearItemId }) =>
+      item.engravings.length <=
+      getEngravingSlotCount(item.slot, item.grade, gearItemId),
     message: (item) => `Слишком много гравировок для слота: ${item.slot}`,
   },
   {

@@ -17,10 +17,14 @@ type Props = {
 
 export default function ItemDetails({ slotKey, item, divided }: Props) {
   const rune = item.rune_id ? findRune(item.rune_id) : undefined;
-  const engravingCount = getEngravingSlotCount(slotKey, item.grade);
+  const gearItem = findGearItem(item.slot, item.item_name);
+  const engravingCount = getEngravingSlotCount(
+    slotKey,
+    item.grade,
+    gearItem?.id,
+  );
   const divider = divided && <div className="border-t border-border" />;
   const synthesis = describeEquipmentSynthesis(item);
-  const gearItem = findGearItem(item.slot, item.item_name);
   const passives = gearItem ? getItemPassiveRolls(gearItem.id) : [];
 
   return (
