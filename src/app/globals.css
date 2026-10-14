@@ -617,3 +617,154 @@
     animation: none;
   }
 }
+
+@keyframes promo-rise {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+  }
+}
+
+.promo-rise {
+  animation: promo-rise 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+
+@keyframes promo-pop {
+  0% {
+    opacity: 0;
+    scale: 0.4;
+  }
+  60% {
+    opacity: 1;
+    scale: 1.18;
+  }
+  100% {
+    scale: 1;
+  }
+}
+
+.promo-pop {
+  animation: promo-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes promo-float {
+  from {
+    opacity: 1;
+    translate: 0 0;
+    scale: 0.8;
+  }
+  to {
+    opacity: 0;
+    translate: 0 -32px;
+    scale: 1.15;
+  }
+}
+
+.promo-float {
+  animation: promo-float 0.9s ease-out forwards;
+}
+
+@keyframes promo-shine {
+  0%,
+  55% {
+    translate: -100% 0;
+  }
+  100% {
+    translate: 100% 0;
+  }
+}
+
+.promo-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgb(255 255 255 / 0.75) 50%,
+    transparent 65%
+  );
+  animation: promo-shine 3.2s ease-in-out infinite;
+}
+
+@keyframes promo-glow {
+  from {
+    filter: drop-shadow(0 0 3px rgb(16 185 129 / 0.25));
+  }
+  to {
+    filter: drop-shadow(0 0 14px rgb(16 185 129 / 0.6));
+  }
+}
+
+.promo-glow {
+  animation: promo-glow 1.6s ease-in-out infinite alternate;
+}
+
+.promo-title {
+  background-image: linear-gradient(100deg, #f59e0b, #f43f5e, #8b5cf6, #f59e0b);
+  background-size: 200% auto;
+  background-clip: text;
+  color: transparent;
+  animation: rainbow-shift 8s linear infinite;
+}
+
+.promo-banner {
+  position: relative;
+  border-radius: var(--radius-xl);
+}
+
+.promo-banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    260px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+    rgb(255 255 255 / 0.8),
+    transparent 70%
+  );
+  mix-blend-mode: overlay;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.promo-banner img {
+  transition:
+    scale 0.6s ease-out,
+    translate 0.3s ease-out;
+}
+
+@media (hover: hover) {
+  .promo-banner:hover::after {
+    opacity: 1;
+  }
+
+  .promo-banner:hover img {
+    scale: 1.05;
+    translate: calc(var(--tilt, 0) * -12px) 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .promo-rise,
+  .promo-pop,
+  .promo-glow,
+  .promo-title,
+  .promo-shine::after {
+    animation: none;
+  }
+
+  .promo-float {
+    display: none;
+  }
+
+  .promo-banner img {
+    transition: none;
+  }
+
+  .promo-banner:hover img {
+    scale: none;
+    translate: none;
+  }
+}

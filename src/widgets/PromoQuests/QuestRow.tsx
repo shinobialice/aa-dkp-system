@@ -1,11 +1,10 @@
 import type { PromoQuest } from "@/shared/config/promoQuests";
 import { cn } from "@/shared/lib/tw-merge";
-import { Badge, Checkbox, TableCell, TableRow } from "@/shared/ui";
+import { Checkbox, TableCell, TableRow } from "@/shared/ui";
 import BossTimer from "./BossTimer";
+import PointsGem from "./PointsGem";
 import {
   isQuestDone,
-  pointsLabel,
-  pointsTone,
   questDoneCount,
   type DoneMarks,
 } from "./promoQuestsModel";
@@ -20,7 +19,7 @@ type Props = {
   marks: DoneMarks;
   todayIndex: number | null;
   mobileDay: number;
-  onToggle: (questId: number, dayIndex: number, isDone: boolean) => void;
+  onToggle: (quest: PromoQuest, dayIndex: number, isDone: boolean) => void;
 };
 
 export default function QuestRow({
@@ -50,12 +49,7 @@ export default function QuestRow({
         </div>
       </TableCell>
       <TableCell className="text-center">
-        <Badge
-          title={pointsLabel(quest.points)}
-          className={cn("border-transparent", pointsTone(quest.points))}
-        >
-          {quest.points}
-        </Badge>
+        <PointsGem points={quest.points} />
       </TableCell>
       {days.map((day) => (
         <TableCell
@@ -71,7 +65,7 @@ export default function QuestRow({
             disabled={characterId === null}
             checked={isQuestDone(marks, characterId, quest.id, day.index)}
             onCheckedChange={(checked) =>
-              onToggle(quest.id, day.index, checked === true)
+              onToggle(quest, day.index, checked === true)
             }
           />
         </TableCell>

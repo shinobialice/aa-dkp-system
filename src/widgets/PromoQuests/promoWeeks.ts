@@ -57,6 +57,21 @@ export function runningWeekNumber(weeks: PromoWeek[], todayKey: string) {
   return dayIndexOf(week.start, todayKey) === null ? null : week.number;
 }
 
+export type WeekStage = "past" | "running" | "upcoming";
+
+export function weekStage(week: PromoWeek, todayKey: string): WeekStage {
+  if (todayKey < week.start) return "upcoming";
+  if (dayIndexOf(week.start, todayKey) === null) return "past";
+  return "running";
+}
+
+export function trailPercent(weeks: PromoWeek[], todayKey: string) {
+  const daysPassed =
+    (keyToTime(todayKey) - keyToTime(weeks[0].start)) / DAY_MS + 1;
+  const percent = (daysPassed / (weeks.length * 7)) * 100;
+  return Math.min(100, Math.max(0, percent));
+}
+
 export function promoStatus(weeks: PromoWeek[], todayKey: string) {
   const first = weeks[0];
   const last = weeks[weeks.length - 1];

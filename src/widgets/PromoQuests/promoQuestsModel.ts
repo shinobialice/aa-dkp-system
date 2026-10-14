@@ -117,17 +117,21 @@ export function initialPartnerId(
   return partner?.id ?? null;
 }
 
-export function pointsTone(points: number) {
-  if (points >= 5) return "bg-amber-500/15 text-amber-700 dark:text-amber-400";
-  if (points >= 4) {
-    return "bg-violet-500/15 text-violet-700 dark:text-violet-400";
-  }
-  if (points >= 2) return "bg-sky-500/15 text-sky-700 dark:text-sky-400";
-  return "bg-muted text-muted-foreground";
+export type PointsTier = "common" | "rare" | "epic" | "legendary";
+
+export function pointsTier(points: number): PointsTier {
+  if (points >= 5) return "legendary";
+  if (points >= 4) return "epic";
+  if (points >= 2) return "rare";
+  return "common";
 }
 
 export function goalPercent(score: number, goal: number) {
   return Math.min(100, (score / goal) * 100);
+}
+
+export function completesGoal(score: number, points: number, goal: number) {
+  return score < goal && score + points >= goal;
 }
 
 export function remainingHint(score: number, perDay: number, goal: number) {

@@ -12,6 +12,15 @@ export type ChangelogDay = {
 
 export const changelog: ChangelogDay[] = [
   {
+    date: "2026-10-14",
+    entries: [
+      {
+        type: "improvement",
+        text: "Марафон Героев: новый дизайн страницы с карточками квестов, кольцом прогресса и конфетти за выполненную цель недели",
+      },
+    ],
+  },
+  {
     date: "2026-10-11",
     entries: [
       {

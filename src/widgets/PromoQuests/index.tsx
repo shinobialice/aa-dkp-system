@@ -3,10 +3,10 @@
 import { useState } from "react";
 import type { PromoEvent } from "@/server/promo";
 import { PROMO_QUEST_EVENTS } from "@/shared/config/promoQuests";
-import EventBanner from "@/widgets/MainPageCards/EventBanner";
 import CharacterDialog, {
   type CharacterDialogRequest,
 } from "./CharacterDialog";
+import PromoBanner from "./PromoBanner";
 import QuestsHeader from "./QuestsHeader";
 import {
   currentPromoWeek,
@@ -16,7 +16,7 @@ import {
   runningWeekNumber,
 } from "./promoWeeks";
 import WeekBody from "./WeekBody";
-import WeekTabs from "./WeekTabs";
+import WeekTrail from "./WeekTrail";
 import { usePromoWeek } from "./usePromoWeek";
 
 type Props = {
@@ -37,17 +37,18 @@ export default function PromoQuests({ event, startKey, todayKey }: Props) {
   const state = usePromoWeek(week.start);
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl min-w-0 flex-col gap-4 text-sm">
-      <EventBanner event={event} />
+    <div className="mx-auto flex w-full max-w-6xl min-w-0 flex-col gap-5 text-sm">
+      <PromoBanner event={event} />
       <QuestsHeader
         title={event.title ?? "Ивент"}
         status={promoStatus(weeks, todayKey)}
         goal={questEvent.weeklyGoal}
+        isRunning={runningWeekNumber(weeks, todayKey) !== null}
       />
-      <WeekTabs
+      <WeekTrail
         weeks={weeks}
         selected={weekNumber}
-        running={runningWeekNumber(weeks, todayKey)}
+        todayKey={todayKey}
         onSelect={setWeekNumber}
       />
       <WeekBody

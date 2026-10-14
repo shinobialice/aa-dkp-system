@@ -68,6 +68,7 @@ export default function WeekBody({
       )}
       {!character && <NoCharacters onAdd={onCharacterAdd} />}
       <WeekQuests
+        key={week.start}
         state={state}
         week={week}
         character={character}

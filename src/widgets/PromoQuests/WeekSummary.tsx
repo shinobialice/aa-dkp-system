@@ -1,13 +1,12 @@
-import { CalendarCheck, CalendarDays, Flag, Trophy } from "lucide-react";
+import { CalendarCheck, CalendarDays, Flag } from "lucide-react";
 import type { PromoCharacter } from "@/actions/promoQuestActions";
 import type { PromoQuest } from "@/shared/config/promoQuests";
 import { cn } from "@/shared/lib/tw-merge";
 import { StatTile, StatUnit } from "@/shared/ui";
+import GoalRing from "./GoalRing";
 import {
   dayScore,
-  doneKey,
   fullDayScore,
-  goalPercent,
   goalScore,
   groupBreakdown,
   groupOf,
@@ -24,6 +23,8 @@ type Props = {
   todayIndex: number | null;
 };
 
+const STAT_CLASS = "bg-background/60 py-2";
+
 export default function WeekSummary({
   characters,
   character,
@@ -35,90 +36,84 @@ export default function WeekSummary({
   const group = groupOf(characters, character);
   const isLinked = group.length > 1;
   const score = goalScore(marks, characters, character, quests);
-  const percent = goalPercent(score, goal);
+  const perDay = fullDayScore(quests);
 
   return (
-    <div className="grid gap-3 sm:grid-cols-3">
-      <StatTile
-        label={isLinked ? "Общий счет связки" : "Набрано за неделю"}
-        icon={Trophy}
-        hint={
-          <>
-            <GoalBar percent={percent} />
-            {isLinked && (
-              <span className="mt-1 block">
-                {groupBreakdown(marks, group, quests)}
-              </span>
-            )}
-          </>
-        }
-      >
-        {score}
-        <StatUnit>из {goal}</StatUnit>
-      </StatTile>
-      <StatTile
-        label="Осталось до цели"
-        icon={Flag}
-        hint={remainingHint(score, fullDayScore(quests) * group.length, goal)}
-      >
-        {Math.max(0, goal - score)}
-      </StatTile>
-      <DayTile
-        characterId={character.id}
-        marks={marks}
-        quests={quests}
-        todayIndex={todayIndex}
-      />
-    </div>
-  );
-}
-
-function GoalBar({ percent }: { percent: number }) {
-  return (
-    <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-muted">
+    <section className="promo-rise relative overflow-hidden rounded-2xl border bg-card p-4 sm:p-5">
       <div
-        className={cn(
-          "h-full rounded-full transition-all",
-          percent >= 100 ? "bg-green-500" : "bg-primary",
-        )}
-        style={{ width: `${percent}%` }}
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-24 -right-16 size-64 rounded-full bg-amber-400/15 blur-3xl"
       />
-    </div>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -bottom-28 -left-10 size-64 rounded-full bg-violet-500/10 blur-3xl"
+      />
+      <div className="relative flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
+        <GoalRing score={score} goal={goal} />
+        <div className="flex w-full min-w-0 flex-1 flex-col gap-3">
+          <div className="text-center sm:text-left">
+            <h2 className="text-lg font-bold tracking-tight">
+              {isLinked ? "Общий счет связки" : "Счет недели"}
+            </h2>
+            <p
+              className={cn(
+                score >= goal
+                  ? "font-medium text-emerald-600 dark:text-emerald-400"
+                  : "text-muted-foreground",
+              )}
+            >
+              {remainingHint(score, perDay * group.length, goal)}
+            </p>
+            {isLinked && (
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {groupBreakdown(marks, group, quests)}
+              </p>
+            )}
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <StatTile
+              icon={Flag}
+              label="Осталось до цели"
+              className={STAT_CLASS}
+            >
+              {Math.max(0, goal - score)}
+            </StatTile>
+            <DayStat
+              characterId={character.id}
+              marks={marks}
+              quests={quests}
+              todayIndex={todayIndex}
+            />
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
-type DayTileProps = {
+type DayStatProps = {
   characterId: number;
   marks: DoneMarks;
   quests: PromoQuest[];
   todayIndex: number | null;
 };
 
-function DayTile({ characterId, marks, quests, todayIndex }: DayTileProps) {
+function DayStat({ characterId, marks, quests, todayIndex }: DayStatProps) {
   const perDay = fullDayScore(quests);
-
   if (todayIndex === null) {
     return (
       <StatTile
-        label="За полный день"
         icon={CalendarDays}
-        hint="если сдать все квесты"
+        label="За полный день"
+        className={STAT_CLASS}
       >
         {perDay}
       </StatTile>
     );
   }
 
-  const doneToday = quests.filter((quest) =>
-    marks.has(doneKey(characterId, quest.id, todayIndex)),
-  ).length;
-
   return (
-    <StatTile
-      label="Сегодня"
-      icon={CalendarCheck}
-      hint={`Сдано квестов: ${doneToday} из ${quests.length}`}
-    >
+    <StatTile icon={CalendarCheck} label="Сегодня" className={STAT_CLASS}>
       {dayScore(marks, characterId, quests, todayIndex)}
       <StatUnit>из {perDay}</StatUnit>
     </StatTile>
