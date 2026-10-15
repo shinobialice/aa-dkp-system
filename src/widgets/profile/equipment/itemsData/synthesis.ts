@@ -1,5 +1,7 @@
 import { GAME_ITEM_SYNTHESIS } from "./gameSynthesis";
 import {
+  CAST_TOLERANCE_CODE,
+  castPushbackPercent,
   signedEffectValue,
   STAT_EFFECTS,
   type StatEffect,
@@ -63,7 +65,14 @@ export function isValidSynthesisSelection(
   );
 }
 
-export function formatSynthesisValue({ effect, value }: SynthesisRoll): string {
+export function formatSynthesisValue({
+  code,
+  effect,
+  value,
+}: SynthesisRoll): string {
+  if (code === CAST_TOLERANCE_CODE) {
+    return `${Math.ceil(castPushbackPercent(value))}%`;
+  }
   const sign = value > 0 ? "+" : "";
   const unit = effect.unit === "" ? " ед." : effect.unit;
   return `${sign}${value}${unit}`;

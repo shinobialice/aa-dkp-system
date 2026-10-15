@@ -12,6 +12,15 @@ export type ChangelogDay = {
 
 export const changelog: ChangelogDay[] = [
   {
+    date: "2026-10-16",
+    entries: [
+      {
+        type: "fix",
+        text: "Калькулятор экипировки: задержка применения умений при получении удара теперь считается как в игре, например −75% у амальгамной серьги",
+      },
+    ],
+  },
+  {
     date: "2026-10-15",
     entries: [
       {

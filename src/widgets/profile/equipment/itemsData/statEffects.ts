@@ -84,6 +84,9 @@ const PERCENT = { unit: "%", decimals: 1 };
 const POINTS = { unit: "", decimals: 0 };
 const FRACTIONAL_POINTS = { unit: "", decimals: 1 };
 
+export const CAST_TOLERANCE_CODE = 80;
+const CAST_TOLERANCE_BASE = 100;
+
 // Коды эффектов — внутренние коды калькулятора, а не unit_attribute игры.
 // Эффекты «на снижение» в данных положительные, а у нас хранятся со знаком минус,
 // как у гравировок.
@@ -161,7 +164,7 @@ export const STAT_EFFECTS: Record<number, StatEffect> = {
   71: { label: STAT_LABEL.MANA_REGEN, ...POINTS },
   73: { label: ENGRAVING_STAT.HEAL_RECEIVED, ...PERCENT },
   76: { label: STAT_LABEL.STEALTH_DETECTION, ...PERCENT },
-  80: { label: STAT_LABEL.CAST_PUSHBACK, ...PERCENT, isReduction: true },
+  [CAST_TOLERANCE_CODE]: { label: STAT_LABEL.CAST_PUSHBACK, ...POINTS },
   81: { label: STAT_LABEL.DAMAGE_TAKEN, ...PERCENT, isReduction: true },
   82: { label: STAT_LABEL.COMBAT_HEALTH_REGEN, ...POINTS },
   83: { label: STAT_LABEL.COMBAT_MANA_REGEN, ...POINTS },
@@ -171,6 +174,16 @@ export const STAT_EFFECTS: Record<number, StatEffect> = {
 
 export function signedEffectValue(effect: StatEffect, value: number): number {
   return effect.isReduction ? -Math.abs(value) : value;
+}
+
+// Задержку при получении удара игра делит на (100 + устойчивость) / 100,
+// поэтому складываются очки устойчивости, а в проценты они переводятся в конце.
+export function castPushbackPercent(tolerance: number): number {
+  return (-100 * tolerance) / (tolerance + CAST_TOLERANCE_BASE);
+}
+
+export function castToleranceFromPercent(reduction: number): number {
+  return (CAST_TOLERANCE_BASE * reduction) / (100 - reduction);
 }
 
 export function addStat(bonuses: StatBonuses, label: string, value: number) {

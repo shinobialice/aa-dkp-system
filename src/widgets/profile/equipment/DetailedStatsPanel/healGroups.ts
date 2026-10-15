@@ -1,5 +1,5 @@
 import { ENGRAVING_STAT } from "../engravingBonuses";
-import { STAT_LABEL } from "../itemsData/statEffects";
+import { castPushbackPercent, STAT_LABEL } from "../itemsData/statEffects";
 import type { DerivedStats } from "../characterStats";
 
 import { bonusRow, computedRow, staticRow, type RowGroup } from "./statRows";
@@ -89,13 +89,16 @@ export function buildHealGroups(stats: DerivedStats): RowGroup[] {
           1,
           ENGRAVING_STAT.HEAL_RECEIVED,
         ),
-        bonusRow(
-          "Задержка применения умений при получении удара",
-          0,
-          "%",
-          1,
-          STAT_LABEL.CAST_PUSHBACK,
-        ),
+        {
+          ...bonusRow(
+            "Задержка применения умений при получении удара",
+            0,
+            "%",
+            1,
+            STAT_LABEL.CAST_PUSHBACK,
+          ),
+          toDisplay: castPushbackPercent,
+        },
         staticRow("Доп. опыт", "100%"),
         staticRow("Доп. шанс получения трофеев", "100%"),
         staticRow("Доп. шанс получения монет", "100%"),

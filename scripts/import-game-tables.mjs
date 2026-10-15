@@ -79,7 +79,7 @@ const UNIT_ATTRIBUTES = {
   120: [65, 0.1],
   252: [68, 0.1],
   56: [73, 0.1],
-  89: [80, 0.1],
+  89: [80, 1],
   58: [81, 0.1],
   94: [76, 1],
   291: [45, 1],
@@ -136,6 +136,7 @@ const MAX_GRADE = 12;
 const SYNTHESIS_START_PERCENT = 0;
 const SYNTHESIS_FULL_PERCENT = 100;
 const PVE_SET_NAME = /_PVE$/i;
+const CAST_TOLERANCE_CODE = "80";
 // В игре у амальгамных эфенских колец и серёг второй слот основной
 // характеристики такой же, как первый (46 и 46 на 12 грейде), хотя таблицы
 // клиента дают ему 10. У обновлённых колец и серёг с той же категорией
@@ -826,7 +827,8 @@ function withPveSlots(tables, category, profile) {
 // записаны нулями в начале грейда, а промежуточные точки посчитаны от этих
 // нулей. Для таких статов вся кривая грейда берется из игровых таблиц.
 // Снижающие статы игровые таблицы хранят отрицательными, а growth.json —
-// положительными.
+// положительными. Задержку при получении удара growth.json хранит процентами
+// из подсказки игры, а калькулятор складывает очки устойчивости из таблиц.
 function withTableValuesForZeros(tables, category, profile) {
   if (!category) return profile;
   const result = {};
@@ -841,9 +843,10 @@ function withTableValuesForZeros(tables, category, profile) {
           const tableValues = interpolatePool(slots[index], Number(percent));
           return Object.fromEntries(
             Object.entries(pool).map(([code, value]) => {
-              const isZeroAtStart = startPools[index][code] === 0;
+              const isTableOnly =
+                startPools[index][code] === 0 || code === CAST_TOLERANCE_CODE;
               const tableValue = tableValues[code];
-              if (!isZeroAtStart || tableValue === undefined) {
+              if (!isTableOnly || tableValue === undefined) {
                 return [code, value];
               }
               return [code, Math.abs(tableValue)];
