@@ -1,15 +1,27 @@
 "use client";
 
 import { useState } from "react";
+import { Pencil } from "lucide-react";
 import type { GuildStatus } from "@/actions/guildStatusSettings";
-import type { WarOpponentsState } from "@/actions/warOpponents";
+import {
+  saveWarOpponents,
+  type WarOpponentDraft,
+  type WarOpponentsState,
+} from "@/actions/warOpponents";
 import type { WarPeriodSnapshot } from "@/actions/warPeriodSnapshot";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui";
-import { activeOpponentNames } from "./opponentsModel";
+import SkewTabs from "@/widgets/arena/SkewTabs";
+import { activeOpponentNames, liveOpponents } from "./opponentsModel";
+import WarBanner from "./WarBanner";
 import WarDashboard from "./WarDashboard";
-import WarHeader from "./WarHeader";
 import WarHistoryTab from "./WarHistoryTab";
-import WarOpponentsLive from "./WarOpponentsLive";
+import WarOpponentsDialog from "./WarOpponentsDialog";
+
+type WarTab = "now" | "history";
+
+const TAB_OPTIONS: { value: WarTab; label: string }[] = [
+  { value: "now", label: "Сейчас" },
+  { value: "history", label: "История" },
+];
 
 type Props = {
   isAdmin: boolean;
@@ -26,55 +38,71 @@ export default function WarPageClient({
   initialWarOpponents,
   snapshot,
 }: Props) {
-  const [tab, setTab] = useState("now");
+  const [tab, setTab] = useState<WarTab>("now");
+  const [opponentsState, setOpponentsState] = useState(initialWarOpponents);
   const { mode, server, faction, startedAt } = initialStatus;
+  const isPvp = mode === "pvp";
+
+  const handleSaveOpponents = async (
+    primary: { name: string | null; ended: boolean },
+    drafts: WarOpponentDraft[],
+  ) => {
+    setOpponentsState(await saveWarOpponents(primary, drafts));
+  };
+
+  const editOpponents = isAdmin && isPvp && (
+    <WarOpponentsDialog
+      state={opponentsState}
+      warStartedAt={startedAt}
+      onSave={handleSaveOpponents}
+      trigger={
+        <button
+          type="button"
+          className="arena-skew inline-flex h-7 cursor-pointer items-center gap-1.5 bg-white/10 px-3 text-xs font-semibold text-white/85 transition-colors hover:bg-white/20"
+        >
+          <Pencil className="size-3.5" />
+          Противники
+        </button>
+      }
+    />
+  );
 
   return (
-    <Tabs
-      value={tab}
-      onValueChange={setTab}
-      className="mx-auto w-full max-w-6xl min-w-0 gap-5"
-    >
-      <WarHeader
+    <div className="mx-auto flex w-full max-w-6xl min-w-0 flex-col gap-5">
+      <WarBanner
         mode={mode}
         server={server}
         faction={faction}
         startedAt={startedAt}
-        aside={
-          <TabsList className="h-10 w-full sm:w-auto">
-            <TabsTrigger value="now" className="cursor-pointer px-4">
-              Сейчас
-            </TabsTrigger>
-            <TabsTrigger value="history" className="cursor-pointer px-4">
-              История
-            </TabsTrigger>
-          </TabsList>
+        endedAt={null}
+        opponents={isPvp ? liveOpponents(opponentsState, startedAt) : []}
+        action={editOpponents}
+        tabs={
+          <SkewTabs
+            tone="banner"
+            options={TAB_OPTIONS}
+            value={tab}
+            onChange={setTab}
+            label="Раздел страницы вара"
+          />
         }
       />
 
-      <TabsContent value="now" className="flex flex-col gap-4">
-        {mode === "pvp" && (
-          <WarOpponentsLive
-            initialState={initialWarOpponents}
-            warStartedAt={startedAt}
-            isAdmin={isAdmin}
-          />
-        )}
+      {tab === "now" && (
         <WarDashboard
           mode={mode}
           startedAt={startedAt}
           asOf={asOf}
           snapshot={snapshot}
         />
-      </TabsContent>
-
-      <TabsContent value="history">
+      )}
+      {tab === "history" && (
         <WarHistoryTab
           current={initialStatus}
-          currentOpponents={activeOpponentNames(initialWarOpponents)}
+          currentOpponents={activeOpponentNames(opponentsState)}
           onOpenCurrent={() => setTab("now")}
         />
-      </TabsContent>
-    </Tabs>
+      )}
+    </div>
   );
 }

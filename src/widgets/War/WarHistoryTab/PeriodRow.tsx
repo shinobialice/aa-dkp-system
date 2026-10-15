@@ -6,7 +6,7 @@ import {
   type GuildMode,
 } from "@/shared/config/guildStatus";
 import { cn } from "@/shared/lib/tw-merge";
-import { periodTone } from "../periodStyles";
+import SkewTag from "@/widgets/arena/SkewTag";
 
 type Props = {
   mode: GuildMode;
@@ -25,33 +25,30 @@ export default function PeriodRow({
   duration,
   onClick,
 }: Props) {
-  const tone = periodTone(mode, live);
-
   return (
     <button
       type="button"
       onClick={onClick}
-      className="grid w-full cursor-pointer grid-cols-[40px_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border bg-card p-3 text-left transition-colors hover:bg-accent/50 sm:grid-cols-[52px_minmax(0,1fr)_auto_20px] sm:gap-4 sm:px-4.5 sm:py-4"
+      className={cn(
+        "arena-cut arena-enter grid w-full cursor-pointer grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-3 border border-l-[3px] bg-card p-3 text-left transition-[translate,background-color] hover:translate-x-1 hover:bg-accent/50 sm:grid-cols-[56px_minmax(0,1fr)_auto_20px] sm:gap-4 sm:px-5 sm:py-4",
+        mode === "pvp" ? "border-l-red-500" : "border-l-green-500",
+      )}
     >
       <Image
         src={MODE_ICON[mode]}
         alt=""
-        width={52}
-        height={52}
-        className="size-10 object-contain sm:size-13"
+        width={56}
+        height={56}
+        className="size-11 object-contain sm:size-14"
       />
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-bold sm:text-base">{MODE_LABEL[mode]}</span>
-          <span
-            className={cn(
-              "inline-flex h-5.5 items-center gap-1.5 rounded-full border-0 px-2 text-xs font-semibold",
-              tone.chip,
-            )}
-          >
-            <span className={cn("size-1.5 rounded-full", tone.dot)} />
-            {statusLabel(mode, live)}
+          <span className="font-display text-lg tracking-wide uppercase">
+            {MODE_LABEL[mode]}
           </span>
+          {live && (
+            <SkewTag className="bg-green-500 text-green-950">Сейчас</SkewTag>
+          )}
         </div>
         <p className="mt-0.5 truncate text-sm text-muted-foreground">{where}</p>
         <p className="mt-0.5 text-xs text-muted-foreground tabular-nums">
@@ -59,7 +56,7 @@ export default function PeriodRow({
         </p>
       </div>
       <div className="flex flex-col items-end">
-        <span className="font-bold tabular-nums sm:text-base">
+        <span className="font-display tabular-nums sm:text-lg">
           {duration ?? "—"}
         </span>
         <span className="text-xs text-muted-foreground">длительность</span>
@@ -67,9 +64,4 @@ export default function PeriodRow({
       <ChevronRight className="hidden size-4.5 text-muted-foreground sm:block" />
     </button>
   );
-}
-
-function statusLabel(mode: GuildMode, live: boolean) {
-  if (live) return "Сейчас";
-  return mode === "pvp" ? "Завершён" : "Завершена";
 }

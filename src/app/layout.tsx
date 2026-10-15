@@ -1,5 +1,13 @@
 import "./globals.css";
+import { Russo_One } from "next/font/google";
 import Providers from "@/app/providers";
+
+const displayFont = Russo_One({
+  weight: "400",
+  subsets: ["latin", "cyrillic"],
+  variable: "--font-russo",
+  display: "swap",
+});
 
 export const metadata = {
   metadataBase: new URL("https://nofearhub.com"),
@@ -36,7 +44,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ru" suppressHydrationWarning>
+    <html lang="ru" suppressHydrationWarning className={displayFont.variable}>
       <body>
         <Providers>{children}</Providers>
       </body>

@@ -1,9 +1,10 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
+import { useFlipReorder } from "@/hooks/useFlipReorder";
 import { plural } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/tw-merge";
-import { Segmented } from "@/shared/ui";
+import SkewTabs from "@/widgets/arena/SkewTabs";
 import {
   SCROLL_LIST,
   sortFighters,
@@ -12,23 +13,28 @@ import {
 } from "../warModel";
 import WarSection from "../WarSection";
 import FighterRow from "./FighterRow";
-import { FIGHTER_COLUMNS, metricMax, SORT_OPTIONS } from "./fightersMeta";
+import { metricMax, SORT_OPTIONS } from "./fightersMeta";
 
 type Props = {
   fighters: Fighter[];
   totalRaids: number;
   hasKillcount: boolean;
+  myUserId: number | null;
+  className?: string;
 };
 
 export default function WarFightersCard({
   fighters,
   totalRaids,
   hasKillcount,
+  myUserId,
+  className,
 }: Props) {
   const [sort, setSort] = useState<FighterSort>(
     hasKillcount ? "kills" : "raids",
   );
   const listRef = useRef<HTMLDivElement>(null);
+  useFlipReorder(listRef, sort);
 
   const sorted = useMemo(() => {
     const pool =
@@ -59,13 +65,14 @@ export default function WarFightersCard({
           : `${players} в киллкаунте за период`
       }
       empty={sorted.length === 0 ? emptyText(isRaids) : null}
+      className={className}
       action={
-        <Segmented
+        <SkewTabs
           options={SORT_OPTIONS}
           value={sort}
           onChange={handleSortChange}
           label="Сортировка бойцов"
-          className="w-full *:flex-1 sm:w-auto"
+          className="w-full sm:w-auto"
         />
       }
     >
@@ -73,29 +80,9 @@ export default function WarFightersCard({
         ref={listRef}
         className={cn(
           SCROLL_LIST,
-          "max-h-[min(70vh,640px)] rounded-b-xl border-t sm:border-t-0",
+          "relative max-h-[min(70vh,560px)] border-t lg:max-h-none lg:min-h-0 lg:flex-1 lg:basis-0",
         )}
       >
-        <div
-          className={cn(
-            "sticky top-0 z-10 hidden items-center gap-3 border-y bg-muted px-4 py-2 text-xs font-medium text-muted-foreground sm:grid",
-            FIGHTER_COLUMNS,
-          )}
-        >
-          <span>#</span>
-          <span>Игрок</span>
-          {SORT_OPTIONS.map((option) => (
-            <span
-              key={option.value}
-              className={cn(
-                "text-right",
-                option.value === sort && "text-foreground",
-              )}
-            >
-              {option.label}
-            </span>
-          ))}
-        </div>
         <ol>
           {sorted.map((fighter, index) => (
             <FighterRow
@@ -105,6 +92,7 @@ export default function WarFightersCard({
               sort={sort}
               max={max}
               totalRaids={totalRaids}
+              isMe={fighter.userId === myUserId}
             />
           ))}
         </ol>

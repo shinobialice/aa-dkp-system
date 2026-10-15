@@ -1,52 +1,55 @@
 "use client";
 
-import { Loader } from "lucide-react";
 import { getEventSettings } from "@/actions/eventSettings";
-import getStats from "@/actions/getStats";
-import { getMarketplaceListings } from "@/actions/marketplaceActions";
+import {
+  getMyFighterCard,
+  type MyFighterCard,
+} from "@/actions/getMyFighterCard";
+import { getHomeWarSummary } from "@/actions/getHomeWarSummary";
 import { useAsyncData } from "@/hooks/useAsyncData";
-import BossRespawnHistory from "./BossRespawnHistory";
-import GuildComposition from "./GuildComposition";
+import { Skeleton } from "@/shared/ui";
+import HeaderClocks from "@/widgets/HeaderClocks";
+import FighterCard from "./FighterCard";
+import HomeWarPanel from "./HomeWarPanel";
 import MainPageBanner from "./MainPageBanner";
-import MainPageHeader from "./MainPageHeader";
+import NextFightPoster from "./NextFightPoster";
 import RespawnTracker from "./RespawnTracker";
-import UpcomingEvents from "./UpcomingEvents";
 
 export default function MainPageCardsClient() {
-  const stats = useAsyncData("main-stats", getStats);
   const event = useAsyncData("event-settings", getEventSettings);
-  const listings = useAsyncData("marketplace-listings", getMarketplaceListings);
-
-  if (stats.isLoading || event.isLoading || listings.isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader className="h-10 w-10 animate-spin text-primary" />
-      </div>
-    );
-  }
+  const fighter = useAsyncData("my-fighter-card", getMyFighterCard);
+  const war = useAsyncData("home-war-summary", getHomeWarSummary);
 
   return (
     <div className="mx-auto flex w-full max-w-6xl min-w-0 flex-col gap-5">
-      <MainPageHeader />
-      <MainPageBanner event={event.data} listings={listings.data} />
-
-      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.75fr)_minmax(0,1fr)]">
-        <div className="flex min-w-0 flex-col gap-5">
-          <section className="space-y-3">
-            <div className="flex items-baseline justify-between gap-2">
-              <h2 className="text-lg font-semibold">Респаун боссов</h2>
-              <span className="text-xs text-muted-foreground">
-                обновляется само
-              </span>
-            </div>
-            <RespawnTracker />
-          </section>
-          <BossRespawnHistory />
-        </div>
-        <UpcomingEvents className="order-first xl:order-none" />
+      <div className="md:hidden">
+        <HeaderClocks />
       </div>
-
-      <GuildComposition stats={stats.data ?? null} />
+      <MainPageBanner event={event.data} />
+      <NextFightPoster />
+      <div className="grid items-start gap-5 lg:grid-cols-[300px_minmax(0,1fr)]">
+        <div className="order-last lg:order-none">
+          <FighterSlot card={fighter.data} isLoading={fighter.isLoading} />
+        </div>
+        <RespawnTracker />
+      </div>
+      {war.data && <HomeWarPanel summary={war.data} />}
     </div>
   );
+}
+
+function FighterSlot({
+  card,
+  isLoading,
+}: {
+  card: MyFighterCard | null | undefined;
+  isLoading: boolean;
+}) {
+  if (isLoading) {
+    return (
+      <Skeleton className="arena-card-shape mx-auto aspect-[5/7.3] w-full max-w-[290px]" />
+    );
+  }
+  if (!card) return null;
+  return <FighterCard card={card} />;
 }

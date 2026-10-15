@@ -2,32 +2,26 @@
 
 import { useState } from "react";
 import { ChevronRight } from "lucide-react";
-import { Button, Card } from "@/shared/ui";
-import RecentKills from "./RecentKills";
 import RespawnHistoryDialog from "./RespawnHistoryDialog";
 import { useRespawnHistory } from "./useRespawnHistory";
 
-const RECENT_SIZE = 4;
+const TOTAL_ONLY = 1;
 
 export default function BossRespawnHistory() {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const { rows, total, loading } = useRespawnHistory(1, RECENT_SIZE);
+  const { total } = useRespawnHistory(1, TOTAL_ONLY);
 
   return (
-    <Card className="min-w-0 gap-0 py-0">
-      <div className="flex items-center justify-between gap-2 border-b px-4 py-3.5">
-        <h2 className="font-semibold">Последние отметки</h2>
-        <Button
-          variant="link"
-          className="h-auto p-0 text-green-700 dark:text-green-400"
-          onClick={() => setDialogOpen(true)}
-        >
-          Вся история · {total}
-          <ChevronRight />
-        </Button>
-      </div>
-      <RecentKills rows={rows} loading={loading} skeletonCount={RECENT_SIZE} />
+    <>
+      <button
+        type="button"
+        onClick={() => setDialogOpen(true)}
+        className="inline-flex cursor-pointer items-center gap-0.5 text-sm font-semibold text-green-700 hover:underline dark:text-green-400"
+      >
+        История отметок · {total}
+        <ChevronRight className="size-4" />
+      </button>
       <RespawnHistoryDialog open={dialogOpen} onOpenChange={setDialogOpen} />
-    </Card>
+    </>
   );
 }

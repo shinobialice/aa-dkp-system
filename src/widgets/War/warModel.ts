@@ -182,18 +182,22 @@ export type TurnoutBucket = {
   count: number;
 };
 
+const TURNOUT_BUCKETS: Omit<TurnoutBucket, "count">[] = [
+  { key: "steady", label: "Стабильно", range: "80% рейдов и больше" },
+  { key: "partial", label: "Частично", range: "50–79%" },
+  { key: "rare", label: "Редко", range: "меньше 50%" },
+];
+
+export function turnoutBucket(share: number) {
+  return TURNOUT_BUCKETS[turnoutBucketIndex(share)];
+}
+
 export function buildTurnout(attendance: PeriodAttendanceResult) {
   const total = attendance.totalRaidsInPeriod;
-  const buckets: TurnoutBucket[] = [
-    {
-      key: "steady",
-      label: "Стабильно",
-      range: "80% рейдов и больше",
-      count: 0,
-    },
-    { key: "partial", label: "Частично", range: "50–79%", count: 0 },
-    { key: "rare", label: "Редко", range: "меньше 50%", count: 0 },
-  ];
+  const buckets: TurnoutBucket[] = TURNOUT_BUCKETS.map((bucket) => ({
+    ...bucket,
+    count: 0,
+  }));
   let sum = 0;
   attendance.top.forEach((entry) => {
     sum += entry.raidsAttended;

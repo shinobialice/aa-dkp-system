@@ -6,9 +6,8 @@ import { getWarPeriodSnapshot } from "@/actions/warPeriodSnapshot";
 import { useAsyncData } from "@/hooks/useAsyncData";
 import { Button } from "@/shared/ui";
 import { periodOpponents } from "./opponentsModel";
+import WarBanner from "./WarBanner";
 import WarDashboard from "./WarDashboard";
-import WarHeader from "./WarHeader";
-import WarOpponentsCard from "./WarOpponentsCard";
 
 type Props = {
   period: WarPeriodHistoryRow;
@@ -33,23 +32,14 @@ export default function WarHistoryDetail({ period, onBack }: Props) {
         История
       </Button>
 
-      <div className="rounded-xl border bg-muted/30 p-4">
-        <WarHeader
-          compact
-          mode={mode}
-          server={period.server}
-          faction={period.faction}
-          startedAt={startedAt}
-          endedAt={endedAt}
-        />
-      </div>
-
-      {mode === "pvp" && (
-        <WarOpponentsCard
-          opponents={periodOpponents(period)}
-          emptyText="Противник не был указан"
-        />
-      )}
+      <WarBanner
+        mode={mode}
+        server={period.server}
+        faction={period.faction}
+        startedAt={startedAt}
+        endedAt={endedAt}
+        opponents={mode === "pvp" ? periodOpponents(period) : []}
+      />
 
       {snapshot && (
         <WarDashboard

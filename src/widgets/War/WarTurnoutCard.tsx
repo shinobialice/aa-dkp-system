@@ -30,9 +30,9 @@ export default function WarTurnoutCard({ attendance }: Props) {
       description={description}
       empty={total === 0 || people === 0 ? "ПВП-рейдов пока не было" : null}
     >
-      <div className="flex flex-col gap-3.5 px-4 pb-4">
-        <div className="flex flex-wrap items-baseline gap-x-2">
-          <span className="text-3xl leading-none font-bold tracking-tight tabular-nums">
+      <div className="flex flex-col gap-3.5 px-4 pb-4 sm:px-5 sm:pb-5">
+        <div className="flex flex-wrap items-baseline gap-x-3">
+          <span className="font-display text-5xl leading-none tabular-nums">
             {averagePercent}%
           </span>
           <span className="text-sm text-muted-foreground">
@@ -40,13 +40,16 @@ export default function WarTurnoutCard({ attendance }: Props) {
             {plural(total, "рейда", "рейдов", "рейдов")}
           </span>
         </div>
-        <div className="flex h-3 gap-0.75 overflow-hidden rounded" aria-hidden>
+        <div className="flex h-3.5 gap-0.75" aria-hidden>
           {buckets
             .filter((bucket) => bucket.count > 0)
             .map((bucket) => (
               <span
                 key={bucket.key}
-                className={BUCKET_COLOR[bucket.key]}
+                className={cn(
+                  "arena-grow-x -skew-x-[20deg]",
+                  BUCKET_COLOR[bucket.key],
+                )}
                 style={{ flexGrow: bucket.count }}
               />
             ))}

@@ -27,40 +27,50 @@ export type RespawnInfo =
 
 export type RespawnKind = RespawnInfo["kind"];
 
-export const STATUS_STYLES: Record<
-  RespawnKind,
-  { label: string; chip: string; dot: string; big: string }
-> = {
+type StatusStyle = {
+  label: string;
+  text: string;
+  big: string;
+  accent: string;
+  fill: string;
+  soft: string;
+};
+
+const IDLE_STYLE = {
+  text: "text-muted-foreground",
+  big: "text-muted-foreground",
+  accent: "border-l-muted-foreground/40",
+  fill: "bg-muted-foreground",
+  soft: "from-transparent",
+};
+
+export const STATUS_STYLES: Record<RespawnKind, StatusStyle> = {
   waiting: {
     label: "Ожидание",
-    chip: "bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300",
-    dot: "bg-amber-500",
+    text: "text-amber-600 dark:text-amber-400",
     big: "",
+    accent: "border-l-amber-500",
+    fill: "bg-amber-500",
+    soft: "from-amber-500/10",
   },
   open: {
     label: "Возможен респаун",
-    chip: "bg-green-50 text-green-700 dark:bg-green-500/15 dark:text-green-300",
-    dot: "bg-green-500 animate-pulse",
+    text: "text-green-700 dark:text-green-400",
     big: "text-green-700 dark:text-green-400",
+    accent: "border-l-green-500",
+    fill: "bg-green-500",
+    soft: "from-green-500/12",
   },
   missed: {
     label: "Проёбано",
-    chip: "bg-red-50 text-red-700 dark:bg-red-500/15 dark:text-red-300",
-    dot: "bg-red-500",
+    text: "text-red-700 dark:text-red-400",
     big: "text-red-700 dark:text-red-400",
+    accent: "border-l-red-500",
+    fill: "bg-red-500",
+    soft: "from-red-500/12",
   },
-  maintenance: {
-    label: "Проф. работы",
-    chip: "bg-muted text-muted-foreground",
-    dot: "bg-zinc-400",
-    big: "text-muted-foreground",
-  },
-  none: {
-    label: "Нет данных",
-    chip: "bg-muted text-muted-foreground",
-    dot: "bg-zinc-400",
-    big: "text-muted-foreground",
-  },
+  maintenance: { label: "Проф. работы", ...IDLE_STYLE },
+  none: { label: "Нет данных", ...IDLE_STYLE },
 };
 
 export function respawnInfo(
@@ -136,6 +146,22 @@ export function respawnCardView(
     text: describeRespawn(info, now),
     cooldown: cooldownSecondsLeft(state.updatedAt, now),
   };
+}
+
+export function hpCells(
+  info: Extract<RespawnInfo, { progress: number }>,
+  respawnHours: number,
+  now: Date,
+) {
+  const total = respawnHours + respawnWindow;
+  const hoursDone =
+    info.kind === "missed"
+      ? total
+      : (now.getTime() - info.killDate.getTime()) / HOUR_MS;
+  return Array.from({ length: total }, (_, index) => ({
+    fill: Math.min(1, Math.max(0, hoursDone - index)),
+    isWindow: index >= respawnHours,
+  }));
 }
 
 export function cooldownSecondsLeft(updatedAt: string | null, now: Date) {

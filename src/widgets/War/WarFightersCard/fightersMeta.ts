@@ -2,7 +2,17 @@ import { formatNumber } from "@/shared/lib/format";
 import { formatDecimal, type Fighter, type FighterSort } from "../warModel";
 
 export const FIGHTER_COLUMNS =
-  "grid-cols-[28px_minmax(0,1fr)_88px_96px_76px] md:grid-cols-[28px_minmax(0,1fr)_112px_112px_92px]";
+  "grid-cols-[26px_36px_minmax(0,1fr)_26px_80px] sm:grid-cols-[30px_36px_minmax(0,1fr)_26px_minmax(110px,0.5fr)]";
+
+const PLACE_TONES = [
+  "text-lg text-[#e8b450]",
+  "text-lg text-[#aab3c5]",
+  "text-lg text-[#c98552]",
+];
+
+export function placeTone(place: number) {
+  return PLACE_TONES[place - 1] ?? "text-muted-foreground";
+}
 
 export const SORT_OPTIONS: { value: FighterSort; label: string }[] = [
   { value: "kills", label: "Киллы" },

@@ -6,15 +6,13 @@ import { useSoundNotificationsEnabled } from "@/hooks/useSoundNotificationsEnabl
 
 export default function SoundNotificationToggle() {
   const { enabled, setSoundEnabled } = useSoundNotificationsEnabled();
+  const Icon = enabled ? Volume2 : VolumeX;
 
   return (
-    <div className="flex items-center gap-2 text-sm font-normal text-muted-foreground">
-      {enabled ? (
-        <Volume2 className="size-4" />
-      ) : (
-        <VolumeX className="size-4" />
-      )}
+    <label className="mt-1 flex w-fit cursor-pointer items-center gap-2 text-xs text-white/70">
+      <Icon className="size-4" />
+      Звук перед событиями
       <Switch checked={enabled} onCheckedChange={setSoundEnabled} />
-    </div>
+    </label>
   );
 }

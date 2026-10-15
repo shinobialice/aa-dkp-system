@@ -1,7 +1,6 @@
-import { Coins, Flag, Package, Tag } from "lucide-react";
 import type { WarPeriodSnapshot } from "@/actions/warPeriodSnapshot";
-import { formatNumber, plural } from "@/shared/lib/format";
-import { StatTile } from "@/shared/ui";
+import { plural } from "@/shared/lib/format";
+import ScoreTile from "../ScoreTile";
 import WarAttendanceCard from "../WarAttendanceCard";
 import WarBuyersCard from "../WarBuyersCard";
 import WarDropsCard from "../WarDropsCard";
@@ -32,32 +31,32 @@ export default function FreeshardDashboard({
     : null;
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
-        <StatTile
-          icon={Coins}
+    <div className="flex flex-col gap-5">
+      <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
+        <ScoreTile
           label="Заработано"
+          value={earned}
           hint={perDayHint(earned, startedAt, endMs)}
-        >
-          {formatNumber(earned)}
-        </StatTile>
-        <StatTile
-          icon={Tag}
+          delayS={0.45}
+        />
+        <ScoreTile
           label="Продано предметов"
+          value={economy?.finance.itemsSoldCount ?? 0}
           hint="без эссенций и расходников"
-        >
-          {formatNumber(economy?.finance.itemsSoldCount ?? 0)}
-        </StatTile>
-        <StatTile
-          icon={Flag}
+          delayS={0.52}
+        />
+        <ScoreTile
           label="Рейдов"
+          value={raids}
           hint={perDayHint(raids, startedAt, endMs)}
-        >
-          {formatNumber(raids)}
-        </StatTile>
-        <StatTile icon={Package} label="Выпало предметов" hint={dropKinds}>
-          {formatNumber(dropped)}
-        </StatTile>
+          delayS={0.59}
+        />
+        <ScoreTile
+          label="Выпало предметов"
+          value={dropped}
+          hint={dropKinds}
+          delayS={0.66}
+        />
       </div>
       <DashboardColumns
         main={

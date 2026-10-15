@@ -1,16 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { Users } from "lucide-react";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/shared/ui";
+import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui";
 import { cn } from "@/shared/lib/tw-merge";
+import SkewTabs from "@/widgets/arena/SkewTabs";
 import type { PeriodMembershipChanges } from "@/actions/warMembership";
 import WarUserLink from "./WarUserLink";
 import SectionEmpty from "./SectionEmpty";
@@ -115,33 +109,26 @@ export default function WarMembershipCard({ changes }: Props) {
       })),
     },
   ];
-  const defaultTab = tabs.find((tab) => tab.rows.length > 0)?.value ?? "joined";
+  const [activeTab, setActiveTab] = useState(
+    () => tabs.find((tab) => tab.rows.length > 0)?.value ?? "joined",
+  );
+  const active = tabs.find((tab) => tab.value === activeTab) ?? tabs[0];
 
   return (
     <WarSection title="Состав за период" icon={Users}>
-      <Tabs defaultValue={defaultTab} className="gap-2.5">
-        <div className="px-4">
-          <TabsList className="grid h-9 w-full grid-cols-3">
-            {tabs.map((tab) => (
-              <TabsTrigger
-                key={tab.value}
-                value={tab.value}
-                className="cursor-pointer"
-              >
-                {tab.label}
-                <span className="text-muted-foreground tabular-nums">
-                  {tab.rows.length}
-                </span>
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </div>
-        {tabs.map((tab) => (
-          <TabsContent key={tab.value} value={tab.value}>
-            <MemberList rows={tab.rows} empty={tab.empty} />
-          </TabsContent>
-        ))}
-      </Tabs>
+      <div className="flex flex-col gap-2.5">
+        <SkewTabs
+          options={tabs.map((tab) => ({
+            value: tab.value,
+            label: `${tab.label} · ${tab.rows.length}`,
+          }))}
+          value={activeTab}
+          onChange={setActiveTab}
+          label="Изменения состава"
+          className="px-4 sm:px-5"
+        />
+        <MemberList rows={active.rows} empty={active.empty} />
+      </div>
     </WarSection>
   );
 }

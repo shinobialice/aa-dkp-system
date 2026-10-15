@@ -3,6 +3,7 @@
 import type { GuildMode } from "@/shared/config/guildStatus";
 import sql from "@/shared/lib/db";
 import type { RaidAttendanceRow, UserRow } from "@/shared/lib/dbTypes";
+import { getSessionUserId } from "./getSessionUserId";
 
 export type PeriodAttendanceEntry = {
   userId: number;
@@ -25,6 +26,13 @@ type AttendanceQueryRow = {
   username: UserRow["username"] | null;
   avatar_url: UserRow["avatar_url"];
   class: UserRow["class"];
+};
+
+export type RaidMark = "attended" | "late" | "missed";
+
+type MyRaidRow = {
+  attended: boolean;
+  is_late: RaidAttendanceRow["is_late"] | null;
 };
 
 const LATE_WEIGHT = 0.5;
@@ -75,6 +83,36 @@ export async function getPeriodAttendanceTop(
     participantsCount: byUser.size,
     totalRaidsInPeriod: raidIds.size,
   };
+}
+
+export async function getMyPeriodRaids(
+  startedAt: string,
+  endedAt: string | null,
+  mode: GuildMode,
+): Promise<RaidMark[]> {
+  const userId = await getSessionUserId();
+  if (userId === null) return [];
+
+  let rows: MyRaidRow[];
+  try {
+    rows = await sql<MyRaidRow[]>`
+      SELECT ra.user_id IS NOT NULL AS attended, ra.is_late
+      FROM raid r
+      LEFT JOIN raid_attendance ra ON ra.raid_id = r.id AND ra.user_id = ${userId}
+      WHERE r.start_date >= ${startedAt}
+        ${endedAt ? sql`AND r.start_date < ${endedAt}` : sql``}
+        ${mode === "pvp" ? pvpRaidsOnly() : sql``}
+      ORDER BY r.start_date
+    `;
+  } catch (error) {
+    console.error("Ошибка при получении рейдов игрока за период:", error);
+    throw new Error("Не удалось получить ваши рейды за период");
+  }
+
+  return rows.map((row) => {
+    if (!row.attended) return "missed";
+    return row.is_late ? "late" : "attended";
+  });
 }
 
 // В режиме "пвп" считаем только рейды, где реально было ПВП — отмечается
