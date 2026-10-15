@@ -25321,12 +25321,12 @@ export const GAME_ITEM_SYNTHESIS: Record<number, ItemSynthesis> = {
       [100, [POOL_1561, POOL_1561, POOL_1693, POOL_1693]],
     ],
     11: [
-      [0, [POOL_284, POOL_284, POOL_1694, POOL_1694]],
-      [100, [POOL_654, POOL_654, POOL_1695, POOL_1695]],
+      [0, [POOL_284, POOL_1386, POOL_1694, POOL_1694]],
+      [100, [POOL_654, POOL_1386, POOL_1695, POOL_1695]],
     ],
     12: [
-      [0, [POOL_239, POOL_239, POOL_1696, POOL_1696, POOL_1628]],
-      [100, [POOL_660, POOL_660, POOL_1697, POOL_1697, POOL_1663]],
+      [0, [POOL_239, POOL_356, POOL_1696, POOL_1696, POOL_1628]],
+      [100, [POOL_660, POOL_356, POOL_1697, POOL_1697, POOL_1663]],
     ],
   }, // Обновленное эфенское кольцо
   55119: {
@@ -25421,12 +25421,12 @@ export const GAME_ITEM_SYNTHESIS: Record<number, ItemSynthesis> = {
       [100, [POOL_1561, POOL_1561, POOL_1702, POOL_1702]],
     ],
     11: [
-      [0, [POOL_284, POOL_284, POOL_1703, POOL_1703]],
-      [100, [POOL_654, POOL_654, POOL_1704, POOL_1704]],
+      [0, [POOL_284, POOL_1386, POOL_1703, POOL_1703]],
+      [100, [POOL_654, POOL_1386, POOL_1704, POOL_1704]],
     ],
     12: [
-      [0, [POOL_239, POOL_239, POOL_1705, POOL_1705, POOL_1628]],
-      [100, [POOL_660, POOL_660, POOL_1706, POOL_1706, POOL_1663]],
+      [0, [POOL_239, POOL_356, POOL_1705, POOL_1705, POOL_1628]],
+      [100, [POOL_660, POOL_356, POOL_1706, POOL_1706, POOL_1663]],
     ],
   }, // Обновленная эфенская серьга
   55121: {

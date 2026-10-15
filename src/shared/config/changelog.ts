@@ -12,6 +12,15 @@ export type ChangelogDay = {
 
 export const changelog: ChangelogDay[] = [
   {
+    date: "2026-10-15",
+    entries: [
+      {
+        type: "fix",
+        text: "Калькулятор экипировки: у обновлённых эфенских колец и серёг второй основной стат синтеза снова +10, а +46 только у амальгамных",
+      },
+    ],
+  },
+  {
     date: "2026-10-14",
     entries: [
       {

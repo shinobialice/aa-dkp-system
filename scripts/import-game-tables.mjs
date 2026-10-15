@@ -138,8 +138,11 @@ const SYNTHESIS_FULL_PERCENT = 100;
 const PVE_SET_NAME = /_PVE$/i;
 // В игре у амальгамных эфенских колец и серёг второй слот основной
 // характеристики такой же, как первый (46 и 46 на 12 грейде), хотя таблицы
-// клиента дают ему 10. Набор синтеза → набор, из которого берутся значения.
-const SYNTHESIS_SET_VALUE_SOURCES = {
+// клиента дают ему 10. У обновлённых колец и серёг с той же категорией
+// синтеза он, как в таблицах, 10. Набор синтеза → набор, из которого
+// берутся значения.
+const AMALGAM_EPHEN_JEWELRY = new Set([8003311, 8003313]);
+const AMALGAM_SYNTHESIS_SET_VALUE_SOURCES = {
   859: 858,
   865: 864,
 };
@@ -357,7 +360,13 @@ async function writeSynthesis() {
           category,
           withTableValuesForZeros(synthesisTables, category, growthProfile),
         )
-      : tableProfile(synthesisTables, category);
+      : tableProfile(
+          synthesisTables,
+          category,
+          AMALGAM_EPHEN_JEWELRY.has(itemId)
+            ? AMALGAM_SYNTHESIS_SET_VALUE_SOURCES
+            : {},
+        );
     if (!profile) continue;
     const gradeLines = Object.entries(profile)
       .sort(([a], [b]) => Number(a) - Number(b))
@@ -748,11 +757,11 @@ function buildSynthesisTables() {
   };
 }
 
-function tableProfile(tables, category) {
+function tableProfile(tables, category, valueSources) {
   if (!category) return undefined;
   const profile = {};
   for (let quality = 1; quality <= MAX_GRADE; quality++) {
-    const slots = tableSlots(tables, category, quality);
+    const slots = tableSlots(tables, category, quality, valueSources);
     if (slots.length === 0) continue;
     profile[quality] = {
       [SYNTHESIS_START_PERCENT]: slots.map((slot) => slot.min),
@@ -762,7 +771,7 @@ function tableProfile(tables, category) {
   return Object.keys(profile).length > 0 ? profile : undefined;
 }
 
-function tableSlots(tables, category, quality) {
+function tableSlots(tables, category, quality, valueSources = {}) {
   const gradeId = clientData.grades[quality]?.id;
   const property = tables.properties.get(`${category}:${gradeId}`);
   if (gradeId === undefined || !property) return [];
@@ -770,7 +779,7 @@ function tableSlots(tables, category, quality) {
   for (const set of tables.sets.get(category) ?? []) {
     const min = {};
     const max = {};
-    const valueSetId = SYNTHESIS_SET_VALUE_SOURCES[set.id] ?? set.id;
+    const valueSetId = valueSources[set.id] ?? set.id;
     for (const group of tables.groups.get(valueSetId) ?? []) {
       const range = tables.values.get(`${group.id}:${gradeId}`);
       const mapping = UNIT_ATTRIBUTES[group.unit_attribute_id];
