@@ -1,0 +1,8 @@
+# Raw captures and per-user data never go into the (public) repository
+*.pcap
+*.pcapng
+*.etl
+captures/
+*.local.csv
+corvus_scanner.json
+__pycache__/
