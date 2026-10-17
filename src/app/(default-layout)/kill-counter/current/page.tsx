@@ -4,6 +4,7 @@ import { hasTag } from "@/actions/hasTag";
 import { KILLCOUNT_EDITOR_TAGS } from "@/server/killcountEditors";
 import { AddKillCount } from "@/widgets/killcount/add-kill-count";
 import { KillcountHeader } from "@/widgets/killcount/ui/KillcountHeader";
+import Link from "next/link";
 import { KillcountDay } from "@/widgets/killcount/ui/KillcountDay";
 import { longDate } from "@/widgets/killcount/ui/killcountModel";
 
@@ -25,7 +26,16 @@ export default async function KillCounterPage() {
     <div className="mx-auto flex w-full max-w-6xl min-w-0 flex-col gap-4 text-sm">
       <KillcountHeader
         subtitle={`Сегодня, ${longDate(moscowToday())} · кто сколько набил за прайм`}
-      />
+      >
+        {canEditKillcount && (
+          <Link
+            href="/kill-counter/scanner"
+            className="w-fit text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+          >
+            Заполнить сканером: программа и инструкция →
+          </Link>
+        )}
+      </KillcountHeader>
       {currentKillCount?.length ? (
         <KillcountDay
           data={currentKillCount}

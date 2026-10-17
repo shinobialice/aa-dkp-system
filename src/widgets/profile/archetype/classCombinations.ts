@@ -47,7 +47,7 @@ export const CLASS_NAME_BY_COMBO: Record<string, string> = {
   "gipnoz+napadenie+soprotivlenie": "Дознаватель",
   "gipnoz+napadenie+strelba": "Баллистик",
   "gipnoz+napadenie+tanec": "Бесстрастный скальд",
-  "gipnoz+napadenie+volshebstvo": "Пcионик",
+  "gipnoz+napadenie+volshebstvo": "Псионик",
   "gipnoz+napadenie+voodush": "Мнемоник",
   "gipnoz+oborona+presledovanie": "Юстициарий",
   "gipnoz+oborona+skritnost": "Лазутчик",
