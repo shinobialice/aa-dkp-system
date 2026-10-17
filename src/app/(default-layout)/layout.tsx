@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { SidebarProvider, Toaster } from "@/shared/ui";
 import { hasTag } from "@/actions/hasTag";
+import { KILLCOUNT_EDITOR_TAGS } from "@/server/killcountEditors";
 import { getActivePromoLink } from "@/server/promo";
 import AppSidebar from "@/widgets/sidebar";
 import MobileNav from "@/widgets/sidebar/MobileNav";
@@ -26,6 +27,7 @@ export default async function DefaultLayout({
   const sessionToken = cookieStore?.get("session_token")?.value ?? "";
   const sidebarOpen = cookieStore?.get("sidebar_state")?.value !== "false";
   const isAdmin = await hasTag(sessionToken, ["Администратор"]);
+  const canEditKillcount = await hasTag(sessionToken, KILLCOUNT_EDITOR_TAGS);
   const isRealAdmin = await hasTag(sessionToken, ["Администратор"], {
     ignorePreview: true,
   });
@@ -40,6 +42,7 @@ export default async function DefaultLayout({
       <div className="flex w-full bg-background text-foreground [--app-header:3.5rem]">
         <AppSidebar
           isAdmin={isAdmin}
+          canEditKillcount={canEditKillcount}
           locationBadge={<GuildLocationBadge />}
           locationIcon={<GuildLocationBadge variant="icon" />}
           promo={promo}
@@ -89,7 +92,11 @@ export default async function DefaultLayout({
           </main>
         </div>
       </div>
-      <MobileNav isAdmin={isAdmin} promo={promo} />
+      <MobileNav
+        isAdmin={isAdmin}
+        canEditKillcount={canEditKillcount}
+        promo={promo}
+      />
     </SidebarProvider>
   );
 }

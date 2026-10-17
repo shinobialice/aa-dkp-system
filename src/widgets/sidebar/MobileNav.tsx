@@ -27,10 +27,11 @@ import {
 
 type Props = {
   isAdmin: boolean;
+  canEditKillcount: boolean;
   promo: PromoLink | null;
 };
 
-export default function MobileNav({ isAdmin, promo }: Props) {
+export default function MobileNav({ isAdmin, canEditKillcount, promo }: Props) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const activeTab = findActiveUrl(pathname, TAB_URLS);
@@ -113,7 +114,17 @@ export default function MobileNav({ isAdmin, promo }: Props) {
             {buildSheetSections(isAdmin).map((section) => (
               <section key={section.title} className="space-y-2">
                 <h3 className="text-xs font-semibold text-muted-foreground">
-                  {section.title}
+                  {section.editorsLink && canEditKillcount ? (
+                    <Link
+                      href={section.editorsLink}
+                      onClick={close}
+                      className="underline-offset-2 hover:underline"
+                    >
+                      {section.title}
+                    </Link>
+                  ) : (
+                    section.title
+                  )}
                 </h3>
                 <div className="grid grid-cols-3 gap-2">
                   {section.items.map((item) => {

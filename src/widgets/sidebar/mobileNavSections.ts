@@ -11,7 +11,12 @@ export const PILL_CLASS =
 export const TILE_CLASS =
   "flex min-h-19 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border bg-card px-1.5 py-2 text-center text-xs leading-tight font-medium transition-colors hover:bg-accent";
 
-type SheetSection = { title: string; items: NavItem[]; withDimonish: boolean };
+type SheetSection = {
+  title: string;
+  items: NavItem[];
+  withDimonish: boolean;
+  editorsLink?: string;
+};
 
 export function buildSheetSections(isAdmin: boolean): SheetSection[] {
   const withoutTabs = (items: NavItem[]) =>
@@ -28,6 +33,7 @@ export function buildSheetSections(isAdmin: boolean): SheetSection[] {
       title: section.title ?? "",
       items: withoutTabs(section.items),
       withDimonish: false,
+      editorsLink: section.editorsLink,
     }))
     .filter((section) => section.items.length > 0);
 

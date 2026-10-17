@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
+import { PRIVATE_UPLOADS_DIR } from "@/shared/lib/localStorage";
 
 const UPLOADS_DIR = process.env.UPLOADS_DIR || "/data/uploads";
 const DEV_FALLBACK_URL =
@@ -43,6 +44,12 @@ export async function GET(
   // Защита от выхода за пределы папки загрузок через "../".
   if (filePath !== root && !filePath.startsWith(root + path.sep)) {
     return NextResponse.json({ error: "Invalid path" }, { status: 400 });
+  }
+  if (
+    filePath === PRIVATE_UPLOADS_DIR ||
+    filePath.startsWith(PRIVATE_UPLOADS_DIR + path.sep)
+  ) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
   try {

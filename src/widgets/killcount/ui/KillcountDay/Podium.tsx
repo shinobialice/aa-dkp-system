@@ -56,7 +56,7 @@ export default function Podium({ rows }: { rows: KillRow[] }) {
             <span className="flex max-w-full min-w-0 text-sm sm:text-base">
               <PlayerName row={row} />
             </span>
-            <ClassBadge row={row} />
+            <ClassBadge row={row} isStacked />
             <span className="text-2xl leading-none font-extrabold text-red-600 tabular-nums dark:text-red-400">
               {kills(row)}{" "}
               <span className="text-xs font-semibold text-muted-foreground">
