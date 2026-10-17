@@ -1,0 +1,74 @@
+name: Scanner installer
+
+# Builds CorvusScannerSetup.exe (tools/corvus-pvp) on Windows, checks the
+# built program and the installer, and on main publishes it to the
+# scanner-latest release that /api/killcount/scanner/installer points to.
+on:
+  push:
+    paths:
+      - "tools/corvus-pvp/**"
+      - "public/images/logo.png"
+      - ".github/workflows/scanner-installer.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: tools/corvus-pvp
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Unit tests on Windows
+        run: python -m unittest discover -s tests -v
+
+      - name: Build program and installer
+        run: ./packaging/build.ps1 -Version "1.0.${{ github.run_number }}"
+
+      - name: Self-test of the built program
+        timeout-minutes: 3
+        run: |
+          $p = Start-Process -FilePath dist\CorvusScanner\CorvusScanner.exe -ArgumentList "--selftest" -Wait -PassThru
+          Get-Content "$env:LOCALAPPDATA\CorvusScanner\selftest.txt" -Encoding utf8
+          if ($p.ExitCode -ne 0) { throw "selftest exit code $($p.ExitCode)" }
+
+      - name: Install silently, check shortcut and firewall rule, uninstall
+        timeout-minutes: 5
+        run: |
+          $setup = Start-Process packaging\Output\CorvusScannerSetup.exe -ArgumentList "/VERYSILENT","/SUPPRESSMSGBOXES","/NORESTART","/TASKS=desktopicon" -Wait -PassThru
+          if ($setup.ExitCode -ne 0) { throw "setup exit code $($setup.ExitCode)" }
+          $exe = "$env:ProgramFiles\CorvusScanner\CorvusScanner.exe"
+          if (-not (Test-Path $exe)) { throw "not installed: $exe" }
+          $lnk = Get-ChildItem "$env:PUBLIC\Desktop","$env:USERPROFILE\Desktop" -Filter "Corvus PvP Scanner.lnk" -ErrorAction SilentlyContinue
+          if (-not $lnk) { throw "desktop shortcut missing" }
+          netsh advfirewall firewall show rule name="Corvus PvP Scanner"
+          if ($LASTEXITCODE -ne 0) { throw "firewall rule missing" }
+          $u = Start-Process "$env:ProgramFiles\CorvusScanner\unins000.exe" -ArgumentList "/VERYSILENT","/SUPPRESSMSGBOXES","/NORESTART" -Wait -PassThru
+          if ($u.ExitCode -ne 0) { throw "uninstall exit code $($u.ExitCode)" }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CorvusScannerSetup
+          path: tools/corvus-pvp/packaging/Output/CorvusScannerSetup.exe
+
+      - name: Publish to the scanner-latest release
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view scanner-latest *> $null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create scanner-latest --title "Corvus PvP Scanner" --latest=false `
+              --notes "Установщик сканера киллкаунта. Ссылка для модераторов — на сайте, раздел «Киллкаунт α»."
+          }
+          gh release upload scanner-latest packaging/Output/CorvusScannerSetup.exe --clobber

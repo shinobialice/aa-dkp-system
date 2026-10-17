@@ -3,6 +3,12 @@ import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { crc32, deflateRawSync } from "node:zlib";
 
+// Установщик (.exe) лежит в релизе scanner-latest репозитория; можно
+// переопределить переменной окружения, если файл переедет.
+export const SCANNER_INSTALLER_URL =
+  process.env.SCANNER_INSTALLER_URL ??
+  "https://github.com/shinobialice/aa-dkp-system/releases/download/scanner-latest/CorvusScannerSetup.exe";
+
 // Папка сканера киллкаунта в репозитории. На проде её кладёт в бандл
 // outputFileTracingIncludes из next.config.js.
 const SCANNER_DIR = path.join(process.cwd(), "tools", "corvus-pvp");

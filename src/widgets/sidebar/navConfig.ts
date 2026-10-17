@@ -34,6 +34,8 @@ export type NavSection = {
   iconClassName: string;
   adminOnly?: boolean;
   withDimonish?: boolean;
+  // Заголовок раздела — ссылка, но только для тех, кто заполняет киллкаунт.
+  editorsLink?: string;
 };
 
 export const NAV_SECTIONS: NavSection[] = [
@@ -78,6 +80,7 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     title: "Киллкаунт α",
     iconClassName: "text-rose-600 dark:text-rose-400",
+    editorsLink: "/kill-counter/scanner",
     items: [
       { title: "Сегодня", url: "/kill-counter/current", icon: Swords },
       { title: "История", url: "/kill-counter/history", icon: History },

@@ -247,6 +247,23 @@ class CaptureTests(unittest.TestCase):
                 self.assertEqual({r['name']: r['presence'] for r in late['rows']}['Сосед'], 'ушёл?')
 
 
+class RawSocketTests(unittest.TestCase):
+    def test_game_port_filter_on_raw_ip(self):
+        from winraw_live import _game_tcp
+        ip_in = eth_tcp(b'payload', 1)[14:]                       # server -> client
+        ip_out = eth_tcp(b'payload', 1, sport=50000, dport=1239)[14:]
+        other = eth_tcp(b'payload', 1, sport=443, dport=50000)[14:]
+        self.assertTrue(_game_tcp(ip_in, 1239))
+        self.assertTrue(_game_tcp(ip_out, 1239))
+        self.assertFalse(_game_tcp(other, 1239))
+        self.assertFalse(_game_tcp(b'\x60' + bytes(40), 1239))     # IPv6 is not used by the game
+        # raw IPv4 (link type 101) goes through the normal decoder
+        dec = CaptureDecoder()
+        frame = dd05(0x0254, b'x')
+        msgs = dec.add_packet(RawPacket(1.0, 101, eth_tcp(frame, 7)[14:]))
+        self.assertEqual([(m.kind, m.status) for m in msgs], [(5, 'ok')])
+
+
 class DiscoverTests(unittest.TestCase):
     def test_finds_removal_candidate(self):
         """A player leaves (heartbeat stops) and a made-up 0x0123 message names him."""

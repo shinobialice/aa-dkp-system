@@ -27,12 +27,19 @@ import AnniversaryBalloons from "@/widgets/AnniversaryBalloons/AnniversaryBalloo
 
 type Props = {
   isAdmin: boolean;
+  canEditKillcount: boolean;
   locationBadge?: ReactNode;
   locationIcon?: ReactNode;
   promo: PromoLink | null;
 };
 
-function AppSidebar({ isAdmin, locationBadge, locationIcon, promo }: Props) {
+function AppSidebar({
+  isAdmin,
+  canEditKillcount,
+  locationBadge,
+  locationIcon,
+  promo,
+}: Props) {
   const pathname = usePathname();
   const activeUrl = findActiveUrl(pathname, ALL_NAV_URLS);
   const sections = NAV_SECTIONS.filter(
@@ -80,9 +87,19 @@ function AppSidebar({ isAdmin, locationBadge, locationIcon, promo }: Props) {
         {promo && <PromoMenuItem promo={promo} />}
         {sections.map((section) => (
           <SidebarGroup key={section.title ?? "main"} className="py-1">
-            {section.title && (
-              <SidebarGroupLabel>{section.title}</SidebarGroupLabel>
-            )}
+            {section.title &&
+              (section.editorsLink && canEditKillcount ? (
+                <SidebarGroupLabel asChild>
+                  <Link
+                    href={section.editorsLink}
+                    className="hover:text-sidebar-foreground hover:underline"
+                  >
+                    {section.title}
+                  </Link>
+                </SidebarGroupLabel>
+              ) : (
+                <SidebarGroupLabel>{section.title}</SidebarGroupLabel>
+              ))}
             <SidebarGroupContent>
               <SidebarMenu>
                 {section.items.map((item) => {

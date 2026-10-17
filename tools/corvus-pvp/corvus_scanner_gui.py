@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import csv
 import json
+import os
 import queue
 import sys
 import threading
@@ -35,9 +36,14 @@ from aa_killcount import build_killcount, describe, list_snapshots, load_snapsho
 from aa_tracker import PRESENT_S, WorldTracker
 
 ROOT = Path(__file__).resolve().parent
-CONFIG = ROOT / 'corvus_scanner.json'
-CAPTURES = ROOT / 'captures'
-SNAPSHOTS = ROOT / 'snapshots'
+# The installed program lives in Program Files (read-only): keep user data in
+# %LOCALAPPDATA%\CorvusScanner.  Run from a plain folder, data stays next to it.
+DATA = (Path(os.environ.get('LOCALAPPDATA') or Path.home()) / 'CorvusScanner'
+        if getattr(sys, 'frozen', False) else ROOT)
+CONFIG = DATA / 'corvus_scanner.json'
+CAPTURES = DATA / 'captures'
+SNAPSHOTS = DATA / 'snapshots'
+ICON = ROOT / 'corvus.png'
 DASH = '—'
 COLUMNS = (('name', 'Ник', 170, 'w'), ('honor', 'PvP честь', 90, 'e'), ('kills', 'PvP убийства', 90, 'e'),
            ('class', 'Класс', 150, 'w'), ('guild_id', 'Гильдия ID', 75, 'e'), ('distance_m', 'Дист., м', 65, 'e'),
@@ -71,9 +77,8 @@ class Engine:
         threading.Thread(target=self._work, daemon=True, name='decoder').start()
 
     def start_capture(self):
-        from npcap_live import LiveCapture
-        self.capture = LiveCapture(self.q.put, on_error=self.errors.append)
-        self.adapters = self.capture.start()
+        from winraw_live import start_any_capture
+        self.capture, self.adapters = start_any_capture(self.q.put, on_error=self.errors.append)
 
     def _work(self):
         while True:
@@ -110,6 +115,9 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title('Corvus PvP — сканер рядом v3')
+        if ICON.is_file():
+            self._icon = tk.PhotoImage(file=str(ICON))
+            self.iconphoto(True, self._icon)
         self.geometry('1150x600')
         self.minsize(820, 420)
         cfg = load_config()
@@ -213,6 +221,7 @@ class App(tk.Tk):
                 for ent in tracker.entities.values():
                     if me and ent.name == me:
                         tracker.me_obj, tracker.me_how = ent.obj_id, 'по нику из настроек'
+        DATA.mkdir(parents=True, exist_ok=True)
         CONFIG.write_text(json.dumps({'me': me or '', 'radius': self.radius_var.get()}, ensure_ascii=False),
                           encoding='utf-8')
 
@@ -316,8 +325,16 @@ class KillcountDialog(tk.Toplevel):
         ttk.Checkbutton(frm, text='только моя гильдия', variable=self.guild_var).grid(row=2, column=1, sticky='w')
         ttk.Button(frm, text='Посчитать и скопировать JSON для сайта', command=self.run).grid(
             row=3, column=1, sticky='w', pady=6)
+        ttk.Button(frm, text='Открыть папку снимков', command=self.open_folder).grid(
+            row=3, column=1, sticky='e', pady=6)
         self.out = tk.Text(self, wrap='word', height=20)
         self.out.pack(fill='both', expand=True, padx=10, pady=(0, 10))
+
+    @staticmethod
+    def open_folder():
+        SNAPSHOTS.mkdir(parents=True, exist_ok=True)
+        if hasattr(os, 'startfile'):
+            os.startfile(str(SNAPSHOTS))
 
     @staticmethod
     def _taken(path: Path):
@@ -363,5 +380,55 @@ class KillcountDialog(tk.Toplevel):
         self.out.insert('1.0', text)
 
 
+def selftest() -> int:
+    """Non-GUI check of a built program: decoder, class table, capture backends."""
+    import zlib
+    from aa_classes import CLASS_NAMES, class_info
+    from aa_unitstate import encode_pisc, encode_pisc_list
+    lines, ok = [], True
+    lines.append(f'классов в таблице: {len(CLASS_NAMES)}')
+    ok &= len(CLASS_NAMES) == 364 and class_info([2, 4, 10]).name is not None
+    # A minimal synthetic unit state: header, filler, character tail.
+    nb = 'Тест'.encode()
+    rec = (b'\x00\x00\xef\x00' + (777).to_bytes(3, 'little') + len(nb).to_bytes(2, 'little') + nb
+           + b'\x2a\x01\x00\x00' + (5).to_bytes(4, 'little') + bytes(14) + bytes(11)
+           + b'\x00\x00\x80\x3f\x37\x01' + bytes(300) + bytes([3, 2]) + bytes(13)
+           + encode_pisc_list([100, 200, 300]) + encode_pisc_list([5, 6]) + bytes([0, 0, 1, 0x13])
+           + encode_pisc([0, 0, 0, 0]) + encode_pisc([101, 1085, 1]) + encode_pisc([1049037, 764, 0, 0])
+           + b'\x00\x20\x00' + b''.join(b'\x00\x00\x00\x00' + bytes([o]) for o in
+                                         [0xFF, 0, 0xFF, 1] + [0xFF] * 5 + [2] + [0xFF] * 19)
+           + bytes([3, 2, 4, 10]))
+    from aa_unitstate import parse_unit_states
+    recs = parse_unit_states(rec)
+    got = (recs[0].honor, recs[0].kills) if recs else None
+    lines.append(f'разбор записи: {got}')
+    ok &= got == (1049037, 764)
+    zlib.compress(b'x')
+    try:
+        import importlib
+        importlib.import_module('tkinter')   # the GUI toolkit must be bundled
+        lines.append('tkinter: есть')
+    except ImportError as e:
+        ok = False
+        lines.append(f'tkinter: нет ({e})')
+    from winraw_live import available, local_ipv4
+    lines.append(f'встроенный захват Windows: {available()}, адреса: {local_ipv4()}')
+    try:
+        from npcap_live import load_npcap
+        load_npcap()
+        lines.append('Npcap: установлен')
+    except Exception as e:
+        lines.append(f'Npcap: нет ({e})')
+    lines.append('ИТОГ: ' + ('OK' if ok else 'ОШИБКА'))
+    out = '\n'.join(lines)
+    DATA.mkdir(parents=True, exist_ok=True)
+    (DATA / 'selftest.txt').write_text(out + '\n', encoding='utf-8')
+    if sys.stdout:
+        print(out)
+    return 0 if ok else 1
+
+
 if __name__ == '__main__':
+    if '--selftest' in sys.argv:
+        sys.exit(selftest())
     App().mainloop()
