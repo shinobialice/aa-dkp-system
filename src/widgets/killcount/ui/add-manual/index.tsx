@@ -1,22 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { TriangleAlert } from "lucide-react";
 import { toast } from "sonner";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-  Button,
-  Input,
-} from "@/shared/ui";
-import { type KillCount } from "../../types";
+import { Button, Input } from "@/shared/ui";
+import { type KillCount, type KillCountExclusion } from "../../types";
+import { setKillCountCurrent } from "../../api/current";
 import {
   findUnknownKillCountUsers,
-  setKillCountCurrent,
-} from "../../api/current";
+  prepareScannerKillCount,
+} from "../../api/scanner";
 import { KillcountDay } from "../KillcountDay";
+import { DraftNotices } from "./DraftNotices";
 
 type AddManualKillCountProps = {
   onBack: () => void;
@@ -32,9 +27,10 @@ function parseJson(value: string): KillCount[] | null {
         ...item,
         userName,
         // «Ник (комментарий)» — старый способ; JSON сканера передаёт comment отдельно.
+        // Пустая строка, не undefined: postgres.js не вставляет undefined.
         comment: rest.length
           ? rest.join(" ").replaceAll(/\(|\)/g, "")
-          : item.comment,
+          : (item.comment ?? ""),
       };
     });
   } catch (error) {
@@ -51,19 +47,29 @@ export function AddManualKillCount({
   const [rows, setRows] = useState<KillCount[]>([]);
   const [jsonInput, setJsonInput] = useState("");
   const [saving, setSaving] = useState(false);
-  const [unknownNames, setUnknownNames] = useState<string[]>([]);
+  // Результат проверки ников хранится вместе с ключом списка, для которого он
+  // получен: пока ключ не совпал с текущим, проверка ещё идёт.
+  const [checked, setChecked] = useState({
+    key: "[]",
+    unknown: [] as string[],
+  });
+  const [excluded, setExcluded] = useState<KillCountExclusion[]>([]);
+  const [preparing, setPreparing] = useState(false);
+  const prepareSeq = useRef(0);
 
-  const namesKey = rows.map((row) => row.userName).join("\n");
+  const namesKey = JSON.stringify(rows.map((row) => row.userName));
+  const checking = checked.key !== namesKey;
+  const unknownNames = checking ? [] : checked.unknown;
   useEffect(() => {
-    const names = namesKey ? namesKey.split("\n") : [];
+    const names: string[] = JSON.parse(namesKey);
     let ignore = false;
     (names.length ? findUnknownKillCountUsers(names) : Promise.resolve([]))
       .then((unknown) => {
-        if (!ignore) setUnknownNames(unknown);
+        if (!ignore) setChecked({ key: namesKey, unknown });
       })
       // Проверка — только подсказка: если она не удалась, ошибку покажет сохранение.
       .catch(() => {
-        if (!ignore) setUnknownNames([]);
+        if (!ignore) setChecked({ key: namesKey, unknown: [] });
       });
     return () => {
       ignore = true;
@@ -72,6 +78,36 @@ export function AddManualKillCount({
 
   const removeUnknown = () => {
     setRows(rows.filter((row) => !unknownNames.includes(row.userName)));
+  };
+
+  // JSON из сканера (есть specs) сначала фильтруется на сервере: только
+  // пользователи сайта на ДД-ролях. Обычный JSON вставляется как раньше.
+  const applyParsed = (parsed: KillCount[]) => {
+    const seq = ++prepareSeq.current;
+    if (!parsed.some((row) => Array.isArray(row.specs))) {
+      setPreparing(false);
+      setExcluded([]);
+      setRows(parsed);
+      return;
+    }
+    setPreparing(true);
+    setRows([]);
+    prepareScannerKillCount(parsed)
+      .then((result) => {
+        if (seq !== prepareSeq.current) return;
+        setRows(result.rows);
+        setExcluded(result.excluded);
+      })
+      .catch((error) => {
+        if (seq !== prepareSeq.current) return;
+        setExcluded([]);
+        toast.error("Не удалось проверить список из сканера", {
+          description: error instanceof Error ? error.message : undefined,
+        });
+      })
+      .finally(() => {
+        if (seq === prepareSeq.current) setPreparing(false);
+      });
   };
 
   const handleSave = async () => {
@@ -105,41 +141,35 @@ export function AddManualKillCount({
             const value = event.currentTarget.value;
             setJsonInput(value);
             const parsed = parseJson(value);
-            if (parsed) setRows(parsed);
+            if (parsed) applyParsed(parsed);
           }}
         />
         <Button
           className="cursor-pointer"
-          disabled={rows.length === 0 || saving || unknownNames.length > 0}
+          disabled={
+            rows.length === 0 ||
+            saving ||
+            preparing ||
+            checking ||
+            unknownNames.length > 0
+          }
           onClick={handleSave}
         >
           Сохранить
         </Button>
       </div>
 
-      {unknownNames.length > 0 && (
-        <Alert variant="destructive">
-          <TriangleAlert />
-          <AlertTitle>
-            Этих ников нет на сайте: {unknownNames.length}
-          </AlertTitle>
-          <AlertDescription>
-            <p>{unknownNames.join(", ")}</p>
-            <p>
-              Сохранение не пройдёт, пока они в списке. Уберите их или исправьте
-              ник в строке.
-            </p>
-            <Button
-              variant="secondary"
-              size="sm"
-              className="cursor-pointer"
-              onClick={removeUnknown}
-            >
-              Убрать из списка
-            </Button>
-          </AlertDescription>
-        </Alert>
+      {preparing && (
+        <p className="text-sm text-muted-foreground">
+          Проверяю список из сканера…
+        </p>
       )}
+
+      <DraftNotices
+        excluded={excluded}
+        unknownNames={unknownNames}
+        onRemoveUnknown={removeUnknown}
+      />
 
       <KillcountDay
         data={rows}

@@ -24,7 +24,7 @@ import sys
 import threading
 import time
 import tkinter as tk
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
@@ -300,8 +300,12 @@ class KillcountDialog(tk.Toplevel):
         frm.pack(fill='x')
         ttk.Label(frm, text='Начало прайма:').grid(row=0, column=0, sticky='w')
         ttk.Label(frm, text='Конец прайма:').grid(row=1, column=0, sticky='w')
-        today = datetime.now().strftime('%Y-%m-%d')
-        first_today = next((i for i, p in enumerate(self.paths) if today in p.name), 0)
+        # Default: the last snapshot is the end, the earliest one within 8 hours
+        # before it is the start (works for a prime that crosses midnight).
+        times = [self._taken(p) for p in self.paths]
+        end_t = times[-1]
+        first_today = next((i for i, t in enumerate(times)
+                            if t and end_t and timedelta(0) <= end_t - t <= timedelta(hours=8)), 0)
         self.start = ttk.Combobox(frm, values=labels, state='readonly', width=80)
         self.end = ttk.Combobox(frm, values=labels, state='readonly', width=80)
         self.start.current(first_today)
@@ -314,6 +318,13 @@ class KillcountDialog(tk.Toplevel):
             row=3, column=1, sticky='w', pady=6)
         self.out = tk.Text(self, wrap='word', height=20)
         self.out.pack(fill='both', expand=True, padx=10, pady=(0, 10))
+
+    @staticmethod
+    def _taken(path: Path):
+        try:
+            return datetime.fromisoformat(load_snapshot(path)['taken_at'])
+        except (OSError, ValueError, KeyError):
+            return None
 
     @staticmethod
     def _label(path: Path) -> str:
@@ -347,7 +358,7 @@ class KillcountDialog(tk.Toplevel):
             text += (f'\n\nJSON скопирован в буфер обмена и сохранён в {path.name}.\n'
                      f'На сайте: Киллкаунт → «Добавить вручную» → вставить в поле «Вставьте JSON» → «Сохранить».')
         else:
-            text += '\n\nНет игроков, которые есть в обоих снимках, — JSON не создан.'
+            text += '\n\nНекого добавлять в киллкаунт — JSON не создан (причины выше).'
         self.out.delete('1.0', 'end')
         self.out.insert('1.0', text)
 

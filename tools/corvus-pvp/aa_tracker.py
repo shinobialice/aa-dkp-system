@@ -48,6 +48,7 @@ class WorldTracker:
     def __init__(self, me_name: Optional[str] = None):
         self.me_name = (me_name or '').strip() or None
         self.me_obj: Optional[int] = None
+        self.me_char_id: Optional[int] = None
         self.me_how = ''
         self.entities: Dict[int, Entity] = {}
         self.last_ts = 0.0
@@ -105,6 +106,9 @@ class WorldTracker:
                 self.me_obj, self.me_how = r.obj_id, 'по нику из настроек'
             elif not self.me_name and self.me_obj is None and subpackets >= WORLD_ENTRY_SUBPACKETS:
                 self.me_obj, self.me_how = r.obj_id, f'авто: запись входа в мир ({subpackets} подпакетов)'
+                self.me_char_id = r.char_id
+            elif not self.me_name and r.char_id is not None and r.char_id == self.me_char_id:
+                self.me_obj = r.obj_id   # re-entered the world: same character, new object id
         return records
 
     # ------------------------------------------------------------- output
@@ -150,12 +154,23 @@ class WorldTracker:
                     'class': cls.label if cls else None,
                     'class_trees': ' + '.join(cls.trees) if cls else None,
                     'class_certain': cls.certain if cls else False,
+                    'class_specs': cls.slugs if cls and len(cls.slugs) == 3 else None,
                     'level': r.level if r else None, 'heir_level': r.heir_level if r else None,
                     'distance_m': None if dist is None else round(dist, 1),
                     'presence': presence, 'seen_ago_s': round(now - last, 1),
                     'record_age_s': round(now - e.state_ts, 1) if e.state_ts is not None else None,
                     'stats_changed': len(e.history) > 1,
                 })
+            newest: Dict[int, dict] = {}
+            for row in rows:
+                cid = row['char_id']
+                if cid is None:
+                    continue
+                cur = newest.get(cid)
+                if cur is None or (row['record_age_s'] or 0) < (cur['record_age_s'] or 0):
+                    newest[cid] = row
+            # Re-login gives a character a new object id; show it once, newest record.
+            rows = [row for row in rows if row['char_id'] is None or newest[row['char_id']] is row]
             rows.sort(key=lambda x: (not x['is_me'], x['presence'] != 'рядом',
                                      x['distance_m'] if x['distance_m'] is not None else 1e9, x['name']))
             return {'now': now, 'me_obj': self.me_obj, 'me_how': self.me_how,

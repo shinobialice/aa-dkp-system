@@ -4,6 +4,7 @@ import { hasTag } from "@/actions/hasTag";
 import { KILLCOUNT_EDITOR_TAGS } from "@/server/killcountEditors";
 import { AddKillCount } from "@/widgets/killcount/add-kill-count";
 import { KillcountHeader } from "@/widgets/killcount/ui/KillcountHeader";
+import { ScannerGuide } from "@/widgets/killcount/ui/ScannerGuide";
 import { KillcountDay } from "@/widgets/killcount/ui/KillcountDay";
 import { longDate } from "@/widgets/killcount/ui/killcountModel";
 
@@ -26,6 +27,7 @@ export default async function KillCounterPage() {
       <KillcountHeader
         subtitle={`Сегодня, ${longDate(moscowToday())} · кто сколько набил за прайм`}
       />
+      {canEditKillcount && <ScannerGuide />}
       {currentKillCount?.length ? (
         <KillcountDay
           data={currentKillCount}

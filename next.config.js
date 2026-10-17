@@ -8,6 +8,10 @@ const nextConfig = {
       },
     ],
   },
+  // Файлы сканера киллкаунта для /api/killcount/scanner (src/server/scannerBundle.ts).
+  outputFileTracingIncludes: {
+    "/api/killcount/scanner": ["./tools/corvus-pvp/**/*"],
+  },
   experimental: {
     serverActions: {
       bodySizeLimit: "6mb",

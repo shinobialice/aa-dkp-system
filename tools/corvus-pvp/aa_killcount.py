@@ -5,7 +5,9 @@ Workflow: at the start of prime and again at the end a person opens the
 scanner on the character select screen, enters the location and presses
 «Сканировать рядом».  Each press writes a snapshot (snapshots/*.json).  The
 killcount is end - start for every player present in both snapshots, in the
-JSON format that the site accepts in «Киллкаунт → Добавить вручную».
+JSON format that the site accepts in «Киллкаунт → Добавить вручную».  Rows carry
+the three tree ids (`specs`); the site keeps only its own users whose role for
+that build is a DPS role (src/shared/config/killcountRoles.ts).
 
 Players are matched by the persistent character id from the unit state
 (falls back to the name when an id is missing), so a rename during prime does
@@ -15,11 +17,12 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional
 
 SNAPSHOT_FORMAT = 'corvus-snapshot/1'
+STALE_START_S = 600   # start record older than this: kills made before the scan may be counted
 
 
 def snapshot_from(snap: Dict, source: str, taken_at: Optional[datetime] = None) -> Dict:
@@ -34,9 +37,11 @@ def snapshot_from(snap: Dict, source: str, taken_at: Optional[datetime] = None) 
     players = [{
         'name': r['name'], 'char_id': r['char_id'], 'obj_id': r['obj_id'],
         'honor': r['honor'], 'kills': r['kills'],
-        'class': r['class'], 'class_certain': r['class_certain'],
+        'class': r['class'], 'class_certain': r['class_certain'], 'specs': r['class_specs'],
         'guild_id': r['guild_id'], 'presence': r['presence'],
         'distance_m': r['distance_m'], 'record_age_s': r['record_age_s'],
+        'record_at': None if r['record_age_s'] is None else
+        (taken_at - timedelta(seconds=r['record_age_s'])).isoformat(timespec='seconds'),
     } for r in snap['rows'] if r['honor'] is not None and r['kills'] is not None]
     return {
         'format': SNAPSHOT_FORMAT,
@@ -75,6 +80,7 @@ class KillcountResult:
     rows: List[Dict]                      # site format, sorted by kills
     only_start: List[str] = field(default_factory=list)
     only_end: List[str] = field(default_factory=list)
+    stale_end: List[str] = field(default_factory=list)
     other_guild: int = 0
     warnings: List[str] = field(default_factory=list)
     guild_id: Optional[int] = None
@@ -86,6 +92,19 @@ class KillcountResult:
 
 def _key(p: Dict) -> str:
     return f"c{p['char_id']}" if p.get('char_id') else f"n{p['name']}"
+
+
+def _record_time(doc: Dict, p: Dict) -> Optional[datetime]:
+    """When the unit state behind these values was received."""
+    if p.get('record_at'):
+        return datetime.fromisoformat(p['record_at'])
+    if p.get('record_age_s') is not None:
+        return datetime.fromisoformat(doc['taken_at']) - timedelta(seconds=p['record_age_s'])
+    return None
+
+
+def _age(p: Dict) -> float:
+    return p['record_age_s'] if p.get('record_age_s') is not None else float('inf')
 
 
 def _class_name(p: Dict) -> str:
@@ -113,19 +132,35 @@ def build_killcount(start: Dict, end: Dict, only_my_guild: bool = True) -> Killc
             if guild is not None and p.get('guild_id') != guild:
                 skipped.add(_key(p))
                 continue
-            out[_key(p)] = p
+            k = _key(p)
+            # The same character twice (re-login gave it a new object id): the
+            # freshest unit state is the one with current values.
+            if k not in out or _age(p) < _age(out[k]):
+                out[k] = p
         return out
 
     a, b = members(start), members(end)
     res.other_guild = len(skipped)
     # A character seen with an id in one snapshot and only by name in the other.
+    # Two different ids are two different characters, even with the same name.
     by_name_a = {p['name']: k for k, p in a.items()}
     for k, p in list(b.items()):
-        if k not in a and p['name'] in by_name_a:
-            b[by_name_a[p['name']]] = b.pop(k)
+        t = by_name_a.get(p['name'])
+        if k not in a and t and t not in b and (k[0] == 'n') != (t[0] == 'n'):
+            b[t] = b.pop(k)
 
+    start_at = datetime.fromisoformat(start['taken_at'])
+    old_start = sorted(p['name'] for p in a.values() if _age(p) > STALE_START_S)
+    if old_start:
+        res.warnings.append(f'Анкеты в начале старше {STALE_START_S // 60} мин (перед сканом начала стоило '
+                            'перезайти в мир) — в разницу могут попасть убийства до начала прайма: '
+                            + ', '.join(old_start))
     for k in sorted(set(a) & set(b), key=lambda k: b[k]['name']):
         s, e = a[k], b[k]
+        e_at = _record_time(end, e)
+        if e_at is not None and e_at <= start_at:
+            res.stale_end.append(e['name'])   # values from before the prime, not the end
+            continue
         notes = []
         if s['name'] != e['name']:
             notes.append(f"был ник {s['name']}")
@@ -138,6 +173,10 @@ def build_killcount(start: Dict, end: Dict, only_my_guild: bool = True) -> Killc
         row = {'id': 0, 'userName': e['name'], 'playerClass': ce,
                'startHonor': s['honor'], 'endHonor': e['honor'],
                'startKills': s['kills'], 'endKills': e['kills']}
+        if e.get('specs'):
+            row['specs'] = e['specs']        # lets the site pick the role slot (Милик/Лук/Маг/...)
+        if s['name'] != e['name']:
+            row['aliases'] = [s['name']]       # the site may still know the old name
         if notes:
             row['comment'] = '; '.join(notes)
         res.rows.append(row)
@@ -145,6 +184,7 @@ def build_killcount(start: Dict, end: Dict, only_my_guild: bool = True) -> Killc
                                  r['userName']))
     for i, r in enumerate(res.rows, 1):
         r['id'] = i
+    res.stale_end.sort()
     res.only_start = sorted(a[k]['name'] for k in set(a) - set(b))
     res.only_end = sorted(b[k]['name'] for k in set(b) - set(a))
     return res
@@ -162,6 +202,9 @@ def describe(res: KillcountResult, start: Dict, end: Dict) -> str:
                      + (f"  ({r['comment']})" if r.get('comment') else ''))
     if res.only_start:
         lines.append('Только в начале (нет в конце, не посчитаны): ' + ', '.join(res.only_start))
+    if res.stale_end:
+        lines.append('Нет свежей анкеты в конце (анкета получена ещё до начала прайма; перед сканом конца '
+                     'нужно перезайти в мир), не посчитаны: ' + ', '.join(res.stale_end))
     if res.only_end:
         lines.append('Только в конце (нет в начале, не посчитаны): ' + ', '.join(res.only_end))
     lines += [f'ВНИМАНИЕ: {w}' for w in res.warnings]

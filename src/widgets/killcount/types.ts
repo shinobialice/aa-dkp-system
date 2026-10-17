@@ -26,7 +26,16 @@ export type KillCount = {
   startKills: number;
   endKills: number;
   comment?: string;
+  // Три ветки класса (id специализаций сайта) — приходят только из сканера.
+  specs?: string[];
+  // Прежние ники того же персонажа (сменил ник на прайме) — тоже из сканера.
+  aliases?: string[];
   id: Id;
+};
+
+export type KillCountExclusion = {
+  userName: string;
+  reason: string;
 };
 
 export type DB_GetKillCountDto = {

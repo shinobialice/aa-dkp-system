@@ -20,6 +20,7 @@ import csv
 import json
 import sys
 from collections import Counter, defaultdict
+from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -257,7 +258,10 @@ def cmd_snapshot(a):
     tr = WorldTracker(a.me)
     for m in msgs:
         tr.feed(m)
-    doc = snapshot_from(tr.snapshot(), f'pcap:{Path(a.capture).name}')
+    # Stamp the capture time, not the time the command runs: killcount orders
+    # start/end by taken_at.
+    taken = datetime.fromtimestamp(tr.last_ts).astimezone()
+    doc = snapshot_from(tr.snapshot(), f'pcap:{Path(a.capture).name}', taken_at=taken)
     path = save_snapshot(doc, Path(a.out_dir))
     print(f"Снимок: {path} ({len(doc['players'])} игроков; я: {doc['me']['name'] if doc['me'] else DASH})")
 

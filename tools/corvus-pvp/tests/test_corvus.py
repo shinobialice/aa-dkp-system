@@ -322,12 +322,15 @@ class KillcountTests(unittest.TestCase):
         self.assertEqual([r['id'] for r in res.rows], [1, 2, 3])
         renamed = res.rows[0]
         self.assertEqual((renamed['startKills'], renamed['endKills'], renamed['comment']), (5, 25, 'был ник Старыйник'))
+        self.assertEqual(renamed['aliases'], ['Старыйник'])
+        self.assertNotIn('aliases', res.rows[1])
         self.assertEqual(res.rows[2]['playerClass'], 'Ведьмак')            # '?' is not sent to the site
         self.assertEqual(res.rows[2]['comment'], 'класс в начале: Аскет')
         self.assertEqual((res.only_start, res.only_end, res.other_guild), (['Ушёл'], ['Пришёл'], 1))
         line = res.site_json()
         self.assertNotIn('\n', line)
         self.assertEqual(json.loads(line), res.rows)
+        self.assertNotIn('specs', res.rows[0])                          # test docs carry no specs
         everyone = build_killcount(start, end, only_my_guild=False)
         self.assertIn('Чужой', [r['userName'] for r in everyone.rows])
 
@@ -339,12 +342,72 @@ class KillcountTests(unittest.TestCase):
         self.assertTrue(any('обратном' in w for w in res.warnings))
         self.assertTrue(any('уменьшились' in w for w in res.warnings))  # honor 100 -> 90
 
+    def test_relogin_duplicate_and_stale_end_record(self):
+        start = self.doc('2026-10-17T20:00:00+03:00', [('Вася', 7, 100, 5, 'Аскет', 1085),
+                                                      ('Петя', 8, 50, 7, 'Аскет', 1085)])
+        end = self.doc('2026-10-17T23:00:00+03:00', [('Вася', 7, 100, 5, 'Аскет', 1085),
+                                                    ('Вася', 7, 400, 25, 'Аскет', 1085),
+                                                    ('Петя', 8, 50, 7, 'Аскет', 1085)])
+        old, new, petya = end['players']
+        old['record_age_s'], new['record_age_s'] = 10790, 20     # old object id vs after re-login
+        petya['record_age_s'] = 10900                           # never re-sent after the start scan
+        res = build_killcount(start, end)
+        self.assertEqual([(r['userName'], r['startKills'], r['endKills']) for r in res.rows], [('Вася', 5, 25)])
+        self.assertEqual(res.stale_end, ['Петя'])
+
+    def test_same_name_different_ids_are_not_merged(self):
+        start = self.doc('2026-10-17T20:00:00+03:00', [('Вася', 10, 100, 10, 'Аскет', 1085)])
+        end = self.doc('2026-10-17T23:00:00+03:00', [('Петя', 10, 150, 12, 'Аскет', 1085),
+                                                    ('Вася', 20, 5000, 3, 'Аскет', 1085)])
+        res = build_killcount(start, end)
+        self.assertEqual([(r['userName'], r['startKills'], r['endKills']) for r in res.rows], [('Петя', 10, 12)])
+        self.assertEqual(res.only_end, ['Вася'])
+
+    def test_cli_snapshot_uses_capture_time(self):
+        import io
+        from contextlib import redirect_stdout
+        import corvus_scan
+        pkts = [(1_700_000_000.0 + i * 0.05, eth_tcp(d, s_)) for i, (s_, d) in
+                enumerate(segments(CaptureTests().stream()))]
+        with tempfile.TemporaryDirectory() as tmp:
+            write_pcap(Path(tmp) / 'a.pcap', pkts)
+            with redirect_stdout(io.StringIO()):
+                corvus_scan.main(['snapshot', str(Path(tmp) / 'a.pcap'), '--out-dir', tmp])
+            doc = load_snapshot(next(Path(tmp).glob('snapshot_*.json')))
+        self.assertTrue(doc['taken_at'].startswith('2023-11-1'))      # capture time, not now
+
+    def test_old_start_record_warns(self):
+        start = self.doc('2026-10-17T20:00:00+03:00', [('Вася', 7, 100, 5, 'Аскет', 1085)])
+        start['players'][0]['record_age_s'] = 3600
+        end = self.doc('2026-10-17T23:00:00+03:00', [('Вася', 7, 120, 6, 'Аскет', 1085)])
+        res = build_killcount(start, end)
+        self.assertEqual(len(res.rows), 1)
+        self.assertTrue(any('старше' in w and 'Вася' in w for w in res.warnings))
+
     def test_unknown_guild_disables_filter(self):
         a = self.doc('2026-10-17T20:00:00+03:00', [('A', 2, 1, 1, '', 5)], me_guild=0)
         b = self.doc('2026-10-17T23:00:00+03:00', [('A', 2, 2, 2, '', 5)], me_guild=0)
         res = build_killcount(a, b)
         self.assertEqual(len(res.rows), 1)
         self.assertIsNone(res.guild_id)
+
+    def test_tracker_relogin_keeps_one_row_and_me(self):
+        own = player_record(25005, 'Я', 10, 1, seed=8)
+        again = player_record(26000, 'Я', 10, 4, seed=8)            # same char id: 1000 + obj id differs
+        again = again.replace((1000 + 26000).to_bytes(4, 'little'), (1000 + 25005).to_bytes(4, 'little'), 1)
+        frames = [(0.0, dd04(own + bytes(600), 45)), (60.0, dd04(again + bytes(600), 45))]
+        seq, pkts = 1, []
+        for t, fr in frames:
+            pkts.append(RawPacket(100 + t, 1, eth_tcp(fr, seq)))
+            seq += len(fr)
+        dec, tr = CaptureDecoder(), WorldTracker()
+        for p in pkts:
+            for m in dec.add_packet(p):
+                tr.feed(m)
+        snap = tr.snapshot()
+        mine = [r for r in snap['rows'] if r['name'] == 'Я']
+        self.assertEqual(len(mine), 1)
+        self.assertEqual((mine[0]['obj_id'], mine[0]['kills'], mine[0]['is_me']), (26000, 4, True))
 
     def test_snapshot_file_from_tracker(self):
         stream = CaptureTests().stream()
@@ -354,6 +417,7 @@ class KillcountTests(unittest.TestCase):
             tr.feed(m)
         doc = snapshot_from(tr.snapshot(), 'test')
         self.assertEqual(doc['me']['name'], 'Я')
+        self.assertEqual(sorted(doc['players'][0]['specs']), ['gipnoz', 'isceleine', 'soprotivlenie'])
         self.assertEqual({p['name']: p['kills'] for p in doc['players']}, {'Я': 1, 'Сосед': 22833})
         with tempfile.TemporaryDirectory() as tmp:
             p1, p2 = save_snapshot(doc, Path(tmp)), save_snapshot(doc, Path(tmp))

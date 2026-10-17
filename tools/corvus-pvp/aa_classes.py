@@ -54,6 +54,7 @@ CLASS_NAMES = _load_names()
 class ClassInfo:
     ability_ids: List[int]
     trees: List[str]            # RU tree names, '?' for unknown ids
+    slugs: List[str]            # site specialization ids (only known trees)
     name: Optional[str]         # RU class name, None if not determinable
     certain: bool               # every id 'confirmed' and the name found
 
@@ -78,4 +79,4 @@ def class_info(active: List[int]) -> ClassInfo:
     name = None
     if len(slugs) == 3 and len(set(slugs)) == 3:
         name = CLASS_NAMES.get('+'.join(sorted(slugs)))
-    return ClassInfo(sorted(active), trees, name, certain and name is not None)
+    return ClassInfo(sorted(active), trees, slugs, name, certain and name is not None)
