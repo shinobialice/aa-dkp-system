@@ -377,3 +377,13 @@ export function lookupClassName(ids: (string | null)[]): string | null {
   if (!key) return null;
   return CLASS_NAME_BY_COMBO[key] ?? null;
 }
+
+// Одно имя может достаться двум сочетаниям (Психокинетик) — тогда веток не угадать.
+const COMBO_BY_CLASS_NAME = new Map<string, string | null>();
+for (const [combo, name] of Object.entries(CLASS_NAME_BY_COMBO)) {
+  COMBO_BY_CLASS_NAME.set(name, COMBO_BY_CLASS_NAME.has(name) ? null : combo);
+}
+
+export function lookupClassSpecs(className: string): string[] | null {
+  return COMBO_BY_CLASS_NAME.get(className)?.split("+") ?? null;
+}

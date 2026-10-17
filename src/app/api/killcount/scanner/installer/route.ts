@@ -1,14 +1,14 @@
 import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { cookies } from "next/headers";
 import { hasTag } from "@/actions/hasTag";
 import { KILLCOUNT_EDITOR_TAGS } from "@/server/killcountEditors";
+import { PRIVATE_UPLOADS_DIR } from "@/shared/lib/localStorage";
 
 export const dynamic = "force-dynamic";
 
 // Установщик не хранится в открытом репозитории: его кладут на сервер вручную.
-const INSTALLER_PATH =
-  process.env.SCANNER_INSTALLER_PATH ??
-  "/opt/corvus-scanner/CorvusScannerSetup.exe";
+const INSTALLER_PATH = path.join(PRIVATE_UPLOADS_DIR, "CorvusScannerSetup.exe");
 
 export async function GET() {
   const sessionToken = (await cookies()).get("session_token")?.value ?? "";

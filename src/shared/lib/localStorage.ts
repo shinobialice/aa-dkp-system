@@ -8,6 +8,9 @@ import path from "path";
 // /api/uploads/[...path].
 const UPLOADS_DIR = process.env.UPLOADS_DIR || "/data/uploads";
 
+// Файлы только для своих (установщик сканера): /api/uploads их не раздаёт.
+export const PRIVATE_UPLOADS_DIR = path.resolve(UPLOADS_DIR, "private");
+
 // Тот же список MIME-типов, что и в ALLOWED_TYPES вызывающих Server Actions —
 // расширение в имени файла нужно API-роуту /api/uploads, чтобы отдать
 // правильный Content-Type (см. CONTENT_TYPES там же). Без расширения роут
