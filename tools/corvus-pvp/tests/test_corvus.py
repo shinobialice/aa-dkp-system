@@ -10,6 +10,7 @@ locally (captures and other players' data are not stored in the repository):
 from __future__ import annotations
 
 import csv
+import json
 import os
 import random
 import struct
@@ -25,6 +26,7 @@ sys.path.insert(0, str(HERE))
 from aa_capture import (CaptureDecoder, RawPacket, _checksum, _xor_dd05, messages_from_file,
                         read_capture)
 from aa_classes import ABILITY_TREES, CLASS_NAMES, class_info
+from aa_killcount import build_killcount, load_snapshot, save_snapshot, snapshot_from
 from aa_tracker import WorldTracker
 from aa_unitstate import (ABILITY_SLOTS, PiscError, encode_pisc, encode_pisc_list,
                           find_confirmed_tails, parse_movements, parse_unit_states, read_pisc,
@@ -296,6 +298,71 @@ class ClassTests(unittest.TestCase):
         self.assertIsNone(odd.name)
         self.assertIn('?99', odd.label)
         self.assertEqual(class_info([]).label, '—')
+
+
+class KillcountTests(unittest.TestCase):
+    @staticmethod
+    def doc(when, players, me_guild=1085):
+        return {'format': 'corvus-snapshot/1', 'taken_at': when, 'source': 'test',
+                'me': {'name': 'Я', 'char_id': 1, 'guild_id': me_guild},
+                'players': [dict(zip(('name', 'char_id', 'honor', 'kills', 'class', 'guild_id'), p),
+                                 class_certain=True) for p in players]}
+
+    def test_prime_delta(self):
+        start = self.doc('2026-10-17T20:00:00+03:00', [
+            ('Я', 1, 1000, 10, 'Аскет', 1085), ('Старыйник', 2, 500, 5, 'Флибустьер', 1085),
+            ('Чужой', 3, 9, 9, 'Сказитель', 777), ('Ушёл', 4, 1, 1, 'Ведьмак', 1085),
+            ('Сменил', 6, 0, 0, 'Аскет', 1085)])
+        end = self.doc('2026-10-17T23:00:00+03:00', [
+            ('Я', 1, 1600, 13, 'Аскет', 1085), ('Новыйник', 2, 900, 25, 'Флибустьер', 1085),
+            ('Чужой', 3, 99, 19, 'Сказитель', 777), ('Пришёл', 5, 7, 7, 'Ведьмак', 1085),
+            ('Сменил', 6, 10, 1, 'Ведьмак?', 1085)])
+        res = build_killcount(start, end)
+        self.assertEqual([r['userName'] for r in res.rows], ['Новыйник', 'Я', 'Сменил'])  # by kills
+        self.assertEqual([r['id'] for r in res.rows], [1, 2, 3])
+        renamed = res.rows[0]
+        self.assertEqual((renamed['startKills'], renamed['endKills'], renamed['comment']), (5, 25, 'был ник Старыйник'))
+        self.assertEqual(res.rows[2]['playerClass'], 'Ведьмак')            # '?' is not sent to the site
+        self.assertEqual(res.rows[2]['comment'], 'класс в начале: Аскет')
+        self.assertEqual((res.only_start, res.only_end, res.other_guild), (['Ушёл'], ['Пришёл'], 1))
+        line = res.site_json()
+        self.assertNotIn('\n', line)
+        self.assertEqual(json.loads(line), res.rows)
+        everyone = build_killcount(start, end, only_my_guild=False)
+        self.assertIn('Чужой', [r['userName'] for r in everyone.rows])
+
+    def test_reversed_order_and_drop(self):
+        a = self.doc('2026-10-17T20:00:00+03:00', [('Я', 1, 100, 10, 'Аскет', 1085)])
+        b = self.doc('2026-10-17T23:00:00+03:00', [('Я', 1, 90, 12, 'Аскет', 1085)])
+        res = build_killcount(b, a)                                     # end given first
+        self.assertEqual((res.rows[0]['startKills'], res.rows[0]['endKills']), (10, 12))
+        self.assertTrue(any('обратном' in w for w in res.warnings))
+        self.assertTrue(any('уменьшились' in w for w in res.warnings))  # honor 100 -> 90
+
+    def test_unknown_guild_disables_filter(self):
+        a = self.doc('2026-10-17T20:00:00+03:00', [('A', 2, 1, 1, '', 5)], me_guild=0)
+        b = self.doc('2026-10-17T23:00:00+03:00', [('A', 2, 2, 2, '', 5)], me_guild=0)
+        res = build_killcount(a, b)
+        self.assertEqual(len(res.rows), 1)
+        self.assertIsNone(res.guild_id)
+
+    def test_snapshot_file_from_tracker(self):
+        stream = CaptureTests().stream()
+        msgs, _ = CaptureTests().decode(segments(stream))
+        tr = WorldTracker()
+        for m in msgs:
+            tr.feed(m)
+        doc = snapshot_from(tr.snapshot(), 'test')
+        self.assertEqual(doc['me']['name'], 'Я')
+        self.assertEqual({p['name']: p['kills'] for p in doc['players']}, {'Я': 1, 'Сосед': 22833})
+        with tempfile.TemporaryDirectory() as tmp:
+            p1, p2 = save_snapshot(doc, Path(tmp)), save_snapshot(doc, Path(tmp))
+            self.assertNotEqual(p1, p2)                                  # same second -> no overwrite
+            self.assertEqual(load_snapshot(p1), doc)
+            bad = Path(tmp) / 'x.json'
+            bad.write_text('{}', encoding='utf-8')
+            with self.assertRaises(ValueError):
+                load_snapshot(bad)
 
 
 # --------------------------------------------------------------------------- real capture

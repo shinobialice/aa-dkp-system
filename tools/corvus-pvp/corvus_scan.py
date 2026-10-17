@@ -6,6 +6,8 @@
   py -3 corvus_scan.py nearby   CAPTURE [--me НИК] [--radius 150] [--at SEC]
   py -3 corvus_scan.py discover CAPTURE            (experiment: who left / which message)
   py -3 corvus_scan.py capture  --seconds 300 --out exp.pcap   (Windows + Npcap, receive-only)
+  py -3 corvus_scan.py snapshot CAPTURE [--me НИК]           (снимок для киллкаунта из файла)
+  py -3 corvus_scan.py killcount START.json END.json [--all-guilds] [--out kc.json]
 
 CAPTURE is .pcap or .pcapng (Npcap, Wireshark, `pktmon etl2pcap`).
 Reports contain names and game values only - no IP addresses or raw payloads.
@@ -249,6 +251,30 @@ def cmd_discover(a):
         print(f'  {key} | {n} из {len(departures)} | {stay_score.get(key, 0)} из {len(stayers[:60])} | {examples[key]}')
 
 
+def cmd_snapshot(a):
+    from aa_killcount import save_snapshot, snapshot_from
+    msgs, _ = load(a.capture, a.port)
+    tr = WorldTracker(a.me)
+    for m in msgs:
+        tr.feed(m)
+    doc = snapshot_from(tr.snapshot(), f'pcap:{Path(a.capture).name}')
+    path = save_snapshot(doc, Path(a.out_dir))
+    print(f"Снимок: {path} ({len(doc['players'])} игроков; я: {doc['me']['name'] if doc['me'] else DASH})")
+
+
+def cmd_killcount(a):
+    from aa_killcount import build_killcount, describe, load_snapshot
+    start, end = load_snapshot(Path(a.start)), load_snapshot(Path(a.end))
+    res = build_killcount(start, end, only_my_guild=not a.all_guilds)
+    print(describe(res, start, end))
+    if a.out:
+        Path(a.out).write_text(res.site_json(), encoding='utf-8')
+        print(f'\nJSON для сайта: {Path(a.out).resolve()}')
+    else:
+        print('\nJSON для сайта (Киллкаунт → Добавить вручную → вставить):')
+        print(res.site_json())
+
+
 def cmd_capture(a):
     from npcap_live import capture_to_file
     capture_to_file(Path(a.out), a.seconds, a.port[0])
@@ -286,6 +312,15 @@ def main(argv=None):
     n.add_argument('--at', type=float, help='секунд от начала захвата (по умолчанию - конец)')
     x = sub.add_parser('discover')
     x.add_argument('capture')
+    sn = sub.add_parser('snapshot')
+    sn.add_argument('capture')
+    sn.add_argument('--me')
+    sn.add_argument('--out-dir', default='snapshots')
+    kc = sub.add_parser('killcount')
+    kc.add_argument('start')
+    kc.add_argument('end')
+    kc.add_argument('--all-guilds', action='store_true', help='не фильтровать по гильдии сканирующего')
+    kc.add_argument('--out')
     c = sub.add_parser('capture')
     c.add_argument('--seconds', type=float, default=300)
     c.add_argument('--out', default='captures/experiment.pcap')
@@ -296,7 +331,8 @@ def main(argv=None):
     if a.report:
         sys.stdout = Tee(sys.stdout, open(a.report, 'w', encoding='utf-8'))
     return {'decode': cmd_decode, 'verify': cmd_verify, 'nearby': cmd_nearby,
-            'discover': cmd_discover, 'capture': cmd_capture}[a.cmd](a) or 0
+            'discover': cmd_discover, 'capture': cmd_capture, 'snapshot': cmd_snapshot,
+            'killcount': cmd_killcount}[a.cmd](a) or 0
 
 
 if __name__ == '__main__':

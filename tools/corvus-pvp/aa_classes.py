@@ -7,7 +7,10 @@ three trees; RU names come from the site table (aa_class_names.json, a copy of
 src/widgets/profile/archetype/classCombinations.ts made by sync_class_names.py).
 
 ABILITY_TREES maps the packet ability id to the site's tree slug.  `status`
-says how each id was established; anything but 'confirmed' is shown with '?'.
+says how each id was established; anything but 'confirmed' is shown with '?':
+  confirmed - emulator enum (AAEmu Ability.cs, AAEmu-Tools, x2 Lua API) agrees
+              with learned-skill ids from captures and with classes checked in game;
+  likely    - emulator enum only (not active for anyone in a capture yet).
 """
 from __future__ import annotations
 
@@ -20,20 +23,20 @@ HERE = Path(__file__).resolve().parent
 
 # ability id -> (site slug, RU tree name, internal enum name, status)
 ABILITY_TREES: Dict[int, Tuple[str, str, str, str]] = {
-    1: ('napadenie', 'Нападение', 'Fight', 'pending'),
-    2: ('gipnoz', 'Гипноз', 'Illusion', 'pending'),
-    3: ('oborona', 'Оборона', 'Adamant', 'pending'),
-    4: ('soprotivlenie', 'Сопротивление', 'Will', 'pending'),
-    5: ('misticizm', 'Мистицизм', 'Death', 'pending'),
-    6: ('presledovanie', 'Преследование', 'Wild', 'pending'),
-    7: ('volshebstvo', 'Волшебство', 'Magic', 'pending'),
-    8: ('skritnost', 'Скрытность', 'Vocation', 'pending'),
-    9: ('voodush', 'Воодушевление', 'Romance', 'pending'),
-    10: ('isceleine', 'Исцеление', 'Love', 'pending'),
-    11: ('gnev', 'Гнев', 'Hatred', 'pending'),
-    12: ('kovarstvo', 'Коварство', 'Assassin', 'pending'),
-    13: ('strelba', 'Стрельба', 'Madness', 'pending'),
-    14: ('tanec', 'Танец', 'Pleasure', 'pending'),
+    1: ('napadenie', 'Нападение', 'Fight', 'confirmed'),
+    2: ('gipnoz', 'Гипноз', 'Illusion', 'confirmed'),
+    3: ('oborona', 'Оборона', 'Adamant', 'confirmed'),
+    4: ('soprotivlenie', 'Сопротивление', 'Will', 'confirmed'),
+    5: ('misticizm', 'Мистицизм', 'Death', 'likely'),
+    6: ('presledovanie', 'Преследование', 'Wild', 'confirmed'),
+    7: ('volshebstvo', 'Волшебство', 'Magic', 'confirmed'),
+    8: ('skritnost', 'Скрытность', 'Vocation', 'confirmed'),
+    9: ('voodush', 'Воодушевление', 'Romance', 'confirmed'),
+    10: ('isceleine', 'Исцеление', 'Love', 'confirmed'),
+    11: ('gnev', 'Гнев', 'Hatred', 'confirmed'),
+    12: ('kovarstvo', 'Коварство', 'Assassin', 'likely'),
+    13: ('strelba', 'Стрельба', 'Madness', 'confirmed'),
+    14: ('tanec', 'Танец', 'Pleasure', 'confirmed'),
 }
 
 

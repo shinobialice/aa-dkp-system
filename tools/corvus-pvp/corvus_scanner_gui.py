@@ -31,11 +31,13 @@ from tkinter import filedialog, messagebox, ttk
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from aa_capture import CaptureDecoder, messages_from_file
+from aa_killcount import build_killcount, describe, list_snapshots, load_snapshot, save_snapshot, snapshot_from
 from aa_tracker import PRESENT_S, WorldTracker
 
 ROOT = Path(__file__).resolve().parent
 CONFIG = ROOT / 'corvus_scanner.json'
 CAPTURES = ROOT / 'captures'
+SNAPSHOTS = ROOT / 'snapshots'
 DASH = '—'
 COLUMNS = (('name', 'Ник', 170, 'w'), ('honor', 'PvP честь', 90, 'e'), ('kills', 'PvP убийства', 90, 'e'),
            ('class', 'Класс', 150, 'w'), ('guild_id', 'Гильдия ID', 75, 'e'), ('distance_m', 'Дист., м', 65, 'e'),
@@ -136,6 +138,7 @@ class App(tk.Tk):
         ttk.Button(btns, text='Сканировать рядом', style='Big.TButton', command=self.scan).pack(side='left')
         ttk.Button(btns, text='Сохранить CSV', command=self.save_csv).pack(side='left', padx=8)
         ttk.Button(btns, text='Открыть PCAP…', command=self.open_pcap).pack(side='left')
+        ttk.Button(btns, text='Киллкаунт…', command=lambda: KillcountDialog(self)).pack(side='left', padx=8)
 
         self.status = tk.StringVar(value='Запуск захвата…')
         ttk.Label(self, textvariable=self.status, padding=(10, 6), wraplength=960).pack(fill='x')
@@ -172,6 +175,8 @@ class App(tk.Tk):
             d = e.decoder.diagnostics()
             snap = e.tracker.snapshot(now=time.time())
             near = sum(r['presence'] == 'рядом' for r in snap['rows'])
+            ages = [r['record_age_s'] for r in snap['rows'] if r['record_age_s'] is not None]
+            last_card = f'{min(ages):.0f} c назад' if ages else DASH
             warn = ''
             if e.last_game_wall is None:
                 warn = '  Игрового трафика пока нет: запусти игру/войди персонажем.'
@@ -182,7 +187,7 @@ class App(tk.Tk):
             self.status.set(
                 f"Захват: {len(e.adapters)} адаптер(ов), трафик игры: {', '.join(e.capture.active_adapters()) or DASH}; "
                 f"последний игровой пакет: {age}; сообщений: {sum(v for k, v in d.items() if k.startswith('DD'))}; "
-                f"анкет игроков: {snap['counts']['player_records']}; рядом сейчас: {near}; "
+                f"анкет игроков: {snap['counts']['player_records']} (последняя {last_card}); рядом сейчас: {near}; "
                 f"без анкеты рядом: {snap['unnamed_in_view']}.{warn}")
         self.after(1000, self.tick)
 
@@ -234,7 +239,13 @@ class App(tk.Tk):
             hint = (f"  {snap['unnamed_in_view']} объект(ов) рядом без анкеты — они были загружены до старта "
                     f"захвата (игроки или NPC). Чтобы получить их ники и PvP: перезайди в мир с экрана выбора "
                     f"персонажа или телепортируйся и вернись, не закрывая программу.")
-        self.info.set(f"[{datetime.now():%H:%M:%S}, {source}] Игроков рядом: {near}. Я: {me}. "
+        saved = ''
+        if source == 'живой захват':
+            doc = snapshot_from(tracker.snapshot(now=now), 'live')
+            if doc['players']:
+                path = save_snapshot(doc, SNAPSHOTS)
+                saved = f"Снимок для киллкаунта: {path.name} ({len(doc['players'])} игроков). "
+        self.info.set(f"[{datetime.now():%H:%M:%S}, {source}] {saved}Игроков рядом: {near}. Я: {me}. "
                       f"«Рядом» = сервер присылал координаты игрока за последние {PRESENT_S} с "
                       f"(он шлёт их каждые 3 с, даже если игрок стоит). «?» у класса — ветка не подтверждена. "
                       f"Неизвестные значения показаны как «{DASH}», "
@@ -268,6 +279,77 @@ class App(tk.Tk):
     def close(self):
         self.engine.stop()
         self.destroy()
+
+
+class KillcountDialog(tk.Toplevel):
+    """Pick the start and end snapshots, copy the site JSON to the clipboard."""
+
+    def __init__(self, app: App):
+        super().__init__(app)
+        self.app = app
+        self.title('Киллкаунт за прайм')
+        self.geometry('960x540')
+        self.paths = list_snapshots(SNAPSHOTS)
+        if not self.paths:
+            ttk.Label(self, padding=16, wraplength=700, text=(
+                'Снимков пока нет. В начале и в конце прайма: зайди в локацию с запущенной программой и '
+                'нажми «Сканировать рядом» — каждый скан сохраняется в папку snapshots.')).pack()
+            return
+        labels = [self._label(p) for p in self.paths]
+        frm = ttk.Frame(self, padding=10)
+        frm.pack(fill='x')
+        ttk.Label(frm, text='Начало прайма:').grid(row=0, column=0, sticky='w')
+        ttk.Label(frm, text='Конец прайма:').grid(row=1, column=0, sticky='w')
+        today = datetime.now().strftime('%Y-%m-%d')
+        first_today = next((i for i, p in enumerate(self.paths) if today in p.name), 0)
+        self.start = ttk.Combobox(frm, values=labels, state='readonly', width=80)
+        self.end = ttk.Combobox(frm, values=labels, state='readonly', width=80)
+        self.start.current(first_today)
+        self.end.current(len(labels) - 1)
+        self.start.grid(row=0, column=1, padx=6, pady=3)
+        self.end.grid(row=1, column=1, padx=6, pady=3)
+        self.guild_var = tk.BooleanVar(value=True)
+        ttk.Checkbutton(frm, text='только моя гильдия', variable=self.guild_var).grid(row=2, column=1, sticky='w')
+        ttk.Button(frm, text='Посчитать и скопировать JSON для сайта', command=self.run).grid(
+            row=3, column=1, sticky='w', pady=6)
+        self.out = tk.Text(self, wrap='word', height=20)
+        self.out.pack(fill='both', expand=True, padx=10, pady=(0, 10))
+
+    @staticmethod
+    def _label(path: Path) -> str:
+        try:
+            doc = load_snapshot(path)
+        except (OSError, ValueError) as e:
+            return f'{path.name} — не читается: {e}'
+        me = (doc.get('me') or {}).get('name') or DASH
+        when = datetime.fromisoformat(doc['taken_at']).strftime('%d.%m %H:%M:%S')
+        return f"{when} — {len(doc['players'])} игроков, сканировал {me}  [{path.name}]"
+
+    def run(self):
+        try:
+            start = load_snapshot(self.paths[self.start.current()])
+            end = load_snapshot(self.paths[self.end.current()])
+        except (OSError, ValueError) as e:
+            messagebox.showerror('Киллкаунт', str(e), parent=self)
+            return
+        if self.start.current() == self.end.current():
+            messagebox.showwarning('Киллкаунт', 'Выбран один и тот же снимок.', parent=self)
+            return
+        res = build_killcount(start, end, only_my_guild=self.guild_var.get())
+        text = describe(res, start, end)
+        if res.rows:
+            data = res.site_json()
+            self.clipboard_clear()
+            self.clipboard_append(data)
+            day = datetime.fromisoformat(end['taken_at']).strftime('%Y-%m-%d')
+            path = SNAPSHOTS / f'killcount_{day}.json'
+            path.write_text(data, encoding='utf-8')
+            text += (f'\n\nJSON скопирован в буфер обмена и сохранён в {path.name}.\n'
+                     f'На сайте: Киллкаунт → «Добавить вручную» → вставить в поле «Вставьте JSON» → «Сохранить».')
+        else:
+            text += '\n\nНет игроков, которые есть в обоих снимках, — JSON не создан.'
+        self.out.delete('1.0', 'end')
+        self.out.insert('1.0', text)
 
 
 if __name__ == '__main__':

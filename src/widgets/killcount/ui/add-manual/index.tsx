@@ -1,11 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { TriangleAlert } from "lucide-react";
 import { toast } from "sonner";
-import { Button, Input } from "@/shared/ui";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+  Button,
+  Input,
+} from "@/shared/ui";
 import { type KillCount } from "../../types";
-import { setKillCountCurrent } from "../../api/current";
+import {
+  findUnknownKillCountUsers,
+  setKillCountCurrent,
+} from "../../api/current";
 import { KillcountDay } from "../KillcountDay";
 
 type AddManualKillCountProps = {
@@ -21,7 +31,10 @@ function parseJson(value: string): KillCount[] | null {
       return {
         ...item,
         userName,
-        comment: rest.join(" ").replaceAll(/\(|\)/g, ""),
+        // «Ник (комментарий)» — старый способ; JSON сканера передаёт comment отдельно.
+        comment: rest.length
+          ? rest.join(" ").replaceAll(/\(|\)/g, "")
+          : item.comment,
       };
     });
   } catch (error) {
@@ -38,6 +51,28 @@ export function AddManualKillCount({
   const [rows, setRows] = useState<KillCount[]>([]);
   const [jsonInput, setJsonInput] = useState("");
   const [saving, setSaving] = useState(false);
+  const [unknownNames, setUnknownNames] = useState<string[]>([]);
+
+  const namesKey = rows.map((row) => row.userName).join("\n");
+  useEffect(() => {
+    const names = namesKey ? namesKey.split("\n") : [];
+    let ignore = false;
+    (names.length ? findUnknownKillCountUsers(names) : Promise.resolve([]))
+      .then((unknown) => {
+        if (!ignore) setUnknownNames(unknown);
+      })
+      // Проверка — только подсказка: если она не удалась, ошибку покажет сохранение.
+      .catch(() => {
+        if (!ignore) setUnknownNames([]);
+      });
+    return () => {
+      ignore = true;
+    };
+  }, [namesKey]);
+
+  const removeUnknown = () => {
+    setRows(rows.filter((row) => !unknownNames.includes(row.userName)));
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -75,12 +110,36 @@ export function AddManualKillCount({
         />
         <Button
           className="cursor-pointer"
-          disabled={rows.length === 0 || saving}
+          disabled={rows.length === 0 || saving || unknownNames.length > 0}
           onClick={handleSave}
         >
           Сохранить
         </Button>
       </div>
+
+      {unknownNames.length > 0 && (
+        <Alert variant="destructive">
+          <TriangleAlert />
+          <AlertTitle>
+            Этих ников нет на сайте: {unknownNames.length}
+          </AlertTitle>
+          <AlertDescription>
+            <p>{unknownNames.join(", ")}</p>
+            <p>
+              Сохранение не пройдёт, пока они в списке. Уберите их или исправьте
+              ник в строке.
+            </p>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="cursor-pointer"
+              onClick={removeUnknown}
+            >
+              Убрать из списка
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
 
       <KillcountDay
         data={rows}

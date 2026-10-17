@@ -6,3 +6,4 @@ captures/
 *.local.csv
 corvus_scanner.json
 __pycache__/
+snapshots/
