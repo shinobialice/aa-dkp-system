@@ -23,6 +23,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from aa_capture import GAME_PORT, messages_from_file
+from aa_classes import class_info
 from aa_tracker import HEARTBEAT_S, PRESENT_S, WorldTracker
 from aa_unitstate import UNITS_PER_METER, parse_movements, parse_unit_states, tail_dict
 
@@ -58,7 +59,8 @@ def describe(r) -> list:
     lines = [f"{r.name}  obj_id={r.obj_id} char_id?={fmt(r.char_id)} уровень={fmt(r.level)}"
              f"/{fmt(r.heir_level)}  статус={r.status}"]
     if r.has_values:
-        lines.append(f"    PvP честь={r.honor}  PvP убийства={r.kills}")
+        cls = class_info(t.active_abilities)
+        lines.append(f"    PvP честь={r.honor}  PvP убийства={r.kills}  класс={cls.label} ({' + '.join(cls.trees)})")
     else:
         lines.append(f"    PvP честь={DASH}  PvP убийства={DASH}  (не подставлено: {r.note or 'нет структуры'})")
     if t is not None:
@@ -95,6 +97,7 @@ def cmd_decode(a):
     rows = [{'name': r.name, 'obj_id': r.obj_id, 'char_id': r.char_id, 'status': r.status,
              'honor': r.honor, 'kills': r.kills, 'level': r.level, 'heir_level': r.heir_level,
              'guild_id': r.tail.expedition_id if r.has_values else None,
+             'class': class_info(r.tail.active_abilities).label if r.has_values else None,
              'pvp_widths': '+'.join(map(str, r.tail.pvp_widths)) if r.tail else None,
              't': round(ts, 3), 'note': r.note} for ts, i, sub, r in recs]
     if a.csv:
@@ -161,14 +164,16 @@ def cmd_nearby(a):
         tr.feed(m)
     snap = tr.snapshot(now=stop, radius_m=a.radius)
     print(f"Снимок на t={snap['now'] - t0:.1f}s; я: obj_id={fmt(snap['me_obj'])} ({snap['me_how'] or 'не определён'})")
-    print(f"Присутствие: AF-пульс каждые {HEARTBEAT_S:.0f} с, 'рядом' = пульс не старше {PRESENT_S} с;"
+    print(f"Сигнал = последнее сообщение сервера с координатами игрока (приходит каждые {HEARTBEAT_S:.0f} с,"
+          f" даже если он стоит); 'рядом' = сигнал не старше {PRESENT_S} с;"
           f" расстояние ≈ единицы/{UNITS_PER_METER:.0f} (масштаб выведен, не официальный)")
-    print(f"{'Ник':16s} {'честь':>9s} {'убийства':>8s} {'гильдия?':>8s} {'дист,м':>7s} {'статус':9s} {'пульс,с':>7s} PvP-статус")
+    print(f"{'Ник':16s} {'честь':>9s} {'убийства':>8s} {'класс':22s} {'гильдия?':>8s} {'дист,м':>7s} {'статус':9s}"
+          f" {'сигнал,с':>8s} PvP-статус")
     for r in snap['rows']:
         print(f"{r['name'] + (' (я)' if r['is_me'] else ''):16s} {fmt(r['honor']):>9s} {fmt(r['kills']):>8s} "
-              f"{fmt(r['guild_id']):>8s} {fmt(r['distance_m']):>7s} {r['presence']:9s} {r['seen_ago_s']:>7} "
-              f"{r['pvp_status']}{' (статы менялись)' if r['stats_changed'] else ''}")
-    print(f"\nОбъектов с AF-пульсом без анкеты 0xEF (загружены до начала захвата; игроки или NPC): "
+              f"{fmt(r['class']):22s} {fmt(r['guild_id']):>8s} {fmt(r['distance_m']):>7s} {r['presence']:9s}"
+              f" {r['seen_ago_s']:>8} {r['pvp_status']}{' (статы менялись)' if r['stats_changed'] else ''}")
+    print(f"\nОбъектов с сигналом, но без анкеты 0xEF (загружены до начала захвата; игроки или NPC): "
           f"{snap['unnamed_in_view']}")
 
 

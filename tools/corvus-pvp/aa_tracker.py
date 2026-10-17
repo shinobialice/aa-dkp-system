@@ -19,6 +19,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 
 from aa_capture import GameMessage
+from aa_classes import class_info
 from aa_unitstate import (MOVEMENT_OPCODE, UNIT_STATE_OPCODE, UnitRecord, distance_m,
                           parse_movements, parse_unit_states)
 
@@ -136,6 +137,7 @@ class WorldTracker:
                     continue
                 r = e.record
                 last = max(t for t in (e.move_ts, e.state_ts) if t is not None)
+                cls = class_info(r.tail.active_abilities) if r and r.has_values else None
                 rows.append({
                     'obj_id': e.obj_id, 'name': e.name, 'is_me': e.obj_id == self.me_obj,
                     'char_id': r.char_id if r else None,
@@ -145,6 +147,9 @@ class WorldTracker:
                     'family_id': r.tail.family_id if r and r.has_values else None,
                     'faction_id': r.tail.faction_id if r and r.has_values else None,
                     'race': r.tail.race if r and r.has_values else None,
+                    'class': cls.label if cls else None,
+                    'class_trees': ' + '.join(cls.trees) if cls else None,
+                    'class_certain': cls.certain if cls else False,
                     'level': r.level if r else None, 'heir_level': r.heir_level if r else None,
                     'distance_m': None if dist is None else round(dist, 1),
                     'presence': presence, 'seen_ago_s': round(now - last, 1),

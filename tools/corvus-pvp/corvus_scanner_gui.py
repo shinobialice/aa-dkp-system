@@ -37,9 +37,9 @@ ROOT = Path(__file__).resolve().parent
 CONFIG = ROOT / 'corvus_scanner.json'
 CAPTURES = ROOT / 'captures'
 DASH = '—'
-COLUMNS = (('name', 'Ник', 190, 'w'), ('honor', 'PvP честь', 95, 'e'), ('kills', 'PvP убийства', 95, 'e'),
-           ('guild_id', 'Гильдия ID', 80, 'e'), ('distance_m', 'Дист., м', 70, 'e'),
-           ('presence', 'Статус', 85, 'w'), ('seen_ago_s', 'Пульс, с', 65, 'e'),
+COLUMNS = (('name', 'Ник', 170, 'w'), ('honor', 'PvP честь', 90, 'e'), ('kills', 'PvP убийства', 90, 'e'),
+           ('class', 'Класс', 150, 'w'), ('guild_id', 'Гильдия ID', 75, 'e'), ('distance_m', 'Дист., м', 65, 'e'),
+           ('presence', 'Статус', 80, 'w'), ('seen_ago_s', 'Сигнал, с назад', 100, 'e'),
            ('record_age_s', 'Анкета, с назад', 105, 'e'), ('pvp_status', 'Разбор', 120, 'w'))
 
 
@@ -108,7 +108,7 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title('Corvus PvP — сканер рядом v3')
-        self.geometry('1000x600')
+        self.geometry('1150x600')
         self.minsize(820, 420)
         cfg = load_config()
         self.engine = Engine(cfg.get('me'))
@@ -235,7 +235,9 @@ class App(tk.Tk):
                     f"захвата (игроки или NPC). Чтобы получить их ники и PvP: перезайди в мир с экрана выбора "
                     f"персонажа или телепортируйся и вернись, не закрывая программу.")
         self.info.set(f"[{datetime.now():%H:%M:%S}, {source}] Игроков рядом: {near}. Я: {me}. "
-                      f"«Рядом» = AF-пульс не старше {PRESENT_S} с. Неизвестные значения показаны как «{DASH}», "
+                      f"«Рядом» = сервер присылал координаты игрока за последние {PRESENT_S} с "
+                      f"(он шлёт их каждые 3 с, даже если игрок стоит). «?» у класса — ветка не подтверждена. "
+                      f"Неизвестные значения показаны как «{DASH}», "
                       f"не нулём.{hint}")
 
     def open_pcap(self):

@@ -24,6 +24,7 @@ sys.path.insert(0, str(HERE))
 
 from aa_capture import (CaptureDecoder, RawPacket, _checksum, _xor_dd05, messages_from_file,
                         read_capture)
+from aa_classes import ABILITY_TREES, CLASS_NAMES, class_info
 from aa_tracker import WorldTracker
 from aa_unitstate import (ABILITY_SLOTS, PiscError, encode_pisc, encode_pisc_list,
                           find_confirmed_tails, parse_movements, parse_unit_states, read_pisc,
@@ -274,6 +275,29 @@ class DiscoverTests(unittest.TestCase):
         self.assertIn('DD05/0x0123 | 1 из 1 | 0 из 1', out)
 
 
+class ClassTests(unittest.TestCase):
+    def test_table_complete_and_mapping_covers_all_trees(self):
+        self.assertEqual(len(CLASS_NAMES), 364)                      # C(14, 3)
+        slugs = {t[0] for t in ABILITY_TREES.values()}
+        self.assertEqual(len(slugs), 14)
+        self.assertEqual(slugs, {x for k in CLASS_NAMES for x in k.split('+')})
+
+    def test_copy_matches_site_table(self):
+        import sync_class_names
+        if not sync_class_names.SOURCE.is_file():
+            self.skipTest('нет src/ - папка сканера скопирована отдельно')
+        self.assertEqual(sync_class_names.read_ts(), CLASS_NAMES)
+
+    def test_lookup_order_independent_and_unknown_ids(self):
+        a, b = class_info([10, 2, 4]), class_info([2, 4, 10])
+        self.assertEqual((a.name, a.trees), (b.name, b.trees))
+        self.assertIsNotNone(a.name)
+        odd = class_info([2, 4, 99])
+        self.assertIsNone(odd.name)
+        self.assertIn('?99', odd.label)
+        self.assertEqual(class_info([]).label, '—')
+
+
 # --------------------------------------------------------------------------- real capture
 
 PCAP = os.environ.get('CORVUS_PCAP')
@@ -297,6 +321,7 @@ class RealCaptureTests(unittest.TestCase):
                 t = r.tail
                 self.assertTrue(t.tail_confirmed and t.lists_sorted)
                 self.assertIsNotNone(r.level)
+                self.assertIsNotNone(class_info(t.active_abilities).name)
 
     @unittest.skipUnless(TRUTH and Path(TRUTH).is_file(), 'CORVUS_TRUTH не задан')
     def test_ground_truth(self):
