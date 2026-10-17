@@ -21,6 +21,18 @@ if (-not (Test-Path $iscc)) {
   choco install innosetup --yes --no-progress
   if ($LASTEXITCODE -ne 0) { throw "Inno Setup install failed" }
 }
-& $iscc "/DAppVersion=$Version" packaging\CorvusScanner.iss
+# Pin the Npcap installer the setup offers to download: this also checks that
+# the URL in CorvusScanner.iss still works.
+$npcapUrl = (Select-String -Path packaging\CorvusScanner.iss -Pattern '#define NpcapUrl "(.+)"').Matches[0].Groups[1].Value
+$npcapSha = ""
+try {
+  Invoke-WebRequest $npcapUrl -OutFile build\npcap-setup.exe -UseBasicParsing
+  $npcapSha = (Get-FileHash build\npcap-setup.exe -Algorithm SHA256).Hash.ToLower()
+  Write-Host "Npcap installer $npcapUrl sha256 $npcapSha"
+} catch {
+  if ($env:GITHUB_ACTIONS) { throw "Npcap URL $npcapUrl is broken ($_): update NpcapUrl in CorvusScanner.iss" }
+  Write-Warning "Could not download $npcapUrl ($_); the setup will not verify its hash"
+}
+& $iscc "/DAppVersion=$Version" "/DNpcapSha256=$npcapSha" packaging\CorvusScanner.iss
 if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed" }
 Get-Item packaging\Output\CorvusScannerSetup.exe

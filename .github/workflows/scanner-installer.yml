@@ -1,8 +1,8 @@
 name: Scanner installer
 
 # Builds CorvusScannerSetup.exe (tools/corvus-pvp) on Windows, checks the
-# built program and the installer, and on main publishes it to the
-# scanner-latest release that /api/killcount/scanner/installer points to.
+# built program and the installer, and publishes it (main, or a manual run) to
+# the scanner-latest release that /api/killcount/scanner/installer points to.
 on:
   push:
     paths:
@@ -61,8 +61,10 @@ jobs:
           name: CorvusScannerSetup
           path: tools/corvus-pvp/packaging/Output/CorvusScannerSetup.exe
 
+      # Pushes to main publish automatically; any branch can be published by
+      # starting the workflow by hand (Actions -> Scanner installer -> Run).
       - name: Publish to the scanner-latest release
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
