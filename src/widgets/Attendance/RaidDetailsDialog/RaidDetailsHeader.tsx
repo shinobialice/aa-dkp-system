@@ -1,4 +1,5 @@
 import type { RaidDetails } from "@/actions/getRaidById";
+import { formatDuration } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/tw-merge";
 import { DialogDescription, DialogTitle } from "@/shared/ui";
 import { formatDay } from "../attendanceModel";
@@ -34,6 +35,8 @@ export default function RaidDetailsHeader({ raid }: Props) {
       </div>
       <DialogDescription className="text-sm text-foreground/70">
         {raidDateLabel(raid.start_date)}
+        {raid.duration_minutes !== null &&
+          ` · шёл ${formatDuration(raid.duration_minutes)}`}
       </DialogDescription>
     </div>
   );

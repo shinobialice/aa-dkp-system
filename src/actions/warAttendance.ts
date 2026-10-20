@@ -1,8 +1,9 @@
 "use server";
 
+import { attendanceWeight } from "@/server/attendance";
 import type { GuildMode } from "@/shared/config/guildStatus";
 import sql from "@/shared/lib/db";
-import type { RaidAttendanceRow, UserRow } from "@/shared/lib/dbTypes";
+import type { RaidAttendanceRow, RaidRow, UserRow } from "@/shared/lib/dbTypes";
 
 export type PeriodAttendanceEntry = {
   userId: number;
@@ -20,14 +21,14 @@ export type PeriodAttendanceResult = {
 
 type AttendanceQueryRow = {
   id: number;
+  dkp_summary: RaidRow["dkp_summary"];
   user_id: RaidAttendanceRow["user_id"] | null;
   is_late: boolean | null;
+  dkp: RaidAttendanceRow["dkp"];
   username: UserRow["username"] | null;
   avatar_url: UserRow["avatar_url"];
   class: UserRow["class"];
 };
-
-const LATE_WEIGHT = 0.5;
 
 export async function getPeriodAttendanceTop(
   startedAt: string,
@@ -38,7 +39,7 @@ export async function getPeriodAttendanceTop(
   let rows: AttendanceQueryRow[];
   try {
     rows = await sql<AttendanceQueryRow[]>`
-      SELECT r.id, ra.user_id, ra.is_late, u.username, u.avatar_url, u.class
+      SELECT r.id, r.dkp_summary, ra.user_id, ra.is_late, ra.dkp, u.username, u.avatar_url, u.class
       FROM raid r
       LEFT JOIN raid_attendance ra ON ra.raid_id = r.id
       LEFT JOIN "user" u ON u.id = ra.user_id
@@ -63,7 +64,11 @@ export async function getPeriodAttendanceTop(
       userClass: row.class,
       raidsAttended: 0,
     };
-    entry.raidsAttended += row.is_late ? LATE_WEIGHT : 1;
+    entry.raidsAttended += attendanceWeight(
+      row.is_late,
+      row.dkp,
+      row.dkp_summary ?? 0,
+    );
     byUser.set(row.user_id, entry);
   }
 

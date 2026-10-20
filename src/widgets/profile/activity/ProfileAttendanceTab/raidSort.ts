@@ -5,6 +5,7 @@ export type SortKey = "startDate" | "dkp";
 export type RaidSort = { key: SortKey; desc: boolean };
 
 export function raidPoints(raid: UserMonthlyRaid): number {
+  if (raid.personalDkp !== null) return raid.personalDkp;
   return raid.isLate ? raid.dkpSummary / 2 : raid.dkpSummary;
 }
 

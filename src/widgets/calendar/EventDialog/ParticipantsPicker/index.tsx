@@ -1,12 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
+import { errorMessage } from "@/shared/lib/errorMessage";
 import type { IdFlags, PickerUser } from "../eventFormModel";
+import type { RaidScan } from "../raidScanModel";
 import OcrBanner from "./OcrBanner";
 import OcrScreenshotViewer from "./OcrScreenshotViewer";
 import ParticipantGroups from "./ParticipantGroups";
 import ParticipantsFilter from "./ParticipantsFilter";
 import ParticipantsSummary from "./ParticipantsSummary";
+import LateSuggestion from "./LateSuggestion";
+import ScanBanner from "./ScanBanner";
 import {
   countLate,
   countSelected,
@@ -20,16 +25,24 @@ type Props = {
   users: PickerUser[];
   selectedIds: IdFlags;
   lateIds: IdFlags;
+  canMarkLate: boolean;
+  notes: Record<number, string>;
+  scan: RaidScan | null;
   onSelectionChange: (selectedIds: IdFlags) => void;
   onLateToggle: (userId: number) => void;
+  onScanImport: (text: string) => void;
 };
 
 export default function ParticipantsPicker({
   users,
   selectedIds,
   lateIds,
+  canMarkLate,
+  notes,
+  scan,
   onSelectionChange,
   onLateToggle,
+  onScanImport,
 }: Props) {
   const [filter, setFilter] = useState<ParticipantFilter>("all");
   const [search, setSearch] = useState("");
@@ -58,6 +71,18 @@ export default function ParticipantsPicker({
     onSelectionChange(flagsForUsers(recognized));
   };
 
+  const handleScanPick = async (file: File) => {
+    try {
+      onScanImport(await file.text());
+    } catch (error) {
+      toast.error(errorMessage(error, "Не удалось прочитать файл сканера"));
+    }
+  };
+
+  const handleLateAccept = (userIds: number[]) => {
+    userIds.filter((id) => !lateIds[id]).forEach(onLateToggle);
+  };
+
   const handleAssign = (
     shotIndex: number,
     wordIndex: number,
@@ -72,12 +97,17 @@ export default function ParticipantsPicker({
       <ParticipantsSummary
         total={users.length}
         selectedCount={selectedCount}
-        lateCount={countLate(users, selectedIds, lateIds)}
+        lateCount={canMarkLate ? countLate(users, selectedIds, lateIds) : 0}
         ocrLoading={ocr.loading}
         onFilesPick={handleFiles}
+        onScanPick={handleScanPick}
         onSelectAll={() => onSelectionChange(flagsForUsers(users))}
         onClear={() => onSelectionChange({})}
       />
+      <ScanBanner scan={scan} />
+      {canMarkLate && (
+        <LateSuggestion scan={scan} users={users} onAccept={handleLateAccept} />
+      )}
       <OcrBanner
         loading={ocr.loading}
         error={ocr.error}
@@ -109,6 +139,8 @@ export default function ParticipantsPicker({
         groups={participantGroups(users, selectedIds, filter, search)}
         selectedIds={selectedIds}
         lateIds={lateIds}
+        canMarkLate={canMarkLate}
+        notes={notes}
         onToggle={(id) =>
           onSelectionChange({ ...selectedIds, [id]: !selectedIds[id] })
         }

@@ -3,6 +3,7 @@ import type { EventForm } from "../useEventForm";
 import BonusPicker from "./BonusPicker";
 import BossSelector from "./BossSelector";
 import CategorySelector from "./CategorySelector";
+import DurationField from "./DurationField";
 import RaidDateField from "./RaidDateField";
 import RaidLootList from "./RaidLootList";
 import RaidValueSummary from "./RaidValueSummary";
@@ -41,6 +42,14 @@ export default function RaidDetailsForm({ form }: Props) {
         activeIds={form.activeBonusIds}
         onToggle={(id) => form.toggleFlag("bonusIds", id)}
       />
+      {(form.isPrimeByTime || draft.durationMinutes !== null) && (
+        <DurationField
+          durationMinutes={draft.durationMinutes}
+          isPvpPrime={form.isPrimeByTime}
+          hasError={errors.duration}
+          onChange={form.setDurationMinutes}
+        />
+      )}
       <RaidDateField
         mode={form.mode}
         category={draft.category}

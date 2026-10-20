@@ -1,5 +1,7 @@
 import { groupByClass } from "@/shared/config/classes";
+import { formatMoscowHM, plural } from "@/shared/lib/format";
 import type { IdFlags, PickerUser } from "../eventFormModel";
+import { scanMinutes, shortStayIds, type RaidScan } from "../raidScanModel";
 
 export type ParticipantFilter = "all" | "on" | "off";
 
@@ -49,6 +51,30 @@ export function participantGroups(
         .sort((a, b) => joinedTime(a) - joinedTime(b)),
     }))
     .filter((group) => group.people.length > 0);
+}
+
+export function scanSummary(scan: RaidScan) {
+  const found = Object.keys(scan.members).length;
+  const period = `${formatMoscowHM(scan.startedAt)}–${formatMoscowHM(scan.endedAt)}`;
+  return {
+    title: `Из сканера (${period}): ${found} ${plural(found, "участник", "участника", "участников")}`,
+    unmatched: scan.unmatched.join(", "),
+  };
+}
+
+export function lateSuggestion(scan: RaidScan, users: PickerUser[]) {
+  const nameById = new Map(users.map((user) => [user.id, user.username]));
+  const ids = shortStayIds(scan);
+  const people = ids.flatMap((id) => {
+    const name = nameById.get(id);
+    return name
+      ? [`${name} — ${Math.round(scan.members[id].minutes)} мин`]
+      : [];
+  });
+  return {
+    ids,
+    text: `Меньше половины рейда (${Math.round(scanMinutes(scan))} мин) были: ${people.join(", ")}. Отметить опоздавшими?`,
+  };
 }
 
 export function flagsForUsers(users: PickerUser[]): IdFlags {

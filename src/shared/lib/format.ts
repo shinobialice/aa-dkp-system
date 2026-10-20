@@ -52,6 +52,13 @@ export function formatMoscowHM(date: Date) {
   });
 }
 
+export function formatDuration(minutes: number) {
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  if (hours === 0) return `${rest} мин`;
+  return rest ? `${hours} ч ${rest} мин` : `${hours} ч`;
+}
+
 export function vkProfileUrl(vkName: string | null, vkId: string | null) {
   if (vkName) return `https://vk.ru/${vkName}`;
   if (vkId) return `https://vk.com/id${vkId}`;

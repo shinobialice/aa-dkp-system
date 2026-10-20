@@ -28,7 +28,7 @@ export async function getUserYearlyAttendance(
     const effectiveStart =
       joinedAt && joinedAt > yearStart ? joinedAt : yearStart;
     raids = await sql<YearRaidRow[]>`
-      SELECT r.type, r.start_date, r.dkp_summary, ra.is_late
+      SELECT r.type, r.start_date, r.dkp_summary, ra.is_late, ra.dkp
       FROM raid r
       LEFT JOIN raid_attendance ra ON ra.raid_id = r.id AND ra.user_id = ${userId}
       WHERE r.start_date >= ${effectiveStart.toISOString()} AND r.start_date < ${endDate}

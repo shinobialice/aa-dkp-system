@@ -7,6 +7,7 @@ export type UserMonthlyRaid = {
   startDate: string | null;
   dkpSummary: number;
   isLate: boolean;
+  personalDkp: number | null;
   bosses: string[];
 };
 
@@ -26,6 +27,7 @@ export async function getUserMonthlyRaids(
         r.start_date AS "startDate",
         COALESCE(r.dkp_summary, 0) AS "dkpSummary",
         ra.is_late AS "isLate",
+        ra.dkp AS "personalDkp",
         COALESCE(
           (
             SELECT array_agg(b.boss_name ORDER BY b.id)

@@ -5,6 +5,7 @@ import type {
   BossRow,
   ItemTypeRow,
   LootRow,
+  RaidAttendanceRow,
   RaidRow,
   UserRow,
 } from "@/shared/lib/dbTypes";
@@ -17,7 +18,8 @@ type RaidBossQueryRow = Pick<
 type AttendanceQueryRow = Pick<
   UserRow,
   "id" | "username" | "active" | "class" | "joined_at"
-> & { is_late: boolean };
+> &
+  Pick<RaidAttendanceRow, "is_late" | "dkp">;
 
 type LootQueryRow = Pick<
   LootRow,
@@ -67,7 +69,7 @@ export const getRaidById = async (id: string) => {
         WHERE rb.raid_id = ${raidId}
       `,
       sql<AttendanceQueryRow[]>`
-        SELECT ra.is_late, u.id, u.username, u.active, u.class, u.joined_at
+        SELECT ra.is_late, ra.dkp, u.id, u.username, u.active, u.class, u.joined_at
         FROM raid_attendance ra
         JOIN "user" u ON u.id = ra.user_id
         WHERE ra.raid_id = ${raidId}
@@ -110,6 +112,7 @@ export const getRaidById = async (id: string) => {
       })),
       raid_attendance: attendanceRows.map((a) => ({
         is_late: a.is_late,
+        dkp: a.dkp,
         user: {
           id: a.id,
           username: a.username,

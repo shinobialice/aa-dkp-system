@@ -10,6 +10,7 @@ export type RangeRaid = {
   bosses: string[];
   people: number;
   attended: boolean;
+  durationMinutes: number | null;
 };
 
 export async function getRaidsInRange(
@@ -23,6 +24,7 @@ export async function getRaidsInRange(
         r.id,
         to_char(r.start_date, 'YYYY-MM-DD"T"HH24:MI') AS start,
         r.type,
+        r.duration_minutes AS "durationMinutes",
         COALESCE(
           (
             SELECT array_agg(b.boss_name ORDER BY b.id)

@@ -7,6 +7,8 @@ type Props = {
   user: PickerUser;
   selected: boolean;
   late: boolean;
+  canMarkLate: boolean;
+  note: string | undefined;
   onToggle: () => void;
   onLateToggle: () => void;
 };
@@ -15,6 +17,8 @@ export default function ParticipantChip({
   user,
   selected,
   late,
+  canMarkLate,
+  note,
   onToggle,
   onLateToggle,
 }: Props) {
@@ -28,9 +32,6 @@ export default function ParticipantChip({
     : undefined;
   const checkStyle = tinted
     ? { backgroundColor: color, borderColor: color }
-    : undefined;
-  const lateBorderStyle = color
-    ? { borderColor: `color-mix(in srgb, ${color} 50%, transparent)` }
     : undefined;
 
   return (
@@ -67,29 +68,54 @@ export default function ParticipantChip({
             не активен
           </span>
         )}
+        {note && (
+          <span className="ml-auto text-2xs font-normal whitespace-nowrap text-muted-foreground tabular-nums">
+            {note}
+          </span>
+        )}
       </button>
-      {selected && (
-        <button
-          type="button"
-          aria-pressed={late}
-          aria-label={
-            late
-              ? `${user.username}: опоздал, снять`
-              : `${user.username}: отметить опоздание`
-          }
-          title={late ? "Опоздал — снять" : "Отметить опоздание"}
-          onClick={onLateToggle}
-          style={lateBorderStyle}
-          className={cn(
-            "flex h-8 w-7.5 cursor-pointer items-center justify-center border-l",
-            late
-              ? "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300"
-              : "text-muted-foreground/60 hover:text-foreground",
-          )}
-        >
-          <Clock className="size-3.5" />
-        </button>
+      {selected && canMarkLate && (
+        <LateToggle
+          username={user.username}
+          color={color}
+          late={late}
+          onToggle={onLateToggle}
+        />
       )}
     </span>
+  );
+}
+
+type LateToggleProps = {
+  username: string;
+  color: string | undefined;
+  late: boolean;
+  onToggle: () => void;
+};
+
+function LateToggle({ username, color, late, onToggle }: LateToggleProps) {
+  const borderStyle = color
+    ? { borderColor: `color-mix(in srgb, ${color} 50%, transparent)` }
+    : undefined;
+
+  return (
+    <button
+      type="button"
+      aria-pressed={late}
+      aria-label={
+        late ? `${username}: опоздал, снять` : `${username}: отметить опоздание`
+      }
+      title={late ? "Опоздал — снять" : "Отметить опоздание"}
+      onClick={onToggle}
+      style={borderStyle}
+      className={cn(
+        "flex h-8 w-7.5 cursor-pointer items-center justify-center border-l",
+        late
+          ? "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300"
+          : "text-muted-foreground/60 hover:text-foreground",
+      )}
+    >
+      <Clock className="size-3.5" />
+    </button>
   );
 }

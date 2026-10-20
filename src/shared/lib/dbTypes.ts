@@ -414,6 +414,7 @@ export type RaidRow = {
   active_user_count: number | null;
   external_key: string | null;
   updated_at: string;
+  duration_minutes: number | null;
 };
 
 export type RaidAttendanceRow = {
@@ -423,6 +424,7 @@ export type RaidAttendanceRow = {
   created_at: string;
   updated_at: string;
   is_late: boolean;
+  dkp: number | null;
 };
 
 export type RaidBonusRow = {

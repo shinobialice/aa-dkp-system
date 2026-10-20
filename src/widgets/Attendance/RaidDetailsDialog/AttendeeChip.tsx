@@ -40,6 +40,11 @@ export default function AttendeeChip({ attendee, isMe }: Props) {
             опоздал
           </span>
         )}
+        {attendee.dkp !== null && (
+          <span className="text-2xs font-semibold text-muted-foreground tabular-nums">
+            {attendee.dkp} дкп
+          </span>
+        )}
       </Link>
     </PlayerHoverCard>
   );

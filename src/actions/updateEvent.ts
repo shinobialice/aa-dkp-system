@@ -9,6 +9,8 @@ import {
 } from "@/utils/getMoscowISOString";
 import ensurePrivilieges from "./ensurePrivilieges";
 import {
+  checkDurationMinutes,
+  checkPersonalDkp,
   deleteRaidLinks,
   insertRaidLinks,
   RAID_EDITOR_TAGS,
@@ -25,8 +27,12 @@ const updateEvent = async (
   bossIds: number[],
   bonusTypeIds: number[],
   lateUserIds: number[] = [],
+  personalDkp: unknown = {},
+  durationMinutes: unknown = null,
 ) => {
   await ensurePrivilieges(RAID_EDITOR_TAGS);
+  const checkedDkp = checkPersonalDkp(personalDkp, userIds, dkp_summary);
+  const duration = checkDurationMinutes(durationMinutes);
 
   // Запоминаем старую дату — если рейд переносят в другой месяц, пересчитать
   // нужно оба месяца (у старого пропадает посещаемость/dkp, у нового — появляется).
@@ -40,13 +46,15 @@ const updateEvent = async (
         UPDATE raid SET
           type = ${type},
           dkp_summary = ${dkp_summary},
-          start_date = ${getMoscowISOString(start_date)}
+          start_date = ${getMoscowISOString(start_date)},
+          duration_minutes = ${duration}
         WHERE id = ${id}
       `;
       await deleteRaidLinks(tx, id);
       await insertRaidLinks(tx, id, {
         userIds,
         lateUserIds,
+        personalDkp: checkedDkp,
         bossIds,
         bonusTypeIds,
       });

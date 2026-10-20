@@ -5,6 +5,13 @@ import { plural } from "@/shared/lib/format";
 import type { ResolvedAttendanceBonus } from "@/utils/attendanceBonusDefaults";
 import computeRaidDkp from "@/utils/eventDkpCalculator";
 import { parseMoscowISOString } from "@/utils/getMoscowISOString";
+import {
+  isPvpPrime,
+  primeHalfHours,
+  PVP_PRIME_BOSS,
+  storedPersonalDkp,
+  type RaidScan,
+} from "./raidScanModel";
 
 export type EventFormMode = "create" | "edit";
 
@@ -18,12 +25,16 @@ export type EventDraft = {
   participantIds: IdFlags;
   lateIds: IdFlags;
   lootLinkIds: IdFlags;
+  scan: RaidScan | null;
+  durationMinutes: number | null;
+  storedDkp: Record<number, number>;
 };
 
 export type EventFormErrors = {
   category: boolean;
   selectedBoss: boolean;
   selectedDate: boolean;
+  duration: boolean;
 };
 
 export type PickerUser = {
@@ -38,6 +49,7 @@ export const NO_ERRORS: EventFormErrors = {
   category: false,
   selectedBoss: false,
   selectedDate: false,
+  duration: false,
 };
 
 export function initialDraft(event: RaidDetails | null): EventDraft {
@@ -50,6 +62,9 @@ export function initialDraft(event: RaidDetails | null): EventDraft {
       participantIds: {},
       lateIds: {},
       lootLinkIds: {},
+      scan: null,
+      durationMinutes: null,
+      storedDkp: {},
     };
   }
 
@@ -64,6 +79,9 @@ export function initialDraft(event: RaidDetails | null): EventDraft {
       attendance.filter((row) => row.is_late).map((row) => row.user.id),
     ),
     lootLinkIds: {},
+    scan: null,
+    durationMinutes: event.duration_minutes,
+    storedDkp: storedPersonalDkp(event),
   };
 }
 
@@ -72,6 +90,7 @@ export function validateDraft(draft: EventDraft): EventFormErrors {
     category: !draft.category,
     selectedBoss: draft.bosses.length === 0,
     selectedDate: !draft.date,
+    duration: isPvpPrime(draft.bosses) && draft.durationMinutes === null,
   };
 }
 
@@ -138,11 +157,18 @@ export function raidDkp(
   resolved: Boss[],
   bonuses: ResolvedAttendanceBonus[] | undefined,
   bonusIds: number[],
+  durationMinutes: number | null,
 ) {
   if (!bonuses) return 0;
   const baseDkp = selected.reduce((sum, boss) => {
     const current = resolved.find((b) => b.id === boss.id);
-    return sum + (current?.dkp_points ?? boss.dkp_points);
+    const points = current?.dkp_points ?? boss.dkp_points;
+    return (
+      sum +
+      (boss.boss_name === PVP_PRIME_BOSS
+        ? points * primeHalfHours(durationMinutes)
+        : points)
+    );
   }, 0);
   const active = bonuses.filter((bonus) => bonusIds.includes(bonus.id));
   return computeRaidDkp(baseDkp, active);

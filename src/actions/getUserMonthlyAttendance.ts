@@ -28,7 +28,7 @@ export async function getUserMonthlyAttendance(
   let raids: AttendedRaid[];
   try {
     raids = await sql<AttendedRaid[]>`
-      SELECT r.type, r.dkp_summary, ra.is_late
+      SELECT r.type, r.dkp_summary, ra.is_late, ra.dkp
       FROM raid r
       LEFT JOIN raid_attendance ra ON ra.raid_id = r.id AND ra.user_id = ${userId}
       WHERE r.start_date >= ${effectiveStart.toISOString()} AND r.start_date < ${endDate}

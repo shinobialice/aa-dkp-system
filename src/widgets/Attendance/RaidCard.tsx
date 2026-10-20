@@ -1,5 +1,6 @@
 import { Check, Users } from "lucide-react";
 import type { RangeRaid } from "@/actions/getRaidsInRange";
+import { formatDuration } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/tw-merge";
 import { raidState } from "./attendanceModel";
 import { RAID_TEXT, raidColorStyle, raidKind, raidTitle } from "./raidKinds";
@@ -28,7 +29,11 @@ export default function RaidCard({ raid, onOpen }: Props) {
       )}
     >
       <span className="flex items-center justify-between gap-1 text-2xs text-muted-foreground tabular-nums">
-        {raid.start.slice(11, 16)}
+        <span>
+          {raid.start.slice(11, 16)}
+          {raid.durationMinutes !== null &&
+            ` · ${formatDuration(raid.durationMinutes)}`}
+        </span>
         <RaidPeople raid={raid} />
       </span>
       <span className="flex items-center justify-between gap-1">

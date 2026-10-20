@@ -13,12 +13,16 @@ export type MonthlyAttendance = {
 
 export type AttendedRaid = Pick<RaidRow, "type" | "dkp_summary"> & {
   is_late: RaidAttendanceRow["is_late"] | null;
+  dkp: RaidAttendanceRow["dkp"];
 };
+
+type UserAttendance = Pick<RaidAttendanceRow, "is_late" | "dkp">;
 
 type MonthRaidRow = Pick<RaidRow, "id" | "type" | "dkp_summary"> & {
   start_date: string;
   user_id: number | null;
   is_late: boolean | null;
+  dkp: number | null;
 };
 
 const LATE_WEIGHT = 0.5;
@@ -27,7 +31,7 @@ const LATE_WEIGHT = 0.5;
 // в рамках одного запроса рейды месяца грузятся один раз.
 const loadMonthRaidRows = cache(
   async (monthStartIso: string, endDateIso: string) => sql<MonthRaidRow[]>`
-    SELECT r.id, r.type, r.start_date, r.dkp_summary, ra.user_id, ra.is_late
+    SELECT r.id, r.type, r.start_date, r.dkp_summary, ra.user_id, ra.is_late, ra.dkp
     FROM raid r
     LEFT JOIN raid_attendance ra ON ra.raid_id = r.id
     WHERE r.start_date >= ${monthStartIso} AND r.start_date < ${endDateIso}
@@ -40,7 +44,7 @@ export function summarizeAttendance(raids: AttendedRaid[]): MonthlyAttendance {
 
   for (const raid of raids) {
     const dkp = raid.dkp_summary ?? 0;
-    const weight = attendanceWeight(raid.is_late);
+    const weight = attendanceWeight(raid.is_late, raid.dkp, dkp);
 
     if (raid.type === "Прайм") {
       totals.prime += 1;
@@ -61,6 +65,20 @@ export function summarizeAttendance(raids: AttendedRaid[]): MonthlyAttendance {
     dkp: earned.points,
     totalPointsAvailable: totals.points,
   };
+}
+
+// Доля посещения: 1 — весь рейд, половина за опоздание. Личные очки (ПВП
+// прайм — за своё время в рейде) задают долю от ДКП рейда напрямую.
+export function attendanceWeight(
+  isLate: boolean | null,
+  personalDkp: number | null,
+  raidDkp: number,
+) {
+  if (isLate === null) return 0;
+  if (personalDkp !== null) {
+    return raidDkp > 0 ? Math.min(personalDkp / raidDkp, 1) : 0;
+  }
+  return isLate ? LATE_WEIGHT : 1;
 }
 
 export async function computeMonthlyAttendanceForUsers(
@@ -88,11 +106,15 @@ export async function computeMonthlyAttendanceForUsers(
         joinedAt && joinedAt > monthStart ? joinedAt : monthStart;
       const attended = raids
         .filter((raid) => new Date(raid.startDate) >= effectiveStart)
-        .map((raid) => ({
-          type: raid.type,
-          dkp_summary: raid.dkp_summary,
-          is_late: raid.lateByUser.get(user.id) ?? null,
-        }));
+        .map((raid) => {
+          const attendance = raid.attendanceByUser.get(user.id);
+          return {
+            type: raid.type,
+            dkp_summary: raid.dkp_summary,
+            is_late: attendance?.is_late ?? null,
+            dkp: attendance?.dkp ?? null,
+          };
+        });
       return [user.id, summarizeAttendance(attended)];
     }),
   );
@@ -103,7 +125,7 @@ function groupRaids(rows: MonthRaidRow[]) {
     number,
     Pick<RaidRow, "type" | "dkp_summary"> & {
       startDate: string;
-      lateByUser: Map<number, boolean>;
+      attendanceByUser: Map<number, UserAttendance>;
     }
   >();
   for (const row of rows) {
@@ -111,17 +133,17 @@ function groupRaids(rows: MonthRaidRow[]) {
       type: row.type,
       dkp_summary: row.dkp_summary,
       startDate: row.start_date,
-      lateByUser: new Map<number, boolean>(),
+      attendanceByUser: new Map<number, UserAttendance>(),
     };
-    if (row.user_id !== null) raid.lateByUser.set(row.user_id, !!row.is_late);
+    if (row.user_id !== null) {
+      raid.attendanceByUser.set(row.user_id, {
+        is_late: !!row.is_late,
+        dkp: row.dkp,
+      });
+    }
     raids.set(row.id, raid);
   }
   return [...raids.values()];
-}
-
-function attendanceWeight(isLate: boolean | null) {
-  if (isLate === null) return 0;
-  return isLate ? LATE_WEIGHT : 1;
 }
 
 function percent(part: number, total: number) {

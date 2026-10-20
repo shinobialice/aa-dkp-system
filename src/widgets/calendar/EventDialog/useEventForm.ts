@@ -25,6 +25,13 @@ import {
   type EventFormMode,
   type IdFlags,
 } from "./eventFormModel";
+import {
+  draftPersonalDkp,
+  isPvpPrime,
+  parseRaidScan,
+  participantNotes,
+  scanDraftPatch,
+} from "./raidScanModel";
 
 export type FlagField =
   | "bonusIds"
@@ -64,7 +71,19 @@ export function useEventForm(mode: EventFormMode, event: RaidDetails | null) {
   const users = pickerUsers(userList.data ?? [], event);
   const selectedUsers = users.filter((user) => draft.participantIds[user.id]);
   const bonusIds = activeBonusIds(draft.bonusIds, bonuses, draft.bosses);
-  const dkp = raidDkp(draft.bosses, bosses, bonuses, bonusIds);
+  const dkp = raidDkp(
+    draft.bosses,
+    bosses,
+    bonuses,
+    bonusIds,
+    draft.durationMinutes,
+  );
+  const isPrimeByTime = isPvpPrime(draft.bosses);
+  const personalDkp = draftPersonalDkp(
+    draft,
+    selectedUsers.map((user) => user.id),
+    dkp,
+  );
 
   const updateDraft = (patch: Partial<EventDraft>) => {
     setDraft((current) => ({ ...current, ...patch }));
@@ -104,6 +123,16 @@ export function useEventForm(mode: EventFormMode, event: RaidDetails | null) {
     updateDraft({ participantIds });
   };
 
+  const setDurationMinutes = (durationMinutes: number | null) => {
+    updateDraft({ durationMinutes });
+    clearError("duration");
+  };
+
+  const importScan = (text: string) => {
+    const scan = parseRaidScan(text, users);
+    setDraft((current) => ({ ...current, ...scanDraftPatch(scan, current) }));
+  };
+
   const saveRaid = async (category: string, date: Date) => {
     const userIds = selectedUsers.map((user) => user.id);
     const args = [
@@ -113,7 +142,9 @@ export function useEventForm(mode: EventFormMode, event: RaidDetails | null) {
       userIds,
       draft.bosses.map((boss) => boss.id),
       bonusIds,
-      userIds.filter((id) => draft.lateIds[id]),
+      isPrimeByTime ? [] : userIds.filter((id) => draft.lateIds[id]),
+      personalDkp,
+      draft.durationMinutes,
     ] as const;
 
     if (mode === "edit" && event) {
@@ -154,11 +185,15 @@ export function useEventForm(mode: EventFormMode, event: RaidDetails | null) {
     unlinkedLoot: canLinkLoot ? (lootList.data ?? []) : [],
     activeBonusIds: bonusIds,
     dkp,
+    isPrimeByTime,
+    participantNotes: participantNotes(draft.scan, personalDkp),
     selectCategory,
     selectBoss,
     changeDate,
     toggleFlag,
     setParticipants,
+    setDurationMinutes,
+    importScan,
     submit,
   };
 }

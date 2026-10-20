@@ -7,6 +7,8 @@ type Props = {
   groups: ParticipantGroup[];
   selectedIds: IdFlags;
   lateIds: IdFlags;
+  canMarkLate: boolean;
+  notes: Record<number, string>;
   onToggle: (userId: number) => void;
   onLateToggle: (userId: number) => void;
 };
@@ -15,6 +17,8 @@ export default function ParticipantGroups({
   groups,
   selectedIds,
   lateIds,
+  canMarkLate,
+  notes,
   onToggle,
   onLateToggle,
 }: Props) {
@@ -48,6 +52,8 @@ export default function ParticipantGroups({
                 user={user}
                 selected={!!selectedIds[user.id]}
                 late={!!selectedIds[user.id] && !!lateIds[user.id]}
+                canMarkLate={canMarkLate}
+                note={notes[user.id]}
                 onToggle={() => onToggle(user.id)}
                 onLateToggle={() => onLateToggle(user.id)}
               />

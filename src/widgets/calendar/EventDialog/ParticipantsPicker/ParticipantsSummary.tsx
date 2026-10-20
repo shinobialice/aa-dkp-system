@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { ImageUp, Loader2 } from "lucide-react";
+import { FileJson, ImageUp, Loader2 } from "lucide-react";
 import { Button } from "@/shared/ui";
 
 type Props = {
@@ -10,6 +10,7 @@ type Props = {
   lateCount: number;
   ocrLoading: boolean;
   onFilesPick: (files: File[]) => void;
+  onScanPick: (file: File) => void;
   onSelectAll: () => void;
   onClear: () => void;
 };
@@ -20,16 +21,24 @@ export default function ParticipantsSummary({
   lateCount,
   ocrLoading,
   onFilesPick,
+  onScanPick,
   onSelectAll,
   onClear,
 }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
+  const scanRef = useRef<HTMLInputElement>(null);
   const progress = total ? Math.round((selectedCount / total) * 100) : 0;
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? []);
     event.target.value = "";
     if (files.length > 0) onFilesPick(files);
+  };
+
+  const handleScanChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (file) onScanPick(file);
   };
 
   return (
@@ -73,6 +82,23 @@ export default function ParticipantsSummary({
       >
         {ocrLoading ? <Loader2 className="animate-spin" /> : <ImageUp />}
         Со скриншота
+      </Button>
+      <input
+        ref={scanRef}
+        type="file"
+        accept=".json,application/json"
+        className="hidden"
+        onChange={handleScanChange}
+      />
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() => scanRef.current?.click()}
+        className="cursor-pointer"
+      >
+        <FileJson />
+        Из сканера
       </Button>
       <Button
         type="button"

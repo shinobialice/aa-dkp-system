@@ -7,7 +7,12 @@ import {
   getMoscowYearMonth,
 } from "@/utils/getMoscowISOString";
 import ensurePrivilieges from "./ensurePrivilieges";
-import { insertRaidLinks, RAID_EDITOR_TAGS } from "@/server/raidLinks";
+import {
+  checkDurationMinutes,
+  checkPersonalDkp,
+  insertRaidLinks,
+  RAID_EDITOR_TAGS,
+} from "@/server/raidLinks";
 import { triggerFinanceRecalc } from "@/server/finance/recalc";
 import { publishChanges } from "@/server/liveChanges";
 
@@ -19,8 +24,12 @@ const createRaidEvent = async (
   bossIds: number[],
   bonusTypeIds: number[],
   lateUserIds: number[] = [],
+  personalDkp: unknown = {},
+  durationMinutes: unknown = null,
 ) => {
   await ensurePrivilieges(RAID_EDITOR_TAGS);
+  const checkedDkp = checkPersonalDkp(personalDkp, userIds, dkp_summary);
+  const duration = checkDurationMinutes(durationMinutes);
 
   let raid: RaidRow;
   try {
@@ -33,9 +42,9 @@ const createRaidEvent = async (
 
       const [created] = await tx<RaidRow[]>`
         INSERT INTO raid
-          (type, dkp_summary, start_date, created_at, active_user_count)
+          (type, dkp_summary, start_date, created_at, active_user_count, duration_minutes)
         VALUES (
-          ${type}, ${dkp_summary}, ${getMoscowISOString(start_date)}, now(), ${count}
+          ${type}, ${dkp_summary}, ${getMoscowISOString(start_date)}, now(), ${count}, ${duration}
         )
         RETURNING *
       `;
@@ -43,6 +52,7 @@ const createRaidEvent = async (
       await insertRaidLinks(tx, created.id, {
         userIds,
         lateUserIds,
+        personalDkp: checkedDkp,
         bossIds,
         bonusTypeIds,
       });

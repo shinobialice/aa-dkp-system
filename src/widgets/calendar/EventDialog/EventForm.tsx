@@ -78,8 +78,12 @@ export default function EventForm({ mode, event, onClose, onComplete }: Props) {
             users={form.users}
             selectedIds={form.draft.participantIds}
             lateIds={form.draft.lateIds}
+            canMarkLate={!form.isPrimeByTime}
+            notes={form.participantNotes}
+            scan={form.draft.scan}
             onSelectionChange={form.setParticipants}
             onLateToggle={(id) => form.toggleFlag("lateIds", id)}
+            onScanImport={form.importScan}
           />
         </div>
       </div>
