@@ -1,16 +1,18 @@
 "use client";
 
 import { useRef } from "react";
-import { FileJson, ImageUp, Loader2 } from "lucide-react";
+import { ImageUp, Loader2 } from "lucide-react";
 import { Button } from "@/shared/ui";
+import ScanRecordsMenu from "./ScanRecordsMenu";
 
 type Props = {
   total: number;
   selectedCount: number;
   lateCount: number;
   ocrLoading: boolean;
+  scanDay: string;
   onFilesPick: (files: File[]) => void;
-  onScanPick: (file: File) => void;
+  onScanImport: (text: string) => void;
   onSelectAll: () => void;
   onClear: () => void;
 };
@@ -20,25 +22,19 @@ export default function ParticipantsSummary({
   selectedCount,
   lateCount,
   ocrLoading,
+  scanDay,
   onFilesPick,
-  onScanPick,
+  onScanImport,
   onSelectAll,
   onClear,
 }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
-  const scanRef = useRef<HTMLInputElement>(null);
   const progress = total ? Math.round((selectedCount / total) * 100) : 0;
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? []);
     event.target.value = "";
     if (files.length > 0) onFilesPick(files);
-  };
-
-  const handleScanChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    event.target.value = "";
-    if (file) onScanPick(file);
   };
 
   return (
@@ -83,23 +79,7 @@ export default function ParticipantsSummary({
         {ocrLoading ? <Loader2 className="animate-spin" /> : <ImageUp />}
         Со скриншота
       </Button>
-      <input
-        ref={scanRef}
-        type="file"
-        accept=".json,application/json"
-        className="hidden"
-        onChange={handleScanChange}
-      />
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={() => scanRef.current?.click()}
-        className="cursor-pointer"
-      >
-        <FileJson />
-        Из сканера
-      </Button>
+      <ScanRecordsMenu day={scanDay} onImport={onScanImport} />
       <Button
         type="button"
         variant="ghost"

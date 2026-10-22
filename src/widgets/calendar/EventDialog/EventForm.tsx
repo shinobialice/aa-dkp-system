@@ -9,6 +9,7 @@ import EventFormFooter from "./EventFormFooter";
 import EventFormSteps, { type EventFormStep } from "./EventFormSteps";
 import { raidLabel, type EventFormMode } from "./eventFormModel";
 import ParticipantsPicker from "./ParticipantsPicker";
+import { scanDay } from "./ParticipantsPicker/participantsModel";
 import RaidDetailsForm from "./RaidDetailsForm";
 import { useEventForm } from "./useEventForm";
 import { errorMessage } from "@/shared/lib/errorMessage";
@@ -81,6 +82,7 @@ export default function EventForm({ mode, event, onClose, onComplete }: Props) {
             canMarkLate={!form.isPrimeByTime}
             notes={form.participantNotes}
             scan={form.draft.scan}
+            scanDay={scanDay(form.draft.date)}
             onSelectionChange={form.setParticipants}
             onLateToggle={(id) => form.toggleFlag("lateIds", id)}
             onScanImport={form.importScan}

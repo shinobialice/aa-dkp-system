@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner";
-import { errorMessage } from "@/shared/lib/errorMessage";
 import type { IdFlags, PickerUser } from "../eventFormModel";
 import type { RaidScan } from "../raidScanModel";
 import OcrBanner from "./OcrBanner";
@@ -28,6 +26,7 @@ type Props = {
   canMarkLate: boolean;
   notes: Record<number, string>;
   scan: RaidScan | null;
+  scanDay: string;
   onSelectionChange: (selectedIds: IdFlags) => void;
   onLateToggle: (userId: number) => void;
   onScanImport: (text: string) => void;
@@ -40,6 +39,7 @@ export default function ParticipantsPicker({
   canMarkLate,
   notes,
   scan,
+  scanDay,
   onSelectionChange,
   onLateToggle,
   onScanImport,
@@ -71,14 +71,6 @@ export default function ParticipantsPicker({
     onSelectionChange(flagsForUsers(recognized));
   };
 
-  const handleScanPick = async (file: File) => {
-    try {
-      onScanImport(await file.text());
-    } catch (error) {
-      toast.error(errorMessage(error, "Не удалось прочитать файл сканера"));
-    }
-  };
-
   const handleLateAccept = (userIds: number[]) => {
     userIds.filter((id) => !lateIds[id]).forEach(onLateToggle);
   };
@@ -99,8 +91,9 @@ export default function ParticipantsPicker({
         selectedCount={selectedCount}
         lateCount={canMarkLate ? countLate(users, selectedIds, lateIds) : 0}
         ocrLoading={ocr.loading}
+        scanDay={scanDay}
         onFilesPick={handleFiles}
-        onScanPick={handleScanPick}
+        onScanImport={onScanImport}
         onSelectAll={() => onSelectionChange(flagsForUsers(users))}
         onClear={() => onSelectionChange({})}
       />

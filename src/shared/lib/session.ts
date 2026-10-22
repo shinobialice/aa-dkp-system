@@ -5,7 +5,7 @@ import sql from "@/shared/lib/db";
 export const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
 
 // В базе лежит только хэш: токен из утёкшего дампа не подойдёт к куке.
-function hashToken(token: string) {
+export function hashToken(token: string) {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
 

@@ -1,21 +1,29 @@
 import Link from "next/link";
 import { Download } from "lucide-react";
+import type { ScannerKey } from "@/actions/scannerLink";
 import { KILLCOUNT_ROLES } from "@/shared/config/killcountRoles";
+import ConnectedScanners from "./ConnectedScanners";
+
+type Props = {
+  keys: ScannerKey[];
+};
 
 const INSTALL_STEPS = [
   "Запустить скачанный файл. Если Windows ругается — «Подробнее» → «Выполнить в любом случае».",
   "Галочку «Установить Npcap» не снимать, дальше везде «Далее» / «Install».",
   "Открыть ярлык «Corvus PvP Scanner» на рабочем столе и вписать свой ник.",
+  "Нажать «Подключить к сайту», подтвердить в открывшемся браузере. Это один раз.",
 ];
 
-const PRIME_STEPS = [
-  "Выйти на выбор персонажа, открыть сканер, зайти в игру, нажать «Сканировать рядом».",
-  "В конце прайма — то же самое.",
-  "В сканере: «Киллкаунт…» → «Посчитать и скопировать JSON для сайта».",
-  "На сайте: «Добавить вручную» → вставить → «Сохранить».",
+const RAID_STEPS = [
+  "Запустить сканер до входа в игру и держать открытым весь рейд.",
+  "Выбрать «Прайм» или «АГЛ» и нажать «Начать рейд» — это начало киллкаунта.",
+  "Кто подошёл позже, попадёт сам: сканер возьмёт его числа при первом появлении рядом.",
+  "В конце, когда все собрались вместе, нажать «Закончить рейд». Посещаемость и киллкаунт уйдут на сайт сами.",
+  "На сайте: «Киллкаунт → Новая страница» — проверить и опубликовать; секретарь берёт запись в «Новом посещении» → «Из сканера».",
 ];
 
-export default function ScannerPage() {
+export default function ScannerPage({ keys }: Props) {
   return (
     <div className="flex max-w-2xl flex-col gap-4">
       <div>
@@ -33,16 +41,27 @@ export default function ScannerPage() {
       </section>
 
       <section className="rounded-xl border bg-card p-4">
-        <h2 className="font-semibold">Каждый прайм</h2>
-        <Steps items={PRIME_STEPS} />
+        <h2 className="font-semibold">Каждый рейд</h2>
+        <Steps items={RAID_STEPS} />
         <p className="mt-3 text-muted-foreground">
-          Попадут игроки гильдии с сайта на ролях {KILLCOUNT_ROLES.join(", ")}.
-          Сканер пустой — перезайдите через выбор персонажа.
+          В киллкаунт попадут игроки гильдии с сайта на ролях{" "}
+          {KILLCOUNT_ROLES.join(", ")}. Свои числа сканер не обновляет: тот, кто
+          сканирует, в киллкаунт не попадает.
         </p>
       </section>
 
+      <section className="rounded-xl border bg-card p-4">
+        <h2 className="font-semibold">Подключённые сканеры</h2>
+        <p className="mt-1 mb-2 text-muted-foreground">
+          Отключённый сканер перестаёт отправлять данные на сайт. Подключить
+          заново можно в программе.
+        </p>
+        <ConnectedScanners keys={keys} />
+      </section>
+
       <p className="text-muted-foreground">
-        Сам киллкаунт — на странице{" "}
+        Старый способ тоже работает: «Киллкаунт…» в сканере, затем «Добавить
+        вручную» на странице{" "}
         <Link href="/kill-counter/current" className="underline">
           «Сегодня»
         </Link>

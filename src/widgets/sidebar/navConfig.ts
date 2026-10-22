@@ -15,6 +15,7 @@ import {
   Package,
   PiggyBank,
   Settings,
+  Sparkles,
   Swords,
   Users,
   UserX,
@@ -84,6 +85,12 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { title: "Сегодня", url: "/kill-counter/current", icon: Swords },
       { title: "История", url: "/kill-counter/history", icon: History },
+      {
+        title: "Новая страница",
+        url: "/kill-counter/new",
+        icon: Sparkles,
+        isNew: true,
+      },
     ],
   },
   {

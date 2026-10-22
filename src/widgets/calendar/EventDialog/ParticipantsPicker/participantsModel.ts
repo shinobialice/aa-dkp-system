@@ -1,5 +1,6 @@
 import { groupByClass } from "@/shared/config/classes";
 import { formatMoscowHM, plural } from "@/shared/lib/format";
+import { getMoscowISOString } from "@/utils/getMoscowISOString";
 import type { IdFlags, PickerUser } from "../eventFormModel";
 import { scanMinutes, shortStayIds, type RaidScan } from "../raidScanModel";
 
@@ -51,6 +52,10 @@ export function participantGroups(
         .sort((a, b) => joinedTime(a) - joinedTime(b)),
     }))
     .filter((group) => group.people.length > 0);
+}
+
+export function scanDay(date: Date | null) {
+  return getMoscowISOString(date ?? new Date()).slice(0, 10);
 }
 
 export function scanSummary(scan: RaidScan) {

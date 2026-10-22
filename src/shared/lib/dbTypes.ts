@@ -253,6 +253,7 @@ export type KillcountStatsRow = {
   recorded_at: string;
   class: string | null;
   comment: string | null;
+  scanner_record_id: number | null;
 };
 
 export type LinkTokenRow = {
@@ -458,6 +459,39 @@ export type SalaryEligibilitySettingsRow = {
   dv_bypass_enabled: boolean;
   gs_enabled: boolean;
   updated_at: string;
+};
+
+export type ScannerKeyRow = {
+  id: number;
+  user_id: number;
+  key_hash: string;
+  label: string;
+  created_at: string;
+  last_used_at: string | null;
+  revoked_at: string | null;
+};
+
+export type ScannerLinkRow = {
+  code: string;
+  user_id: number;
+  key: string;
+  created_at: string;
+  expires_at: string;
+};
+
+export type ScannerRecordRow = {
+  id: number;
+  client_id: string;
+  user_id: number;
+  kind: string;
+  started_at: string;
+  ended_at: string;
+  raid: unknown;
+  killcount: unknown;
+  status: string;
+  published_at: string | null;
+  published_by: number | null;
+  created_at: string;
 };
 
 export type ScreenshotsLinkSettingsRow = {

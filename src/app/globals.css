@@ -9,6 +9,14 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "Russo One";
+  src: url("/fonts/RussoOne-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --radius: 0.5rem;
   --background: oklch(1 0 0);
@@ -89,6 +97,7 @@
 }
 
 @theme inline {
+  --font-display: "Russo One", "Arial Black", Impact, sans-serif;
   --text-2xs: 0.6875rem;
   --text-2xs--line-height: 1rem;
   --color-background: var(--background);
@@ -766,5 +775,96 @@
   .promo-banner:hover img {
     scale: none;
     translate: none;
+  }
+}
+
+/* Арена: формы главной и страницы вара */
+.arena-cut {
+  --cut: 14px;
+  clip-path: polygon(
+    0 0,
+    calc(100% - var(--cut)) 0,
+    100% var(--cut),
+    100% 100%,
+    0 100%
+  );
+  background-image: linear-gradient(
+    to bottom left,
+    transparent 50%,
+    var(--border) 50%,
+    var(--border) calc(50% + 1.2px),
+    transparent calc(50% + 1.2px)
+  );
+  background-position: top right;
+  background-size: var(--cut) var(--cut);
+  background-repeat: no-repeat;
+}
+
+.arena-shield {
+  clip-path: polygon(0 0, 100% 0, 100% 68%, 50% 100%, 0 68%);
+}
+
+.arena-skew {
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+}
+
+.arena-rim {
+  background: linear-gradient(
+    155deg,
+    #f4f6fa,
+    #9aa3b5 40%,
+    #e3e7ef 60%,
+    #6b7385 85%,
+    #d4d9e3
+  );
+}
+
+.arena-rim-gold {
+  background: linear-gradient(
+    155deg,
+    #fff4cf,
+    #e8b450 40%,
+    #fde68a 60%,
+    #a16207 85%,
+    #fcd34d
+  );
+}
+
+.arena-banner {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  color: #fff;
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - 28px),
+    calc(100% - 28px) 100%,
+    0 100%
+  );
+}
+
+.arena-poster {
+  background:
+    repeating-linear-gradient(
+      115deg,
+      rgb(255 255 255 / 0.035) 0 1px,
+      transparent 1px 10px
+    ),
+    linear-gradient(115deg, #0b1411 0 54%, #15803d 54% 76%, #166534 76%);
+}
+
+.arena-ghost {
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgb(255 255 255 / 0.09);
+}
+
+.arena-blink {
+  animation: arena-blink 1.2s ease-in-out infinite;
+}
+
+@keyframes arena-blink {
+  50% {
+    opacity: 0.25;
   }
 }
