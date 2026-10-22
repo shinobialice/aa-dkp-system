@@ -28,7 +28,9 @@ export const getAllLootQueues = async (): Promise<QueueMap> => {
         u.class
       FROM loot_queue lq
       JOIN item_type it ON it.id = lq.item_type_id
-      LEFT JOIN "user" u ON u.id = lq.user_id
+      JOIN "user" u ON u.id = lq.user_id
+      WHERE u.active = true
+        AND u.id NOT IN (SELECT user_id FROM user_tags WHERE tag = 'АФК' AND removed_at IS NULL)
     `;
   } catch (error) {
     console.error("Ошибка при получении очередей на лут:", error);
