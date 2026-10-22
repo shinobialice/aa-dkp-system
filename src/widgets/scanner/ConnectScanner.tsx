@@ -7,15 +7,11 @@ import { toast } from "sonner";
 import { confirmScannerLink } from "@/actions/scannerLink";
 import { errorMessage } from "@/shared/lib/errorMessage";
 import { Button } from "@/shared/ui";
-import ArenaPanel from "@/widgets/arena/ArenaPanel";
 
 type Props = {
   code: string;
   username: string;
 };
-
-const ACTION_BUTTON =
-  "arena-skew h-10 rounded-none px-6 font-display tracking-wide uppercase";
 
 export default function ConnectScanner({ code, username }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,44 +31,46 @@ export default function ConnectScanner({ code, username }: Props) {
 
   if (isDone) {
     return (
-      <ArenaPanel title="Сканер подключён" className="max-w-xl">
-        <p className="text-sm">
+      <section className="flex max-w-xl flex-col gap-2 rounded-xl border bg-card p-4">
+        <h1 className="text-lg font-bold">Сканер подключён</h1>
+        <p>
           Сканер сам заберёт ключ в течение минуты. Эту вкладку можно закрыть.
         </p>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground">
           Отключить сканер можно на странице «Сканер» в разделе «Киллкаунт».
         </p>
-      </ArenaPanel>
+      </section>
     );
   }
 
   return (
-    <ArenaPanel title="Подключить сканер?" className="max-w-xl">
-      <p className="text-sm text-muted-foreground">
+    <section className="flex max-w-xl flex-col gap-3 rounded-xl border bg-card p-4">
+      <h1 className="text-lg font-bold">Подключить сканер?</h1>
+      <p className="text-muted-foreground">
         Сканер на этом компьютере сможет отправлять на сайт записи рейдов и
         киллкаунт от вашего имени. Сверьте код с тем, что показывает сканер.
       </p>
-      <div className="flex items-center gap-3 border px-3 py-2.5">
-        <Radar className="size-5 shrink-0 text-green-600 dark:text-green-400" />
+      <div className="flex items-center gap-3 rounded-lg border bg-muted/40 px-3 py-2.5">
+        <Radar className="size-5 shrink-0 text-muted-foreground" />
         <span className="font-semibold">{username}</span>
-        <span className="ml-auto font-display text-sm tracking-widest text-muted-foreground">
+        <span className="ml-auto font-mono text-sm tracking-widest text-muted-foreground">
           {fingerprint(code)}
         </span>
       </div>
       <div className="flex flex-wrap gap-2">
         <Button
-          className={ACTION_BUTTON}
+          className="cursor-pointer"
           disabled={isSubmitting}
           onClick={handleConfirm}
         >
           {isSubmitting && <Loader2 className="animate-spin" />}
           Подключить
         </Button>
-        <Button variant="outline" className={ACTION_BUTTON} asChild>
+        <Button variant="outline" asChild>
           <Link href="/kill-counter/scanner">Отмена</Link>
         </Button>
       </div>
-    </ArenaPanel>
+    </section>
   );
 }
 

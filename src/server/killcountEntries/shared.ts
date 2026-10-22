@@ -11,9 +11,9 @@ import {
 } from "@/utils/getMoscowISOString";
 import type { KillCount } from "@/widgets/killcount/types";
 import type {
-  ArenaFighter,
-  ArenaRaid,
-  ArenaWindow,
+  KillcountFighter,
+  LinkedRaid,
+  ScanWindow,
   RaidQueryRow,
   RecordQueryRow,
 } from "./types";
@@ -24,7 +24,7 @@ export function toWindow(
   startedAt: string | null,
   endedAt: string | null,
   scannedBy: string | null,
-): ArenaWindow | null {
+): ScanWindow | null {
   if (!startedAt || !endedAt || !scannedBy) return null;
   return { startedAt, endedAt, scannedBy };
 }
@@ -43,7 +43,7 @@ export function startTimes(rows: ScannerKillcountRow[]) {
 export function withStartTimes(
   resolved: KillCount[],
   raw: ScannerKillcountRow[],
-): ArenaFighter[] {
+): KillcountFighter[] {
   const byName = startTimes(raw);
   return resolved.map((row) => ({
     ...row,
@@ -82,7 +82,7 @@ export function raidsOfDay(type: string, day: string) {
   `;
 }
 
-export function covers(window: ArenaWindow | null, startDate: string) {
+export function covers(window: ScanWindow | null, startDate: string) {
   if (!window) return false;
   const at = parseMoscowISOString(startDate).getTime();
   return (
@@ -94,8 +94,8 @@ export function covers(window: ArenaWindow | null, startDate: string) {
 
 export function linkRaid(
   raid: RaidQueryRow,
-  window: ArenaWindow | null,
-): ArenaRaid {
+  window: ScanWindow | null,
+): LinkedRaid {
   return {
     id: raid.id,
     time: raid.time,

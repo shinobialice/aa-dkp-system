@@ -7,6 +7,7 @@ import { cn } from "@/shared/lib/tw-merge";
 const TABS = [
   { href: "/kill-counter/current", label: "Сегодня" },
   { href: "/kill-counter/history", label: "История" },
+  { href: "/kill-counter/new", label: "Праймы и АГЛ" },
 ];
 
 export function KillcountHeader({

@@ -2,15 +2,15 @@ import type { RaidRow, ScannerRecordRow, UserRow } from "@/shared/lib/dbTypes";
 import type { RecordKind } from "@/server/scanner/record";
 import type { KillCount, KillCountExclusion } from "@/widgets/killcount/types";
 
-export type ArenaFighter = KillCount & { startAt: string | null };
+export type KillcountFighter = KillCount & { startAt: string | null };
 
-export type ArenaWindow = {
+export type ScanWindow = {
   startedAt: string;
   endedAt: string;
   scannedBy: string;
 };
 
-export type ArenaRaid = {
+export type LinkedRaid = {
   id: number;
   time: string;
   boss: string;
@@ -18,13 +18,13 @@ export type ArenaRaid = {
   isLinked: boolean;
 };
 
-export type ArenaKillcount = {
+export type KillcountEntry = {
   kind: RecordKind;
   key: string;
   day: string;
-  window: ArenaWindow | null;
-  fighters: ArenaFighter[];
-  raids: ArenaRaid[];
+  window: ScanWindow | null;
+  fighters: KillcountFighter[];
+  raids: LinkedRaid[];
   canEditRows: boolean;
 };
 
@@ -34,14 +34,14 @@ export type PrimeDay = {
   fighters: number;
   topUserName: string | null;
   topKills: number | null;
-  window: ArenaWindow | null;
+  window: ScanWindow | null;
 };
 
 export type AglRecordSummary = {
   id: number;
   totalKills: number;
   fighters: number;
-  window: ArenaWindow;
+  window: ScanWindow;
 };
 
 export type AglItem = {
@@ -57,9 +57,9 @@ export type PendingRecord = {
   id: number;
   kind: RecordKind;
   day: string;
-  window: ArenaWindow;
+  window: ScanWindow;
   inRaid: number;
-  fighters: ArenaFighter[];
+  fighters: KillcountFighter[];
   excluded: KillCountExclusion[];
   warnings: string[];
   blockedReason: string | null;

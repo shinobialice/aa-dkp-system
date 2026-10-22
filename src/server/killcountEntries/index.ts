@@ -3,10 +3,10 @@ export { getPendingRecords } from "./pending";
 export { getPrimeDay, getPrimeDays } from "./primes";
 export type {
   AglItem,
-  ArenaFighter,
-  ArenaKillcount,
-  ArenaRaid,
-  ArenaWindow,
+  KillcountFighter,
+  KillcountEntry,
+  LinkedRaid,
+  ScanWindow,
   PendingRecord,
   PrimeDay,
 } from "./types";

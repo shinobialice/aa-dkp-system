@@ -12,7 +12,7 @@ import {
 import type {
   AglItem,
   AglRecordSummary,
-  ArenaKillcount,
+  KillcountEntry,
   RaidQueryRow,
   RecordQueryRow,
 } from "./types";
@@ -81,7 +81,7 @@ export async function getAglItems(): Promise<AglItem[]> {
 
 export async function getAglRecord(
   recordId: number,
-): Promise<ArenaKillcount | null> {
+): Promise<KillcountEntry | null> {
   const [record] = await sql<RecordQueryRow[]>`
     SELECT sr.id, sr.kind, sr.started_at, sr.ended_at, sr.raid, sr.killcount, u.username
     FROM scanner_record sr

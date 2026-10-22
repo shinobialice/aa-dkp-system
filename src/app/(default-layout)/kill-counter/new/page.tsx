@@ -9,8 +9,8 @@ import {
   getPrimeDays,
   type AglItem,
   type PrimeDay,
-} from "@/server/killcountArena";
-import KillcountArena from "@/widgets/killcount/arena/KillcountArena";
+} from "@/server/killcountEntries";
+import KillcountEntries from "@/widgets/killcount/entries/KillcountEntries";
 
 type Props = {
   searchParams: Promise<{ kind?: string; day?: string; record?: string }>;
@@ -34,7 +34,7 @@ export default async function KillcountNewPage({ searchParams }: Props) {
 
   return (
     <div className="mx-auto flex w-full max-w-6xl min-w-0 flex-col gap-4 text-sm">
-      <KillcountArena
+      <KillcountEntries
         kind={kind}
         selected={selected}
         primeDays={primeDays}

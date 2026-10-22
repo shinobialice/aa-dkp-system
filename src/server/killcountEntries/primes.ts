@@ -2,7 +2,7 @@ import "server-only";
 import sql from "@/shared/lib/db";
 import { parseKillcountDoc } from "@/server/scanner/record";
 import { linkRaid, raidsOfDay, startTimes, toWindow } from "./shared";
-import type { ArenaKillcount, PrimeDay, RecordQueryRow } from "./types";
+import type { KillcountEntry, PrimeDay, RecordQueryRow } from "./types";
 
 type PrimeDayQueryRow = {
   day: string;
@@ -67,7 +67,7 @@ export async function getPrimeDays(): Promise<PrimeDay[]> {
   }));
 }
 
-export async function getPrimeDay(day: string): Promise<ArenaKillcount> {
+export async function getPrimeDay(day: string): Promise<KillcountEntry> {
   const [rows, [record]] = await Promise.all([
     sql<FighterQueryRow[]>`
       SELECT
