@@ -830,6 +830,17 @@
   );
 }
 
+.arena-rim-bronze {
+  background: linear-gradient(
+    155deg,
+    #f6d9c4,
+    #c98552 40%,
+    #e8b48f 60%,
+    #7c3f17 85%,
+    #d9a070
+  );
+}
+
 .arena-banner {
   position: relative;
   isolation: isolate;

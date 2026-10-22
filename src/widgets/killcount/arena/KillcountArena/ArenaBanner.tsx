@@ -5,7 +5,7 @@ import { formatNumber } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/tw-merge";
 import SkewTag from "@/widgets/arena/SkewTag";
 import { longDate } from "../../ui/killcountModel";
-import MvpShield from "./MvpShield";
+import TopThree from "./TopThree";
 import RaidLineup from "./RaidLineup";
 import {
   arenaHref,
@@ -85,7 +85,7 @@ export default function ArenaBanner({
               : "добавлен вручную, время не записано"}
           </p>
         </div>
-        {sorted.length > 0 && <MvpShield fighters={sorted} />}
+        {sorted.length > 0 && <TopThree fighters={sorted} />}
       </div>
       <RaidLineup raids={raids} kind={kind} />
     </section>
