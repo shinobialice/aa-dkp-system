@@ -15,7 +15,10 @@ async function verifySessionCached(token: string) {
 
   const result = await verifySessionToken(token);
   if (sessionCache.size > 1000) sessionCache.clear();
-  sessionCache.set(token, { result, expiresAt: Date.now() + SESSION_CACHE_TTL_MS });
+  sessionCache.set(token, {
+    result,
+    expiresAt: Date.now() + SESSION_CACHE_TTL_MS,
+  });
   return result;
 }
 
@@ -42,6 +45,8 @@ export async function proxy(req: NextRequest) {
     "/api/auth/vk/callback",
     "/api/notify-respawn",
     "/api/notify-schedule",
+    // Сканер ходит без куки: его запросы проверяются по собственному ключу.
+    "/api/scanner",
   ];
 
   const isPublic = publicPaths.some((path) =>
