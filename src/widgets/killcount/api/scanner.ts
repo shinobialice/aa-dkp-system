@@ -3,6 +3,7 @@
 import sql from "@/shared/lib/db";
 import ensurePrivilieges from "@/actions/ensurePrivilieges";
 import { KILLCOUNT_EDITOR_TAGS } from "@/server/killcountEditors";
+import { RAID_EDITOR_TAGS } from "@/server/raidLinks";
 import {
   KILLCOUNT_ROLES,
   resolveKillcountRole,
@@ -25,12 +26,21 @@ export const findUnknownKillCountUsers = async (userNames: string[]) => {
   }
 };
 
+type ScannerKillCount = { rows: KillCount[]; excluded: KillCountExclusion[] };
+
+export const prepareScannerKillCount = async (rows: KillCount[]) => {
+  await ensurePrivilieges(KILLCOUNT_EDITOR_TAGS);
+  return filterScannerRows(rows);
+};
+
+export const prepareRaidKillCount = async (rows: KillCount[]) => {
+  await ensurePrivilieges(RAID_EDITOR_TAGS);
+  return filterScannerRows(rows);
+};
+
 // Черновик из сканера: оставляет только пользователей сайта на ДД-роли.
 // Роль определяется по трём веткам из сканера (слот архетипа), иначе основная.
-export const prepareScannerKillCount = async (
-  rows: KillCount[],
-): Promise<{ rows: KillCount[]; excluded: KillCountExclusion[] }> => {
-  await ensurePrivilieges(KILLCOUNT_EDITOR_TAGS);
+async function filterScannerRows(rows: KillCount[]): Promise<ScannerKillCount> {
   if (rows.length === 0) return { rows: [], excluded: [] };
   try {
     const users = await sql<
@@ -103,4 +113,4 @@ export const prepareScannerKillCount = async (
   } catch (error) {
     throw new Error("Не удалось проверить список из сканера", { cause: error });
   }
-};
+}

@@ -5,6 +5,7 @@ import { plural } from "@/shared/lib/format";
 import type { ResolvedAttendanceBonus } from "@/utils/attendanceBonusDefaults";
 import computeRaidDkp from "@/utils/eventDkpCalculator";
 import { parseMoscowISOString } from "@/utils/getMoscowISOString";
+import type { KillCount } from "@/widgets/killcount/types";
 import {
   isPvpPrime,
   primeHalfHours,
@@ -28,6 +29,7 @@ export type EventDraft = {
   scan: RaidScan | null;
   durationMinutes: number | null;
   storedDkp: Record<number, number>;
+  killcount: KillCount[];
 };
 
 export type EventFormErrors = {
@@ -65,6 +67,7 @@ export function initialDraft(event: RaidDetails | null): EventDraft {
       scan: null,
       durationMinutes: null,
       storedDkp: {},
+      killcount: [],
     };
   }
 
@@ -82,6 +85,7 @@ export function initialDraft(event: RaidDetails | null): EventDraft {
     scan: null,
     durationMinutes: event.duration_minutes,
     storedDkp: storedPersonalDkp(event),
+    killcount: event.killcount,
   };
 }
 

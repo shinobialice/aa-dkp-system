@@ -15,6 +15,7 @@ import {
   insertRaidLinks,
   RAID_EDITOR_TAGS,
 } from "@/server/raidLinks";
+import { resolveRaidKillcount } from "@/server/raidKillcount";
 import { triggerFinanceRecalc } from "@/server/finance/recalc";
 import { publishChanges } from "@/server/liveChanges";
 
@@ -29,10 +30,12 @@ const updateEvent = async (
   lateUserIds: number[] = [],
   personalDkp: unknown = {},
   durationMinutes: unknown = null,
+  killcount: unknown = [],
 ) => {
   await ensurePrivilieges(RAID_EDITOR_TAGS);
   const checkedDkp = checkPersonalDkp(personalDkp, userIds, dkp_summary);
   const duration = checkDurationMinutes(durationMinutes);
+  const checkedKillcount = await resolveRaidKillcount(killcount);
 
   // Запоминаем старую дату — если рейд переносят в другой месяц, пересчитать
   // нужно оба месяца (у старого пропадает посещаемость/dkp, у нового — появляется).
@@ -57,6 +60,7 @@ const updateEvent = async (
         personalDkp: checkedDkp,
         bossIds,
         bonusTypeIds,
+        killcount: checkedKillcount,
       });
     });
   } catch (error) {

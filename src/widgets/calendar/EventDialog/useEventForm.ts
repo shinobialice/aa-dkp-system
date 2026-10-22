@@ -11,6 +11,7 @@ import { linkLootToRaid } from "@/actions/linkLootToRaid";
 import updateEvent from "@/actions/updateEvent";
 import { useAsyncData } from "@/hooks/useAsyncData";
 import { isPrimeLinkableSource } from "@/widgets/Loot/GuildLoot/LootTypes";
+import type { KillCount } from "@/widgets/killcount/types";
 import {
   activeBonusIds,
   checkedIds,
@@ -128,6 +129,10 @@ export function useEventForm(mode: EventFormMode, event: RaidDetails | null) {
     clearError("duration");
   };
 
+  const setKillcount = (killcount: KillCount[]) => {
+    updateDraft({ killcount });
+  };
+
   const importScan = (text: string) => {
     const scan = parseRaidScan(text, users);
     setDraft((current) => ({ ...current, ...scanDraftPatch(scan, current) }));
@@ -145,6 +150,7 @@ export function useEventForm(mode: EventFormMode, event: RaidDetails | null) {
       isPrimeByTime ? [] : userIds.filter((id) => draft.lateIds[id]),
       personalDkp,
       draft.durationMinutes,
+      isPrimeByTime ? [] : draft.killcount,
     ] as const;
 
     if (mode === "edit" && event) {
@@ -193,6 +199,7 @@ export function useEventForm(mode: EventFormMode, event: RaidDetails | null) {
     toggleFlag,
     setParticipants,
     setDurationMinutes,
+    setKillcount,
     importScan,
     submit,
   };

@@ -1,6 +1,7 @@
 import "server-only";
 import type { TransactionSql } from "postgres";
 import * as v from "valibot";
+import type { RaidKillcountInsert } from "./raidKillcount";
 
 export const RAID_EDITOR_TAGS = [
   "Администратор",
@@ -17,6 +18,7 @@ export type RaidLinks = {
   personalDkp: PersonalDkp;
   bossIds: number[];
   bonusTypeIds: number[];
+  killcount: RaidKillcountInsert[];
 };
 
 const MAX_DURATION_MINUTES = 24 * 60;
@@ -63,7 +65,14 @@ export function checkDurationMinutes(durationMinutes: unknown) {
 export async function insertRaidLinks(
   tx: TransactionSql,
   raidId: number,
-  { userIds, lateUserIds, personalDkp, bossIds, bonusTypeIds }: RaidLinks,
+  {
+    userIds,
+    lateUserIds,
+    personalDkp,
+    bossIds,
+    bonusTypeIds,
+    killcount,
+  }: RaidLinks,
 ) {
   if (userIds.length > 0) {
     const createdAt = new Date().toISOString();
@@ -89,10 +98,16 @@ export async function insertRaidLinks(
     }));
     await tx`INSERT INTO raid_bonus ${tx(bonuses)}`;
   }
+
+  if (killcount.length > 0) {
+    const rows = killcount.map((row) => ({ raid_id: raidId, ...row }));
+    await tx`INSERT INTO raid_killcount ${tx(rows)}`;
+  }
 }
 
 export async function deleteRaidLinks(tx: TransactionSql, raidId: number) {
   await tx`DELETE FROM raid_attendance WHERE raid_id = ${raidId}`;
   await tx`DELETE FROM raid_boss WHERE raid_id = ${raidId}`;
   await tx`DELETE FROM raid_bonus WHERE raid_id = ${raidId}`;
+  await tx`DELETE FROM raid_killcount WHERE raid_id = ${raidId}`;
 }

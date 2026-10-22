@@ -62,3 +62,24 @@ export function warTitle(war: KillCountWar) {
 export function daysTotal(days: KillCountHistoryData[]) {
   return days.reduce((sum, day) => sum + Number(day.totalKills), 0);
 }
+
+export function parseKillcountJson(value: string): KillCount[] | null {
+  try {
+    const parsed: KillCount[] = JSON.parse(value);
+    return parsed.map((item) => {
+      const [userName = "", ...rest] = item.userName.split(" ");
+      return {
+        ...item,
+        userName,
+        // «Ник (комментарий)» — старый способ; JSON сканера передаёт comment отдельно.
+        // Пустая строка, не undefined: postgres.js не вставляет undefined.
+        comment: rest.length
+          ? rest.join(" ").replaceAll(/\(|\)/g, "")
+          : (item.comment ?? ""),
+      };
+    });
+  } catch (error) {
+    console.error("Данные не сериализуемы", error);
+    return null;
+  }
+}

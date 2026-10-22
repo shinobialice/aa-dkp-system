@@ -437,6 +437,18 @@ export type RaidBossRow = {
   boss_id: number;
 };
 
+export type RaidKillcountRow = {
+  id: number;
+  raid_id: number;
+  user_id: number;
+  class: string;
+  start_honor: number;
+  end_honor: number;
+  start_kills: number;
+  end_kills: number;
+  comment: string | null;
+};
+
 export type SalaryEligibilitySettingsRow = {
   id: number;
   prime_enabled: boolean;

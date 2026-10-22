@@ -5,6 +5,7 @@ import BossSelector from "./BossSelector";
 import CategorySelector from "./CategorySelector";
 import DurationField from "./DurationField";
 import RaidDateField from "./RaidDateField";
+import RaidKillcountField from "./RaidKillcountField";
 import RaidLootList from "./RaidLootList";
 import RaidValueSummary from "./RaidValueSummary";
 import UnlinkedLootPicker from "./UnlinkedLootPicker";
@@ -58,6 +59,12 @@ export default function RaidDetailsForm({ form }: Props) {
         hasError={errors.selectedDate}
         onChange={form.changeDate}
       />
+      {draft.bosses.length > 0 && !form.isPrimeByTime && (
+        <RaidKillcountField
+          rows={draft.killcount}
+          onChange={form.setKillcount}
+        />
+      )}
       {raidLoot && <RaidLootList loot={raidLoot} />}
       <UnlinkedLootPicker
         items={form.unlinkedLoot}

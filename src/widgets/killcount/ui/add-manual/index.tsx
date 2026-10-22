@@ -11,33 +11,13 @@ import {
   prepareScannerKillCount,
 } from "../../api/scanner";
 import { KillcountDay } from "../KillcountDay";
+import { parseKillcountJson } from "../killcountModel";
 import { DraftNotices } from "./DraftNotices";
 
 type AddManualKillCountProps = {
   onBack: () => void;
   isCanEdit: boolean;
 };
-
-function parseJson(value: string): KillCount[] | null {
-  try {
-    const parsed: KillCount[] = JSON.parse(value);
-    return parsed.map((item) => {
-      const [userName = "", ...rest] = item.userName.split(" ");
-      return {
-        ...item,
-        userName,
-        // «Ник (комментарий)» — старый способ; JSON сканера передаёт comment отдельно.
-        // Пустая строка, не undefined: postgres.js не вставляет undefined.
-        comment: rest.length
-          ? rest.join(" ").replaceAll(/\(|\)/g, "")
-          : (item.comment ?? ""),
-      };
-    });
-  } catch (error) {
-    console.error("Данные не сериализуемы", error);
-    return null;
-  }
-}
 
 export function AddManualKillCount({
   onBack,
@@ -140,7 +120,7 @@ export function AddManualKillCount({
           onChange={(event) => {
             const value = event.currentTarget.value;
             setJsonInput(value);
-            const parsed = parseJson(value);
+            const parsed = parseKillcountJson(value);
             if (parsed) applyParsed(parsed);
           }}
         />

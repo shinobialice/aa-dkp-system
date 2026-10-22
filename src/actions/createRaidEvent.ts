@@ -13,6 +13,7 @@ import {
   insertRaidLinks,
   RAID_EDITOR_TAGS,
 } from "@/server/raidLinks";
+import { resolveRaidKillcount } from "@/server/raidKillcount";
 import { triggerFinanceRecalc } from "@/server/finance/recalc";
 import { publishChanges } from "@/server/liveChanges";
 
@@ -26,10 +27,12 @@ const createRaidEvent = async (
   lateUserIds: number[] = [],
   personalDkp: unknown = {},
   durationMinutes: unknown = null,
+  killcount: unknown = [],
 ) => {
   await ensurePrivilieges(RAID_EDITOR_TAGS);
   const checkedDkp = checkPersonalDkp(personalDkp, userIds, dkp_summary);
   const duration = checkDurationMinutes(durationMinutes);
+  const checkedKillcount = await resolveRaidKillcount(killcount);
 
   let raid: RaidRow;
   try {
@@ -55,6 +58,7 @@ const createRaidEvent = async (
         personalDkp: checkedDkp,
         bossIds,
         bonusTypeIds,
+        killcount: checkedKillcount,
       });
       return created;
     });

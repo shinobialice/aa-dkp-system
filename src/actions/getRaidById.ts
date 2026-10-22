@@ -6,9 +6,11 @@ import type {
   ItemTypeRow,
   LootRow,
   RaidAttendanceRow,
+  RaidKillcountRow,
   RaidRow,
   UserRow,
 } from "@/shared/lib/dbTypes";
+import type { KillCount } from "@/widgets/killcount/types";
 
 type RaidBossQueryRow = Pick<
   BossRow,
@@ -39,6 +41,11 @@ type LootQueryRow = Pick<
   item_type_grade: ItemTypeRow["grade"];
 };
 
+type KillcountQueryRow = Omit<RaidKillcountRow, "raid_id"> &
+  Pick<UserRow, "username" | "avatar_url"> & {
+    user_class: UserRow["class"];
+  };
+
 export type RaidDetails = Awaited<ReturnType<typeof getRaidById>>;
 export type RaidDetailsLoot = RaidDetails["loot"][number];
 export type RaidDetailsAttendee = RaidDetails["raid_attendance"][number];
@@ -61,6 +68,7 @@ export const getRaidById = async (id: string) => {
       lootRows,
       [activeMembersRow],
       bonusRows,
+      killcountRows,
     ] = await Promise.all([
       sql<RaidBossQueryRow[]>`
         SELECT b.id, b.boss_name, b.dkp_points, b.category
@@ -94,6 +102,15 @@ export const getRaidById = async (id: string) => {
       `,
       sql<{ bonus_type_id: number }[]>`
         SELECT bonus_type_id FROM raid_bonus WHERE raid_id = ${raidId}
+      `,
+      sql<KillcountQueryRow[]>`
+        SELECT
+          rk.id, rk.user_id, rk.class, rk.start_honor, rk.end_honor,
+          rk.start_kills, rk.end_kills, rk.comment,
+          u.username, u.avatar_url, u.class AS user_class
+        FROM raid_killcount rk
+        JOIN "user" u ON u.id = rk.user_id
+        WHERE rk.raid_id = ${raidId}
       `,
     ]);
 
@@ -138,6 +155,21 @@ export const getRaidById = async (id: string) => {
           grade: l.item_type_grade,
         },
       })),
+      killcount: killcountRows.map(
+        (k): KillCount => ({
+          id: k.id,
+          userId: k.user_id,
+          userName: k.username,
+          role: k.user_class,
+          avatarUrl: k.avatar_url,
+          playerClass: k.class,
+          startHonor: k.start_honor,
+          endHonor: k.end_honor,
+          startKills: k.start_kills,
+          endKills: k.end_kills,
+          comment: k.comment ?? undefined,
+        }),
+      ),
     };
   } catch (error) {
     console.error("Ошибка при получении рейда:", error);

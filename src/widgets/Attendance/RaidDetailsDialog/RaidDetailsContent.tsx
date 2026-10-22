@@ -5,12 +5,13 @@ import { Check, Pencil, Search } from "lucide-react";
 import type { RaidDetails } from "@/actions/getRaidById";
 import { cn } from "@/shared/lib/tw-merge";
 import { Button, Segmented } from "@/shared/ui";
+import { KillcountDay } from "@/widgets/killcount/ui/KillcountDay";
 import AttendeeGroups from "./AttendeeGroups";
 import RaidDetailsHeader from "./RaidDetailsHeader";
 import RaidLootTab from "./RaidLootTab";
 import RaidStats from "./RaidStats";
 
-type Tab = "people" | "loot";
+type Tab = "people" | "loot" | "killcount";
 
 type Props = {
   raid: RaidDetails;
@@ -34,13 +35,24 @@ export default function RaidDetailsContent({
   );
   const loot = raid.loot.filter((item) => item.status !== "Распродано");
   const showLoot = raid.type !== "АГЛ";
-  const activeTab = showLoot ? tab : "people";
+  const killcount = raid.killcount;
   const tabs = [
     { value: "people" as const, label: `Участники ${attendees.length}` },
     ...(showLoot
       ? [{ value: "loot" as const, label: `Лут ${loot.length}` }]
       : []),
+    ...(killcount.length > 0
+      ? [
+          {
+            value: "killcount" as const,
+            label: `Киллкаунт ${killcount.length}`,
+          },
+        ]
+      : []),
   ];
+  const activeTab = tabs.some((option) => option.value === tab)
+    ? tab
+    : "people";
 
   return (
     <>
@@ -97,6 +109,9 @@ export default function RaidDetailsContent({
           />
         )}
         {activeTab === "loot" && <RaidLootTab loot={loot} />}
+        {activeTab === "killcount" && (
+          <KillcountDay data={killcount} mode="saved" isCanEdit={false} />
+        )}
       </div>
 
       {canEdit && (
