@@ -41,8 +41,8 @@ export async function POST(request: Request) {
       ${record.kind},
       ${moscowNaive(record.started_at)},
       ${moscowNaive(record.ended_at)},
-      ${sql.json(record.raid)},
-      ${sql.json(record.killcount)}
+      ${record.raid === null ? null : sql.json(record.raid)},
+      ${record.killcount === null ? null : sql.json(record.killcount)}
     )
     ON CONFLICT (client_id) DO NOTHING
     RETURNING id, status

@@ -58,7 +58,7 @@ export type PendingRecord = {
   kind: RecordKind;
   day: string;
   window: ScanWindow;
-  inRaid: number;
+  inRaid: number | null;
   fighters: KillcountFighter[];
   excluded: KillCountExclusion[];
   warnings: string[];

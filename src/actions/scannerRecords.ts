@@ -50,7 +50,9 @@ export async function getScannerRaidRecords(
     SELECT sr.id, sr.kind, sr.started_at, sr.ended_at, sr.raid, u.username
     FROM scanner_record sr
     JOIN "user" u ON u.id = sr.user_id
-    WHERE sr.started_at::date = ${day}::date AND sr.status <> 'dismissed'
+    WHERE sr.started_at::date = ${day}::date
+      AND sr.status <> 'dismissed'
+      AND sr.raid IS NOT NULL
     ORDER BY sr.started_at
   `;
   return rows.map((row) => {
@@ -76,7 +78,7 @@ export async function publishScannerRecord(recordId: number) {
   const [record] = await sql<PendingQueryRow[]>`
     SELECT id, kind, ended_at, killcount
     FROM scanner_record
-    WHERE id = ${recordId} AND status = 'pending'
+    WHERE id = ${recordId} AND status = 'pending' AND killcount IS NOT NULL
   `;
   if (!record) throw new Error("Запись уже обработана");
 

@@ -65,7 +65,8 @@ export default function PendingRecordCard({ record }: Props) {
             {timeOf(record.window.startedAt)}–{timeOf(record.window.endedAt)}
           </p>
           <p className="text-xs text-muted-foreground">
-            Записал(а) {record.window.scannedBy} · в рейде было {record.inRaid}
+            Записал(а) {record.window.scannedBy}
+            {record.inRaid !== null && ` · в рейде было ${record.inRaid}`}
             {record.kind === "prime" &&
               " · рейды привяжутся сами, когда секретарь внесёт посещение"}
           </p>

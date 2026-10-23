@@ -56,13 +56,17 @@ export const SCANNER_RECORD_SCHEMA = v.pipe(
     started_at: ISO_TIME,
     ended_at: ISO_TIME,
     scanner: v.object({ name: v.string(), version: v.string() }),
-    raid: RAID_DOC_SCHEMA,
-    killcount: KILLCOUNT_DOC_SCHEMA,
+    raid: v.nullable(RAID_DOC_SCHEMA),
+    killcount: v.nullable(KILLCOUNT_DOC_SCHEMA),
   }),
   v.check((record) => {
     const span = Date.parse(record.ended_at) - Date.parse(record.started_at);
     return span > 0 && span <= MAX_RECORD_HOURS * HOUR_MS;
   }, "Время записи некорректно"),
+  v.check(
+    (record) => record.raid !== null || record.killcount !== null,
+    "В записи нет ни посещения, ни киллкаунта",
+  ),
 );
 
 export type ScannerRecordDoc = v.InferOutput<typeof SCANNER_RECORD_SCHEMA>;

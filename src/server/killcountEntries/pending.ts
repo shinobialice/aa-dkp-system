@@ -17,14 +17,14 @@ export async function getPendingRecords(): Promise<PendingRecord[]> {
     SELECT sr.id, sr.kind, sr.started_at, sr.ended_at, sr.raid, sr.killcount, u.username
     FROM scanner_record sr
     JOIN "user" u ON u.id = sr.user_id
-    WHERE sr.status = 'pending'
+    WHERE sr.status = 'pending' AND sr.killcount IS NOT NULL
     ORDER BY sr.started_at DESC
   `;
   const pending: PendingRecord[] = [];
   for (const record of records) {
     const kind = parseRecordKind(record.kind);
     const doc = parseKillcountDoc(record.killcount);
-    const raid = parseRaidDoc(record.raid);
+    const raid = record.raid === null ? null : parseRaidDoc(record.raid);
     const resolved = await filterScannerRows(doc.rows);
     const day =
       kind === "prime"
@@ -41,7 +41,9 @@ export async function getPendingRecords(): Promise<PendingRecord[]> {
       kind,
       day,
       window,
-      inRaid: raid.members.filter((member) => member.in_guild !== false).length,
+      inRaid: raid
+        ? raid.members.filter((member) => member.in_guild !== false).length
+        : null,
       fighters: withStartTimes(resolved.rows, doc.rows),
       excluded: [
         ...resolved.excluded,
