@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { cookies } from "next/headers";
 import { hasTag } from "@/actions/hasTag";
-import { KILLCOUNT_EDITOR_TAGS } from "@/server/killcountEditors";
+import { SCANNER_USER_TAGS } from "@/server/scanner/auth";
 import { PRIVATE_UPLOADS_DIR } from "@/shared/lib/localStorage";
 
 export const dynamic = "force-dynamic";
@@ -12,9 +12,9 @@ const INSTALLER_PATH = path.join(PRIVATE_UPLOADS_DIR, "CorvusScannerSetup.exe");
 
 export async function GET() {
   const sessionToken = (await cookies()).get("session_token")?.value ?? "";
-  if (!(await hasTag(sessionToken, KILLCOUNT_EDITOR_TAGS))) {
+  if (!(await hasTag(sessionToken, SCANNER_USER_TAGS))) {
     return textResponse(
-      "Сканер доступен только администраторам и модераторам",
+      "Сканер доступен только администраторам, модераторам и секретарям",
       403,
     );
   }

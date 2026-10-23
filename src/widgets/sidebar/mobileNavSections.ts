@@ -1,4 +1,9 @@
-import { MOBILE_TABS, NAV_SECTIONS, type NavItem } from "./navConfig";
+import {
+  MOBILE_TABS,
+  visibleNavSections,
+  type NavAccess,
+  type NavItem,
+} from "./navConfig";
 
 export const TAB_URLS = MOBILE_TABS.map((tab) => tab.url);
 
@@ -15,15 +20,12 @@ type SheetSection = {
   title: string;
   items: NavItem[];
   withDimonish: boolean;
-  editorsLink?: string;
 };
 
-export function buildSheetSections(isAdmin: boolean): SheetSection[] {
+export function buildSheetSections(access: NavAccess): SheetSection[] {
   const withoutTabs = (items: NavItem[]) =>
     items.filter((item) => !TAB_URLS.includes(item.url));
-  const visible = NAV_SECTIONS.filter(
-    (section) => !section.adminOnly || isAdmin,
-  );
+  const visible = visibleNavSections(access);
   const guild = visible
     .filter((section) => section.title === null || section.withDimonish)
     .flatMap((section) => withoutTabs(section.items));
@@ -33,7 +35,6 @@ export function buildSheetSections(isAdmin: boolean): SheetSection[] {
       title: section.title ?? "",
       items: withoutTabs(section.items),
       withDimonish: false,
-      editorsLink: section.editorsLink,
     }))
     .filter((section) => section.items.length > 0);
 

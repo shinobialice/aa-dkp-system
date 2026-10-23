@@ -4,7 +4,6 @@ import sql from "@/shared/lib/db";
 import ensurePrivilieges from "@/actions/ensurePrivilieges";
 import { KILLCOUNT_EDITOR_TAGS } from "@/server/killcountEditors";
 import {
-  type DB_GetKillCountDto,
   type DB_UpdateKillCountDto,
   type KillCountHistoryData,
   type KillCountWar,
@@ -100,38 +99,6 @@ export const getKillCountHistory = async () => {
     return currentData;
   } catch (error) {
     throw new Error("Не удалось получить историю для killcount", {
-      cause: error,
-    });
-  }
-};
-
-export const getKillCountByDate = async (date: string) => {
-  try {
-    const currentData = await sql<DB_GetKillCountDto[]>`
-    SELECT 
-      u.username AS "userName",
-			u.id AS "userId",
-			u.class AS "role",
-			u.avatar_url AS "avatarUrl",
-			s.id,
-      s.start_honor AS "startHonor",
-      s.end_honor AS "endHonor",
-      s.start_kills as "startKills",
-			s.comment as "comment",
-      s.end_kills as "endKills",
-			s.class as "playerClass",
-      (s.end_kills - s.start_kills) AS "totalKills",
-      (s.end_honor - s.start_honor) AS "totalHonor"
-			FROM killcount_stats s
-		JOIN "user" u ON s.user_id = u.id
-		WHERE s.recorded_at >= ${date}::date 
-			AND s.recorded_at < ${date}::date + INTERVAL '1 day'
-		ORDER BY "totalKills" DESC;
-		`;
-
-    return currentData;
-  } catch (error) {
-    throw new Error(`Не удалось получить историю за дату ${date}`, {
       cause: error,
     });
   }

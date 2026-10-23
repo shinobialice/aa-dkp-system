@@ -2,10 +2,16 @@ import Link from "next/link";
 import type { AglItem } from "@/server/killcountEntries/types";
 import { formatDuration, formatNumber } from "@/shared/lib/format";
 import { cn } from "@/shared/lib/tw-merge";
-import { longDate, weekday } from "../../ui/killcountModel";
-import { entryHref, playersText, windowMinutes } from "./killcountEntriesModel";
+import { longDate, weekday } from "../ui/killcountModel";
+import {
+  aglHref,
+  playersText,
+  windowMinutes,
+  type KillcountPage,
+} from "./killcountEntriesModel";
 
 type Props = {
+  page: KillcountPage;
   items: AglItem[];
   selectedKey: string | null;
 };
@@ -13,7 +19,7 @@ type Props = {
 const ROW =
   "grid grid-cols-[3.25rem_minmax(0,1fr)_auto] items-center gap-x-3 px-3.5 py-2";
 
-export default function AglList({ items, selectedKey }: Props) {
+export default function AglList({ page, items, selectedKey }: Props) {
   const scanned = items.filter((item) => item.record);
   const days = [...new Set(items.map((item) => item.day))];
 
@@ -39,7 +45,11 @@ export default function AglList({ items, selectedKey }: Props) {
                 .filter((item) => item.day === day)
                 .map((item) => (
                   <li key={item.key} className="border-b last:border-b-0">
-                    <AglRow item={item} isSelected={item.key === selectedKey} />
+                    <AglRow
+                      page={page}
+                      item={item}
+                      isSelected={item.key === selectedKey}
+                    />
                   </li>
                 ))}
             </ol>
@@ -55,7 +65,13 @@ export default function AglList({ items, selectedKey }: Props) {
   );
 }
 
-function AglRow({ item, isSelected }: { item: AglItem; isSelected: boolean }) {
+type AglRowProps = {
+  page: KillcountPage;
+  item: AglItem;
+  isSelected: boolean;
+};
+
+function AglRow({ page, item, isSelected }: AglRowProps) {
   if (!item.record) {
     return (
       <div className={cn(ROW, "text-muted-foreground")}>
@@ -72,7 +88,7 @@ function AglRow({ item, isSelected }: { item: AglItem; isSelected: boolean }) {
   return (
     <Link
       prefetch={false}
-      href={entryHref("agl", item.key)}
+      href={aglHref(page, item.key)}
       aria-current={isSelected ? "page" : undefined}
       className={cn(
         ROW,

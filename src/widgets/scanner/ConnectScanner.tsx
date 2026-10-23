@@ -37,7 +37,7 @@ export default function ConnectScanner({ code, username }: Props) {
           Сканер сам заберёт ключ в течение минуты. Эту вкладку можно закрыть.
         </p>
         <p className="text-muted-foreground">
-          Отключить сканер можно на странице «Сканер» в разделе «Киллкаунт».
+          Отключить сканер может администратор на странице «Сканер».
         </p>
       </section>
     );
@@ -67,7 +67,7 @@ export default function ConnectScanner({ code, username }: Props) {
           Подключить
         </Button>
         <Button variant="outline" asChild>
-          <Link href="/kill-counter/scanner">Отмена</Link>
+          <Link href="/scanner">Отмена</Link>
         </Button>
       </div>
     </section>

@@ -1,51 +1,67 @@
-import { getKillCountCurrent } from "@/widgets/killcount/api/current";
 import { cookies } from "next/headers";
+import Link from "next/link";
 import { hasTag } from "@/actions/hasTag";
 import { KILLCOUNT_EDITOR_TAGS } from "@/server/killcountEditors";
-import { AddKillCount } from "@/widgets/killcount/add-kill-count";
+import {
+  getAglToday,
+  getPendingRecords,
+  getPrimeDay,
+  getSelectedAglRecord,
+} from "@/server/killcountEntries";
+import { getMoscowISOString } from "@/utils/getMoscowISOString";
+import AglToday from "@/widgets/killcount/entries/AglToday";
+import KindSwitch from "@/widgets/killcount/entries/KindSwitch";
+import PendingRecordCard from "@/widgets/killcount/entries/PendingRecordCard";
+import PrimeToday from "@/widgets/killcount/entries/PrimeToday";
 import { KillcountHeader } from "@/widgets/killcount/ui/KillcountHeader";
-import Link from "next/link";
-import { KillcountDay } from "@/widgets/killcount/ui/KillcountDay";
 import { longDate } from "@/widgets/killcount/ui/killcountModel";
 
-function moscowToday() {
-  return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Moscow" }).format(
-    new Date(),
-  );
-}
+type Props = {
+  searchParams: Promise<{ kind?: string; record?: string }>;
+};
 
-export default async function KillCounterPage() {
+const SUBTITLE = {
+  prime: "кто сколько набил за прайм",
+  agl: "киллкаунты АГЛ — для интереса, ни на что не влияют",
+};
+
+export default async function KillCounterPage({ searchParams }: Props) {
+  const params = await searchParams;
+  const kind = params.kind === "agl" ? "agl" : "prime";
+  const today = getMoscowISOString(new Date()).slice(0, 10);
   const sessionToken = (await cookies()).get("session_token")?.value ?? "";
-
-  const [canEditKillcount, currentKillCount] = await Promise.all([
-    hasTag(sessionToken, KILLCOUNT_EDITOR_TAGS),
-    getKillCountCurrent(),
+  const canEdit = await hasTag(sessionToken, KILLCOUNT_EDITOR_TAGS);
+  const [pending, prime, aglItems] = await Promise.all([
+    canEdit ? getPendingRecords() : [],
+    kind === "prime" ? getPrimeDay(today) : null,
+    kind === "agl" ? getAglToday(today) : [],
   ]);
+  const selectedAgl = await getSelectedAglRecord(aglItems, params.record);
 
   return (
     <div className="mx-auto flex w-full max-w-6xl min-w-0 flex-col gap-4 text-sm">
       <KillcountHeader
-        subtitle={`Сегодня, ${longDate(moscowToday())} · кто сколько набил за прайм`}
+        subtitle={`Сегодня, ${longDate(today)} · ${SUBTITLE[kind]}`}
       >
-        {canEditKillcount && (
-          <Link
-            href="/kill-counter/scanner"
-            className="w-fit text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
-          >
-            Заполнить сканером: программа и инструкция →
-          </Link>
-        )}
+        <div className="flex flex-wrap items-center gap-3">
+          <KindSwitch page="/kill-counter/current" kind={kind} />
+          {canEdit && (
+            <Link
+              href="/scanner"
+              className="text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+            >
+              Заполнить сканером: программа и инструкция →
+            </Link>
+          )}
+        </div>
       </KillcountHeader>
-      {currentKillCount?.length ? (
-        <KillcountDay
-          data={currentKillCount}
-          mode="saved"
-          canAddToday
-          isCanEdit={canEditKillcount}
-        />
-      ) : (
-        <AddKillCount isCanEdit={canEditKillcount} />
-      )}
+      {pending
+        .filter((record) => record.kind === kind)
+        .map((record) => (
+          <PendingRecordCard key={record.id} record={record} />
+        ))}
+      {prime && <PrimeToday entry={prime} canEdit={canEdit} />}
+      {kind === "agl" && <AglToday items={aglItems} selected={selectedAgl} />}
     </div>
   );
 }

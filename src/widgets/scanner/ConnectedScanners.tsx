@@ -30,11 +30,7 @@ export default function ConnectedScanners({ keys }: Props) {
   };
 
   if (keys.length === 0) {
-    return (
-      <p className="text-muted-foreground">
-        Подключённых сканеров нет. Нажмите «Подключить к сайту» в программе.
-      </p>
-    );
+    return <p className="text-muted-foreground">Подключённых сканеров нет.</p>;
   }
 
   return (
@@ -42,9 +38,9 @@ export default function ConnectedScanners({ keys }: Props) {
       {keys.map((key) => (
         <li key={key.id} className="flex items-center gap-3 py-2">
           <span className="min-w-0 flex-1">
-            <span className="block font-semibold">{key.label}</span>
+            <span className="block font-semibold">{key.username}</span>
             <span className="block text-xs text-muted-foreground">
-              {lastUsedText(key.last_used_at)}
+              {key.label} · {lastUsedText(key.last_used_at)}
             </span>
           </span>
           <Button

@@ -1,13 +1,10 @@
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import type {
-  KillcountEntry,
-  LinkedRaid,
-} from "@/server/killcountEntries/types";
-import { cn } from "@/shared/lib/tw-merge";
+import type { KillcountEntry } from "@/server/killcountEntries/types";
 import { Button } from "@/shared/ui";
-import { longDate, weekday } from "../../ui/killcountModel";
+import { longDate, weekday } from "../ui/killcountModel";
 import { KIND_LABEL, timeOf, windowText } from "./killcountEntriesModel";
+import RaidChips from "./RaidChips";
 
 type Props = {
   entry: KillcountEntry;
@@ -74,33 +71,5 @@ function NavLink({
         {children}
       </Link>
     </Button>
-  );
-}
-
-function RaidChips({ raids, kind }: { raids: LinkedRaid[]; kind: string }) {
-  return (
-    <div className="flex flex-wrap items-center gap-1.5 text-xs">
-      <span className="text-muted-foreground">
-        {kind === "prime" ? "Рейды прайма:" : "Рейд:"}
-      </span>
-      {raids.length === 0 && (
-        <span className="rounded-full border border-dashed px-2.5 py-0.5 text-muted-foreground">
-          посещение ещё не заполнено
-        </span>
-      )}
-      {raids.map((raid) => (
-        <span
-          key={raid.id}
-          className={cn(
-            "rounded-full border px-2.5 py-0.5",
-            raid.isLinked ? "bg-muted" : "text-muted-foreground",
-          )}
-        >
-          <span className="font-semibold tabular-nums">{raid.time}</span>{" "}
-          {raid.boss}
-          <span className="text-muted-foreground"> · {raid.people} чел.</span>
-        </span>
-      ))}
-    </div>
   );
 }

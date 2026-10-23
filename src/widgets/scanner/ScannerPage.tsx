@@ -5,7 +5,7 @@ import { KILLCOUNT_ROLES } from "@/shared/config/killcountRoles";
 import ConnectedScanners from "./ConnectedScanners";
 
 type Props = {
-  keys: ScannerKey[];
+  keys: ScannerKey[] | null;
 };
 
 const INSTALL_STEPS = [
@@ -20,12 +20,19 @@ const RAID_STEPS = [
   "Выбрать «Прайм» или «АГЛ» и нажать «Начать рейд» — это начало киллкаунта.",
   "Кто подошёл позже, попадёт сам: сканер возьмёт его числа при первом появлении рядом.",
   "В конце, когда все собрались вместе, нажать «Закончить рейд»: посещаемость записана. Если сканер попросит, перезайти через выбор персонажа — он снимет свежие килы и отправит всё сам.",
-  "На сайте: «Киллкаунт → Новая страница» — проверить и опубликовать; секретарь берёт запись в «Новом посещении» → «Из сканера».",
+  "На сайте: «Киллкаунт → Сегодня» — проверить и опубликовать; секретарь берёт запись в «Новом посещении» → «Из сканера».",
 ];
 
 export default function ScannerPage({ keys }: Props) {
   return (
     <div className="flex max-w-2xl flex-col gap-4">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Сканер</h1>
+        <p className="mt-1 text-muted-foreground">
+          Программа для Windows: считывает состав рейда, честь и убийства
+          игроков вокруг и отправляет на сайт
+        </p>
+      </div>
       <div>
         <a
           href="/api/killcount/scanner/installer"
@@ -50,14 +57,16 @@ export default function ScannerPage({ keys }: Props) {
         </p>
       </section>
 
-      <section className="rounded-xl border bg-card p-4">
-        <h2 className="font-semibold">Подключённые сканеры</h2>
-        <p className="mt-1 mb-2 text-muted-foreground">
-          Отключённый сканер перестаёт отправлять данные на сайт. Подключить
-          заново можно в программе.
-        </p>
-        <ConnectedScanners keys={keys} />
-      </section>
+      {keys && (
+        <section className="rounded-xl border bg-card p-4">
+          <h2 className="font-semibold">Подключённые сканеры</h2>
+          <p className="mt-1 mb-2 text-muted-foreground">
+            Отключённый сканер перестаёт отправлять данные на сайт. Подключить
+            заново можно в программе.
+          </p>
+          <ConnectedScanners keys={keys} />
+        </section>
+      )}
 
       <p className="text-muted-foreground">
         Старый способ тоже работает: «Киллкаунт…» в сканере, затем «Добавить

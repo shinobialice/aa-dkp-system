@@ -31,10 +31,12 @@ type ArchetypeQueryRow = Pick<
   | "specialization_3"
 >;
 
-// Черновик из сканера: оставляет только пользователей сайта на ДД-роли.
+// Черновик из сканера: оставляет только пользователей сайта на нужных ролях
+// (по умолчанию ДД).
 // Роль определяется по трём веткам из сканера (слот архетипа), иначе основная.
 export async function filterScannerRows(
   rows: KillCount[],
+  roles: string[] = KILLCOUNT_ROLES,
 ): Promise<ScannerKillCount> {
   if (rows.length === 0) return { rows: [], excluded: [] };
   try {
@@ -68,7 +70,7 @@ export async function filterScannerRows(
         archetypes.filter((slot) => slot.user_id === user.id),
         row.specs,
       );
-      if (!role || !KILLCOUNT_ROLES.includes(role)) {
+      if (!role || !roles.includes(role)) {
         excluded.push({
           userName: row.userName,
           reason: role ? `роль ${role}` : "роль не указана на сайте",

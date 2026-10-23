@@ -12,8 +12,8 @@ import type { PendingRecord } from "@/server/killcountEntries/types";
 import { errorMessage } from "@/shared/lib/errorMessage";
 import { formatNumber } from "@/shared/lib/format";
 import { Button } from "@/shared/ui";
-import { KillcountDay } from "../../ui/KillcountDay";
-import { longDate } from "../../ui/killcountModel";
+import { KillcountDay } from "../ui/KillcountDay";
+import { longDate } from "../ui/killcountModel";
 import {
   KIND_LABEL,
   playersText,

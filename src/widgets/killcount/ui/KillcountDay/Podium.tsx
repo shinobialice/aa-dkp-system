@@ -23,7 +23,12 @@ const PODIUM = [
   },
 ];
 
-export default function Podium({ rows }: { rows: KillRow[] }) {
+type Props = {
+  rows: KillRow[];
+  isHonorOnly?: boolean;
+};
+
+export default function Podium({ rows, isHonorOnly = false }: Props) {
   const order = [1, 0, 2].filter((place) => rows[place]);
   return (
     <section
@@ -57,18 +62,36 @@ export default function Podium({ rows }: { rows: KillRow[] }) {
               <PlayerName row={row} />
             </span>
             <ClassBadge row={row} isStacked />
-            <span className="text-2xl leading-none font-extrabold text-red-600 tabular-nums dark:text-red-400">
-              {kills(row)}{" "}
-              <span className="text-xs font-semibold text-muted-foreground">
-                килов
-              </span>
-            </span>
-            <span className="text-xs text-muted-foreground tabular-nums">
-              {formatNumber(honor(row))} хонора
-            </span>
+            <Score row={row} isHonorOnly={isHonorOnly} />
           </div>
         );
       })}
     </section>
+  );
+}
+
+function Score({ row, isHonorOnly }: { row: KillRow; isHonorOnly: boolean }) {
+  if (isHonorOnly) {
+    return (
+      <span className="text-2xl leading-none font-extrabold text-emerald-600 tabular-nums dark:text-emerald-400">
+        {formatNumber(honor(row))}{" "}
+        <span className="text-xs font-semibold text-muted-foreground">
+          хонора
+        </span>
+      </span>
+    );
+  }
+  return (
+    <>
+      <span className="text-2xl leading-none font-extrabold text-red-600 tabular-nums dark:text-red-400">
+        {kills(row)}{" "}
+        <span className="text-xs font-semibold text-muted-foreground">
+          килов
+        </span>
+      </span>
+      <span className="text-xs text-muted-foreground tabular-nums">
+        {formatNumber(honor(row))} хонора
+      </span>
+    </>
   );
 }

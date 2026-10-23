@@ -5,6 +5,7 @@ import {
   CalendarDays,
   Gift,
   HandCoins,
+  HeartPulse,
   History,
   House,
   Info,
@@ -14,6 +15,7 @@ import {
   Newspaper,
   Package,
   PiggyBank,
+  Radar,
   Settings,
   Sparkles,
   Swords,
@@ -27,6 +29,8 @@ export type NavItem = {
   url: string;
   icon: LucideIcon;
   isNew?: boolean;
+  scannerOnly?: boolean;
+  healcountOnly?: boolean;
 };
 
 export type NavSection = {
@@ -35,8 +39,12 @@ export type NavSection = {
   iconClassName: string;
   adminOnly?: boolean;
   withDimonish?: boolean;
-  // Заголовок раздела — ссылка, но только для тех, кто заполняет киллкаунт.
-  editorsLink?: string;
+};
+
+export type NavAccess = {
+  isAdmin: boolean;
+  canUseScanner: boolean;
+  canSeeHealcount: boolean;
 };
 
 export const NAV_SECTIONS: NavSection[] = [
@@ -66,6 +74,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { title: "Посещаемость", url: "/activities", icon: CalendarDays },
       { title: "Расписание", url: "/schedule", icon: Calendar },
       { title: "Статистика", url: "/stats", icon: LineChart },
+      { title: "Сканер", url: "/scanner", icon: Radar, scannerOnly: true },
     ],
   },
   {
@@ -81,15 +90,14 @@ export const NAV_SECTIONS: NavSection[] = [
   {
     title: "Киллкаунт α",
     iconClassName: "text-rose-600 dark:text-rose-400",
-    editorsLink: "/kill-counter/scanner",
     items: [
       { title: "Сегодня", url: "/kill-counter/current", icon: Swords },
       { title: "История", url: "/kill-counter/history", icon: History },
       {
-        title: "Новая страница",
-        url: "/kill-counter/new",
-        icon: Sparkles,
-        isNew: true,
+        title: "Хилкаунт",
+        url: "/kill-counter/heals",
+        icon: HeartPulse,
+        healcountOnly: true,
       },
     ],
   },
@@ -112,6 +120,23 @@ export const MOBILE_TABS: NavItem[] = [
   { title: "Казна", url: "/loot", icon: PiggyBank },
   { title: "Участники", url: "/members", icon: Users },
 ];
+
+export function visibleNavSections({
+  isAdmin,
+  canUseScanner,
+  canSeeHealcount,
+}: NavAccess) {
+  return NAV_SECTIONS.filter((section) => !section.adminOnly || isAdmin).map(
+    (section) => ({
+      ...section,
+      items: section.items.filter(
+        (item) =>
+          (!item.scannerOnly || canUseScanner) &&
+          (!item.healcountOnly || canSeeHealcount),
+      ),
+    }),
+  );
+}
 
 export const ALL_NAV_URLS = NAV_SECTIONS.flatMap((section) =>
   section.items.map((item) => item.url),

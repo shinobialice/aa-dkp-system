@@ -20,14 +20,15 @@ import {
   SidebarTrigger,
 } from "@/shared/ui";
 import DimonishMenuItem from "./DimonishMenuItem";
-import { ALL_NAV_URLS, NAV_SECTIONS, findActiveUrl } from "./navConfig";
+import { ALL_NAV_URLS, findActiveUrl, visibleNavSections } from "./navConfig";
 import PromoMenuItem from "./PromoMenuItem";
 import type { PromoLink } from "@/shared/config/promoPages";
 import AnniversaryBalloons from "@/widgets/AnniversaryBalloons/AnniversaryBalloons";
 
 type Props = {
   isAdmin: boolean;
-  canEditKillcount: boolean;
+  canUseScanner: boolean;
+  canSeeHealcount: boolean;
   locationBadge?: ReactNode;
   locationIcon?: ReactNode;
   promo: PromoLink | null;
@@ -35,16 +36,19 @@ type Props = {
 
 function AppSidebar({
   isAdmin,
-  canEditKillcount,
+  canUseScanner,
+  canSeeHealcount,
   locationBadge,
   locationIcon,
   promo,
 }: Props) {
   const pathname = usePathname();
   const activeUrl = findActiveUrl(pathname, ALL_NAV_URLS);
-  const sections = NAV_SECTIONS.filter(
-    (section) => !section.adminOnly || isAdmin,
-  );
+  const sections = visibleNavSections({
+    isAdmin,
+    canUseScanner,
+    canSeeHealcount,
+  });
 
   return (
     <Sidebar collapsible="icon">
@@ -87,19 +91,9 @@ function AppSidebar({
         {promo && <PromoMenuItem promo={promo} />}
         {sections.map((section) => (
           <SidebarGroup key={section.title ?? "main"} className="py-1">
-            {section.title &&
-              (section.editorsLink && canEditKillcount ? (
-                <SidebarGroupLabel asChild>
-                  <Link
-                    href={section.editorsLink}
-                    className="hover:text-sidebar-foreground hover:underline"
-                  >
-                    {section.title}
-                  </Link>
-                </SidebarGroupLabel>
-              ) : (
-                <SidebarGroupLabel>{section.title}</SidebarGroupLabel>
-              ))}
+            {section.title && (
+              <SidebarGroupLabel>{section.title}</SidebarGroupLabel>
+            )}
             <SidebarGroupContent>
               <SidebarMenu>
                 {section.items.map((item) => {

@@ -1,14 +1,15 @@
 import type {
   AglItem,
   KillcountFighter,
-  PrimeDay,
   ScanWindow,
 } from "@/server/killcountEntries/types";
 import { formatDuration, formatNumber, plural } from "@/shared/lib/format";
 import { parseMoscowISOString } from "@/utils/getMoscowISOString";
-import { honor, kills, longDate } from "../../ui/killcountModel";
+import { honor, kills } from "../ui/killcountModel";
 
 export type EntryKind = "prime" | "agl";
+
+export type KillcountPage = "/kill-counter/current" | "/kill-counter/history";
 
 export type SummaryTile = {
   label: string;
@@ -24,10 +25,12 @@ export const KIND_LABEL: Record<EntryKind, string> = {
 
 const MINUTE_MS = 60_000;
 
-export function entryHref(kind: EntryKind, key: string | null) {
-  if (key === null) return `/kill-counter/new?kind=${kind}`;
-  const param = kind === "prime" ? "day" : "record";
-  return `/kill-counter/new?kind=${kind}&${param}=${key}`;
+export function kindHref(page: KillcountPage, kind: EntryKind) {
+  return kind === "prime" ? page : `${page}?kind=agl`;
+}
+
+export function aglHref(page: KillcountPage, key: string) {
+  return `${page}?kind=agl&record=${key}`;
 }
 
 export function timeOf(naive: string) {
@@ -55,27 +58,6 @@ export function totalKills(fighters: KillcountFighter[]) {
 
 export function totalHonor(fighters: KillcountFighter[]) {
   return fighters.reduce((sum, fighter) => sum + honor(fighter), 0);
-}
-
-export function primeTiles(days: PrimeDay[]): SummaryTile[] {
-  const total = days.reduce((sum, day) => sum + day.totalKills, 0);
-  const best = days.reduce<PrimeDay | null>(
-    (top, day) => (top && top.totalKills >= day.totalKills ? top : day),
-    null,
-  );
-  return [
-    { label: "Всего килов", value: formatNumber(total) },
-    { label: "Праймов", value: String(days.length) },
-    {
-      label: "В среднем за прайм",
-      value: days.length ? formatNumber(Math.round(total / days.length)) : "0",
-    },
-    {
-      label: "Лучший прайм",
-      value: best ? formatNumber(best.totalKills) : "—",
-      unit: best ? longDate(best.day) : undefined,
-    },
-  ];
 }
 
 export function aglTiles(items: AglItem[]): SummaryTile[] {

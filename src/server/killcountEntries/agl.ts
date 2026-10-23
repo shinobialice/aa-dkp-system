@@ -20,10 +20,27 @@ import type {
 const AGL_HISTORY_DAYS = 45;
 const DAY_MS = 86_400_000;
 
-export async function getAglItems(): Promise<AglItem[]> {
-  const since = getMoscowISOString(
-    new Date(Date.now() - AGL_HISTORY_DAYS * DAY_MS),
+export function getAglHistory() {
+  return aglItemsSince(
+    getMoscowISOString(new Date(Date.now() - AGL_HISTORY_DAYS * DAY_MS)),
   );
+}
+
+export async function getAglToday(day: string) {
+  const items = await aglItemsSince(`${day}T00:00:00`);
+  return items.filter((item) => item.day === day);
+}
+
+export async function getSelectedAglRecord(
+  items: AglItem[],
+  wanted: string | undefined,
+) {
+  const scanned = items.filter((item) => item.record);
+  const item = scanned.find((entry) => entry.key === wanted) ?? scanned[0];
+  return item?.record ? getAglRecord(item.record.id) : null;
+}
+
+async function aglItemsSince(since: string): Promise<AglItem[]> {
   const [records, raids] = await Promise.all([
     sql<RecordQueryRow[]>`
       SELECT sr.id, sr.kind, sr.started_at, sr.ended_at, sr.raid, sr.killcount, u.username

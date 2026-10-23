@@ -1,6 +1,6 @@
-export { getAglItems, getAglRecord } from "./agl";
+export { getAglHistory, getAglToday, getSelectedAglRecord } from "./agl";
 export { getPendingRecords } from "./pending";
-export { getPrimeDay, getPrimeDays } from "./primes";
+export { getPrimeDay } from "./primes";
 export type {
   AglItem,
   KillcountFighter,
@@ -8,5 +8,4 @@ export type {
   LinkedRaid,
   ScanWindow,
   PendingRecord,
-  PrimeDay,
 } from "./types";

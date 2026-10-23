@@ -11,11 +11,10 @@ import ensurePrivilieges from "./ensurePrivilieges";
 import { getSessionUserId } from "./getSessionUserId";
 
 const LINK_TTL_MINUTES = 10;
+const SCANNER_ADMIN_TAGS = ["Администратор"];
 
-export type ScannerKey = Pick<
-  ScannerKeyRow,
-  "id" | "label" | "created_at" | "last_used_at"
->;
+export type ScannerKey = Pick<ScannerKeyRow, "id" | "label" | "last_used_at"> &
+  Pick<UserRow, "username">;
 
 export async function confirmScannerLink(code: string) {
   await ensurePrivilieges(SCANNER_USER_TAGS);
@@ -41,24 +40,21 @@ export async function confirmScannerLink(code: string) {
   return { username: user.username };
 }
 
-export async function getMyScannerKeys(): Promise<ScannerKey[]> {
-  await ensurePrivilieges(SCANNER_USER_TAGS);
-  const userId = await getSessionUserId();
-  if (userId === null) return [];
+export async function getScannerKeys(): Promise<ScannerKey[]> {
+  await ensurePrivilieges(SCANNER_ADMIN_TAGS);
   return sql<ScannerKey[]>`
-    SELECT id, label, created_at, last_used_at
-    FROM scanner_key
-    WHERE user_id = ${userId} AND revoked_at IS NULL
-    ORDER BY created_at DESC
+    SELECT k.id, k.label, k.last_used_at, u.username
+    FROM scanner_key k
+    JOIN "user" u ON u.id = k.user_id
+    WHERE k.revoked_at IS NULL
+    ORDER BY k.last_used_at DESC NULLS LAST, k.created_at DESC
   `;
 }
 
 export async function revokeScannerKey(keyId: number) {
-  await ensurePrivilieges(SCANNER_USER_TAGS);
-  const userId = await getSessionUserId();
-  if (userId === null) throw new Error("Нужно войти на сайт");
+  await ensurePrivilieges(SCANNER_ADMIN_TAGS);
   await sql`
     UPDATE scanner_key SET revoked_at = now()
-    WHERE id = ${keyId} AND user_id = ${userId} AND revoked_at IS NULL
+    WHERE id = ${keyId} AND revoked_at IS NULL
   `;
 }

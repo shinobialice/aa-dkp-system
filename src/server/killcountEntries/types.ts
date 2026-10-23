@@ -28,15 +28,6 @@ export type KillcountEntry = {
   canEditRows: boolean;
 };
 
-export type PrimeDay = {
-  day: string;
-  totalKills: number;
-  fighters: number;
-  topUserName: string | null;
-  topKills: number | null;
-  window: ScanWindow | null;
-};
-
 export type AglRecordSummary = {
   id: number;
   totalKills: number;

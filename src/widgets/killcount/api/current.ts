@@ -6,37 +6,6 @@ import { KILLCOUNT_EDITOR_TAGS } from "@/server/killcountEditors";
 import { notifyKillCountAdded } from "@/server/killcountNotify";
 import { type KillCount } from "../types";
 
-export const getKillCountCurrent = async () => {
-  try {
-    const currentData = await sql<KillCount[]>`
-			SELECT 
-			u.username AS "userName",
-			u.id AS "userId",
-			u.class AS "role",
-			u.avatar_url AS "avatarUrl",
-			s.id AS "id",
-			s.start_honor AS "startHonor", 
-			s.end_honor AS "endHonor", 
-			s.start_kills AS "startKills", 
-			s.end_kills AS "endKills", 
-			s.class AS "playerClass",
-			(s.end_kills - s.start_kills) AS "totalKills", 
-			(s.end_honor - s.start_honor) AS "totalHonor"
-			FROM killcount_stats s 
-			JOIN "user" u ON s.user_id = u.id 
-			WHERE s.recorded_at >= CURRENT_DATE 
-			AND s.recorded_at < CURRENT_DATE + INTERVAL '1 day'
-			ORDER BY "totalKills" DESC;
-		`;
-
-    return currentData;
-  } catch (error) {
-    throw new Error("Не удалось получить киллкаунт за сегодня", {
-      cause: error,
-    });
-  }
-};
-
 export const setKillCountCurrent = async (dto: KillCount[]) => {
   await ensurePrivilieges(KILLCOUNT_EDITOR_TAGS);
   await insertKillCountRows(dto);

@@ -1,10 +1,9 @@
 import { hasTag } from "@/actions/hasTag";
 import { KILLCOUNT_EDITOR_TAGS } from "@/server/killcountEditors";
+import { getPrimeDay } from "@/server/killcountEntries";
 import { Button } from "@/shared/ui";
-import {
-  getKillCountByDate,
-  getKillCountHistory,
-} from "@/widgets/killcount/api/history";
+import { getKillCountHistory } from "@/widgets/killcount/api/history";
+import PrimeScanInfo from "@/widgets/killcount/entries/PrimeScanInfo";
 import { KillcountHeader } from "@/widgets/killcount/ui/KillcountHeader";
 import { KillcountDay } from "@/widgets/killcount/ui/KillcountDay";
 import { dayKey, longDate } from "@/widgets/killcount/ui/killcountModel";
@@ -46,9 +45,9 @@ export default async function Page({
 
   const sessionToken = (await cookies()).get("session_token")?.value ?? "";
 
-  const [canEditKillcount, dataByDate, history] = await Promise.all([
+  const [canEditKillcount, prime, history] = await Promise.all([
     hasTag(sessionToken, KILLCOUNT_EDITOR_TAGS),
-    getKillCountByDate(slug),
+    getPrimeDay(slug),
     getKillCountHistory(),
   ]);
 
@@ -81,8 +80,9 @@ export default async function Page({
         </div>
       </KillcountHeader>
 
+      <PrimeScanInfo entry={prime} />
       <KillcountDay
-        data={dataByDate}
+        data={prime.fighters}
         mode="saved"
         isCanEdit={canEditKillcount}
       />
